@@ -1,0 +1,500 @@
+{
+  "verification": "Final equipped GLBs parsed through Three.js, omitting only material/image decoding in Node. Geometry, skinning, authored tracks and sockets retained. Riding loop and bicycle checked from the shared runtime implementation.",
+  "models": [
+    {
+      "tier": "detailed",
+      "bytes": 39892264,
+      "bones": 22,
+      "clips": [
+        {
+          "name": "idle",
+          "duration": 3.200000047683716,
+          "tracks": 68
+        },
+        {
+          "name": "walk",
+          "duration": 1.2000000476837158,
+          "tracks": 68
+        },
+        {
+          "name": "run",
+          "duration": 0.800000011920929,
+          "tracks": 68
+        },
+        {
+          "name": "ride",
+          "duration": 3.5999999046325684,
+          "tracks": 68
+        },
+        {
+          "name": "jump",
+          "duration": 1.600000023841858,
+          "tracks": 68
+        },
+        {
+          "name": "codex_attack",
+          "duration": 1.600000023841858,
+          "tracks": 68
+        },
+        {
+          "name": "bug_attack",
+          "duration": 2,
+          "tracks": 68
+        },
+        {
+          "name": "server_overload",
+          "duration": 3.200000047683716,
+          "tracks": 68
+        },
+        {
+          "name": "takeoff",
+          "duration": 1.2000000476837158,
+          "tracks": 68
+        },
+        {
+          "name": "hover",
+          "duration": 2.4000000953674316,
+          "tracks": 68
+        },
+        {
+          "name": "fly_forward",
+          "duration": 1.2000000476837158,
+          "tracks": 68
+        },
+        {
+          "name": "land",
+          "duration": 1.2000000476837158,
+          "tracks": 68
+        }
+      ],
+      "bounds": {
+        "min": [
+          -0.8036943685121128,
+          -1.0387046781596456e-7,
+          -0.534002716486756
+        ],
+        "max": [
+          0.8036943685121128,
+          3.100000019263336,
+          0.5527406984890743
+        ]
+      },
+      "hoverSockets": [
+        {
+          "name": "fx_keyboard",
+          "position": [
+            -0.1077,
+            2.3218,
+            -0.5111
+          ],
+          "axis": [
+            -0.5301,
+            0.8477,
+            -0.0221
+          ]
+        },
+        {
+          "name": "fx_wrist_L",
+          "position": [
+            0.882,
+            1.9098,
+            0.1461
+          ],
+          "axis": [
+            0.5289,
+            -0.8165,
+            0.2316
+          ]
+        },
+        {
+          "name": "fx_wrist_R",
+          "position": [
+            -0.8823,
+            1.9094,
+            0.143
+          ],
+          "axis": [
+            -0.5293,
+            -0.8167,
+            0.2297
+          ]
+        },
+        {
+          "name": "fx_pack_L",
+          "position": [
+            0.3507,
+            1.7498,
+            -0.313
+          ],
+          "axis": [
+            0.0007,
+            -0.9624,
+            -0.2715
+          ]
+        },
+        {
+          "name": "fx_pack_R",
+          "position": [
+            -0.3493,
+            1.7497,
+            -0.3142
+          ],
+          "axis": [
+            0.0007,
+            -0.9624,
+            -0.2715
+          ]
+        }
+      ],
+      "ride": {
+        "duration": 3.5999999046325684,
+        "crankRevolutions": 3,
+        "maximumEndpointMatrixDelta": 0
+      }
+    },
+    {
+      "tier": "game",
+      "bytes": 6257428,
+      "bones": 22,
+      "clips": [
+        {
+          "name": "idle",
+          "duration": 3.200000047683716,
+          "tracks": 68
+        },
+        {
+          "name": "walk",
+          "duration": 1.2000000476837158,
+          "tracks": 68
+        },
+        {
+          "name": "run",
+          "duration": 0.800000011920929,
+          "tracks": 68
+        },
+        {
+          "name": "ride",
+          "duration": 3.5999999046325684,
+          "tracks": 68
+        },
+        {
+          "name": "jump",
+          "duration": 1.600000023841858,
+          "tracks": 68
+        },
+        {
+          "name": "codex_attack",
+          "duration": 1.600000023841858,
+          "tracks": 68
+        },
+        {
+          "name": "bug_attack",
+          "duration": 2,
+          "tracks": 68
+        },
+        {
+          "name": "server_overload",
+          "duration": 3.200000047683716,
+          "tracks": 68
+        },
+        {
+          "name": "takeoff",
+          "duration": 1.2000000476837158,
+          "tracks": 68
+        },
+        {
+          "name": "hover",
+          "duration": 2.4000000953674316,
+          "tracks": 68
+        },
+        {
+          "name": "fly_forward",
+          "duration": 1.2000000476837158,
+          "tracks": 68
+        },
+        {
+          "name": "land",
+          "duration": 1.2000000476837158,
+          "tracks": 68
+        }
+      ],
+      "bounds": {
+        "min": [
+          -0.8036943685121128,
+          -1.0724668525077835e-7,
+          -0.5435389231493303
+        ],
+        "max": [
+          0.8036943685121128,
+          3.1000000192612616,
+          0.5435389334907061
+        ]
+      },
+      "hoverSockets": [
+        {
+          "name": "fx_keyboard",
+          "position": [
+            -0.1077,
+            2.3218,
+            -0.5111
+          ],
+          "axis": [
+            -0.5301,
+            0.8477,
+            -0.0221
+          ]
+        },
+        {
+          "name": "fx_wrist_L",
+          "position": [
+            0.882,
+            1.9098,
+            0.1461
+          ],
+          "axis": [
+            0.5289,
+            -0.8165,
+            0.2316
+          ]
+        },
+        {
+          "name": "fx_wrist_R",
+          "position": [
+            -0.8823,
+            1.9094,
+            0.143
+          ],
+          "axis": [
+            -0.5293,
+            -0.8167,
+            0.2297
+          ]
+        },
+        {
+          "name": "fx_pack_L",
+          "position": [
+            0.3507,
+            1.7498,
+            -0.313
+          ],
+          "axis": [
+            0.0007,
+            -0.9624,
+            -0.2715
+          ]
+        },
+        {
+          "name": "fx_pack_R",
+          "position": [
+            -0.3493,
+            1.7497,
+            -0.3142
+          ],
+          "axis": [
+            0.0007,
+            -0.9624,
+            -0.2715
+          ]
+        }
+      ],
+      "ride": {
+        "duration": 3.5999999046325684,
+        "crankRevolutions": 3,
+        "maximumEndpointMatrixDelta": 0
+      }
+    },
+    {
+      "tier": "light",
+      "bytes": 2680904,
+      "bones": 22,
+      "clips": [
+        {
+          "name": "idle",
+          "duration": 3.200000047683716,
+          "tracks": 68
+        },
+        {
+          "name": "walk",
+          "duration": 1.2000000476837158,
+          "tracks": 68
+        },
+        {
+          "name": "run",
+          "duration": 0.800000011920929,
+          "tracks": 68
+        },
+        {
+          "name": "ride",
+          "duration": 3.5999999046325684,
+          "tracks": 68
+        },
+        {
+          "name": "jump",
+          "duration": 1.600000023841858,
+          "tracks": 68
+        },
+        {
+          "name": "codex_attack",
+          "duration": 1.600000023841858,
+          "tracks": 68
+        },
+        {
+          "name": "bug_attack",
+          "duration": 2,
+          "tracks": 68
+        },
+        {
+          "name": "server_overload",
+          "duration": 3.200000047683716,
+          "tracks": 68
+        },
+        {
+          "name": "takeoff",
+          "duration": 1.2000000476837158,
+          "tracks": 68
+        },
+        {
+          "name": "hover",
+          "duration": 2.4000000953674316,
+          "tracks": 68
+        },
+        {
+          "name": "fly_forward",
+          "duration": 1.2000000476837158,
+          "tracks": 68
+        },
+        {
+          "name": "land",
+          "duration": 1.2000000476837158,
+          "tracks": 68
+        }
+      ],
+      "bounds": {
+        "min": [
+          -0.8036943685121128,
+          -1.1449926953993513e-7,
+          -0.5422208259657518
+        ],
+        "max": [
+          0.8036943685121128,
+          3.100000019249491,
+          0.5422208363120214
+        ]
+      },
+      "hoverSockets": [
+        {
+          "name": "fx_keyboard",
+          "position": [
+            -0.1077,
+            2.3218,
+            -0.5111
+          ],
+          "axis": [
+            -0.5301,
+            0.8477,
+            -0.0221
+          ]
+        },
+        {
+          "name": "fx_wrist_L",
+          "position": [
+            0.882,
+            1.9098,
+            0.1461
+          ],
+          "axis": [
+            0.5289,
+            -0.8165,
+            0.2316
+          ]
+        },
+        {
+          "name": "fx_wrist_R",
+          "position": [
+            -0.8823,
+            1.9094,
+            0.143
+          ],
+          "axis": [
+            -0.5293,
+            -0.8167,
+            0.2297
+          ]
+        },
+        {
+          "name": "fx_pack_L",
+          "position": [
+            0.3507,
+            1.7498,
+            -0.313
+          ],
+          "axis": [
+            0.0007,
+            -0.9624,
+            -0.2715
+          ]
+        },
+        {
+          "name": "fx_pack_R",
+          "position": [
+            -0.3493,
+            1.7497,
+            -0.3142
+          ],
+          "axis": [
+            0.0007,
+            -0.9624,
+            -0.2715
+          ]
+        }
+      ],
+      "ride": {
+        "duration": 3.5999999046325684,
+        "crankRevolutions": 3,
+        "maximumEndpointMatrixDelta": 0
+      }
+    }
+  ],
+  "bicycle": {
+    "seconds": 3.5999999999999996,
+    "crankRevolutions": 3,
+    "scale": 0.48,
+    "forward": 0.14,
+    "crankOffset": -1.5707963267948966,
+    "wheelPerCrank": 0.3333333333333333,
+    "grip": {
+      "halfSpan": 0.46,
+      "forward": 0.61,
+      "height": 1.7
+    },
+    "blender": {
+      "bottomBracket": [
+        0,
+        -0.13520000000000001,
+        0.4848
+      ],
+      "crankRadius": 0.16319999999999998,
+      "pedalHalfSpan": 0.33599999999999997,
+      "pedalHalfThickness": 0.017279999999999997,
+      "saddleCenter": [
+        0,
+        0.20319999999999994,
+        1.128
+      ],
+      "gripLeft": [
+        0.46,
+        -0.61,
+        1.7
+      ],
+      "gripRight": [
+        -0.46,
+        -0.61,
+        1.7
+      ]
+    },
+    "wheelRadius": 0.4608,
+    "rollingSpeed": 0.804247719318987,
+    "maximumChainLoopDisplacement": 0.001060536681815872,
+    "fullWheelRevolutions": 1
+  }
+}

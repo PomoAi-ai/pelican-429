@@ -1,0 +1,121 @@
+[
+  {
+    "tier": "game",
+    "clipCount": 14,
+    "sprint": {
+      "duration": 0.6,
+      "channels": 68
+    },
+    "changedExistingClips": [],
+    "changedMeshes": [
+      "Cube.005",
+      "Cube.002",
+      "Cube.014",
+      "Cube.015",
+      "Cube.021",
+      "Cube.020",
+      "Cube.023",
+      "Cube.029",
+      "Cube.024",
+      "Cube.025",
+      "Cube.026",
+      "Cube.030",
+      "Cube.031",
+      "Cube.032",
+      "Cube.036",
+      "Sphere",
+      "Sphere.001",
+      "Cube.027",
+      "Cube.033",
+      "Cube.034",
+      "Cube.040",
+      "Keyboard graphite bottom"
+    ],
+    "defaultBlinkWeights": [
+      [
+        0
+      ],
+      [
+        0
+      ],
+      [
+        0
+      ],
+      [
+        0
+      ]
+    ],
+    "bodySurfaceAndUvPreserved": true,
+    "allPositionBuffersPreserved": true,
+    "equipmentTriangleSetsPreserved": true,
+    "equipmentBufferDifference": "Triangle order only for the two thruster lens meshes; equipment UV roundoff <= 5.960464477539063e-8. Detailed-tier lens normal roundoff <= 0.00009578466415405273."
+  },
+  {
+    "tier": "detailed",
+    "clipCount": 14,
+    "sprint": {
+      "duration": 0.6,
+      "channels": 68
+    },
+    "changedExistingClips": [],
+    "changedMeshes": [
+      "Cube.002",
+      "Cube.015",
+      "Cube.021",
+      "Cube.026",
+      "Cube.030",
+      "Sphere",
+      "Sphere.001",
+      "Keyboard graphite bottom"
+    ],
+    "defaultBlinkWeights": [
+      [
+        0
+      ],
+      [
+        0
+      ],
+      [
+        0
+      ],
+      [
+        0
+      ]
+    ],
+    "bodySurfaceAndUvPreserved": true,
+    "allPositionBuffersPreserved": true,
+    "equipmentTriangleSetsPreserved": true,
+    "equipmentBufferDifference": "Triangle order only for the two thruster lens meshes; equipment UV roundoff <= 5.960464477539063e-8. Detailed-tier lens normal roundoff <= 0.00009578466415405273."
+  },
+  {
+    "tier": "light",
+    "clipCount": 14,
+    "sprint": {
+      "duration": 0.6,
+      "channels": 68
+    },
+    "changedExistingClips": [],
+    "changedMeshes": [
+      "Sphere",
+      "Sphere.001"
+    ],
+    "defaultBlinkWeights": [
+      [
+        0
+      ],
+      [
+        0
+      ],
+      [
+        0
+      ],
+      [
+        0
+      ]
+    ],
+    "bodySurfaceAndUvPreserved": true,
+    "allPositionBuffersPreserved": true,
+    "equipmentTriangleSetsPreserved": true,
+    "equipmentBufferDifference": "Triangle order only for the two thruster lens meshes; equipment UV roundoff <= 5.960464477539063e-8. Detailed-tier lens normal roundoff <= 0.00009578466415405273."
+  }
+]

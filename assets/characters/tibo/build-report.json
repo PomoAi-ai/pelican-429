@@ -1,0 +1,49 @@
+{
+  "kind": "tibo",
+  "height": 2.65,
+  "source": "assets/characters/tibo/source.glb",
+  "triangles": 34968,
+  "bones": [
+    "root",
+    "hips",
+    "spine",
+    "head",
+    "upper_arm.L",
+    "forearm.L",
+    "hand.L",
+    "upper_arm.R",
+    "forearm.R",
+    "hand.R",
+    "thigh.L",
+    "shin.L",
+    "foot.L",
+    "thigh.R",
+    "shin.R",
+    "foot.R"
+  ],
+  "sourceType": "Rodin static textured mesh",
+  "skin": [
+    {
+      "mesh": "model",
+      "vertices": 20780,
+      "maximumInfluences": 4,
+      "normalizationMaxError": 2.220446049250313e-16
+    }
+  ],
+  "walk": {
+    "minimumSoleZ": -1.3224780559539795e-07,
+    "supportFootMaximumGroundError": 1.801071505269647e-07,
+    "loopEndpointMaximumVertexDifference": 0
+  },
+  "actions": {
+    "idle": 4.0,
+    "walk": 1.2,
+    "run": 0.8,
+    "jump": 1.6,
+    "greet": 3.0,
+    "skill1": 2.4,
+    "skill2": 3.0,
+    "ultimate": 6.0
+  },
+  "asset": "public/characters/tibo/tibo.glb"
+}

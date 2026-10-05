@@ -1,0 +1,19 @@
+{
+  "files": [
+    {
+      "name": "base_basic_pbr.glb",
+      "role": "model",
+      "mime_type": "model/gltf-binary"
+    },
+    {
+      "name": "base_basic_shaded.glb",
+      "role": "model",
+      "mime_type": "model/gltf-binary"
+    },
+    {
+      "name": "texture_emissive.png",
+      "role": "texture",
+      "mime_type": "image/png"
+    }
+  ]
+}

@@ -1,0 +1,277 @@
+{
+  "pbr": {
+    "defaultView": "AgX",
+    "defaultLook": "None",
+    "materials": [
+      {
+        "name": "model",
+        "nodes": [
+          {
+            "type": "BSDF_PRINCIPLED",
+            "name": "Principled BSDF",
+            "image": null,
+            "colorspace": null,
+            "inputs": {
+              "Base Color": [
+                0.800000011920929,
+                0.800000011920929,
+                0.800000011920929,
+                1.0
+              ],
+              "Metallic": 0.0,
+              "Roughness": 0.5,
+              "IOR": 1.5,
+              "Alpha": 1.0,
+              "Weight": 0.0,
+              "Diffuse Roughness": 0.0,
+              "Subsurface Weight": 0.0,
+              "Subsurface Scale": 0.004999999888241291,
+              "Subsurface IOR": 1.399999976158142,
+              "Subsurface Anisotropy": 0.0,
+              "Specular IOR Level": 0.5,
+              "Specular Tint": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+              ],
+              "Anisotropic": 0.0,
+              "Anisotropic Rotation": 0.0,
+              "Transmission Weight": 0.0,
+              "Coat Weight": 0.0,
+              "Coat Roughness": 0.029999999329447746,
+              "Coat IOR": 1.5,
+              "Coat Tint": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+              ],
+              "Sheen Weight": 0.0,
+              "Sheen Roughness": 0.5,
+              "Sheen Tint": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+              ],
+              "Emission Color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+              ],
+              "Emission Strength": 0.0,
+              "Thin Film Thickness": 0.0,
+              "Thin Film IOR": 1.3300000429153442
+            }
+          },
+          {
+            "type": "OUTPUT_MATERIAL",
+            "name": "Material Output",
+            "image": null,
+            "colorspace": null,
+            "inputs": {
+              "Thickness": 0.0
+            }
+          },
+          {
+            "type": "TEX_IMAGE",
+            "name": "Image Texture",
+            "image": "texture_diffuse",
+            "colorspace": "sRGB",
+            "inputs": {}
+          },
+          {
+            "type": "SEPARATE_COLOR",
+            "name": "Separate Color",
+            "image": null,
+            "colorspace": null,
+            "inputs": {
+              "Color": [
+                0.800000011920929,
+                0.800000011920929,
+                0.800000011920929,
+                1.0
+              ]
+            }
+          },
+          {
+            "type": "TEX_IMAGE",
+            "name": "Image Texture.001",
+            "image": "texture_metallic-texture_roughness",
+            "colorspace": "Non-Color",
+            "inputs": {}
+          },
+          {
+            "type": "NORMAL_MAP",
+            "name": "Normal Map",
+            "image": null,
+            "colorspace": null,
+            "inputs": {
+              "Strength": 1.0,
+              "Color": [
+                0.5,
+                0.5,
+                1.0,
+                1.0
+              ]
+            }
+          },
+          {
+            "type": "TEX_IMAGE",
+            "name": "Image Texture.002",
+            "image": "texture_normal",
+            "colorspace": "Non-Color",
+            "inputs": {}
+          }
+        ],
+        "links": [
+          [
+            "Principled BSDF",
+            "BSDF",
+            "Material Output",
+            "Surface"
+          ],
+          [
+            "Image Texture",
+            "Color",
+            "Principled BSDF",
+            "Base Color"
+          ],
+          [
+            "Separate Color",
+            "Blue",
+            "Principled BSDF",
+            "Metallic"
+          ],
+          [
+            "Separate Color",
+            "Green",
+            "Principled BSDF",
+            "Roughness"
+          ],
+          [
+            "Image Texture.001",
+            "Color",
+            "Separate Color",
+            "Color"
+          ],
+          [
+            "Normal Map",
+            "Normal",
+            "Principled BSDF",
+            "Normal"
+          ],
+          [
+            "Image Texture.002",
+            "Color",
+            "Normal Map",
+            "Color"
+          ]
+        ]
+      }
+    ]
+  },
+  "shaded": {
+    "defaultView": "AgX",
+    "defaultLook": "None",
+    "materials": [
+      {
+        "name": "model",
+        "nodes": [
+          {
+            "type": "BSDF_PRINCIPLED",
+            "name": "Principled BSDF",
+            "image": null,
+            "colorspace": null,
+            "inputs": {
+              "Base Color": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ],
+              "Metallic": 0.0,
+              "Roughness": 1.0,
+              "IOR": 1.5,
+              "Alpha": 1.0,
+              "Weight": 0.0,
+              "Diffuse Roughness": 0.0,
+              "Subsurface Weight": 0.0,
+              "Subsurface Scale": 0.004999999888241291,
+              "Subsurface IOR": 1.399999976158142,
+              "Subsurface Anisotropy": 0.0,
+              "Specular IOR Level": 0.5,
+              "Specular Tint": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+              ],
+              "Anisotropic": 0.0,
+              "Anisotropic Rotation": 0.0,
+              "Transmission Weight": 0.0,
+              "Coat Weight": 0.0,
+              "Coat Roughness": 0.029999999329447746,
+              "Coat IOR": 1.5,
+              "Coat Tint": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+              ],
+              "Sheen Weight": 0.0,
+              "Sheen Roughness": 0.5,
+              "Sheen Tint": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+              ],
+              "Emission Color": [
+                1.0,
+                1.0,
+                1.0,
+                1.0
+              ],
+              "Emission Strength": 1.0,
+              "Thin Film Thickness": 0.0,
+              "Thin Film IOR": 1.3300000429153442
+            }
+          },
+          {
+            "type": "OUTPUT_MATERIAL",
+            "name": "Material Output",
+            "image": null,
+            "colorspace": null,
+            "inputs": {
+              "Thickness": 0.0
+            }
+          },
+          {
+            "type": "TEX_IMAGE",
+            "name": "Image Texture",
+            "image": "shaded",
+            "colorspace": "sRGB",
+            "inputs": {}
+          }
+        ],
+        "links": [
+          [
+            "Principled BSDF",
+            "BSDF",
+            "Material Output",
+            "Surface"
+          ],
+          [
+            "Image Texture",
+            "Color",
+            "Principled BSDF",
+            "Emission Color"
+          ]
+        ]
+      }
+    ]
+  }
+}

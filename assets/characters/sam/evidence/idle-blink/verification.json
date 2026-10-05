@@ -1,0 +1,38 @@
+{
+  "kind": "sam",
+  "source": "assets/characters/sam/sam-rigged.blend",
+  "restSha256": "8c773cac98fb51408d53d5597d6197be2e35c6ad258ec62935be31839f44861a",
+  "preservedClipSha256": {
+    "greet": "4514956f98b8d1bf541921a7549c7ebecef8fd812cb7fb40b5d52654f5ee9f08",
+    "jump": "a32b7ff4334334278564bc103b0ca83d4490e396d1b3faa4320d9657fcccdd87",
+    "run": "7fa143cf9c32bff3a1a135877c9f2415ccda462bcd6662607fdd4ea40e806f5d",
+    "skill1": "ea9b0b1c594923ee5bd40e6ccacbf8c24a41eec877869d3e32cc0d380c993d53",
+    "skill2": "84764e7f93748f6a40e5a163f1064ad761af90c5c16286a1bbd9c8bdae58921a",
+    "ultimate": "1658cfff7341db0e1db077041b9a9986446404275dc5442dc6a06f7cb09be2a7",
+    "walk": "b1969bf6a910e96e131ae0472bb168f837782d4f97c833ac405406d3b7b96bf0"
+  },
+  "originalVertexCount": 19896,
+  "addedEyelidVertices": 924,
+  "eyeClosureCentersXZ": [
+    [
+      -0.148,
+      2.137
+    ],
+    [
+      0.148,
+      2.137
+    ]
+  ],
+  "morphs": [
+    "Blink",
+    "BlinkTravel"
+  ],
+  "idleSeconds": 4,
+  "blinkClosedFrames": [
+    42,
+    44
+  ],
+  "originalGeometryUvWeightsAndTexturesUnchanged": true,
+  "newEyelidWeights": "Barycentric interpolation from original eye-rim triangles",
+  "sourceTextureImagesUnchanged": true
+}

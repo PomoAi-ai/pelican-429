@@ -1,0 +1,12 @@
+{
+  "assets/characters/tibo/tibo-rigged.blend": "c9ae88c9b3ee01e4b80bfb46c118c5039ef4821c20b163016bf42b1dfa8c3417",
+  "public/characters/tibo/tibo.glb": "acd3af835ab9861a0c8992ce3b08181842b18892a2791d7f09b4531f78bd0910",
+  "assets/characters/tibo/source.glb": "12a5e6d264ecf3597dddb70dc289a35b553ab18ce978fe4e4d68aa2ff8d90913",
+  "scripts/blender_npcs/build.py": "a2d3ee479da9c26d47f471e3b8da39c2f88686f0e70502d61bd8b28d53aa8a9d",
+  "scripts/blender_npcs/animation.py": "2330eca46b40c1a3109b24cbcade2a34086a655dd196ac982fb5df12a4a52155",
+  "public/characters/tibo/render-left.png": "66dbfe8a1abf7a6f80d56ad9c72f1365e4b122997ee916f7049278194a0eaaa3",
+  "public/characters/tibo/render-back.png": "179606fa31a59c9aed088511cc286104257a7314c0ba7efb1d3085417ea1d29d",
+  "public/characters/tibo/render-hero.png": "08e1ea3ddfda67df8b3cfa1a90fe8d182d8bb1dcdd97e6a8419037db653b878f",
+  "public/characters/tibo/render-right.png": "2698268db8004bcc63b630cf936ad762043df12054377895f274f962bb2f974a",
+  "public/characters/tibo/render-front.png": "768eb9d33a1d555a4ea8c21b45687a04485ae48975c36e158845e14c2f86b4ff"
+}

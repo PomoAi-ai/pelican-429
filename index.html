@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>鹈鹕 429 / Pelican 429</title>
+    <link rel="stylesheet" href="/src/ui/showcase.css" />
+    <link rel="stylesheet" href="/src/ui/navigation.css" />
+    <link rel="stylesheet" href="/src/ui/intro.css" />
+    <link rel="stylesheet" href="/src/ui/facility.css" />
+    <link rel="stylesheet" href="/src/ui/facility-chapter.css" />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2311151c'/%3E%3Cpath d='M16 43Q8 30 24 29L27 15Q32 10 37 17L36 27Q53 26 58 29Q47 40 36 32Q33 48 16 43Z' fill='%23f3efe4'/%3E%3C/svg%3E" />
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #11151c;
+        --fg: #f3efe4;
+        --muted: #b8b3a6;
+        --panel: rgba(12, 16, 22, 0.62);
+        --accent: #e0584a;
+        --hp: #7bd46a;
+        font-family: 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Noto Sans CJK SC', 'Source Han Sans SC', system-ui, sans-serif;
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; height: 100%; overflow: hidden; background: var(--bg); color: var(--fg); }
+      #app { position: fixed; inset: 0; }
+      #app canvas { display: block; width: 100%; height: 100%; outline: none; cursor: crosshair; }
+      #hud { position: fixed; inset: 0; pointer-events: none; user-select: none; }
+      .hud-stats {
+        position: absolute; top: 12px; left: 12px; padding: 4px 10px; border-radius: 6px;
+        background: var(--panel); font: 12px/1.6 ui-monospace, 'SF Mono', Menlo, monospace; color: var(--muted);
+      }
+      .hud-hints {
+        position: absolute; right: 12px; bottom: 12px; padding: 8px 12px; border-radius: 8px;
+        background: var(--panel); font-size: 13px; line-height: 1.7;
+        transition: opacity 600ms ease, transform 600ms ease;
+      }
+      .hud-hints-hidden { opacity: 0; transform: translateY(8px); pointer-events: none; }
+      .hud-help-badge {
+        position: absolute; right: 12px; bottom: 12px; padding: 2px 8px; border-radius: 6px;
+        background: var(--panel); font-size: 12px; line-height: 1.6; opacity: 0.75;
+      }
+      .hud-help-badge[hidden] { display: none; }
+      .hud-status {
+        position: absolute; top: 44px; left: 12px; display: flex; flex-direction: column; gap: 6px;
+        padding: 6px 10px; border-radius: 8px; background: var(--panel); font-size: 12px; min-width: 190px;
+      }
+      .hud-status:empty { display: none; }
+      .hud-flight, .hud-orb { display: flex; align-items: center; gap: 8px; }
+      .hud-flight[hidden] { display: none; }
+      .hud-flight-label, .hud-orb-label { width: 28px; color: var(--muted); }
+      .hud-flight-track, .hud-orb-track {
+        position: relative; flex: 1; height: 8px; border-radius: 4px; overflow: hidden;
+        background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(255, 255, 255, 0.25);
+      }
+      .hud-flight-fill {
+        height: 100%; width: 100%; background: linear-gradient(90deg, #5ec8f0, #b6ecff);
+        transition: width 80ms linear, background-color 120ms;
+      }
+      .hud-flight-low .hud-flight-fill { background: linear-gradient(90deg, #d8453a, #ff8a6e); }
+      .hud-flight-low .hud-flight-label { color: #ff8a7a; }
+      .hud-orb-fill { height: 100%; width: 100%; background: #b88a3c; }
+      .hud-orb-fill.hud-orb-ready { background: linear-gradient(90deg, #ffb43c, #ffe29a); }
+      /* 普攻水量与四个技能冷却。 */
+      .hud-weapon {
+        position: absolute; left: 12px; bottom: 12px; display: flex; flex-direction: column; gap: 6px;
+        padding: 8px 10px; border-radius: 10px; background: var(--panel); font-size: 12px; min-width: 230px;
+      }
+      .hud-weapon-slots { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+      .hud-weapon-slot {
+        position: relative; min-width: 104px; border-radius: 7px; display: grid; grid-template-columns: 1fr auto; gap: 4px;
+        padding: 6px 7px; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.12); color: var(--muted);
+      }
+      .hud-weapon-slot[hidden] { display: none; }
+      .hud-weapon-key { grid-column: 1; font: 10px ui-monospace, monospace; color: #b0cbd5; }
+      .hud-skill-name { grid-column: 1 / -1; grid-row: 2; color: #e3eff4; font-size: 12px; }
+      .hud-skill-state { grid-column: 2; grid-row: 1; font-size: 10px; }
+      .hud-skill-track { grid-column: 1 / -1; height: 3px; background: #0b1723; border-radius: 3px; overflow: hidden; }
+      .hud-skill-fill { height: 100%; background: linear-gradient(90deg, #5576b8, #8cf2eb); }
+      .hud-weapon-slot:last-child .hud-skill-fill { background: linear-gradient(90deg, #ad80ee, #73e8ff, #ffe3a1); }
+      .hud-weapon-ready .hud-skill-state { color: #9ee5db; }
+      .hud-weapon-slot.hud-weapon-active { border-color: #ffe29a; color: #fff; background: rgba(255, 210, 120, 0.22); box-shadow: 0 0 8px rgba(255, 210, 120, 0.45); }
+      .hud-weapon-slot.hud-weapon-disabled { opacity: 0.35; }
+      .hud-weapon-main { display: flex; align-items: center; gap: 10px; }
+      .hud-weapon-icon {
+        width: 38px; height: 38px; flex: none; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+        font-size: 19px; font-weight: 800; color: #10151c; background: #9fd6ee; box-shadow: 0 0 10px rgba(159, 214, 238, 0.5);
+      }
+      .hud-weapon-info { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+      .hud-weapon-name { font-size: 14px; font-weight: 700; }
+      .hud-weapon-track {
+        height: 8px; border-radius: 4px; overflow: hidden; background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(255, 255, 255, 0.25);
+      }
+      .hud-weapon-toast[hidden] { display: none; }
+      .hud-weapon-fill { height: 100%; width: 100%; background: linear-gradient(90deg, #4fb2e6, #bfe9ff); transition: width 80ms linear; }
+      .hud-weapon-low .hud-weapon-fill { background: linear-gradient(90deg, #d8453a, #ff8a6e); }
+      .hud-weapon-low .hud-weapon-detail { color: #ff8a7a; }
+      .hud-character-switch { pointer-events: auto; padding: 6px 10px; border: 1px solid #9fd6ee; border-radius: 6px; color: var(--fg); background: #203b49; font: inherit; cursor: pointer; }
+      .hud-character-switch:focus-visible { outline: 2px solid #ffe29a; outline-offset: 2px; }
+      .hud-character-switch:disabled { opacity: 0.5; cursor: default; }
+      .hud-weapon-detail { color: var(--muted); font-size: 11px; }
+      .hud-weapon-toast {
+        position: absolute; left: 50%; top: 18%; transform: translateX(-50%); padding: 6px 16px; border-radius: 18px;
+        background: rgba(12, 16, 22, 0.72); font-size: 18px; font-weight: 700; color: #ffe9b0; white-space: nowrap;
+        text-shadow: 0 1px 0 #000;
+      }
+      .hud-world { position: absolute; inset: 0; }
+      .hud-bar {
+        position: absolute; left: 0; top: 0; width: 72px; height: 10px; border-radius: 5px; overflow: hidden;
+        background: rgba(0, 0, 0, 0.55); border: 1px solid rgba(255, 255, 255, 0.35);
+        transition: opacity 200ms ease;
+      }
+      .hud-bar-fill { height: 100%; background: var(--hp); transition: width 120ms ease-out; }
+      .hud-bar-empty .hud-bar-fill { background: var(--accent); }
+      .hud-bar-label {
+        position: absolute; inset: 0; font-size: 8px; line-height: 10px; text-align: center; color: #fff;
+        text-shadow: 0 0 2px #000;
+      }
+      .hud-bar-reset { animation: hud-bar-reset 400ms ease-out; }
+      @keyframes hud-bar-reset { from { box-shadow: 0 0 10px 3px var(--hp); } to { box-shadow: none; } }
+      .hud-popup {
+        position: absolute; left: 0; top: 0; font-size: 22px; font-weight: 800; color: #ffe27a;
+        text-shadow: 0 2px 0 #7a2b10, 0 0 6px rgba(0, 0, 0, 0.6); white-space: nowrap;
+      }
+      /* 设置面板（任务 019）：右上角小地图下方齿轮 + 右侧卡片（不遮挡画面中央，切换效果可即时看到）。 */
+      .settings-gear {
+        position: fixed; top: 162px; right: 12px; width: 34px; height: 34px; padding: 0; border-radius: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.18); background: var(--panel); color: var(--fg);
+        font-size: 19px; line-height: 32px; text-align: center; cursor: pointer; z-index: 4; user-select: none;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35); transition: background-color 120ms, transform 200ms;
+      }
+      .settings-gear:hover { background: rgba(40, 48, 60, 0.82); }
+      .settings-gear.settings-gear-open { border-color: #ffe29a; transform: rotate(45deg); }
+      .settings-gear.settings-gear-alert::after {
+        content: ''; position: absolute; right: -2px; top: -2px; width: 9px; height: 9px; border-radius: 50%; background: #ff8a6e;
+      }
+      .settings-panel {
+        position: fixed; top: 204px; right: 12px; width: 300px; max-height: calc(100vh - 216px); overflow-y: auto;
+        padding: 10px 12px 12px; border-radius: 10px; background: rgba(12, 16, 22, 0.9); border: 1px solid rgba(255, 255, 255, 0.12);
+        box-shadow: 0 4px 18px rgba(0, 0, 0, 0.45); font-size: 13px; z-index: 8; user-select: none;
+      }
+      .settings-panel[hidden] { display: none; }
+      .settings-header { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+      .settings-title { font-size: 15px; font-weight: 700; }
+      .settings-paused { padding: 0 8px; border-radius: 9px; background: rgba(255, 210, 120, 0.2); color: #ffe29a; font-size: 11px; line-height: 18px; }
+      .settings-close {
+        margin-left: auto; width: 24px; height: 24px; padding: 0; border: none; border-radius: 6px; background: transparent;
+        color: var(--muted); font-size: 18px; line-height: 24px; cursor: pointer;
+      }
+      .settings-close:hover { background: rgba(255, 255, 255, 0.1); color: var(--fg); }
+      .settings-issues {
+        margin: 4px 0 8px; padding: 6px 8px; border-radius: 6px; background: rgba(216, 69, 58, 0.22); border: 1px solid rgba(255, 138, 110, 0.5);
+        color: #ffc9bd; font-size: 12px; line-height: 1.5; white-space: pre-line;
+      }
+      .settings-issues[hidden], .settings-seed-error[hidden] { display: none; }
+      .settings-group { padding: 6px 0; border-top: 1px solid rgba(255, 255, 255, 0.08); }
+      .settings-group-title { color: var(--muted); font-size: 11px; letter-spacing: 0.08em; margin-bottom: 4px; }
+      .settings-row { display: flex; align-items: center; gap: 8px; min-height: 30px; }
+      .settings-label { width: 64px; flex: none; }
+      .settings-seg { flex: 1; display: flex; padding: 2px; gap: 2px; border-radius: 8px; background: rgba(0, 0, 0, 0.35); }
+      .settings-range { flex: 1; min-width: 0; accent-color: #ffe29a; cursor: pointer; }
+      .settings-range-value { width: 46px; text-align: right; font-variant-numeric: tabular-nums; }
+      .settings-option {
+        flex: 1; min-width: 0; padding: 3px 4px; border: 1px solid transparent; border-radius: 6px; background: transparent;
+        color: var(--muted); font: inherit; font-size: 12px; cursor: pointer; white-space: nowrap;
+      }
+      .settings-option:hover { color: var(--fg); background: rgba(255, 255, 255, 0.08); }
+      .settings-option.settings-active { color: #fff; border-color: #ffe29a; background: rgba(255, 210, 120, 0.22); box-shadow: 0 0 8px rgba(255, 210, 120, 0.35); }
+      .settings-option:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; }
+      /* 022：选项多于 4 个（降水 8 档）时换行，每行 4 个。 */
+      .settings-seg { flex-wrap: wrap; }
+      .settings-seg:has(> :nth-child(5)) > .settings-option { flex: 1 0 22%; }
+      .settings-note { margin: 2px 0 2px 72px; color: var(--muted); font-size: 11px; }
+      .settings-seed {
+        flex: 1; min-width: 0; padding: 4px 8px; border-radius: 6px; border: 1px solid rgba(255, 255, 255, 0.2);
+        background: rgba(0, 0, 0, 0.35); color: var(--fg); font: 12px/1.4 ui-monospace, 'SF Mono', Menlo, monospace; user-select: text;
+      }
+      .settings-seed:focus { outline: none; border-color: #ffe29a; }
+      .settings-language-select { flex: 1; min-width: 0; padding: 4px 8px; border-radius: 6px; border: 1px solid rgba(255, 255, 255, 0.2); background: #20252c; color: var(--fg); font: inherit; }
+      .settings-language-select:focus-visible { outline: 2px solid #ffe29a; outline-offset: 2px; }
+      .settings-new-world {
+        flex: none; padding: 4px 10px; border-radius: 6px; border: 1px solid rgba(255, 210, 120, 0.6); background: rgba(255, 210, 120, 0.16);
+        color: #ffe9b0; font: inherit; font-size: 12px; cursor: pointer;
+      }
+      .settings-new-world:hover { background: rgba(255, 210, 120, 0.3); }
+      .settings-seed-error { margin: 2px 0 2px 72px; color: #ff8a7a; font-size: 11px; }
+      .settings-footer { margin-top: 6px; color: var(--muted); font-size: 11px; text-align: right; }
+      .overlay {
+        position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; flex-direction: column;
+        gap: 12px; background: var(--bg); z-index: 10;
+      }
+      .overlay[hidden] { display: none; }
+      #loading h1 { margin: 0; font-size: 32px; letter-spacing: 0.08em; }
+      #loading p { margin: 0; color: var(--muted); }
+      #error { background: rgba(40, 8, 8, 0.94); padding: 24px; z-index: 20; }
+      #error h2 { margin: 0; color: #ff8a7a; }
+      #error pre {
+        max-width: min(900px, 92vw); max-height: 60vh; overflow: auto; margin: 0; padding: 12px; border-radius: 8px;
+        background: rgba(0, 0, 0, 0.4); font-size: 12px; white-space: pre-wrap; word-break: break-word;
+      }
+    </style>
+    <link rel="stylesheet" href="/src/ui/control-surface.css" />
+  </head>
+  <body>
+    <main id="entry-index" hidden>
+      <div class="entry-content">
+        <p class="entry-eyebrow">PELICAN 429 / PLAYGROUND</p>
+        <h1>今天，从哪里开始？</h1>
+        <p class="entry-intro">探索世界，检查关卡，或近距离观察角色动作与场景资源。</p>
+        <nav class="entry-links" aria-label="功能入口">
+          <a class="entry-card" href="/?mode=game&amp;level=facility&amp;scene=fortress">
+            <img src="/resources/facility-fortress.jpg" alt="山体算力堡垒的实时场景" />
+            <div><span class="entry-number">FACILITY / THREE SCENES</span><h2>机房自由探索 <span>↗</span></h2><p>自由查看山体堡垒、算力大教堂与光纤深渊。走动、跳跃和飞行，探索设备与检修通道。</p></div>
+          </a>
+          <a class="entry-card" href="/?mode=intro&amp;opening=finale">
+            <img src="/assets/chapter-one/01-grassy-coding-concept-v3-mac-studio.png" alt="Grassy 在雨雪夜的房间里编程" />
+            <div><span class="entry-number">00 / PRELUDE</span><h2>AGI 降智风暴 · 序章 <span>↗</span></h2><p>四个音符把 AGI 推到 99%，一道 429 劈下，全场降智。黑暗里重新敲响，所有模型回归——前沿模型，人人有权使用。</p></div>
+          </a>
+          <a class="entry-card" href="/?mode=game">
+            <img src="/showcase/pelican.jpg" alt="游戏中的鹈鹕" />
+            <div><span class="entry-number">01 / DEMO</span><h2>演示场景 <span>↗</span></h2><p>切换鹈鹕与人形 Grassy，查看移动、飞行、游泳与战斗表现。</p></div>
+          </a>
+          <a class="entry-card" href="/?mode=game&amp;level=test">
+            <img src="/showcase/dummy.jpg" alt="训练假人" />
+            <div><span class="entry-number">02 / SANDBOX</span><h2>测试关卡 <span>↗</span></h2><p>进入固定小关卡，检查移动、物理与攻击效果。</p></div>
+          </a>
+          <a class="entry-card" href="/?mode=showcase">
+            <img src="/showcase/fish.jpg" alt="小鱼角色" />
+            <div><span class="entry-number">03 / CHARACTERS</span><h2>角色卡 <span>↗</span></h2><p>选择角色与动作，最多 8 张卡并排比较地上和地下效果。</p></div>
+          </a>
+          <a class="entry-card" href="/?mode=lab">
+            <img src="/resources/terrain.jpg" alt="游戏瓦片和花草" />
+            <div><span>SCENE LAB</span><h2>场景功能展示</h2><p>瓦片形状、材质拼接、植被分层与全部游戏资源。</p></div>
+          </a>
+          <a class="entry-card" href="/?mode=resources">
+            <img src="/resources/tree.jpg" alt="游戏中的树木资源" />
+            <div><span class="entry-number">04 / RESOURCES</span><h2>场景资源 <span>↗</span></h2><p>泥土瓦片、自然花草、树木与建筑，切换材质、变体和环境并排对照。</p></div>
+          </a>
+        </nav>
+        <p class="entry-footnote">全局开发导航可随时切换入口 · 页面切换会重新开始场景</p>
+      </div>
+    </main>
+    <nav id="dev-navigation" aria-label="开发导航">
+      <div class="dev-brand">PELICAN 429 <span>DEV</span></div>
+      <div class="dev-links">
+        <a href="/" data-page="index">首页</a>
+        <a href="/?mode=intro&amp;opening=finale" data-page="intro">序章动画</a>
+        <a href="/?mode=game&amp;level=facility&amp;scene=fortress" data-page="chapter-fortress">01 山体堡垒</a>
+        <a href="/?mode=game&amp;level=facility&amp;scene=cathedral" data-page="chapter-cathedral">02 算力大教堂</a>
+        <a href="/?mode=game&amp;level=facility&amp;scene=abyss" data-page="chapter-abyss">03 光纤深渊</a>
+        <a href="/?mode=facility" data-page="facility">机房预览</a>
+        <a href="/?mode=game" data-page="game">演示场景</a>
+        <a href="/?mode=game&amp;level=test" data-page="test">测试关卡</a>
+        <a href="/?mode=showcase" id="dev-showcase-link" data-page="showcase">角色展示场</a>
+        <a href="/?mode=resources" data-page="resources">场景资源</a>
+        <a href="/?mode=lab" data-page="lab">场景功能展示</a>
+      </div>
+    </nav>
+    <div id="app"></div>
+    <div id="hud" aria-live="off"></div>
+    <div id="loading" class="overlay" role="status">
+      <h1>鹈鹕 429 / Pelican 429</h1>
+      <p>AGI 降临…</p>
+    </div>
+    <div id="error" class="overlay" role="alert" hidden>
+      <h2>游戏出错了</h2>
+      <pre id="error-message"></pre>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

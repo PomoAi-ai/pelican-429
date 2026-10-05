@@ -1,0 +1,87 @@
+{
+  "source": "Retained Rodin refined meshes; new weighted skeleton and baked actions",
+  "fps": 30,
+  "clips": {
+    "idle": 3.2,
+    "walk": 1.2
+  },
+  "walkSpeedTilesPerSecond": 0.8333333333333334,
+  "loop": "identical endpoint pose; in-place root; alternating 60% support / 40% swing",
+  "tiers": [
+    {
+      "id": "light",
+      "triangles": 20000,
+      "bones": 22,
+      "height": 3.1,
+      "restPoseSurfaceUnchanged": true,
+      "surfaceHash": {
+        "positions": "7f001b90817f5118cad20fc372c5992b539f9d1373ef5e53ed0c290d585501e9",
+        "uv": "e0d0d11d8e06521deab42737453fd56354bc8676b79ad4158ca782cf6d4afe5f"
+      },
+      "skin": {
+        "vertices": 9984,
+        "maximumInfluences": 4,
+        "unweightedVertices": 0,
+        "normalizationMaxError": 2.220446049250313e-16
+      },
+      "clips": {
+        "idle": 3.2,
+        "walk": 1.2
+      },
+      "walkSpeedTilesPerSecond": 0.8333333333333334,
+      "bytes": 1756920,
+      "glb": "public/characters/human/history/models-rodin-animated/grassy-rodin-animated-light.glb",
+      "blend": "assets/characters/grassy/history/model-rodin-animated/grassy-rodin-animated-light.blend"
+    },
+    {
+      "id": "game",
+      "triangles": 45000,
+      "bones": 22,
+      "height": 3.1,
+      "restPoseSurfaceUnchanged": true,
+      "surfaceHash": {
+        "positions": "0cd71a6fe7beea44e7edc041b1aa7f63c44f752cc47b9663de302781774eacd6",
+        "uv": "509c376f13c9455af830befab61025831bb90e9b750dff7a85876fe02746429c"
+      },
+      "skin": {
+        "vertices": 22484,
+        "maximumInfluences": 4,
+        "unweightedVertices": 0,
+        "normalizationMaxError": 2.220446049250313e-16
+      },
+      "clips": {
+        "idle": 3.2,
+        "walk": 1.2
+      },
+      "walkSpeedTilesPerSecond": 0.8333333333333334,
+      "bytes": 4980932,
+      "glb": "public/characters/human/history/models-rodin-animated/grassy-rodin-animated-game.glb",
+      "blend": "assets/characters/grassy/history/model-rodin-animated/grassy-rodin-animated-game.blend"
+    },
+    {
+      "id": "detailed",
+      "triangles": 500000,
+      "bones": 22,
+      "height": 3.1,
+      "restPoseSurfaceUnchanged": true,
+      "surfaceHash": {
+        "positions": "9dd336ab6f161482d6c8d6a6aa366df460a5e68982f9a318168a09e88cc8d1a0",
+        "uv": "98f1d0e91e7fc365bfd8bac5abbfbdcc144c42ad9ad068e033731de08780c082"
+      },
+      "skin": {
+        "vertices": 391911,
+        "maximumInfluences": 4,
+        "unweightedVertices": 0,
+        "normalizationMaxError": 2.220446049250313e-16
+      },
+      "clips": {
+        "idle": 3.2,
+        "walk": 1.2
+      },
+      "walkSpeedTilesPerSecond": 0.8333333333333334,
+      "bytes": 37635228,
+      "glb": "public/characters/human/history/models-rodin-animated/grassy-rodin-animated-detailed.glb",
+      "blend": "assets/characters/grassy/history/model-rodin-animated/grassy-rodin-animated-detailed.blend"
+    }
+  ]
+}

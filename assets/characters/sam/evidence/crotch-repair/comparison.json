@@ -1,0 +1,11 @@
+{
+  "framesSampled": 37,
+  "beforeMaximumCrossMidlineExtension": 0.11556276679039001,
+  "afterMaximumCrossMidlineExtension": 0.00037911906838417053,
+  "beforeMaximumCrossMidlineRatio": 13.500232696533203,
+  "afterMaximumCrossMidlineRatio": 1.0096577405929565,
+  "maximumCoincidentUvSeamGap": 0.0,
+  "finalBlendSha256": "3e76267f06bf3e54895436145294879b7d5f55bfa9350e4d7318c656ff5f8bcc",
+  "finalGlbSha256": "8066ed187b19fdd3bb98a693e899dea81ad1a5c9988383efb0ba5b31dfe14484",
+  "extensionReductionPercent": 99.6719366635866
+}

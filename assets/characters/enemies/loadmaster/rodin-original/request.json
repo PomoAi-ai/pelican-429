@@ -1,0 +1,9 @@
+{
+  "service": "Hyper3D CLI",
+  "input": "assets/concepts/enemy-model-input/loadmaster.png",
+  "prompt": "One wheeled industrial robot with four rubber wheels, navy ivory chassis and one curved golden articulated manipulator ending in a cream two-jaw gripper. Preserve the arch of the arm, cyan rotary joints, proportions and clean surface details in the reference.",
+  "tier": "Gen-2.5-High",
+  "meshMode": "Quad",
+  "quality": 30000,
+  "format": "glb"
+}

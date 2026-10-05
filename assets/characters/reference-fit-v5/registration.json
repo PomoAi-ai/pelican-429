@@ -1,0 +1,590 @@
+{
+  "schema": "npc_reference_registration.v1",
+  "status": "review_required",
+  "source_images_unchanged": true,
+  "method": {
+    "mask": "RGBA alpha > 127",
+    "bbox_order": "xmin,ymin,xmax,ymax inclusive",
+    "height_metric": "bbox ymax-ymin; +1 only for pixel coverage count",
+    "image_measurements": "Exact alpha statistics and bounding boxes",
+    "anatomical_measurements": "Manual visual landmark estimates; chin +/-12 px, other landmarks +/-10 px. Not automated segmentation.",
+    "important_alpha_note": "Every image alpha maximum is 254, so alpha==255 is an invalid foreground mask. Nonzero-alpha bbox includes faint fringe/outliers."
+  },
+  "coordinate_contract": {
+    "blender": "Z up; front looks toward -Y; sole Z=0",
+    "front": "image horizontal axis maps to model X",
+    "back": "image horizontal axis reversed relative to front",
+    "left": "anatomical left view, face points toward image left",
+    "right": "anatomical right view, face points toward image right",
+    "world_heights": {
+      "sam": 2.7,
+      "tibo": 2.65
+    },
+    "reference_authority": "Front controls head/body proportions and garment hem. Side views control depth, not independent vertical scale.",
+    "transforms": "Suggested metadata only; no pixel resampling or edits were performed."
+  },
+  "thresholds": {
+    "heads": {
+      "target": 3.1,
+      "min": 3.0,
+      "max": 3.2
+    },
+    "four_view_height_drift_ratio": 0.01,
+    "four_view_baseline_drift_ratio": 0.01,
+    "body_landmark_drift_ratio": 0.015
+  },
+  "characters": {
+    "sam": {
+      "front_authority": "output/imagegen/animal-npc-turnaround-v5/sam/front.png",
+      "world_height": 2.7,
+      "views": {
+        "front": {
+          "path": "output/imagegen/animal-npc-turnaround-v5/sam/front.png",
+          "sha256": "c2a559ed502232897819eb496e86e633c4de3d090938fc588c84c0339fdf77b0",
+          "size": [
+            1024,
+            1536
+          ],
+          "alpha_min": 0,
+          "alpha_max": 254,
+          "transparent_fraction": 0.6351051330566406,
+          "alpha_above_127_fraction": 0.3411235809326172,
+          "bbox_alpha127": [
+            233,
+            38,
+            912,
+            1488
+          ],
+          "height_span_px": 1450,
+          "coverage_height_px": 1451,
+          "manual_landmarks": {
+            "chin_y": 490,
+            "collar_front_y": 543,
+            "hem_y": 912,
+            "ankle_y": 1360,
+            "body_axis_x": 512
+          },
+          "bbox_alpha0": [
+            191,
+            34,
+            923,
+            1511
+          ],
+          "bbox_alpha203": [
+            234,
+            39,
+            911,
+            1488
+          ],
+          "head_ratio_estimate": 3.2079646017699117,
+          "head_ratio_manual_uncertainty_interval": [
+            3.125,
+            3.2954545454545454
+          ],
+          "nominal_head_ratio_in_target": false,
+          "raw_height_ratio_to_front": 1.0,
+          "raw_sole_offset_from_front_px": 0,
+          "suggested_uniform_registration": {
+            "scale": 1.0,
+            "translation_xy": [
+              0.0,
+              0.0
+            ],
+            "formula": "x_registered = scale*x + translation_x; y_registered = scale*y + translation_y",
+            "x_anchor": "manual pelvis/body axis, deliberately not alpha bbox center because Sam tail is asymmetric"
+          },
+          "registered_manual_y": {
+            "chin_y": 490.0,
+            "collar_front_y": 543.0,
+            "hem_y": 912.0,
+            "ankle_y": 1360.0
+          },
+          "registered_hem_delta_from_front_px": 0.0,
+          "units_per_source_pixel": 0.0018620689655172416
+        },
+        "back": {
+          "path": "output/imagegen/animal-npc-turnaround-v5/sam/back.png",
+          "sha256": "0e554012d750443ad3e4360e7fb0d9d80509ba4201f98b2f0daeb21d9db861b6",
+          "size": [
+            1024,
+            1536
+          ],
+          "alpha_min": 0,
+          "alpha_max": 254,
+          "transparent_fraction": 0.6414877573649088,
+          "alpha_above_127_fraction": 0.3326530456542969,
+          "bbox_alpha127": [
+            150,
+            37,
+            784,
+            1488
+          ],
+          "height_span_px": 1451,
+          "coverage_height_px": 1452,
+          "manual_landmarks": {
+            "chin_y": null,
+            "collar_back_y": 499,
+            "hem_y": 884,
+            "ankle_y": 1362,
+            "body_axis_x": 512
+          },
+          "bbox_alpha0": [
+            0,
+            31,
+            1009,
+            1499
+          ],
+          "bbox_alpha203": [
+            152,
+            38,
+            784,
+            1488
+          ],
+          "head_ratio_estimate": null,
+          "head_ratio_note": "Chin is not visible in rear view; do not infer a head count from hood/hair edge.",
+          "raw_height_ratio_to_front": 1.0006896551724138,
+          "raw_sole_offset_from_front_px": 0,
+          "suggested_uniform_registration": {
+            "scale": 0.9993108201240524,
+            "translation_xy": [
+              0.35286009648518757,
+              1.025499655410158
+            ],
+            "formula": "x_registered = scale*x + translation_x; y_registered = scale*y + translation_y",
+            "x_anchor": "manual pelvis/body axis, deliberately not alpha bbox center because Sam tail is asymmetric"
+          },
+          "registered_manual_y": {
+            "collar_back_y": 499.682,
+            "hem_y": 884.416,
+            "ankle_y": 1362.087
+          },
+          "registered_hem_delta_from_front_px": -27.583999999999946,
+          "units_per_source_pixel": 0.0018607856650585805
+        },
+        "left": {
+          "path": "output/imagegen/animal-npc-turnaround-v5/sam/left.png",
+          "sha256": "3d20f2032d733262d1a40ccf1a9c64a8c575c50637e6085d772ab8f7bae3b2df",
+          "size": [
+            1024,
+            1536
+          ],
+          "alpha_min": 0,
+          "alpha_max": 254,
+          "transparent_fraction": 0.7079893747965494,
+          "alpha_above_127_fraction": 0.27478599548339844,
+          "bbox_alpha127": [
+            219,
+            29,
+            937,
+            1503
+          ],
+          "height_span_px": 1474,
+          "coverage_height_px": 1475,
+          "manual_landmarks": {
+            "chin_y": 494,
+            "collar_side_y": 551,
+            "hem_y": 897,
+            "ankle_y": 1390,
+            "body_axis_x": 478
+          },
+          "bbox_alpha0": [
+            0,
+            21,
+            1003,
+            1515
+          ],
+          "bbox_alpha203": [
+            219,
+            30,
+            936,
+            1503
+          ],
+          "head_ratio_estimate": 3.1698924731182796,
+          "head_ratio_manual_uncertainty_interval": [
+            3.090146750524109,
+            3.253863134657837
+          ],
+          "nominal_head_ratio_in_target": true,
+          "raw_height_ratio_to_front": 1.016551724137931,
+          "raw_sole_offset_from_front_px": 15,
+          "suggested_uniform_registration": {
+            "scale": 0.9837177747625508,
+            "translation_xy": [
+              41.78290366350069,
+              9.472184531886114
+            ],
+            "formula": "x_registered = scale*x + translation_x; y_registered = scale*y + translation_y",
+            "x_anchor": "manual pelvis/body axis, deliberately not alpha bbox center because Sam tail is asymmetric"
+          },
+          "registered_manual_y": {
+            "chin_y": 495.429,
+            "collar_side_y": 551.501,
+            "hem_y": 891.867,
+            "ankle_y": 1376.84
+          },
+          "registered_hem_delta_from_front_px": -20.133000000000038,
+          "units_per_source_pixel": 0.001831750339213026
+        },
+        "right": {
+          "path": "output/imagegen/animal-npc-turnaround-v5/sam/right.png",
+          "sha256": "8f5b9cafc4bda3f26857d990700e251367dd4b56279abf2b0804e45809c80056",
+          "size": [
+            1024,
+            1536
+          ],
+          "alpha_min": 0,
+          "alpha_max": 254,
+          "transparent_fraction": 0.7081883748372396,
+          "alpha_above_127_fraction": 0.2716134389241536,
+          "bbox_alpha127": [
+            104,
+            20,
+            803,
+            1502
+          ],
+          "height_span_px": 1482,
+          "coverage_height_px": 1483,
+          "manual_landmarks": {
+            "chin_y": 497,
+            "collar_side_y": 540,
+            "hem_y": 899,
+            "ankle_y": 1388,
+            "body_axis_x": 550
+          },
+          "bbox_alpha0": [
+            0,
+            13,
+            1011,
+            1519
+          ],
+          "bbox_alpha203": [
+            105,
+            23,
+            802,
+            1502
+          ],
+          "head_ratio_estimate": 3.106918238993711,
+          "head_ratio_manual_uncertainty_interval": [
+            3.0306748466257667,
+            3.1870967741935483
+          ],
+          "nominal_head_ratio_in_target": true,
+          "raw_height_ratio_to_front": 1.0220689655172415,
+          "raw_sole_offset_from_front_px": 14,
+          "suggested_uniform_registration": {
+            "scale": 0.9784075573549258,
+            "translation_xy": [
+              -26.12415654520919,
+              18.431848852901567
+            ],
+            "formula": "x_registered = scale*x + translation_x; y_registered = scale*y + translation_y",
+            "x_anchor": "manual pelvis/body axis, deliberately not alpha bbox center because Sam tail is asymmetric"
+          },
+          "registered_manual_y": {
+            "chin_y": 504.7,
+            "collar_side_y": 546.772,
+            "hem_y": 898.02,
+            "ankle_y": 1376.462
+          },
+          "registered_hem_delta_from_front_px": -13.980000000000018,
+          "units_per_source_pixel": 0.0018218623481781378
+        }
+      }
+    },
+    "tibo": {
+      "front_authority": "output/imagegen/animal-npc-turnaround-v5/tibo/front.png",
+      "world_height": 2.65,
+      "views": {
+        "front": {
+          "path": "output/imagegen/animal-npc-turnaround-v5/tibo/front.png",
+          "sha256": "5fd44c4a417ecde1cc0ab25811dd54da6e9b6349e138ffaa3e00f17dc0671264",
+          "size": [
+            1024,
+            1536
+          ],
+          "alpha_min": 0,
+          "alpha_max": 254,
+          "transparent_fraction": 0.5553963979085287,
+          "alpha_above_127_fraction": 0.4244524637858073,
+          "bbox_alpha127": [
+            138,
+            39,
+            886,
+            1508
+          ],
+          "height_span_px": 1469,
+          "coverage_height_px": 1470,
+          "manual_landmarks": {
+            "chin_y": 521,
+            "collar_front_y": 581,
+            "hem_y": 982,
+            "ankle_y": 1384,
+            "body_axis_x": 512
+          },
+          "bbox_alpha0": [
+            128,
+            30,
+            949,
+            1521
+          ],
+          "bbox_alpha203": [
+            139,
+            39,
+            885,
+            1507
+          ],
+          "head_ratio_estimate": 3.0477178423236513,
+          "head_ratio_manual_uncertainty_interval": [
+            2.973684210526316,
+            3.125531914893617
+          ],
+          "nominal_head_ratio_in_target": true,
+          "raw_height_ratio_to_front": 1.0,
+          "raw_sole_offset_from_front_px": 0,
+          "suggested_uniform_registration": {
+            "scale": 1.0,
+            "translation_xy": [
+              0.0,
+              0.0
+            ],
+            "formula": "x_registered = scale*x + translation_x; y_registered = scale*y + translation_y",
+            "x_anchor": "manual pelvis/body axis, deliberately not alpha bbox center because Sam tail is asymmetric"
+          },
+          "registered_manual_y": {
+            "chin_y": 521.0,
+            "collar_front_y": 581.0,
+            "hem_y": 982.0,
+            "ankle_y": 1384.0
+          },
+          "registered_hem_delta_from_front_px": 0.0,
+          "units_per_source_pixel": 0.0018039482641252552
+        },
+        "back": {
+          "path": "output/imagegen/animal-npc-turnaround-v5/tibo/back.png",
+          "sha256": "eb64e3cddcbb5d0e837c67a94b3b6c21a0484e2a48a40bf0e2c774939a7a8156",
+          "size": [
+            1024,
+            1536
+          ],
+          "alpha_min": 0,
+          "alpha_max": 254,
+          "transparent_fraction": 0.5636310577392578,
+          "alpha_above_127_fraction": 0.41589927673339844,
+          "bbox_alpha127": [
+            134,
+            42,
+            889,
+            1499
+          ],
+          "height_span_px": 1457,
+          "coverage_height_px": 1458,
+          "manual_landmarks": {
+            "chin_y": null,
+            "hood_top_y": 465,
+            "hem_y": 964,
+            "ankle_y": 1400,
+            "body_axis_x": 512
+          },
+          "bbox_alpha0": [
+            65,
+            34,
+            945,
+            1507
+          ],
+          "bbox_alpha203": [
+            135,
+            42,
+            889,
+            1499
+          ],
+          "head_ratio_estimate": null,
+          "head_ratio_note": "Chin is not visible in rear view; do not infer a head count from hood/hair edge.",
+          "raw_height_ratio_to_front": 0.9918311776718857,
+          "raw_sole_offset_from_front_px": -9,
+          "suggested_uniform_registration": {
+            "scale": 1.0082361015785861,
+            "translation_xy": [
+              -4.216884008236093,
+              -3.3459162663004918
+            ],
+            "formula": "x_registered = scale*x + translation_x; y_registered = scale*y + translation_y",
+            "x_anchor": "manual pelvis/body axis, deliberately not alpha bbox center because Sam tail is asymmetric"
+          },
+          "registered_manual_y": {
+            "hood_top_y": 465.484,
+            "hem_y": 968.594,
+            "ankle_y": 1408.185
+          },
+          "registered_hem_delta_from_front_px": -13.405999999999949,
+          "units_per_source_pixel": 0.001818805765271105
+        },
+        "left": {
+          "path": "output/imagegen/animal-npc-turnaround-v5/tibo/left.png",
+          "sha256": "525f80f746c10f8ccfe470b2555f8e4f30de59b90571a4abc9b57f53517f4701",
+          "size": [
+            1024,
+            1536
+          ],
+          "alpha_min": 0,
+          "alpha_max": 254,
+          "transparent_fraction": 0.6820557912190756,
+          "alpha_above_127_fraction": 0.3042112986246745,
+          "bbox_alpha127": [
+            262,
+            28,
+            763,
+            1511
+          ],
+          "height_span_px": 1483,
+          "coverage_height_px": 1484,
+          "manual_landmarks": {
+            "chin_y": 514,
+            "collar_side_y": 549,
+            "hem_y": 979,
+            "ankle_y": 1410,
+            "body_axis_x": 535
+          },
+          "bbox_alpha0": [
+            65,
+            17,
+            943,
+            1522
+          ],
+          "bbox_alpha203": [
+            263,
+            28,
+            762,
+            1510
+          ],
+          "head_ratio_estimate": 3.051440329218107,
+          "head_ratio_manual_uncertainty_interval": [
+            2.9779116465863456,
+            3.128691983122363
+          ],
+          "nominal_head_ratio_in_target": true,
+          "raw_height_ratio_to_front": 1.0095302927161334,
+          "raw_sole_offset_from_front_px": 3,
+          "suggested_uniform_registration": {
+            "scale": 0.9905596763317599,
+            "translation_xy": [
+              -17.9494268374915,
+              11.264329062710885
+            ],
+            "formula": "x_registered = scale*x + translation_x; y_registered = scale*y + translation_y",
+            "x_anchor": "manual pelvis/body axis, deliberately not alpha bbox center because Sam tail is asymmetric"
+          },
+          "registered_manual_y": {
+            "chin_y": 520.412,
+            "collar_side_y": 555.082,
+            "hem_y": 981.022,
+            "ankle_y": 1407.953
+          },
+          "registered_hem_delta_from_front_px": -0.9779999999999518,
+          "units_per_source_pixel": 0.001786918408631153
+        },
+        "right": {
+          "path": "output/imagegen/animal-npc-turnaround-v5/tibo/right.png",
+          "sha256": "7e5c444396f8ac5ff285505f9d0acf0731dfac97da94ec3b6db3e6a334b21d48",
+          "size": [
+            1024,
+            1536
+          ],
+          "alpha_min": 0,
+          "alpha_max": 254,
+          "transparent_fraction": 0.6849377950032552,
+          "alpha_above_127_fraction": 0.3015219370524089,
+          "bbox_alpha127": [
+            259,
+            28,
+            764,
+            1507
+          ],
+          "height_span_px": 1479,
+          "coverage_height_px": 1480,
+          "manual_landmarks": {
+            "chin_y": 502,
+            "collar_side_y": 538,
+            "hem_y": 967,
+            "ankle_y": 1400,
+            "body_axis_x": 494
+          },
+          "bbox_alpha0": [
+            45,
+            17,
+            1009,
+            1535
+          ],
+          "bbox_alpha203": [
+            260,
+            28,
+            763,
+            1506
+          ],
+          "head_ratio_estimate": 3.1202531645569622,
+          "head_ratio_manual_uncertainty_interval": [
+            3.04320987654321,
+            3.2012987012987013
+          ],
+          "nominal_head_ratio_in_target": true,
+          "raw_height_ratio_to_front": 1.0068073519400953,
+          "raw_sole_offset_from_front_px": -1,
+          "suggested_uniform_registration": {
+            "scale": 0.993238674780257,
+            "translation_xy": [
+              21.340094658553085,
+              11.189317106152657
+            ],
+            "formula": "x_registered = scale*x + translation_x; y_registered = scale*y + translation_y",
+            "x_anchor": "manual pelvis/body axis, deliberately not alpha bbox center because Sam tail is asymmetric"
+          },
+          "registered_manual_y": {
+            "chin_y": 509.795,
+            "collar_side_y": 545.552,
+            "hem_y": 971.651,
+            "ankle_y": 1401.723
+          },
+          "registered_hem_delta_from_front_px": -10.349000000000046,
+          "units_per_source_pixel": 0.0017917511832319134
+        }
+      }
+    }
+  },
+  "findings": [
+    {
+      "severity": "resolved_by_model_detail_pending_verification",
+      "character": "tibo",
+      "view": "left",
+      "finding": "Reset badge is present on anatomical left chest in the front reference, but absent in the left-side illustration. The right side correctly has no badge.",
+      "resolution": "Accepted production decision: preserve the front badge in the actual 3D model as authoritative chest detail. The left reference remains badge-free; verify the actual exported model, not the side illustration, for badge presence."
+    },
+    {
+      "severity": "registration_required",
+      "character": "sam",
+      "view": "right",
+      "finding": "Right-view alpha height is approximately 2.2% larger than front and the sole is 14 px lower.",
+      "resolution": "Apply metadata uniform scale/translation when using as modeling reference. Do not change the 3D camera scale separately to conceal model fitting errors."
+    },
+    {
+      "severity": "resolved_with_material_authority",
+      "character": "sam",
+      "view": "left",
+      "finding": "Sam left view was replaced by the plain-knit candidate. The conspicuous hexagonal/floral pattern conflict is substantially reduced.",
+      "resolution": "Replacement verified by SHA-256 and visual inspection. Front remains the authority for final sweater and denim detail strength."
+    },
+    {
+      "severity": "landmark_review",
+      "character": "sam",
+      "view": "front,left",
+      "finding": "Sam front nominal head ratio remains approximately 3.21 with manual uncertainty crossing 3.2. The replacement left view is approximately 3.17 and its registered chin is close to front.",
+      "resolution": "Use the actual fitted model chin landmark to verify head ratio. Do not claim a strict anatomical pass from approximate illustration landmarks alone."
+    },
+    {
+      "severity": "registration_required",
+      "character": "both",
+      "view": "all",
+      "finding": "Independent illustrations do not exactly share collar/hem/ankle rows even after uniform scale. Back collars and Tibo hood are not homologous to front collar openings.",
+      "resolution": "Use front garment hem and leg proportions as canonical; use local modeling correspondences only for true homologous landmarks. Never warp collar or hood rows as if they were the same anatomy."
+    }
+  ],
+  "verdict": "Coherent concept set with documented illustration differences. Sam left strong-pattern conflict has been mitigated by a replacement image; Tibo left badge is explicitly restored from front authority during modeling. Uniform registration remains required. Final model geometry, likeness and badge presence are not yet certified by this reference report."
+}

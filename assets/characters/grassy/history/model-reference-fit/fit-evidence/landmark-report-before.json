@@ -1,0 +1,199 @@
+{
+  "schema": "landmark_fit_report.v1",
+  "source": "assets/characters/grassy/history/model-reference-fit/fit-evidence/source-landmarks.json",
+  "product": "assets/characters/grassy/history/model-reference-fit/fit-evidence/product-landmarks.json",
+  "tolerance_px": 12.0,
+  "all_pass": false,
+  "landmarks": [
+    {
+      "view": "front",
+      "name": "chin",
+      "source": [
+        625,
+        426
+      ],
+      "product": [
+        625.9418086409569,
+        432.9662353992462
+      ],
+      "delta_px": [
+        0.9418086409568787,
+        6.966235399246216
+      ],
+      "distance_px": 7.029611593387797,
+      "pass": true,
+      "proposed_action": "move recipe/control point 'chin' by -0.94,-6.97 px in front view"
+    },
+    {
+      "view": "front",
+      "name": "eye_L",
+      "source": [
+        562,
+        314
+      ],
+      "product": [
+        564.2534567713737,
+        309.032163977623
+      ],
+      "delta_px": [
+        2.253456771373749,
+        -4.967836022377014
+      ],
+      "distance_px": 5.4550400700340305,
+      "pass": true,
+      "proposed_action": "move recipe/control point 'eye_L' by -2.25,4.97 px in front view"
+    },
+    {
+      "view": "front",
+      "name": "eye_R",
+      "source": [
+        684,
+        312
+      ],
+      "product": [
+        689.746505856514,
+        309.032163977623
+      ],
+      "delta_px": [
+        5.746505856513977,
+        -2.967836022377014
+      ],
+      "distance_px": 6.46764100848741,
+      "pass": true,
+      "proposed_action": "move recipe/control point 'eye_R' by -5.75,2.97 px in front view"
+    },
+    {
+      "view": "front",
+      "name": "hair_top",
+      "source": [
+        611,
+        37
+      ],
+      "product": [
+        613.3642989993095,
+        37.000558733940125
+      ],
+      "delta_px": [
+        2.36429899930954,
+        0.0005587339401245117
+      ],
+      "distance_px": 2.364299065329872,
+      "pass": true,
+      "proposed_action": "move recipe/control point 'hair_top' by -2.36,-0.00 px in front view"
+    },
+    {
+      "view": "front",
+      "name": "nose_tip",
+      "source": [
+        624,
+        350
+      ],
+      "product": [
+        627.0,
+        345.16456854343414
+      ],
+      "delta_px": [
+        3.0,
+        -4.835431456565857
+      ],
+      "distance_px": 5.690465479303658,
+      "pass": true,
+      "proposed_action": "move recipe/control point 'nose_tip' by -3.00,4.84 px in front view"
+    },
+    {
+      "view": "front",
+      "name": "smile_low",
+      "source": [
+        625,
+        378
+      ],
+      "product": [
+        627.3632569313049,
+        370.68964648246765
+      ],
+      "delta_px": [
+        2.3632569313049316,
+        -7.310353517532349
+      ],
+      "distance_px": 7.682854409310279,
+      "pass": true,
+      "proposed_action": "move recipe/control point 'smile_low' by -2.36,7.31 px in front view"
+    },
+    {
+      "view": "right",
+      "name": "chin",
+      "source": [
+        704,
+        451
+      ],
+      "product": [
+        699.8698636293411,
+        456.94948947429657
+      ],
+      "delta_px": [
+        -4.1301363706588745,
+        5.94948947429657
+      ],
+      "distance_px": 7.242544542148494,
+      "pass": true,
+      "proposed_action": "move recipe/control point 'chin' by 4.13,-5.95 px in right view"
+    },
+    {
+      "view": "right",
+      "name": "eye_L",
+      "source": [
+        731,
+        334
+      ],
+      "product": [
+        743.8665565252304,
+        334.58549523353577
+      ],
+      "delta_px": [
+        12.866556525230408,
+        0.5854952335357666
+      ],
+      "distance_px": 12.879871175032859,
+      "pass": false,
+      "proposed_action": "move recipe/control point 'eye_L' by -12.87,-0.59 px in right view"
+    },
+    {
+      "view": "right",
+      "name": "nose_tip",
+      "source": [
+        778,
+        376
+      ],
+      "product": [
+        780.8184567689896,
+        370.2601661682129
+      ],
+      "delta_px": [
+        2.818456768989563,
+        -5.739833831787109
+      ],
+      "distance_px": 6.3944812905497646,
+      "pass": true,
+      "proposed_action": "move recipe/control point 'nose_tip' by -2.82,5.74 px in right view"
+    },
+    {
+      "view": "right",
+      "name": "smile_low",
+      "source": [
+        757,
+        403
+      ],
+      "product": [
+        772.02188372612,
+        395.4619005918503
+      ],
+      "delta_px": [
+        15.021883726119995,
+        -7.538099408149719
+      ],
+      "distance_px": 16.807139357077272,
+      "pass": false,
+      "proposed_action": "move recipe/control point 'smile_low' by -15.02,7.54 px in right view"
+    }
+  ]
+}

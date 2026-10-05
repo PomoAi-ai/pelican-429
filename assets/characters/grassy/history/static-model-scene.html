@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Grassy · 静态模型入场对照</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#edf1eb;color:#263b30;font-family:system-ui,-apple-system,"PingFang SC",sans-serif}main{max-width:1560px;margin:auto;padding:22px 28px}small{font-size:11px;letter-spacing:2px;color:#58745f}h1{font-size:25px;margin:7px 0}p{color:#647569;font-size:14px;line-height:1.6;margin:7px 0}fieldset{border:0;padding:0;margin:16px 0;display:flex;align-items:center;gap:10px;flex-wrap:wrap}label{display:flex;align-items:center;gap:6px;font-size:13px}select,button,a{font:inherit;font-size:13px;color:inherit}select,button{border:1px solid #b8c8b6;background:white;border-radius:7px;padding:8px 11px;cursor:pointer}button[aria-pressed=true]{background:#355840;color:white;border-color:#355840}fieldset a{margin-left:auto}#stage{height:clamp(420px,65vh,680px);position:relative;overflow:hidden;border-radius:12px;border:1px solid #cad7c5;background:#afd8de}canvas{display:block;width:100%;height:100%}.actor-tag{position:absolute;transform:translate(-50%,-100%);border:1px solid #b6caae;background:#ffffffed;padding:4px 7px;border-radius:6px;font-size:11px;white-space:nowrap;pointer-events:none}.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;text-align:center;margin:16px 0}.stats strong{display:block;font-size:21px}.stats span{font-size:12px;color:#647569}#status{min-height:23px}#error{color:#a8302c;white-space:pre-wrap;overflow-wrap:anywhere}footer{border-top:1px solid #d2ddce;padding-top:10px}[hidden]{display:none!important}@media(max-width:700px){main{padding:16px}h1{font-size:21px}#stage{height:460px}fieldset{gap:8px}fieldset a{margin-left:0;flex-basis:100%}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.stats strong{font-size:20px}}
+</style>
+<main>
+<small>PELICAN 429 / GRASSY IN SCENE</small>
+<h1>Grassy · 静态模型入场对照</h1>
+<p>门口和屋外显示同一版本，保留游戏中的渔屋、地面和鹈鹕尺寸。</p>
+<fieldset id="controls" disabled aria-label="模型对照设置">
+  <label>模型<select id="variant" aria-label="模型版本"></select></label>
+  <label>视角<select id="view" aria-label="人物视角"></select></label>
+  <button id="close" aria-pressed="true">门前近景</button>
+  <button id="game" aria-pressed="false">游戏视距</button>
+  <label><input id="reference" type="checkbox">显示侧面原画</label>
+  <a href="/?mode=showcase&amp;demo=grassy-models">模型版本并排展示 ↗</a>
+</fieldset>
+<p id="status" role="status">正在加载模型、场景与导出数据…</p>
+<div id="stage" aria-label="静态三维 Grassy 与鹈鹕、门框及侧面原画对照">
+  <span class="actor-tag" id="tag-door" hidden>门口 · 3D</span>
+  <span class="actor-tag" id="tag-bird" hidden>鹈鹕</span>
+  <span class="actor-tag" id="tag-human" hidden>Grassy · 3D</span>
+  <span class="actor-tag" id="tag-reference" hidden>原画 · 2D</span>
+</div>
+<div class="stats" aria-label="当前模型导出数据">
+  <div><strong id="height">—</strong><span>全高 · 含发梢</span></div>
+  <div><strong id="triangles">—</strong><span>三角面</span></div>
+  <div><strong id="materials">—</strong><span>材质</span></div>
+  <div><strong id="bytes">—</strong><span>GLB 文件体积</span></div>
+</div>
+<footer><p>所有模型均使用共享资源的原始尺寸。勾选后出现的「原画 · 2D」是已确认的透明侧面参考图，按人物轮廓与屋外模型对齐脚底和全高；切换模型视角时，原画保持侧面。</p><p><a href="/characters/human/history/turnaround-master-v2/right.png" target="_blank" rel="noopener">查看侧面母版</a> · <a id="manifest-link" href="/characters/human/history/models/manifest.json" target="_blank" rel="noopener">查看当前版本导出数据</a></p></footer>
+<pre id="error" role="alert"></pre>
+</main>
+<script type="module">
+import * as THREE from 'three';
+import { GRASSY_HEIGHT, GRASSY_MODELS } from '/src/config/grassy.ts';
+import { MODEL_SHOWCASE_VIEWS } from '/src/config/showcase.ts';
+import { loadGrassyStaticAsset, createGrassyStaticModel, disposeGrassyStaticAssets } from '/src/render/grassy/grassy-static.ts';
+import { createStage } from '/src/render/stage.ts';
+import { TUNING } from '/src/config/tuning.ts';
+import { createPelicanRig } from '/src/render/pelican/pelican-rig.ts';
+import { generateWorld } from '/src/world/worldgen.ts';
+import { pickHomeHut } from '/src/world/spawn-home.ts';
+import { levelGroundColumns } from '/src/render/surface-decor-view.ts';
+import { createFishSchool } from '/src/entities/fish.ts';
+import { createWorldViews } from '/src/render/world-views.ts';
+
+const el = id => document.getElementById(id);
+const number = new Intl.NumberFormat('zh-CN');
+
+function manifestPath(model) {
+  return model.path.replace(/[^/]+$/, 'manifest.json');
+}
+
+async function readManifests() {
+  const paths = [...new Set(GRASSY_MODELS.map(manifestPath))];
+  const manifests = new Map(await Promise.all(paths.map(async path => {
+    const response = await fetch(path);
+    if (!response.ok) throw new Error(`读取导出数据失败：${path} (${response.status})`);
+    const manifest = await response.json();
+    if (!manifest || !Array.isArray(manifest.models)) throw new Error(`导出数据 ${path} 缺少 models 列表`);
+    return [path, manifest];
+  })));
+  const rows = new Map();
+  for (const model of GRASSY_MODELS) {
+    const path = manifestPath(model);
+    const row = manifests.get(path).models.find(item => item.path === model.path);
+    if (!row || !['triangles', 'materials', 'bytes'].every(key => Number.isInteger(row[key]) && row[key] > 0) || !Number.isFinite(row.height) || row.height <= 0) {
+      throw new Error(`导出数据 ${path} 中 ${model.id} 的尺寸或资源统计不完整`);
+    }
+    rows.set(model.id, row);
+  }
+  return rows;
+}
+
+function imageBounds(image) {
+  const canvas = document.createElement('canvas');
+  canvas.width = image.width;
+  canvas.height = image.height;
+  const context = canvas.getContext('2d');
+  context.drawImage(image, 0, 0);
+  const pixels = context.getImageData(0, 0, image.width, image.height).data;
+  let left = image.width, right = -1, top = image.height, bottom = -1, transparent = false;
+  for (let y = 0; y < image.height; y++) {
+    for (let x = 0; x < image.width; x++) {
+      const alpha = pixels[(y * image.width + x) * 4 + 3];
+      if (alpha === 0) transparent = true;
+      if (alpha < 32) continue;
+      left = Math.min(left, x); right = Math.max(right, x);
+      top = Math.min(top, y); bottom = Math.max(bottom, y);
+    }
+  }
+  if (!transparent || bottom < top) throw new Error('侧面母版需要包含完整人物和透明背景。');
+  return { left, right: right + 1, top, bottom: bottom + 1 };
+}
+
+function visibleHeight(root) {
+  root.updateMatrixWorld(true);
+  const box = new THREE.Box3();
+  root.traverseVisible(node => {
+    if (node.isMesh) {
+      node.geometry.computeBoundingBox();
+      box.union(node.geometry.boundingBox.clone().applyMatrix4(node.matrixWorld));
+    }
+  });
+  return box.max.y - box.min.y;
+}
+
+async function start() {
+  const [manifest, texture] = await Promise.all([
+    readManifests(),
+    new THREE.TextureLoader().loadAsync('/characters/human/history/turnaround-master-v2/right.png'),
+  ]);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  const bounds = imageBounds(texture.image);
+  const unitsPerPixel = GRASSY_HEIGHT / (bounds.bottom - bounds.top);
+  const stage = createStage(el('stage'), TUNING, { quality: 'high', antialias: 'msaa' });
+  const level = generateWorld(TUNING.worldgen.seed, TUNING.worldgen);
+  const ground = levelGroundColumns(level);
+  const fish = createFishSchool(level.fishSpawns, level.fluid, TUNING.fish);
+  stage.addBackdrop({ width: level.map.width, height: level.map.height, surface: ground });
+  const worldViews = createWorldViews({ scene: stage.scene, level, fish, ground, windMode: 'calm' });
+  worldViews.weather.setEnabled(false);
+  const hut = pickHomeHut(level.structures, level.map.width);
+  const doorX = (hut.lakeSide === 1 ? hut.x0 : hut.x1) + 0.5;
+  const birdX = 55.5, humanX = 58.5, referenceX = 61.2;
+  const outdoorFloor = worldViews.ground(humanX);
+  const bird = createPelicanRig({ scale: TUNING.render.pelicanScale });
+  const birdHeight = visibleHeight(bird.root);
+  bird.root.position.set(birdX, worldViews.ground(birdX), 0);
+  stage.scene.add(bird.root);
+  const image = texture.image;
+  const reference = new THREE.Mesh(
+    new THREE.PlaneGeometry(image.width * unitsPerPixel, image.height * unitsPerPixel),
+    new THREE.MeshBasicMaterial({ map: texture, transparent: true, alphaTest: 0.04, depthWrite: false, toneMapped: false }),
+  );
+  reference.name = 'approved-side-reference-2d';
+  reference.position.set(
+    referenceX + (image.width / 2 - (bounds.left + bounds.right) / 2) * unitsPerPixel,
+    outdoorFloor + (bounds.bottom - image.height / 2) * unitsPerPixel,
+    0,
+  );
+  reference.visible = false;
+  stage.scene.add(reference);
+  let models = [], gameView = false;
+  for (const model of GRASSY_MODELS) el('variant').add(new Option(model.label, model.id));
+  for (const [id, view] of Object.entries(MODEL_SHOWCASE_VIEWS)) el('view').add(new Option(view.label, id));
+  el('variant').value = 'game';
+  el('view').value = 'right';
+
+  async function chooseVariant() {
+    const variant = el('variant').value;
+    await loadGrassyStaticAsset(variant);
+    const next = [createGrassyStaticModel(variant), createGrassyStaticModel(variant)];
+    for (const model of models) model.dispose();
+    models = next;
+    models[0].root.position.set(doorX, hut.floorY, 0);
+    models[1].root.position.set(humanX, outdoorFloor, 0);
+    stage.scene.add(...models.map(model => model.root));
+    const stats = manifest.get(variant);
+    el('height').textContent = stats.height.toFixed(2) + ' 格';
+    el('triangles').textContent = number.format(stats.triangles);
+    el('materials').textContent = number.format(stats.materials);
+    el('bytes').textContent = (stats.bytes / 1024 / 1024).toFixed(2) + ' MiB';
+    const info = GRASSY_MODELS.find(model => model.id === variant);
+    el('manifest-link').href = manifestPath(info);
+    el('status').textContent = `${info.label} · 两个相同的 3D 实例 · 鹈鹕 ${birdHeight.toFixed(2)} 格`;
+    render();
+  }
+
+  function render() {
+    const aspect = el('stage').clientWidth / el('stage').clientHeight;
+    const viewHeight = gameView
+      ? 2 * TUNING.camera.distance * Math.tan(THREE.MathUtils.degToRad(TUNING.camera.fov) / 2)
+      : Math.max(6.6, (reference.visible ? 11.7 : 9.4) / aspect);
+    const distance = viewHeight / (2 * Math.tan(THREE.MathUtils.degToRad(stage.camera.fov) / 2));
+    const cameraX = reference.visible ? 57.2 : 55.7;
+    const cameraY = hut.floorY + (gameView ? 4.5 : 2.3);
+    stage.camera.position.set(cameraX, cameraY, distance);
+    stage.camera.lookAt(cameraX, cameraY, 0);
+    stage.camera.updateMatrixWorld();
+    for (const model of models) model.root.rotation.y = MODEL_SHOWCASE_VIEWS[el('view').value].yaw;
+    const halfWidth = viewHeight * aspect / 2;
+    worldViews.update({ x: cameraX - halfWidth - 3, y: cameraY - viewHeight / 2 - 3, w: 2 * halfWidth + 6, h: viewHeight + 6 }, 0, 0, 1);
+    stage.render();
+    for (const [id, x, y, visible] of [
+      ['tag-door', doorX, hut.floorY + GRASSY_HEIGHT, true],
+      ['tag-bird', birdX, worldViews.ground(birdX) + birdHeight, true],
+      ['tag-human', humanX, outdoorFloor + GRASSY_HEIGHT, true],
+      ['tag-reference', referenceX, outdoorFloor + GRASSY_HEIGHT, reference.visible],
+    ]) {
+      const point = new THREE.Vector3(x, y + 0.25, 0).project(stage.camera);
+      el(id).hidden = !visible || Math.abs(point.x) > 1 || Math.abs(point.y) > 1;
+      el(id).style.left = (point.x * 0.5 + 0.5) * 100 + '%';
+      el(id).style.top = (-point.y * 0.5 + 0.5) * 100 + '%';
+    }
+  }
+
+  el('variant').onchange = chooseVariant;
+  el('view').onchange = render;
+  el('reference').onchange = () => { reference.visible = el('reference').checked; render(); };
+  for (const [id, selected] of [['close', false], ['game', true]]) {
+    el(id).onclick = () => {
+      gameView = selected;
+      el('close').setAttribute('aria-pressed', String(!gameView));
+      el('game').setAttribute('aria-pressed', String(gameView));
+      render();
+    };
+  }
+  const observer = new ResizeObserver(render);
+  observer.observe(el('stage'));
+  el('controls').disabled = false;
+  await chooseVariant();
+  window.addEventListener('pagehide', () => {
+    observer.disconnect();
+    for (const model of models) model.dispose();
+    reference.geometry.dispose(); reference.material.dispose(); texture.dispose();
+    bird.dispose(); worldViews.dispose(); stage.dispose(); disposeGrassyStaticAssets();
+  }, { once: true });
+}
+
+start().catch(error => {
+  el('status').textContent = '场景加载失败';
+  el('error').textContent = error.message;
+  throw error;
+});
+</script>
+</html>

@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<title>精细模型截图输出</title>
+<style>body{font-family:system-ui;background:#eee;margin:24px}#stage{position:absolute;left:-10000px;width:720px;height:900px}#outputs{display:grid;grid-template-columns:repeat(2,360px);gap:20px}figure{margin:0}img{width:360px;height:450px}figcaption{padding:8px}#status{white-space:pre-wrap}</style>
+<h1>展示场同源模型截图</h1><p id="status" role="status">正在载入实际精细模型…</p><div id="stage"></div><div id="outputs"></div>
+<script type="module">
+import * as THREE from 'three';
+import { TUNING } from '/src/config/tuning.ts';
+import { createStage } from '/src/render/stage.ts';
+import { loadGrassyStaticAsset, createGrassyStaticModel, disposeGrassyStaticAssets } from '/src/render/grassy/grassy-static.ts';
+const models=[['astra','detailed'],['sol','atelier-detailed'],['sonnet','fresh-detailed'],['opus','opus55-detailed']];
+async function capture(){
+  const stage=createStage(document.getElementById('stage'),TUNING,{quality:'high',antialias:'msaa'});
+  stage.renderer.setPixelRatio(1);
+  stage.renderer.setSize(720,900);stage.setSize(720,900);
+  stage.scene.background=new THREE.Color('#dfe4e6');
+  stage.camera.fov=5;
+  stage.camera.position.set(0,1.55,3.55/(2*Math.tan(THREE.MathUtils.degToRad(5)/2)));
+  stage.camera.lookAt(0,1.55,0);stage.camera.updateProjectionMatrix();stage.camera.updateMatrixWorld();
+  for(const [name,id] of models){
+    await loadGrassyStaticAsset(id);
+    const model=createGrassyStaticModel(id);stage.scene.add(model.root);
+    for(const [direction,yaw] of [['front',0],['right',Math.PI/2]]){
+      document.getElementById('status').textContent=`正在截图：${name} ${direction}`;
+      model.root.rotation.y=yaw;
+      stage.render();
+      const figure=document.createElement('figure'),img=document.createElement('img'),caption=document.createElement('figcaption');
+      img.alt=`${name}-${direction}`;img.src=stage.canvas.toDataURL('image/png');
+      caption.textContent=img.alt;figure.append(img,caption);document.getElementById('outputs').append(figure);
+      await img.decode();
+    }
+    model.dispose();
+  }
+  stage.dispose();disposeGrassyStaticAssets();
+  document.getElementById('status').textContent='8 张正侧面截图已完成';
+}
+capture().catch(error=>{document.getElementById('status').textContent=error.stack;throw error;});
+</script>
+</html>

@@ -1,0 +1,16 @@
+{
+  "kind": "sam",
+  "beforeAndAfterTwoRefreshes": {
+    "vertices": 20820,
+    "faces": 34985,
+    "materials": 1,
+    "shapeKeys": 3,
+    "idleSlots": 2,
+    "keyNlaTracks": 1
+  },
+  "idempotent": true,
+  "sevenOtherActionFingerprintsUnchanged": true,
+  "originalVerticesMaximumMorphDisplacement": 0.0,
+  "idleFootMaximumDisplacement": 0,
+  "idleLoopMaximumVertexDifference": 0.0
+}

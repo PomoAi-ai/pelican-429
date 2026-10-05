@@ -1,0 +1,63 @@
+[
+  {
+    "tier": "detailed",
+    "bytes": 39892264,
+    "clips": 12,
+    "bones": 22,
+    "effectSockets": [
+      "fx_wrist_L",
+      "fx_wrist_R",
+      "fx_pack_L",
+      "fx_pack_R",
+      "fx_keyboard"
+    ],
+    "loopTrackMaximumEndpointDifference": 0,
+    "embeddedImages": 3,
+    "rideSeconds": 3.6
+  },
+  {
+    "tier": "game",
+    "bytes": 6257428,
+    "clips": 12,
+    "bones": 22,
+    "effectSockets": [
+      "fx_wrist_L",
+      "fx_wrist_R",
+      "fx_pack_L",
+      "fx_pack_R",
+      "fx_keyboard"
+    ],
+    "loopTrackMaximumEndpointDifference": 0,
+    "embeddedImages": 3,
+    "rideSeconds": 3.6
+  },
+  {
+    "tier": "light",
+    "bytes": 2680904,
+    "clips": 12,
+    "bones": 22,
+    "effectSockets": [
+      "fx_wrist_L",
+      "fx_wrist_R",
+      "fx_pack_L",
+      "fx_pack_R",
+      "fx_keyboard"
+    ],
+    "loopTrackMaximumEndpointDifference": 0,
+    "embeddedImages": 3,
+    "rideSeconds": 3.6,
+    "retainedClipBinaryKeyframesUnchanged": [
+      "idle",
+      "walk",
+      "run",
+      "jump",
+      "codex_attack",
+      "bug_attack",
+      "server_overload",
+      "takeoff",
+      "hover",
+      "fly_forward",
+      "land"
+    ]
+  }
+]

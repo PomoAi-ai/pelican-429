@@ -1,0 +1,6 @@
+assets/characters/grassy/history/model-static/fine-detail-final/grassy-variants.blend filter=lfs diff=lfs merge=lfs -text
+assets/characters/grassy/history/model-static/fine-detail-final/public/grassy-detailed.glb filter=lfs diff=lfs merge=lfs -text
+assets/characters/grassy/history/model-static/grassy-variants.blend filter=lfs diff=lfs merge=lfs -text
+public/characters/human/history/models/grassy-detailed.glb filter=lfs diff=lfs merge=lfs -text
+*.blend filter=lfs diff=lfs merge=lfs -text
+*.glb filter=lfs diff=lfs merge=lfs -text

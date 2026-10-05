@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Grassy · 3.1 头身侧面入场</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#edf1eb;color:#263b30;font-family:system-ui,-apple-system,"PingFang SC",sans-serif}main{max-width:1560px;margin:auto;padding:22px 28px}small{font-size:11px;letter-spacing:2px;color:#58745f}h1{font-size:25px;margin:7px 0}p{color:#647569;font-size:14px;line-height:1.6;margin:7px 0}.controls{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin:16px 0}button,a{font:inherit;font-size:13px;color:inherit}button{border:1px solid #b8c8b6;background:white;border-radius:7px;padding:8px 14px;cursor:pointer}button[aria-pressed=true]{background:#355840;color:white;border-color:#355840}.controls a{margin-left:auto}#stage{height:clamp(420px,65vh,660px);position:relative;overflow:hidden;border-radius:12px;border:1px solid #cad7c5;background:#afd8de}canvas{display:block;width:100%;height:100%}.actor-tag{position:absolute;transform:translate(-50%,-100%);border:1px solid #b6caae;background:#ffffffed;padding:5px 9px;border-radius:6px;font-size:12px;white-space:nowrap;pointer-events:none}.stats{display:flex;justify-content:center;gap:44px;text-align:center;margin:15px 0}.stats strong{display:block;font-size:23px}.stats span{font-size:13px;color:#647569}#error{color:#a8302c;white-space:pre-wrap}footer{border-top:1px solid #d2ddce;padding-top:10px}@media(max-width:700px){main{padding:16px}h1{font-size:21px}#stage{height:440px}.controls a{margin-left:0}.stats{gap:24px}}
+</style>
+<main>
+<small>PELICAN 429 / CHARACTER IN SCENE</small>
+<h1>3.1 头身 · 侧面原画放入场景</h1>
+<p>门口与屋外各放置一个相同人物，与门框和鹈鹕一起看比例。</p>
+<div class="controls">
+  <button id="close" aria-pressed="true">门前近景</button>
+  <button id="game" aria-pressed="false">游戏视距</button>
+  <a href="/characters/human/history/turnaround-3p1/right.png" target="_blank" rel="noopener">查看侧面角色卡</a>
+</div>
+<div id="stage" aria-label="Grassy 侧面原画与鹈鹕的游戏场景对照">
+  <span class="actor-tag" id="tag-bird">鹈鹕</span>
+  <span class="actor-tag" id="tag-human">Grassy · 3.1 头身</span>
+  <span class="actor-tag" id="tag-door">门口</span>
+</div>
+<div class="stats"><div><strong id="bird-height">加载中</strong><span>鹈鹕 · 游戏原尺寸</span></div><div><strong id="human-height">加载中</strong><span>Grassy · 含发梢的显示高度</span></div></div>
+<footer><p>门口与屋外人物的显示高度统一为 3.1 格，含发梢。头发作为造型外轮廓，身体与门框的关系可直接在门口比较。</p></footer>
+<pre id="error" role="alert"></pre>
+</main>
+<script type="module">
+import * as THREE from 'three';
+import { createStage } from '/src/render/stage.ts';
+import { TUNING } from '/src/config/tuning.ts';
+import { createPelicanRig } from '/src/render/pelican/pelican-rig.ts';
+import { generateWorld } from '/src/world/worldgen.ts';
+import { pickHomeHut } from '/src/world/spawn-home.ts';
+import { levelGroundColumns } from '/src/render/surface-decor-view.ts';
+import { createFishSchool } from '/src/entities/fish.ts';
+import { createWorldViews } from '/src/render/world-views.ts';
+
+const el = id => document.getElementById(id);
+const humanHeight = 3.1;
+const birdX = 55.5;
+const humanX = 58.5;
+
+function imageBounds(image) {
+  const canvas = document.createElement('canvas');
+  canvas.width = image.width;
+  canvas.height = image.height;
+  const context = canvas.getContext('2d');
+  context.drawImage(image, 0, 0);
+  const pixels = context.getImageData(0, 0, image.width, image.height).data;
+  let left = image.width, right = -1, top = image.height, bottom = -1, transparent = false;
+  for (let y = 0; y < image.height; y++) {
+    for (let x = 0; x < image.width; x++) {
+      const alpha = pixels[(y * image.width + x) * 4 + 3];
+      if (alpha === 0) transparent = true;
+      if (alpha < 32) continue;
+      left = Math.min(left, x); right = Math.max(right, x);
+      top = Math.min(top, y); bottom = Math.max(bottom, y);
+    }
+  }
+  if (!transparent || bottom < top) throw new Error('右侧面资源需要包含完整人物和透明背景。');
+  return { left, right: right + 1, top, bottom: bottom + 1 };
+}
+
+function visibleBounds(root) {
+  root.updateMatrixWorld(true);
+  const box = new THREE.Box3();
+  root.traverseVisible(node => {
+    if (node.isMesh) {
+      node.geometry.computeBoundingBox();
+      box.union(node.geometry.boundingBox.clone().applyMatrix4(node.matrixWorld));
+    }
+  });
+  return box;
+}
+
+async function start() {
+  const texture = await new THREE.TextureLoader().loadAsync('/characters/human/history/turnaround-3p1/right-cutout.png');
+  texture.colorSpace = THREE.SRGBColorSpace;
+  const image = texture.image;
+  const bounds = imageBounds(image);
+  const unitsPerPixel = humanHeight / (bounds.bottom - bounds.top);
+  const stage = createStage(el('stage'), TUNING, { quality: 'high', antialias: 'msaa' });
+  const level = generateWorld(TUNING.worldgen.seed, TUNING.worldgen);
+  const ground = levelGroundColumns(level);
+  const fish = createFishSchool(level.fishSpawns, level.fluid, TUNING.fish);
+  stage.addBackdrop({ width: level.map.width, height: level.map.height, surface: ground });
+  const worldViews = createWorldViews({ scene: stage.scene, level, fish, ground, windMode: 'calm' });
+  worldViews.weather.setEnabled(false);
+  const bird = createPelicanRig({ scale: TUNING.render.pelicanScale });
+  const birdBounds = visibleBounds(bird.root);
+  const birdHeight = birdBounds.max.y - birdBounds.min.y;
+  bird.root.position.set(birdX, worldViews.ground(birdX), 0);
+  const human = new THREE.Mesh(
+    new THREE.PlaneGeometry(image.width * unitsPerPixel, image.height * unitsPerPixel),
+    new THREE.MeshBasicMaterial({ map: texture, transparent: true, alphaTest: 0.04, depthWrite: false, toneMapped: false }),
+  );
+  human.position.set(
+    humanX + (image.width / 2 - (bounds.left + bounds.right) / 2) * unitsPerPixel,
+    worldViews.ground(humanX) + (bounds.bottom - image.height / 2) * unitsPerPixel,
+    0,
+  );
+  const hut = pickHomeHut(level.structures, level.map.width);
+  const doorX = (hut.lakeSide === 1 ? hut.x0 : hut.x1) + 0.5;
+  const doorwayHuman = human.clone();
+  doorwayHuman.position.x += doorX - humanX;
+  doorwayHuman.position.y += hut.floorY - worldViews.ground(humanX);
+  stage.scene.add(bird.root, human, doorwayHuman);
+  el('bird-height').textContent = birdHeight.toFixed(2) + ' 格';
+  el('human-height').textContent = humanHeight.toFixed(2) + ' 格';
+  let gameView = false;
+
+  function render() {
+    const aspect = el('stage').clientWidth / el('stage').clientHeight;
+    const viewHeight = gameView
+      ? 2 * TUNING.camera.distance * Math.tan(THREE.MathUtils.degToRad(TUNING.camera.fov) / 2)
+      : Math.max(7.2, 13 / aspect);
+    const distance = viewHeight / (2 * Math.tan(THREE.MathUtils.degToRad(stage.camera.fov) / 2));
+    const cameraX = 55.7, cameraY = gameView ? 53.5 : 51.3;
+    stage.camera.position.set(cameraX, cameraY, distance);
+    stage.camera.lookAt(cameraX, cameraY, 0);
+    stage.camera.updateMatrixWorld();
+    const halfWidth = viewHeight * aspect / 2;
+    worldViews.update({ x: cameraX - halfWidth - 3, y: cameraY - viewHeight / 2 - 3, w: 2 * halfWidth + 6, h: viewHeight + 6 }, 0, 0, 1);
+    stage.render();
+    for (const [id, x, floor, height, label] of [
+      ['tag-bird', birdX, worldViews.ground(birdX), birdHeight, gameView ? '鹈鹕' : '鹈鹕 · ' + birdHeight.toFixed(2) + ' 格'],
+      ['tag-human', humanX, worldViews.ground(humanX), humanHeight, gameView ? 'Grassy' : 'Grassy · 3.1 头身 · ' + humanHeight.toFixed(2) + ' 格'],
+      ['tag-door', doorX, hut.floorY, humanHeight, '门口'],
+    ]) {
+      const point = new THREE.Vector3(x, floor + height + 0.25, 0).project(stage.camera);
+      el(id).style.left = (point.x * 0.5 + 0.5) * 100 + '%';
+      el(id).style.top = (-point.y * 0.5 + 0.5) * 100 + '%';
+      el(id).textContent = label;
+    }
+  }
+
+  for (const [id, selected] of [['close', false], ['game', true]]) {
+    el(id).onclick = () => {
+      gameView = selected;
+      el('close').setAttribute('aria-pressed', String(!gameView));
+      el('game').setAttribute('aria-pressed', String(gameView));
+      render();
+    };
+  }
+  new ResizeObserver(() => requestAnimationFrame(render)).observe(el('stage'));
+  requestAnimationFrame(render);
+}
+
+start().catch(error => {
+  el('error').textContent = '场景加载失败：' + error.message;
+  throw error;
+});
+</script>
+</html>

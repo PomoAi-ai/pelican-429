@@ -1,0 +1,160 @@
+{
+  "renderedFromSourceSha256": "f82d83faf36583fc80f8acb489a5800fd4c9112e0b98999ea0003166e59bdda8",
+  "currentSourceSha256": "c14aa4ed28cb352070780f27f6c0f3957a11c8cc11e60e61a2911ff297a0c641",
+  "restGeometryAndUVIdentical": true,
+  "materialsAndTexturesIdentical": true,
+  "staticReusePass": true,
+  "verificationChain": [
+    {
+      "fromSourceSha256": "f82d83faf36583fc80f8acb489a5800fd4c9112e0b98999ea0003166e59bdda8",
+      "toSourceSha256": "badca6068a0d4373e3ac8dc9e68a1e7559f5b446ef180bbf6bea15c53d916be2",
+      "method": "Exact REST geometry/UV/matrix/material-node/packed-texture equality, verified before crotch repair.",
+      "evidence": {
+        "sources": [
+          {
+            "path": "$TMPDIR/sam-fit-render-source.blend",
+            "sourceSha256": "f82d83faf36583fc80f8acb489a5800fd4c9112e0b98999ea0003166e59bdda8",
+            "restMeshes": [
+              {
+                "name": "model",
+                "matrix": [
+                  [
+                    1.0,
+                    0.0,
+                    0.0,
+                    0.0
+                  ],
+                  [
+                    0.0,
+                    1.0,
+                    0.0,
+                    0.0
+                  ],
+                  [
+                    0.0,
+                    0.0,
+                    1.0,
+                    0.0
+                  ],
+                  [
+                    0.0,
+                    0.0,
+                    0.0,
+                    1.0
+                  ]
+                ],
+                "vertexCount": 19896,
+                "faceCount": 34217,
+                "restMeshSha256": "5677fe39067ccb7a09332f4db1101c5a6f8bd0259a51e43320e4347eabfb9b69",
+                "uvSha256": [
+                  "a3f1b4b9741c13d514e89fd4cba85b042b35e733e49646c098c909efbc6d00e5"
+                ],
+                "materials": [
+                  "model"
+                ]
+              }
+            ],
+            "materialSha256": "8a6599c4845ae513f777e16ca2e3e6841bbb668d1160bf57b5016f97f1a349b7",
+            "packedTextures": [
+              {
+                "name": "texture_diffuse",
+                "colorspace": "sRGB",
+                "packedSha256": "2f0d1b0c32be45da4b754acabe8377673722ca6edb0f78ccd037fa3767d9ae10"
+              },
+              {
+                "name": "texture_metallic-texture_roughness",
+                "colorspace": "Non-Color",
+                "packedSha256": "90701c974c51fae2d40431d758b86a2fee633f3996092c9cf874513f112aff1c"
+              },
+              {
+                "name": "texture_normal",
+                "colorspace": "Non-Color",
+                "packedSha256": "8b3b1c0ab969c4d1bb15efdc8ed3dbd7f1c65554d9c5f0a2c267348a2b9178f1"
+              }
+            ]
+          },
+          {
+            "path": "assets/characters/sam/sam-rigged.blend",
+            "sourceSha256": "badca6068a0d4373e3ac8dc9e68a1e7559f5b446ef180bbf6bea15c53d916be2",
+            "restMeshes": [
+              {
+                "name": "model",
+                "matrix": [
+                  [
+                    1.0,
+                    0.0,
+                    0.0,
+                    0.0
+                  ],
+                  [
+                    0.0,
+                    1.0,
+                    0.0,
+                    0.0
+                  ],
+                  [
+                    0.0,
+                    0.0,
+                    1.0,
+                    0.0
+                  ],
+                  [
+                    0.0,
+                    0.0,
+                    0.0,
+                    1.0
+                  ]
+                ],
+                "vertexCount": 19896,
+                "faceCount": 34217,
+                "restMeshSha256": "5677fe39067ccb7a09332f4db1101c5a6f8bd0259a51e43320e4347eabfb9b69",
+                "uvSha256": [
+                  "a3f1b4b9741c13d514e89fd4cba85b042b35e733e49646c098c909efbc6d00e5"
+                ],
+                "materials": [
+                  "model"
+                ]
+              }
+            ],
+            "materialSha256": "8a6599c4845ae513f777e16ca2e3e6841bbb668d1160bf57b5016f97f1a349b7",
+            "packedTextures": [
+              {
+                "name": "texture_diffuse",
+                "colorspace": "sRGB",
+                "packedSha256": "2f0d1b0c32be45da4b754acabe8377673722ca6edb0f78ccd037fa3767d9ae10"
+              },
+              {
+                "name": "texture_metallic-texture_roughness",
+                "colorspace": "Non-Color",
+                "packedSha256": "90701c974c51fae2d40431d758b86a2fee633f3996092c9cf874513f112aff1c"
+              },
+              {
+                "name": "texture_normal",
+                "colorspace": "Non-Color",
+                "packedSha256": "8b3b1c0ab969c4d1bb15efdc8ed3dbd7f1c65554d9c5f0a2c267348a2b9178f1"
+              }
+            ]
+          }
+        ],
+        "restGeometryAndUVIdentical": true,
+        "materialsAndTexturesIdentical": true
+      }
+    },
+    {
+      "fromSourceSha256": "badca6068a0d4373e3ac8dc9e68a1e7559f5b446ef180bbf6bea15c53d916be2",
+      "toSourceSha256": "3e76267f06bf3e54895436145294879b7d5f55bfa9350e4d7318c656ff5f8bcc",
+      "method": "Exact REST evaluated geometry/topology/corner normals/UV/matrix/material assignment/material nodes/packed textures equality.",
+      "evidence": "../evidence/crotch-repair/final-static-comparison.json",
+      "evidenceSha256": "e9989111e51ba1cc251fbaa026937d60e90845a2bcb28dd35a13a24b1c488ff2"
+    },
+    {
+      "fromSourceSha256": "3e76267f06bf3e54895436145294879b7d5f55bfa9350e4d7318c656ff5f8bcc",
+      "toSourceSha256": "c14aa4ed28cb352070780f27f6c0f3957a11c8cc11e60e61a2911ff297a0c641",
+      "method": "Independent exact REST geometry/topology/normals/UV/transforms/material assignments/material nodes/packed textures/vertex weights/vertex groups/armature modifiers/rest skeleton equality after adding action clips.",
+      "evidence": "action-skills-static-comparison.json",
+      "evidenceSha256": "015cdd76da423db7123fb79a3caaa9aee88f9af7dca9416655901ab7c5f4ec79"
+    }
+  ],
+  "scope": "Static four-direction images and chin landmarks only; this does not certify animation deformation.",
+  "currentRestBindingIdenticalToPreviousAcceptedAsset": true
+}

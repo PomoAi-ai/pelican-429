@@ -1,0 +1,43 @@
+{
+  "name": "Rodin 版",
+  "height": 3.1,
+  "orientation": "Y-up, +Z forward",
+  "pose": "static",
+  "reference": "/characters/human/history/turnaround-master-v2/right.png",
+  "source": "Hyper3D Rodin Gen-2.5-High：四向原画生成的四边面全身，加四向头部裁图单独生成的头部",
+  "models": [
+    {
+      "id": "detailed",
+      "triangles": 124476,
+      "meshObjects": 2,
+      "materials": 2,
+      "height": 3.1,
+      "sole": 0.0,
+      "texture": 2048,
+      "bytes": 7826920,
+      "path": "/characters/human/history/models-rodin/grassy-rodin-detailed.glb"
+    },
+    {
+      "id": "game",
+      "triangles": 25999,
+      "meshObjects": 2,
+      "materials": 2,
+      "height": 3.1,
+      "sole": 0.0,
+      "texture": 1024,
+      "bytes": 2240840,
+      "path": "/characters/human/history/models-rodin/grassy-rodin-game.glb"
+    },
+    {
+      "id": "light",
+      "triangles": 14000,
+      "meshObjects": 2,
+      "materials": 2,
+      "height": 3.1,
+      "sole": 0.0,
+      "texture": 512,
+      "bytes": 1002552,
+      "path": "/characters/human/history/models-rodin/grassy-rodin-light.glb"
+    }
+  ]
+}

@@ -1,0 +1,47 @@
+{
+  "artifact": "$TMPDIR/rodin-material-export.glb",
+  "bytes": 21048928,
+  "sha256": "cc3ec93c918550b9816dcaee31a5759e6db5e765bf8210bbc0ebac04afb47d31",
+  "materials": [
+    {
+      "doubleSided": true,
+      "name": "Rodin calibrated fabric and skin",
+      "normalTexture": {
+        "index": 0
+      },
+      "pbrMetallicRoughness": {
+        "baseColorTexture": {
+          "index": 1
+        },
+        "metallicFactor": 0,
+        "metallicRoughnessTexture": {
+          "index": 2
+        }
+      }
+    }
+  ],
+  "images": [
+    {
+      "bufferView": 4,
+      "mimeType": "image/png",
+      "name": "rodin-refined-normal"
+    },
+    {
+      "bufferView": 5,
+      "mimeType": "image/png",
+      "name": "rodin-refined-base-color"
+    },
+    {
+      "bufferView": 6,
+      "mimeType": "image/png",
+      "name": "rodin-refined-roughness"
+    }
+  ],
+  "mesh_count": 1,
+  "roundtrip_render": "roundtrip-material-front.png",
+  "map_sha256": {
+    "rodin-refined-roughness.png": "040c2a56b6f67f23bdbf66c7255b7899159a2a9b2dc281bc0ced211129474735",
+    "rodin-refined-normal.png": "11da661b145ca457662ee33aed47954ffeaaa568b1906b36519bf420bd9efa9b",
+    "rodin-refined-base-color.png": "b817e6b007393f18f8d26e45de0c3afb59d1d5334421a44a17841fc3101deea9"
+  }
+}

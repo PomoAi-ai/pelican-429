@@ -1,0 +1,32 @@
+{
+  "bytes": 9949840,
+  "skins": 1,
+  "joints": 11,
+  "animations": [
+    {
+      "name": "hit",
+      "channels": 33,
+      "duration": 0.5
+    },
+    {
+      "name": "idle",
+      "channels": 33,
+      "duration": 2
+    },
+    {
+      "name": "move",
+      "channels": 33,
+      "duration": 1
+    },
+    {
+      "name": "skill1",
+      "channels": 33,
+      "duration": 2.9
+    },
+    {
+      "name": "skill2",
+      "channels": 33,
+      "duration": 2.3666666666666667
+    }
+  ]
+}

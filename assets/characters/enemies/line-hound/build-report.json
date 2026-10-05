@@ -1,0 +1,52 @@
+{
+  "sourceBounds": [
+    [
+      -0.9442600607872009,
+      -0.40341106057167053,
+      -0.6443219184875488
+    ],
+    [
+      0.9407589435577393,
+      0.40251395106315613,
+      0.6430810689926147
+    ]
+  ],
+  "yawDegrees": 90,
+  "skin": [
+    {
+      "mesh": "model",
+      "vertices": 38303,
+      "maxInfluences": 2
+    }
+  ],
+  "kind": "line-hound",
+  "height": 1.5,
+  "forward": "+X",
+  "up": "Y in glTF; Z in Blender",
+  "source": "assets/characters/enemies/line-hound/rodin-original/source.glb",
+  "bones": [
+    "root",
+    "body",
+    "head",
+    "thigh.FL",
+    "shin.FL",
+    "foot.FL",
+    "thigh.FR",
+    "shin.FR",
+    "foot.FR",
+    "thigh.BL",
+    "shin.BL",
+    "foot.BL",
+    "thigh.BR",
+    "shin.BR",
+    "foot.BR"
+  ],
+  "clips": {
+    "idle": 3.0,
+    "move": 0.6,
+    "skill1": 1.9333333333333333,
+    "skill2": 1.6666666666666667,
+    "hit": 0.6
+  },
+  "triangles": 62493
+}

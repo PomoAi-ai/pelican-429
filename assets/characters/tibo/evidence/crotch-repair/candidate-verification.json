@@ -1,0 +1,16 @@
+{
+  "skin": [
+    {
+      "mesh": "model",
+      "vertices": 20780,
+      "maximumInfluences": 4,
+      "normalizationMaxError": 2.220446049250313e-16
+    }
+  ],
+  "preservedHeadArmTailWeightMaximumDifference": 0.0,
+  "walk": {
+    "minimumSoleZ": -1.3224780559539795e-07,
+    "supportFootMaximumGroundError": 1.801071505269647e-07,
+    "loopEndpointMaximumVertexDifference": 0
+  }
+}

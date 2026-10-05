@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Grassy × 鹈鹕 · 体型对照</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#edf0e9;color:#273932;font-family:system-ui,-apple-system,"PingFang SC",sans-serif}main{max-width:1500px;margin:auto;padding:26px 32px}header{display:flex;align-items:flex-end;justify-content:space-between;gap:24px}small{font-size:11px;letter-spacing:3px;color:#58705d}h1{font-size:28px;margin:8px 0}p{font-size:14px;line-height:1.6;color:#66776c;margin:6px 0}.controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:18px 0}button{border:1px solid #b9c7b7;background:#fff;padding:9px 14px;border-radius:7px;color:#294331;cursor:pointer}button[aria-pressed=true]{background:#304e3b;color:white}.scale{display:flex;align-items:center;gap:10px;margin-left:auto;font-size:14px}.scale output{font-weight:700;min-width:42px}input{accent-color:#405f44;width:150px}#stage{width:100%;height:390px;border:1px solid #d2dbcb;border-radius:12px;overflow:hidden;background:#e4ebdf;position:relative}canvas{display:block;width:100%;height:100%}.labels{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;text-align:center;margin:14px 0}.labels h2{font-size:18px;margin:0 0 8px}.labels strong{font-size:26px}.labels p{font-size:13px;margin:3px 0}.bad{color:#a64e40}.good{color:#356341}.tag{display:inline-block;font-size:11px;margin:0 0 8px;padding:3px 10px;border-radius:20px;background:#dce5d4}.explain{margin-top:16px;border-top:1px solid #cfd9c9;padding-top:12px;font-size:13px;color:#68796a}#error{white-space:pre-wrap;color:#b00020}a{color:inherit} @media(max-width:800px){main{padding:18px}.scale{margin-left:0}#stage{height:340px}.labels h2{font-size:14px}.labels strong{font-size:22px}header p{display:none}}
+</style>
+<style>
+#stage{height:470px;background:#9ccdd8}.actor-tag{position:absolute;transform:translate(-50%,-100%);background:#ffffffdf;border:1px solid #b8c9ad;padding:5px 9px;border-radius:6px;font-size:12px;white-space:nowrap;pointer-events:none;color:#203629;box-shadow:0 2px 10px #18311b12}.actor-tag b{font-weight:700}#tag-current{border-color:#c78272;color:#8d342c}#tag-proposed{border-color:#77a56f;color:#2c5f32}@media(max-width:800px){#stage{height:420px}}
+</style>
+<main>
+<header><div><small>PELICAN 429 / IN-GAME SCALE</small><h1>放回游戏场景，看真实体型</h1><p>出生渔屋门前 · 相同地面与镜头 · 渔屋门洞高 3 格</p></div><p>鹈鹕保持游戏中的实际大小<br>右侧人形为尺寸候选</p></header>
+<div class="controls"><button id="quarter" aria-pressed="true">三分之四</button><button id="side" aria-pressed="false">横版侧面</button><button id="game" aria-pressed="true">游戏视距</button><button id="close" aria-pressed="false">门前近景</button><label class="scale">候选人形缩放 <input id="scale" aria-label="候选人形缩放" type="range" min="0.65" max="1" step="0.01" value="0.8"><output id="scaleValue">80%</output></label></div>
+<div id="stage"><span class="actor-tag" id="tag-bird">鹈鹕 · 2.58 格</span><span class="actor-tag" id="tag-current">当前 · 3.56 格</span><span class="actor-tag" id="tag-proposed">80% · 2.85 格</span></div>
+<div class="labels"><section><span class="tag">现有游戏基准</span><h2>鹈鹕</h2><strong id="birdHeight">加载中</strong><p>含帽子的可见高度</p></section><section><span class="tag">当前人形</span><h2>Grassy · 当前尺寸</h2><strong class="bad" id="currentHeight">加载中</strong><p id="currentRatio"></p></section><section><span class="tag">尺寸候选</span><h2>Grassy · 缩小后</h2><strong class="good" id="proposedHeight">加载中</strong><p id="proposedRatio"></p></section></div>
+<p class="explain">使用游戏默认种子的真实地图、房屋和植被。三个角色按各自脚下的实际地面贴地；右侧只作尺寸比较，当前人形造型仍待静态重做。</p>
+<pre id="error"></pre>
+</main>
+<script type="module">
+import * as THREE from 'three';
+import { createStage } from '/src/render/stage.ts';
+import { TUNING } from '/src/config/tuning.ts';
+import { createPelicanRig } from '/src/render/pelican/pelican-rig.ts';
+import { loadGrassyAsset,createGrassyRig } from '/src/render/grassy/grassy-rig.ts';
+import { generateWorld } from '/src/world/worldgen.ts';
+import { levelGroundColumns } from '/src/render/surface-decor-view.ts';
+import { createFishSchool } from '/src/entities/fish.ts';
+import { createWorldViews } from '/src/render/world-views.ts';
+
+const el=id=>document.getElementById(id);
+try {
+await loadGrassyAsset();
+const stage=createStage(el('stage'),TUNING,{quality:'high',antialias:'msaa'});
+const level=generateWorld(TUNING.worldgen.seed,TUNING.worldgen);
+const ground=levelGroundColumns(level);
+const fish=createFishSchool(level.fishSpawns,level.fluid,TUNING.fish);
+stage.addBackdrop({width:level.map.width,height:level.map.height,surface:ground});
+const worldViews=createWorldViews({scene:stage.scene,level,fish,ground,windMode:'calm'});
+worldViews.weather.setEnabled(false);
+const bird=createPelicanRig({scale:TUNING.render.pelicanScale});
+const current=createGrassyRig(), proposed=createGrassyRig();
+current.props.visible=false;proposed.props.visible=false;
+stage.scene.add(bird.root,current.root,proposed.root);
+function bounds(root){root.updateMatrixWorld(true);const box=new THREE.Box3();root.traverseVisible(node=>{if(node.isMesh){if(node.isSkinnedMesh){node.computeBoundingBox();box.union(node.boundingBox.clone().applyMatrix4(node.matrixWorld));}else{node.geometry.computeBoundingBox();box.union(node.geometry.boundingBox.clone().applyMatrix4(node.matrixWorld));}}});return box;}
+const bh=bounds(bird.root).getSize(new THREE.Vector3()).y;
+const hb=bounds(current.root),hh=hb.max.y-hb.min.y;
+bird.root.position.set(55.5,worldViews.ground(55.5),0);
+current.root.position.set(58.5,worldViews.ground(58.5)-hb.min.y,0);
+el('birdHeight').textContent=bh.toFixed(2)+' 格';el('currentHeight').textContent=hh.toFixed(2)+' 格';el('currentRatio').textContent='比鹈鹕高 '+Math.round((hh/bh-1)*100)+'%';
+let side=false,game=true;
+function render(){
+  const scale=Number(el('scale').value);
+  proposed.root.scale.setScalar(scale);
+  proposed.root.position.set(61.5,worldViews.ground(61.5)-hb.min.y*scale,0);
+  current.root.rotation.y=proposed.root.rotation.y=side?Math.PI/2:Math.PI/4;
+  bird.root.rotation.y=side?0:-Math.PI/8;
+  el('scaleValue').textContent=Math.round(scale*100)+'%';
+  el('proposedHeight').textContent=(hh*scale).toFixed(2)+' 格';
+  el('proposedRatio').textContent='比鹈鹕'+(hh*scale>=bh?'高 ':'矮 ')+Math.abs(Math.round((hh*scale/bh-1)*100))+'%';
+  const aspect=el('stage').clientWidth/el('stage').clientHeight;
+  const viewHeight=game?2*TUNING.camera.distance*Math.tan(THREE.MathUtils.degToRad(TUNING.camera.fov)/2):Math.max(9.4,20/aspect);
+  const distance=viewHeight/(2*Math.tan(THREE.MathUtils.degToRad(stage.camera.fov)/2));
+  const cameraX=game?58.5:56.5,cameraY=game?53.5:51.8;
+  stage.camera.position.set(cameraX,cameraY,distance);stage.camera.lookAt(cameraX,cameraY,0);stage.camera.updateMatrixWorld();
+  const halfWidth=viewHeight*aspect/2;
+  worldViews.update({x:cameraX-halfWidth-3,y:cameraY-viewHeight/2-3,w:2*halfWidth+6,h:viewHeight+6},0,0,1);
+  stage.render();
+  for(const [id,x,y,text] of [
+    ['tag-bird',55.5,worldViews.ground(55.5)+bh+.28,'鹈鹕 · '+bh.toFixed(2)+' 格'],
+    ['tag-current',58.5,worldViews.ground(58.5)+hh+.28,'当前 · '+hh.toFixed(2)+' 格'],
+    ['tag-proposed',61.5,worldViews.ground(61.5)+hh*scale+.28,Math.round(scale*100)+'% · '+(hh*scale).toFixed(2)+' 格']
+  ]){const p=new THREE.Vector3(x,y,0).project(stage.camera);el(id).style.left=(p.x*.5+.5)*100+'%';el(id).style.top=(-p.y*.5+.5)*100+'%';el(id).textContent=text;}
+}
+el('scale').addEventListener('input',render);
+for(const [id,value] of [['quarter',false],['side',true]])el(id).onclick=()=>{side=value;el('side').setAttribute('aria-pressed',String(side));el('quarter').setAttribute('aria-pressed',String(!side));render();};
+for(const [id,value] of [['game',true],['close',false]])el(id).onclick=()=>{game=value;el('game').setAttribute('aria-pressed',String(game));el('close').setAttribute('aria-pressed',String(!game));render();};
+new ResizeObserver(()=>requestAnimationFrame(render)).observe(el('stage'));
+requestAnimationFrame(render);
+}catch(error){el('error').textContent=error.stack;throw error;}
+</script>
+</html>

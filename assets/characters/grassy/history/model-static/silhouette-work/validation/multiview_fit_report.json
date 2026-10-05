@@ -1,0 +1,429 @@
+{
+  "method": "constant world height 3.1, frame 3.55, references aligned by alpha bbox center",
+  "views": {
+    "front": {
+      "before": {
+        "reference": "assets/characters/grassy/history/model-static/silhouette-work/validation/reference-front.png",
+        "render": "assets/characters/grassy/history/model-static/silhouette-work/validation/before-front.png",
+        "reference_mode": "alpha",
+        "render_mode": "bright",
+        "image_size": [
+          720,
+          900
+        ],
+        "reference_bbox": [
+          192,
+          57,
+          336,
+          786
+        ],
+        "render_bbox": [
+          200,
+          57,
+          320,
+          786
+        ],
+        "reference_centroid": [
+          359.7537304517162,
+          453.8938867185167
+        ],
+        "render_centroid": [
+          359.28563904709415,
+          446.7308163390287
+        ],
+        "iou": 0.8757785113841337,
+        "reference_foreground_ratio": 0.25834259259259257,
+        "render_foreground_ratio": 0.25199074074074074,
+        "bbox_center_drift_px": [
+          0.0,
+          0.0
+        ],
+        "bbox_size_ratio": [
+          0.9523809523809523,
+          1.0
+        ],
+        "bbox_size_error_ratio": [
+          -0.047619047619047616,
+          0.0
+        ],
+        "pass_bbox_center_1p5pct": true,
+        "pass_bbox_size_5pct": true,
+        "centroid_drift_px": [
+          -0.4680914046220437,
+          -7.163070379487976
+        ],
+        "pass_size_gate": false
+      },
+      "after": {
+        "reference": "assets/characters/grassy/history/model-static/silhouette-work/validation/reference-front.png",
+        "render": "assets/characters/grassy/history/model-static/silhouette-work/validation/after-front.png",
+        "reference_mode": "alpha",
+        "render_mode": "bright",
+        "image_size": [
+          720,
+          900
+        ],
+        "reference_bbox": [
+          192,
+          57,
+          336,
+          786
+        ],
+        "render_bbox": [
+          193,
+          57,
+          334,
+          786
+        ],
+        "reference_centroid": [
+          359.7537304517162,
+          453.8938867185167
+        ],
+        "render_centroid": [
+          359.2434880823465,
+          452.13746928889975
+        ],
+        "iou": 0.9074420880363078,
+        "reference_foreground_ratio": 0.25834259259259257,
+        "render_foreground_ratio": 0.2650648148148148,
+        "bbox_center_drift_px": [
+          0.0,
+          0.0
+        ],
+        "bbox_size_ratio": [
+          0.9940476190476191,
+          1.0
+        ],
+        "bbox_size_error_ratio": [
+          -0.005952380952380952,
+          0.0
+        ],
+        "pass_bbox_center_1p5pct": true,
+        "pass_bbox_size_5pct": true,
+        "centroid_drift_px": [
+          -0.5102423693696778,
+          -1.7564174296169313
+        ],
+        "pass_size_gate": true
+      }
+    },
+    "right": {
+      "before": {
+        "reference": "assets/characters/grassy/history/model-static/silhouette-work/validation/reference-right.png",
+        "render": "assets/characters/grassy/history/model-static/silhouette-work/validation/before-right.png",
+        "reference_mode": "alpha",
+        "render_mode": "bright",
+        "image_size": [
+          720,
+          900
+        ],
+        "reference_bbox": [
+          225,
+          57,
+          269,
+          786
+        ],
+        "render_bbox": [
+          235,
+          57,
+          236,
+          786
+        ],
+        "reference_centroid": [
+          368.59607198142413,
+          410.01854946524065
+        ],
+        "render_centroid": [
+          358.50461274197596,
+          398.2517611410264
+        ],
+        "iou": 0.8263273778509841,
+        "reference_foreground_ratio": 0.1754567901234568,
+        "render_foreground_ratio": 0.15991666666666668,
+        "bbox_center_drift_px": [
+          -6.5,
+          0.0
+        ],
+        "bbox_size_ratio": [
+          0.8773234200743495,
+          1.0
+        ],
+        "bbox_size_error_ratio": [
+          -0.12267657992565056,
+          0.0
+        ],
+        "pass_bbox_center_1p5pct": true,
+        "pass_bbox_size_5pct": false,
+        "centroid_drift_px": [
+          -10.09145923944817,
+          -11.766788324214247
+        ],
+        "pass_size_gate": false
+      },
+      "after": {
+        "reference": "assets/characters/grassy/history/model-static/silhouette-work/validation/reference-right.png",
+        "render": "assets/characters/grassy/history/model-static/silhouette-work/validation/after-right.png",
+        "reference_mode": "alpha",
+        "render_mode": "bright",
+        "image_size": [
+          720,
+          900
+        ],
+        "reference_bbox": [
+          225,
+          57,
+          269,
+          786
+        ],
+        "render_bbox": [
+          213,
+          57,
+          272,
+          786
+        ],
+        "reference_centroid": [
+          368.59607198142413,
+          410.01854946524065
+        ],
+        "render_centroid": [
+          355.15550743199975,
+          400.57134551215074
+        ],
+        "iou": 0.8201272049378074,
+        "reference_foreground_ratio": 0.1754567901234568,
+        "render_foreground_ratio": 0.18314197530864199,
+        "bbox_center_drift_px": [
+          -10.5,
+          0.0
+        ],
+        "bbox_size_ratio": [
+          1.0111524163568772,
+          1.0
+        ],
+        "bbox_size_error_ratio": [
+          0.011152416356877323,
+          0.0
+        ],
+        "pass_bbox_center_1p5pct": true,
+        "pass_bbox_size_5pct": true,
+        "centroid_drift_px": [
+          -13.44056454942438,
+          -9.447203953089911
+        ],
+        "pass_size_gate": true
+      }
+    },
+    "left": {
+      "before": {
+        "reference": "assets/characters/grassy/history/model-static/silhouette-work/validation/reference-left.png",
+        "render": "assets/characters/grassy/history/model-static/silhouette-work/validation/before-left.png",
+        "reference_mode": "alpha",
+        "render_mode": "bright",
+        "image_size": [
+          720,
+          900
+        ],
+        "reference_bbox": [
+          224,
+          57,
+          271,
+          786
+        ],
+        "render_bbox": [
+          249,
+          57,
+          236,
+          786
+        ],
+        "reference_centroid": [
+          349.93260961268606,
+          409.3472826040169
+        ],
+        "render_centroid": [
+          360.49421471652596,
+          398.25363570566947
+        ],
+        "iou": 0.821364050716831,
+        "reference_foreground_ratio": 0.1792577160493827,
+        "render_foreground_ratio": 0.15991512345679013,
+        "bbox_center_drift_px": [
+          7.5,
+          0.0
+        ],
+        "bbox_size_ratio": [
+          0.8708487084870848,
+          1.0
+        ],
+        "bbox_size_error_ratio": [
+          -0.12915129151291513,
+          0.0
+        ],
+        "pass_bbox_center_1p5pct": true,
+        "pass_bbox_size_5pct": false,
+        "centroid_drift_px": [
+          10.561605103839895,
+          -11.093646898347458
+        ],
+        "pass_size_gate": false
+      },
+      "after": {
+        "reference": "assets/characters/grassy/history/model-static/silhouette-work/validation/reference-left.png",
+        "render": "assets/characters/grassy/history/model-static/silhouette-work/validation/after-left.png",
+        "reference_mode": "alpha",
+        "render_mode": "bright",
+        "image_size": [
+          720,
+          900
+        ],
+        "reference_bbox": [
+          224,
+          57,
+          271,
+          786
+        ],
+        "render_bbox": [
+          235,
+          57,
+          272,
+          786
+        ],
+        "reference_centroid": [
+          349.93260961268606,
+          409.3472826040169
+        ],
+        "render_centroid": [
+          363.843165176653,
+          400.5678763723995
+        ],
+        "iou": 0.8162258313998453,
+        "reference_foreground_ratio": 0.1792577160493827,
+        "render_foreground_ratio": 0.18314660493827162,
+        "bbox_center_drift_px": [
+          11.5,
+          0.0
+        ],
+        "bbox_size_ratio": [
+          1.003690036900369,
+          1.0
+        ],
+        "bbox_size_error_ratio": [
+          0.0036900369003690036,
+          0.0
+        ],
+        "pass_bbox_center_1p5pct": false,
+        "pass_bbox_size_5pct": true,
+        "centroid_drift_px": [
+          13.91055556396691,
+          -8.779406231617429
+        ],
+        "pass_size_gate": true
+      }
+    },
+    "back": {
+      "before": {
+        "reference": "assets/characters/grassy/history/model-static/silhouette-work/validation/reference-back.png",
+        "render": "assets/characters/grassy/history/model-static/silhouette-work/validation/before-back.png",
+        "reference_mode": "alpha",
+        "render_mode": "bright",
+        "image_size": [
+          720,
+          900
+        ],
+        "reference_bbox": [
+          179,
+          57,
+          362,
+          786
+        ],
+        "render_bbox": [
+          200,
+          57,
+          320,
+          786
+        ],
+        "reference_centroid": [
+          360.98828673598246,
+          454.52687264702064
+        ],
+        "render_centroid": [
+          359.71288765861544,
+          446.732129733967
+        ],
+        "iou": 0.828519617540389,
+        "reference_foreground_ratio": 0.2615216049382716,
+        "render_foreground_ratio": 0.25198765432098763,
+        "bbox_center_drift_px": [
+          0.0,
+          0.0
+        ],
+        "bbox_size_ratio": [
+          0.8839779005524862,
+          1.0
+        ],
+        "bbox_size_error_ratio": [
+          -0.11602209944751381,
+          0.0
+        ],
+        "pass_bbox_center_1p5pct": true,
+        "pass_bbox_size_5pct": false,
+        "centroid_drift_px": [
+          -1.2753990773670125,
+          -7.794742913053653
+        ],
+        "pass_size_gate": false
+      },
+      "after": {
+        "reference": "assets/characters/grassy/history/model-static/silhouette-work/validation/reference-back.png",
+        "render": "assets/characters/grassy/history/model-static/silhouette-work/validation/after-back.png",
+        "reference_mode": "alpha",
+        "render_mode": "bright",
+        "image_size": [
+          720,
+          900
+        ],
+        "reference_bbox": [
+          179,
+          57,
+          362,
+          786
+        ],
+        "render_bbox": [
+          193,
+          57,
+          334,
+          786
+        ],
+        "reference_centroid": [
+          360.98828673598246,
+          454.52687264702064
+        ],
+        "render_centroid": [
+          359.75603153163644,
+          452.13660604084674
+        ],
+        "iou": 0.8715070010804644,
+        "reference_foreground_ratio": 0.2615216049382716,
+        "render_foreground_ratio": 0.2650679012345679,
+        "bbox_center_drift_px": [
+          0.0,
+          0.0
+        ],
+        "bbox_size_ratio": [
+          0.9226519337016574,
+          1.0
+        ],
+        "bbox_size_error_ratio": [
+          -0.07734806629834254,
+          0.0
+        ],
+        "pass_bbox_center_1p5pct": true,
+        "pass_bbox_size_5pct": false,
+        "centroid_drift_px": [
+          -1.2322552043460178,
+          -2.3902666061738955
+        ],
+        "pass_size_gate": false
+      }
+    }
+  }
+}

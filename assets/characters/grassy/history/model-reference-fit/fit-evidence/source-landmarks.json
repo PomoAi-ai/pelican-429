@@ -1,0 +1,80 @@
+{
+  "schema": "landmarks.v1",
+  "image_size": [
+    1254,
+    1254
+  ],
+  "source": "Manually marked from approved front/right images; 1254px original canvas",
+  "landmarks": [
+    {
+      "view": "front",
+      "name": "eye_L",
+      "class": "feature",
+      "x": 562,
+      "y": 314
+    },
+    {
+      "view": "front",
+      "name": "eye_R",
+      "class": "feature",
+      "x": 684,
+      "y": 312
+    },
+    {
+      "view": "front",
+      "name": "nose_tip",
+      "class": "feature",
+      "x": 624,
+      "y": 350
+    },
+    {
+      "view": "front",
+      "name": "smile_low",
+      "class": "feature",
+      "x": 625,
+      "y": 378
+    },
+    {
+      "view": "front",
+      "name": "chin",
+      "class": "feature",
+      "x": 625,
+      "y": 426
+    },
+    {
+      "view": "front",
+      "name": "hair_top",
+      "class": "structural_tip",
+      "x": 611,
+      "y": 37
+    },
+    {
+      "view": "right",
+      "name": "eye_L",
+      "class": "feature",
+      "x": 731,
+      "y": 334
+    },
+    {
+      "view": "right",
+      "name": "nose_tip",
+      "class": "feature",
+      "x": 778,
+      "y": 376
+    },
+    {
+      "view": "right",
+      "name": "smile_low",
+      "class": "feature",
+      "x": 757,
+      "y": 403
+    },
+    {
+      "view": "right",
+      "name": "chin",
+      "class": "feature",
+      "x": 704,
+      "y": 451
+    }
+  ]
+}

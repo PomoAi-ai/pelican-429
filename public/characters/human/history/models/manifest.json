@@ -1,0 +1,41 @@
+{
+  "height": 3.1,
+  "orientation": "Y-up, +Z forward",
+  "pose": "static",
+  "reference": "/characters/human/history/turnaround-master-v2/right.png",
+  "models": [
+    {
+      "id": "detailed",
+      "triangles": 3242254,
+      "meshObjects": 26,
+      "materials": 26,
+      "height": 3.1,
+      "width": 1.317439,
+      "depth": 1.068699,
+      "bytes": 110440524,
+      "path": "/characters/human/history/models/grassy-detailed.glb"
+    },
+    {
+      "id": "game",
+      "triangles": 44900,
+      "meshObjects": 26,
+      "materials": 26,
+      "height": 3.1,
+      "width": 1.317442,
+      "depth": 1.06894,
+      "bytes": 5024168,
+      "path": "/characters/human/history/models/grassy-game.glb"
+    },
+    {
+      "id": "light",
+      "triangles": 19003,
+      "meshObjects": 26,
+      "materials": 26,
+      "height": 3.1,
+      "width": 1.316729,
+      "depth": 1.08726,
+      "bytes": 1463180,
+      "path": "/characters/human/history/models/grassy-light.glb"
+    }
+  ]
+}

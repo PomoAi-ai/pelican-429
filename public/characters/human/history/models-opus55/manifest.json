@@ -1,0 +1,45 @@
+{
+  "name": "Opus 5.5 版",
+  "height": 3.1,
+  "orientation": "Y-up, +Z forward",
+  "pose": "static",
+  "reference": "/characters/human/history/turnaround-master-v2/right.png",
+  "models": [
+    {
+      "id": "detailed",
+      "triangles": 616961,
+      "meshObjects": 10,
+      "materials": 9,
+      "height": 3.1,
+      "sole": 0.0,
+      "width": 1.274152,
+      "depth": 1.015228,
+      "bytes": 17978896,
+      "path": "/characters/human/history/models-opus55/grassy-opus55-detailed.glb"
+    },
+    {
+      "id": "game",
+      "triangles": 45997,
+      "meshObjects": 10,
+      "materials": 10,
+      "height": 3.1,
+      "sole": 0.0,
+      "width": 1.273329,
+      "depth": 1.015649,
+      "bytes": 2514208,
+      "path": "/characters/human/history/models-opus55/grassy-opus55-game.glb"
+    },
+    {
+      "id": "light",
+      "triangles": 19097,
+      "meshObjects": 10,
+      "materials": 10,
+      "height": 3.1,
+      "sole": 0.0,
+      "width": 1.269898,
+      "depth": 1.014061,
+      "bytes": 969064,
+      "path": "/characters/human/history/models-opus55/grassy-opus55-light.glb"
+    }
+  ]
+}

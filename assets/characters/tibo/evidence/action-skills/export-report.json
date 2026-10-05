@@ -1,0 +1,21 @@
+{
+  "kind": "tibo",
+  "glbSha256": "d98101da4002c708e1c0d8815e141d7cef0f0117c1d2f1363f542f52929b6466",
+  "riggedBlendSha256": "31eb95e06e514bb00b497410ef38e130d88e21ed31b141746f146aa419676ce2",
+  "clips": {
+    "greet": 3,
+    "idle": 4,
+    "jump": 1.6,
+    "run": 0.8,
+    "skill1": 2.4,
+    "skill2": 3,
+    "ultimate": 6,
+    "walk": 1.2
+  },
+  "joints": 16,
+  "staticMeshAttributeAndIndexBytesIdentical": true,
+  "inverseBindMatricesIdentical": true,
+  "materialsIdentical": true,
+  "embeddedTextureBytesIdentical": true,
+  "oldIdleWalkGreetChannelBytesIdentical": true
+}

@@ -1,0 +1,73 @@
+{
+  "schema": "look_fit_report.v1",
+  "notes": [
+    "Whole-character color statistics; not a perceptual likeness score.",
+    "Before calibration used a repeated sRGB transfer. After calibration removes that transfer."
+  ],
+  "views": {
+    "front": {
+      "reference": {
+        "mean_rgb": [
+          0.6294559240341187,
+          0.3635455369949341,
+          0.39922910928726196
+        ],
+        "brightness_mean": 0.7076048851013184,
+        "brightness_p95": 0.9921569228172302,
+        "saturation_mean": 0.5666290521621704
+      },
+      "before": {
+        "mean_rgb": [
+          0.4867997169494629,
+          0.22382035851478577,
+          0.24324128031730652
+        ],
+        "brightness_mean": 0.5420366525650024,
+        "brightness_p95": 0.9411765336990356,
+        "saturation_mean": 0.5934388637542725
+      },
+      "after": {
+        "mean_rgb": [
+          0.6122438311576843,
+          0.36837947368621826,
+          0.40338706970214844
+        ],
+        "brightness_mean": 0.6821773648262024,
+        "brightness_p95": 0.9647059440612793,
+        "saturation_mean": 0.5036168098449707
+      }
+    },
+    "right": {
+      "reference": {
+        "mean_rgb": [
+          0.5665112137794495,
+          0.3616214096546173,
+          0.3777172267436981
+        ],
+        "brightness_mean": 0.6299564838409424,
+        "brightness_p95": 0.9921569228172302,
+        "saturation_mean": 0.5161055326461792
+      },
+      "before": {
+        "mean_rgb": [
+          0.40396663546562195,
+          0.2152160257101059,
+          0.22850139439105988
+        ],
+        "brightness_mean": 0.4459526538848877,
+        "brightness_p95": 0.8941177129745483,
+        "saturation_mean": 0.47974643111228943
+      },
+      "after": {
+        "mean_rgb": [
+          0.5071170330047607,
+          0.3392115533351898,
+          0.35996243357658386
+        ],
+        "brightness_mean": 0.5622905492782593,
+        "brightness_p95": 0.9137255549430847,
+        "saturation_mean": 0.4330497086048126
+      }
+    }
+  }
+}

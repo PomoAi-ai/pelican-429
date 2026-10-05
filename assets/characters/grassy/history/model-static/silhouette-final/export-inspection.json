@@ -1,0 +1,188 @@
+{
+  "results": [
+    {
+      "variant": "detailed",
+      "path": "assets/characters/grassy/history/model-static/silhouette-final/public/grassy-detailed.glb",
+      "bytes": 83157564,
+      "sha256": "3cbfcc86621e38fd062590922fbfce52634c73af638c87366b96d90fa21db8a0",
+      "coordinateSystem": "glTF Y-up, all ancestor and local node transforms applied",
+      "meshNodes": 26,
+      "positionCount": 1210431,
+      "minimum": [
+        -0.6583544567441209,
+        0,
+        -0.5810703544904641
+      ],
+      "maximum": [
+        0.6583544567441209,
+        3.099999946172659,
+        0.4918596888303739
+      ],
+      "width": 1.3167089134882417,
+      "depth": 1.072930043320838,
+      "height": 3.099999946172659,
+      "soleY": 0,
+      "tolerance": 0.00001,
+      "heightPass": true,
+      "solePass": true,
+      "clothSheen": [
+        {
+          "material": "denim",
+          "sheenColorFactor": [
+            0.02500000037252903,
+            0.02500000037252903,
+            0.02500000037252903
+          ]
+        },
+        {
+          "material": "denim_cuff",
+          "sheenColorFactor": [
+            0.02500000037252903,
+            0.02500000037252903,
+            0.02500000037252903
+          ]
+        },
+        {
+          "material": "sweater",
+          "sheenColorFactor": [
+            0.02500000037252903,
+            0.02500000037252903,
+            0.02500000037252903
+          ]
+        },
+        {
+          "material": "sweater_rib",
+          "sheenColorFactor": [
+            0.02500000037252903,
+            0.02500000037252903,
+            0.02500000037252903
+          ]
+        }
+      ],
+      "clothSheenPass": true
+    },
+    {
+      "variant": "game",
+      "path": "assets/characters/grassy/history/model-static/silhouette-final/public/grassy-game.glb",
+      "bytes": 5193636,
+      "sha256": "a385c87c11e361b9eeb7db3b3172c5ecdde754d2440964b6f232e560ce1696fc",
+      "coordinateSystem": "glTF Y-up, all ancestor and local node transforms applied",
+      "meshNodes": 26,
+      "positionCount": 28339,
+      "minimum": [
+        -0.658483674353505,
+        1.7851171929539333e-13,
+        -0.5798925098301311
+      ],
+      "maximum": [
+        0.658129176159548,
+        3.0999999474179845,
+        0.49250870501974475
+      ],
+      "width": 1.316612850513053,
+      "depth": 1.0724012148498758,
+      "height": 3.099999947417806,
+      "soleY": 1.7851171929539333e-13,
+      "tolerance": 0.00001,
+      "heightPass": true,
+      "solePass": true,
+      "clothSheen": [
+        {
+          "material": "denim_cuff_game",
+          "sheenColorFactor": [
+            0.02500000037252903,
+            0.02500000037252903,
+            0.02500000037252903
+          ]
+        },
+        {
+          "material": "denim_game",
+          "sheenColorFactor": [
+            0.02500000037252903,
+            0.02500000037252903,
+            0.02500000037252903
+          ]
+        },
+        {
+          "material": "sweater_game",
+          "sheenColorFactor": [
+            0.02500000037252903,
+            0.02500000037252903,
+            0.02500000037252903
+          ]
+        },
+        {
+          "material": "sweater_rib_game",
+          "sheenColorFactor": [
+            0.02500000037252903,
+            0.02500000037252903,
+            0.02500000037252903
+          ]
+        }
+      ],
+      "clothSheenPass": true
+    },
+    {
+      "variant": "light",
+      "path": "assets/characters/grassy/history/model-static/silhouette-final/public/grassy-light.glb",
+      "bytes": 1504988,
+      "sha256": "cd86b53f437c5e63e999b50b2d038d10a69a88e872a887b8c28210442319ab7c",
+      "coordinateSystem": "glTF Y-up, all ancestor and local node transforms applied",
+      "meshNodes": 26,
+      "positionCount": 13417,
+      "minimum": [
+        -0.658611399039799,
+        -1.8751484739953916e-12,
+        -0.584104857130896
+      ],
+      "maximum": [
+        0.6570350233996436,
+        3.1000000558004217,
+        0.4922584215375281
+      ],
+      "width": 1.3156464224394426,
+      "depth": 1.076363278668424,
+      "height": 3.1000000558022967,
+      "soleY": -1.8751484739953916e-12,
+      "tolerance": 0.00001,
+      "heightPass": true,
+      "solePass": true,
+      "clothSheen": [
+        {
+          "material": "denim_cuff_light",
+          "sheenColorFactor": [
+            0.02500000037252903,
+            0.02500000037252903,
+            0.02500000037252903
+          ]
+        },
+        {
+          "material": "denim_light",
+          "sheenColorFactor": [
+            0.02500000037252903,
+            0.02500000037252903,
+            0.02500000037252903
+          ]
+        },
+        {
+          "material": "sweater_light",
+          "sheenColorFactor": [
+            0.02500000037252903,
+            0.02500000037252903,
+            0.02500000037252903
+          ]
+        },
+        {
+          "material": "sweater_rib_light",
+          "sheenColorFactor": [
+            0.02500000037252903,
+            0.02500000037252903,
+            0.02500000037252903
+          ]
+        }
+      ],
+      "clothSheenPass": true
+    }
+  ],
+  "allPass": true
+}

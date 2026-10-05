@@ -1,0 +1,119 @@
+{
+  "schema": "orthographic_registration.v1",
+  "views": [
+    {
+      "path": "public/characters/human/history/turnaround-master-v2/front.png",
+      "role": "front",
+      "image_size": [
+        1254,
+        1254
+      ],
+      "bbox": [
+        374,
+        37,
+        507,
+        1185
+      ],
+      "center": [
+        627.9260156916345,
+        635.2783861243994
+      ],
+      "bbox_center": [
+        627.5,
+        629.5
+      ],
+      "bbox_ratio": [
+        0.4043062200956938,
+        0.9449760765550239
+      ]
+    },
+    {
+      "path": "public/characters/human/history/turnaround-master-v2/right.png",
+      "role": "right-side",
+      "image_size": [
+        1254,
+        1254
+      ],
+      "bbox": [
+        407,
+        66,
+        400,
+        1170
+      ],
+      "center": [
+        620.7673537114412,
+        591.6271685891926
+      ],
+      "bbox_center": [
+        607.0,
+        651.0
+      ],
+      "bbox_ratio": [
+        0.3189792663476874,
+        0.9330143540669856
+      ]
+    },
+    {
+      "path": "public/characters/human/history/turnaround-master-v2/left.png",
+      "role": "left-side",
+      "image_size": [
+        1254,
+        1254
+      ],
+      "bbox": [
+        440,
+        60,
+        407,
+        1177
+      ],
+      "center": [
+        629.466537026779,
+        588.007220580203
+      ],
+      "bbox_center": [
+        643.5,
+        648.5
+      ],
+      "bbox_ratio": [
+        0.32456140350877194,
+        0.9385964912280702
+      ]
+    },
+    {
+      "path": "public/characters/human/history/turnaround-master-v2/back.png",
+      "role": "back",
+      "image_size": [
+        1254,
+        1254
+      ],
+      "bbox": [
+        358,
+        49,
+        543,
+        1183
+      ],
+      "center": [
+        631.220881035669,
+        646.9122259449741
+      ],
+      "bbox_center": [
+        629.5,
+        640.5
+      ],
+      "bbox_ratio": [
+        0.43301435406698563,
+        0.9433811802232854
+      ]
+    }
+  ],
+  "coordinate_contract": {
+    "front": "X/Z",
+    "side": "Y/Z",
+    "top": "X/Y",
+    "back": "rear X/Z"
+  },
+  "notes": [
+    "Reference front width/height = 0.428; back width/height = 0.459 (7.3% wider), chiefly different arm/hand spacing. The generated references are not a mutually exact orthographic turnaround.",
+    "Keep front/side canonical; report back mismatch rather than forcing a different pose for rear rendering. No top reference was supplied."
+  ]
+}

@@ -1,0 +1,24 @@
+title = "Private production metadata"
+
+# Default secret allowlists exempt local paths, so metadata uses independent rules.
+
+[[rules]]
+id = "local-production-path"
+description = "Local user, volume or user-specific temporary path"
+regex = '''(?i)(?:/(?:Users|home|Volumes)/[^\s"'<>`]+|/(?:private/)?var/folders/[^\s"'<>`]+|[A-Z]:\\+(?:Users|Documents and Settings)\\+[^\s"'<>`]+)'''
+
+[[rules]]
+id = "private-rodin-workspace"
+description = "Private Rodin workspace link"
+regex = '''(?i)https?://(?:[^/\s]+\.)?(?:hyper3d\.ai|rodin\.ai)/workspace(?:/[^\s"'<>`)]*)?'''
+
+[[rules]]
+id = "production-metadata-uuid"
+description = "Private generation or session UUID in production metadata"
+path = '''(?i)(?:^(?:assets|output|public|task|docs)/.*\.(?:md|txt|json)$|(?:^|/)(?:ORIGIN|SOURCE|README)\.md$)'''
+regex = '''(?i)\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b'''
+
+[[rules]]
+id = "private-generation-id"
+description = "Private generation or session identifier"
+regex = '''(?i)(?:\b(?:generation|session|thread)[_-]?id["']?\s*[:=]\s*["']?|codex://threads/)[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}'''

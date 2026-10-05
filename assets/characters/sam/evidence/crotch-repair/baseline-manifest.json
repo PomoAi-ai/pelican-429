@@ -1,0 +1,63 @@
+{
+  "assets/characters/sam/sam-rigged.blend": {
+    "sha256": "badca6068a0d4373e3ac8dc9e68a1e7559f5b446ef180bbf6bea15c53d916be2",
+    "bytes": 15824471,
+    "snapshot": "$TMPDIR/npc-crotch-repair-baseline/sam-sam-rigged.blend"
+  },
+  "public/characters/sam/sam.glb": {
+    "sha256": "ebc95610601b95c5d706128a54efafc3267031541793bd3290cde90a9454fdfc",
+    "bytes": 15481564,
+    "snapshot": "$TMPDIR/npc-crotch-repair-baseline/sam-sam.glb"
+  },
+  "assets/characters/sam/source.glb": {
+    "sha256": "700a45578f3d3213136f997862961d80cf41230cb51a403322e4fbfc37844014",
+    "bytes": 15007300,
+    "snapshot": "$TMPDIR/npc-crotch-repair-baseline/sam-source.glb"
+  },
+  "assets/characters/sam/fit-rigged/report.json": {
+    "sha256": "b826949ba24b2fa6c7897b8fb77461bdff3a01f660710eebfca1427271255fcf",
+    "bytes": 11708,
+    "snapshot": "$TMPDIR/npc-crotch-repair-baseline/sam-report.json"
+  },
+  "assets/characters/sam/fit-landmarks-rigged.json": {
+    "sha256": "eb3072fd55df2ec3a4fe605a8e077574f20d5f7aa618b0ee013a3573b92a55e8",
+    "bytes": 397,
+    "snapshot": "$TMPDIR/npc-crotch-repair-baseline/sam-fit-landmarks-rigged.json"
+  },
+  "public/characters/sam/reference-back.png": {
+    "sha256": "0e554012d750443ad3e4360e7fb0d9d80509ba4201f98b2f0daeb21d9db861b6",
+    "bytes": 2097549
+  },
+  "public/characters/sam/reference-front.png": {
+    "sha256": "c2a559ed502232897819eb496e86e633c4de3d090938fc588c84c0339fdf77b0",
+    "bytes": 2082861
+  },
+  "public/characters/sam/reference-left.png": {
+    "sha256": "3d20f2032d733262d1a40ccf1a9c64a8c575c50637e6085d772ab8f7bae3b2df",
+    "bytes": 1850068
+  },
+  "public/characters/sam/reference-right.png": {
+    "sha256": "8f5b9cafc4bda3f26857d990700e251367dd4b56279abf2b0804e45809c80056",
+    "bytes": 1851922
+  },
+  "public/characters/sam/render-back.png": {
+    "sha256": "153808e1a67561b23b7f4fb96205442e2ff3fe7818cd5426cc91d3acc310e409",
+    "bytes": 1406843
+  },
+  "public/characters/sam/render-front.png": {
+    "sha256": "b29e6571713dda814b4ddfd0eaeef7301014117d51a38609de8a11aa8232bfe2",
+    "bytes": 1396800
+  },
+  "public/characters/sam/render-hero.png": {
+    "sha256": "cf76c5684a9c84097daf6af1b263214b1496ba48ed12f2474c22bd9e0f026cc7",
+    "bytes": 1423950
+  },
+  "public/characters/sam/render-left.png": {
+    "sha256": "7a349a70eb0ad2aa3315eff52ebf9332e00d50a24dd2cd63fba50d27be8c3d79",
+    "bytes": 1244014
+  },
+  "public/characters/sam/render-right.png": {
+    "sha256": "0e5f8c801092e99bc1e7d6a8bf737e8d121b11627d9b5d93d500bd64e79f7a3e",
+    "bytes": 1251885
+  }
+}

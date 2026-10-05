@@ -1,0 +1,9 @@
+{
+  "status": "completed",
+  "stage": {
+    "name": "pack",
+    "current": 5,
+    "total": 5
+  },
+  "timed_out": false
+}

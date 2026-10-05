@@ -1,0 +1,12 @@
+{
+  "assets/characters/sam/sam-rigged.blend": "badca6068a0d4373e3ac8dc9e68a1e7559f5b446ef180bbf6bea15c53d916be2",
+  "public/characters/sam/sam.glb": "ebc95610601b95c5d706128a54efafc3267031541793bd3290cde90a9454fdfc",
+  "assets/characters/sam/source.glb": "700a45578f3d3213136f997862961d80cf41230cb51a403322e4fbfc37844014",
+  "scripts/blender_npcs/build.py": "a2d3ee479da9c26d47f471e3b8da39c2f88686f0e70502d61bd8b28d53aa8a9d",
+  "scripts/blender_npcs/animation.py": "2330eca46b40c1a3109b24cbcade2a34086a655dd196ac982fb5df12a4a52155",
+  "public/characters/sam/render-left.png": "7a349a70eb0ad2aa3315eff52ebf9332e00d50a24dd2cd63fba50d27be8c3d79",
+  "public/characters/sam/render-back.png": "153808e1a67561b23b7f4fb96205442e2ff3fe7818cd5426cc91d3acc310e409",
+  "public/characters/sam/render-hero.png": "cf76c5684a9c84097daf6af1b263214b1496ba48ed12f2474c22bd9e0f026cc7",
+  "public/characters/sam/render-right.png": "0e5f8c801092e99bc1e7d6a8bf737e8d121b11627d9b5d93d500bd64e79f7a3e",
+  "public/characters/sam/render-front.png": "b29e6571713dda814b4ddfd0eaeef7301014117d51a38609de8a11aa8232bfe2"
+}

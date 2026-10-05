@@ -1,0 +1,50 @@
+{
+  "kind": "sam",
+  "height": 2.7,
+  "source": "assets/characters/sam/source.glb",
+  "triangles": 34217,
+  "bones": [
+    "root",
+    "hips",
+    "spine",
+    "head",
+    "upper_arm.L",
+    "forearm.L",
+    "hand.L",
+    "upper_arm.R",
+    "forearm.R",
+    "hand.R",
+    "thigh.L",
+    "shin.L",
+    "foot.L",
+    "thigh.R",
+    "shin.R",
+    "foot.R",
+    "tail"
+  ],
+  "sourceType": "Rodin static textured mesh",
+  "skin": [
+    {
+      "mesh": "model",
+      "vertices": 19896,
+      "maximumInfluences": 4,
+      "normalizationMaxError": 2.220446049250313e-16
+    }
+  ],
+  "walk": {
+    "minimumSoleZ": -1.3969838619232178e-07,
+    "supportFootMaximumGroundError": 1.4002482373598468e-07,
+    "loopEndpointMaximumVertexDifference": 0
+  },
+  "actions": {
+    "idle": 4.0,
+    "walk": 1.2,
+    "run": 0.8,
+    "jump": 1.6,
+    "greet": 3.0,
+    "skill1": 2.4,
+    "skill2": 3.0,
+    "ultimate": 6.0
+  },
+  "asset": "public/characters/sam/sam.glb"
+}

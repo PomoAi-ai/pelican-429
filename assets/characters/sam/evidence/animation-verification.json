@@ -1,0 +1,41 @@
+{
+  "blendSha256": "c14aa4ed28cb352070780f27f6c0f3957a11c8cc11e60e61a2911ff297a0c641",
+  "restMeshSha256": "5954b79ac3c60a5e88e807d2890bdd21fec5354dc7558cc5318099faacb3d441",
+  "vertices": 19896,
+  "maximumInfluences": 4,
+  "weightMaximumSumError": 4.0978193283081055e-08,
+  "clipEndpointMaximumVertexDifference": {
+    "idle": 0.0,
+    "walk": 0.0,
+    "run": 0.0,
+    "jump": 0.0,
+    "greet": 0.0,
+    "skill1": 0.0,
+    "skill2": 0.0,
+    "ultimate": 0.0
+  },
+  "previouslyStretchedTailVertices": {
+    "16110": {
+      "hips": 0.7115817666053772,
+      "tail": 0.2884182333946228
+    },
+    "16108": {
+      "hips": 0.46857762336730957,
+      "tail": 0.5314223766326904
+    },
+    "16018": {
+      "hips": 1.0
+    },
+    "16013": {
+      "hips": 0.9906656742095947,
+      "tail": 0.009334344416856766
+    },
+    "16064": {
+      "hips": 0.7884960770606995,
+      "tail": 0.21150390803813934
+    }
+  },
+  "crotchRepairReport": "crotch-repair/after-verification.json",
+  "weightsSha256": "427ea9478e2e8a01ff11b5f0a86e569c4cc3af2b9f81e4d6b231a9cff9b39d84",
+  "actionSkillsReport": "action-skills/deformation-report.json"
+}

@@ -1,0 +1,26 @@
+{
+  "kind": "sam",
+  "fps": 30,
+  "clips": {
+    "idle": 4.0,
+    "walk": 1.2,
+    "run": 0.8,
+    "jump": 1.6,
+    "greet": 3.0,
+    "skill1": 2.4,
+    "skill2": 3.0,
+    "ultimate": 6.0
+  },
+  "preservedClipSha256": {
+    "idle": "c619e60a6f5ac083f7d6e9662839dde3e9c8adf40d4dae5a0a70bc3486046eed",
+    "walk": "b1969bf6a910e96e131ae0472bb168f837782d4f97c833ac405406d3b7b96bf0",
+    "greet": "4514956f98b8d1bf541921a7549c7ebecef8fd812cb7fb40b5d52654f5ee9f08"
+  },
+  "walk": {
+    "minimumSoleZ": -1.3969838619232178e-07,
+    "supportFootMaximumGroundError": 1.4002482373598468e-07,
+    "loopEndpointMaximumVertexDifference": 0
+  },
+  "blendSha256": "c14aa4ed28cb352070780f27f6c0f3957a11c8cc11e60e61a2911ff297a0c641",
+  "glbSha256": "cb7799f3d51534f1cede3ffd5d2f4aa5f7d3bfdd42a0b2cb9a69ce4b94f8da72"
+}

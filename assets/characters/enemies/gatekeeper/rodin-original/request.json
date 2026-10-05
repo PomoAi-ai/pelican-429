@@ -1,0 +1,9 @@
+{
+  "service": "Hyper3D CLI",
+  "input": "assets/concepts/enemy-model-input/gatekeeper.png",
+  "prompt": "One ivory navy and teal humanoid robot with a large two-jaw pincer on its right forearm and a five-finger left hand. Amber circular face sensor, swept rear head fin, mechanical rotary joints, two separate legs. Preserve all reference details and smooth armor surfaces.",
+  "tier": "Gen-2.5-High",
+  "meshMode": "Quad",
+  "quality": 30000,
+  "format": "glb"
+}

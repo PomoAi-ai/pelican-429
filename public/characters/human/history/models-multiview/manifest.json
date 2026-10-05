@@ -1,0 +1,22 @@
+{
+  "name": "多视图贴图版",
+  "method": "Reference constrained closed volumes with four-view projected UV colors",
+  "height": 3.0999999046325684,
+  "triangles": 331536,
+  "meshCount": 20,
+  "glbBytes": 27941916,
+  "glb": "public/characters/human/history/models-multiview/grassy-multiview.glb",
+  "blend": "assets/characters/grassy/history/model-multiview/grassy-multiview.blend",
+  "static": true,
+  "limitations": [
+    "Original reference lighting is retained in the surface colors.",
+    "Occluded anatomy is approximated; this is not neural 3D reconstruction.",
+    "Eyes, eyebrows, mouth and fine hair features are painted rather than individually sculpted.",
+    "Four references contain conflicting hand poses; the model follows the front pose."
+  ],
+  "materialNotes": "Reference-projected color with clean neck skin and solid off-white sole to avoid silhouette-edge artifacts.",
+  "width": 1.3114296197891235,
+  "depth": 1.0094763338565826,
+  "materials": 21,
+  "references": "public/characters/human/history/turnaround-master-v2"
+}

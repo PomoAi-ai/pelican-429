@@ -1,0 +1,165 @@
+{
+  "schema": "multiview_fit_report.v1",
+  "views": {
+    "front": {
+      "reference": {
+        "bbox": [
+          376,
+          38,
+          504,
+          1183
+        ],
+        "centroid": [
+          627.8795296343853,
+          633.7955991079273
+        ]
+      },
+      "render": {
+        "bbox": [
+          375,
+          36,
+          503,
+          1189
+        ],
+        "centroid": [
+          626.5256332247304,
+          637.7600328574352
+        ]
+      },
+      "iou": 0.9299379190071263,
+      "bbox_center_drift_px": [
+        -1.5,
+        1.0
+      ],
+      "bbox_size_error_ratio": [
+        -0.001984126984126977,
+        0.00507185122569731
+      ],
+      "pass_bbox_center_1p5pct": true,
+      "pass_bbox_size": true
+    },
+    "right": {
+      "reference": {
+        "bbox": [
+          408,
+          36,
+          398,
+          1188
+        ],
+        "centroid": [
+          620.8760153533892,
+          570.4621490725668
+        ]
+      },
+      "render": {
+        "bbox": [
+          413,
+          36,
+          388,
+          1189
+        ],
+        "centroid": [
+          622.661097456345,
+          566.8597321639511
+        ]
+      },
+      "iou": 0.9309453543946193,
+      "bbox_center_drift_px": [
+        0.0,
+        0.5
+      ],
+      "bbox_size_error_ratio": [
+        -0.025125628140703515,
+        0.0008417508417508657
+      ],
+      "pass_bbox_center_1p5pct": true,
+      "pass_bbox_size": true
+    },
+    "left": {
+      "reference": {
+        "bbox": [
+          443,
+          41,
+          401,
+          1182
+        ],
+        "centroid": [
+          629.274598192907,
+          571.8901931761064
+        ]
+      },
+      "render": {
+        "bbox": [
+          453,
+          36,
+          388,
+          1189
+        ],
+        "centroid": [
+          630.3415607835009,
+          566.9906767540677
+        ]
+      },
+      "iou": 0.912065194247111,
+      "bbox_center_drift_px": [
+        3.5,
+        -1.5
+      ],
+      "bbox_size_error_ratio": [
+        -0.032418952618453845,
+        0.005922165820642977
+      ],
+      "pass_bbox_center_1p5pct": true,
+      "pass_bbox_size": true
+    },
+    "back": {
+      "reference": {
+        "bbox": [
+          353,
+          39,
+          541,
+          1180
+        ],
+        "centroid": [
+          625.3349345512377,
+          635.3261319305686
+        ]
+      },
+      "render": {
+        "bbox": [
+          376,
+          36,
+          503,
+          1189
+        ],
+        "centroid": [
+          626.4779660079379,
+          637.7696256447844
+        ]
+      },
+      "iou": 0.8770523021812305,
+      "bbox_center_drift_px": [
+        4.0,
+        1.5
+      ],
+      "bbox_size_error_ratio": [
+        -0.07024029574861368,
+        0.007627118644067732
+      ],
+      "pass_bbox_center_1p5pct": true,
+      "pass_bbox_size": false
+    }
+  },
+  "limitations": [
+    "Silhouette IoU does not score eye, face, material or hairstyle resemblance.",
+    "No top photograph exists; top has no template metric."
+  ],
+  "summary": {
+    "all_bbox_centers_pass": true,
+    "all_bbox_sizes_pass": false,
+    "visual_review_required": true
+  },
+  "reference_conflicts": [
+    "Back reference arms/hands spread wider than the approved front pose. Front pose wins; back width is not forced by scaling the camera."
+  ]
+}

@@ -1,0 +1,45 @@
+{
+  "skin": [
+    {
+      "mesh": "model",
+      "vertices": 20780,
+      "maximumInfluences": 4,
+      "normalizationMaxError": 2.220446049250313e-16
+    }
+  ],
+  "preservedHeadArmTailWeightMaximumDifference": 0.0,
+  "walk": {
+    "minimumSoleZ": -1.3224780559539795e-07,
+    "supportFootMaximumGroundError": 1.801071505269647e-07,
+    "loopEndpointMaximumVertexDifference": 0
+  },
+  "animationChannelsUnchanged": true,
+  "animationChannelsSha256": "76606fb9a758ac400058429473e75fdcbccbff300a0cf73d8cb1c56782cf701a",
+  "restGeometryUnchanged": true,
+  "restMeshSha256": "f9df687ecd7e971498519875287c7392fa0e7ab87c5314b018e752720deb29f7",
+  "allClipEndpointMaximumVertexDifference": {
+    "idle": 0.0,
+    "walk": 0.0,
+    "greet": 0.0,
+    "special": 0.0
+  },
+  "nonWalkClipMaximumVertexDifference": {
+    "idle": 9.357585804536939e-05,
+    "greet": 0.0,
+    "special": 0.0
+  },
+  "finalBlendSha256": "bcc65fd7f8c4cb7f7199b32c7e6780321747c364b830f8428aa9dff7bc84075c",
+  "finalGlbSha256": "443b15eae670a9b90f3307dbc692e87edb0c966a01ed63d5ce6662946ad61d56",
+  "unchangedInputsAndStaticViews": {
+    "assets/characters/tibo/source.glb": true,
+    "scripts/blender_npcs/animation.py": true,
+    "public/characters/tibo/render-left.png": true,
+    "public/characters/tibo/render-back.png": true,
+    "public/characters/tibo/render-hero.png": true,
+    "public/characters/tibo/render-right.png": true,
+    "public/characters/tibo/render-front.png": true
+  },
+  "renderCandidateAndFinalWeightsIdentical": true,
+  "weightsSha256": "2e8cdf16302a4b7d6f9c05f05c42b6d07bd1e5f53c95ce667b935b4a6738416e",
+  "weightMaximumSumError": 4.1443854570388794e-08
+}

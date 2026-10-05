@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>光子 · 引路精灵</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #081925; color: #e3f6f3; font: 14px system-ui, sans-serif; }
+  canvas { position: fixed; inset: 0; z-index: 0; }
+  header, footer { position: fixed; z-index: 1; left: 32px; right: 32px; }
+  header { top: 26px; pointer-events: none; }
+  header a { float: right; pointer-events: auto; color: #b6e7e3; }
+  small { letter-spacing: 3px; color: #87b8bd; }
+  h1 { font-size: 38px; margin: 10px 0; font-weight: 550; }
+  p { color: #a6c8ce; line-height: 1.7; }
+  body[data-environment="surface"] header, body[data-environment="surface"] footer,
+  body[data-environment="surface"] header :is(p,small,a) { color: #183d48; }
+  footer { bottom: 24px; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+  button, select { font: inherit; border: 1px solid #47777c; border-radius: 8px; background: #102d3b; color: #e3f6f3; padding: 10px 14px; }
+  label { display: flex; align-items: center; gap: 8px; }
+  :focus-visible { outline: 2px solid #a2f4e2; outline-offset: 3px; }
+  #viewport { position: fixed; inset: 0; }
+  #error { position: fixed; z-index: 2; inset: 25%; color: #ffb9a5; white-space: pre-wrap; }
+  @media(max-width: 600px) { header,footer { left: 18px; right: 18px; } h1 { font-size: 30px; } footer { gap: 6px; } }
+</style>
+<div id="viewport" role="img" aria-label="光子实时三维模型"></div>
+<header>
+  <a href="/?mode=showcase">角色展示场 ↗</a>
+  <small>PELICAN 429 / COMPANION</small>
+  <h1>光子</h1>
+  <p>一点微光，陪你找到前方的路。<br>飞行微光 · 流动光点 · 环境照明</p>
+</header>
+<footer>
+  <label>动作 <select id="action"></select></label>
+  <label>视角 <select id="view"></select></label>
+  <label>环境 <select id="environment"><option value="underground">暗处</option><option value="surface">明处</option></select></label>
+  <button id="play">暂停</button>
+  <button id="reset">重播</button>
+  <span id="status" aria-live="polite"></span>
+</footer>
+<pre id="error" hidden></pre>
+<script type="module">
+  import { LUMA_ACTIONS } from '/src/config/luma.ts';
+  import { MODEL_SHOWCASE_VIEWS } from '/src/config/showcase.ts';
+  import { createShowcaseModel } from '/src/ui/showcase-model.ts';
+  import { createShowcaseRenderer } from '/src/render/showcase-renderer.ts';
+  import { createLumaShowcaseSession } from '/src/app/showcase/luma-session.ts';
+  const model = createShowcaseModel();
+  model.clear(); model.selectActor('luma', true);
+  const card = model.cards[0];
+  card.environment = 'underground'; card.modelYaw = 0; card.zoom = 1.25;
+  const host = createShowcaseRenderer(document.body);
+  const session = createLumaShowcaseSession(host.renderer, card);
+  const viewport = document.querySelector('#viewport');
+  const action = document.querySelector('#action');
+  const view = document.querySelector('#view');
+  const play = document.querySelector('#play');
+  const status = document.querySelector('#status');
+  for (const item of LUMA_ACTIONS) action.add(new Option(item.label, item.id));
+  for (const [id,item] of Object.entries(MODEL_SHOWCASE_VIEWS)) view.add(new Option(item.label,id));
+  view.value = 'front';
+  action.onchange = () => { card.entryId = `luma.${action.value}`; session.reset(); };
+  view.onchange = () => { card.modelYaw = MODEL_SHOWCASE_VIEWS[view.value].yaw; };
+  document.querySelector('#environment').onchange = event => {
+    card.environment = event.target.value;
+    document.body.dataset.environment = card.environment;
+    session.reset();
+  };
+  play.onclick = () => { card.playing = !card.playing; play.textContent = card.playing ? '暂停' : '播放'; };
+  document.querySelector('#reset').onclick = () => { session.reset(); card.playing = true; play.textContent = '暂停'; };
+  let previous = performance.now();
+  let raf;
+  let disposed = false;
+  function dispose() {
+    if (disposed) return;
+    disposed = true;
+    cancelAnimationFrame(raf); session.dispose(); host.dispose();
+  }
+  function frame(now) {
+    try {
+      if (session.complete && card.playing) session.reset();
+      const dt = session.advance((now - previous) / 1000, card.playing, null);
+      previous = now;
+      const rect = viewport.getBoundingClientRect();
+      host.begin(); host.draw(session.render(rect, dt, false), rect, rect);
+      status.textContent = session.status;
+      raf = requestAnimationFrame(frame);
+    } catch (error) {
+      const message = document.querySelector('#error');
+      message.hidden = false; message.textContent = String(error);
+      dispose();
+      throw error;
+    }
+  }
+  raf = requestAnimationFrame(frame);
+  window.addEventListener('pagehide', dispose, {once:true});
+</script>
+</html>

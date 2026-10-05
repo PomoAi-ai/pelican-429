@@ -1,0 +1,338 @@
+{
+  "kind": "sam",
+  "sourceBlendSha256": "badca6068a0d4373e3ac8dc9e68a1e7559f5b446ef180bbf6bea15c53d916be2",
+  "crotchCrossMidlineEdges": 78,
+  "coincidentCrotchGroups": 148,
+  "worst": {
+    "frame": 33,
+    "crossMidlineMaximumExtension": 0.11556276679039001,
+    "crossMidlineMaximumRatio": 12.825366020202637,
+    "regionMaximumExtension": 0.11556276679039001,
+    "coincidentUvSeamMaximumGap": 0.0,
+    "worstEdge": 43609
+  },
+  "worstEdgeVertices": [
+    {
+      "index": 8849,
+      "restPositionOverHeight": [
+        -0.008793613873422146,
+        0.06810978800058365,
+        0.3420342803001404
+      ],
+      "weights": {
+        "hips": 0.3599225878715515,
+        "thigh.R": 0.6400774121284485
+      }
+    },
+    {
+      "index": 13872,
+      "restPositionOverHeight": [
+        0.003716443432494998,
+        0.06075868755578995,
+        0.32999762892723083
+      ],
+      "weights": {
+        "hips": 0.004207909107208252,
+        "thigh.L": 0.9957920908927917
+      }
+    }
+  ],
+  "samples": [
+    {
+      "frame": 1,
+      "crossMidlineMaximumExtension": 0.10656774044036865,
+      "crossMidlineMaximumRatio": 13.413082122802734,
+      "regionMaximumExtension": 0.10656774044036865,
+      "coincidentUvSeamMaximumGap": 0.0,
+      "worstEdge": 43609
+    },
+    {
+      "frame": 2,
+      "crossMidlineMaximumExtension": 0.10457591712474823,
+      "crossMidlineMaximumRatio": 13.500232696533203,
+      "regionMaximumExtension": 0.10457591712474823,
+      "coincidentUvSeamMaximumGap": 0.0,
+      "worstEdge": 43609
+    },
+    {
+      "frame": 3,
+      "crossMidlineMaximumExtension": 0.09979423880577087,
+      "crossMidlineMaximumRatio": 13.186308860778809,
+      "regionMaximumExtension": 0.09979423880577087,
+      "coincidentUvSeamMaximumGap": 0.0,
+      "worstEdge": 43609
+    },
+    {
+      "frame": 4,
+      "crossMidlineMaximumExtension": 0.09564344584941864,
+      "crossMidlineMaximumRatio": 13.020305633544922,
+      "regionMaximumExtension": 0.09564344584941864,
+      "coincidentUvSeamMaximumGap": 0.0,
+      "worstEdge": 43609
+    },
+    {
+      "frame": 5,
+      "crossMidlineMaximumExtension": 0.09498733282089233,
+      "crossMidlineMaximumRatio": 13.424476623535156,
+      "regionMaximumExtension": 0.09498733282089233,
+      "coincidentUvSeamMaximumGap": 0.0,
+      "worstEdge": 43609
+    },
+    {
+      "frame": 6,
+      "crossMidlineMaximumExtension": 0.09031188488006592,
+      "crossMidlineMaximumRatio": 12.721243858337402,
+      "regionMaximumExtension": 0.09031188488006592,
+      "coincidentUvSeamMaximumGap": 0.0,
+      "worstEdge": 36189
+    },
+    {
+      "frame": 7,
+      "crossMidlineMaximumExtension": 0.07529723644256592,
+      "crossMidlineMaximumRatio": 10.503804206848145,
+      "regionMaximumExtension": 0.07529723644256592,
+      "coincidentUvSeamMaximumGap": 0.0,
+      "worstEdge": 43609
+    },
+    {
+      "frame": 8,
+      "crossMidlineMaximumExtension": 0.05677074193954468,
+      "crossMidlineMaximumRatio": 7.380451679229736,
+      "regionMaximumExtension": 0.05677074193954468,
+      "coincidentUvSeamMaximumGap": 0.0,
+      "worstEdge": 43609
+    },
+    {
+      "frame": 9,
+      "crossMidlineMaximumExtension": 0.03642192482948303,
+      "crossMidlineMaximumRatio": 4.114382266998291,
+      "regionMaximumExtension": 0.03642192482948303,
+      "coincidentUvSeamMaximumGap": 0.0,
+      "worstEdge": 43609
+    },
+    {
+      "frame": 10,
+      "crossMidlineMaximumExtension": 0.016990453004837036,
+      "crossMidlineMaximumRatio": 3.35713529586792,
+      "regionMaximumExtension": 0.030384711921215057,
+      "coincidentUvSeamMaximumGap": 0.0,
+      "worstEdge": 43609
+    },
+    {
+      "frame": 11,
+      "crossMidlineMaximumExtension": 0.03532828763127327,
+      "crossMidlineMaximumRatio": 6.102307319641113,
+      "regionMaximumExtension": 0.03532828763127327,
+      "coincidentUvSeamMaximumGap": 0.0,
+      "worstEdge": 53484
+    },
+    {
+      "frame": 12,
+      "crossMidlineMaximumExtension": 0.051476940512657166,
+      "crossMidlineMaximumRatio": 8.66829776763916,
+      "regionMaximumExtension": 0.051476940512657166,
+      "coincidentUvSeamMaximumGap": 0.0,
+      "worstEdge": 9118
+    },
+    {
+      "frame": 13,
+      "crossMidlineMaximumExtension": 0.06719087809324265,
+      "crossMidlineMaximumRatio": 10.579750061035156,
+      "regionMaximumExtension": 0.06719087809324265,
+      "coincidentUvSeamMaximumGap": 0.0,
+      "worstEdge": 9118
+    },
+    {
+      "frame": 14,
+      "crossMidlineMaximumExtension": 0.07851378619670868,
+      "crossMidlineMaximumRatio": 11.877779960632324,
+      "regionMaximumExtension": 0.07851378619670868,
+      "coincidentUvSeamMaximumGap": 0.0,
+      "worstEdge": 9118
+    },
+    {
+      "frame": 15,
+      "crossMidlineMaximumExtension": 0.08426546305418015,
+      "crossMidlineMaximumRatio": 12.693706512451172,
+      "regionMaximumExtension": 0.08426546305418015,
+      "coincidentUvSeamMaximumGap": 0.0,
+      "worstEdge": 9118
+    },
+    {
+      "frame": 16,
+      "crossMidlineMaximumExtension": 0.08556698262691498,
+      "crossMidlineMaximumRatio": 12.845670700073242,
+      "regionMaximumExtension": 0.08556698262691498,
+      "coincidentUvSeamMaximumGap": 0.0,
+      "worstEdge": 9118
+    },
+    {
+      "frame": 17,
+      "crossMidlineMaximumExtension": 0.08474039286375046,
+      "crossMidlineMaximumRatio": 12.680471420288086,
+      "regionMaximumExtension": 0.08474039286375046,
+      "coincidentUvSeamMaximumGap": 0.0,
+      "worstEdge": 9118
+    },
+    {
+      "frame": 18,
+      "crossMidlineMaximumExtension": 0.0852409303188324,
+      "crossMidlineMaximumRatio": 12.71186351776123,
+      "regionMaximumExtension": 0.0852409303188324,
+      "coincidentUvSeamMaximumGap": 0.0,
+      "worstEdge": 9118
+    },
+    {
+      "frame": 19,
+      "crossMidlineMaximumExtension": 0.08950278908014297,
+      "crossMidlineMaximumRatio": 13.299553871154785,
+      "regionMaximumExtension": 0.08950278908014297,
+      "coincidentUvSeamMaximumGap": 0.0,
+      "worstEdge": 9118
+    },
+    {
+      "frame": 20,
+      "crossMidlineMaximumExtension": 0.09041324257850647,
+      "crossMidlineMaximumRatio": 13.39384937286377,
+      "regionMaximumExtension": 0.09041324257850647,
+      "coincidentUvSeamMaximumGap": 0.0,
+      "worstEdge": 9118
+    },
+    {
+      "frame": 21,
+      "crossMidlineMaximumExtension": 0.08858083933591843,
+      "crossMidlineMaximumRatio": 13.088253021240234,
+      "regionMaximumExtension": 0.08858083933591843,
+      "coincidentUvSeamMaximumGap": 0.0,
+      "worstEdge": 9118
+    },
+    {
+      "frame": 22,
+      "crossMidlineMaximumExtension": 0.087638720870018,
+      "crossMidlineMaximumRatio": 12.91829776763916,
+      "regionMaximumExtension": 0.087638720870018,
+      "coincidentUvSeamMaximumGap": 0.0,
+      "worstEdge": 9118
+    },
+    {
+      "frame": 23,
+      "crossMidlineMaximumExtension": 0.09082243591547012,
+      "crossMidlineMaximumRatio": 13.354823112487793,
+      "regionMaximumExtension": 0.09082243591547012,
+      "coincidentUvSeamMaximumGap": 0.0,
+      "worstEdge": 9118
+    },
+    {
+      "frame": 24,
+      "crossMidlineMaximumExtension": 0.08621406555175781,
+      "crossMidlineMaximumRatio": 12.660696029663086,
+      "regionMaximumExtension": 0.08621406555175781,
+      "coincidentUvSeamMaximumGap": 0.0,
+      "worstEdge": 9118
+    },
+    {
+      "frame": 25,
+      "crossMidlineMaximumExtension": 0.07110504060983658,
+      "crossMidlineMaximumRatio": 10.468731880187988,
+      "regionMaximumExtension": 0.07110504060983658,
+      "coincidentUvSeamMaximumGap": 0.0,
+      "worstEdge": 9118
+    },
+    {
+      "frame": 26,
+      "crossMidlineMaximumExtension": 0.04912589490413666,
+      "crossMidlineMaximumRatio": 7.380145072937012,
+      "regionMaximumExtension": 0.04912589490413666,
+      "coincidentUvSeamMaximumGap": 0.0,
+      "worstEdge": 9118
+    },
+    {
+      "frame": 27,
+      "crossMidlineMaximumExtension": 0.023631537333130836,
+      "crossMidlineMaximumRatio": 4.145386219024658,
+      "regionMaximumExtension": 0.028058137744665146,
+      "coincidentUvSeamMaximumGap": 0.0,
+      "worstEdge": 9118
+    },
+    {
+      "frame": 28,
+      "crossMidlineMaximumExtension": 0.03378064185380936,
+      "crossMidlineMaximumRatio": 2.868042469024658,
+      "regionMaximumExtension": 0.03378064185380936,
+      "coincidentUvSeamMaximumGap": 0.0,
+      "worstEdge": 43609
+    },
+    {
+      "frame": 29,
+      "crossMidlineMaximumExtension": 0.060711368918418884,
+      "crossMidlineMaximumRatio": 5.867868423461914,
+      "regionMaximumExtension": 0.060711368918418884,
+      "coincidentUvSeamMaximumGap": 0.0,
+      "worstEdge": 43609
+    },
+    {
+      "frame": 30,
+      "crossMidlineMaximumExtension": 0.08385501801967621,
+      "crossMidlineMaximumRatio": 8.552927017211914,
+      "regionMaximumExtension": 0.08385501801967621,
+      "coincidentUvSeamMaximumGap": 0.0,
+      "worstEdge": 43609
+    },
+    {
+      "frame": 31,
+      "crossMidlineMaximumExtension": 0.10064327716827393,
+      "crossMidlineMaximumRatio": 10.499122619628906,
+      "regionMaximumExtension": 0.10064327716827393,
+      "coincidentUvSeamMaximumGap": 0.0,
+      "worstEdge": 43609
+    },
+    {
+      "frame": 32,
+      "crossMidlineMaximumExtension": 0.11171974241733551,
+      "crossMidlineMaximumRatio": 12.011929512023926,
+      "regionMaximumExtension": 0.11171974241733551,
+      "coincidentUvSeamMaximumGap": 0.0,
+      "worstEdge": 43609
+    },
+    {
+      "frame": 33,
+      "crossMidlineMaximumExtension": 0.11556276679039001,
+      "crossMidlineMaximumRatio": 12.825366020202637,
+      "regionMaximumExtension": 0.11556276679039001,
+      "coincidentUvSeamMaximumGap": 0.0,
+      "worstEdge": 43609
+    },
+    {
+      "frame": 34,
+      "crossMidlineMaximumExtension": 0.11372680962085724,
+      "crossMidlineMaximumRatio": 12.970757484436035,
+      "regionMaximumExtension": 0.11372680962085724,
+      "coincidentUvSeamMaximumGap": 0.0,
+      "worstEdge": 43609
+    },
+    {
+      "frame": 35,
+      "crossMidlineMaximumExtension": 0.10910958051681519,
+      "crossMidlineMaximumRatio": 12.802067756652832,
+      "regionMaximumExtension": 0.10910958051681519,
+      "coincidentUvSeamMaximumGap": 0.0,
+      "worstEdge": 43609
+    },
+    {
+      "frame": 36,
+      "crossMidlineMaximumExtension": 0.10568742454051971,
+      "crossMidlineMaximumRatio": 12.82649040222168,
+      "regionMaximumExtension": 0.10568742454051971,
+      "coincidentUvSeamMaximumGap": 0.0,
+      "worstEdge": 43609
+    },
+    {
+      "frame": 37,
+      "crossMidlineMaximumExtension": 0.10656774044036865,
+      "crossMidlineMaximumRatio": 13.413082122802734,
+      "regionMaximumExtension": 0.10656774044036865,
+      "coincidentUvSeamMaximumGap": 0.0,
+      "worstEdge": 43609
+    }
+  ]
+}

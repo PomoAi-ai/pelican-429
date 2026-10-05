@@ -1,0 +1,197 @@
+{
+  "tier": "detailed",
+  "bones": 22,
+  "bodyTriangles": 500000,
+  "equipmentTriangles": 87712,
+  "effectSockets": [
+    "fx_wrist_L",
+    "fx_wrist_R",
+    "fx_pack_L",
+    "fx_pack_R",
+    "fx_keyboard"
+  ],
+  "equipped": true,
+  "phases": {
+    "jump": {
+      "anticipation": [
+        0,
+        0.2
+      ],
+      "airborne": [
+        0.2,
+        0.79
+      ],
+      "landing": [
+        0.79,
+        1
+      ]
+    },
+    "keyboard_smash": {
+      "draw": [
+        0,
+        0.22
+      ],
+      "windup": [
+        0.22,
+        0.3
+      ],
+      "strikes": [
+        [
+          0.3,
+          0.36666666666666664
+        ],
+        [
+          0.6,
+          0.7
+        ]
+      ],
+      "impacts": [
+        0.36666666666666664,
+        0.7
+      ],
+      "recovery": [
+        0.7,
+        0.8
+      ],
+      "stow": [
+        0.8,
+        1
+      ]
+    },
+    "codex_attack": {
+      "draw": [
+        0,
+        0.27
+      ],
+      "fire": [
+        0.38,
+        0.68
+      ],
+      "stow": [
+        0.75,
+        1
+      ]
+    },
+    "bug_attack": {
+      "draw": [
+        0,
+        0.27
+      ],
+      "fire": [
+        0.42,
+        0.65
+      ],
+      "stow": [
+        0.75,
+        1
+      ]
+    },
+    "server_overload": {
+      "draw": [
+        0,
+        0.27
+      ],
+      "charge": [
+        0.38,
+        0.72
+      ],
+      "release": 0.73,
+      "stow": [
+        0.75,
+        1
+      ]
+    },
+    "takeoff": {
+      "crouch": [
+        0,
+        0.18
+      ],
+      "boost": [
+        0.18,
+        0.8
+      ],
+      "hover": [
+        0.8,
+        1
+      ]
+    },
+    "land": {
+      "descent": [
+        0.18,
+        0.7
+      ],
+      "impact": 0.7,
+      "settle": [
+        0.7,
+        1
+      ]
+    }
+  },
+  "surfacePreserved": true,
+  "surfaceHash": {
+    "positions": "9dd336ab6f161482d6c8d6a6aa366df460a5e68982f9a318168a09e88cc8d1a0",
+    "uv": "98f1d0e91e7fc365bfd8bac5abbfbdcc144c42ad9ad068e033731de08780c082"
+  },
+  "clips": {
+    "idle": {
+      "duration": 3.2,
+      "loop": true
+    },
+    "walk": {
+      "duration": 1.2,
+      "loop": true
+    },
+    "run": {
+      "duration": 0.8,
+      "loop": true
+    },
+    "sprint": {
+      "duration": 0.6,
+      "loop": true
+    },
+    "ride": {
+      "duration": 3.6,
+      "loop": true
+    },
+    "jump": {
+      "duration": 1.6,
+      "loop": false
+    },
+    "keyboard_smash": {
+      "duration": 2.0,
+      "loop": false
+    },
+    "codex_attack": {
+      "duration": 1.6,
+      "loop": false
+    },
+    "bug_attack": {
+      "duration": 2.0,
+      "loop": false
+    },
+    "server_overload": {
+      "duration": 3.2,
+      "loop": false
+    },
+    "takeoff": {
+      "duration": 1.2,
+      "loop": false
+    },
+    "hover": {
+      "duration": 2.4,
+      "loop": true
+    },
+    "fly_forward": {
+      "duration": 1.2,
+      "loop": true
+    },
+    "land": {
+      "duration": 1.2,
+      "loop": false
+    }
+  },
+  "bytes": 40215720,
+  "glb": "public/characters/human/models-equipped/grassy-equipped-detailed.glb",
+  "blend": "assets/characters/grassy/model-equipped/grassy-equipped-detailed.blend",
+  "motion": null
+}

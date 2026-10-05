@@ -1,0 +1,239 @@
+{
+  "moves": [
+    {
+      "from": "public/characters/human/models",
+      "to": "public/characters/human/history/models"
+    },
+    {
+      "from": "public/characters/human/models-atelier",
+      "to": "public/characters/human/history/models-atelier"
+    },
+    {
+      "from": "public/characters/human/models-fresh",
+      "to": "public/characters/human/history/models-fresh"
+    },
+    {
+      "from": "public/characters/human/models-multiview",
+      "to": "public/characters/human/history/models-multiview"
+    },
+    {
+      "from": "public/characters/human/models-opus55",
+      "to": "public/characters/human/history/models-opus55"
+    },
+    {
+      "from": "public/characters/human/models-reference-fit",
+      "to": "public/characters/human/history/models-reference-fit"
+    },
+    {
+      "from": "public/characters/human/models-rodin",
+      "to": "public/characters/human/history/models-rodin"
+    },
+    {
+      "from": "public/characters/human/models-rodin-refined",
+      "to": "public/characters/human/history/models-rodin-refined"
+    },
+    {
+      "from": "public/characters/human/models-rodin-animated",
+      "to": "public/characters/human/history/models-rodin-animated"
+    },
+    {
+      "from": "public/characters/human/proportions",
+      "to": "public/characters/human/history/proportions"
+    },
+    {
+      "from": "public/characters/human/turnaround",
+      "to": "public/characters/human/history/turnaround"
+    },
+    {
+      "from": "public/characters/human/turnaround-3p1",
+      "to": "public/characters/human/history/turnaround-3p1"
+    },
+    {
+      "from": "public/characters/human/turnaround-final-3p1",
+      "to": "public/characters/human/history/turnaround-final-3p1"
+    },
+    {
+      "from": "public/characters/human/grassy.glb",
+      "to": "public/characters/human/history/grassy.glb"
+    },
+    {
+      "from": "public/characters/human/grassy-four-directions-285.png",
+      "to": "public/characters/human/history/grassy-four-directions-285.png"
+    },
+    {
+      "from": "assets/characters/grassy/model-static",
+      "to": "assets/characters/grassy/history/model-static"
+    },
+    {
+      "from": "assets/characters/grassy/model-atelier",
+      "to": "assets/characters/grassy/history/model-atelier"
+    },
+    {
+      "from": "assets/characters/grassy/model-opus55",
+      "to": "assets/characters/grassy/history/model-opus55"
+    },
+    {
+      "from": "assets/characters/grassy/model-rodin-animated",
+      "to": "assets/characters/grassy/history/model-rodin-animated"
+    },
+    {
+      "from": "assets/characters/grassy/proportion-comparison.jpg",
+      "to": "assets/characters/grassy/history/proportion-comparison.jpg"
+    },
+    {
+      "from": "assets/characters/grassy/model-rodin",
+      "to": "assets/characters/grassy/history/model-rodin"
+    },
+    {
+      "from": "assets/characters/grassy/side-reference-scene-close.png",
+      "to": "assets/characters/grassy/history/side-reference-scene-close.png"
+    },
+    {
+      "from": "assets/characters/grassy/grassy-proportion-31-refinement.txt",
+      "to": "assets/characters/grassy/history/grassy-proportion-31-refinement.txt"
+    },
+    {
+      "from": "assets/characters/grassy/grassy-character-card-v3-prompt.md",
+      "to": "assets/characters/grassy/history/grassy-character-card-v3-prompt.md"
+    },
+    {
+      "from": "assets/characters/grassy/side-reference-scene.html",
+      "to": "assets/characters/grassy/history/side-reference-scene.html"
+    },
+    {
+      "from": "assets/characters/grassy/model-fresh",
+      "to": "assets/characters/grassy/history/model-fresh"
+    },
+    {
+      "from": "assets/characters/grassy/grassy-proportion-separate-prompts.txt",
+      "to": "assets/characters/grassy/history/grassy-proportion-separate-prompts.txt"
+    },
+    {
+      "from": "assets/characters/grassy/grassy-proportion-refinements.txt",
+      "to": "assets/characters/grassy/history/grassy-proportion-refinements.txt"
+    },
+    {
+      "from": "assets/characters/grassy/proportion-scene-close.jpg",
+      "to": "assets/characters/grassy/history/proportion-scene-close.jpg"
+    },
+    {
+      "from": "assets/characters/grassy/model-comparison",
+      "to": "assets/characters/grassy/history/model-comparison"
+    },
+    {
+      "from": "assets/characters/grassy/grassy-proportion-325-prompt.txt",
+      "to": "assets/characters/grassy/history/grassy-proportion-325-prompt.txt"
+    },
+    {
+      "from": "assets/characters/grassy/proportion-scene-game.jpg",
+      "to": "assets/characters/grassy/history/proportion-scene-game.jpg"
+    },
+    {
+      "from": "assets/characters/grassy/turnaround",
+      "to": "assets/characters/grassy/history/turnaround"
+    },
+    {
+      "from": "assets/characters/grassy/grassy-character-card-v2-prompt.md",
+      "to": "assets/characters/grassy/history/grassy-character-card-v2-prompt.md"
+    },
+    {
+      "from": "assets/characters/grassy/grassy-proportion-31-prompt.txt",
+      "to": "assets/characters/grassy/history/grassy-proportion-31-prompt.txt"
+    },
+    {
+      "from": "assets/characters/grassy/proportion-compare.html",
+      "to": "assets/characters/grassy/history/proportion-compare.html"
+    },
+    {
+      "from": "assets/characters/grassy/doorway-reference-3p1-tiles.png",
+      "to": "assets/characters/grassy/history/doorway-reference-3p1-tiles.png"
+    },
+    {
+      "from": "assets/characters/grassy/side-reference-scene-game.png",
+      "to": "assets/characters/grassy/history/side-reference-scene-game.png"
+    },
+    {
+      "from": "assets/characters/grassy/model-method-comparison",
+      "to": "assets/characters/grassy/history/model-method-comparison"
+    },
+    {
+      "from": "assets/characters/grassy/grassy-proportion-options-prompt.txt",
+      "to": "assets/characters/grassy/history/grassy-proportion-options-prompt.txt"
+    },
+    {
+      "from": "assets/characters/grassy/grassy-character-card-v1-prompt.md",
+      "to": "assets/characters/grassy/history/grassy-character-card-v1-prompt.md"
+    },
+    {
+      "from": "assets/characters/grassy/model",
+      "to": "assets/characters/grassy/history/model"
+    },
+    {
+      "from": "assets/characters/grassy/model-reference-fit",
+      "to": "assets/characters/grassy/history/model-reference-fit"
+    },
+    {
+      "from": "assets/characters/grassy/model-final",
+      "to": "assets/characters/grassy/history/model-final"
+    },
+    {
+      "from": "assets/characters/grassy/grassy-proportion-corrections.txt",
+      "to": "assets/characters/grassy/history/grassy-proportion-corrections.txt"
+    },
+    {
+      "from": "assets/characters/grassy/doorway-reference-taller.png",
+      "to": "assets/characters/grassy/history/doorway-reference-taller.png"
+    },
+    {
+      "from": "assets/characters/grassy/model-rodin-refined",
+      "to": "assets/characters/grassy/history/model-rodin-refined"
+    },
+    {
+      "from": "assets/characters/grassy/proportion-game-distance.jpg",
+      "to": "assets/characters/grassy/history/proportion-game-distance.jpg"
+    },
+    {
+      "from": "assets/characters/grassy/doorway-reference-scene.png",
+      "to": "assets/characters/grassy/history/doorway-reference-scene.png"
+    },
+    {
+      "from": "assets/characters/grassy/grassy-character-card-v2.png",
+      "to": "assets/characters/grassy/history/grassy-character-card-v2.png"
+    },
+    {
+      "from": "assets/characters/grassy/model-multiview",
+      "to": "assets/characters/grassy/history/model-multiview"
+    },
+    {
+      "from": "assets/characters/grassy/standalone-cards-prompts.md",
+      "to": "assets/characters/grassy/history/standalone-cards-prompts.md"
+    },
+    {
+      "from": "assets/characters/grassy/static-model-scene.html",
+      "to": "assets/characters/grassy/history/static-model-scene.html"
+    },
+    {
+      "from": "assets/characters/grassy/grassy-character-card-v3.png",
+      "to": "assets/characters/grassy/history/grassy-character-card-v3.png"
+    },
+    {
+      "from": "assets/characters/grassy/grassy-character-card-v1.png",
+      "to": "assets/characters/grassy/history/grassy-character-card-v1.png"
+    },
+    {
+      "from": "assets/characters/grassy/grassy-turnaround-285-prompt.txt",
+      "to": "assets/characters/grassy/history/grassy-turnaround-285-prompt.txt"
+    },
+    {
+      "from": "public/characters/human/turnaround-master-v2/front-draft.png",
+      "to": "public/characters/human/history/turnaround-master-v2/front-draft.png"
+    }
+  ],
+  "archivedDocuments": [
+    {
+      "from": "public/characters/human/SOURCE.md",
+      "to": "public/characters/human/history/SOURCE.md",
+      "replacement": "The original path now documents only the current equipped character."
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "frames": 109,
+  "seconds": 3.5999999999999996,
+  "maximumErrorTiles": {
+    "shoeBallToPedal": 7.336457744295103e-07,
+    "wristToGripOffset": 8.148769177172133e-07,
+    "pelvisToSaddleOffset": 5.960464477539063e-08
+  }
+}

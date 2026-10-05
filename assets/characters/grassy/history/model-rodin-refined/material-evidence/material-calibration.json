@@ -1,0 +1,15 @@
+{
+  "source": "Rodin original UV and PBR atlas",
+  "maps": {
+    "base-color": "assets/characters/grassy/history/model-rodin-refined/material-evidence/rodin-refined-base-color.png",
+    "roughness": "assets/characters/grassy/history/model-rodin-refined/material-evidence/rodin-refined-roughness.png",
+    "normal": "assets/characters/grassy/history/model-rodin-refined/material-evidence/rodin-refined-normal.png"
+  },
+  "skin_saturation": 0.9,
+  "shirt_tint_mix": 0.3,
+  "denim_tint_mix": 0.22,
+  "cloth_roughness_mix": 0.55,
+  "cloth_bump_distance": 0.0012,
+  "lighting_baked": false,
+  "geometry_changed": false
+}

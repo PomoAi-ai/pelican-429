@@ -1,0 +1,477 @@
+{
+  "scope": "Actual retained and newly exported GLBs; weight continuity and content preservation, not an appearance acceptance check.",
+  "tiers": {
+    "game": {
+      "before": {
+        "path": "$TMPDIR/grassy-leg-skin-before/grassy-equipped-game.glb",
+        "bytes": 6257428,
+        "vertices": 27344,
+        "triangles": 45000,
+        "positionsHash": "e8f6e259cd1ea5136d5a222eeca0b3de7b9924d50dafecf810a8bab1ac32ecce",
+        "uvHash": "f31f7a86d536f4c6f2592ea9964027caf70b58665deb3c8755a18c018b29e91f",
+        "animationHash": "77e807fdcae6f7c89829cabc8b40f2e13266a5ae72bfb36e721bb55b9d6f8597",
+        "clipNames": [
+          "idle",
+          "walk",
+          "run",
+          "ride",
+          "jump",
+          "codex_attack",
+          "bug_attack",
+          "server_overload",
+          "takeoff",
+          "hover",
+          "fly_forward",
+          "land"
+        ],
+        "jointNames": [
+          "root",
+          "hips",
+          "spine",
+          "chest",
+          "clavicle.L",
+          "upper_arm.L",
+          "forearm.L",
+          "hand.L",
+          "clavicle.R",
+          "upper_arm.R",
+          "forearm.R",
+          "hand.R",
+          "neck",
+          "head",
+          "thigh.L",
+          "shin.L",
+          "foot.L",
+          "toe.L",
+          "thigh.R",
+          "shin.R",
+          "foot.R",
+          "toe.R"
+        ],
+        "sockets": [
+          "fx_wrist_L",
+          "fx_wrist_R",
+          "fx_pack_L",
+          "fx_pack_R",
+          "fx_keyboard"
+        ],
+        "socketHash": "4b3eea87769d15d4be7da56ff13fedb3a079799f57a324c99794f603d32e116c",
+        "weights": {
+          "maxInfluences": 4,
+          "normalizationMaxError": 1.3969838619232178e-7,
+          "minWeight": 0,
+          "negativeEntries": 0,
+          "nonfiniteVertices": 0,
+          "zeroWeightVertices": 0
+        },
+        "crotch": {
+          "mixedThighVertices": 0,
+          "crossCenterEdges": 66,
+          "maxAdjacentLeftThighFractionDifference": 1
+        },
+        "lowerPants": {
+          "region": "glTF Y 0.76..0.90, abs(X)<0.45; below fingertips",
+          "vertices": 283,
+          "maxArmWeight": 0.1467670351266861,
+          "armWeightOver001Vertices": 52
+        }
+      },
+      "after": {
+        "path": "public/characters/human/models-equipped/grassy-equipped-game.glb",
+        "bytes": 6261788,
+        "vertices": 27344,
+        "triangles": 45000,
+        "positionsHash": "e8f6e259cd1ea5136d5a222eeca0b3de7b9924d50dafecf810a8bab1ac32ecce",
+        "uvHash": "f31f7a86d536f4c6f2592ea9964027caf70b58665deb3c8755a18c018b29e91f",
+        "animationHash": "77e807fdcae6f7c89829cabc8b40f2e13266a5ae72bfb36e721bb55b9d6f8597",
+        "clipNames": [
+          "idle",
+          "walk",
+          "run",
+          "ride",
+          "jump",
+          "codex_attack",
+          "bug_attack",
+          "server_overload",
+          "takeoff",
+          "hover",
+          "fly_forward",
+          "land"
+        ],
+        "jointNames": [
+          "root",
+          "hips",
+          "spine",
+          "chest",
+          "clavicle.L",
+          "upper_arm.L",
+          "forearm.L",
+          "hand.L",
+          "clavicle.R",
+          "upper_arm.R",
+          "forearm.R",
+          "hand.R",
+          "neck",
+          "head",
+          "thigh.L",
+          "shin.L",
+          "foot.L",
+          "toe.L",
+          "thigh.R",
+          "shin.R",
+          "foot.R",
+          "toe.R"
+        ],
+        "sockets": [
+          "fx_wrist_L",
+          "fx_wrist_R",
+          "fx_pack_L",
+          "fx_pack_R",
+          "fx_keyboard"
+        ],
+        "socketHash": "4b3eea87769d15d4be7da56ff13fedb3a079799f57a324c99794f603d32e116c",
+        "weights": {
+          "maxInfluences": 4,
+          "normalizationMaxError": 1.3969838619232178e-7,
+          "minWeight": 0,
+          "negativeEntries": 0,
+          "nonfiniteVertices": 0,
+          "zeroWeightVertices": 0
+        },
+        "crotch": {
+          "mixedThighVertices": 421,
+          "crossCenterEdges": 66,
+          "maxAdjacentLeftThighFractionDifference": 0.6584462877256418
+        },
+        "lowerPants": {
+          "region": "glTF Y 0.76..0.90, abs(X)<0.45; below fingertips",
+          "vertices": 283,
+          "maxArmWeight": 0.0009838950354605913,
+          "armWeightOver001Vertices": 0
+        }
+      },
+      "positionsPreserved": true,
+      "uvPreserved": true,
+      "animationTracksPreserved": true,
+      "boneNamesPreserved": true,
+      "effectSocketsPreserved": true
+    },
+    "light": {
+      "before": {
+        "path": "$TMPDIR/grassy-leg-skin-before/grassy-equipped-light.glb",
+        "bytes": 2680904,
+        "vertices": 12852,
+        "triangles": 20000,
+        "positionsHash": "36ef3fe93c4bdb41b87af235e6b53d8102bfc37c5605e194180db560c1920133",
+        "uvHash": "7ab5c8dfbd1a65502b7c2dbb5fddad7cdf833214578c65982335652d88cc6688",
+        "animationHash": "763ecf45b6c33bee064d659f18176ce793f92eb5a12c3d910f6a30c9cb9b5658",
+        "clipNames": [
+          "idle",
+          "walk",
+          "run",
+          "ride",
+          "jump",
+          "codex_attack",
+          "bug_attack",
+          "server_overload",
+          "takeoff",
+          "hover",
+          "fly_forward",
+          "land"
+        ],
+        "jointNames": [
+          "root",
+          "hips",
+          "spine",
+          "chest",
+          "clavicle.L",
+          "upper_arm.L",
+          "forearm.L",
+          "hand.L",
+          "clavicle.R",
+          "upper_arm.R",
+          "forearm.R",
+          "hand.R",
+          "neck",
+          "head",
+          "thigh.L",
+          "shin.L",
+          "foot.L",
+          "toe.L",
+          "thigh.R",
+          "shin.R",
+          "foot.R",
+          "toe.R"
+        ],
+        "sockets": [
+          "fx_wrist_L",
+          "fx_wrist_R",
+          "fx_pack_L",
+          "fx_pack_R",
+          "fx_keyboard"
+        ],
+        "socketHash": "4b3eea87769d15d4be7da56ff13fedb3a079799f57a324c99794f603d32e116c",
+        "weights": {
+          "maxInfluences": 4,
+          "normalizationMaxError": 1.1362135410308838e-7,
+          "minWeight": 0,
+          "negativeEntries": 0,
+          "nonfiniteVertices": 0,
+          "zeroWeightVertices": 0
+        },
+        "crotch": {
+          "mixedThighVertices": 0,
+          "crossCenterEdges": 46,
+          "maxAdjacentLeftThighFractionDifference": 1
+        },
+        "lowerPants": {
+          "region": "glTF Y 0.76..0.90, abs(X)<0.45; below fingertips",
+          "vertices": 133,
+          "maxArmWeight": 0.16618874669075012,
+          "armWeightOver001Vertices": 26
+        }
+      },
+      "after": {
+        "path": "public/characters/human/models-equipped/grassy-equipped-light.glb",
+        "bytes": 2683680,
+        "vertices": 12852,
+        "triangles": 20000,
+        "positionsHash": "36ef3fe93c4bdb41b87af235e6b53d8102bfc37c5605e194180db560c1920133",
+        "uvHash": "7ab5c8dfbd1a65502b7c2dbb5fddad7cdf833214578c65982335652d88cc6688",
+        "animationHash": "763ecf45b6c33bee064d659f18176ce793f92eb5a12c3d910f6a30c9cb9b5658",
+        "clipNames": [
+          "idle",
+          "walk",
+          "run",
+          "ride",
+          "jump",
+          "codex_attack",
+          "bug_attack",
+          "server_overload",
+          "takeoff",
+          "hover",
+          "fly_forward",
+          "land"
+        ],
+        "jointNames": [
+          "root",
+          "hips",
+          "spine",
+          "chest",
+          "clavicle.L",
+          "upper_arm.L",
+          "forearm.L",
+          "hand.L",
+          "clavicle.R",
+          "upper_arm.R",
+          "forearm.R",
+          "hand.R",
+          "neck",
+          "head",
+          "thigh.L",
+          "shin.L",
+          "foot.L",
+          "toe.L",
+          "thigh.R",
+          "shin.R",
+          "foot.R",
+          "toe.R"
+        ],
+        "sockets": [
+          "fx_wrist_L",
+          "fx_wrist_R",
+          "fx_pack_L",
+          "fx_pack_R",
+          "fx_keyboard"
+        ],
+        "socketHash": "4b3eea87769d15d4be7da56ff13fedb3a079799f57a324c99794f603d32e116c",
+        "weights": {
+          "maxInfluences": 4,
+          "normalizationMaxError": 1.1362135410308838e-7,
+          "minWeight": 0,
+          "negativeEntries": 0,
+          "nonfiniteVertices": 0,
+          "zeroWeightVertices": 0
+        },
+        "crotch": {
+          "mixedThighVertices": 207,
+          "crossCenterEdges": 46,
+          "maxAdjacentLeftThighFractionDifference": 0.36209162446621546
+        },
+        "lowerPants": {
+          "region": "glTF Y 0.76..0.90, abs(X)<0.45; below fingertips",
+          "vertices": 133,
+          "maxArmWeight": 0.0009370915358886123,
+          "armWeightOver001Vertices": 0
+        }
+      },
+      "positionsPreserved": true,
+      "uvPreserved": true,
+      "animationTracksPreserved": true,
+      "boneNamesPreserved": true,
+      "effectSocketsPreserved": true
+    },
+    "detailed": {
+      "before": {
+        "path": "$TMPDIR/grassy-leg-skin-before/grassy-equipped-detailed.glb",
+        "bytes": 39892264,
+        "vertices": 392607,
+        "triangles": 500000,
+        "positionsHash": "42482f277f3a7437d9b2470a827ec5e3a20bda2cf79df44718c36a1526c8d096",
+        "uvHash": "cd4b85ef003e25b3a65f7d8ce960cb2fceea8747ba5cc2863dceb84740dec022",
+        "animationHash": "7d2c09aee1163346e0459cacd2ee419ed6aabb59a9da92075edd438730446ab6",
+        "clipNames": [
+          "idle",
+          "walk",
+          "run",
+          "ride",
+          "jump",
+          "codex_attack",
+          "bug_attack",
+          "server_overload",
+          "takeoff",
+          "hover",
+          "fly_forward",
+          "land"
+        ],
+        "jointNames": [
+          "root",
+          "hips",
+          "spine",
+          "chest",
+          "clavicle.L",
+          "upper_arm.L",
+          "forearm.L",
+          "hand.L",
+          "clavicle.R",
+          "upper_arm.R",
+          "forearm.R",
+          "hand.R",
+          "neck",
+          "head",
+          "thigh.L",
+          "shin.L",
+          "foot.L",
+          "toe.L",
+          "thigh.R",
+          "shin.R",
+          "foot.R",
+          "toe.R"
+        ],
+        "sockets": [
+          "fx_wrist_L",
+          "fx_wrist_R",
+          "fx_pack_L",
+          "fx_pack_R",
+          "fx_keyboard"
+        ],
+        "socketHash": "4b3eea87769d15d4be7da56ff13fedb3a079799f57a324c99794f603d32e116c",
+        "weights": {
+          "maxInfluences": 4,
+          "normalizationMaxError": 1.341104507446289e-7,
+          "minWeight": 0,
+          "negativeEntries": 0,
+          "nonfiniteVertices": 0,
+          "zeroWeightVertices": 0
+        },
+        "crotch": {
+          "mixedThighVertices": 0,
+          "crossCenterEdges": 297,
+          "maxAdjacentLeftThighFractionDifference": 1
+        },
+        "lowerPants": {
+          "region": "glTF Y 0.76..0.90, abs(X)<0.45; below fingertips",
+          "vertices": 4986,
+          "maxArmWeight": 0.1805468499660492,
+          "armWeightOver001Vertices": 814
+        }
+      },
+      "after": {
+        "path": "public/characters/human/models-equipped/grassy-equipped-detailed.glb",
+        "bytes": 39892264,
+        "vertices": 392607,
+        "triangles": 500000,
+        "positionsHash": "42482f277f3a7437d9b2470a827ec5e3a20bda2cf79df44718c36a1526c8d096",
+        "uvHash": "cd4b85ef003e25b3a65f7d8ce960cb2fceea8747ba5cc2863dceb84740dec022",
+        "animationHash": "7d2c09aee1163346e0459cacd2ee419ed6aabb59a9da92075edd438730446ab6",
+        "clipNames": [
+          "idle",
+          "walk",
+          "run",
+          "ride",
+          "jump",
+          "codex_attack",
+          "bug_attack",
+          "server_overload",
+          "takeoff",
+          "hover",
+          "fly_forward",
+          "land"
+        ],
+        "jointNames": [
+          "root",
+          "hips",
+          "spine",
+          "chest",
+          "clavicle.L",
+          "upper_arm.L",
+          "forearm.L",
+          "hand.L",
+          "clavicle.R",
+          "upper_arm.R",
+          "forearm.R",
+          "hand.R",
+          "neck",
+          "head",
+          "thigh.L",
+          "shin.L",
+          "foot.L",
+          "toe.L",
+          "thigh.R",
+          "shin.R",
+          "foot.R",
+          "toe.R"
+        ],
+        "sockets": [
+          "fx_wrist_L",
+          "fx_wrist_R",
+          "fx_pack_L",
+          "fx_pack_R",
+          "fx_keyboard"
+        ],
+        "socketHash": "4b3eea87769d15d4be7da56ff13fedb3a079799f57a324c99794f603d32e116c",
+        "weights": {
+          "maxInfluences": 4,
+          "normalizationMaxError": 1.341104507446289e-7,
+          "minWeight": 0,
+          "negativeEntries": 0,
+          "nonfiniteVertices": 0,
+          "zeroWeightVertices": 0
+        },
+        "crotch": {
+          "mixedThighVertices": 6513,
+          "crossCenterEdges": 297,
+          "maxAdjacentLeftThighFractionDifference": 0.18263288386742216
+        },
+        "lowerPants": {
+          "region": "glTF Y 0.76..0.90, abs(X)<0.45; below fingertips",
+          "vertices": 4986,
+          "maxArmWeight": 0.0009976502042263746,
+          "armWeightOver001Vertices": 0
+        }
+      },
+      "positionsPreserved": true,
+      "uvPreserved": true,
+      "animationTracksPreserved": true,
+      "boneNamesPreserved": true,
+      "effectSocketsPreserved": true
+    }
+  },
+  "diffReview": {
+    "files": [
+      "scripts/blender_grassy_rodin/animate.py",
+      "scripts/blender_grassy_rodin/extend_actions.py"
+    ],
+    "result": "No blocking findings under core-review and diff-guard. The unreachable-island branch retains the preexisting anatomical binding when the reference geodesics cannot classify that connected component; it does not claim a successful geodesic classification. No new tests, catches, dependencies, or runtime branches."
+  }
+}

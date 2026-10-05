@@ -1,0 +1,16 @@
+{
+  "kind": "tibo",
+  "beforeAndAfterTwoRefreshes": {
+    "vertices": 21704,
+    "faces": 35736,
+    "materials": 1,
+    "shapeKeys": 3,
+    "idleSlots": 2,
+    "keyNlaTracks": 1
+  },
+  "idempotent": true,
+  "sevenOtherActionFingerprintsUnchanged": true,
+  "originalVerticesMaximumMorphDisplacement": 0.0,
+  "idleFootMaximumDisplacement": 0,
+  "idleLoopMaximumVertexDifference": 0.0
+}

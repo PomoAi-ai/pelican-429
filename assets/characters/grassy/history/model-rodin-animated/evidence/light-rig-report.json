@@ -1,0 +1,25 @@
+{
+  "id": "light",
+  "triangles": 20000,
+  "bones": 22,
+  "height": 3.1,
+  "restPoseSurfaceUnchanged": true,
+  "surfaceHash": {
+    "positions": "7f001b90817f5118cad20fc372c5992b539f9d1373ef5e53ed0c290d585501e9",
+    "uv": "e0d0d11d8e06521deab42737453fd56354bc8676b79ad4158ca782cf6d4afe5f"
+  },
+  "skin": {
+    "vertices": 9984,
+    "maximumInfluences": 4,
+    "unweightedVertices": 0,
+    "normalizationMaxError": 2.220446049250313e-16
+  },
+  "clips": {
+    "idle": 3.2,
+    "walk": 1.2
+  },
+  "walkSpeedTilesPerSecond": 0.8333333333333334,
+  "bytes": 1756920,
+  "glb": "public/characters/human/history/models-rodin-animated/grassy-rodin-animated-light.glb",
+  "blend": "assets/characters/grassy/history/model-rodin-animated/grassy-rodin-animated-light.blend"
+}

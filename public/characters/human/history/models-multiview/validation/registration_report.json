@@ -1,0 +1,116 @@
+{
+  "coordinate_contract": {
+    "front": "X/Z",
+    "right_left": "Y/Z",
+    "back": "rear X/Z"
+  },
+  "world_height": 3.1,
+  "pixel_to_world": 0.002607232968881413,
+  "canonical_landmark_rows": [
+    36,
+    310,
+    421,
+    456,
+    741,
+    950,
+    1105,
+    1225
+  ],
+  "view_landmark_rows": {
+    "front": [
+      36,
+      310,
+      421,
+      456,
+      741,
+      950,
+      1105,
+      1225
+    ],
+    "right": [
+      67,
+      334,
+      450,
+      477,
+      763,
+      973,
+      1125,
+      1236
+    ],
+    "left": [
+      57,
+      336,
+      454,
+      480,
+      762,
+      975,
+      1126,
+      1237
+    ],
+    "back": [
+      48,
+      323,
+      423,
+      451,
+      748,
+      968,
+      1126,
+      1234
+    ]
+  },
+  "notes": [
+    "Front is the silhouette authority; right is the depth authority.",
+    "Source four-view images are independent illustrations: hair tufts, hand pose, and shoe stance conflict.",
+    "Vertical landmark correspondence is fixed before fitting; camera scale is shared across all views."
+  ],
+  "views": {
+    "front": {
+      "bbox": [
+        376,
+        38,
+        504,
+        1183
+      ],
+      "centroid": [
+        627.8795296343853,
+        633.7955991079273
+      ]
+    },
+    "right": {
+      "bbox": [
+        408,
+        67,
+        398,
+        1168
+      ],
+      "centroid": [
+        620.8011426570237,
+        591.1293368842846
+      ]
+    },
+    "left": {
+      "bbox": [
+        443,
+        62,
+        402,
+        1173
+      ],
+      "centroid": [
+        629.4915911212365,
+        587.0331252867562
+      ]
+    },
+    "back": {
+      "bbox": [
+        359,
+        51,
+        541,
+        1178
+      ],
+      "centroid": [
+        631.3348829437747,
+        645.7043882272726
+      ]
+    }
+  }
+}

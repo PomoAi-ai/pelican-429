@@ -1,0 +1,83 @@
+{
+  "results": [
+    {
+      "variant": "detailed",
+      "path": "assets/characters/grassy/history/model-static/fine-detail-final/public/grassy-detailed.glb",
+      "bytes": 110440524,
+      "sha256": "5f56c90c46c7bfda0705bdf203418696db69b4a6fc58d9708157421161121bf3",
+      "coordinateSystem": "glTF Y-up, all ancestor and local node transforms applied",
+      "meshNodes": 26,
+      "positionCount": 1719923,
+      "minimum": [
+        -0.6587194298123791,
+        0,
+        -0.5765670275029962
+      ],
+      "maximum": [
+        0.6587194298123791,
+        3.1000001183739414,
+        0.4921323619139173
+      ],
+      "width": 1.3174388596247582,
+      "depth": 1.0686993894169134,
+      "height": 3.1000001183739414,
+      "soleY": 0,
+      "tolerance": 0.00001,
+      "heightPass": true,
+      "solePass": true
+    },
+    {
+      "variant": "game",
+      "path": "assets/characters/grassy/history/model-static/fine-detail-final/public/grassy-game.glb",
+      "bytes": 5024168,
+      "sha256": "c57a6624a20f7ac8c86b84dfc87ffa16159593045c073a48c23e18971583541b",
+      "coordinateSystem": "glTF Y-up, all ancestor and local node transforms applied",
+      "meshNodes": 26,
+      "positionCount": 28380,
+      "minimum": [
+        -0.6588984288331545,
+        3.2971013072535804e-12,
+        -0.5761212346971405
+      ],
+      "maximum": [
+        0.658543707353914,
+        3.0999997908458,
+        0.49281891801306443
+      ],
+      "width": 1.3174421361870685,
+      "depth": 1.068940152710205,
+      "height": 3.099999790842503,
+      "soleY": 3.2971013072535804e-12,
+      "tolerance": 0.00001,
+      "heightPass": true,
+      "solePass": true
+    },
+    {
+      "variant": "light",
+      "path": "assets/characters/grassy/history/model-static/fine-detail-final/public/grassy-light.glb",
+      "bytes": 1463180,
+      "sha256": "dd768d150752df710c4e5e214dab1482b7ff54abddaa3c114457a0385767aaf0",
+      "coordinateSystem": "glTF Y-up, all ancestor and local node transforms applied",
+      "meshNodes": 26,
+      "positionCount": 13556,
+      "minimum": [
+        -0.6591531968257485,
+        -4.059960267283058e-12,
+        -0.5945964835803501
+      ],
+      "maximum": [
+        0.6575755244014303,
+        3.1000000317185084,
+        0.4926633712898294
+      ],
+      "width": 1.3167287212271788,
+      "depth": 1.0872598548701795,
+      "height": 3.100000031722568,
+      "soleY": -4.059960267283058e-12,
+      "tolerance": 0.00001,
+      "heightPass": true,
+      "solePass": true
+    }
+  ],
+  "allPass": true
+}

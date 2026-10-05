@@ -1,0 +1,7 @@
+Mode: built-in image_gen edit. Inputs are the first separate C and E cards.
+
+FILE: c-3-heads-v3.png
+Edit the attached image with ONE subtle proportion change: make the ENTIRE head (hair, skull, face and ears together) only 10% smaller in width and height than it is now, preserving its exact shape and the same face. Do not shrink it dramatically. Keep the highest hair tip and shoe soles at their current canvas heights. Naturally extend the neck and the red sweater upward to meet the slightly higher chin. Leave the sweater hem, jeans and shoes in their current positions and retain the same body width. The head should still be quite large and wider than the shoulders, yielding approximately 3 visible heads tall. All existing lettering, palette, costume, front standing pose and square card must stay unchanged. Exactly one character. This is a small fine adjustment, not a redesign.
+
+FILE: e-4-heads-v3.png
+Edit the attached image with ONE very small proportion adjustment: make the ENTIRE head (including hair, face, ears and skull) only 6% smaller in width and height, keeping its exact shape, swept hair and friendly face. This is a barely perceptible reduction; do NOT make a tiny head. Preserve the highest hair tip and sole baseline in the same places, naturally extend the neck and sweater upward to meet the slightly higher chin. Keep the rest of the body, jeans legs, shoes, all text, square layout, pose and lighting unchanged. The final target is approximately 4 visible heads tall. Exactly one character. Make only the small adjustment specified.

@@ -1,0 +1,17 @@
+{
+  "sourceSha256": "700a45578f3d3213136f997862961d80cf41230cb51a403322e4fbfc37844014",
+  "points": {
+    "chin": [
+      0.0,
+      -0.24827194213867188,
+      1.8639310598373413
+    ]
+  },
+  "annotationMethod": "Manual visible lower jaw in actual fit render, front pixel with +/-8px visual uncertainty, ray-cast to actual mesh.",
+  "frontPixels": {
+    "chin": [
+      512,
+      487
+    ]
+  }
+}

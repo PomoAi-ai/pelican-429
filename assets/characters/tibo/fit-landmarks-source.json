@@ -1,0 +1,26 @@
+{
+  "sourceSha256": "12a5e6d264ecf3597dddb70dc289a35b553ab18ce978fe4e4d68aa2ff8d90913",
+  "points": {
+    "chin": [
+      0.0,
+      -0.3318977355957031,
+      1.7191627025604248
+    ],
+    "hem": [
+      0.0,
+      -0.24260234832763672,
+      0.9272294044494629
+    ]
+  },
+  "annotationMethod": "Manual visible lower jaw / garment hem on actual 1024x1536 front render, ray-cast into normalized source mesh. Chin visual row uncertainty +/-8 px.",
+  "frontPixels": {
+    "chin": [
+      512,
+      555
+    ],
+    "hem": [
+      512,
+      994
+    ]
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "sourceBounds": [
+    [
+      -0.3540300726890564,
+      -0.565280020236969,
+      -0.9477850198745728
+    ],
+    [
+      0.35645008087158203,
+      0.5647249817848206,
+      0.9503260254859924
+    ]
+  ],
+  "yawDegrees": 90,
+  "skin": [
+    {
+      "mesh": "model",
+      "vertices": 33718,
+      "maxInfluences": 2
+    }
+  ],
+  "kind": "gatekeeper",
+  "height": 2.6,
+  "forward": "+X",
+  "up": "Y in glTF; Z in Blender",
+  "source": "assets/characters/enemies/gatekeeper/rodin-original/source.glb",
+  "bones": [
+    "root",
+    "pelvis",
+    "chest",
+    "head",
+    "arm.L",
+    "forearm.L",
+    "hand.L",
+    "arm.R",
+    "forearm.R",
+    "hand.R",
+    "thigh.L",
+    "shin.L",
+    "foot.L",
+    "thigh.R",
+    "shin.R",
+    "foot.R"
+  ],
+  "clips": {
+    "idle": 3.0,
+    "move": 0.8,
+    "skill1": 1.6333333333333333,
+    "skill2": 1.6333333333333333,
+    "hit": 0.6
+  },
+  "triangles": 58758
+}

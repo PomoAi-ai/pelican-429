@@ -1,0 +1,26 @@
+[
+  {
+    "kind": "watch-wasp",
+    "tool": "built-in image_gen",
+    "reference": "assets/concepts/enemy-front-side/watch-wasp.png",
+    "prompt": "Use case: identity-preserve. Create a clean 3D modeling input image from the provided front/side reference sheet. Show EXACTLY ONE complete watch-wasp robot, in a front three-quarter view facing slightly to the viewer's right, neutral resting pose, centered with ample clear margins on plain white. Combine information from the two views of the SAME single robot; preserve the exact shapes, proportions, colors, materials and all distinctive details of the reference. No redesign. No multiple views, duplicates, labels, lines, text, ground plane or props. The entire robot must be visible. Exactly four open motors with four two-bladed propellers, carbon X frame, strapped black battery, front camera, rear antenna. Keep all four arms/rotors readable."
+  },
+  {
+    "kind": "line-hound",
+    "tool": "built-in image_gen",
+    "reference": "assets/concepts/enemy-front-side/line-hound.png",
+    "prompt": "Use case: identity-preserve. Create a clean 3D modeling input image from the provided front/side reference sheet. Show EXACTLY ONE complete line-hound robot, in a front three-quarter view facing slightly to the viewer's right, neutral resting pose, centered with ample clear margins on plain white. Combine information from the two views of the SAME single robot; preserve the exact shapes, proportions, colors, materials and all distinctive details of the reference. No redesign. No multiple views, duplicates, labels, lines, text, ground plane or props. The entire robot must be visible. Exactly four jointed mechanical legs, all clearly separated, teal smooth dorsal shell, cream limb armor, triple lime optical sensors."
+  },
+  {
+    "kind": "loadmaster",
+    "tool": "built-in image_gen",
+    "reference": "assets/concepts/enemy-front-side/loadmaster.png",
+    "prompt": "Use case: identity-preserve. Create a clean 3D modeling input image from the provided front/side reference sheet. Show EXACTLY ONE complete loadmaster robot, in a front three-quarter view facing slightly to the viewer's right, neutral resting pose, centered with ample clear margins on plain white. Combine information from the two views of the SAME single robot; preserve the exact shapes, proportions, colors, materials and all distinctive details of the reference. No redesign. No multiple views, duplicates, labels, lines, text, ground plane or props. The entire robot must be visible. Exactly four wheels, one curved golden manipulator arm with cream two-jaw gripper. Preserve the arm's arch and visible rotary joints."
+  },
+  {
+    "kind": "gatekeeper",
+    "tool": "built-in image_gen",
+    "reference": "assets/concepts/enemy-front-side/gatekeeper.png",
+    "prompt": "Use case: identity-preserve. Create a clean 3D modeling input image from the provided front/side reference sheet. Show EXACTLY ONE complete gatekeeper robot, in a front three-quarter view facing slightly to the viewer's right, neutral resting pose, centered with ample clear margins on plain white. Combine information from the two views of the SAME single robot; preserve the exact shapes, proportions, colors, materials and all distinctive details of the reference. No redesign. No multiple views, duplicates, labels, lines, text, ground plane or props. The entire robot must be visible. Two legs and two arms; its right forearm has a large white two-jaw pincer, its left arm a five-finger hand. Ivory armor, navy shoulders, teal abdomen and rear head fin, amber circular face sensor."
+  }
+]

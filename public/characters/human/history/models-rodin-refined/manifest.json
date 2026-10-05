@@ -1,0 +1,44 @@
+{
+  "name": "Rodin 精修版",
+  "height": 3.1,
+  "orientation": "Y-up, +Z forward",
+  "pose": "static",
+  "reference": "/characters/human/history/turnaround-master-v2/right.png",
+  "source": "Hyper3D Rodin Gen-2.5-High raw PBR with local geometry and material refinement",
+  "textureEncoding": "lossless PNG",
+  "models": [
+    {
+      "id": "detailed",
+      "triangles": 500000,
+      "meshObjects": 1,
+      "materials": 1,
+      "height": 3.1,
+      "sole": 0.0,
+      "texture": 2048,
+      "bytes": 29728476,
+      "path": "/characters/human/history/models-rodin-refined/grassy-rodin-refined-detailed.glb"
+    },
+    {
+      "id": "game",
+      "triangles": 45000,
+      "meshObjects": 1,
+      "materials": 1,
+      "height": 3.1,
+      "sole": 0.0,
+      "texture": 1024,
+      "bytes": 4379564,
+      "path": "/characters/human/history/models-rodin-refined/grassy-rodin-refined-game.glb"
+    },
+    {
+      "id": "light",
+      "triangles": 20000,
+      "meshObjects": 1,
+      "materials": 1,
+      "height": 3.1,
+      "sole": 0.0,
+      "texture": 512,
+      "bytes": 1445256,
+      "path": "/characters/human/history/models-rodin-refined/grassy-rodin-refined-light.glb"
+    }
+  ]
+}

@@ -1,0 +1,64 @@
+{
+  "path": "$TMPDIR/npc-crotch-repair-baseline/sam-sam-rigged.blend",
+  "sourceSha256": "badca6068a0d4373e3ac8dc9e68a1e7559f5b446ef180bbf6bea15c53d916be2",
+  "restMeshes": [
+    {
+      "cornerNormalsSha256": "960b17fca3eaf9392c4b5477d3c7d7e17bb94e24d4c5714a62a8b2aae379ff26",
+      "materialIndicesSha256": "84cb0da2eeaf5b39b09f3f53c1e092cd0a52a51c43a7a1ae4f153ba3e8e56943",
+      "name": "model",
+      "matrix": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "vertexCount": 19896,
+      "faceCount": 34217,
+      "restMeshSha256": "5677fe39067ccb7a09332f4db1101c5a6f8bd0259a51e43320e4347eabfb9b69",
+      "uvSha256": [
+        "a3f1b4b9741c13d514e89fd4cba85b042b35e733e49646c098c909efbc6d00e5"
+      ],
+      "materials": [
+        "model"
+      ]
+    }
+  ],
+  "materialSha256": "8a6599c4845ae513f777e16ca2e3e6841bbb668d1160bf57b5016f97f1a349b7",
+  "packedTextures": [
+    {
+      "name": "texture_diffuse",
+      "colorspace": "sRGB",
+      "packedSha256": "2f0d1b0c32be45da4b754acabe8377673722ca6edb0f78ccd037fa3767d9ae10"
+    },
+    {
+      "name": "texture_metallic-texture_roughness",
+      "colorspace": "Non-Color",
+      "packedSha256": "90701c974c51fae2d40431d758b86a2fee633f3996092c9cf874513f112aff1c"
+    },
+    {
+      "name": "texture_normal",
+      "colorspace": "Non-Color",
+      "packedSha256": "8b3b1c0ab969c4d1bb15efdc8ed3dbd7f1c65554d9c5f0a2c267348a2b9178f1"
+    }
+  ]
+}

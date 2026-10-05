@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<title>Grassy · 实际游戏模型展示图</title>
+<style>
+body{font-family:system-ui;background:#eee;margin:24px}#stage{position:absolute;left:-10000px;width:1000px;height:1150px}#outputs{display:grid;grid-template-columns:repeat(3,300px);gap:20px}figure{margin:0}img{width:300px;height:345px}figcaption{padding:8px}#status{white-space:pre-wrap}
+</style>
+<h1>Grassy 同源模型展示图</h1>
+<p id="status" role="status">正在加载实际模型…</p><div id="stage"></div><div id="outputs"></div>
+<script type="module">
+import * as THREE from 'three';
+import { TUNING } from '/src/config/tuning.ts';
+import { createStage } from '/src/render/stage.ts';
+import { loadGrassyStaticAsset, createGrassyStaticModel, disposeGrassyStaticAssets } from '/src/render/grassy/grassy-static.ts';
+
+const views={
+  front:[0,0,1.55,3.55], right:[Math.PI/2,0,1.55,3.55],
+  left:[-Math.PI/2,0,1.55,3.55], back:[Math.PI,0,1.55,3.55],
+  hero:[Math.PI/4,10,1.55,3.55], face:[Math.PI/6,6,2.53,1.45],
+  'face-front':[0,0,2.53,1.45], cloth:[Math.PI/12,0,1.54,1.32],
+  shoes:[Math.PI/8,18,.34,1.50],
+};
+async function capture(){
+  const stage=createStage(document.getElementById('stage'),TUNING,{quality:'high',antialias:'msaa'});
+  stage.renderer.setPixelRatio(1);stage.renderer.setSize(1000,1150);stage.setSize(1000,1150);
+  stage.scene.background=new THREE.Color('#dfe4e6');stage.camera.fov=5;
+  for(const variant of ['detailed','game','light']){
+    await loadGrassyStaticAsset(variant);
+    const model=createGrassyStaticModel(variant);stage.scene.add(model.root);
+    const selected=variant==='detailed'?Object.keys(views):['front','right','left','back','hero'];
+    for(const view of selected){
+      const [yaw,elevation,height,frame]=views[view];
+      const pitch=THREE.MathUtils.degToRad(elevation),distance=frame/(2*Math.tan(THREE.MathUtils.degToRad(5)/2));
+      model.root.rotation.y=yaw;
+      stage.camera.position.set(0,height+distance*Math.sin(pitch),distance*Math.cos(pitch));
+      stage.camera.lookAt(0,height,0);stage.camera.updateProjectionMatrix();stage.camera.updateMatrixWorld();
+      document.getElementById('status').textContent=`正在生成 ${variant} / ${view}`;
+      stage.render();
+      const name=`render-${variant}-${view}`;
+      const figure=document.createElement('figure'),img=document.createElement('img'),caption=document.createElement('figcaption');
+      img.alt=name;img.src=stage.canvas.toDataURL('image/png');caption.textContent=name;
+      figure.append(img,caption);document.getElementById('outputs').append(figure);await img.decode();
+    }
+    model.dispose();
+  }
+  stage.dispose();disposeGrassyStaticAssets();
+  document.body.dataset.ready='true';document.getElementById('status').textContent='19 张实际游戏模型展示图已完成';
+}
+capture().catch(error=>{document.getElementById('status').textContent=error.stack;throw error;});
+</script>
+</html>

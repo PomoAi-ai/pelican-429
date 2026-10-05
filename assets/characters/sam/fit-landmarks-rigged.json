@@ -1,0 +1,19 @@
+{
+  "sourceSha256": "c14aa4ed28cb352070780f27f6c0f3957a11c8cc11e60e61a2911ff297a0c641",
+  "points": {
+    "chin": [
+      0.0,
+      -0.2870798110961914,
+      1.8490344285964966
+    ]
+  },
+  "annotationMethod": "Manual visible lower jaw in actual fit render, front pixel with +/-8px visual uncertainty, ray-cast to actual mesh.",
+  "frontPixels": {
+    "chin": [
+      512,
+      495
+    ]
+  },
+  "staticGeometryReuseEvidence": "fit-rigged/action-skills-static-comparison.json",
+  "annotationReuseNote": "Existing actual-mesh chin annotation reused after independently confirming exact REST geometry, transforms, weights and rest skeleton equivalence. No new visual annotation is implied."
+}

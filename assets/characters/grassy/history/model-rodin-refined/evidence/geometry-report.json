@@ -1,0 +1,447 @@
+{
+  "sourceVertices": 391911,
+  "sourceTriangles": 500000,
+  "uvSha256Before": "98f1d0e91e7fc365bfd8bac5abbfbdcc144c42ad9ad068e033731de08780c082",
+  "uvSha256After": "98f1d0e91e7fc365bfd8bac5abbfbdcc144c42ad9ad068e033731de08780c082",
+  "maxVertexDisplacement": 0.09562308341264725,
+  "movedVertices": 32998,
+  "boundsBefore": [
+    [
+      -0.676324188709259,
+      -0.5527406930923462,
+      0.0
+    ],
+    [
+      0.676324188709259,
+      0.5527406930923462,
+      3.0999999046325684
+    ]
+  ],
+  "boundsAfter": [
+    [
+      -0.6763768792152405,
+      -0.5527406930923462,
+      0.0
+    ],
+    [
+      0.6763471364974976,
+      0.5340027213096619,
+      3.0999999046325684
+    ]
+  ],
+  "normalMethod": "inverse-transpose of local deformation Jacobian; source UV seams retained",
+  "minimumLocalJacobianDeterminant": 0.18692412729730765,
+  "eyeRotationDegrees": 12.0,
+  "scope": [
+    "nose",
+    "mouth",
+    "chin",
+    "cheeks",
+    "eye opening",
+    "rear hair tips",
+    "lower fingers",
+    "toe edge"
+  ],
+  "localAnchors": [
+    {
+      "name": "nose",
+      "operationCenter": [
+        0,
+        -0.455,
+        2.278
+      ],
+      "anchorKind": "nearest source vertex to operation center; not an automatically detected semantic landmark",
+      "sourceVertexIndex": 252155,
+      "before": [
+        -0.000715484784450382,
+        -0.4585142731666565,
+        2.2824838161468506
+      ],
+      "after": [
+        -0.000715484784450382,
+        -0.44375520944595337,
+        2.2824838161468506
+      ],
+      "displacement": [
+        0.0,
+        0.01475905068218708,
+        0.0
+      ]
+    },
+    {
+      "name": "mouth",
+      "operationCenter": [
+        0,
+        -0.405,
+        2.206
+      ],
+      "anchorKind": "nearest source vertex to operation center; not an automatically detected semantic landmark",
+      "sourceVertexIndex": 233383,
+      "before": [
+        0.002808563644066453,
+        -0.4104194939136505,
+        2.183267116546631
+      ],
+      "after": [
+        0.002808563644066453,
+        -0.40490442514419556,
+        2.1839563846588135
+      ],
+      "displacement": [
+        0.0,
+        0.005515061318874359,
+        0.0006893826648592949
+      ]
+    },
+    {
+      "name": "chin",
+      "operationCenter": [
+        0,
+        -0.34,
+        2.095
+      ],
+      "anchorKind": "nearest source vertex to operation center; not an automatically detected semantic landmark",
+      "sourceVertexIndex": 223743,
+      "before": [
+        -0.001164821907877922,
+        -0.34835872054100037,
+        2.0678253173828125
+      ],
+      "after": [
+        -0.001164821907877922,
+        -0.34336331486701965,
+        2.0621163845062256
+      ],
+      "displacement": [
+        0.0,
+        0.004995403345674276,
+        -0.005709032528102398
+      ]
+    },
+    {
+      "name": "jawTransition",
+      "operationCenter": [
+        0,
+        -0.145,
+        2.082
+      ],
+      "anchorKind": "nearest source vertex to operation center; not an automatically detected semantic landmark",
+      "sourceVertexIndex": 218414,
+      "before": [
+        -0.0016378543805330992,
+        -0.16832567751407623,
+        2.0596184730529785
+      ],
+      "after": [
+        -0.0016378543805330992,
+        -0.16832567751407623,
+        2.081270217895508
+      ],
+      "displacement": [
+        0.0,
+        0.0,
+        0.021651769056916237
+      ]
+    },
+    {
+      "name": "rearHairUpper",
+      "operationCenter": [
+        0.005,
+        0.535,
+        2.58
+      ],
+      "anchorKind": "nearest source vertex to operation center; not an automatically detected semantic landmark",
+      "sourceVertexIndex": 333523,
+      "before": [
+        0.010637100785970688,
+        0.5367642641067505,
+        2.5817666053771973
+      ],
+      "after": [
+        0.009449285455048084,
+        0.5232436656951904,
+        2.498049259185791
+      ],
+      "displacement": [
+        -0.0011878155637532473,
+        -0.013520578853785992,
+        -0.08371743559837341
+      ]
+    },
+    {
+      "name": "rearHairMiddle",
+      "operationCenter": [
+        0,
+        0.545,
+        2.435
+      ],
+      "anchorKind": "nearest source vertex to operation center; not an automatically detected semantic landmark",
+      "sourceVertexIndex": 388854,
+      "before": [
+        -0.0020399466156959534,
+        0.5518774390220642,
+        2.436725378036499
+      ],
+      "after": [
+        -0.001349705271422863,
+        0.5320942401885986,
+        2.356506824493408
+      ],
+      "displacement": [
+        0.0006902414024807513,
+        -0.019783176481723785,
+        -0.08021864295005798
+      ]
+    },
+    {
+      "name": "eye-1",
+      "operationCenter": [
+        -0.176,
+        -0.366,
+        2.358
+      ],
+      "anchorKind": "nearest source vertex to operation center; not an automatically detected semantic landmark",
+      "sourceVertexIndex": 248227,
+      "before": [
+        -0.17301452159881592,
+        -0.3651273846626282,
+        2.3552467823028564
+      ],
+      "after": [
+        -0.1728983372449875,
+        -0.3657671809196472,
+        2.3597893714904785
+      ],
+      "displacement": [
+        0.00011618706776062027,
+        -0.0006397846154868603,
+        0.0045427000150084496
+      ]
+    },
+    {
+      "name": "cheek-1",
+      "operationCenter": [
+        -0.205,
+        -0.305,
+        2.214
+      ],
+      "anchorKind": "nearest source vertex to operation center; not an automatically detected semantic landmark",
+      "sourceVertexIndex": 226956,
+      "before": [
+        -0.22550839185714722,
+        -0.3315308690071106,
+        2.1994800567626953
+      ],
+      "after": [
+        -0.24370785057544708,
+        -0.3339047133922577,
+        2.2042276859283447
+      ],
+      "displacement": [
+        -0.018199464306235313,
+        -0.0023738432209938765,
+        0.004747686441987753
+      ]
+    },
+    {
+      "name": "fingers-1",
+      "operationCenter": [
+        -0.6,
+        -0.105,
+        0.97
+      ],
+      "anchorKind": "nearest source vertex to operation center; not an automatically detected semantic landmark",
+      "sourceVertexIndex": 2725,
+      "before": [
+        -0.6005220413208008,
+        -0.10200769454240799,
+        0.9726088047027588
+      ],
+      "after": [
+        -0.6025188565254211,
+        -0.11199173331260681,
+        0.9213429689407349
+      ],
+      "displacement": [
+        -0.0019968070555478334,
+        -0.009984035044908524,
+        -0.05126582086086273
+      ]
+    },
+    {
+      "name": "rearHair-1",
+      "operationCenter": [
+        -0.105,
+        0.456,
+        2.323
+      ],
+      "anchorKind": "nearest source vertex to operation center; not an automatically detected semantic landmark",
+      "sourceVertexIndex": 292586,
+      "before": [
+        -0.09974310547113419,
+        0.4578520357608795,
+        2.3243939876556396
+      ],
+      "after": [
+        -0.09220290929079056,
+        0.4498934745788574,
+        2.278632164001465
+      ],
+      "displacement": [
+        0.007540195249021053,
+        -0.007958568632602692,
+        -0.045761771500110626
+      ]
+    },
+    {
+      "name": "toe-1",
+      "operationCenter": [
+        -0.34,
+        -0.455,
+        0.115
+      ],
+      "anchorKind": "nearest source vertex to operation center; not an automatically detected semantic landmark",
+      "sourceVertexIndex": 190076,
+      "before": [
+        -0.34128111600875854,
+        -0.4543870687484741,
+        0.11628115177154541
+      ],
+      "after": [
+        -0.34128111600875854,
+        -0.44839349389076233,
+        0.11328435689210892
+      ],
+      "displacement": [
+        0.0,
+        0.005993586964905262,
+        -0.002996793482452631
+      ]
+    },
+    {
+      "name": "eye1",
+      "operationCenter": [
+        0.176,
+        -0.366,
+        2.358
+      ],
+      "anchorKind": "nearest source vertex to operation center; not an automatically detected semantic landmark",
+      "sourceVertexIndex": 261831,
+      "before": [
+        0.17871443927288055,
+        -0.3626677095890045,
+        2.3606629371643066
+      ],
+      "after": [
+        0.1779623031616211,
+        -0.36217615008354187,
+        2.3660573959350586
+      ],
+      "displacement": [
+        -0.000752139138057828,
+        0.0004915451281704009,
+        0.005394435953348875
+      ]
+    },
+    {
+      "name": "cheek1",
+      "operationCenter": [
+        0.205,
+        -0.305,
+        2.214
+      ],
+      "anchorKind": "nearest source vertex to operation center; not an automatically detected semantic landmark",
+      "sourceVertexIndex": 237691,
+      "before": [
+        0.22295401990413666,
+        -0.3272973299026489,
+        2.2048251628875732
+      ],
+      "after": [
+        0.2426106333732605,
+        -0.32986122369766235,
+        2.2099530696868896
+      ],
+      "displacement": [
+        0.01965661533176899,
+        -0.002563906367868185,
+        0.00512781273573637
+      ]
+    },
+    {
+      "name": "fingers1",
+      "operationCenter": [
+        0.6,
+        -0.105,
+        0.97
+      ],
+      "anchorKind": "nearest source vertex to operation center; not an automatically detected semantic landmark",
+      "sourceVertexIndex": 215194,
+      "before": [
+        0.6003091931343079,
+        -0.10161742568016052,
+        0.9731764197349548
+      ],
+      "after": [
+        0.6023049354553223,
+        -0.11159615218639374,
+        0.9220794439315796
+      ],
+      "displacement": [
+        0.0019957460463047028,
+        -0.009978730231523514,
+        -0.05109698325395584
+      ]
+    },
+    {
+      "name": "rearHair1",
+      "operationCenter": [
+        0.105,
+        0.456,
+        2.323
+      ],
+      "anchorKind": "nearest source vertex to operation center; not an automatically detected semantic landmark",
+      "sourceVertexIndex": 288770,
+      "before": [
+        0.10661375522613525,
+        0.4554041028022766,
+        2.324228286743164
+      ],
+      "after": [
+        0.0984896868467331,
+        0.447409063577652,
+        2.27825665473938
+      ],
+      "displacement": [
+        -0.008124071173369884,
+        -0.00799505040049553,
+        -0.04597153887152672
+      ]
+    },
+    {
+      "name": "toe1",
+      "operationCenter": [
+        0.34,
+        -0.455,
+        0.115
+      ],
+      "anchorKind": "nearest source vertex to operation center; not an automatically detected semantic landmark",
+      "sourceVertexIndex": 151839,
+      "before": [
+        0.34025225043296814,
+        -0.4526369273662567,
+        0.11046290397644043
+      ],
+      "after": [
+        0.34025225043296814,
+        -0.44670847058296204,
+        0.10749868303537369
+      ],
+      "displacement": [
+        0.0,
+        0.005928445141762495,
+        -0.0029642225708812475
+      ]
+    }
+  ]
+}

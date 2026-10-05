@@ -1,0 +1,214 @@
+{
+  "schema": "multiview_fit_report.v1",
+  "views": {
+    "front": {
+      "reference": "public/characters/human/history/turnaround-master-v2/front.png",
+      "render": "assets/characters/grassy/history/model-reference-fit/fit-evidence/silhouette-front.png",
+      "reference_mode": "alpha",
+      "render_mode": "bright",
+      "image_size": [
+        1254,
+        1254
+      ],
+      "reference_bbox": [
+        374,
+        37,
+        507,
+        1185
+      ],
+      "render_bbox": [
+        367,
+        37,
+        520,
+        1184
+      ],
+      "reference_centroid": [
+        627.9260156916345,
+        635.2783861243994
+      ],
+      "render_centroid": [
+        626.8315618425597,
+        632.4505395589329
+      ],
+      "iou": 0.8852271881281485,
+      "reference_foreground_ratio": 0.24007768442419664,
+      "render_foreground_ratio": 0.2430270979754737,
+      "bbox_center_drift_px": [
+        -0.5,
+        -0.5
+      ],
+      "bbox_size_ratio": [
+        1.0256410256410255,
+        0.99915611814346
+      ],
+      "bbox_size_error_ratio": [
+        0.02564102564102564,
+        -0.0008438818565400844
+      ],
+      "pass_bbox_center_1p5pct": true,
+      "pass_bbox_size_5pct": true,
+      "centroid_drift_px": [
+        -1.094453849074739,
+        -2.8278465654665297
+      ]
+    },
+    "right": {
+      "reference": "public/characters/human/history/turnaround-master-v2/right.png",
+      "render": "assets/characters/grassy/history/model-reference-fit/fit-evidence/silhouette-right.png",
+      "reference_mode": "alpha",
+      "render_mode": "bright",
+      "image_size": [
+        1254,
+        1254
+      ],
+      "reference_bbox": [
+        407,
+        66,
+        400,
+        1170
+      ],
+      "render_bbox": [
+        415,
+        66,
+        394,
+        1169
+      ],
+      "reference_centroid": [
+        620.7673537114412,
+        591.6271685891926
+      ],
+      "render_centroid": [
+        626.513617009345,
+        577.7345654533729
+      ],
+      "iou": 0.8527803420419452,
+      "reference_foreground_ratio": 0.1590476662876562,
+      "render_foreground_ratio": 0.15875895698358555,
+      "bbox_center_drift_px": [
+        5.0,
+        -0.5
+      ],
+      "bbox_size_ratio": [
+        0.985,
+        0.9991452991452991
+      ],
+      "bbox_size_error_ratio": [
+        -0.015,
+        -0.0008547008547008547
+      ],
+      "pass_bbox_center_1p5pct": true,
+      "pass_bbox_size_5pct": true,
+      "centroid_drift_px": [
+        5.746263297903852,
+        -13.89260313581974
+      ]
+    },
+    "left": {
+      "reference": "public/characters/human/history/turnaround-master-v2/left.png",
+      "render": "assets/characters/grassy/history/model-reference-fit/fit-evidence/silhouette-left.png",
+      "reference_mode": "alpha",
+      "render_mode": "bright",
+      "image_size": [
+        1254,
+        1254
+      ],
+      "reference_bbox": [
+        440,
+        60,
+        407,
+        1177
+      ],
+      "render_bbox": [
+        444,
+        61,
+        395,
+        1174
+      ],
+      "reference_centroid": [
+        629.466537026779,
+        588.007220580203
+      ],
+      "render_centroid": [
+        625.5078563122363,
+        575.2029385266884
+      ],
+      "iou": 0.8546025675051717,
+      "reference_foreground_ratio": 0.16416430739019508,
+      "render_foreground_ratio": 0.16022921229418333,
+      "bbox_center_drift_px": [
+        -2.0,
+        -0.5
+      ],
+      "bbox_size_ratio": [
+        0.9705159705159705,
+        0.9974511469838573
+      ],
+      "bbox_size_error_ratio": [
+        -0.029484029484029485,
+        -0.002548853016142736
+      ],
+      "pass_bbox_center_1p5pct": true,
+      "pass_bbox_size_5pct": true,
+      "centroid_drift_px": [
+        -3.958680714542652,
+        -12.804282053514612
+      ]
+    },
+    "back": {
+      "reference": "public/characters/human/history/turnaround-master-v2/back.png",
+      "render": "assets/characters/grassy/history/model-reference-fit/fit-evidence/silhouette-back.png",
+      "reference_mode": "alpha",
+      "render_mode": "bright",
+      "image_size": [
+        1254,
+        1254
+      ],
+      "reference_bbox": [
+        358,
+        49,
+        543,
+        1183
+      ],
+      "render_bbox": [
+        371,
+        50,
+        518,
+        1179
+      ],
+      "reference_centroid": [
+        631.220881035669,
+        646.9122259449741
+      ],
+      "render_centroid": [
+        629.1709963506635,
+        642.9770221097546
+      ],
+      "iou": 0.8647797272872583,
+      "reference_foreground_ratio": 0.24123697310552006,
+      "render_foreground_ratio": 0.24099786584047475,
+      "bbox_center_drift_px": [
+        0.5,
+        -1.0
+      ],
+      "bbox_size_ratio": [
+        0.9539594843462247,
+        0.9966187658495351
+      ],
+      "bbox_size_error_ratio": [
+        -0.04604051565377532,
+        -0.0033812341504649195
+      ],
+      "pass_bbox_center_1p5pct": true,
+      "pass_bbox_size_5pct": true,
+      "centroid_drift_px": [
+        -2.049884685005509,
+        -3.9352038352195677
+      ]
+    }
+  },
+  "summary": {
+    "allCentersWithin1p5Percent": true,
+    "allSizesWithinViewTolerance": true,
+    "limits": "These are proportion checks; they do not certify artistic likeness."
+  }
+}

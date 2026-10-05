@@ -1,0 +1,62 @@
+{
+  "detailed": {
+    "bytesBefore": 39892264,
+    "bytesAfter": 39909104,
+    "addedClips": [
+      "keyboard_smash"
+    ],
+    "original12AnimationHashesIdentical": true,
+    "bodyAllAttributesAndIndicesIdentical": true,
+    "skeletonAndInverseBindsIdentical": true,
+    "boneCount": 22,
+    "materialsIdentical": true,
+    "embeddedImagesIdentical": true,
+    "texturesIdentical": true,
+    "bodyDimensionsIdentical": true,
+    "newClipChannelCount": 68,
+    "newClipDataAllFinite": true,
+    "newClipDuration": 1.4,
+    "newClipMaximumSamples": 43,
+    "equipmentExportDifferences": "UV rounding <= 5.96e-8; Pod lens triangle winding-preserving permutations; light right pod normal rounding <= 9.11e-5. Positions/topology/materials unchanged."
+  },
+  "game": {
+    "bytesBefore": 6261788,
+    "bytesAfter": 6282824,
+    "addedClips": [
+      "keyboard_smash"
+    ],
+    "original12AnimationHashesIdentical": true,
+    "bodyAllAttributesAndIndicesIdentical": true,
+    "skeletonAndInverseBindsIdentical": true,
+    "boneCount": 22,
+    "materialsIdentical": true,
+    "embeddedImagesIdentical": true,
+    "texturesIdentical": true,
+    "bodyDimensionsIdentical": true,
+    "newClipChannelCount": 68,
+    "newClipDataAllFinite": true,
+    "newClipDuration": 1.4,
+    "newClipMaximumSamples": 43,
+    "equipmentExportDifferences": "UV rounding <= 5.96e-8; Pod lens triangle winding-preserving permutations; light right pod normal rounding <= 9.11e-5. Positions/topology/materials unchanged."
+  },
+  "light": {
+    "bytesBefore": 2683680,
+    "bytesAfter": 2706276,
+    "addedClips": [
+      "keyboard_smash"
+    ],
+    "original12AnimationHashesIdentical": true,
+    "bodyAllAttributesAndIndicesIdentical": true,
+    "skeletonAndInverseBindsIdentical": true,
+    "boneCount": 22,
+    "materialsIdentical": true,
+    "embeddedImagesIdentical": true,
+    "texturesIdentical": true,
+    "bodyDimensionsIdentical": true,
+    "newClipChannelCount": 68,
+    "newClipDataAllFinite": true,
+    "newClipDuration": 1.4,
+    "newClipMaximumSamples": 43,
+    "equipmentExportDifferences": "UV rounding <= 5.96e-8; Pod lens triangle winding-preserving permutations; light right pod normal rounding <= 9.11e-5. Positions/topology/materials unchanged."
+  }
+}

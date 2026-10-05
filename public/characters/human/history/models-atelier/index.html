@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Grassy · gpt6.1sol版本</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f3f0eb;color:#292621;font:14px/1.6 system-ui,sans-serif}
+header{max-width:1500px;margin:auto;padding:30px 38px 20px;display:flex;align-items:baseline;gap:18px}
+h1{margin:0;font-size:27px;letter-spacing:-.6px;font-weight:600}header span{color:#77716a}
+main{max-width:1500px;margin:auto;padding:0 38px 32px;display:grid;grid-template-columns:minmax(400px,1.4fr) minmax(310px,1fr);gap:24px}
+.stage{position:relative;height:calc(100vh - 142px);min-height:640px;border:1px solid #d9d4cc;border-radius:16px;overflow:hidden;background:radial-gradient(ellipse at 50% 30%,#f8f5ef,#dcd5cd)}
+canvas{display:block;width:100%;height:100%;touch-action:none}.controls{position:absolute;left:20px;right:20px;top:20px;display:flex;flex-wrap:wrap;gap:6px}
+button,a.file{border:1px solid #d8d1c8;border-radius:8px;background:#ffffffdd;padding:7px 12px;color:#3a332c;font:inherit;cursor:pointer;text-decoration:none}
+button:hover,a.file:hover{background:#fff;border-color:#bdb2a5}button.active{background:#3c332b;color:white;border-color:#3c332b}
+.hint{position:absolute;left:24px;bottom:20px;color:#6c6258;font-size:12px}.state{position:absolute;right:24px;bottom:20px;color:#6c6258;font-size:12px}
+.aside{display:flex;flex-direction:column;gap:20px}.intro{padding:8px 0}.intro p{margin:8px 0;color:#73695f}.files{display:flex;gap:8px;margin-top:16px}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.view{margin:0;overflow:hidden;border-radius:12px;border:1px solid #d8d3cc;background:#fff}
+.view img{display:block;width:100%;height:auto}.view figcaption{padding:9px 13px;font-size:12px;color:#6e645b}.wide{grid-column:span 2}
+@media(max-width:950px){header{padding:22px}main{padding:0 20px 25px;display:flex;flex-direction:column}.stage{height:72vh;min-height:520px}.aside{max-width:750px}header>span{display:none}}
+</style>
+<header><h1>Grassy <span style="font-weight:400">· gpt6.1sol版本</span></h1><span>形体重塑 · 母版对照</span></header>
+<main>
+<section class="stage" aria-label="gpt6.1sol版本，可旋转的三维模型">
+  <canvas id="model"></canvas>
+  <div class="controls">
+    <button data-view="hero">斜侧</button><button data-view="front" class="active">正面</button><button data-view="back">背面</button><button data-view="left">左侧</button><button data-view="right">右侧</button><button data-view="face">脸部</button>
+    <button id="spin" aria-pressed="false">自动旋转</button><button id="wire" aria-pressed="false">查看网格</button>
+  </div>
+  <div class="hint">拖动旋转 · 滚轮缩放 · 右键平移</div><div id="state" class="state">正在加载模型…</div>
+</section>
+<section class="aside">
+ <div class="intro"><strong>gpt6.1sol版本 · 母版对照</strong><p>对照图左侧为原始参考，右侧为当前模型的实际渲染，按相同角色高度并列。可旋转查看脸型、发束、肩袖、裤脚和鞋子。</p>
+ <div class="files"><a class="file" href="grassy-atelier-detailed.glb" download>下载 GLB</a><a class="file" href="asset-paths.txt">文件路径</a></div></div>
+ <div class="grid">
+  <figure class="view wide"><img src="comparison-face-front.png" alt="头部参考母版与实际三维模型并列"><figcaption>脸型与发束：参考母版（左）· 当前实际渲染（右）</figcaption></figure>
+  <figure class="view wide"><img src="comparison-front.png" alt="正面参考母版与实际三维模型并列"><figcaption>正面对照：参考母版（左）· gpt6.1sol版本（右）</figcaption></figure>
+  <figure class="view wide"><img src="comparison-right.png" alt="侧面参考母版与实际三维模型并列"><figcaption>侧面对照：参考母版（左）· gpt6.1sol版本（右）</figcaption></figure>
+  <figure class="view"><img src="render-front.png" alt="模型正面"><figcaption>正面</figcaption></figure>
+  <figure class="view"><img src="render-back.png" alt="模型背面"><figcaption>背面</figcaption></figure>
+  <figure class="view"><img src="render-face.png" alt="脸部与发束细节"><figcaption>面部与发束</figcaption></figure>
+  <figure class="view"><img src="render-cloth.png" alt="毛衣织纹与服装细节"><figcaption>针织与缝线</figcaption></figure>
+  <figure class="view wide"><img src="render-shoes.png" alt="鞋带和鞋面细节"><figcaption>鞋面、拼接与鞋带</figcaption></figure>
+ </div>
+</section>
+</main>
+<script type="importmap">{"imports":{"three":"/node_modules/three/build/three.module.js","three/addons/":"/node_modules/three/examples/jsm/"}}</script>
+<script type="module">
+import * as THREE from 'three';
+import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
+const canvas=document.querySelector('#model'),stage=canvas.parentElement,state=document.querySelector('#state');
+const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+renderer.toneMapping=THREE.NeutralToneMapping;renderer.toneMappingExposure=1.0;
+const scene=new THREE.Scene(),camera=new THREE.PerspectiveCamera(32,1,.01,60);
+const studio=new THREE.Scene();studio.background=new THREE.Color(0x64605b);
+function diskLight(position,radius,color,power){
+  const material=new THREE.MeshBasicMaterial({color,side:THREE.DoubleSide});material.color.multiplyScalar(power);
+  const disk=new THREE.Mesh(new THREE.CircleGeometry(radius,64),material);disk.position.set(...position);disk.lookAt(0,1.55,0);studio.add(disk);
+}
+diskLight([-3,6,4.5],2.5,0xfff2e8,5);diskLight([4,3.5,3],2.4,0xe7efff,2);diskLight([1,5,-4],1.8,0xffefdf,3);diskLight([0,.8,5],3,0xffead9,2.5);
+const pmrem=new THREE.PMREMGenerator(renderer);scene.environment=pmrem.fromScene(studio,.06).texture;scene.environmentIntensity=.8;pmrem.dispose();
+studio.traverse(obj=>{if(obj.isMesh){obj.geometry.dispose();obj.material.dispose();}});
+const controls=new OrbitControls(camera,canvas);controls.target.set(0,1.55,0);controls.enableDamping=true;controls.minDistance=2;controls.maxDistance=12;controls.maxPolarAngle=Math.PI*.92;
+scene.add(new THREE.HemisphereLight(0xfff6eb,0xb0a59a,.7));
+const key=new THREE.DirectionalLight(0xfff2df,2.1);key.position.set(-3,5,5);key.castShadow=true;key.shadow.mapSize.set(2048,2048);key.shadow.camera.left=-2;key.shadow.camera.right=2;key.shadow.camera.top=4;key.shadow.camera.bottom=-1;key.shadow.bias=-.0002;key.shadow.normalBias=.025;scene.add(key);
+const fill=new THREE.DirectionalLight(0xe4edff,.9);fill.position.set(4,3,-2);scene.add(fill);
+const floor=new THREE.Mesh(new THREE.CircleGeometry(2.5,96),new THREE.ShadowMaterial({opacity:.10}));floor.rotation.x=-Math.PI/2;floor.position.y=-.006;floor.receiveShadow=true;scene.add(floor);
+const views={hero:[-3.4,2.4,6.5],front:[0,1.55,7.2],back:[0,1.55,-7.2],left:[7.2,1.55,0],right:[-7.2,1.55,0],face:[0,2.52,2.8]};
+function view(name){camera.position.set(...views[name]);controls.target.set(0,name==='face'?2.52:1.55,0);controls.update();document.querySelectorAll('[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===name));}
+document.querySelectorAll('[data-view]').forEach(button=>button.onclick=()=>view(button.dataset.view));
+document.querySelector('#spin').onclick=function(){controls.autoRotate=!controls.autoRotate;this.setAttribute('aria-pressed',String(controls.autoRotate));this.classList.toggle('active',controls.autoRotate);};
+const meshes=[];document.querySelector('#wire').onclick=function(){const enabled=this.getAttribute('aria-pressed')==='false';this.setAttribute('aria-pressed',String(enabled));this.classList.toggle('active',enabled);meshes.forEach(mesh=>mesh.material.wireframe=enabled);};
+view('front');new ResizeObserver(()=>{const w=stage.clientWidth,h=stage.clientHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();}).observe(stage);
+try{const asset=await new GLTFLoader().loadAsync('grassy-atelier-detailed.glb');asset.scene.traverse(obj=>{if(obj.isMesh){obj.castShadow=true;obj.receiveShadow=true;meshes.push(obj);}});scene.add(asset.scene);state.textContent='模型已加载';}
+catch(error){state.textContent='模型加载失败：'+error.message;}
+renderer.setAnimationLoop(()=>{controls.update();renderer.render(scene,camera);});
+</script>
+</html>

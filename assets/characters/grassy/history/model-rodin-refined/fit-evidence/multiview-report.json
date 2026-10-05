@@ -1,0 +1,290 @@
+{
+  "camera": {
+    "imageSize": 800,
+    "orthoScale": 3.4,
+    "target": [
+      0,
+      0,
+      1.55
+    ]
+  },
+  "views": {
+    "front": {
+      "registration": {
+        "image": "public/characters/human/history/turnaround-master-v2/front.png",
+        "sourceOriginX": 627.5,
+        "sourcePixelsPerUnit": 381.61290322580646,
+        "note": "Reference uses the same full-bounds horizontal center and sole-to-hair normalization as the model export; no anisotropic warp."
+      },
+      "reference": {
+        "bbox": [
+          245,
+          35,
+          555,
+          765
+        ],
+        "centroid": [
+          400.22652499293986,
+          402.9888167184411
+        ]
+      },
+      "before": {
+        "bbox": [
+          241,
+          35,
+          558,
+          764
+        ],
+        "centroid": [
+          398.97989303783544,
+          404.8118263308403
+        ],
+        "iou": 0.9356691634024824,
+        "bboxCenterDriftPx": [
+          -0.5,
+          -0.5
+        ],
+        "bboxSizeErrorRatio": [
+          0.022508038585209,
+          -0.001367989056087593
+        ],
+        "passCenter": true,
+        "passSize": true
+      },
+      "after": {
+        "bbox": [
+          241,
+          35,
+          558,
+          764
+        ],
+        "centroid": [
+          398.957220717787,
+          405.3137353031913
+        ],
+        "iou": 0.9328327103557695,
+        "bboxCenterDriftPx": [
+          -0.5,
+          -0.5
+        ],
+        "bboxSizeErrorRatio": [
+          0.022508038585209,
+          -0.001367989056087593
+        ],
+        "passCenter": true,
+        "passSize": true
+      }
+    },
+    "right": {
+      "registration": {
+        "image": "public/characters/human/history/turnaround-master-v2/right.png",
+        "sourceOriginX": 606.5,
+        "sourcePixelsPerUnit": 376.7741935483871,
+        "note": "Reference uses the same full-bounds horizontal center and sole-to-hair normalization as the model export; no anisotropic warp."
+      },
+      "reference": {
+        "bbox": [
+          276,
+          35,
+          524,
+          765
+        ],
+        "centroid": [
+          408.9107422584159,
+          363.3090409253592
+        ]
+      },
+      "before": {
+        "bbox": [
+          270,
+          35,
+          529,
+          764
+        ],
+        "centroid": [
+          409.3027793303186,
+          359.35544941822064
+        ],
+        "iou": 0.9370171129694631,
+        "bboxCenterDriftPx": [
+          -0.5,
+          -0.5
+        ],
+        "bboxSizeErrorRatio": [
+          0.04417670682730934,
+          -0.001367989056087593
+        ],
+        "passCenter": true,
+        "passSize": true
+      },
+      "after": {
+        "bbox": [
+          274,
+          35,
+          529,
+          764
+        ],
+        "centroid": [
+          408.91621478908996,
+          359.07364081317655
+        ],
+        "iou": 0.9356450395327586,
+        "bboxCenterDriftPx": [
+          1.5,
+          -0.5
+        ],
+        "bboxSizeErrorRatio": [
+          0.028112449799196693,
+          -0.001367989056087593
+        ],
+        "passCenter": true,
+        "passSize": true
+      }
+    },
+    "left": {
+      "registration": {
+        "image": "public/characters/human/history/turnaround-master-v2/left.png",
+        "sourceOriginX": 643.0,
+        "sourcePixelsPerUnit": 378.38709677419354,
+        "note": "Reference uses the same full-bounds horizontal center and sole-to-hair normalization as the model export; no anisotropic warp."
+      },
+      "reference": {
+        "bbox": [
+          275,
+          35,
+          525,
+          765
+        ],
+        "centroid": [
+          391.5725540360816,
+          362.6464228063229
+        ]
+      },
+      "before": {
+        "bbox": [
+          270,
+          35,
+          529,
+          764
+        ],
+        "centroid": [
+          389.69663834803464,
+          359.35141864151865
+        ],
+        "iou": 0.9362683396924045,
+        "bboxCenterDriftPx": [
+          -0.5,
+          -0.5
+        ],
+        "bboxSizeErrorRatio": [
+          0.03585657370517925,
+          -0.001367989056087593
+        ],
+        "passCenter": true,
+        "passSize": true
+      },
+      "after": {
+        "bbox": [
+          270,
+          35,
+          525,
+          764
+        ],
+        "centroid": [
+          390.0827993785477,
+          359.0709491363641
+        ],
+        "iou": 0.9340579496696024,
+        "bboxCenterDriftPx": [
+          -2.5,
+          -0.5
+        ],
+        "bboxSizeErrorRatio": [
+          0.019920318725099584,
+          -0.001367989056087593
+        ],
+        "passCenter": true,
+        "passSize": true
+      }
+    },
+    "back": {
+      "registration": {
+        "image": "public/characters/human/history/turnaround-master-v2/back.png",
+        "sourceOriginX": 629.0,
+        "sourcePixelsPerUnit": 380.0,
+        "note": "Reference uses the same full-bounds horizontal center and sole-to-hair normalization as the model export; no anisotropic warp."
+      },
+      "reference": {
+        "bbox": [
+          233,
+          35,
+          567,
+          765
+        ],
+        "centroid": [
+          401.4275801468691,
+          404.45488273486154
+        ]
+      },
+      "before": {
+        "bbox": [
+          241,
+          35,
+          558,
+          764
+        ],
+        "centroid": [
+          400.0184092940125,
+          404.81369354506086
+        ],
+        "iou": 0.9034198734844491,
+        "bboxCenterDriftPx": [
+          -0.5,
+          -0.5
+        ],
+        "bboxSizeErrorRatio": [
+          -0.05074626865671639,
+          -0.001367989056087593
+        ],
+        "passCenter": true,
+        "passSize": false
+      },
+      "after": {
+        "bbox": [
+          241,
+          35,
+          558,
+          764
+        ],
+        "centroid": [
+          400.04303205637973,
+          405.31592947048017
+        ],
+        "iou": 0.9011442580068485,
+        "bboxCenterDriftPx": [
+          -0.5,
+          -0.5
+        ],
+        "bboxSizeErrorRatio": [
+          -0.05074626865671639,
+          -0.001367989056087593
+        ],
+        "passCenter": true,
+        "passSize": false
+      }
+    }
+  },
+  "limitations": [
+    "Silhouette does not measure face likeness, material quality or internal hair flow.",
+    "References have conflicting finger poses and hair tufts; approved side image governs depth.",
+    "Before is the existing 200k export; after preserves the raw 500k geometry before local refinement."
+  ],
+  "before": {
+    "meshObjects": 1,
+    "glb": "public/characters/human/history/models-rodin/grassy-rodin-detailed.glb"
+  },
+  "after": {
+    "meshObjects": 1,
+    "glb": "public/characters/human/history/models-rodin-refined/grassy-rodin-refined-detailed.glb"
+  }
+}

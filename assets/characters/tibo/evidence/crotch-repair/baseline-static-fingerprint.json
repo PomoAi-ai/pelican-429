@@ -1,0 +1,64 @@
+{
+  "path": "$TMPDIR/npc-crotch-repair-baseline/tibo-tibo-rigged.blend",
+  "sourceSha256": "c9ae88c9b3ee01e4b80bfb46c118c5039ef4821c20b163016bf42b1dfa8c3417",
+  "restMeshes": [
+    {
+      "cornerNormalsSha256": "6b7ef90a0c8700de57a59f6c6c5d9e24aaf19e262a0187f55ba7aa93750d31ee",
+      "materialIndicesSha256": "37a6b6eb400b4da912a2bb06fa3440beaaf8c7dacae4be75e1908d9e664162c6",
+      "name": "model",
+      "matrix": [
+        [
+          1.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "vertexCount": 20780,
+      "faceCount": 34968,
+      "restMeshSha256": "557d96354f757ec096f087637290108b1faf3a0cc467c404b520c25f5d806945",
+      "uvSha256": [
+        "f86f74029013d7a0e3a75d234df82b37b6efb08d43177cfe5701139b473cd7a7"
+      ],
+      "materials": [
+        "model"
+      ]
+    }
+  ],
+  "materialSha256": "8a6599c4845ae513f777e16ca2e3e6841bbb668d1160bf57b5016f97f1a349b7",
+  "packedTextures": [
+    {
+      "name": "texture_diffuse",
+      "colorspace": "sRGB",
+      "packedSha256": "932de4913e598130daa0b88778dcbd8af725b03b1b2441524effeb51774b9d4d"
+    },
+    {
+      "name": "texture_metallic-texture_roughness",
+      "colorspace": "Non-Color",
+      "packedSha256": "3e163976b107fed79fdaf730fc0d002231e886bac61b6d111a0442d201de7e93"
+    },
+    {
+      "name": "texture_normal",
+      "colorspace": "Non-Color",
+      "packedSha256": "6d60093b5993e5ee8c75b7df523ee94df2c1ecfea42133b138915129536fd272"
+    }
+  ]
+}

@@ -1,0 +1,73 @@
+{
+  "kind": "sam",
+  "clips": [
+    "greet",
+    "idle",
+    "jump",
+    "run",
+    "skill1",
+    "skill2",
+    "ultimate",
+    "walk"
+  ],
+  "morphNames": [
+    "Blink",
+    "BlinkTravel"
+  ],
+  "unchangedClips": {
+    "greet": {
+      "channels": 51,
+      "samplerDataSha256": "8d7830b9df8798ebaac279912c15602d74103848188fbe4c7419646c8ba198b8"
+    },
+    "jump": {
+      "channels": 51,
+      "samplerDataSha256": "1266b32a477e6633f07651e9ef86c1015cbf6ae8ecf4e235acaaf2ce362c6e75"
+    },
+    "run": {
+      "channels": 51,
+      "samplerDataSha256": "7deca24c41095de235a0a1038e0deb2501486b67ff4b4de73f967cbd19a9716a"
+    },
+    "skill1": {
+      "channels": 51,
+      "samplerDataSha256": "d758ffe6b7484b48890bc267b661ff4c68dc8669e89c8e6c6132ddafa9c365ea"
+    },
+    "skill2": {
+      "channels": 51,
+      "samplerDataSha256": "0bdf8fe520c9cfe954d1a95ec2fa6ce9e11265ea10cbb2936239ded51ddbc208"
+    },
+    "ultimate": {
+      "channels": 51,
+      "samplerDataSha256": "38372ca729adbdc9cf36b0b091a708fe86eefc97db9708303c7068a428d05d48"
+    },
+    "walk": {
+      "channels": 51,
+      "samplerDataSha256": "b9550ee07851903d376c6c059e3bf80ea50280dba44f1561c980d4e759ccbbd1"
+    }
+  },
+  "idleWeights": {
+    "channelCount": 52,
+    "timeRange": [
+      0.0,
+      4.0
+    ],
+    "openEndpoints": [
+      [
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0
+      ]
+    ],
+    "maxima": [
+      1.0,
+      0.9599999785423279
+    ],
+    "closedTimes": [
+      1.3666666746139526,
+      1.399999976158142,
+      1.4333332777023315
+    ]
+  }
+}

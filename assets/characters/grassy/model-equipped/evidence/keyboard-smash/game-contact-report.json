@@ -1,0 +1,154 @@
+[
+  {
+    "frame": 11,
+    "wristError": {
+      "L": 6.447228089804631e-07,
+      "R": 6.447228089804631e-07
+    },
+    "headVerticesInsideKeyboard": 0
+  },
+  {
+    "frame": 12,
+    "wristError": {
+      "L": 6.22290760809812e-07,
+      "R": 6.22290760809812e-07
+    },
+    "headVerticesInsideKeyboard": 0
+  },
+  {
+    "frame": 13,
+    "wristError": {
+      "L": 4.3800289799866286e-07,
+      "R": 4.3800289799866286e-07
+    },
+    "headVerticesInsideKeyboard": 0
+  },
+  {
+    "frame": 14,
+    "wristError": {
+      "L": 3.4240261593687705e-07,
+      "R": 3.4240261593687705e-07
+    },
+    "headVerticesInsideKeyboard": 0
+  },
+  {
+    "frame": 15,
+    "wristError": {
+      "L": 5.462855929083633e-07,
+      "R": 5.462855929083633e-07
+    },
+    "headVerticesInsideKeyboard": 0
+  },
+  {
+    "frame": 16,
+    "wristError": {
+      "L": 7.152557373046875e-07,
+      "R": 7.152557373046875e-07
+    },
+    "headVerticesInsideKeyboard": 0
+  },
+  {
+    "frame": 17,
+    "wristError": {
+      "L": 6.664001874625056e-07,
+      "R": 6.664001874625056e-07
+    },
+    "headVerticesInsideKeyboard": 0
+  },
+  {
+    "frame": 18,
+    "wristError": {
+      "L": 5.960464477539063e-08,
+      "R": 5.960464477539063e-08
+    },
+    "headVerticesInsideKeyboard": 0
+  },
+  {
+    "frame": 19,
+    "wristError": {
+      "L": 8.429369702178807e-08,
+      "R": 8.429369702178807e-08
+    },
+    "headVerticesInsideKeyboard": 0
+  },
+  {
+    "frame": 20,
+    "wristError": {
+      "L": 4.2981520598697533e-07,
+      "R": 4.2981520598697533e-07
+    },
+    "headVerticesInsideKeyboard": 0
+  },
+  {
+    "frame": 21,
+    "wristError": {
+      "L": 2.7957056521316944e-07,
+      "R": 2.7957056521316944e-07
+    },
+    "headVerticesInsideKeyboard": 0
+  },
+  {
+    "frame": 22,
+    "wristError": {
+      "L": 1.6858739404357614e-07,
+      "R": 1.6858739404357614e-07
+    },
+    "headVerticesInsideKeyboard": 0
+  },
+  {
+    "frame": 23,
+    "wristError": {
+      "L": 2.6656007498500226e-07,
+      "R": 2.6656007498500226e-07
+    },
+    "headVerticesInsideKeyboard": 0
+  },
+  {
+    "frame": 24,
+    "wristError": {
+      "L": 7.275674114068569e-07,
+      "R": 7.275674114068569e-07
+    },
+    "headVerticesInsideKeyboard": 0
+  },
+  {
+    "frame": 25,
+    "wristError": {
+      "L": 2.980232238769531e-07,
+      "R": 2.980232238769531e-07
+    },
+    "headVerticesInsideKeyboard": 0
+  },
+  {
+    "frame": 26,
+    "wristError": {
+      "L": 6.07850493620966e-07,
+      "R": 6.07850493620966e-07
+    },
+    "headVerticesInsideKeyboard": 0
+  },
+  {
+    "frame": 27,
+    "wristError": {
+      "L": 4.842304232499576e-07,
+      "R": 4.842304232499576e-07
+    },
+    "headVerticesInsideKeyboard": 0
+  },
+  {
+    "frame": 28,
+    "wristError": {
+      "L": 9.684608464999152e-07,
+      "R": 9.684608464999152e-07
+    },
+    "headVerticesInsideKeyboard": 0
+  },
+  {
+    "frame": 29,
+    "wristError": {
+      "L": 3.03925246810483e-07,
+      "R": 3.03925246810483e-07
+    },
+    "headVerticesInsideKeyboard": 0
+  }
+]

@@ -1,0 +1,26 @@
+{
+  "kind": "tibo",
+  "fps": 30,
+  "clips": {
+    "idle": 4.0,
+    "walk": 1.2,
+    "run": 0.8,
+    "jump": 1.6,
+    "greet": 3.0,
+    "skill1": 2.4,
+    "skill2": 3.0,
+    "ultimate": 6.0
+  },
+  "preservedClipSha256": {
+    "idle": "b59fdd7bec3f5e1ec1eb3aaa0fc34af42e4fc8f9d8e996e2a9f634108bbd645d",
+    "walk": "5ea45426e6c4fb6b54b4877397290590c37dde753b8add7e651fe8a5204aabef",
+    "greet": "4cbbed1decc3969f4133597ffb6d61342a00de06c782992d6ac5b973ef779e50"
+  },
+  "walk": {
+    "minimumSoleZ": -1.3224780559539795e-07,
+    "supportFootMaximumGroundError": 1.801071505269647e-07,
+    "loopEndpointMaximumVertexDifference": 0
+  },
+  "blendSha256": "31eb95e06e514bb00b497410ef38e130d88e21ed31b141746f146aa419676ce2",
+  "glbSha256": "d98101da4002c708e1c0d8815e141d7cef0f0117c1d2f1363f542f52929b6466"
+}

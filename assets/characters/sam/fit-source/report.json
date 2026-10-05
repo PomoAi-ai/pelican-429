@@ -1,0 +1,422 @@
+{
+  "kind": "sam",
+  "source": "assets/characters/sam/source.glb",
+  "sourceSha256": "700a45578f3d3213136f997862961d80cf41230cb51a403322e4fbfc37844014",
+  "registrationSha256": "35293177a981cdf46754eb788e6b33f266de23951a5e8e40b759f0708d05ed34",
+  "referenceImagesUnmodified": true,
+  "sourceImagesUnmodified": true,
+  "pose": "static source",
+  "importedBounds": {
+    "min": [
+      -0.42209699749946594,
+      -0.4742639660835266,
+      0.0
+    ],
+    "max": [
+      0.4200870096683502,
+      0.471390962600708,
+      1.8949559926986694
+    ]
+  },
+  "inspectedBounds": {
+    "min": [
+      -0.4964403808116913,
+      -0.42974013090133667,
+      0.0
+    ],
+    "max": [
+      0.7035330533981323,
+      0.9176623225212097,
+      2.700000047683716
+    ]
+  },
+  "measuredHeight": 2.700000047683716,
+  "soleZ": 0.0,
+  "heightPass": true,
+  "solePass": true,
+  "orientationContract": "Blender Z up, front -Y; glTF import converts standard Y up / +Z front.",
+  "sourceNormalization": true,
+  "camera": {
+    "resolution": [
+      1024,
+      1536
+    ],
+    "orthoScale": 2.860137939453125,
+    "centerZ": 1.340689655172414,
+    "worldUnitsPerPixel": 0.0018620689655172416,
+    "sameScaleAndBaselineForAllViews": true
+  },
+  "meshes": [
+    {
+      "name": "model",
+      "vertices": 19896,
+      "uvLayers": 1,
+      "materials": 1
+    }
+  ],
+  "views": {
+    "front": {
+      "reference": {
+        "bbox": [
+          233,
+          38,
+          912,
+          1488
+        ],
+        "size": [
+          680,
+          1451
+        ],
+        "bboxCenter": [
+          572.5,
+          763.0
+        ],
+        "centroid": [
+          524.8101703885784,
+          767.0506898100437
+        ],
+        "area": 536597
+      },
+      "model": {
+        "bbox": [
+          245,
+          38,
+          889,
+          1487
+        ],
+        "size": [
+          645,
+          1450
+        ],
+        "bboxCenter": [
+          567.0,
+          762.5
+        ],
+        "centroid": [
+          527.0194450816579,
+          765.8690236574736
+        ],
+        "area": 540548
+      },
+      "bboxCenterDeltaPx": [
+        -5.5,
+        -0.5
+      ],
+      "bboxSizeErrorRatio": [
+        -0.05147058823529416,
+        -0.000689179875947632
+      ],
+      "centroidDeltaPx": [
+        2.2092746930794647,
+        -1.1816661525700738
+      ],
+      "silhouetteIoU": 0.9208937284218336,
+      "bboxCenterPass": true,
+      "bboxSizePass": false,
+      "silhouetteIoUNote": "Diagnostic only: independent illustrations contain documented pose/detail conflicts.",
+      "landmarks": {
+        "status": "manually_annotated",
+        "points": {
+          "chin": {
+            "world": [
+              0.0,
+              -0.24827194213867188,
+              1.8639310598373413
+            ],
+            "projectedPx": [
+              512.0,
+              487.0009460449219
+            ],
+            "referenceY": 490.0,
+            "verticalDeltaPx": -2.999053955078125
+          }
+        }
+      }
+    },
+    "back": {
+      "reference": {
+        "bbox": [
+          150,
+          38,
+          784,
+          1488
+        ],
+        "size": [
+          635,
+          1451
+        ],
+        "bboxCenter": [
+          467.0,
+          763.0
+        ],
+        "centroid": [
+          498.42828395666277,
+          763.5590855879292
+        ],
+        "area": 522784
+      },
+      "model": {
+        "bbox": [
+          134,
+          38,
+          778,
+          1487
+        ],
+        "size": [
+          645,
+          1450
+        ],
+        "bboxCenter": [
+          456.0,
+          762.5
+        ],
+        "centroid": [
+          495.9780632056431,
+          765.8672174606376
+        ],
+        "area": 540553
+      },
+      "bboxCenterDeltaPx": [
+        -11.0,
+        -0.5
+      ],
+      "bboxSizeErrorRatio": [
+        0.015748031496062964,
+        -0.000689179875947632
+      ],
+      "centroidDeltaPx": [
+        -2.4502207510196854,
+        2.3081318727083726
+      ],
+      "silhouetteIoU": 0.906605918466879,
+      "bboxCenterPass": true,
+      "bboxSizePass": true,
+      "silhouetteIoUNote": "Diagnostic only: independent illustrations contain documented pose/detail conflicts.",
+      "landmarks": {
+        "status": "manually_annotated",
+        "points": {
+          "chin": {
+            "world": [
+              0.0,
+              -0.24827194213867188,
+              1.8639310598373413
+            ],
+            "projectedPx": [
+              511.9991455078125,
+              487.0009460449219
+            ],
+            "referenceY": null,
+            "verticalDeltaPx": null
+          }
+        }
+      }
+    },
+    "left": {
+      "reference": {
+        "bbox": [
+          257,
+          38,
+          964,
+          1488
+        ],
+        "size": [
+          708,
+          1451
+        ],
+        "bboxCenter": [
+          610.5,
+          763.0
+        ],
+        "centroid": [
+          537.8048318117382,
+          737.7856068810048
+        ],
+        "area": 418311
+      },
+      "model": {
+        "bbox": [
+          281,
+          38,
+          1004,
+          1487
+        ],
+        "size": [
+          724,
+          1450
+        ],
+        "bboxCenter": [
+          642.5,
+          762.5
+        ],
+        "centroid": [
+          548.6588803160299,
+          738.6236158261836
+        ],
+        "area": 405025
+      },
+      "bboxCenterDeltaPx": [
+        32.0,
+        -0.5
+      ],
+      "bboxSizeErrorRatio": [
+        0.02259887005649719,
+        -0.000689179875947632
+      ],
+      "centroidDeltaPx": [
+        10.854048504291768,
+        0.8380089451787853
+      ],
+      "silhouetteIoU": 0.8597637279483183,
+      "bboxCenterPass": false,
+      "bboxSizePass": true,
+      "silhouetteIoUNote": "Diagnostic only: independent illustrations contain documented pose/detail conflicts.",
+      "landmarks": {
+        "status": "manually_annotated",
+        "points": {
+          "chin": {
+            "world": [
+              0.0,
+              -0.24827194213867188,
+              1.8639310598373413
+            ],
+            "projectedPx": [
+              378.6690368652344,
+              487.0002136230469
+            ],
+            "referenceY": 495.429,
+            "verticalDeltaPx": -8.428786376953099
+          }
+        }
+      }
+    },
+    "right": {
+      "reference": {
+        "bbox": [
+          76,
+          38,
+          760,
+          1488
+        ],
+        "size": [
+          685,
+          1451
+        ],
+        "bboxCenter": [
+          418.0,
+          763.0
+        ],
+        "centroid": [
+          485.04766341427626,
+          732.5172694593207
+        ],
+        "area": 408930
+      },
+      "model": {
+        "bbox": [
+          19,
+          38,
+          742,
+          1487
+        ],
+        "size": [
+          724,
+          1450
+        ],
+        "bboxCenter": [
+          380.5,
+          762.5
+        ],
+        "centroid": [
+          474.33936256101447,
+          738.6250027775926
+        ],
+        "area": 405027
+      },
+      "bboxCenterDeltaPx": [
+        -37.5,
+        -0.5
+      ],
+      "bboxSizeErrorRatio": [
+        0.05693430656934306,
+        -0.000689179875947632
+      ],
+      "centroidDeltaPx": [
+        -10.70830085326179,
+        6.107733318271926
+      ],
+      "silhouetteIoU": 0.8812159676062458,
+      "bboxCenterPass": false,
+      "bboxSizePass": false,
+      "silhouetteIoUNote": "Diagnostic only: independent illustrations contain documented pose/detail conflicts.",
+      "landmarks": {
+        "status": "manually_annotated",
+        "points": {
+          "chin": {
+            "world": [
+              0.0,
+              -0.24827194213867188,
+              1.8639310598373413
+            ],
+            "projectedPx": [
+              645.3309936523438,
+              487.0002136230469
+            ],
+            "referenceY": 504.7,
+            "verticalDeltaPx": -17.699786376953114
+          }
+        }
+      }
+    }
+  },
+  "referenceConflicts": [
+    {
+      "severity": "resolved_by_model_detail_pending_verification",
+      "character": "tibo",
+      "view": "left",
+      "finding": "Reset badge is present on anatomical left chest in the front reference, but absent in the left-side illustration. The right side correctly has no badge.",
+      "resolution": "Accepted production decision: preserve the front badge in the actual 3D model as authoritative chest detail. The left reference remains badge-free; verify the actual exported model, not the side illustration, for badge presence."
+    },
+    {
+      "severity": "registration_required",
+      "character": "sam",
+      "view": "right",
+      "finding": "Right-view alpha height is approximately 2.2% larger than front and the sole is 14 px lower.",
+      "resolution": "Apply metadata uniform scale/translation when using as modeling reference. Do not change the 3D camera scale separately to conceal model fitting errors."
+    },
+    {
+      "severity": "resolved_with_material_authority",
+      "character": "sam",
+      "view": "left",
+      "finding": "Sam left view was replaced by the plain-knit candidate. The conspicuous hexagonal/floral pattern conflict is substantially reduced.",
+      "resolution": "Replacement verified by SHA-256 and visual inspection. Front remains the authority for final sweater and denim detail strength."
+    },
+    {
+      "severity": "landmark_review",
+      "character": "sam",
+      "view": "front,left",
+      "finding": "Sam front nominal head ratio remains approximately 3.21 with manual uncertainty crossing 3.2. The replacement left view is approximately 3.17 and its registered chin is close to front.",
+      "resolution": "Use the actual fitted model chin landmark to verify head ratio. Do not claim a strict anatomical pass from approximate illustration landmarks alone."
+    },
+    {
+      "severity": "registration_required",
+      "character": "both",
+      "view": "all",
+      "finding": "Independent illustrations do not exactly share collar/hem/ankle rows even after uniform scale. Back collars and Tibo hood are not homologous to front collar openings.",
+      "resolution": "Use front garment hem and leg proportions as canonical; use local modeling correspondences only for true homologous landmarks. Never warp collar or hood rows as if they were the same anatomy."
+    }
+  ],
+  "limitations": [
+    "Silhouette agreement does not establish face likeness or material quality.",
+    "No semantic structural-part count is inferred from a fused Rodin mesh.",
+    "Manual chin annotations are required before claiming a measured head ratio.",
+    "Reference alpha registration is applied only to comparison masks, not original files."
+  ],
+  "headProportion": {
+    "status": "manually_annotated",
+    "heads": 3.229398761631678,
+    "pass": false,
+    "visualUncertaintyPx": 8
+  },
+  "bboxGatesPass": false,
+  "status": "adjustment_required"
+}

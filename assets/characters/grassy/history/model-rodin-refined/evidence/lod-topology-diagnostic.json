@@ -1,0 +1,17 @@
+{
+  "beforeWeld": {
+    "vertices": 391911,
+    "faces": 500000,
+    "boundaryEdges": 228326
+  },
+  "afterWeld": {
+    "vertices": 249984,
+    "faces": 500000,
+    "boundaryEdges": 0
+  },
+  "afterDecimate": {
+    "vertices": 9984,
+    "faces": 20000,
+    "boundaryEdges": 0
+  }
+}

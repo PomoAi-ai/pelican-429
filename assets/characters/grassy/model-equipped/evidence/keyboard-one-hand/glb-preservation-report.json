@@ -1,0 +1,38 @@
+{
+  "game": {
+    "bytes": 6298336,
+    "oldClipsPreserved": 12,
+    "updatedClip": "keyboard_smash",
+    "updatedClipChannels": 68,
+    "retainedBodyAttributesPreserved": true,
+    "allMeshAttributesAndTopologyPreserved": true,
+    "materialsPreserved": true,
+    "skinsPreserved": true,
+    "equipmentPositionsPreserved": true,
+    "texturesPreserved": true
+  },
+  "detailed": {
+    "bytes": 39920256,
+    "oldClipsPreserved": 12,
+    "updatedClip": "keyboard_smash",
+    "updatedClipChannels": 68,
+    "retainedBodyAttributesPreserved": true,
+    "allMeshAttributesAndTopologyPreserved": true,
+    "materialsPreserved": true,
+    "skinsPreserved": true,
+    "equipmentPositionsPreserved": true,
+    "texturesPreserved": true
+  },
+  "light": {
+    "bytes": 2717428,
+    "oldClipsPreserved": 12,
+    "updatedClip": "keyboard_smash",
+    "updatedClipChannels": 68,
+    "retainedBodyAttributesPreserved": true,
+    "allMeshAttributesAndTopologyPreserved": true,
+    "materialsPreserved": true,
+    "skinsPreserved": true,
+    "equipmentPositionsPreserved": true,
+    "texturesPreserved": true
+  }
+}

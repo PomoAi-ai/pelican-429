@@ -1,0 +1,9 @@
+{
+  "service": "Hyper3D CLI",
+  "input": "assets/concepts/enemy-model-input/line-hound.png",
+  "prompt": "A single teal and ivory quadruped inspection robot matching the reference. Four distinct articulated mechanical legs, smooth teal dorsal shell, black face with three lime sensors. Preserve proportions and clear mechanical joints.",
+  "tier": "Gen-2.5-High",
+  "meshMode": "Quad",
+  "quality": 30000,
+  "format": "glb"
+}

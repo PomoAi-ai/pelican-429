@@ -1,0 +1,27 @@
+.facility-chapter-hud { position: fixed; inset: 0; z-index: 3; color: #edf5ed; font-size: 12px; line-height: 1.5; pointer-events: none; user-select: none; }
+.facility-chapter-panel { position: absolute; top: calc(var(--dev-nav-height) + 76px); left: 12px; width: min(290px, calc(100vw - 260px)); padding: 9px 12px; border: 1px solid #70959266; border-radius: 10px; background: #0c1c23dc; box-shadow: 0 5px 24px #0003; }
+.facility-chapter-header { display: flex; align-items: center; gap: 9px; }
+.facility-chapter-number { flex: none; color: #8de5d3; font: 11px/1.5 ui-monospace, monospace; }
+.facility-chapter-title { margin: 0; font-size: 15px; font-weight: 650; letter-spacing: .5px; }
+.facility-chapter-description { margin: 6px 0 10px; color: #d5e2dd; font-size: 12px; }
+.facility-chapter-footer { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; margin-top: 6px; }
+.facility-chapter-link { display: inline-flex; align-items: center; justify-content: center; min-height: 30px; padding: 3px 8px; border-radius: 5px; color: #d3e7df; text-decoration: underline; text-underline-offset: 3px; pointer-events: auto; }
+.facility-chapter-link:hover { color: #fff; background: #70959233; }
+.facility-chapter-link:focus-visible { outline: 2px solid #a1efcb; outline-offset: 3px; }
+.facility-chapter-controls { display: flex; flex-wrap: wrap; gap: 4px 10px; margin-top: 6px; padding-top: 8px; border-top: 1px solid #70959233; color: #b5c9c5; font-size: 10px; }
+.facility-chapter-control { white-space: nowrap; }
+.facility-chapter-control kbd { color: #edf5ed; font: inherit; }
+.facility-chapter-exit { position: absolute; left: 0; top: 0; max-width: 230px; padding: 6px 11px; border: 1px solid #ddba7555; border-radius: 6px; background: #151e22eb; color: #ebcf97; font-size: 11px; text-align: center; box-shadow: 0 4px 12px #0004; }
+.facility-chapter-exit::after { position: absolute; left: calc(50% - 4px); bottom: -5px; width: 7px; height: 7px; content: ''; transform: rotate(45deg); border-right: 1px solid #ddba7555; border-bottom: 1px solid #ddba7555; background: #151e22; }
+.facility-chapter-hud [hidden] { display: none; }
+.facility-chapter-danger { position: absolute; top: 0; left: 0; padding: 5px 10px; color: #f0d49c; background: #142b2be8; border: 1px solid #bc995e88; border-radius: 5px; font-size: 11px; white-space: nowrap; }
+.facility-chapter-death { position: absolute; top: 43%; left: 50%; transform: translate(-50%, -50%); width: min(360px, 85vw); padding: 22px; text-align: center; background: #101c23ed; border: 1px solid #d7957188; border-radius: 10px; box-shadow: 0 0 100px 30px #05121588; }
+.facility-chapter-death strong { color: #ffd3a1; font-size: 20px; }
+.facility-chapter-death p { margin: 10px 0 0; color: #c0d6d3; }
+@media (max-width: 600px) {
+  .facility-chapter-panel { top: calc(var(--dev-nav-height) + 208px); width: min(326px, calc(100vw - 68px)); padding: 10px 12px; }
+  .facility-chapter-title { font-size: 13px; }
+  .facility-chapter-description { margin-bottom: 7px; font-size: 11px; }
+  .facility-chapter-controls { gap: 3px 8px; }
+  .facility-chapter-exit { max-width: 180px; font-size: 10px; }
+}

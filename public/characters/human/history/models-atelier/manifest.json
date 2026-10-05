@@ -1,0 +1,14 @@
+{
+  "name": "gpt6.1sol版本",
+  "sourceObjects": 415,
+  "exportMeshes": 24,
+  "triangles": 1004232,
+  "materials": 24,
+  "height": 3.099999905563891,
+  "width": 1.3287031650543213,
+  "depth": 1.0200690925121307,
+  "glbBytes": 40575580,
+  "static": true,
+  "glb": "public/characters/human/history/models-atelier/grassy-atelier-detailed.glb",
+  "blend": "assets/characters/grassy/history/model-atelier/grassy-atelier-detailed.blend"
+}

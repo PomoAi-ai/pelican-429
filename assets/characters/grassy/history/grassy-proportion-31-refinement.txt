@@ -1,0 +1,4 @@
+Mode: built-in image_gen edit.
+Input: public/characters/human/history/proportions/grassy-3p1-heads.png
+
+Edit this Grassy card with one very small adjustment: enlarge the entire head, including ALL the hair, face, ears and skull, by approximately 5% uniformly in width and height. Keep the top of the hair at the same canvas position, so the chin shifts slightly lower. Keep the eyes, nose and mouth arranged identically within the enlarged head. Naturally shorten the neck and the upper sweater a little to meet the chin, keeping the sweater hem, blue jeans, arms and cream shoes in their existing positions. Preserve the sole baseline, whole character height, single frontal A-pose, all colors, lighting, identity and quality. Keep all text EXACTLY unchanged: "GRASSY", "3.1头身", "目标身高 2.85 格". The goal is a slightly fuller head and more compact body to match a 3.1-head character. Do not make a huge bobblehead: this is only a subtle 5% increase. One character only.

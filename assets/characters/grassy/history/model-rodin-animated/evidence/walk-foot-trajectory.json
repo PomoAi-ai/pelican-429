@@ -1,0 +1,483 @@
+[
+  {
+    "frame": 0,
+    "L": {
+      "phase": 0.0,
+      "support": true,
+      "soleClearance": 0
+    },
+    "R": {
+      "phase": 0.5,
+      "support": true,
+      "soleClearance": 0
+    }
+  },
+  {
+    "frame": 1,
+    "L": {
+      "phase": 0.027777777777777776,
+      "support": true,
+      "soleClearance": 0
+    },
+    "R": {
+      "phase": 0.5277777777777778,
+      "support": true,
+      "soleClearance": 0
+    }
+  },
+  {
+    "frame": 2,
+    "L": {
+      "phase": 0.05555555555555555,
+      "support": true,
+      "soleClearance": 0
+    },
+    "R": {
+      "phase": 0.5555555555555556,
+      "support": true,
+      "soleClearance": 0
+    }
+  },
+  {
+    "frame": 3,
+    "L": {
+      "phase": 0.08333333333333333,
+      "support": true,
+      "soleClearance": 0
+    },
+    "R": {
+      "phase": 0.5833333333333334,
+      "support": true,
+      "soleClearance": 0
+    }
+  },
+  {
+    "frame": 4,
+    "L": {
+      "phase": 0.1111111111111111,
+      "support": true,
+      "soleClearance": 0
+    },
+    "R": {
+      "phase": 0.6111111111111112,
+      "support": false,
+      "soleClearance": 0.0012153797590233708
+    }
+  },
+  {
+    "frame": 5,
+    "L": {
+      "phase": 0.1388888888888889,
+      "support": true,
+      "soleClearance": 0
+    },
+    "R": {
+      "phase": 0.6388888888888888,
+      "support": false,
+      "soleClearance": 0.014467836456880637
+    }
+  },
+  {
+    "frame": 6,
+    "L": {
+      "phase": 0.16666666666666666,
+      "support": true,
+      "soleClearance": 0
+    },
+    "R": {
+      "phase": 0.6666666666666666,
+      "support": false,
+      "soleClearance": 0.03999999999999997
+    }
+  },
+  {
+    "frame": 7,
+    "L": {
+      "phase": 0.19444444444444445,
+      "support": true,
+      "soleClearance": 0
+    },
+    "R": {
+      "phase": 0.6944444444444444,
+      "support": false,
+      "soleClearance": 0.07302754058018733
+    }
+  },
+  {
+    "frame": 8,
+    "L": {
+      "phase": 0.2222222222222222,
+      "support": true,
+      "soleClearance": 0
+    },
+    "R": {
+      "phase": 0.7222222222222222,
+      "support": false,
+      "soleClearance": 0.1073616114660535
+    }
+  },
+  {
+    "frame": 9,
+    "L": {
+      "phase": 0.25,
+      "support": true,
+      "soleClearance": 0
+    },
+    "R": {
+      "phase": 0.75,
+      "support": false,
+      "soleClearance": 0.13656854249492384
+    }
+  },
+  {
+    "frame": 10,
+    "L": {
+      "phase": 0.2777777777777778,
+      "support": true,
+      "soleClearance": 0
+    },
+    "R": {
+      "phase": 0.7777777777777778,
+      "support": false,
+      "soleClearance": 0.1551754096628727
+    }
+  },
+  {
+    "frame": 11,
+    "L": {
+      "phase": 0.3055555555555556,
+      "support": true,
+      "soleClearance": 0
+    },
+    "R": {
+      "phase": 0.8055555555555556,
+      "support": false,
+      "soleClearance": 0.15969557584733968
+    }
+  },
+  {
+    "frame": 12,
+    "L": {
+      "phase": 0.3333333333333333,
+      "support": true,
+      "soleClearance": 0
+    },
+    "R": {
+      "phase": 0.8333333333333333,
+      "support": false,
+      "soleClearance": 0.14928203230275514
+    }
+  },
+  {
+    "frame": 13,
+    "L": {
+      "phase": 0.3611111111111111,
+      "support": true,
+      "soleClearance": 0
+    },
+    "R": {
+      "phase": 0.8611111111111112,
+      "support": false,
+      "soleClearance": 0.12588611490808366
+    }
+  },
+  {
+    "frame": 14,
+    "L": {
+      "phase": 0.3888888888888889,
+      "support": true,
+      "soleClearance": 0
+    },
+    "R": {
+      "phase": 0.8888888888888888,
+      "support": false,
+      "soleClearance": 0.0938918542133545
+    }
+  },
+  {
+    "frame": 15,
+    "L": {
+      "phase": 0.4166666666666667,
+      "support": true,
+      "soleClearance": 0
+    },
+    "R": {
+      "phase": 0.9166666666666667,
+      "support": false,
+      "soleClearance": 0.05929447639179824
+    }
+  },
+  {
+    "frame": 16,
+    "L": {
+      "phase": 0.4444444444444444,
+      "support": true,
+      "soleClearance": 0
+    },
+    "R": {
+      "phase": 0.9444444444444444,
+      "support": false,
+      "soleClearance": 0.028576991225076915
+    }
+  },
+  {
+    "frame": 17,
+    "L": {
+      "phase": 0.4722222222222222,
+      "support": true,
+      "soleClearance": 0
+    },
+    "R": {
+      "phase": 0.9722222222222222,
+      "support": false,
+      "soleClearance": 0.007495377037067993
+    }
+  },
+  {
+    "frame": 18,
+    "L": {
+      "phase": 0.5,
+      "support": true,
+      "soleClearance": 0
+    },
+    "R": {
+      "phase": 0.0,
+      "support": true,
+      "soleClearance": 0
+    }
+  },
+  {
+    "frame": 19,
+    "L": {
+      "phase": 0.5277777777777778,
+      "support": true,
+      "soleClearance": 0
+    },
+    "R": {
+      "phase": 0.02777777777777768,
+      "support": true,
+      "soleClearance": 0
+    }
+  },
+  {
+    "frame": 20,
+    "L": {
+      "phase": 0.5555555555555556,
+      "support": true,
+      "soleClearance": 0
+    },
+    "R": {
+      "phase": 0.05555555555555558,
+      "support": true,
+      "soleClearance": 0
+    }
+  },
+  {
+    "frame": 21,
+    "L": {
+      "phase": 0.5833333333333334,
+      "support": true,
+      "soleClearance": 0
+    },
+    "R": {
+      "phase": 0.08333333333333348,
+      "support": true,
+      "soleClearance": 0
+    }
+  },
+  {
+    "frame": 22,
+    "L": {
+      "phase": 0.6111111111111112,
+      "support": false,
+      "soleClearance": 0.0012153797590233708
+    },
+    "R": {
+      "phase": 0.11111111111111116,
+      "support": true,
+      "soleClearance": 0
+    }
+  },
+  {
+    "frame": 23,
+    "L": {
+      "phase": 0.6388888888888888,
+      "support": false,
+      "soleClearance": 0.014467836456880637
+    },
+    "R": {
+      "phase": 0.13888888888888884,
+      "support": true,
+      "soleClearance": 0
+    }
+  },
+  {
+    "frame": 24,
+    "L": {
+      "phase": 0.6666666666666666,
+      "support": false,
+      "soleClearance": 0.03999999999999997
+    },
+    "R": {
+      "phase": 0.16666666666666652,
+      "support": true,
+      "soleClearance": 0
+    }
+  },
+  {
+    "frame": 25,
+    "L": {
+      "phase": 0.6944444444444444,
+      "support": false,
+      "soleClearance": 0.07302754058018733
+    },
+    "R": {
+      "phase": 0.19444444444444442,
+      "support": true,
+      "soleClearance": 0
+    }
+  },
+  {
+    "frame": 26,
+    "L": {
+      "phase": 0.7222222222222222,
+      "support": false,
+      "soleClearance": 0.1073616114660535
+    },
+    "R": {
+      "phase": 0.22222222222222232,
+      "support": true,
+      "soleClearance": 0
+    }
+  },
+  {
+    "frame": 27,
+    "L": {
+      "phase": 0.75,
+      "support": false,
+      "soleClearance": 0.13656854249492384
+    },
+    "R": {
+      "phase": 0.25,
+      "support": true,
+      "soleClearance": 0
+    }
+  },
+  {
+    "frame": 28,
+    "L": {
+      "phase": 0.7777777777777778,
+      "support": false,
+      "soleClearance": 0.1551754096628727
+    },
+    "R": {
+      "phase": 0.2777777777777777,
+      "support": true,
+      "soleClearance": 0
+    }
+  },
+  {
+    "frame": 29,
+    "L": {
+      "phase": 0.8055555555555556,
+      "support": false,
+      "soleClearance": 0.15969557584733968
+    },
+    "R": {
+      "phase": 0.3055555555555556,
+      "support": true,
+      "soleClearance": 0
+    }
+  },
+  {
+    "frame": 30,
+    "L": {
+      "phase": 0.8333333333333334,
+      "support": false,
+      "soleClearance": 0.14928203230275508
+    },
+    "R": {
+      "phase": 0.3333333333333335,
+      "support": true,
+      "soleClearance": 0
+    }
+  },
+  {
+    "frame": 31,
+    "L": {
+      "phase": 0.8611111111111112,
+      "support": false,
+      "soleClearance": 0.12588611490808366
+    },
+    "R": {
+      "phase": 0.36111111111111116,
+      "support": true,
+      "soleClearance": 0
+    }
+  },
+  {
+    "frame": 32,
+    "L": {
+      "phase": 0.8888888888888888,
+      "support": false,
+      "soleClearance": 0.0938918542133545
+    },
+    "R": {
+      "phase": 0.38888888888888884,
+      "support": true,
+      "soleClearance": 0
+    }
+  },
+  {
+    "frame": 33,
+    "L": {
+      "phase": 0.9166666666666666,
+      "support": false,
+      "soleClearance": 0.059294476391798384
+    },
+    "R": {
+      "phase": 0.4166666666666665,
+      "support": true,
+      "soleClearance": 0
+    }
+  },
+  {
+    "frame": 34,
+    "L": {
+      "phase": 0.9444444444444444,
+      "support": false,
+      "soleClearance": 0.028576991225076915
+    },
+    "R": {
+      "phase": 0.4444444444444444,
+      "support": true,
+      "soleClearance": 0
+    }
+  },
+  {
+    "frame": 35,
+    "L": {
+      "phase": 0.9722222222222222,
+      "support": false,
+      "soleClearance": 0.007495377037067993
+    },
+    "R": {
+      "phase": 0.4722222222222223,
+      "support": true,
+      "soleClearance": 0
+    }
+  },
+  {
+    "frame": 36,
+    "L": {
+      "phase": 0.0,
+      "support": true,
+      "soleClearance": 0
+    },
+    "R": {
+      "phase": 0.5,
+      "support": true,
+      "soleClearance": 0
+    }
+  }
+]

@@ -1,0 +1,38 @@
+{
+  "kind": "tibo",
+  "source": "assets/characters/tibo/tibo-rigged.blend",
+  "restSha256": "d64f53c817b87a1f56c5ac94b6d15ca0ef52365be79657a2c9fdbf4e644a77e0",
+  "preservedClipSha256": {
+    "greet": "4cbbed1decc3969f4133597ffb6d61342a00de06c782992d6ac5b973ef779e50",
+    "jump": "6b78d24faf37939c92fe061c29ff96f6a109efff0d0d7cb163a04591203c0e70",
+    "run": "958ed3786159dadfd7f629d16a5fdd59bb0b5439a0f01f51589b81650a13fc71",
+    "skill1": "49435d943243588179fa434a164c59714dbb1b986be24fc230c327928fd12fe4",
+    "skill2": "dd198aa71df33b5c2898c3178cb0a85cb04133cce5870e39cdb2ce909057d3d6",
+    "ultimate": "266901b67d1287ba1dd767bf3e0892c5a94835ad63f299534f8a8ff68ae04fe1",
+    "walk": "5ea45426e6c4fb6b54b4877397290590c37dde753b8add7e651fe8a5204aabef"
+  },
+  "originalVertexCount": 20780,
+  "addedEyelidVertices": 924,
+  "eyeClosureCentersXZ": [
+    [
+      -0.154,
+      2.121
+    ],
+    [
+      0.123,
+      2.121
+    ]
+  ],
+  "morphs": [
+    "Blink",
+    "BlinkTravel"
+  ],
+  "idleSeconds": 4,
+  "blinkClosedFrames": [
+    47,
+    49
+  ],
+  "originalGeometryUvWeightsAndTexturesUnchanged": true,
+  "newEyelidWeights": "Barycentric interpolation from original eye-rim triangles",
+  "sourceTextureImagesUnchanged": true
+}

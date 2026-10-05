@@ -1,0 +1,440 @@
+{
+  "method": "Actual game GLB, baked 30 fps keys including endpoints, linear skinning from joint world matrices and inverse bind matrices. All mesh edges whose two original glTF Y coordinates are below 1.4, with rest length > 0.00001. Edge ratios quantify localized deformation; they do not prove appearance quality. Rounded 1e-6 identical-position vertex pairs used for seam weight comparison.",
+  "before": {
+    "path": "$TMPDIR/grassy-leg-skin-before/grassy-equipped-game.glb",
+    "bytes": 6257428,
+    "bodyVertices": 27344,
+    "bodyTriangles": 45000,
+    "lowerBodyEdges": 31914,
+    "positionsHash": "e8f6e259cd1ea5136d5a222eeca0b3de7b9924d50dafecf810a8bab1ac32ecce",
+    "uvHash": "f31f7a86d536f4c6f2592ea9964027caf70b58665deb3c8755a18c018b29e91f",
+    "seams": {
+      "pairs": 4860,
+      "maxWeightL1Difference": 0
+    },
+    "clips": {
+      "walk": {
+        "seconds": 1.2000000476837158,
+        "sampledFrames": 37,
+        "maximumEdgeStretch": 23.010444904809606,
+        "maxPerFrameEdgesAbove3": 56,
+        "maxPerFrameEdgesAbove5": 35,
+        "maxPerFrameEdgesAbove10": 13,
+        "worstEdge": {
+          "frame": 22,
+          "seconds": 0.7333333333333333,
+          "restLength": 0.006396277580355631,
+          "posedLength": 0.14718119285864215,
+          "vertices": [
+            6016,
+            6194
+          ],
+          "positions": [
+            [
+              -0.002707213629037142,
+              1.083423137664795,
+              0.27125653624534607
+            ],
+            [
+              0.0009273005416616797,
+              1.081627368927002,
+              0.2663090229034424
+            ]
+          ],
+          "weights": [
+            {
+              "thigh.R": 0.9353076815605164,
+              "hips": 0.06469231843948364
+            },
+            {
+              "thigh.L": 0.9402642250061035,
+              "hips": 0.059735774993896484
+            }
+          ]
+        },
+        "originalProblemEdges": {
+          "crotch": {
+            "maximumRatio": 23.010444904809606,
+            "frame": 22
+          },
+          "outerJeans": {
+            "maximumRatio": 2.664853619983183,
+            "frame": 1
+          }
+        }
+      },
+      "run": {
+        "seconds": 0.800000011920929,
+        "sampledFrames": 25,
+        "maximumEdgeStretch": 37.53640718401623,
+        "maxPerFrameEdgesAbove3": 77,
+        "maxPerFrameEdgesAbove5": 52,
+        "maxPerFrameEdgesAbove10": 31,
+        "worstEdge": {
+          "frame": 9,
+          "seconds": 0.3,
+          "restLength": 0.006396277580355631,
+          "posedLength": 0.24009327971822306,
+          "vertices": [
+            6016,
+            6194
+          ],
+          "positions": [
+            [
+              -0.002707213629037142,
+              1.083423137664795,
+              0.27125653624534607
+            ],
+            [
+              0.0009273005416616797,
+              1.081627368927002,
+              0.2663090229034424
+            ]
+          ],
+          "weights": [
+            {
+              "thigh.R": 0.9353076815605164,
+              "hips": 0.06469231843948364
+            },
+            {
+              "thigh.L": 0.9402642250061035,
+              "hips": 0.059735774993896484
+            }
+          ]
+        },
+        "originalProblemEdges": {
+          "crotch": {
+            "maximumRatio": 37.53640718401623,
+            "frame": 9
+          },
+          "outerJeans": {
+            "maximumRatio": 5.687131272154845,
+            "frame": 23
+          }
+        }
+      },
+      "ride": {
+        "seconds": 3.5999999046325684,
+        "sampledFrames": 109,
+        "maximumEdgeStretch": 25.611679263127854,
+        "maxPerFrameEdgesAbove3": 60,
+        "maxPerFrameEdgesAbove5": 38,
+        "maxPerFrameEdgesAbove10": 18,
+        "worstEdge": {
+          "frame": 22,
+          "seconds": 0.7333333333333333,
+          "restLength": 0.006396277580355631,
+          "posedLength": 0.16381940986600393,
+          "vertices": [
+            6016,
+            6194
+          ],
+          "positions": [
+            [
+              -0.002707213629037142,
+              1.083423137664795,
+              0.27125653624534607
+            ],
+            [
+              0.0009273005416616797,
+              1.081627368927002,
+              0.2663090229034424
+            ]
+          ],
+          "weights": [
+            {
+              "thigh.R": 0.9353076815605164,
+              "hips": 0.06469231843948364
+            },
+            {
+              "thigh.L": 0.9402642250061035,
+              "hips": 0.059735774993896484
+            }
+          ]
+        },
+        "originalProblemEdges": {
+          "crotch": {
+            "maximumRatio": 25.611679263127854,
+            "frame": 22
+          },
+          "outerJeans": {
+            "maximumRatio": 4.259764261072099,
+            "frame": 5
+          }
+        }
+      },
+      "jump": {
+        "seconds": 1.600000023841858,
+        "sampledFrames": 49,
+        "maximumEdgeStretch": 5.102968710943999,
+        "maxPerFrameEdgesAbove3": 10,
+        "maxPerFrameEdgesAbove5": 1,
+        "maxPerFrameEdgesAbove10": 0,
+        "worstEdge": {
+          "frame": 16,
+          "seconds": 0.5333333333333333,
+          "restLength": 0.006679342693490117,
+          "posedLength": 0.03408447677455249,
+          "vertices": [
+            5070,
+            5150
+          ],
+          "positions": [
+            [
+              -0.39162057638168335,
+              0.8207157254219055,
+              0.07997786998748779
+            ],
+            [
+              -0.38739150762557983,
+              0.8196441531181335,
+              0.0749201700091362
+            ]
+          ],
+          "weights": [
+            {
+              "thigh.R": 0.9234098792076111,
+              "hand.R": 0.07659013569355011
+            },
+            {
+              "thigh.R": 0.956680178642273,
+              "hand.R": 0.04331980273127556
+            }
+          ]
+        },
+        "originalProblemEdges": {
+          "crotch": {
+            "maximumRatio": 3.759475408933257,
+            "frame": 7
+          },
+          "outerJeans": {
+            "maximumRatio": 5.102968710943999,
+            "frame": 16
+          }
+        }
+      }
+    }
+  },
+  "after": {
+    "path": "public/characters/human/models-equipped/grassy-equipped-game.glb",
+    "bytes": 6261788,
+    "bodyVertices": 27344,
+    "bodyTriangles": 45000,
+    "lowerBodyEdges": 31914,
+    "positionsHash": "e8f6e259cd1ea5136d5a222eeca0b3de7b9924d50dafecf810a8bab1ac32ecce",
+    "uvHash": "f31f7a86d536f4c6f2592ea9964027caf70b58665deb3c8755a18c018b29e91f",
+    "seams": {
+      "pairs": 4860,
+      "maxWeightL1Difference": 0
+    },
+    "clips": {
+      "walk": {
+        "seconds": 1.2000000476837158,
+        "sampledFrames": 37,
+        "maximumEdgeStretch": 3.082868557469959,
+        "maxPerFrameEdgesAbove3": 2,
+        "maxPerFrameEdgesAbove5": 0,
+        "maxPerFrameEdgesAbove10": 0,
+        "worstEdge": {
+          "frame": 9,
+          "seconds": 0.3,
+          "restLength": 0.023423092497354064,
+          "posedLength": 0.07221031537880335,
+          "vertices": [
+            10799,
+            10863
+          ],
+          "positions": [
+            [
+              -0.2686026692390442,
+              0.33050432801246643,
+              -0.21272066235542297
+            ],
+            [
+              -0.26917925477027893,
+              0.30725011229515076,
+              -0.20997288823127747
+            ]
+          ],
+          "weights": [
+            {
+              "shin.R": 0.8180885314941406,
+              "foot.R": 0.18191146850585938
+            },
+            {
+              "foot.R": 0.5457742214202881,
+              "shin.R": 0.4542257785797119
+            }
+          ]
+        },
+        "originalProblemEdges": {
+          "crotch": {
+            "maximumRatio": 1.4290566885563187,
+            "frame": 22
+          },
+          "outerJeans": {
+            "maximumRatio": 1.000001661839613,
+            "frame": 2
+          }
+        }
+      },
+      "run": {
+        "seconds": 0.800000011920929,
+        "sampledFrames": 25,
+        "maximumEdgeStretch": 4.601078710064707,
+        "maxPerFrameEdgesAbove3": 21,
+        "maxPerFrameEdgesAbove5": 0,
+        "maxPerFrameEdgesAbove10": 0,
+        "worstEdge": {
+          "frame": 2,
+          "seconds": 0.06666666666666667,
+          "restLength": 0.023423092497354064,
+          "posedLength": 0.10777149221345214,
+          "vertices": [
+            10799,
+            10863
+          ],
+          "positions": [
+            [
+              -0.2686026692390442,
+              0.33050432801246643,
+              -0.21272066235542297
+            ],
+            [
+              -0.26917925477027893,
+              0.30725011229515076,
+              -0.20997288823127747
+            ]
+          ],
+          "weights": [
+            {
+              "shin.R": 0.8180885314941406,
+              "foot.R": 0.18191146850585938
+            },
+            {
+              "foot.R": 0.5457742214202881,
+              "shin.R": 0.4542257785797119
+            }
+          ]
+        },
+        "originalProblemEdges": {
+          "crotch": {
+            "maximumRatio": 1.764575876089222,
+            "frame": 9
+          },
+          "outerJeans": {
+            "maximumRatio": 1.0000017204465477,
+            "frame": 1
+          }
+        }
+      },
+      "ride": {
+        "seconds": 3.5999999046325684,
+        "sampledFrames": 109,
+        "maximumEdgeStretch": 4.012330175287313,
+        "maxPerFrameEdgesAbove3": 11,
+        "maxPerFrameEdgesAbove5": 0,
+        "maxPerFrameEdgesAbove10": 0,
+        "worstEdge": {
+          "frame": 12,
+          "seconds": 0.4,
+          "restLength": 0.023423092497354064,
+          "posedLength": 0.09398118082567958,
+          "vertices": [
+            10799,
+            10863
+          ],
+          "positions": [
+            [
+              -0.2686026692390442,
+              0.33050432801246643,
+              -0.21272066235542297
+            ],
+            [
+              -0.26917925477027893,
+              0.30725011229515076,
+              -0.20997288823127747
+            ]
+          ],
+          "weights": [
+            {
+              "shin.R": 0.8180885314941406,
+              "foot.R": 0.18191146850585938
+            },
+            {
+              "foot.R": 0.5457742214202881,
+              "shin.R": 0.4542257785797119
+            }
+          ]
+        },
+        "originalProblemEdges": {
+          "crotch": {
+            "maximumRatio": 1.2389048356495072,
+            "frame": 22
+          },
+          "outerJeans": {
+            "maximumRatio": 1.0000018834590652,
+            "frame": 5
+          }
+        }
+      },
+      "jump": {
+        "seconds": 1.600000023841858,
+        "sampledFrames": 49,
+        "maximumEdgeStretch": 2.8961868480688797,
+        "maxPerFrameEdgesAbove3": 0,
+        "maxPerFrameEdgesAbove5": 0,
+        "maxPerFrameEdgesAbove10": 0,
+        "worstEdge": {
+          "frame": 7,
+          "seconds": 0.23333333333333334,
+          "restLength": 0.023423092497354064,
+          "posedLength": 0.06783765243193769,
+          "vertices": [
+            10799,
+            10863
+          ],
+          "positions": [
+            [
+              -0.2686026692390442,
+              0.33050432801246643,
+              -0.21272066235542297
+            ],
+            [
+              -0.26917925477027893,
+              0.30725011229515076,
+              -0.20997288823127747
+            ]
+          ],
+          "weights": [
+            {
+              "shin.R": 0.8180885314941406,
+              "foot.R": 0.18191146850585938
+            },
+            {
+              "foot.R": 0.5457742214202881,
+              "shin.R": 0.4542257785797119
+            }
+          ]
+        },
+        "originalProblemEdges": {
+          "crotch": {
+            "maximumRatio": 1.0000049735208711,
+            "frame": 0
+          },
+          "outerJeans": {
+            "maximumRatio": 1.0000018693205202,
+            "frame": 1
+          }
+        }
+      }
+    }
+  },
+  "surfacePreserved": true,
+  "animationTracksPreserved": true,
+  "remainingAssessment": {
+    "location": "Right ankle, shin-to-foot transition at original glTF Y 0.307-0.331.",
+    "weightsUnchanged": true,
+    "note": "This is an existing ankle deformation, not a remaining crotch discontinuity or hand-weight pull. Review actual run frame 2 visually; the numerical report is not an appearance pass."
+  }
+}

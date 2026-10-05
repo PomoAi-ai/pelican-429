@@ -1,0 +1,12 @@
+# 技能效果图提示词
+
+由内置 imagegen 工具生成，参考 public/characters/sam/render-front.png。
+用于视觉构图与色彩目标；模型动作、姿态和实际效果以浏览器验收为准。
+
+Use case: stylized-concept. Asset: production game VFX target sheet, landscape 3:2, three clearly separated illustrated panels, premium cinematic stylized 3D.
+Input reference is the EXACT approved Sam anthropomorphic white stoat game model. Preserve his face, human short brown hair, blue-grey eyes, white fur, gray crewneck sweater, teal routing pin, blue cuffed jeans, white shoes and black-tipped stoat tail. CRITICAL: full-body proportions remain ~3.17 heads tall, short stocky limbs; do not turn him human or make him taller.
+Layout: top left small skill panel labeled "ROUTE CASCADE"; top right labeled "COMPUTE SURGE"; bottom full-width hero panel labeled "AGI ADVENT". All panels use a 3/4 front game camera, dark navy unobtrusive stage, floor visible, character unoccluded. These are three distinct skill impact keyframes, not UI screenshots.
+ROUTE CASCADE: Sam's bent forearms operate an elegant fan of cyan and white-gold model nodes around his chest; three sharp braided data ribbons chain left/right through crystalline nodes with bright impact diamonds. Beautiful tapered energy trails, purposeful silhouette, no random confetti.
+COMPUTE SURGE: two bent paws push a dense bright blue-white core, concentric orbit ribbons and a sweeping horizontal expanding shock ring; powerful warm rim light, character still readable.
+AGI ADVENT, much grander: small full-body Sam near bottom center slightly levitating with bent forearms lifted (upper arms near torso), looking up. A monumental white-gold crystalline intelligence core descends above him within interlocking cyan orbital rings and angular neural lattice. A broad luminous shaft connects heaven to a huge radial neural floor sigil. Stacked shockwaves sweep across the entire arena, elegant starfall trails and floating data glyphs, deep indigo sky, cyan/white-gold highlights. Scale: core assembly 1.5x character height, arena radius ~1.5x his height; effects dominate space while character remains legible, no occlusion of face. Small luminous text near climax "AGI. ONLINE.".
+Style: match the reference's polished 3D game art, spectacular but designed and buildable realtime geometry/particles; crisp dark negative space, soft volumetric glow with bright cores, controlled highlights. Avoid photoreal humans, changing clothing, extra characters, long limbs, grotesque satire, walls of text.

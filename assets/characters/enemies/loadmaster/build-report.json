@@ -1,0 +1,95 @@
+{
+  "height": 2.8,
+  "forward": "+X",
+  "sourceYawDegrees": 90,
+  "bounds": [
+    [
+      -1.3476624488830566,
+      -1.019957184791565,
+      0.0
+    ],
+    [
+      2.162202835083008,
+      1.019957184791565,
+      2.799999952316284
+    ]
+  ],
+  "joints": {
+    "root": [
+      0,
+      0,
+      0
+    ],
+    "chassis": [
+      0,
+      0,
+      0.75
+    ],
+    "shoulder": [
+      -0.355,
+      0,
+      1.404
+    ],
+    "elbow": [
+      0.833,
+      0,
+      2.396
+    ],
+    "wrist": [
+      1.333,
+      0,
+      1.9
+    ],
+    "clamp_upper": [
+      1.35,
+      0,
+      1.93
+    ],
+    "clamp_lower": [
+      1.35,
+      0,
+      1.85
+    ],
+    "wheel_front_left": [
+      0.903,
+      -0.81,
+      0.465
+    ],
+    "wheel_front_right": [
+      0.903,
+      0.81,
+      0.465
+    ],
+    "wheel_rear_left": [
+      -0.429,
+      -0.81,
+      0.465
+    ],
+    "wheel_rear_right": [
+      -0.429,
+      0.81,
+      0.465
+    ]
+  },
+  "weightedVertices": {
+    "root": 0,
+    "chassis": 11158,
+    "shoulder": 5577,
+    "elbow": 2164,
+    "wrist": 860,
+    "clamp_upper": 1337,
+    "clamp_lower": 745,
+    "wheel_front_left": 2932,
+    "wheel_front_right": 3053,
+    "wheel_rear_left": 2705,
+    "wheel_rear_right": 2728
+  },
+  "clips": {
+    "idle": 2.0,
+    "move": 1.0,
+    "skill1": 2.9,
+    "skill2": 2.3666666666666667,
+    "hit": 0.5
+  },
+  "triangles": 57472
+}

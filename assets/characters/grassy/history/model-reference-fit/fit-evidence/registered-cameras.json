@@ -1,0 +1,82 @@
+{
+  "front": {
+    "imageSize": [
+      1254,
+      1254
+    ],
+    "referenceAlphaBounds": [
+      375,
+      37,
+      880,
+      1221
+    ],
+    "pixelsPerUnit": 381.93548387096774,
+    "bodyOriginX": 627,
+    "cameraTarget": [
+      0.0,
+      0.0,
+      1.5552364587783813
+    ],
+    "orthoScale": 3.2832770347595215
+  },
+  "right": {
+    "imageSize": [
+      1254,
+      1254
+    ],
+    "referenceAlphaBounds": [
+      407,
+      66,
+      806,
+      1235
+    ],
+    "pixelsPerUnit": 377.09677419354836,
+    "bodyOriginX": 638,
+    "cameraTarget": [
+      -0.0,
+      0.029170231893658638,
+      1.6123182773590088
+    ],
+    "orthoScale": 3.325406312942505
+  },
+  "left": {
+    "imageSize": [
+      1254,
+      1254
+    ],
+    "referenceAlphaBounds": [
+      441,
+      61,
+      845,
+      1235
+    ],
+    "pixelsPerUnit": 378.7096774193548,
+    "bodyOriginX": 615,
+    "cameraTarget": [
+      0.0,
+      0.03168654069304466,
+      1.6054514646530151
+    ],
+    "orthoScale": 3.3112435340881348
+  },
+  "back": {
+    "imageSize": [
+      1254,
+      1254
+    ],
+    "referenceAlphaBounds": [
+      358,
+      50,
+      900,
+      1229
+    ],
+    "pixelsPerUnit": 380.3225806451613,
+    "bodyOriginX": 630,
+    "cameraTarget": [
+      0.007888040505349636,
+      -0.0,
+      1.5828667879104614
+    ],
+    "orthoScale": 3.297200918197632
+  }
+}

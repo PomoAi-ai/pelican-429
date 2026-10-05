@@ -1,0 +1,57 @@
+{
+  "height": 3.1,
+  "projection": "perspective, fov 5 degrees, near-orthographic inspection",
+  "frameHeight": 3.55,
+  "imageSize": [
+    720,
+    900
+  ],
+  "models": [
+    {
+      "name": "gpt6.1astra版本",
+      "id": "astra",
+      "model": "public/characters/human/history/models/grassy-detailed.glb",
+      "sha256": "3cbfcc86621e38fd062590922fbfce52634c73af638c87366b96d90fa21db8a0",
+      "front": "astra-front.png",
+      "right": "astra-right.png"
+    },
+    {
+      "name": "gpt6.1sol版本",
+      "id": "sol",
+      "model": "public/characters/human/history/models-atelier/grassy-atelier-detailed.glb",
+      "sha256": "cb827c64523b1153070d9bdcfcd8f28f13579c4262882113629d8e68f1a8fba8",
+      "front": "sol-front.png",
+      "right": "sol-right.png"
+    },
+    {
+      "name": "Sonnet 5.5版本",
+      "id": "sonnet",
+      "model": "public/characters/human/history/models-fresh/grassy-detailed.glb",
+      "sha256": "3ccf8fcf69118c45d22e1814f680448cbd44162265d7c3d1fe3280996e1b3db3",
+      "front": "sonnet-front.png",
+      "right": "sonnet-right.png"
+    },
+    {
+      "name": "Opus 5.5 版",
+      "id": "opus",
+      "model": "public/characters/human/history/models-opus55/grassy-opus55-detailed.glb",
+      "sha256": "bc7ae1672f7d6f41dbd8479b1c26c2336e1af29e77b413881ebbdf898189883f",
+      "front": "opus-front.png",
+      "right": "opus-right.png"
+    }
+  ],
+  "reference": "public/characters/human/history/turnaround-master-v2",
+  "renderer": "src/render/stage.ts + src/render/grassy/grassy-static.ts, high quality, MSAA",
+  "materialChanges": false,
+  "comparison": "grassy-detailed-model-comparison.jpg",
+  "comparisonSize": [
+    1440,
+    4052
+  ],
+  "referenceImages": [
+    "reference-front.png",
+    "reference-right.png"
+  ],
+  "capturedAt": "2026-10-04T10:27:57.261620+00:00",
+  "materialChangesNote": "仅说明截图未额外调材质；使用各版本已导出的实际共享材质。"
+}

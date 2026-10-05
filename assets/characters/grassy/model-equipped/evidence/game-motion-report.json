@@ -1,0 +1,100 @@
+{
+  "idle": {
+    "seconds": 3.2,
+    "loop": true,
+    "minimumSoleZ": 8.814076579710672e-08,
+    "maximumBodyZ": 3.1151318550109863,
+    "endpointVertexDifference": 0.0
+  },
+  "walk": {
+    "seconds": 1.2,
+    "loop": true,
+    "minimumSoleZ": 1.0270741768181324e-07,
+    "maximumBodyZ": 3.0644805431365967,
+    "endpointVertexDifference": 0.0
+  },
+  "run": {
+    "seconds": 0.8,
+    "loop": true,
+    "minimumSoleZ": 2.2724270820617676e-07,
+    "maximumBodyZ": 3.0665881633758545,
+    "endpointVertexDifference": 0.0
+  },
+  "sprint": {
+    "seconds": 0.6,
+    "loop": true,
+    "minimumSoleZ": 2.4586915969848633e-07,
+    "maximumBodyZ": 3.000589609146118,
+    "endpointVertexDifference": 0.0
+  },
+  "ride": {
+    "seconds": 3.6,
+    "loop": true,
+    "minimumSoleZ": 0.3388803005218506,
+    "maximumBodyZ": 3.201808452606201,
+    "endpointVertexDifference": 0.0
+  },
+  "jump": {
+    "seconds": 1.6,
+    "loop": false,
+    "minimumSoleZ": -1.2632201951134903e-08,
+    "maximumBodyZ": 3.719857931137085,
+    "endpointVertexDifference": 0.0
+  },
+  "keyboard_smash": {
+    "seconds": 2.0,
+    "loop": false,
+    "minimumSoleZ": 8.473069357251006e-09,
+    "maximumBodyZ": 3.1000001430511475,
+    "endpointVertexDifference": 0.0
+  },
+  "codex_attack": {
+    "seconds": 1.6,
+    "loop": false,
+    "minimumSoleZ": 5.726632323899139e-08,
+    "maximumBodyZ": 3.1000001430511475,
+    "endpointVertexDifference": 0.0
+  },
+  "bug_attack": {
+    "seconds": 2.0,
+    "loop": false,
+    "minimumSoleZ": 8.814076579710672e-08,
+    "maximumBodyZ": 3.1000001430511475,
+    "endpointVertexDifference": 0.0
+  },
+  "server_overload": {
+    "seconds": 3.2,
+    "loop": false,
+    "minimumSoleZ": -3.8453585204933916e-08,
+    "maximumBodyZ": 3.1000001430511475,
+    "endpointVertexDifference": 0.0
+  },
+  "takeoff": {
+    "seconds": 1.2,
+    "loop": false,
+    "minimumSoleZ": -9.59479251605444e-08,
+    "maximumBodyZ": 3.6199724674224854,
+    "endpointVertexDifference": 0.7109309434890747
+  },
+  "hover": {
+    "seconds": 2.4,
+    "loop": true,
+    "minimumSoleZ": 0.5750002861022949,
+    "maximumBodyZ": 3.644973039627075,
+    "endpointVertexDifference": 0.0
+  },
+  "fly_forward": {
+    "seconds": 1.2,
+    "loop": true,
+    "minimumSoleZ": 0.5840004682540894,
+    "maximumBodyZ": 3.614046812057495,
+    "endpointVertexDifference": 0.0
+  },
+  "land": {
+    "seconds": 1.2,
+    "loop": false,
+    "minimumSoleZ": 7.431001591839959e-08,
+    "maximumBodyZ": 3.6199724674224854,
+    "endpointVertexDifference": 0.7109309434890747
+  }
+}

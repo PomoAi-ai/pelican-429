@@ -1,0 +1,13 @@
+# 第一幕：雨雪夜，Grassy 编程
+
+内置 image_gen 生成的独立场景概念图，尚未接入游戏。
+
+参考：assets/characters/grassy/grassy-character-card-v1.png、public/showcase/pelican.jpg、public/resources/terrain.jpg。后两张为仓库内真实游戏模型及地形截图。
+
+## 完整提示词
+
+Use case: stylized-concept. Draw ONE single uninterrupted landscape 16:9 scene, chapter one opening for the existing game Pelican 429. NOT a collage, NOT storyboard panels, NOT a character card. Reference 1 is established Grassy character card: strictly preserve HUMAN Grassy likeness, tousled black hair, big brown eyes, red crewneck sweater, charcoal trousers, cream sneakers, rounded stylized sculpted proportions. Ignore all text and bird on that card. References 2 and 3 are actual game screenshots and primary guide to rendering language: simple readable rounded modeled geometry, matte materials, gently faceted forms, soft shading, restrained teal/green/coral palette, side-scrolling 2.5D orthographic view. Translate that style into a new interior, not anime painting or realistic cinematic photography. Scene: rain AND snow at night outside a large window, Grassy alone at his home computer frantically absorbed in vibe coding. Show a side-on cutaway room like a game level, horizontal wooden floor platform across bottom, modest wooden desk on right-center and chair, Grassy seated left of monitor facing right in clearly readable three-quarter profile. Both hands typing keyboard energetically, leaning forward with intense focused eyes, slight motion trails at fingertips only. Two monitors on the desk show code editor and AI conversation, clean abstract small code lines, no legible invented dialogue. Snowflakes and slanting rain outside dark blue window, snowy sill, simple silhouetted trees outdoors. Screen teal light illuminates face and red sweater, one small warm desk lamp, maintain clear shapes without harsh contrast or heavy bloom. A small shelf and computer tower suffice, keep room spare and buildable in Three.js, no elaborate props. Entire character, chair, desk and floor readable, moderate wide framing, near-orthographic side view with slight depth matching game screenshots. Atmosphere is feverish concentration against cold storm outside; this is BEFORE supernatural rupture. NO pelican, transformation, flying wheels, floating keyboard, shattered room, magical portal, island, castle or extra characters in this first shot. No captions, title, branding, HUD, borders or watermark. No night-shift/overtime narrative. Premium polished game environment concept with simple physical geometry and cohesive materials, not glossy plastic.
+
+## 输出说明
+
+床、室外房屋和屏幕图标为生成结果中的补充细节，不作为已确定的场景资产或剧情设定。此图用于确认第一幕构图及气氛，不代表实时渲染效果。

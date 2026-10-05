@@ -1,0 +1,40 @@
+{
+  "seconds": 3.5999999999999996,
+  "crankRevolutions": 3,
+  "scale": 0.48,
+  "forward": 0.14,
+  "crankOffset": -1.5707963267948966,
+  "wheelPerCrank": 0.3333333333333333,
+  "grip": {
+    "halfSpan": 0.46,
+    "forward": 0.61,
+    "height": 1.7
+  },
+  "blender": {
+    "bottomBracket": [
+      0,
+      -0.13520000000000001,
+      0.4848
+    ],
+    "crankRadius": 0.16319999999999998,
+    "pedalHalfSpan": 0.33599999999999997,
+    "pedalHalfThickness": 0.017279999999999997,
+    "saddleCenter": [
+      0,
+      0.20319999999999994,
+      1.128
+    ],
+    "gripLeft": [
+      0.46,
+      -0.61,
+      1.7
+    ],
+    "gripRight": [
+      -0.46,
+      -0.61,
+      1.7
+    ]
+  },
+  "wheelRadius": 0.4608,
+  "rollingSpeed": 0.804247719318987
+}

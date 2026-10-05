@@ -1,0 +1,48 @@
+{
+  "sourceReopened": true,
+  "sourceMeshObjects": 415,
+  "glbImported": true,
+  "importedMeshObjects": 24,
+  "height": 3.099999905563891,
+  "imagesEmbedded": 15,
+  "materials": 24,
+  "normalImageMeanRGB": {
+    "Grassy_denim-normal": [
+      0.5,
+      0.5,
+      0.9993
+    ],
+    "Grassy_denim_cuff-normal": [
+      0.5,
+      0.5,
+      0.9993
+    ],
+    "grassy_hair_strands_normal": [
+      0.5016,
+      0.4999,
+      0.9886
+    ],
+    "Grassy_rib-normal": [
+      0.5,
+      0.5001,
+      0.9966
+    ],
+    "Grassy_shoe-normal": [
+      0.5,
+      0.5,
+      1.0
+    ],
+    "Grassy_sweater-normal": [
+      0.5,
+      0.5,
+      0.9929
+    ]
+  },
+  "vertexColorPrimitives": 3,
+  "triangles": 1004232,
+  "extensions": [
+    "KHR_materials_clearcoat",
+    "KHR_materials_specular",
+    "KHR_materials_anisotropy"
+  ]
+}

@@ -1,0 +1,43 @@
+▶ core/rng
+  ✔ mulberry32: 同 seed 同序列，[0,1)，不同 seed 不同 (2.751958ms)
+  ✔ mulberry32: 非有限整数 seed 抛异常 (0.797417ms)
+  ✔ hashU32/hash01: 确定、u32 范围、对坐标与 seed 敏感 (0.333ms)
+  ✔ valueNoise1D/2D: [-1,1]、确定、连续 (8.031875ms)
+  ✔ fbm1D: [-1,1]、非法 octaves 抛 (1.707667ms)
+  ✔ randInt: 闭区间且覆盖两端；非法参数抛 (0.505334ms)
+✔ core/rng (16.526208ms)
+▶ world/worldgen
+  ✔ 尺寸、seed、surface 与 skyMin (78.533ms)
+  ✔ 同 seed 地图一致，不同 seed 不同 (439.587542ms)
+  ✔ 只有地表：≥3 种非空气方块、无 wood/leaves/copper、地表下全实心、地表之上只有树平台与渔屋 (39.078458ms)
+  ✔ 湖泊：≥1 个湖、水只在地表之上的非实心格、湖底与两岸有沙、水被岸挡住 (49.145209ms)
+  ✔ 树：≥10 棵、9 种形态都出现、平台为 branch 且与 platformRow+crownDx 一致、上方净空、避开出生区；树干 ±1 列无水 (5.472416ms)
+  ✔ 多个 seed 都有湖、树，且地表下全实心 (608.441291ms)
+  ✔ lakeChance=0 仍保底 1 个湖（在出生区外） (229.968ms)
+  ✔ treeChance=0 无树无 branch (102.03575ms)
+  ✔ 增大 treeMinGap 后，组合树与其他地面树仍保持配置间距 (132.757875ms)
+  ✔ perchedPools：高处小水池（有缺口可形成瀑布），不进入出生区 (169.940833ms)
+  ✔ perchedPools：每个高处小水池至少一侧岸在水位行不是实心（溢口未被结构后平整填平；seed 16/139/197 曾被填平） (472.228ms)
+  ✔ 底行为石质基岩 (0.223417ms)
+  ✔ seed 1: 中央草甸（原出生区）平坦安全；出生在渔屋陆侧门外、假人在更远处且可达 (182.453042ms)
+  ✔ seed 7: 中央草甸（原出生区）平坦安全；出生在渔屋陆侧门外、假人在更远处且可达 (193.954583ms)
+  ✔ seed 12345: 中央草甸（原出生区）平坦安全；出生在渔屋陆侧门外、假人在更远处且可达 (126.05475ms)
+  ✔ seed 3735928559: 中央草甸（原出生区）平坦安全；出生在渔屋陆侧门外、假人在更远处且可达 (149.985ms)
+  ✔ seed 20260930: 中央草甸（原出生区）平坦安全；出生在渔屋陆侧门外、假人在更远处且可达 (32.426833ms)
+  ✔ 生成耗时中位数 < 250ms（PERF=1 严格） (823.596041ms)
+  ✔ 非法 seed / cfg / registry 抛异常 (0.931834ms)
+✔ world/worldgen (3839.019916ms)
+▶ world/trees
+  ✔ pickTreeKind：按栖息地权重表（TREE_KINDS 顺序）累加选种，边界确定；未知栖息地抛 (2.040917ms)
+  ✔ planTree：确定性、尺寸在范围内、平台 = baseY + platformRow (0.480625ms)
+  ✔ placeTrees：平地 treeChance=1 时按 treeMinGap 等距种树、写 branch、避开 exclude 区间、树干 ±1 列不在湖内 (8.232125ms)
+  ✔ placeTrees：平台格被占用则整棵放弃；坡度 >1 或非草地不种 (0.580833ms)
+✔ world/trees (11.531125ms)
+ℹ tests 29
+ℹ suites 3
+ℹ pass 29
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 5795.833541

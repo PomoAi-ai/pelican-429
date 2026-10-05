@@ -1,0 +1,45 @@
+{
+  "skin": [
+    {
+      "mesh": "model",
+      "vertices": 19896,
+      "maximumInfluences": 4,
+      "normalizationMaxError": 2.220446049250313e-16
+    }
+  ],
+  "preservedHeadArmTailWeightMaximumDifference": 0.0,
+  "walk": {
+    "minimumSoleZ": -1.3969838619232178e-07,
+    "supportFootMaximumGroundError": 1.4002482373598468e-07,
+    "loopEndpointMaximumVertexDifference": 0
+  },
+  "animationChannelsUnchanged": true,
+  "animationChannelsSha256": "aa441a8d4d6b1dfe4c5da0d0fd60274e0c04a31676fb7d7fa1a49f28cd4db04e",
+  "restGeometryUnchanged": true,
+  "restMeshSha256": "5954b79ac3c60a5e88e807d2890bdd21fec5354dc7558cc5318099faacb3d441",
+  "allClipEndpointMaximumVertexDifference": {
+    "idle": 0.0,
+    "walk": 0.0,
+    "greet": 0.0,
+    "special": 0.0
+  },
+  "nonWalkClipMaximumVertexDifference": {
+    "idle": 9.09703376237303e-05,
+    "greet": 0.0,
+    "special": 0.0
+  },
+  "finalBlendSha256": "3e76267f06bf3e54895436145294879b7d5f55bfa9350e4d7318c656ff5f8bcc",
+  "finalGlbSha256": "8066ed187b19fdd3bb98a693e899dea81ad1a5c9988383efb0ba5b31dfe14484",
+  "unchangedInputsAndStaticViews": {
+    "assets/characters/sam/source.glb": true,
+    "scripts/blender_npcs/animation.py": true,
+    "public/characters/sam/render-left.png": true,
+    "public/characters/sam/render-back.png": true,
+    "public/characters/sam/render-hero.png": true,
+    "public/characters/sam/render-right.png": true,
+    "public/characters/sam/render-front.png": true
+  },
+  "renderCandidateAndFinalWeightsIdentical": true,
+  "weightsSha256": "427ea9478e2e8a01ff11b5f0a86e569c4cc3af2b9f81e4d6b231a9cff9b39d84",
+  "weightMaximumSumError": 4.0978193283081055e-08
+}

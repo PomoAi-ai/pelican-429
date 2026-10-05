@@ -1,0 +1,743 @@
+[
+  {
+    "variant": "detailed",
+    "bytes": 83157564,
+    "triangles": 2272662,
+    "primitives": 26,
+    "materials": 26,
+    "low": [
+      -0.6583544567441209,
+      0,
+      -0.5810703544904641
+    ],
+    "high": [
+      0.6583544567441209,
+      3.099999946172659,
+      0.4918596888303739
+    ],
+    "height": 3.099999946172659,
+    "normalMapped": 7,
+    "textured": 7,
+    "images": [
+      {
+        "name": "denim_normal",
+        "width": 1024,
+        "height": 1024
+      },
+      {
+        "name": "denim_color",
+        "width": 1024,
+        "height": 1024
+      },
+      {
+        "name": "denim_roughness",
+        "width": 1024,
+        "height": 1024
+      },
+      {
+        "name": "denim_cuff_color",
+        "width": 1024,
+        "height": 1024
+      },
+      {
+        "name": "hair_normal",
+        "width": 1024,
+        "height": 1024
+      },
+      {
+        "name": "hair_color",
+        "width": 1024,
+        "height": 1024
+      },
+      {
+        "name": "hair_roughness",
+        "width": 1024,
+        "height": 1024
+      },
+      {
+        "name": "leather_normal",
+        "width": 1024,
+        "height": 1024
+      },
+      {
+        "name": "shoe_color",
+        "width": 1024,
+        "height": 1024
+      },
+      {
+        "name": "leather_roughness",
+        "width": 1024,
+        "height": 1024
+      },
+      {
+        "name": "shoe_trim_color",
+        "width": 1024,
+        "height": 1024
+      },
+      {
+        "name": "knit_normal",
+        "width": 1024,
+        "height": 1024
+      },
+      {
+        "name": "sweater_color",
+        "width": 1024,
+        "height": 1024
+      },
+      {
+        "name": "knit_roughness",
+        "width": 1024,
+        "height": 1024
+      },
+      {
+        "name": "rib_normal",
+        "width": 1024,
+        "height": 1024
+      },
+      {
+        "name": "sweater_rib_color",
+        "width": 1024,
+        "height": 1024
+      },
+      {
+        "name": "rib_roughness",
+        "width": 1024,
+        "height": 1024
+      }
+    ],
+    "uvRanges": [
+      {
+        "material": "denim",
+        "min": [
+          0,
+          -5.285715103149414
+        ],
+        "max": [
+          13.784893035888672,
+          1
+        ]
+      },
+      {
+        "material": "denim_cuff",
+        "min": [
+          0,
+          -1.095238208770752
+        ],
+        "max": [
+          5.316882610321045,
+          1
+        ]
+      },
+      {
+        "material": "hair",
+        "min": [
+          0,
+          -1.1920928955078125e-7
+        ],
+        "max": [
+          8,
+          1
+        ]
+      },
+      {
+        "material": "shoe",
+        "min": [
+          0,
+          0
+        ],
+        "max": [
+          1,
+          1
+        ]
+      },
+      {
+        "material": "shoe_trim",
+        "min": [
+          0,
+          0
+        ],
+        "max": [
+          1,
+          1
+        ]
+      },
+      {
+        "material": "sweater",
+        "min": [
+          0,
+          -13.319934844970703
+        ],
+        "max": [
+          11.865934371948242,
+          1
+        ]
+      },
+      {
+        "material": "sweater_rib",
+        "min": [
+          0,
+          0
+        ],
+        "max": [
+          9.475000381469727,
+          1
+        ]
+      }
+    ],
+    "denimColors": [
+      {
+        "material": "denim",
+        "min": 0.45719999074935913,
+        "max": 0.8874635696411133
+      },
+      {
+        "material": "denim_cuff",
+        "min": 0.8240200281143188,
+        "max": 0.8399221301078796
+      }
+    ],
+    "animations": 0,
+    "skins": 0,
+    "sha256": "3cbfcc86621e38fd062590922fbfce52634c73af638c87366b96d90fa21db8a0",
+    "boundsMethod": "glTF Y-up, all ancestor and local node transforms applied",
+    "soleY": 0,
+    "expectedHeight": 3.1,
+    "dimensionTolerance": 0.00001,
+    "heightPass": true,
+    "solePass": true,
+    "positionCount": 1210431,
+    "attributes": {
+      "TEXCOORD_0": 26,
+      "COLOR_0": 9
+    },
+    "clothSheen": [
+      {
+        "material": "denim",
+        "sheenColorFactor": [
+          0.02500000037252903,
+          0.02500000037252903,
+          0.02500000037252903
+        ]
+      },
+      {
+        "material": "denim_cuff",
+        "sheenColorFactor": [
+          0.02500000037252903,
+          0.02500000037252903,
+          0.02500000037252903
+        ]
+      },
+      {
+        "material": "sweater",
+        "sheenColorFactor": [
+          0.02500000037252903,
+          0.02500000037252903,
+          0.02500000037252903
+        ]
+      },
+      {
+        "material": "sweater_rib",
+        "sheenColorFactor": [
+          0.02500000037252903,
+          0.02500000037252903,
+          0.02500000037252903
+        ]
+      }
+    ],
+    "clothSheenPass": true
+  },
+  {
+    "variant": "game",
+    "bytes": 5193636,
+    "triangles": 44977,
+    "primitives": 26,
+    "materials": 26,
+    "low": [
+      -0.658483674353505,
+      1.7851171929539333e-13,
+      -0.5798925098301311
+    ],
+    "high": [
+      0.658129176159548,
+      3.0999999474179845,
+      0.49250870501974475
+    ],
+    "height": 3.099999947417806,
+    "normalMapped": 7,
+    "textured": 7,
+    "images": [
+      {
+        "name": "denim_normal_game",
+        "width": 512,
+        "height": 512
+      },
+      {
+        "name": "denim_cuff_color_game",
+        "width": 512,
+        "height": 512
+      },
+      {
+        "name": "denim_roughness_game",
+        "width": 512,
+        "height": 512
+      },
+      {
+        "name": "denim_color_game",
+        "width": 512,
+        "height": 512
+      },
+      {
+        "name": "hair_normal_game",
+        "width": 512,
+        "height": 512
+      },
+      {
+        "name": "hair_color_game",
+        "width": 512,
+        "height": 512
+      },
+      {
+        "name": "hair_roughness_game",
+        "width": 512,
+        "height": 512
+      },
+      {
+        "name": "leather_normal_game",
+        "width": 512,
+        "height": 512
+      },
+      {
+        "name": "shoe_color_game",
+        "width": 512,
+        "height": 512
+      },
+      {
+        "name": "leather_roughness_game",
+        "width": 512,
+        "height": 512
+      },
+      {
+        "name": "shoe_trim_color_game",
+        "width": 512,
+        "height": 512
+      },
+      {
+        "name": "knit_normal_game",
+        "width": 512,
+        "height": 512
+      },
+      {
+        "name": "sweater_color_game",
+        "width": 512,
+        "height": 512
+      },
+      {
+        "name": "knit_roughness_game",
+        "width": 512,
+        "height": 512
+      },
+      {
+        "name": "rib_normal_game",
+        "width": 512,
+        "height": 512
+      },
+      {
+        "name": "sweater_rib_color_game",
+        "width": 512,
+        "height": 512
+      },
+      {
+        "name": "rib_roughness_game",
+        "width": 512,
+        "height": 512
+      }
+    ],
+    "uvRanges": [
+      {
+        "material": "denim_cuff_game",
+        "min": [
+          -0.000019428853192948736,
+          -1.0956194400787354
+        ],
+        "max": [
+          5.315227508544922,
+          1.0014979839324951
+        ]
+      },
+      {
+        "material": "denim_game",
+        "min": [
+          -0.0012894052779302,
+          -5.283786773681641
+        ],
+        "max": [
+          10.859472274780273,
+          1
+        ]
+      },
+      {
+        "material": "hair_game",
+        "min": [
+          -0.0034265746362507343,
+          -0.002946019172668457
+        ],
+        "max": [
+          7.993389129638672,
+          1
+        ]
+      },
+      {
+        "material": "shoe_game",
+        "min": [
+          0,
+          0
+        ],
+        "max": [
+          1,
+          1
+        ]
+      },
+      {
+        "material": "shoe_trim_game",
+        "min": [
+          -0.000891365110874176,
+          0
+        ],
+        "max": [
+          1.001356601715088,
+          1
+        ]
+      },
+      {
+        "material": "sweater_game",
+        "min": [
+          -0.00007095427281456068,
+          -13.31842041015625
+        ],
+        "max": [
+          8.549452781677246,
+          1.0000721216201782
+        ]
+      },
+      {
+        "material": "sweater_rib_game",
+        "min": [
+          -0.00007995242776814848,
+          0
+        ],
+        "max": [
+          9.42597770690918,
+          1
+        ]
+      }
+    ],
+    "denimColors": [
+      {
+        "material": "denim_cuff_game",
+        "min": 0.8240317106246948,
+        "max": 0.8398391008377075
+      },
+      {
+        "material": "denim_game",
+        "min": 0.4577667713165283,
+        "max": 0.8805620670318604
+      }
+    ],
+    "animations": 0,
+    "skins": 0,
+    "sha256": "a385c87c11e361b9eeb7db3b3172c5ecdde754d2440964b6f232e560ce1696fc",
+    "boundsMethod": "glTF Y-up, all ancestor and local node transforms applied",
+    "soleY": 1.7851171929539333e-13,
+    "expectedHeight": 3.1,
+    "dimensionTolerance": 0.00001,
+    "heightPass": true,
+    "solePass": true,
+    "positionCount": 28339,
+    "attributes": {
+      "TEXCOORD_0": 26,
+      "COLOR_0": 9
+    },
+    "clothSheen": [
+      {
+        "material": "denim_cuff_game",
+        "sheenColorFactor": [
+          0.02500000037252903,
+          0.02500000037252903,
+          0.02500000037252903
+        ]
+      },
+      {
+        "material": "denim_game",
+        "sheenColorFactor": [
+          0.02500000037252903,
+          0.02500000037252903,
+          0.02500000037252903
+        ]
+      },
+      {
+        "material": "sweater_game",
+        "sheenColorFactor": [
+          0.02500000037252903,
+          0.02500000037252903,
+          0.02500000037252903
+        ]
+      },
+      {
+        "material": "sweater_rib_game",
+        "sheenColorFactor": [
+          0.02500000037252903,
+          0.02500000037252903,
+          0.02500000037252903
+        ]
+      }
+    ],
+    "clothSheenPass": true
+  },
+  {
+    "variant": "light",
+    "bytes": 1504988,
+    "triangles": 18864,
+    "primitives": 26,
+    "materials": 26,
+    "low": [
+      -0.658611399039799,
+      -1.8751484739953916e-12,
+      -0.584104857130896
+    ],
+    "high": [
+      0.6570350233996436,
+      3.1000000558004217,
+      0.4922584215375281
+    ],
+    "height": 3.1000000558022967,
+    "normalMapped": 7,
+    "textured": 7,
+    "images": [
+      {
+        "name": "denim_normal_light",
+        "width": 256,
+        "height": 256
+      },
+      {
+        "name": "denim_cuff_color_light",
+        "width": 256,
+        "height": 256
+      },
+      {
+        "name": "denim_roughness_light",
+        "width": 256,
+        "height": 256
+      },
+      {
+        "name": "denim_color_light",
+        "width": 256,
+        "height": 256
+      },
+      {
+        "name": "hair_normal_light",
+        "width": 256,
+        "height": 256
+      },
+      {
+        "name": "hair_color_light",
+        "width": 256,
+        "height": 256
+      },
+      {
+        "name": "hair_roughness_light",
+        "width": 256,
+        "height": 256
+      },
+      {
+        "name": "leather_normal_light",
+        "width": 256,
+        "height": 256
+      },
+      {
+        "name": "shoe_color_light",
+        "width": 256,
+        "height": 256
+      },
+      {
+        "name": "leather_roughness_light",
+        "width": 256,
+        "height": 256
+      },
+      {
+        "name": "shoe_trim_color_light",
+        "width": 256,
+        "height": 256
+      },
+      {
+        "name": "knit_normal_light",
+        "width": 256,
+        "height": 256
+      },
+      {
+        "name": "sweater_color_light",
+        "width": 256,
+        "height": 256
+      },
+      {
+        "name": "knit_roughness_light",
+        "width": 256,
+        "height": 256
+      },
+      {
+        "name": "rib_normal_light",
+        "width": 256,
+        "height": 256
+      },
+      {
+        "name": "sweater_rib_color_light",
+        "width": 256,
+        "height": 256
+      },
+      {
+        "name": "rib_roughness_light",
+        "width": 256,
+        "height": 256
+      }
+    ],
+    "uvRanges": [
+      {
+        "material": "denim_cuff_light",
+        "min": [
+          -0.000019428853192948736,
+          -1.0955471992492676
+        ],
+        "max": [
+          5.315227508544922,
+          1.0014979839324951
+        ]
+      },
+      {
+        "material": "denim_light",
+        "min": [
+          -0.0012894052779302,
+          -5.277642250061035
+        ],
+        "max": [
+          9.604636192321777,
+          1
+        ]
+      },
+      {
+        "material": "hair_light",
+        "min": [
+          -0.0223010815680027,
+          -0.004445672035217285
+        ],
+        "max": [
+          7.993389129638672,
+          1
+        ]
+      },
+      {
+        "material": "shoe_light",
+        "min": [
+          0,
+          0
+        ],
+        "max": [
+          1,
+          1
+        ]
+      },
+      {
+        "material": "shoe_trim_light",
+        "min": [
+          -0.000891365110874176,
+          0
+        ],
+        "max": [
+          1.001356601715088,
+          1
+        ]
+      },
+      {
+        "material": "sweater_light",
+        "min": [
+          -0.00007095427281456068,
+          -13.314399719238281
+        ],
+        "max": [
+          8.546801567077637,
+          1.0000721216201782
+        ]
+      },
+      {
+        "material": "sweater_rib_light",
+        "min": [
+          0.00869544968008995,
+          0
+        ],
+        "max": [
+          9.266216278076172,
+          1
+        ]
+      }
+    ],
+    "denimColors": [
+      {
+        "material": "denim_cuff_light",
+        "min": 0.8240352272987366,
+        "max": 0.8394714593887329
+      },
+      {
+        "material": "denim_light",
+        "min": 0.45871230959892273,
+        "max": 0.8655872344970703
+      }
+    ],
+    "animations": 0,
+    "skins": 0,
+    "sha256": "cd86b53f437c5e63e999b50b2d038d10a69a88e872a887b8c28210442319ab7c",
+    "boundsMethod": "glTF Y-up, all ancestor and local node transforms applied",
+    "soleY": -1.8751484739953916e-12,
+    "expectedHeight": 3.1,
+    "dimensionTolerance": 0.00001,
+    "heightPass": true,
+    "solePass": true,
+    "positionCount": 13417,
+    "attributes": {
+      "TEXCOORD_0": 26,
+      "COLOR_0": 9
+    },
+    "clothSheen": [
+      {
+        "material": "denim_cuff_light",
+        "sheenColorFactor": [
+          0.02500000037252903,
+          0.02500000037252903,
+          0.02500000037252903
+        ]
+      },
+      {
+        "material": "denim_light",
+        "sheenColorFactor": [
+          0.02500000037252903,
+          0.02500000037252903,
+          0.02500000037252903
+        ]
+      },
+      {
+        "material": "sweater_light",
+        "sheenColorFactor": [
+          0.02500000037252903,
+          0.02500000037252903,
+          0.02500000037252903
+        ]
+      },
+      {
+        "material": "sweater_rib_light",
+        "sheenColorFactor": [
+          0.02500000037252903,
+          0.02500000037252903,
+          0.02500000037252903
+        ]
+      }
+    ],
+    "clothSheenPass": true
+  }
+]

@@ -1,0 +1,79 @@
+{
+  "schema": "landmarks.v1",
+  "image_size": [
+    1254,
+    1254
+  ],
+  "landmarks": [
+    {
+      "view": "front",
+      "name": "nose_tip",
+      "class": "feature",
+      "x": 627.0,
+      "y": 345.16456854343414
+    },
+    {
+      "view": "front",
+      "name": "chin",
+      "class": "feature",
+      "x": 625.9195348620415,
+      "y": 432.9662353992462
+    },
+    {
+      "view": "front",
+      "name": "smile_low",
+      "class": "feature",
+      "x": 627.361762046814,
+      "y": 370.6821720600128
+    },
+    {
+      "view": "front",
+      "name": "eye_L",
+      "class": "feature",
+      "x": 564.2534567713737,
+      "y": 309.032163977623
+    },
+    {
+      "view": "front",
+      "name": "eye_R",
+      "class": "feature",
+      "x": 689.746505856514,
+      "y": 309.032163977623
+    },
+    {
+      "view": "front",
+      "name": "hair_top",
+      "class": "structural_tip",
+      "x": 613.3642989993095,
+      "y": 37.000558733940125
+    },
+    {
+      "view": "right",
+      "name": "nose_tip",
+      "class": "feature",
+      "x": 780.7923710346222,
+      "y": 370.2601661682129
+    },
+    {
+      "view": "right",
+      "name": "chin",
+      "class": "feature",
+      "x": 699.8155245780945,
+      "y": 456.94948947429657
+    },
+    {
+      "view": "right",
+      "name": "smile_low",
+      "class": "feature",
+      "x": 761.308868765831,
+      "y": 395.45450091362
+    },
+    {
+      "view": "right",
+      "name": "eye_L",
+      "class": "feature",
+      "x": 737.7099494934082,
+      "y": 334.58549523353577
+    }
+  ]
+}

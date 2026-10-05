@@ -1,0 +1,63 @@
+{
+  "assets/characters/tibo/tibo-rigged.blend": {
+    "sha256": "c9ae88c9b3ee01e4b80bfb46c118c5039ef4821c20b163016bf42b1dfa8c3417",
+    "bytes": 13767957,
+    "snapshot": "$TMPDIR/npc-crotch-repair-baseline/tibo-tibo-rigged.blend"
+  },
+  "public/characters/tibo/tibo.glb": {
+    "sha256": "acd3af835ab9861a0c8992ce3b08181842b18892a2791d7f09b4531f78bd0910",
+    "bytes": 13410136,
+    "snapshot": "$TMPDIR/npc-crotch-repair-baseline/tibo-tibo.glb"
+  },
+  "assets/characters/tibo/source.glb": {
+    "sha256": "12a5e6d264ecf3597dddb70dc289a35b553ab18ce978fe4e4d68aa2ff8d90913",
+    "bytes": 12930768,
+    "snapshot": "$TMPDIR/npc-crotch-repair-baseline/tibo-source.glb"
+  },
+  "assets/characters/tibo/fit-rigged/report.json": {
+    "sha256": "86b86930419b274c1bae70e1ea9ac83dce09e1a97df412cc942024af574a0184",
+    "bytes": 11293,
+    "snapshot": "$TMPDIR/npc-crotch-repair-baseline/tibo-report.json"
+  },
+  "assets/characters/tibo/fit-landmarks-rigged.json": {
+    "sha256": "1d8f0bca51c63cef37cfaf816ea09be8b5b54c133bb41eb752a36b416d2bee25",
+    "bytes": 416,
+    "snapshot": "$TMPDIR/npc-crotch-repair-baseline/tibo-fit-landmarks-rigged.json"
+  },
+  "public/characters/tibo/reference-back.png": {
+    "sha256": "eb64e3cddcbb5d0e837c67a94b3b6c21a0484e2a48a40bf0e2c774939a7a8156",
+    "bytes": 2178213
+  },
+  "public/characters/tibo/reference-front.png": {
+    "sha256": "5fd44c4a417ecde1cc0ab25811dd54da6e9b6349e138ffaa3e00f17dc0671264",
+    "bytes": 2280664
+  },
+  "public/characters/tibo/reference-left.png": {
+    "sha256": "525f80f746c10f8ccfe470b2555f8e4f30de59b90571a4abc9b57f53517f4701",
+    "bytes": 1915953
+  },
+  "public/characters/tibo/reference-right.png": {
+    "sha256": "7e5c444396f8ac5ff285505f9d0acf0731dfac97da94ec3b6db3e6a334b21d48",
+    "bytes": 1875970
+  },
+  "public/characters/tibo/render-back.png": {
+    "sha256": "179606fa31a59c9aed088511cc286104257a7314c0ba7efb1d3085417ea1d29d",
+    "bytes": 1380928
+  },
+  "public/characters/tibo/render-front.png": {
+    "sha256": "768eb9d33a1d555a4ea8c21b45687a04485ae48975c36e158845e14c2f86b4ff",
+    "bytes": 1425605
+  },
+  "public/characters/tibo/render-hero.png": {
+    "sha256": "08e1ea3ddfda67df8b3cfa1a90fe8d182d8bb1dcdd97e6a8419037db653b878f",
+    "bytes": 1436826
+  },
+  "public/characters/tibo/render-left.png": {
+    "sha256": "66dbfe8a1abf7a6f80d56ad9c72f1365e4b122997ee916f7049278194a0eaaa3",
+    "bytes": 1163515
+  },
+  "public/characters/tibo/render-right.png": {
+    "sha256": "2698268db8004bcc63b630cf936ad762043df12054377895f274f962bb2f974a",
+    "bytes": 1178882
+  }
+}

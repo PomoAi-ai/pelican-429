@@ -1,0 +1,9 @@
+{
+  "service": "Hyper3D CLI",
+  "input": "assets/concepts/enemy-model-input/watch-wasp.png",
+  "prompt": "One modern FPV quadcopter, exactly four open two-blade propellers and four orange motors on a carbon X frame, a strapped black battery, front camera and rear antenna. Preserve the reference geometry. No duplicate drone, no propeller guards, no extra rotors.",
+  "tier": "Gen-2.5-High",
+  "meshMode": "Raw",
+  "quality": 60000,
+  "format": "glb"
+}

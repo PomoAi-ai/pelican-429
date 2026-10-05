@@ -1,0 +1,53 @@
+{
+  "name": "欧米 OMI-01",
+  "tool": "image_gen built-in",
+  "approvedDesign": "[local source path removed]",
+  "status": "action-concept-sheets",
+  "design": {
+    "body": "大头、紧凑躯干、短四肢、宽脚掌",
+    "hands": "双臂均为双指机械夹爪",
+    "palette": "白色、藏蓝、灰青腹甲、琥珀色指示灯"
+  },
+  "skills": [
+    {
+      "name": "夹臂横扫",
+      "phases": [
+        "压低重心、单臂后拉蓄力",
+        "转体带动夹臂向前横扫",
+        "前脚承重、夹爪接触点闪光",
+        "手臂落下、身体前倾收招"
+      ],
+      "readability": "单臂、原地近身弧线攻击；蓄力和收招轮廓明显"
+    },
+    {
+      "name": "突进夹击",
+      "phases": [
+        "屈膝蹬地准备、双钳张开",
+        "身体前倾、短距离地面突进",
+        "前脚踩实、双钳向内夹合",
+        "后仰刹停、双臂回收"
+      ],
+      "readability": "双臂、直线位移攻击；刹停后有反击窗口"
+    }
+  ],
+  "images": [
+    {
+      "id": "skill-01-clamp-sweep",
+      "prompt": "Use case: stylized-concept. Production ANIMATION KEY POSE SHEET for OMI-01, a robot enemy in a 2.5D side-scrolling action game. Reference image is a STRICT locked character design. Draw ONLY the ROBOT from reference; omit the human entirely. Preserve EXACTLY the approved short compact large spherical head, single amber ring on black faceplate, white helmet, white chest/limb shells, navy shoulder caps/toe caps, muted teal belly, black joints, amber circular joint lights, BOTH arms end in identical two-pronged blunt mechanical grippers. Keep short legs and large stable feet; same head size, limb lengths and body mass every pose. Robot looks like the reference, not a generic Transformer, no redesign, no new weapons, no wings, no extra limbs. Clean rounded premium 3D animated-game concept art with believable mechanical articulations. Make poses substantially different and anatomically functional, feet firmly grounded except intentional step. All panels true orthographic SIDE VIEW facing RIGHT with just enough small torso twist to distinguish far arm, fixed camera and identical character scale. Plain very light blue-gray background, subtle thin ground line in each panel, soft studio shading. Landscape 3:2, 2x2 orderly large panels with generous spacing, entire body visible in each, no overlaps between panels. Title 'OMI-01' top left. Legible minimal English labels only as specified. Motion arcs subtle amber graphic cues, never giant glowing energy blades, do not obscure silhouette. Sheet title 'CLAMP SWEEP'. Four key poses sequence: panel1 WINDUP: feet planted wide, knees bend, torso leans and twists back LEFT, camera-near arm elbow bent drawing open gripper back behind waist; far arm balances forward low; amber eye ring slightly brighter. panel2 SWING: grounded weight shift to forward right foot, torso rotates forward, near arm makes compact chest-height forward sweeping strike, open gripper travels left-to-right; a SHORT curved amber line traces hand path only. panel3 IMPACT: near arm extended FORWARD RIGHT at torso level but elbow not locked, gripper snaps partially shut with small orange contact sparks in empty air at tip, rear foot heel lifted, far arm pulled back for counterbalance; no target character. panel4 RECOVER: overextended torso tipped a little forward, attacking arm lowered, knees absorb weight, head remains looking right, visible recovery opening before returning idle. All four full bodies SAME SIZE; emphasize readable windup and recovery.",
+      "source": "[local source path removed]",
+      "file": "skill-01-clamp-sweep.png"
+    },
+    {
+      "id": "skill-02-dash-clamp",
+      "prompt": "Use case: stylized-concept. Production ANIMATION KEY POSE SHEET for OMI-01, a robot enemy in a 2.5D side-scrolling action game. Reference image is a STRICT locked character design. Draw ONLY the ROBOT from reference; omit the human entirely. Preserve EXACTLY the approved short compact large spherical head, single amber ring on black faceplate, white helmet, white chest/limb shells, navy shoulder caps/toe caps, muted teal belly, black joints, amber circular joint lights, BOTH arms end in identical two-pronged blunt mechanical grippers. Keep short legs and large stable feet; same head size, limb lengths and body mass every pose. Robot looks like the reference, not a generic Transformer, no redesign, no new weapons, no wings, no extra limbs. Clean rounded premium 3D animated-game concept art with believable mechanical articulations. Make poses substantially different and anatomically functional, feet firmly grounded except intentional step. All panels true orthographic SIDE VIEW facing RIGHT with just enough small torso twist to distinguish far arm, fixed camera and identical character scale. Plain very light blue-gray background, subtle thin ground line in each panel, soft studio shading. Landscape 3:2, 2x2 orderly large panels with generous spacing, entire body visible in each, no overlaps between panels. Title 'OMI-01' top left. Legible minimal English labels only as specified. Motion arcs subtle amber graphic cues, never giant glowing energy blades, do not obscure silhouette. Sheet title 'DASH CLAMP'. Four key poses sequence: panel1 BRACE: low crouch with rear leg loaded, torso angled forward RIGHT, BOTH grippers held open ahead at chest level, head tilted toward travel direction, amber ring brighter. panel2 DASH: fast short ground dash to RIGHT, body leans forward approximately 30 degrees, rear leg pushes backward and leading knee drives ahead, both open grippers forward, small grounded dust streak behind feet, no rocket jets. panel3 CLAMP: lead foot plants and robot lunges, BOTH grippers snap inward around empty space directly in front of chest, arms remain separate and visible, tiny amber closure spark, front knee bent and rear leg braced; no victim. panel4 BRAKE: front foot firmly planted farther forward, body rocks BACK from braking with knees bent, both closed grippers retract toward abdomen, tiny heel dust and clear vulnerable recovery posture. Preserve body proportions and gripper identity in all frames, distinguish two-handed straight dash from one-handed sweeping skill.",
+      "source": "[local source path removed]",
+      "file": "skill-02-dash-clamp.png"
+    },
+    {
+      "id": "basic-actions",
+      "prompt": "Use case: stylized-concept. Production ANIMATION KEY POSE SHEET for OMI-01, a robot enemy in a 2.5D side-scrolling action game. Reference image is a STRICT locked character design. Draw ONLY the ROBOT from reference; omit the human entirely. Preserve EXACTLY the approved short compact large spherical head, single amber ring on black faceplate, white helmet, white chest/limb shells, navy shoulder caps/toe caps, muted teal belly, black joints, amber circular joint lights, BOTH arms end in identical two-pronged blunt mechanical grippers. Keep short legs and large stable feet; same head size, limb lengths and body mass every pose. Robot looks like the reference, not a generic Transformer, no redesign, no new weapons, no wings, no extra limbs. Clean rounded premium 3D animated-game concept art with believable mechanical articulations. Make poses substantially different and anatomically functional, feet firmly grounded except intentional step. All panels true orthographic SIDE VIEW facing RIGHT with just enough small torso twist to distinguish far arm, fixed camera and identical character scale. Plain very light blue-gray background, subtle thin ground line in each panel, soft studio shading. Landscape 3:2, 2x2 orderly large panels with generous spacing, entire body visible in each, no overlaps between panels. Title 'OMI-01' top left. Legible minimal English labels only as specified. Motion arcs subtle amber graphic cues, never giant glowing energy blades, do not obscure silhouette. Sheet title 'BASIC ACTIONS'. Four key poses: panel1 IDLE: alert relaxed ready stance, both short gripper arms hang loosely with slightly bent elbows, knees soft and head looking right; tiny dashed ghost line above chest can suggest gentle breathing-like servo bob. panel2 WALK: rightward measured mechanical walking, leading foot planted heel first and rear toe pushing, alternating arms, head stable. panel3 HIT: recoils backward LEFT from a hit to chest coming from RIGHT, torso tilted back, knees buckled, arms spread a little but connected, amber optic flickers, small pale spark at sternum, no large effects or damage. panel4 SHUTDOWN: defeated but intact robot seated on ground with knees bent and feet forward, torso slumped and large head bowed, both grippers loose on floor, amber eye dim/off, NO dismemberment. Mechanical range believable, clean shapes. Do not include human or any other robots beyond these four poses of OMI.",
+      "source": "[local source path removed]",
+      "file": "basic-actions.png"
+    }
+  ]
+}

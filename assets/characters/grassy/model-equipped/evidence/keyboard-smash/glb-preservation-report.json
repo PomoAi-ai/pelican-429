@@ -1,0 +1,29 @@
+{
+  "game": {
+    "bytes": 6282824,
+    "oldClipsPreserved": 12,
+    "newClip": "keyboard_smash",
+    "newClipChannels": 68,
+    "retainedBodyAttributesPreserved": true,
+    "equipmentPositionsPreserved": true,
+    "texturesPreserved": true
+  },
+  "detailed": {
+    "bytes": 39909104,
+    "oldClipsPreserved": 12,
+    "newClip": "keyboard_smash",
+    "newClipChannels": 68,
+    "retainedBodyAttributesPreserved": true,
+    "equipmentPositionsPreserved": true,
+    "texturesPreserved": true
+  },
+  "light": {
+    "bytes": 2706276,
+    "oldClipsPreserved": 12,
+    "newClip": "keyboard_smash",
+    "newClipChannels": 68,
+    "retainedBodyAttributesPreserved": true,
+    "equipmentPositionsPreserved": true,
+    "texturesPreserved": true
+  }
+}

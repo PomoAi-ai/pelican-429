@@ -1,0 +1,10 @@
+title = "Repository secrets"
+
+[extend]
+useDefault = true
+
+[[rules]]
+id = "generic-api-key"
+[[rules.allowlists]]
+description = "Verified material cache keys"
+regexes = ['''^(face-climbers-v1|shrub-leaf-v1)$''']

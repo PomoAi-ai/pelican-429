@@ -1,0 +1,856 @@
+[
+  {
+    "leftHandClearance": 0.8712667544214868,
+    "frame": 0,
+    "wristError": {
+      "R": 0.6171043021525657
+    },
+    "headVerticesInsideKeyboard": 0,
+    "leftHandDistance": 1.0612377073476904,
+    "farEndBlender": [
+      0.44522523880004883,
+      0.4749999940395355,
+      1.898207664489746
+    ]
+  },
+  {
+    "leftHandClearance": 0.8803894317699219,
+    "frame": 1,
+    "wristError": {
+      "R": 0.6330394613356531
+    },
+    "headVerticesInsideKeyboard": 0,
+    "leftHandDistance": 1.0815291909746014,
+    "farEndBlender": [
+      0.39842888712882996,
+      0.4533403217792511,
+      1.8981090784072876
+    ]
+  },
+  {
+    "leftHandClearance": 0.8958451892892971,
+    "frame": 2,
+    "wristError": {
+      "R": 0.6624434403408145
+    },
+    "headVerticesInsideKeyboard": 0,
+    "leftHandDistance": 1.1384230353258222,
+    "farEndBlender": [
+      0.2721825838088989,
+      0.383800745010376,
+      1.895586609840393
+    ]
+  },
+  {
+    "leftHandClearance": 0.911008923164184,
+    "frame": 3,
+    "wristError": {
+      "R": 0.6657142484725607
+    },
+    "headVerticesInsideKeyboard": 0,
+    "leftHandDistance": 1.2205213243527406,
+    "farEndBlender": [
+      0.08654969930648804,
+      0.2604817748069763,
+      1.885681390762329
+    ]
+  },
+  {
+    "leftHandClearance": 0.9935141852874374,
+    "frame": 4,
+    "wristError": {
+      "R": 0.5998364455045883
+    },
+    "headVerticesInsideKeyboard": 0,
+    "leftHandDistance": 1.3270541193375027,
+    "farEndBlender": [
+      -0.14627543091773987,
+      0.09199929237365723,
+      1.8637715578079224
+    ]
+  },
+  {
+    "leftHandClearance": 1.1873954728876257,
+    "frame": 5,
+    "wristError": {
+      "R": 0.5078774282322049
+    },
+    "headVerticesInsideKeyboard": 0,
+    "leftHandDistance": 1.4560371336464077,
+    "farEndBlender": [
+      -0.4168831706047058,
+      -0.09922993183135986,
+      1.830016851425171
+    ]
+  },
+  {
+    "leftHandClearance": 1.427453092740391,
+    "frame": 6,
+    "wristError": {
+      "R": 0.38125547205797045
+    },
+    "headVerticesInsideKeyboard": 0,
+    "leftHandDistance": 1.6020103875032103,
+    "farEndBlender": [
+      -0.7102454304695129,
+      -0.2843344509601593,
+      1.7854548692703247
+    ]
+  },
+  {
+    "leftHandClearance": 1.5525346556047899,
+    "frame": 7,
+    "wristError": {
+      "R": 0.2762142660180913
+    },
+    "headVerticesInsideKeyboard": 0,
+    "leftHandDistance": 1.7655923218796723,
+    "farEndBlender": [
+      -1.0095882415771484,
+      -0.4278826117515564,
+      1.7326476573944092
+    ]
+  },
+  {
+    "leftHandClearance": 1.5714303960546596,
+    "frame": 8,
+    "wristError": {
+      "R": 0.1993774618659
+    },
+    "headVerticesInsideKeyboard": 0,
+    "leftHandDistance": 1.9404844291694623,
+    "farEndBlender": [
+      -1.2947443723678589,
+      -0.5029353499412537,
+      1.6791778802871704
+    ]
+  },
+  {
+    "leftHandClearance": 1.6358675994448761,
+    "frame": 9,
+    "wristError": {
+      "R": 0.13897610045431882
+    },
+    "headVerticesInsideKeyboard": 0,
+    "leftHandDistance": 2.1146634318460595,
+    "farEndBlender": [
+      -1.5462660789489746,
+      -0.5002749562263489,
+      1.6335276365280151
+    ]
+  },
+  {
+    "leftHandClearance": 1.7404499356052496,
+    "frame": 10,
+    "wristError": {
+      "R": 0.08584674710410685
+    },
+    "headVerticesInsideKeyboard": 0,
+    "leftHandDistance": 2.2743478370645978,
+    "farEndBlender": [
+      -1.7500139474868774,
+      -0.4318942129611969,
+      1.6016861200332642
+    ]
+  },
+  {
+    "leftHandClearance": 1.8565284099360782,
+    "frame": 11,
+    "wristError": {
+      "R": 0.043020908929485124
+    },
+    "headVerticesInsideKeyboard": 0,
+    "leftHandDistance": 2.4068869356979046,
+    "farEndBlender": [
+      -1.8992623090744019,
+      -0.328174352645874,
+      1.5847572088241577
+    ]
+  },
+  {
+    "leftHandClearance": 1.951266147202925,
+    "frame": 12,
+    "wristError": {
+      "R": 0.0135266332780246
+    },
+    "headVerticesInsideKeyboard": 0,
+    "leftHandDistance": 2.500455939358063,
+    "farEndBlender": [
+      -1.9931750297546387,
+      -0.23032939434051514,
+      1.578927755355835
+    ]
+  },
+  {
+    "leftHandClearance": 1.996894500268726,
+    "frame": 13,
+    "wristError": {
+      "R": 0.00039602149424117775
+    },
+    "headVerticesInsideKeyboard": 0,
+    "leftHandDistance": 2.5428779002777238,
+    "farEndBlender": [
+      -2.0324952602386475,
+      -0.17965355515480042,
+      1.5780903100967407
+    ]
+  },
+  {
+    "leftHandClearance": 1.9997685908571463,
+    "frame": 14,
+    "wristError": {
+      "R": 7.372781501199425e-07
+    },
+    "headVerticesInsideKeyboard": 0,
+    "leftHandDistance": 2.5451232602852984,
+    "farEndBlender": [
+      -2.039721965789795,
+      -0.13795652985572815,
+      1.5820674896240234
+    ]
+  },
+  {
+    "leftHandClearance": 2.003875308135096,
+    "frame": 15,
+    "wristError": {
+      "R": 1.6916520275000825e-07
+    },
+    "headVerticesInsideKeyboard": 0,
+    "leftHandDistance": 2.547704672225299,
+    "farEndBlender": [
+      -2.0537586212158203,
+      -0.006378786638379097,
+      1.594550609588623
+    ]
+  },
+  {
+    "leftHandClearance": 2.007477393705192,
+    "frame": 16,
+    "wristError": {
+      "R": 5.50788926430828e-07
+    },
+    "headVerticesInsideKeyboard": 0,
+    "leftHandDistance": 2.54976330040165,
+    "farEndBlender": [
+      -2.0587456226348877,
+      0.1606430858373642,
+      1.6091383695602417
+    ]
+  },
+  {
+    "leftHandClearance": 2.0096521473698066,
+    "frame": 17,
+    "wristError": {
+      "R": 1.341104507446289e-07
+    },
+    "headVerticesInsideKeyboard": 0,
+    "leftHandDistance": 2.550447975281608,
+    "farEndBlender": [
+      -2.051614761352539,
+      0.3032793700695038,
+      1.6205226182937622
+    ]
+  },
+  {
+    "leftHandClearance": 2.010335980312059,
+    "frame": 18,
+    "wristError": {
+      "R": 3.749056346836425e-07
+    },
+    "headVerticesInsideKeyboard": 0,
+    "leftHandDistance": 2.5504363558515637,
+    "farEndBlender": [
+      -2.045416831970215,
+      0.36341798305511475,
+      1.6250311136245728
+    ]
+  },
+  {
+    "leftHandClearance": 1.9516282035261368,
+    "frame": 19,
+    "wristError": {
+      "R": 5.503352079576071e-07
+    },
+    "headVerticesInsideKeyboard": 0,
+    "leftHandDistance": 2.5077121393674995,
+    "farEndBlender": [
+      -1.9648218154907227,
+      -0.5163675546646118,
+      1.5813376903533936
+    ]
+  },
+  {
+    "leftHandClearance": 1.5821149381717063,
+    "frame": 20,
+    "wristError": {
+      "R": 2.457562461863554e-07
+    },
+    "headVerticesInsideKeyboard": 0,
+    "leftHandDistance": 2.1012683324841004,
+    "farEndBlender": [
+      -0.5266743898391724,
+      -1.7369773387908936,
+      1.457902431488037
+    ]
+  },
+  {
+    "leftHandClearance": 1.0865217348821825,
+    "frame": 21,
+    "wristError": {
+      "R": 2.6656007498500226e-07
+    },
+    "headVerticesInsideKeyboard": 0,
+    "leftHandDistance": 1.3406628733678274,
+    "farEndBlender": [
+      1.1745558977127075,
+      -1.0784757137298584,
+      1.4302232265472412
+    ]
+  },
+  {
+    "leftHandClearance": 0.8350760887855593,
+    "frame": 22,
+    "wristError": {
+      "R": 4.626564591008432e-07
+    },
+    "headVerticesInsideKeyboard": 0,
+    "leftHandDistance": 0.9326823279215122,
+    "farEndBlender": [
+      1.488835334777832,
+      -0.32585975527763367,
+      1.4716604948043823
+    ]
+  },
+  {
+    "leftHandClearance": 0.8042407407152341,
+    "frame": 23,
+    "wristError": {
+      "R": 5.855227322694212e-07
+    },
+    "headVerticesInsideKeyboard": 0,
+    "leftHandDistance": 0.8914390796651426,
+    "farEndBlender": [
+      1.4923309087753296,
+      -0.24689586460590363,
+      1.485487937927246
+    ]
+  },
+  {
+    "leftHandClearance": 0.7362141072184534,
+    "frame": 24,
+    "wristError": {
+      "R": 6.862627827924165e-07
+    },
+    "headVerticesInsideKeyboard": 0,
+    "leftHandDistance": 0.8035287760704745,
+    "farEndBlender": [
+      1.4855642318725586,
+      -0.07646648585796356,
+      1.5157134532928467
+    ]
+  },
+  {
+    "leftHandClearance": 0.6691941833496093,
+    "frame": 25,
+    "wristError": {
+      "R": 6.447228089804631e-07
+    },
+    "headVerticesInsideKeyboard": 0,
+    "leftHandDistance": 0.7224275362379367,
+    "farEndBlender": [
+      1.4601125717163086,
+      0.08422545343637466,
+      1.5462950468063354
+    ]
+  },
+  {
+    "leftHandClearance": 0.6457489943504333,
+    "frame": 26,
+    "wristError": {
+      "R": 5.87982525138523e-07
+    },
+    "headVerticesInsideKeyboard": 0,
+    "leftHandDistance": 0.6962862372508252,
+    "farEndBlender": [
+      1.4419958591461182,
+      0.14016103744506836,
+      1.5666757822036743
+    ]
+  },
+  {
+    "leftHandClearance": 0.6492682313919067,
+    "frame": 27,
+    "wristError": {
+      "R": 5.639356216837841e-07
+    },
+    "headVerticesInsideKeyboard": 0,
+    "leftHandDistance": 0.7001438148533307,
+    "farEndBlender": [
+      1.435441255569458,
+      0.1367415487766266,
+      1.5806394815444946
+    ]
+  },
+  {
+    "leftHandClearance": 0.6569174146652221,
+    "frame": 28,
+    "wristError": {
+      "R": 2.950279395762582e-07
+    },
+    "headVerticesInsideKeyboard": 0,
+    "leftHandDistance": 0.7086082369086848,
+    "farEndBlender": [
+      1.4331066608428955,
+      0.122160404920578,
+      1.5897769927978516
+    ]
+  },
+  {
+    "leftHandClearance": 0.6675359225273132,
+    "frame": 29,
+    "wristError": {
+      "R": 7.949807901879582e-07
+    },
+    "headVerticesInsideKeyboard": 0,
+    "leftHandDistance": 0.7205434770332338,
+    "farEndBlender": [
+      1.435787558555603,
+      0.09793199598789215,
+      1.5916587114334106
+    ]
+  },
+  {
+    "leftHandClearance": 0.679967246055603,
+    "frame": 30,
+    "wristError": {
+      "R": 4.944401986311989e-07
+    },
+    "headVerticesInsideKeyboard": 0,
+    "leftHandDistance": 0.7348030724684385,
+    "farEndBlender": [
+      1.4414091110229492,
+      0.06855514645576477,
+      1.5928679704666138
+    ]
+  },
+  {
+    "leftHandClearance": 0.6930968379974365,
+    "frame": 31,
+    "wristError": {
+      "R": 6.143906154658885e-07
+    },
+    "headVerticesInsideKeyboard": 0,
+    "leftHandDistance": 0.7502184583226241,
+    "farEndBlender": [
+      1.4479358196258545,
+      0.0375371053814888,
+      1.5967662334442139
+    ]
+  },
+  {
+    "leftHandClearance": 0.7058727955818176,
+    "frame": 32,
+    "wristError": {
+      "R": 5.617164619258274e-07
+    },
+    "headVerticesInsideKeyboard": 0,
+    "leftHandDistance": 0.7655930302596621,
+    "farEndBlender": [
+      1.4544801712036133,
+      0.007106401026248932,
+      1.6024693250656128
+    ]
+  },
+  {
+    "leftHandClearance": 0.7173219537734985,
+    "frame": 33,
+    "wristError": {
+      "R": 1.1365005353491512e-06
+    },
+    "headVerticesInsideKeyboard": 0,
+    "leftHandDistance": 0.779707108702082,
+    "farEndBlender": [
+      1.4603526592254639,
+      -0.02048477530479431,
+      1.6089705228805542
+    ]
+  },
+  {
+    "leftHandClearance": 0.7265637539332678,
+    "frame": 34,
+    "wristError": {
+      "R": 7.434171249429239e-07
+    },
+    "headVerticesInsideKeyboard": 0,
+    "leftHandDistance": 0.7913244468760908,
+    "farEndBlender": [
+      1.465041160583496,
+      -0.04297468438744545,
+      1.6151407957077026
+    ]
+  },
+  {
+    "leftHandClearance": 0.7327990261912205,
+    "frame": 35,
+    "wristError": {
+      "R": 4.777675730550706e-07
+    },
+    "headVerticesInsideKeyboard": 0,
+    "leftHandDistance": 0.7992037971697509,
+    "farEndBlender": [
+      1.468148946762085,
+      -0.058110445737838745,
+      1.619758129119873
+    ]
+  },
+  {
+    "leftHandClearance": 0.7350896693829346,
+    "frame": 36,
+    "wristError": {
+      "R": 3.384893146634265e-07
+    },
+    "headVerticesInsideKeyboard": 0,
+    "leftHandDistance": 0.8021037439230579,
+    "farEndBlender": [
+      1.469287633895874,
+      -0.06365146487951279,
+      1.6215695142745972
+    ]
+  },
+  {
+    "leftHandClearance": 0.8785892454912057,
+    "frame": 37,
+    "wristError": {
+      "R": 3.816559456248789e-07
+    },
+    "headVerticesInsideKeyboard": 0,
+    "leftHandDistance": 0.9928457234621538,
+    "farEndBlender": [
+      1.431447982788086,
+      -0.4417911767959595,
+      1.6023821830749512
+    ]
+  },
+  {
+    "leftHandClearance": 1.1486249266395383,
+    "frame": 38,
+    "wristError": {
+      "R": 5.593396538234788e-07
+    },
+    "headVerticesInsideKeyboard": 0,
+    "leftHandDistance": 1.4631581513846363,
+    "farEndBlender": [
+      0.9548662900924683,
+      -1.2783159017562866,
+      1.539009928703308
+    ]
+  },
+  {
+    "leftHandClearance": 1.4945434257297212,
+    "frame": 39,
+    "wristError": {
+      "R": 6.76978629326853e-07
+    },
+    "headVerticesInsideKeyboard": 0,
+    "leftHandDistance": 1.9928844728673603,
+    "farEndBlender": [
+      -0.24367812275886536,
+      -1.757146954536438,
+      1.457165002822876
+    ]
+  },
+  {
+    "leftHandClearance": 1.8084138822246132,
+    "frame": 40,
+    "wristError": {
+      "R": 3.5886748369909214e-07
+    },
+    "headVerticesInsideKeyboard": 0,
+    "leftHandDistance": 2.3644445377876444,
+    "farEndBlender": [
+      -1.4822213649749756,
+      -1.2883931398391724,
+      1.4267627000808716
+    ]
+  },
+  {
+    "leftHandClearance": 1.961878748909205,
+    "frame": 41,
+    "wristError": {
+      "R": 5.693725697559952e-07
+    },
+    "headVerticesInsideKeyboard": 0,
+    "leftHandDistance": 2.516609512363914,
+    "farEndBlender": [
+      -2.0279247760772705,
+      -0.42125099897384644,
+      1.4560524225234985
+    ]
+  },
+  {
+    "leftHandClearance": 1.9968162454390355,
+    "frame": 42,
+    "wristError": {
+      "R": 4.4755022221687883e-07
+    },
+    "headVerticesInsideKeyboard": 0,
+    "leftHandDistance": 2.543235410861769,
+    "farEndBlender": [
+      -2.0961050987243652,
+      -0.017504217103123665,
+      1.4802480936050415
+    ]
+  },
+  {
+    "leftHandClearance": 2.000443781135152,
+    "frame": 43,
+    "wristError": {
+      "R": 5.679846167172195e-07
+    },
+    "headVerticesInsideKeyboard": 0,
+    "leftHandDistance": 2.545551786391942,
+    "farEndBlender": [
+      -2.0918126106262207,
+      0.051145266741514206,
+      1.4944510459899902
+    ]
+  },
+  {
+    "leftHandClearance": 2.005922248199662,
+    "frame": 44,
+    "wristError": {
+      "R": 7.536880061069444e-07
+    },
+    "headVerticesInsideKeyboard": 0,
+    "leftHandDistance": 2.548952353216098,
+    "farEndBlender": [
+      -2.0728864669799805,
+      0.19530227780342102,
+      1.5258808135986328
+    ]
+  },
+  {
+    "leftHandClearance": 2.0089985032471396,
+    "frame": 45,
+    "wristError": {
+      "R": 1.2013700229374393e-07
+    },
+    "headVerticesInsideKeyboard": 0,
+    "leftHandDistance": 2.5503266295976608,
+    "farEndBlender": [
+      -2.0426177978515625,
+      0.3219314217567444,
+      1.5591270923614502
+    ]
+  },
+  {
+    "leftHandClearance": 2.007290726076467,
+    "frame": 46,
+    "wristError": {
+      "R": 2.641543433254337e-07
+    },
+    "headVerticesInsideKeyboard": 0,
+    "leftHandDistance": 2.5496764616499963,
+    "farEndBlender": [
+      -2.038832902908325,
+      0.2528342306613922,
+      1.5796304941177368
+    ]
+  },
+  {
+    "leftHandClearance": 1.9579418462619917,
+    "frame": 47,
+    "wristError": {
+      "R": 1.3328003749250113e-07
+    },
+    "headVerticesInsideKeyboard": 0,
+    "leftHandDistance": 2.513230322060076,
+    "farEndBlender": [
+      -1.9677367210388184,
+      -0.4917101263999939,
+      1.5696078538894653
+    ]
+  },
+  {
+    "leftHandClearance": 1.8975278920187526,
+    "frame": 48,
+    "wristError": {
+      "R": 5.092623081992585e-07
+    },
+    "headVerticesInsideKeyboard": 0,
+    "leftHandDistance": 2.456885316817875,
+    "farEndBlender": [
+      -1.7509245872497559,
+      -0.9585555195808411,
+      1.56305992603302
+    ]
+  },
+  {
+    "leftHandClearance": 1.8661977533938392,
+    "frame": 49,
+    "wristError": {
+      "R": 0.011427645309625513
+    },
+    "headVerticesInsideKeyboard": 0,
+    "leftHandDistance": 2.424331329238308,
+    "farEndBlender": [
+      -1.716507077217102,
+      -0.9631891846656799,
+      1.567884087562561
+    ]
+  },
+  {
+    "leftHandClearance": 1.7870740559075615,
+    "frame": 50,
+    "wristError": {
+      "R": 0.04302077566849937
+    },
+    "headVerticesInsideKeyboard": 0,
+    "leftHandDistance": 2.3338063527292885,
+    "farEndBlender": [
+      -1.618934154510498,
+      -0.9631887078285217,
+      1.5839862823486328
+    ]
+  },
+  {
+    "leftHandClearance": 1.6913801360397385,
+    "frame": 51,
+    "wristError": {
+      "R": 0.09074616449697828
+    },
+    "headVerticesInsideKeyboard": 0,
+    "leftHandDistance": 2.1967615320739347,
+    "farEndBlender": [
+      -1.4652693271636963,
+      -0.9296277761459351,
+      1.614625096321106
+    ]
+  },
+  {
+    "leftHandClearance": 1.6158952222136027,
+    "frame": 52,
+    "wristError": {
+      "R": 0.15057150070215636
+    },
+    "headVerticesInsideKeyboard": 0,
+    "leftHandDistance": 2.027977961821957,
+    "farEndBlender": [
+      -1.2633025646209717,
+      -0.8365412354469299,
+      1.6602492332458496
+    ]
+  },
+  {
+    "leftHandClearance": 1.5845289558039346,
+    "frame": 53,
+    "wristError": {
+      "R": 0.21846318487528557
+    },
+    "headVerticesInsideKeyboard": 0,
+    "leftHandDistance": 1.846352039281232,
+    "farEndBlender": [
+      -1.0236620903015137,
+      -0.6736860275268555,
+      1.7161481380462646
+    ]
+  },
+  {
+    "leftHandClearance": 1.4939866391815886,
+    "frame": 54,
+    "wristError": {
+      "R": 0.3178738881060103
+    },
+    "headVerticesInsideKeyboard": 0,
+    "leftHandDistance": 1.6706137730556425,
+    "farEndBlender": [
+      -0.7598146796226501,
+      -0.45219922065734863,
+      1.7736122608184814
+    ]
+  },
+  {
+    "leftHandClearance": 1.2564865206264029,
+    "frame": 55,
+    "wristError": {
+      "R": 0.43282494174206304
+    },
+    "headVerticesInsideKeyboard": 0,
+    "leftHandDistance": 1.5119461916077273,
+    "farEndBlender": [
+      -0.48636120557785034,
+      -0.201915442943573,
+      1.8235214948654175
+    ]
+  },
+  {
+    "leftHandClearance": 1.0347083798279488,
+    "frame": 56,
+    "wristError": {
+      "R": 0.5378681519259368
+    },
+    "headVerticesInsideKeyboard": 0,
+    "leftHandDistance": 1.3691974470289436,
+    "farEndBlender": [
+      -0.21706277132034302,
+      0.03850919008255005,
+      1.861502766609192
+    ]
+  },
+  {
+    "leftHandClearance": 0.9279529681391425,
+    "frame": 57,
+    "wristError": {
+      "R": 0.6447699830775654
+    },
+    "headVerticesInsideKeyboard": 0,
+    "leftHandDistance": 1.2482504641300731,
+    "farEndBlender": [
+      0.03094196319580078,
+      0.23835204541683197,
+      1.8854968547821045
+    ]
+  },
+  {
+    "leftHandClearance": 0.9053740378052834,
+    "frame": 58,
+    "wristError": {
+      "R": 0.6578843900757461
+    },
+    "headVerticesInsideKeyboard": 0,
+    "leftHandDistance": 1.1537410734085485,
+    "farEndBlender": [
+      0.24055732786655426,
+      0.37749621272087097,
+      1.8958697319030762
+    ]
+  },
+  {
+    "leftHandClearance": 0.8837961571740998,
+    "frame": 59,
+    "wristError": {
+      "R": 0.6323236240380484
+    },
+    "headVerticesInsideKeyboard": 0,
+    "leftHandDistance": 1.0859642986037217,
+    "farEndBlender": [
+      0.3890034556388855,
+      0.4524597227573395,
+      1.89823579788208
+    ]
+  },
+  {
+    "leftHandClearance": 0.8712667544214868,
+    "frame": 60,
+    "wristError": {
+      "R": 0.6171043021525657
+    },
+    "headVerticesInsideKeyboard": 0,
+    "leftHandDistance": 1.0612377073476904,
+    "farEndBlender": [
+      0.44522523880004883,
+      0.4749999940395355,
+      1.898207664489746
+    ]
+  }
+]

@@ -1,0 +1,73 @@
+{
+  "kind": "tibo",
+  "clips": [
+    "greet",
+    "idle",
+    "jump",
+    "run",
+    "skill1",
+    "skill2",
+    "ultimate",
+    "walk"
+  ],
+  "morphNames": [
+    "Blink",
+    "BlinkTravel"
+  ],
+  "unchangedClips": {
+    "greet": {
+      "channels": 48,
+      "samplerDataSha256": "c156e857240f01f3050087936eb054eeaefbba62431f2106035c4b65a095d14c"
+    },
+    "jump": {
+      "channels": 48,
+      "samplerDataSha256": "d25d7f2c6f039febcfd0f5f95caef8c2f207abea7f5e466fa676b2739fe68574"
+    },
+    "run": {
+      "channels": 48,
+      "samplerDataSha256": "82b9788fc038fdc829c8a1b1536593eeb4d6186996c6f9e5ec5ca529c31e9028"
+    },
+    "skill1": {
+      "channels": 48,
+      "samplerDataSha256": "fcecd3783766f4b3e484148146c9f45850427f797c2722f4754435c0f6ffccbd"
+    },
+    "skill2": {
+      "channels": 48,
+      "samplerDataSha256": "7382f7a52f73ee7feba6d8d7eddeb79db06080ede06af90b66c7ebbcd088cfb0"
+    },
+    "ultimate": {
+      "channels": 48,
+      "samplerDataSha256": "d23cd05e9afaaaf1945b092650005148c9a2906731e8ad4b9b8421bbb2db1cf6"
+    },
+    "walk": {
+      "channels": 48,
+      "samplerDataSha256": "1aed394011ab7053b7b06f32de4f4168c560eb9345bd3c6124740f33e67f916b"
+    }
+  },
+  "idleWeights": {
+    "channelCount": 49,
+    "timeRange": [
+      0.0,
+      4.0
+    ],
+    "openEndpoints": [
+      [
+        0.0,
+        0.0
+      ],
+      [
+        0.0,
+        0.0
+      ]
+    ],
+    "maxima": [
+      1.0,
+      0.9599999785423279
+    ],
+    "closedTimes": [
+      1.5333333015441895,
+      1.5666667222976685,
+      1.600000023841858
+    ]
+  }
+}

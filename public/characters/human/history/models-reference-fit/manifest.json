@@ -1,0 +1,36 @@
+{
+  "name": "参考校准版",
+  "method": "reference-fit",
+  "description": "Front/side constrained face, embedded eyes, flatter layered solid hair and garment volume fitting",
+  "base": "atelier editable outfit and hands; rebuilt face and hair",
+  "triangles": 1010110,
+  "materials": 25,
+  "meshes": 25,
+  "height": 3.0999999046325684,
+  "width": 1.3610634803771973,
+  "depth": 1.0453818440437317,
+  "static": true,
+  "glbBytes": 40813184,
+  "glb": "public/characters/human/history/models-reference-fit/grassy-reference-fit.glb",
+  "blend": "assets/characters/grassy/history/model-reference-fit/grassy-reference-fit.blend",
+  "references": [
+    "public/characters/human/history/turnaround-master-v2/front.png",
+    "public/characters/human/history/turnaround-master-v2/right.png"
+  ],
+  "fitEvidence": {
+    "directory": "assets/characters/grassy/history/model-reference-fit/fit-evidence",
+    "landmarkCount": 10,
+    "landmarkTolerancePx": 12.0,
+    "allLandmarksWithinTolerance": true,
+    "maximumLandmarkErrorPx": 8.689125761761963,
+    "skills": [
+      "multiview-fit-loop",
+      "landmark-fit-repair"
+    ]
+  },
+  "limitations": [
+    "Static high-resolution comparison candidate; no rig or animation.",
+    "Measured alignment checks proportions, not final artistic likeness.",
+    "Hair clump shapes remain stylized and more regular than the reference."
+  ]
+}

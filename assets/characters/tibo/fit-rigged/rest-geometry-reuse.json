@@ -1,0 +1,25 @@
+{
+  "renderedFromSourceSha256": "c9ae88c9b3ee01e4b80bfb46c118c5039ef4821c20b163016bf42b1dfa8c3417",
+  "currentSourceSha256": "31eb95e06e514bb00b497410ef38e130d88e21ed31b141746f146aa419676ce2",
+  "restGeometryAndUVIdentical": true,
+  "materialsAndTexturesIdentical": true,
+  "staticReusePass": true,
+  "verificationChain": [
+    {
+      "fromSourceSha256": "c9ae88c9b3ee01e4b80bfb46c118c5039ef4821c20b163016bf42b1dfa8c3417",
+      "toSourceSha256": "bcc65fd7f8c4cb7f7199b32c7e6780321747c364b830f8428aa9dff7bc84075c",
+      "method": "Exact REST evaluated geometry/topology/corner normals/UV/matrix/material assignment/material nodes/packed textures equality.",
+      "evidence": "../evidence/crotch-repair/final-static-comparison.json",
+      "evidenceSha256": "0f775367453f322200338ec5ab3d53ef505d1c9efaaa0b5835cd8437a315dccc"
+    },
+    {
+      "fromSourceSha256": "bcc65fd7f8c4cb7f7199b32c7e6780321747c364b830f8428aa9dff7bc84075c",
+      "toSourceSha256": "31eb95e06e514bb00b497410ef38e130d88e21ed31b141746f146aa419676ce2",
+      "method": "Independent exact REST geometry/topology/normals/UV/transforms/material assignments/material nodes/packed textures/vertex weights/vertex groups/armature modifiers/rest skeleton equality after adding action clips.",
+      "evidence": "action-skills-static-comparison.json",
+      "evidenceSha256": "4adfe2015a5ab735f196922827403ce2cab1d8199caf1a574f0f143b942bafca"
+    }
+  ],
+  "scope": "Static four-direction images and chin landmarks only; this does not certify animation deformation.",
+  "currentRestBindingIdenticalToPreviousAcceptedAsset": true
+}

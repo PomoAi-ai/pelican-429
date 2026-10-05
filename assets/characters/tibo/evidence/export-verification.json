@@ -1,0 +1,20 @@
+{
+  "sourceSha256": "12a5e6d264ecf3597dddb70dc289a35b553ab18ce978fe4e4d68aa2ff8d90913",
+  "sourceOriginalIdentical": true,
+  "embeddedTexturesIdentical": true,
+  "textureCount": 3,
+  "riggedBlendSha256": "31eb95e06e514bb00b497410ef38e130d88e21ed31b141746f146aa419676ce2",
+  "glbSha256": "d98101da4002c708e1c0d8815e141d7cef0f0117c1d2f1363f542f52929b6466",
+  "clips": {
+    "greet": 3,
+    "idle": 4,
+    "jump": 1.6,
+    "run": 0.8,
+    "skill1": 2.4,
+    "skill2": 3,
+    "ultimate": 6,
+    "walk": 1.2
+  },
+  "joints": 16,
+  "actionSkillsReport": "action-skills/export-report.json"
+}

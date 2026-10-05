@@ -1,0 +1,52 @@
+Grassy 独立精细模型 — gpt6.1sol版本
+Blender 5.2.2 LTS；新建网格，不使用旧模型作为输入。
+
+可编辑 Blender 源文件
+assets/characters/grassy/history/model-atelier/grassy-atelier-detailed.blend
+
+独立 GLB
+public/characters/human/history/models-atelier/grassy-atelier-detailed.glb
+
+实际模型渲染
+public/characters/human/history/models-atelier/comparison-face-front.png
+public/characters/human/history/models-atelier/comparison-face-right.png
+public/characters/human/history/models-atelier/comparison-front.png
+public/characters/human/history/models-atelier/comparison-right.png
+public/characters/human/history/models-atelier/render-front.png
+public/characters/human/history/models-atelier/render-back.png
+public/characters/human/history/models-atelier/render-left.png
+public/characters/human/history/models-atelier/render-right.png
+public/characters/human/history/models-atelier/render-hero.png
+public/characters/human/history/models-atelier/render-face.png
+public/characters/human/history/models-atelier/render-face-front.png
+public/characters/human/history/models-atelier/render-cloth.png
+public/characters/human/history/models-atelier/render-shoes.png
+
+实际 GLB 重新导入后的检查渲染
+public/characters/human/history/models-atelier/glb-check-hero.png
+public/characters/human/history/models-atelier/glb-check-face.png
+
+材质纹理目录（同时打包进 Blender 和 GLB）
+assets/characters/grassy/history/model-atelier/textures/
+
+旋转检查页面（需本地 Vite 开发服务器）
+http://127.0.0.1:5176/characters/human/history/models-atelier/index.html
+public/characters/human/history/models-atelier/index.html
+assets/characters/grassy/history/model-atelier/preview-gpt6.1sol-page.jpg
+assets/characters/grassy/history/model-atelier/preview-gpt6.1sol-face.jpg
+
+独立生成脚本
+scripts/grassy_atelier/build.py
+scripts/grassy_atelier/common.py
+scripts/grassy_atelier/face.py
+scripts/grassy_atelier/hair.py
+scripts/grassy_atelier/outfit.py
+scripts/grassy_atelier/clothing.py
+scripts/grassy_atelier/inspect_export.py
+scripts/grassy_atelier/comparison.py
+
+原始参考（只读）
+public/characters/human/history/turnaround-master-v2/front.png
+public/characters/human/history/turnaround-master-v2/back.png
+public/characters/human/history/turnaround-master-v2/left.png
+public/characters/human/history/turnaround-master-v2/right.png

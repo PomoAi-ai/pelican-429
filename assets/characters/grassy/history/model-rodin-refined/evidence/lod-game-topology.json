@@ -1,0 +1,19 @@
+{
+  "beforeWeld": {
+    "vertices": 391911,
+    "faces": 500000,
+    "boundaryEdges": 228326
+  },
+  "uvSha256BeforeWeld": "98f1d0e91e7fc365bfd8bac5abbfbdcc144c42ad9ad068e033731de08780c082",
+  "afterWeld": {
+    "vertices": 249984,
+    "faces": 500000,
+    "boundaryEdges": 0
+  },
+  "uvSha256AfterWeld": "98f1d0e91e7fc365bfd8bac5abbfbdcc144c42ad9ad068e033731de08780c082",
+  "afterDecimation": {
+    "vertices": 22484,
+    "faces": 45000,
+    "boundaryEdges": 0
+  }
+}

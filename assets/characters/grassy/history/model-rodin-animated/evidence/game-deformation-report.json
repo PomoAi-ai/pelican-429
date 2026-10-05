@@ -1,0 +1,15 @@
+{
+  "sampling": "30 fps baked keyframes; loop endpoints compare all retained mesh vertices",
+  "idle": {
+    "minimumSoleZ": 8.814076579710672e-08,
+    "loopEndpointMaximumVertexDifference": 0.0,
+    "chestFrontMedianPeakToPeakDepth": 0.009919539093971252,
+    "shoulderMedianPeakToPeakHeight": 0.010291695594787598,
+    "soleMaximumPeakToPeakDisplacement": 0.0
+  },
+  "walk": {
+    "minimumSoleZ": 1.0270741768181324e-07,
+    "loopEndpointMaximumVertexDifference": 0.0,
+    "supportFootMaximumGroundError": 7.475243819499156e-07
+  }
+}
