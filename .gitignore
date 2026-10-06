@@ -1,5 +1,6 @@
 node_modules/
 dist/
+dist-full/
 __pycache__/
 *.pyc
 *.blend1

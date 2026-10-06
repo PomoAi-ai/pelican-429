@@ -159,7 +159,7 @@ export function createSettingsWiring(input: SettingsWiringInput): SettingsWiring
     controller: settings,
     seed: input.seed,
     onNewWorld: (seed) => gameHost().location.assign(`${location.pathname}${newWorldSearch(location.search, seed, settings.current())}`),
-    onShowcase: () => {
+    onShowcase: import.meta.env.PROD && import.meta.env.MODE !== 'full' ? undefined : () => {
       const params = new URLSearchParams(location.search);
       params.set('mode', 'showcase');
       gameHost().location.assign(`${location.pathname}?${params}`);

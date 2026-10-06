@@ -7,6 +7,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "build:full": "vite build --mode full --outDir dist-full",
     "assets:web": "node scripts/build-web-models.ts",
     "assets:ktx2": "node scripts/build-web-models.ts --ktx2",
     "assets:web-1k": "node scripts/build-web-models.ts --web-1k",

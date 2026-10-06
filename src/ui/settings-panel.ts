@@ -56,7 +56,7 @@ export interface SettingsPanelOptions {
   readonly seed: number | null;
   /** “新世界”：种子已校验（uint32）。 */
   readonly onNewWorld: (seed: number) => void;
-  readonly onShowcase: () => void;
+  readonly onShowcase?: () => void;
   /** 留空种子时的随机源（[0,1)，缺省 Math.random）。 */
   readonly random?: () => number;
 }
@@ -197,11 +197,13 @@ export function createSettingsPanel(options: SettingsPanelOptions): SettingsPane
     seedError.textContent = getLanguage() === 'en' ? `Invalid seed: “${invalidSeed}” (enter an integer from 0 to 4294967295)` : `种子无效：“${invalidSeed}”（需 0–4294967295 的整数）`;
   };
   label(el('div', 'settings-note', world), '重新加载页面生成新世界（设置会保留）');
-  const showcase = el('button', 'settings-new-world', world);
-  showcase.type = 'button';
-  label(showcase, '角色展示场 ↗');
-  showcase.addEventListener('click', options.onShowcase);
-  label(el('div', 'settings-note', world), '选择角色，在预览卡内切换动作，并排查看地上 / 地下效果；返回时重新进入原种子世界。');
+  if (options.onShowcase) {
+    const showcase = el('button', 'settings-new-world', world);
+    showcase.type = 'button';
+    label(showcase, '角色展示场 ↗');
+    showcase.addEventListener('click', options.onShowcase);
+    label(el('div', 'settings-note', world), '选择角色，在预览卡内切换动作，并排查看地上 / 地下效果；返回时重新进入原种子世界。');
+  }
   const resume = label(el('button', 'settings-footer', card), '关闭并继续');
   resume.type = 'button';
   resume.addEventListener('click', () => controller.setOpen(false));
@@ -292,7 +294,6 @@ export function createSettingsPanel(options: SettingsPanelOptions): SettingsPane
     dispose() {
       unsubscribe();
       gear.removeEventListener('click', onGear);
-      showcase.removeEventListener('click', options.onShowcase);
       seedInput.removeEventListener('keydown', onSeedKey);
       seedInput.removeEventListener('keyup', onSeedKey);
       gear.remove();

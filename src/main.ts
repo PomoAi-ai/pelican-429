@@ -1,4 +1,4 @@
-import { parseAppMode } from './config/app-mode.ts';
+import { parseAppMode, RELEASE_MODES } from './config/app-mode.ts';
 import { parseFacilityChapter } from './config/facility-scenes.ts';
 import { attachDomLanguage } from './ui/dom-language.ts';
 import { STORY_SAVE_KEY } from './config/story-save.ts';
@@ -34,7 +34,14 @@ function attachGameNavigation(navigation: HTMLElement): void {
 
 async function boot(): Promise<void> {
   const params = new URLSearchParams(location.search);
-  const mode = parseAppMode(params);
+  const release = import.meta.env.PROD && import.meta.env.MODE !== 'full';
+  const mode = parseAppMode(params, release);
+  if (release) {
+    for (const link of document.querySelectorAll<HTMLAnchorElement>('a[href]')) {
+      const url = new URL(link.href);
+      if (url.origin === location.origin && url.searchParams.has('mode') && !RELEASE_MODES.includes(url.searchParams.get('mode')!)) link.remove();
+    }
+  }
   if ((mode === 'game' || mode === 'story' || mode === 'controls') && mountMobileGameViewport()) return;
   const navigation = document.getElementById('dev-navigation')!;
   if (mode === 'game' || mode === 'story' || mode === 'controls') attachGameNavigation(navigation);
@@ -128,11 +135,13 @@ async function boot(): Promise<void> {
     : mode === 'game' && params.get('free') === '1' ? 'game'
     : mode === 'game' && params.get('level') === 'facility' ? `chapter-${parseFacilityChapter(params)}` : mode;
   navigation.querySelector<HTMLAnchorElement>(`[data-page="${currentPage}"]`)!.setAttribute('aria-current', 'page');
-  const showcaseParams = new URLSearchParams(params);
-  showcaseParams.delete('demo');
-  showcaseParams.delete('library');
-  showcaseParams.set('mode', 'showcase');
-  (document.getElementById('dev-showcase-link') as HTMLAnchorElement).href = `${location.pathname}?${showcaseParams}`;
+  if (!release) {
+    const showcaseParams = new URLSearchParams(params);
+    showcaseParams.delete('demo');
+    showcaseParams.delete('library');
+    showcaseParams.set('mode', 'showcase');
+    (document.getElementById('dev-showcase-link') as HTMLAnchorElement).href = `${location.pathname}?${showcaseParams}`;
+  }
   // 导航属于开发页面，聚焦链接时的按键不传递给游戏控制器。
   navigation.addEventListener('keydown', (event) => event.stopPropagation());
   if (mode === 'compare') {
