@@ -348,6 +348,8 @@ async function start(story: StorySave | undefined, newStory: boolean, onReady?: 
   } });
   disposers.push(() => weaponHud.dispose());
   const controls = createControlSurface(document.body, {
+    canvas,
+    onZoom: zoom => cameraRig.setZoom(zoom),
     navigation,
     onPress: (action, bindingKey) => tracker.press(action, 'mouse', bindingKey),
     onRelease: (action, bindingKey) => tracker.release(action, bindingKey),

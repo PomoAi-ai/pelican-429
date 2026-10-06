@@ -27,9 +27,17 @@ body[data-controls=mobile] .settings-gear { top: calc(var(--dev-nav-height) + va
 .control-toolbar { position: absolute; right: -44px; top: 44px; width: 230px; padding: 12px; border: 1px solid #e5d7b84d; border-radius: 10px; background: #171b24f5; box-shadow: 0 8px 24px #0005; }
 .control-modes, .control-tools { display: flex; gap: 6px; }
 .control-modes[hidden] { display: none; }
+.control-toolbar { max-height: calc(100dvh - var(--dev-nav-height) - var(--game-safe-top) - var(--game-safe-bottom) - 80px); overflow-y: auto; }
 .control-modes button, .control-tools button, .control-toolbar .control-home { flex: 1; border: 1px solid #f2dcb32e; border-radius: 5px; background: #ffffff08; color: var(--control-muted); padding: 9px 7px; font-size: 11px; }
 .control-modes button[aria-pressed=true] { color: #191b20; background: #ddc79f; border-color: #ddc79f; }
 .control-tools { flex-wrap: wrap; margin-top: 9px; }
+.control-zoom { display: grid; gap: 8px; margin-top: 12px; font-size: 12px; }
+.control-zoom label { display: grid; grid-template-columns: 1fr auto; gap: 6px; }
+.control-zoom label > span { grid-column: 1 / -1; }
+.control-zoom input { min-width: 0; width: 100%; min-height: 32px; accent-color: var(--control-gold); }
+.control-zoom button { min-height: 36px; border: 1px solid #f2dcb32e; border-radius: 5px; background: #ffffff08; color: var(--control-ink); }
+.control-zoom small { color: var(--control-muted); }
+body[data-controls=mobile] #app canvas { touch-action: none; }
 .control-fullscreen { position: relative; white-space: nowrap; min-height: 36px; padding: 7px 10px; border: 1px solid #e5d7b84d; border-radius: 6px; background: var(--control-glass); color: var(--control-ink); font-size: 11px; pointer-events: auto; }
 .control-fullscreen-error { position: absolute; top: calc(var(--dev-nav-height) + 52px); right: 12px; max-width: 280px; margin: 0; padding: 9px; border-radius: 6px; background: var(--control-glass); font-size: 11px; color: #ffb69e; }
 .control-home-screen-guide { pointer-events: auto; max-width: min(400px, calc(100vw - 48px)); max-height: calc(100dvh - 48px); overflow: auto; padding: 20px; border: 1px solid #ffffff40; border-radius: 12px; background: #17212f; color: #fff; font: 14px/1.6 sans-serif; }

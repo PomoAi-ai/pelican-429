@@ -2,6 +2,7 @@ import type { GameAction } from '../config/keybindings.ts';
 import { getLanguage, onLanguageChange } from './language.ts';
 import { gameHost } from './mobile-game-viewport.ts';
 import { homeScreenInstallState } from './home-screen-install.ts';
+import { createGameZoom } from './game-zoom.ts';
 
 export interface ControlSurface {
   readonly mode: 'desktop' | 'mobile';
@@ -9,6 +10,8 @@ export interface ControlSurface {
 }
 
 export interface ControlSurfaceOptions {
+  readonly canvas: HTMLCanvasElement;
+  readonly onZoom: (zoom: number) => void;
   readonly navigation: HTMLDetailsElement;
   readonly onPress: (action: GameAction, bindingKey: string) => void;
   readonly onRelease: (action: GameAction, bindingKey: string) => void;
@@ -240,6 +243,7 @@ export function createControlSurface(parent: HTMLElement, options: ControlSurfac
     }
   }, { signal });
   const home = button(bar, 'control-home', '首页 · 导航', 'Home · Pages');
+  const zoom = createGameZoom(bar, options.canvas, options.onZoom);
   const pages = node('div', 'control-nav');
   pages.popover = 'auto';
   pages.setAttribute('role', 'navigation');
@@ -343,6 +347,7 @@ export function createControlSurface(parent: HTMLElement, options: ControlSurfac
     menu.open = false;
     options.navigation.open = false;
     mode = next;
+    zoom.setMobile(mode === 'mobile');
     options.onModeChange(mode);
     parent.dataset.controls = mode;
     desktop.setAttribute('aria-pressed', String(mode === 'desktop'));
@@ -370,6 +375,7 @@ export function createControlSurface(parent: HTMLElement, options: ControlSurfac
   return {
     get mode() { return mode; },
     dispose() {
+      zoom.dispose();
       releaseControls();
       controller.abort();
       unsubscribe();

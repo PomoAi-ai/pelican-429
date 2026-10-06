@@ -39,6 +39,8 @@ export interface CameraRigOptions {
 }
 
 export interface CameraRig {
+  /** 调整跟随视野的缩放倍率（由调用方限定范围）。 */
+  setZoom(zoom: number): void;
   /** 立即对准目标（无平滑），用于出生/传送。 */
   snapTo(targetX: number, targetY: number, facing: 1 | -1): void;
   update(targetX: number, targetY: number, facing: 1 | -1, dt: number, closeup?: { shot: CameraShot; blend: number }): void;
@@ -90,6 +92,7 @@ export function createCameraRig(options: CameraRigOptions): CameraRig {
   const goal = { x: 0, y: 0 };
   const focus = { x: 0, y: 0 };
   let lead = 0;
+  let zoom = 1;
   let closeup: { shot: CameraShot; blend: number } | undefined;
 
   const halfExtents = (distance: number): { hw: number; hh: number } => {
@@ -104,17 +107,18 @@ export function createCameraRig(options: CameraRigOptions): CameraRig {
 
   /** 当前相机：跟随位置（常规距离夹紧）；开场取景时与取景（按其距离夹紧）按 introBlend 混合。 */
   const clamped = (): { x: number; y: number; hw: number; hh: number; distance: number } => {
-    const follow = clampAt(focus.x, focus.y, cfg.distance);
+    const followDistance = cfg.distance / zoom;
+    const follow = clampAt(focus.x, focus.y, followDistance);
     if (closeup) {
       const { shot, blend } = closeup;
-      const distance = lerp(cfg.distance, shot.distance, blend);
+      const distance = lerp(followDistance, shot.distance, blend);
       const extents = halfExtents(distance);
       return { x: lerp(follow.x, shot.x, blend), y: lerp(follow.y, shot.y, blend), ...extents, distance };
     }
-    if (intro === null) return { ...follow, distance: cfg.distance };
+    if (intro === null) return { ...follow, distance: followDistance };
     const k = introBlend(intro.t, introCfg.hold, introCfg.blend);
     const shot = clampAt(intro.shot.x, intro.shot.y, intro.shot.distance);
-    const distance = lerp(intro.shot.distance, cfg.distance, k);
+    const distance = lerp(intro.shot.distance, followDistance, k);
     const { hw, hh } = halfExtents(distance);
     return { x: lerp(shot.x, follow.x, k), y: lerp(shot.y, follow.y, k), hw, hh, distance };
   };
@@ -138,6 +142,10 @@ export function createCameraRig(options: CameraRigOptions): CameraRig {
 
   return {
     focus,
+    setZoom(value) {
+      zoom = value;
+      apply();
+    },
     get introActive() {
       return intro !== null;
     },
