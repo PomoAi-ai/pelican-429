@@ -1,0 +1,487 @@
+{
+  "intermediate": [
+    {
+      "scene": "free",
+      "marks": [
+        {
+          "name": "game:startup-start",
+          "ms": 164.5
+        },
+        {
+          "name": "game:level-ready",
+          "ms": 373.2000000476837
+        },
+        {
+          "name": "game:assets-ready",
+          "ms": 2783.7000000476837
+        },
+        {
+          "name": "game:scene-ready",
+          "ms": 3071.399999976158
+        },
+        {
+          "name": "game:first-frame",
+          "ms": 13216.200000047684
+        }
+      ],
+      "startup": [
+        13051.700000047684
+      ]
+    },
+    {
+      "scene": "free",
+      "marks": [
+        {
+          "name": "game:startup-start",
+          "ms": 157.70000004768372
+        },
+        {
+          "name": "game:level-ready",
+          "ms": 319.89999997615814
+        },
+        {
+          "name": "game:assets-ready",
+          "ms": 3377.899999976158
+        },
+        {
+          "name": "game:scene-ready",
+          "ms": 3623
+        },
+        {
+          "name": "game:first-frame",
+          "ms": 11054.200000047684
+        }
+      ],
+      "startup": [
+        10896.5
+      ]
+    },
+    {
+      "scene": "free",
+      "marks": [
+        {
+          "name": "game:startup-start",
+          "ms": 117.70000004768372
+        },
+        {
+          "name": "game:level-ready",
+          "ms": 308.5
+        },
+        {
+          "name": "game:assets-ready",
+          "ms": 2698.5
+        },
+        {
+          "name": "game:scene-ready",
+          "ms": 2946.7000000476837
+        },
+        {
+          "name": "game:first-frame",
+          "ms": 8219.100000023842
+        }
+      ],
+      "startup": [
+        8101.399999976158
+      ],
+      "assets": [
+        {
+          "url": "human/models-equipped/grassy-equipped-game.ktx2-compact.glb",
+          "start": 1656.1000000238419,
+          "end": 2190.600000023842,
+          "bytes": 2176804
+        },
+        {
+          "url": "enemies/line-hound/model.ktx2-compact.glb",
+          "start": 1656.2000000476837,
+          "end": 1664.3000000715256,
+          "bytes": 1464480
+        },
+        {
+          "url": "enemies/gatekeeper/model.ktx2-compact.glb",
+          "start": 1656.2000000476837,
+          "end": 1663.9000000953674,
+          "bytes": 1241964
+        },
+        {
+          "url": "enemies/watch-wasp/model.ktx2-compact.glb",
+          "start": 1656.2000000476837,
+          "end": 1665.5,
+          "bytes": 1345928
+        },
+        {
+          "url": "sam/human/sam-human.ktx2-compact.glb",
+          "start": 1656.3000000715256,
+          "end": 1665,
+          "bytes": 1175344
+        },
+        {
+          "url": "enemies/loadmaster/model.ktx2-compact.glb",
+          "start": 1656.3000000715256,
+          "end": 1667.3000000715256,
+          "bytes": 1124084
+        },
+        {
+          "url": "tibo/human/tibo-human.ktx2-compact.glb",
+          "start": 1656.4000000953674,
+          "end": 1666.5,
+          "bytes": 1150988
+        }
+      ]
+    },
+    {
+      "scene": "fortress-before-yield-fix",
+      "marks": [
+        {
+          "name": "game:startup-start",
+          "ms": 141.5
+        },
+        {
+          "name": "game:level-ready",
+          "ms": 155.10000002384186
+        },
+        {
+          "name": "game:assets-ready",
+          "ms": 1555.6999999284744
+        },
+        {
+          "name": "game:scene-ready",
+          "ms": 1586.3999999761581
+        },
+        {
+          "name": "game:first-frame",
+          "ms": 4387.600000023842
+        }
+      ],
+      "startup": [
+        4246.100000023842
+      ]
+    }
+  ],
+  "parallelCandidate": [
+    {
+      "scene": "free",
+      "marks": [
+        {
+          "name": "game:startup-start",
+          "ms": 202.80000007152557
+        },
+        {
+          "name": "game:level-ready",
+          "ms": 376.2000000476837
+        },
+        {
+          "name": "game:assets-ready",
+          "ms": 1382
+        },
+        {
+          "name": "game:scene-ready",
+          "ms": 1630.5
+        },
+        {
+          "name": "game:first-frame",
+          "ms": 3231.3000000715256
+        }
+      ],
+      "startup": [
+        3028.5
+      ],
+      "assets": [
+        {
+          "url": "human/models-equipped/grassy-equipped-game.ktx2-compact.glb",
+          "start": 432.90000009536743,
+          "end": 1207,
+          "bytes": 2176804
+        },
+        {
+          "url": "enemies/gatekeeper/model.ktx2-compact.glb",
+          "start": 433,
+          "end": 465.3000000715256,
+          "bytes": 1241964
+        },
+        {
+          "url": "enemies/watch-wasp/model.ktx2-compact.glb",
+          "start": 433,
+          "end": 470.3000000715256,
+          "bytes": 1345928
+        },
+        {
+          "url": "enemies/loadmaster/model.ktx2-compact.glb",
+          "start": 433.10000002384186,
+          "end": 464.2000000476837,
+          "bytes": 1124084
+        },
+        {
+          "url": "enemies/line-hound/model.ktx2-compact.glb",
+          "start": 433.10000002384186,
+          "end": 470.60000002384186,
+          "bytes": 1464480
+        },
+        {
+          "url": "sam/human/sam-human.ktx2-compact.glb",
+          "start": 433.10000002384186,
+          "end": 475.5,
+          "bytes": 1175344
+        },
+        {
+          "url": "tibo/human/tibo-human.ktx2-compact.glb",
+          "start": 433.2000000476837,
+          "end": 476.2000000476837,
+          "bytes": 1150988
+        }
+      ]
+    },
+    {
+      "scene": "free",
+      "marks": [
+        {
+          "name": "game:startup-start",
+          "ms": 129.79999995231628
+        },
+        {
+          "name": "game:level-ready",
+          "ms": 304.39999997615814
+        },
+        {
+          "name": "game:assets-ready",
+          "ms": 2617.2999999523163
+        },
+        {
+          "name": "game:scene-ready",
+          "ms": 2869.0999999046326
+        },
+        {
+          "name": "game:first-frame",
+          "ms": 7056.399999976158
+        }
+      ],
+      "startup": [
+        6926.600000023842
+      ]
+    },
+    {
+      "scene": "free",
+      "marks": [
+        {
+          "name": "game:startup-start",
+          "ms": 104.70000004768372
+        },
+        {
+          "name": "game:level-ready",
+          "ms": 262.2000000476837
+        },
+        {
+          "name": "game:assets-ready",
+          "ms": 2159.5
+        },
+        {
+          "name": "game:scene-ready",
+          "ms": 2392.7000000476837
+        },
+        {
+          "name": "game:first-frame",
+          "ms": 7831.5
+        }
+      ],
+      "startup": [
+        7726.799999952316
+      ]
+    },
+    {
+      "scene": "fortress",
+      "marks": [
+        {
+          "name": "game:startup-start",
+          "ms": 121.10000002384186
+        },
+        {
+          "name": "game:level-ready",
+          "ms": 133.80000007152557
+        },
+        {
+          "name": "game:assets-ready",
+          "ms": 1808.3000000715256
+        },
+        {
+          "name": "game:scene-ready",
+          "ms": 1843.8000000715256
+        },
+        {
+          "name": "game:first-frame",
+          "ms": 5460.700000047684
+        }
+      ],
+      "startup": [
+        5339.600000023842
+      ]
+    },
+    {
+      "scene": "fortress",
+      "marks": [
+        {
+          "name": "game:startup-start",
+          "ms": 245.89999997615814
+        },
+        {
+          "name": "game:level-ready",
+          "ms": 265.2999999523163
+        },
+        {
+          "name": "game:assets-ready",
+          "ms": 1843.2999999523163
+        },
+        {
+          "name": "game:scene-ready",
+          "ms": 1877.7999999523163
+        },
+        {
+          "name": "game:first-frame",
+          "ms": 5086.599999904633
+        }
+      ],
+      "startup": [
+        4840.699999928474
+      ]
+    },
+    {
+      "scene": "fortress",
+      "marks": [
+        {
+          "name": "game:startup-start",
+          "ms": 126.10000002384186
+        },
+        {
+          "name": "game:level-ready",
+          "ms": 138
+        },
+        {
+          "name": "game:assets-ready",
+          "ms": 1586.1000000238419
+        },
+        {
+          "name": "game:scene-ready",
+          "ms": 1619.5
+        },
+        {
+          "name": "game:first-frame",
+          "ms": 4846.700000047684
+        }
+      ],
+      "startup": [
+        4720.600000023842
+      ]
+    }
+  ],
+  "deliveredFortress": [
+    {
+      "scene": "fortress",
+      "marks": [
+        {
+          "name": "game:startup-start",
+          "ms": 121.10000002384186
+        },
+        {
+          "name": "game:level-ready",
+          "ms": 133.80000007152557
+        },
+        {
+          "name": "game:assets-ready",
+          "ms": 1808.3000000715256
+        },
+        {
+          "name": "game:scene-ready",
+          "ms": 1843.8000000715256
+        },
+        {
+          "name": "game:first-frame",
+          "ms": 5460.700000047684
+        }
+      ],
+      "startup": [
+        5339.600000023842
+      ]
+    },
+    {
+      "scene": "fortress",
+      "marks": [
+        {
+          "name": "game:startup-start",
+          "ms": 245.89999997615814
+        },
+        {
+          "name": "game:level-ready",
+          "ms": 265.2999999523163
+        },
+        {
+          "name": "game:assets-ready",
+          "ms": 1843.2999999523163
+        },
+        {
+          "name": "game:scene-ready",
+          "ms": 1877.7999999523163
+        },
+        {
+          "name": "game:first-frame",
+          "ms": 5086.599999904633
+        }
+      ],
+      "startup": [
+        4840.699999928474
+      ]
+    },
+    {
+      "scene": "fortress",
+      "marks": [
+        {
+          "name": "game:startup-start",
+          "ms": 126.10000002384186
+        },
+        {
+          "name": "game:level-ready",
+          "ms": 138
+        },
+        {
+          "name": "game:assets-ready",
+          "ms": 1586.1000000238419
+        },
+        {
+          "name": "game:scene-ready",
+          "ms": 1619.5
+        },
+        {
+          "name": "game:first-frame",
+          "ms": 4846.700000047684
+        }
+      ],
+      "startup": [
+        4720.600000023842
+      ]
+    }
+  ],
+  "restoredFreeCheck": {
+    "marks": [
+      {
+        "name": "game:startup-start",
+        "ms": 166.29999995231628
+      },
+      {
+        "name": "game:level-ready",
+        "ms": 335.5
+      },
+      {
+        "name": "game:assets-ready",
+        "ms": 2603
+      },
+      {
+        "name": "game:scene-ready",
+        "ms": 3415.5
+      },
+      {
+        "name": "game:first-frame",
+        "ms": 11940
+      }
+    ],
+    "startup": [
+      11773.700000047684
+    ]
+  }
+}
