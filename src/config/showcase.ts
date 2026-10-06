@@ -38,16 +38,16 @@ export interface ShowcaseEntry<Actor extends string = ShowcaseActor> {
 export const MAX_SHOWCASE_CARDS = 8;
 
 export const SHOWCASE_ACTORS: ReadonlyArray<{ id: ShowcaseActor; name: string; image: string; description: string; defaultEntry: string }> = [
-  { id: 'pelican', name: '鹈鹕', image: '/characters/pelican/02-pelican-2d-three-quarter.png', description: '原画、参考图与实时模型', defaultEntry: 'pelican.idle' },
-  { id: 'human', name: 'Grassy · 人类', image: '/characters/human/equipment-concepts/flight.png', description: '正式装备角色 · 骑行、键盘战斗与推进飞行', defaultEntry: 'human.rodin-animated-game.idle' },
-  { id: 'luma', name: '光子', image: '/characters/luma/portrait.jpg', description: '飞行微光 · 自由游弋与环境照明', defaultEntry: 'luma.idle' },
+  { id: 'pelican', name: '鹈鹕', image: './characters/pelican/02-pelican-2d-three-quarter.png', description: '原画、参考图与实时模型', defaultEntry: 'pelican.idle' },
+  { id: 'human', name: 'Grassy · 人类', image: './characters/human/equipment-concepts/flight.png', description: '正式装备角色 · 骑行、键盘战斗与推进飞行', defaultEntry: 'human.rodin-animated-game.idle' },
+  { id: 'luma', name: '光子', image: './characters/luma/portrait.jpg', description: '飞行微光 · 自由游弋与环境照明', defaultEntry: 'luma.idle' },
   ...(Object.keys(NPCS) as NpcKind[]).map((id) => ({
-    id, name: `${NPCS[id].name} · ${NPCS[id].title}`, image: `/characters/${id}/render-front.png`,
+    id, name: `${NPCS[id].name} · ${NPCS[id].title}`, image: `./characters/${id}/render-front.png`,
     description: NPCS[id].description, defaultEntry: `${id}.idle`,
   })),
-  { id: 'dummy', name: '训练假人', image: '/showcase/dummy.jpg', description: '受击、射击与漂浮', defaultEntry: 'dummy.idle' },
+  { id: 'dummy', name: '训练假人', image: './showcase/dummy.jpg', description: '受击、射击与漂浮', defaultEntry: 'dummy.idle' },
   ...ENEMY_KINDS.map((id) => ({ id, name: ENEMY_RULES[id].name, image: `${ENEMY_MODEL_DIRS[id]}/thumbnail.png`, description: ENEMY_RULES[id].skills.map((skill) => skill.name).join(' · '), defaultEntry: `${id}.idle` })),
-  { id: 'fish', name: '鱼类', image: '/showcase/fish.jpg', description: '七种鱼的外形、游动与扑腾', defaultEntry: 'fish.species.minnow' },
+  { id: 'fish', name: '鱼类', image: './showcase/fish.jpg', description: '七种鱼的外形、游动与扑腾', defaultEntry: 'fish.species.minnow' },
 ];
 
 const entries = (actor: ShowcaseActor, group: string, rows: ReadonlyArray<readonly [string, string, string, number]>): ShowcaseEntry[] =>
@@ -260,7 +260,7 @@ export const CHARACTER_CATALOG: ShowcaseCatalog = {
 
 export const CHARACTER_HISTORY_CATALOG: ShowcaseCatalog = {
   mode: 'showcase', library: 'history', title: '角色历史资料库',
-  subjects: [{ id: 'human', name: 'Grassy · 历史版本', image: '/characters/human/history/models-rodin-refined/render-game-hero.png', description: '旧原画、比例稿、模型与工程归档', defaultEntry: 'human.rodin-refined-game' }],
+  subjects: [{ id: 'human', name: 'Grassy · 历史版本', image: './characters/human/history/models-rodin-refined/render-game-hero.png', description: '旧原画、比例稿、模型与工程归档', defaultEntry: 'human.rodin-refined-game' }],
   entries: historyEntries, maxCards: GRASSY_MODELS.length,
   demos: [{
     id: 'grassy-models', title: '全部历史模型', description: '归档的 18 个模型，使用原始模型与材质，可旋转和缩放检查。',

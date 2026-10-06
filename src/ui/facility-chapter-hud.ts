@@ -19,7 +19,7 @@ function element<T extends keyof HTMLElementTagNameMap>(tag: T, className: strin
 
 function chapterLink(parent: HTMLElement, id: FacilityChapterId, label: string) {
   const link = element('a', 'facility-chapter-link', parent);
-  link.href = `/?mode=game&level=facility&scene=${id}`;
+  link.href = `./?mode=game&level=facility&scene=${id}`;
   link.textContent = label;
   return link;
 }

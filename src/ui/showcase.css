@@ -155,7 +155,7 @@
 .sc-asset-dialog-footer { margin-top: 12px; font-size: 12px; }
 .sc-asset-dialog-footer a { margin-left: auto; }
 .sc-assets .sc-asset-error { color: #ffc4af; border-color: #e99070; }
-.sc-actor-image[src^="/characters/"] { object-fit: contain; background: #faf7ed; }
+.sc-actor-image[src^="./characters/"] { object-fit: contain; background: #faf7ed; }
 .sc-actor-image.sc-character-image { object-fit: contain; background: #faf7ed; }
 
 .sc-resource-controls input[type=number] { width: 95px; min-width: 0; padding: 5px 7px; background: #10191e; color: var(--sc-text); border: 1px solid var(--sc-line); border-radius: 6px; }

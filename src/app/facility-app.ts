@@ -19,9 +19,9 @@ function createFacilityPage(sceneId: FacilitySceneId): HTMLElement {
       <div><p class="facility-eyebrow">SCENE PREVIEW / ${scene.number}</p><h1>${scene.name}</h1><p class="facility-subtitle">${scene.subtitle}</p></div>
       <div class="facility-languages" role="group" aria-label="语言 / Language" style="display:flex;gap:8px;align-items:center"><button type="button" data-language="zh">中文</button><button type="button" data-language="en">English</button></div>
       <nav class="facility-scene-list" aria-label="机房场景选择">
-        ${FACILITY_SCENE_IDS.map((id) => `<a href="/?mode=facility&amp;scene=${id}" ${id === sceneId ? 'aria-current="page"' : ''}><span>${FACILITY_SCENES[id].number}</span>${FACILITY_SCENES[id].name}</a>`).join('')}
+        ${FACILITY_SCENE_IDS.map((id) => `<a href="./?mode=facility&amp;scene=${id}" ${id === sceneId ? 'aria-current="page"' : ''}><span>${FACILITY_SCENES[id].number}</span>${FACILITY_SCENES[id].name}</a>`).join('')}
       </nav>
-      ${sceneId === 'original' ? '' : `<a class="facility-play" href="/?mode=game&amp;level=facility&amp;scene=${sceneId}">进入场景 · 自由探索</a>`}
+      ${sceneId === 'original' ? '' : `<a class="facility-play" href="./?mode=game&amp;level=facility&amp;scene=${sceneId}">进入场景 · 自由探索</a>`}
     </header>
     <section class="facility-viewport" aria-label="机房内外场景">
       <div class="facility-location"><span>实时场景预览</span><strong data-location>${scene.overview.caption}</strong></div>

@@ -17,14 +17,14 @@ export function showIntroGallery(images: IntroImages): void {
   gallery.className = 'intro-gallery';
   gallery.innerHTML = `
     <header class="intro-gallery-header">
-      <a href="/" class="intro-gallery-home"></a>
+      <a href="./" class="intro-gallery-home"></a>
       <p class="intro-gallery-eyebrow">PELICAN 429 / HISTORY</p>
       <h1></h1>
       <p class="intro-gallery-lede"></p>
-      <a class="intro-gallery-current" href="/?mode=intro&opening=finale"></a>
+      <a class="intro-gallery-current" href="./?mode=intro&opening=finale"></a>
     </header>
     <nav class="intro-edition-grid">
-      ${archive.map((edition) => `<a class="intro-edition-card" href="/?mode=intro&opening=${edition.id}" style="--card-accent:${edition.accent}">
+      ${archive.map((edition) => `<a class="intro-edition-card" href="./?mode=intro&opening=${edition.id}" style="--card-accent:${edition.accent}">
         <div class="intro-edition-preview"><canvas data-opening="${edition.id}"></canvas><span class="intro-edition-number">${edition.number}</span><span class="intro-edition-play" aria-hidden="true">↗</span></div>
         <div class="intro-edition-body"><p class="intro-edition-en">${edition.title}</p><h2>${edition.name}</h2><p>${edition.description}</p><div class="intro-edition-meta"><span>${edition.music}</span><span>${edition.duration}s 序奏</span></div></div>
       </a>`).join('')}

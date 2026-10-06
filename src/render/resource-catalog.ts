@@ -42,7 +42,7 @@ function variants<K extends string>(kinds: readonly K[], labels: Record<K, strin
 }
 function resource<K extends keyof ResourceActions>(id: K, name: string, description: string, choices: ReadonlyArray<readonly [ResourceActions[K], string]>, image = id as string) {
   return {
-    subject: { id, name, description, image: `/resources/${image}.jpg`, defaultEntry: `${id}.${choices[0]![0]}` },
+    subject: { id, name, description, image: `./resources/${image}.jpg`, defaultEntry: `${id}.${choices[0]![0]}` },
     entries: choices.map(([action, label]) => ({ id: `${id}.${action}`, actor: id, action, label, group: '游戏变体', description, seconds: 30, supportsShapes: id === 'terrain' && DEFAULT_TILES.byKey(action).collision === 'solid' })) as ResourceEntry[],
   };
 }

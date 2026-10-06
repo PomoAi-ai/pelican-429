@@ -134,7 +134,7 @@ function createCard(parent: HTMLElement, card: ShowcaseCard, model: ShowcaseMode
       const options = card.resource!;
       gameLink.hidden = options.composition === null;
       if (options.composition) {
-        gameLink.href = `/?${new URLSearchParams({ mode: 'game', level: 'composition', composition: options.composition, seed: String(options.seed), material: entry.action, environment: card.environment })}`;
+        gameLink.href = `./?${new URLSearchParams({ mode: 'game', level: 'composition', composition: options.composition, seed: String(options.seed), material: entry.action, environment: card.environment })}`;
         gameLink.setAttribute('aria-label', `进入游戏：${labCardText(card, model).title}`);
       } else gameLink.removeAttribute('href');
     }
@@ -254,7 +254,7 @@ export function createShowcasePanel(parent: HTMLElement, model: ShowcaseModel, r
   if (!isResource) {
     const libraries = el('nav', 'sc-library-tabs', sidebar);
     libraries.setAttribute('aria-label', '角色资料库导航');
-    for (const [historical, label, url] of [[false, '角色资料', '/?mode=showcase'], [true, '历史资料', '/?mode=showcase&library=history']] as const) {
+    for (const [historical, label, url] of [[false, '角色资料', './?mode=showcase'], [true, '历史资料', './?mode=showcase&library=history']] as const) {
       const link = el('a', '', libraries, label); link.href = url;
       if (isHistory === historical) link.setAttribute('aria-current', 'page');
     }
@@ -300,7 +300,7 @@ export function createShowcasePanel(parent: HTMLElement, model: ShowcaseModel, r
   const sidebarBottom = el('div', 'sc-sidebar-bottom', sidebar);
   button(sidebarBottom, '清空选择', () => model.clear());
   const back = el('a', '', sidebarBottom, '↗ 返回游戏'); back.href = returnUrl;
-  const home = el('a', 'sc-home-link', sidebarBottom, '首页索引'); home.href = '/';
+  const home = el('a', 'sc-home-link', sidebarBottom, '首页索引'); home.href = './';
   el('p', '', sidebarBottom, `最多 ${model.catalog.maxCards} 张预览卡 · ${action}在右侧切换`);
   const main = el('main', 'sc-main', root);
   let labDetails = false;

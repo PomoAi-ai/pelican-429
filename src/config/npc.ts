@@ -12,12 +12,12 @@ export const NPCS: Readonly<Record<NpcKind, {
 }>> = {
   sam: {
     name: 'Sam', title: 'The Model Router', height: 2.7,
-    path: '/characters/sam/sam.glb',
+    path: './characters/sam/sam.glb',
     description: '白鼬山姆 · 棕色短发、蓝灰眼睛、灰毛衣与路由胸章。',
   },
   tibo: {
     name: 'Tibo', title: 'The Reset Master', height: 2.65,
-    path: '/characters/tibo/tibo.glb',
+    path: './characters/tibo/tibo.glb',
     description: '鼹鼠提博 · 侧分头发、开朗笑容、黑色帽衫与重置胸章。',
   },
 };

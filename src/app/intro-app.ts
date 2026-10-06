@@ -47,7 +47,7 @@ function createStage(edition: IntroEdition): HTMLElement {
   stage.innerHTML = `
     <canvas class="intro-canvas" role="img" aria-label="从代码与多模型协奏到雨雪夜编程、屏幕失控、鹈鹕梦境与坠入游戏世界的动画"></canvas>
     <div class="intro-ready">
-      <a class="intro-choose" href="/?mode=intro">← 历史版本</a>
+      <a class="intro-choose" href="./?mode=intro">← 历史版本</a>
       <p class="intro-kicker">PELICAN 429 / OPENING ${edition.number}</p>
       <p class="intro-edition-genre">${edition.name}</p>
       <h1>${edition.title}</h1>
@@ -62,14 +62,14 @@ function createStage(edition: IntroEdition): HTMLElement {
         <h2></h2>
         <p class="intro-human"></p>
       </div>
-      <a class="intro-mission-enter" href="/?mode=game"></a>
+      <a class="intro-mission-enter" href="./?mode=game"></a>
       <p class="intro-rights"></p>
     </div>` : `
     <div class="intro-chapter" hidden>
       <p class="intro-kicker">CHAPTER 01</p>
       <h2>FIGHT THE ROGUE AI</h2>
       <p class="intro-human">Become human again.</p>
-      <a href="/?mode=game">进入游戏 <span aria-hidden="true">→</span></a>
+      <a href="./?mode=game">进入游戏 <span aria-hidden="true">→</span></a>
     </div>`}
     <div class="intro-languages" role="group" aria-label="语言 / Language"><button type="button" data-language="zh" aria-pressed="true">中文</button><button type="button" data-language="en" aria-pressed="false">English</button></div>
     <div class="intro-controls">
@@ -78,7 +78,7 @@ function createStage(edition: IntroEdition): HTMLElement {
         <input id="intro-seek" type="range" min="0" max="${total}" step="0.1" value="0" />
       </div>
       <div class="intro-control-row">
-        <a class="intro-back" href="/?mode=intro" aria-label="查看历史版本">← <span>历史版本</span></a>
+        <a class="intro-back" href="./?mode=intro" aria-label="查看历史版本">← <span>历史版本</span></a>
         <span class="intro-divider" aria-hidden="true"></span>
         <button type="button" class="intro-toggle">播放</button>
         <button type="button" class="intro-replay">重播</button>

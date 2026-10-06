@@ -15,7 +15,7 @@ async function loadFortressView() {
   const textures: THREE.Texture[] = [];
   try {
     for (const name of ['city-depth-v3/sky', 'city-depth-v3/far-city', 'city-depth-v3/middle-district', 'city-depth-v3/near-rooftops', 'fortress-black-hole-tear']) {
-      textures.push(await loader.loadAsync(`/environments/${name}.png`));
+      textures.push(await loader.loadAsync(`./environments/${name}.png`));
     }
     return createFortressView({
       sky: textures[0]!, farCity: textures[1]!, middleDistrict: textures[2]!, nearRooftops: textures[3]!,
