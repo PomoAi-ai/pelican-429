@@ -53,7 +53,7 @@ export interface CaveRules {
   /**
    * 洞口坡道保证的骑行包络（瓦片，validateTuning 交叉校验）：车身半宽 ≥ player.halfWidth、骑行高 ≥ player.bike.rideHeight、
    * 车头前探距离 ≥ bike.bumperReach + 一 tick 位移（bike.speed × sim.step）、保险杠高 ≤ bike.bumperHeight
-   * （骑行高度窗口先于保险杠被挡才算 clearance 下车，保险杠越高越宽松）；地面跟踪台阶取 player.stepUp 的上限 0.5（上坡时窗口更高，更保守）。
+   * （骑行高度窗口先于保险杠被挡才算 clearance 下车，保险杠越高越宽松）；地面跟踪台阶取 player.stepUp 的上限 1（上坡时窗口更高，更保守）。
    */
   readonly RIDE: { readonly halfWidth: number; readonly height: number; readonly reach: number; readonly stepUp: number; readonly bumperHeight: number };
   readonly POOL_CHANCE: number;
@@ -94,7 +94,7 @@ export const CAVE_RULES: CaveRules = Object.freeze({
   ENTRANCE_GAP: 70,
   ENTRANCE_CLEAR: 8,
   APPROACH: 4,
-  RIDE: Object.freeze({ halfWidth: 0.4, height: 3.3, reach: 1.6, stepUp: 0.5, bumperHeight: 1 }),
+  RIDE: Object.freeze({ halfWidth: 0.4, height: 3.3, reach: 1.6, stepUp: 1, bumperHeight: 1 }),
   POOL_CHANCE: 0.45,
   POOL_DEPTH: Object.freeze({ min: 2, max: 3 }),
   POOL_MAX_CELLS: 140,

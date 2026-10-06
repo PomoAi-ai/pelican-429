@@ -1,110 +1,137 @@
 import * as THREE from 'three';
-import { NPCS, npcAction } from '../../config/npc.ts';
+import { NPCS, npcAction, npcModel } from '../../config/npc.ts';
 import type { NpcKind, NpcAction } from '../../config/npc.ts';
 import { showcaseEntry } from '../../config/showcase.ts';
 import type { ShowcaseCard } from '../../config/showcase.ts';
 import { TUNING } from '../../config/tuning.ts';
-import { createNpcRig, loadNpcAsset } from '../../render/npc/npc-rig.ts';
-import { animateNpc } from '../../render/npc/npc-animator.ts';
+import { createNpcTransformation, loadNpcForms } from '../../render/npc/npc-transformation.ts';
 import { createNpcTargets } from '../../render/npc/npc-targets.ts';
 import { createStageView } from '../../render/stage.ts';
 import type { InputFrame } from '../../sim/sim-world.ts';
 import { createNpcWorld } from './npc-world.ts';
+import { BossScore } from '../boss-audio.ts';
 
 /** 模型尺寸、材质和动作由游戏共享资源提供，展示场只控制取景与播放时间。 */
-export function createNpcShowcaseSession(renderer: THREE.WebGLRenderer, card: ShowcaseCard) {
+export function createNpcShowcaseSession(renderer: THREE.WebGLRenderer, card: ShowcaseCard, caveBackground: THREE.Texture) {
   const stage = createStageView(renderer, TUNING, { quality: 'high', antialias: 'msaa' });
-  let kind = showcaseEntry(card.entryId).actor as NpcKind;
+  const entry = showcaseEntry(card.entryId);
+  const kind = entry.actor as NpcKind;
   let action = selectedAction();
-  let rig: ReturnType<typeof createNpcRig> | null = null;
-  let targets = createNpcTargets(kind);
+  let rig: ReturnType<typeof createNpcTransformation> | null = null;
+  const targets = createNpcTargets(kind, true);
   stage.scene.add(targets.root);
   let environment = card.environment;
-  let world = createNpcWorld(stage, environment);
+  let world = createNpcWorld(stage, environment, caveBackground);
   stage.addBackdrop(world.backdrop);
   const sky = stage.scene.background;
   const undergroundBackground = new THREE.Color('#111c27');
   const screen = new THREE.Vector3();
   let time = 0;
   let revision = card.revision;
+  let transformationRevision = card.npcTransformationRevision;
   let width = 0;
   let height = 0;
   let disposed = false;
+  let audioContext: AudioContext | null = null;
+  let score: BossScore | null = null;
+  let soundEnabled = false;
+  let audioPlaying = false;
+  let audioSpeed = card.speed;
+
+  function stopAudio(): void {
+    score?.stop();
+    audioPlaying = false;
+  }
+
 
   function selectedAction() {
     return npcAction(kind, showcaseEntry(card.entryId).action as NpcAction);
   }
 
   function duration(): number {
-    return rig ? Math.max(action.seconds, rig.actions[action.id].getClip().duration) : 0;
+    return rig ? rig.duration(action.id) : 0;
   }
 
-  function sample(): void {
+  function sample(frameDt: number): void {
     if (!rig) return;
-    animateNpc(rig, action.id, time);
     rig.root.position.set(world.x, world.groundY, 0);
-    rig.root.rotation.y = card.facing * Math.PI / 2;
-    // 身体朝向行进方向；技能与助威文字仍在横版世界平面展开。
-    rig.effects.root.rotation.y = -rig.root.rotation.y;
+    rig.sample(action.id, time, card.facing, frameDt);
     targets.root.position.set(world.x, world.groundY, 0);
     targets.sample(action.id, time, card.facing, card.targetDodge);
   }
 
-  function show(next: NpcKind): void {
-    if (kind !== next) {
-      targets.dispose();
-      targets = createNpcTargets(next);
-      stage.scene.add(targets.root);
-    }
-    kind = next;
-    rig?.dispose();
-    rig = null;
+  function show(): void {
     targets.root.visible = false;
     // 资源加载失败交给展示场的 unhandledrejection 错误面板。
-    void loadNpcAsset(next).then(() => {
-      if (disposed || kind !== next) return;
-      rig?.dispose();
-      rig = createNpcRig(next);
+    void loadNpcForms(kind).then(() => {
+      // 关闭的预览不能重新挂回场景；加载中的形态选择以最后一次为准。
+      if (disposed) return;
+      rig = createNpcTransformation(kind, showcaseEntry(card.entryId).npcForm!);
       stage.scene.add(rig.root);
-      sample();
+      sample(0);
     });
   }
 
   function reset(): void {
-    const next = showcaseEntry(card.entryId).actor as NpcKind;
-    if (kind !== next) show(next);
-    action = selectedAction();
+    stopAudio();
+    const next = selectedAction();
+    if (next.id === action.id) rig?.resetPose();
+    action = next;
     time = 0;
     revision = card.revision;
     if (environment !== card.environment) {
       world.dispose();
       environment = card.environment;
-      world = createNpcWorld(stage, environment);
+      world = createNpcWorld(stage, environment, caveBackground);
     }
     stage.scene.background = environment === 'underground' ? undergroundBackground : sky;
-    sample();
+    sample(0);
   }
-  show(kind);
+  show();
   reset();
 
   return {
     get ready() { return rig !== null; },
-    get complete() { return rig !== null && time >= duration(); },
+    get complete() {
+      return rig !== null && time >= duration() && !rig.transforming && rig.form === showcaseEntry(card.entryId).npcForm
+        && transformationRevision === card.npcTransformationRevision;
+    },
     get ticks() { return Math.floor(time / TUNING.sim.step); },
     get duration() { return duration(); },
     get progress() { return rig ? Math.min(1, time / duration()) : 0; },
     get status() {
       const npc = NPCS[kind];
-      if (!rig) return `${npc.name} · 正在加载模型…`;
-      return `${npc.name} · ${npc.title} · ${time >= duration() ? '演示完成' : action.label}`;
+      const label = `${npc.name} · ${npcModel(kind, showcaseEntry(card.entryId).npcForm!).label}`;
+      if (!rig) return `${label} · 正在加载模型…`;
+      return `${label} · ${npc.title} · ${time >= duration() ? '演示完成' : action.label}`;
     },
     get needsReset() { return revision !== card.revision; },
     reset,
+    async setSoundEnabled(enabled: boolean): Promise<void> {
+      soundEnabled = enabled;
+      stopAudio();
+      if (!enabled) return;
+      if (!audioContext) {
+        audioContext = new AudioContext();
+        score = new BossScore(audioContext, audioContext.destination);
+      }
+      await audioContext.resume();
+    },
     advance(elapsed: number, playing: boolean, _manual: (() => InputFrame) | null): number {
-      if (!rig || !playing || time >= duration()) return 0;
-      const dt = Math.min(Math.min(elapsed, TUNING.sim.maxFrameTime) * card.speed, duration() - time);
-      time += dt;
-      sample();
+      if (!rig) { stopAudio(); return 0; }
+      rig.setForm(showcaseEntry(card.entryId).npcForm!);
+      if (transformationRevision !== card.npcTransformationRevision) rig.replay();
+      transformationRevision = card.npcTransformationRevision;
+      const dt = playing ? Math.min(elapsed, TUNING.sim.maxFrameTime) * card.speed : 0;
+      if (!playing || time >= duration()) stopAudio();
+      else if (soundEnabled && audioContext?.state === 'running' && (!audioPlaying || audioSpeed !== card.speed)) {
+        stopAudio();
+        score!.schedule(kind, action.id, audioContext.currentTime, card.speed, time);
+        audioPlaying = true;
+        audioSpeed = card.speed;
+      }
+      time = Math.min(duration(), time + dt);
+      sample(dt);
       return dt;
     },
     render(rect: DOMRect, dt: number, worldScale: boolean): THREE.Texture {
@@ -146,6 +173,8 @@ export function createNpcShowcaseSession(renderer: THREE.WebGLRenderer, card: Sh
     dispose() {
       if (disposed) return;
       disposed = true;
+      stopAudio();
+      if (audioContext) void audioContext.close();
       world.dispose();
       rig?.dispose();
       targets.dispose();

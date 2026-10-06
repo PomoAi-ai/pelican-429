@@ -11,7 +11,7 @@ import { getLanguage, onLanguageChange } from './language.ts';
 
 export const TOAST_SECONDS = 1.2;
 const TOAST_FADE = 0.25;
-const SKILLS = [
+export const PELICAN_SKILL_SLOTS = [
   { key: '右键', name: '鱼群轰炸', en: 'Fish barrage', cooldown: PELICAN_SKILLS.fishCooldownTicks },
   { key: '1', name: '振翅突进', en: 'Wing dash', cooldown: PELICAN_SKILLS.dashCooldownTicks },
   { key: '2', name: '吞弹反击', en: 'Swallow & return', cooldown: PELICAN_SKILLS.swallowCooldownTicks },
@@ -32,6 +32,7 @@ export interface WeaponHudFrame {
   readonly photonCooldownTicks: number;
   readonly photonChargeTicks: number;
   readonly photonActiveTicks: number;
+  readonly transformUnlocked: boolean;
 }
 export interface WeaponHud {
   handleEvents(events: readonly SimEvent[]): void;
@@ -52,6 +53,7 @@ export function createWeaponHud(root: HTMLElement, options: WeaponHudOptions): W
   const panel = el('div', 'hud-weapon', root);
   const main = el('div', 'hud-weapon-main', panel);
   const icon = el('div', 'hud-weapon-icon', main);
+  const portrait = el('span', 'hud-skill-icon', icon);
   const info = el('div', 'hud-weapon-info', main);
   const name = el('div', 'hud-weapon-name', info);
   const health = el('div', 'hud-player-health', info);
@@ -63,7 +65,12 @@ export function createWeaponHud(root: HTMLElement, options: WeaponHudOptions): W
   const switchCharacter = document.createElement('button');
   switchCharacter.type = 'button';
   switchCharacter.className = 'hud-character-switch';
-  el('span', 'hud-character-key', switchCharacter).textContent = 'F · ';
+  const switchPortrait = el('span', 'hud-skill-icon hud-character-icon', switchCharacter);
+  switchPortrait.setAttribute('aria-hidden', 'true');
+  const switchArrow = el('span', 'hud-character-arrow', switchCharacter);
+  switchArrow.textContent = '⇄';
+  switchArrow.setAttribute('aria-hidden', 'true');
+  el('span', 'hud-character-key', switchCharacter).textContent = 'F';
   const switchLabel = el('span', 'hud-character-label', switchCharacter);
   switchCharacter.addEventListener('click', options.onTransform);
   const consumedKeys = new Set<string>();
@@ -78,19 +85,22 @@ export function createWeaponHud(root: HTMLElement, options: WeaponHudOptions): W
   panel.addEventListener('focusout', () => consumedKeys.clear());
   panel.append(switchCharacter);
   const slots = el('div', 'hud-weapon-slots', panel);
-  const skills = SKILLS.map((skill, index) => {
+  const skills = PELICAN_SKILL_SLOTS.map((skill, index) => {
     const slot = el('button', 'hud-weapon-slot', slots) as HTMLButtonElement;
     slot.type = 'button';
     slot.setAttribute('data-slot', String(index + 1));
     slot.addEventListener('click', () => options.onSkill(SKILL_ACTIONS[index]!));
+    const artwork = el('span', 'hud-skill-icon', slot);
+    artwork.setAttribute('aria-hidden', 'true');
     const key = el('span', 'hud-weapon-key', slot);
     key.textContent = skill.key;
     const label = el('span', 'hud-skill-name', slot);
     const state = el('span', 'hud-skill-state', slot);
     const progress = el('div', 'hud-skill-fill', el('div', 'hud-skill-track', slot));
-    return { slot, key, label, state, progress };
+    return { slot, artwork, key, label, state, progress };
   });
   const toastEl = el('div', 'hud-weapon-toast', root);
+  toastEl.setAttribute('role', 'status');
   toastEl.hidden = true;
   let toastText = '';
   let toastAge = TOAST_SECONDS;
@@ -102,14 +112,20 @@ export function createWeaponHud(root: HTMLElement, options: WeaponHudOptions): W
     toastEl.style.opacity = '1';
   };
   const unsubscribe = onLanguageChange(() => { toastText = ''; toastEl.hidden = true; });
+  // 每帧调用：只在内容变化时写 DOM，避免无谓的样式失效与重排。
   const setText = (node: HTMLElement, text: string): void => {
     if (node.textContent !== text) node.textContent = text;
+  };
+  const setAttr = (node: HTMLElement, name: string, value: string): void => {
+    if (node.getAttribute(name) !== value) node.setAttribute(name, value);
   };
   return {
     handleEvents(events) {
       const en = getLanguage() === 'en';
       for (const ev of events) {
-        if (ev.type === 'transformBlocked') showToast(en ? 'More room is needed to transform' : '空间不足，换个开阔位置变身');
+        if (ev.type === 'transformBlocked') showToast(ev.reason === 'story'
+          ? en ? 'Defeat Tibo to unlock transformation' : '击败 Tibo 后解锁变身'
+          : en ? 'More room is needed to transform' : '空间不足，换个开阔位置变身');
         else if (ev.type === 'weaponBlocked') showToast(en
           ? ev.reason === 'riding' ? 'Dismount to use this skill' : 'Water refilling…'
           : ev.reason === 'riding' ? '下车后释放此技能' : '水量恢复中…');
@@ -125,11 +141,18 @@ export function createWeaponHud(root: HTMLElement, options: WeaponHudOptions): W
       const human = p.form === 'human';
       const transforming = p.transformTicks >= 0;
       switchCharacter.disabled = transforming || player.health!.hp <= 0;
-      setText(switchLabel, transforming ? en ? 'Switching…' : '切换中…'
+      // 剧情锁定仍接收点击以说明解锁条件，真正的变身限制由模拟层统一处理。
+      setAttr(switchCharacter, 'aria-disabled', String(!frame.transformUnlocked || switchCharacter.disabled));
+      setAttr(switchPortrait, 'data-icon', human ? 'pelican' : 'human');
+      setText(switchLabel, !frame.transformUnlocked ? en ? 'Locked · Defeat Tibo' : '未解锁 · 击败 Tibo'
+        : transforming ? en ? 'Switching…' : '切换中…'
         : human ? en ? 'Pelican' : '变为鹈鹕' : en ? 'Grassy' : '变为人形');
-      setText(icon, human ? en ? 'K' : '键' : en ? 'W' : '水');
+      setAttr(switchCharacter, 'aria-label', `${en ? 'Switch form' : '形态切换'} · ${switchLabel.textContent}`);
+      setAttr(switchCharacter, 'title', `${en ? 'Switch form' : '形态切换'} · F`);
+      setAttr(panel, 'data-player-form', human ? 'human' : 'pelican');
+      setAttr(portrait, 'data-icon', human ? 'human' : 'pelican');
       setText(name, human ? 'GRASSY' : en ? 'PELICAN' : '鹈鹕');
-      setText(healthLabel, `${Math.ceil(player.health!.hp)} / ${player.health!.maxHp}`);
+      setText(healthLabel, `${player.health!.hp.toFixed(2)} / ${player.health!.maxHp.toFixed(2)}`);
       healthFill.style.width = `${Math.max(0, player.health!.hp / player.health!.maxHp * 100)}%`;
       setText(detail, human ? en ? 'Melee strike' : '近战挥击'
         : en ? `Water · ${Math.floor(w.water / W.water.cost)} shots` : `水量 ${Math.floor(w.water / W.water.cost)} 发`);
@@ -143,24 +166,28 @@ export function createWeaponHud(root: HTMLElement, options: WeaponHudOptions): W
       skills.forEach((view, i) => {
         const humanSkill = HUMAN_SLOTS[i]!;
         const humanEquipment = human && i < 3;
-        const skill = humanEquipment ? { ...humanSkill, cooldown: HUMAN_SKILLS[humanSkill.action].cooldown } : SKILLS[i]!;
+        const skill = humanEquipment ? { ...humanSkill, cooldown: HUMAN_SKILLS[humanSkill.action].cooldown } : PELICAN_SKILL_SLOTS[i]!;
         const cooldown = humanEquipment ? p.humanCombat.cooldowns[i]! : i < 3 ? w.cooldowns[i]! : frame.photonCooldownTicks;
         const isActive = humanEquipment ? p.humanCombat.action === humanSkill.action : active[i]!;
+        setAttr(view.artwork, 'data-icon', humanEquipment ? ['codex', 'bug', 'server'][i]! : ['fish', 'dash', 'swallow', 'photon'][i]!);
         const disabled = transforming || p.ride.mode !== 'off' && (humanEquipment || i === 1 || i === 2);
         const state = transforming ? en ? 'Transforming' : '变身中'
           : disabled ? en ? 'Dismount' : '需下车'
           : !human && i === 2 && w.gulpTicks > 0 ? en ? `Absorbed ${w.mouthful?.count ?? 0}/3` : `吸入 ${w.mouthful?.count ?? 0}/3`
           : i === 3 && frame.photonChargeTicks > 0 ? en ? 'Charging' : '聚光中'
+          : !human && i === 1 && isActive ? en ? 'Invincible' : '无敌中'
           : isActive ? en ? 'Active' : '释放中'
           : cooldown > 0 ? `${(cooldown / 60).toFixed(1)}${en ? 's' : '秒'}` : en ? 'Ready' : '就绪';
         setText(view.key, i === 0 && en ? 'RMB' : skill.key);
         setText(view.label, en ? skill.en : skill.name);
         setText(view.state, state);
+        view.state.hidden = cooldown === 0 && !disabled && !isActive;
         view.slot.classList.toggle('hud-weapon-active', isActive);
         view.slot.classList.toggle('hud-weapon-ready', cooldown === 0 && !disabled);
         view.slot.classList.toggle('hud-weapon-disabled', disabled);
         view.slot.disabled = disabled || player.health!.hp <= 0;
-        view.slot.setAttribute('aria-label', `${en ? skill.en : skill.name} · ${state}`);
+        setAttr(view.slot, 'aria-label', `${en ? skill.en : skill.name} · ${state}`);
+        setAttr(view.slot, 'title', `${en ? skill.en : skill.name} · ${state}${!human && i === 1 ? en ? ' · Invincible while dashing; ends when the dash stops' : ' · 突进期间无敌，停止后立即解除' : ''}`);
         view.progress.style.width = `${(100 * (1 - cooldown / skill.cooldown)).toFixed(1)}%`;
       });
       if (toastText !== '') {

@@ -1,6 +1,6 @@
 /**
  * DOM 键鼠绑定：把 KeyboardEvent.code / MouseEvent.button 经绑定表映射为 GameAction 并喂给 ActionTracker。
- * - 键盘按键在 window 上监听；鼠标按下只在画布上监听，松开在 window 上监听（拖出画布松开也能释放）。
+ * - 键盘按键在 window 上监听（keyup 用捕获阶段，Meta 松开时 releaseAll）；鼠标按下只在画布上监听，松开在 window 上监听（拖出画布松开也能释放）。
  * - 失焦（blur）或页面隐藏（visibilitychange → hidden）时 releaseAll，避免卡键。
  * - 已绑定的按键阻止默认行为（空格/方向键滚动页面）；画布上禁用右键菜单。
  * - 带 Ctrl/Meta/Alt 的组合键交给浏览器（不拦截快捷键）。
@@ -83,12 +83,19 @@ export function bindKeyboardMouse(options: KeyboardMouseOptions): KeyboardMouseB
     // 自动重复的 keydown 由 tracker 按 bindingKey 去重，不会重复锁存。
     tracker.press(action, 'keyboard', e.code);
   });
+  // 松开走捕获阶段：抽屉、面板等 UI 会拦截 keyup 冒泡，焦点落在其中时松开不能丢，否则角色卡在移动状态。
+  // 按下仍走冒泡阶段，UI 可以照常拦截按键。
   on<KeyLike>(target, 'keyup', (e) => {
+    // macOS 按住 Meta 期间其他键不发 keyup，只能在 Meta 松开时整体释放。
+    if (e.code === 'MetaLeft' || e.code === 'MetaRight') {
+      tracker.releaseAll();
+      return;
+    }
     const action = lookup.keys.get(e.code);
     if (action === undefined) return;
     e.preventDefault();
     tracker.release(action, e.code);
-  });
+  }, { capture: true });
   on<MouseLike>(canvas, 'mousedown', (e) => {
     updatePointer(e);
     const action = lookup.mouse.get(e.button);

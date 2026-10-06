@@ -1,6 +1,8 @@
 import * as THREE from 'three';
 import { mulberry32 } from '../../core/rng.ts';
 
+const LIGHT_INTENSITY = 1.8;
+
 const lightVertex = /* glsl */`
   attribute float seed;
   attribute float size;
@@ -71,7 +73,7 @@ export function createLumaRig(): LumaRig {
   const particles = new THREE.Group();
   root.add(motion);
   motion.add(particles);
-  const light = new THREE.PointLight(0x8deaff, 18, 9, 2);
+  const light = new THREE.PointLight(0x8deaff, LIGHT_INTENSITY, 9, 2);
   light.position.z = 0.45;
   motion.add(light);
   const uniforms = {
@@ -128,7 +130,8 @@ export function createLumaRig(): LumaRig {
 }
 
 export function animateLumaParticles(rig: LumaRig, cycle: number, spread: number, energy: number, alert: boolean): void {
-  rig.light.intensity = 18 * energy;
+  // 技能的高能量只放大光核和粒子，实体照明保留柔和的上限。
+  rig.light.intensity = LIGHT_INTENSITY * Math.min(energy, 1.4);
   rig.uniforms.uCycle.value = cycle;
   rig.uniforms.uSpread.value = spread;
   rig.uniforms.uEnergy.value = energy;

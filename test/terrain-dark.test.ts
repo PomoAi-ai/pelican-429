@@ -157,7 +157,7 @@ describe('地下暗部：着色器与挂接', () => {
 
   test('方块材质与洞壁背板标记为地形；挂接后缓存键带 terrain、着色器走 lmTerrain', () => {
     const tile = createTileMaterial(generateTileTextures(32));
-    const wall = createCaveWallMaterial(new THREE.DataTexture(new Uint8Array(4), 2, 2), 2, 2);
+    const wall = createCaveWallMaterial(new THREE.DataTexture(new Uint8Array(4), 2, 2), new THREE.DataTexture(), 2, 2, new THREE.Texture());
     const map = createTileMap(20, 10, DEFAULT_TILES);
     const wl = createWorldLight({ map, fluid: createFluidMap(map), trees: [], lighting: DEFAULT_LIGHTING });
     for (const m of [tile, wall]) {

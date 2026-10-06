@@ -28,8 +28,10 @@ export interface GameSettings {
   rain: PrecipLevel;
   snow: PrecipLevel;
   water: WaterPaletteName;
-  /** 性能面板（等同 ?debug 下按 P）。 */
+  /** 帧率性能面板，与 Cmd+Option+Z / Ctrl+Alt+Z 同步。 */
   perfPanel: boolean;
+  minimapVisible: boolean;
+  minimapOpacity: number;
   /** 显示与世界瓦片对齐的格子虚线。 */
   tileGrid: boolean;
   /** 允许全地图单击传送角色。 */
@@ -104,7 +106,9 @@ export const SETTING_DEFS: readonly AnySettingDef[] = Object.freeze([
   { key: 'snowPower', group: 'weather', title: '雪量强度', note: '叠加所选雪量，自动天气同样生效', param: 'snowPower', options: [], range: { min: 0, max: 5, step: 0.1, unit: '倍' } },
   { key: 'snow', group: 'weather', title: '雪量', param: 'snow', options: choices('snow', PRECIP_LEVELS, LABELS.snow, [...PRECIP_LEVELS]) },
   { key: 'water', group: 'water', title: '水色', param: 'water', options: choices('water', WATER_PALETTE_NAMES, LABELS.water, ['clear', 'emerald', 'deep']) },
-  { key: 'perfPanel', group: 'debug', title: '性能面板', param: null, options: ON_OFF },
+  { key: 'perfPanel', group: 'graphics', title: '显示帧率（FPS）', note: '快捷键：Cmd+Option+Z / Ctrl+Alt+Z', param: null, options: ON_OFF },
+  { key: 'minimapVisible', group: 'graphics', title: '显示小地图', param: null, options: ON_OFF },
+  { key: 'minimapOpacity', group: 'graphics', title: '小地图不透明度', note: '0% 透明，100% 不透明', param: null, options: [], range: { min: 0, max: 100, step: 5, unit: '%' } },
   { key: 'tileGrid', group: 'debug', title: '格子虚线', note: '每格对应一个真实瓦片', param: null, options: ON_OFF },
   { key: 'mapTeleport', group: 'debug', title: '地图点击传送', note: '关闭设置后按 M 打开全地图，点击位置传送；拖动仍为平移', param: null, options: ON_OFF },
   { key: 'dummyShoot', group: 'debug', title: '假人射击', param: 'dummyShoot', options: ON_OFF },
@@ -251,6 +255,8 @@ export function newWorldSearch(currentSearch: string, seed: number, live: GameSe
   const q = new URLSearchParams(currentSearch);
   q.delete('level');
   q.delete('inspect');
+  q.delete('region');
+  q.delete('scene');
   q.set('seed', String(parseSeed(String(seed))));
   for (const def of SETTING_DEFS) {
     if (def.param === null || !q.has(def.param)) continue;

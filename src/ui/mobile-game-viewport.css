@@ -1,0 +1,5 @@
+.mobile-game-host > :not(.mobile-game-frame) { display: none !important; }
+.mobile-game-frame { position: fixed; left: 0; top: 0; width: max(100dvw, 100dvh); height: min(100dvw, 100dvh); border: 0; transform-origin: top left; }
+@media (orientation: portrait) {
+  .mobile-game-frame { transform: translateX(100dvw) rotate(90deg); }
+}

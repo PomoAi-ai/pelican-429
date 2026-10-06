@@ -8,7 +8,7 @@ import { LUMA_ACTIONS } from './luma.ts';
 import { FISH_SPECIES } from './fish-appearance.ts';
 import type { FishSpeciesId } from './fish-appearance.ts';
 import { NPCS, NPC_ACTIONS } from './npc.ts';
-import type { NpcKind } from './npc.ts';
+import type { NpcKind, NpcForm } from './npc.ts';
 
 export type ShowcaseEnvironment = 'surface' | 'underground';
 export type ShowcaseActor = 'pelican' | 'human' | 'luma' | 'dummy' | 'fish' | NpcKind | EnemyKind;
@@ -32,21 +32,22 @@ export interface ShowcaseEntry<Actor extends string = ShowcaseActor> {
   readonly loop?: boolean;
   readonly supportsShapes?: boolean;
   readonly fishSpecies?: FishSpeciesId;
+  readonly npcForm?: NpcForm;
   readonly grassyAnimation?: { readonly variant: GrassyAnimatedVariant; readonly clip: GrassyAction; readonly flight?: GrassyFlight };
 }
 
 export const MAX_SHOWCASE_CARDS = 8;
 
 export const SHOWCASE_ACTORS: ReadonlyArray<{ id: ShowcaseActor; name: string; image: string; description: string; defaultEntry: string }> = [
-  { id: 'pelican', name: '鹈鹕', image: './characters/pelican/02-pelican-2d-three-quarter.png', description: '原画、参考图与实时模型', defaultEntry: 'pelican.idle' },
-  { id: 'human', name: 'Grassy · 人类', image: './characters/human/equipment-concepts/flight.png', description: '正式装备角色 · 骑行、键盘战斗与推进飞行', defaultEntry: 'human.rodin-animated-game.idle' },
+  { id: 'pelican', name: '鹈鹕', image: './resources/home/pelican.webp', description: '原画、参考图与实时模型', defaultEntry: 'pelican.idle' },
+  { id: 'human', name: 'Grassy · 人类', image: './resources/home/grassy.webp', description: '正式装备角色 · 骑行、键盘战斗与推进飞行', defaultEntry: 'human.rodin-animated-game.idle' },
   { id: 'luma', name: '光子', image: './characters/luma/portrait.jpg', description: '飞行微光 · 自由游弋与环境照明', defaultEntry: 'luma.idle' },
   ...(Object.keys(NPCS) as NpcKind[]).map((id) => ({
     id, name: `${NPCS[id].name} · ${NPCS[id].title}`, image: `./characters/${id}/render-front.png`,
-    description: NPCS[id].description, defaultEntry: `${id}.idle`,
+    description: NPCS[id].description, defaultEntry: `${id}.monster.idle`,
   })),
   { id: 'dummy', name: '训练假人', image: './showcase/dummy.jpg', description: '受击、射击与漂浮', defaultEntry: 'dummy.idle' },
-  ...ENEMY_KINDS.map((id) => ({ id, name: ENEMY_RULES[id].name, image: `${ENEMY_MODEL_DIRS[id]}/thumbnail.png`, description: ENEMY_RULES[id].skills.map((skill) => skill.name).join(' · '), defaultEntry: `${id}.idle` })),
+  ...ENEMY_KINDS.map((id) => ({ id, name: ENEMY_RULES[id].name, image: `./resources/home/${ENEMY_MODEL_DIRS[id].split('/').at(-1)}.webp`, description: ENEMY_RULES[id].skills.map((skill) => skill.name).join(' · '), defaultEntry: `${id}.idle` })),
   { id: 'fish', name: '鱼类', image: './showcase/fish.jpg', description: '七种鱼的外形、游动与扑腾', defaultEntry: 'fish.species.minnow' },
 ];
 
@@ -56,7 +57,7 @@ const entries = (actor: ShowcaseActor, group: string, rows: ReadonlyArray<readon
 export const SHOWCASE_ENTRIES: readonly ShowcaseEntry[] = [
   ...GRASSY_ANIMATED_MODELS.flatMap((model) => GRASSY_ACTIONS.map((action) => ({
     id: `human.rodin-animated-${model.id}.${action.id}`, actor: 'human' as const, action: action.id,
-    label: action.label, group: action.id === 'ride' ? '自行车' : ['keyboard_smash', 'codex_attack', 'bug_attack', 'server_overload'].includes(action.id) ? '键盘战斗' : ['takeoff', 'hover', 'fly_forward', 'land'].includes(action.id) ? '推进飞行' : '基础动作',
+    label: action.label, group: action.id === 'ride' ? '自行车' : ['keyboard_smash', 'codex_attack', 'bug_attack', 'server_overload'].includes(action.id) ? '键盘战斗' : ['takeoff', 'hover', 'fly_forward', 'fly_fast', 'land'].includes(action.id) ? '推进飞行' : '基础动作',
     description: `${model.label}：${action.description}`, seconds: action.seconds, loop: action.loop,
     grassyAnimation: { variant: model.id, clip: action.id },
   }))),
@@ -73,11 +74,12 @@ export const SHOWCASE_ENTRIES: readonly ShowcaseEntry[] = [
   }))),
   ...GRASSY_MODELS.map((model) => ({ id: `human.${model.id}`, actor: 'human' as const, action: model.id, label: model.label, description: model.description, seconds: 0, group: '静态模型' })),
   ...LUMA_ACTIONS.map((action) => ({ ...action, id: `luma.${action.id}`, actor: 'luma' as const, action: action.id, group: '宠物动作',
-    ...(action.id === 'ultimate' ? { label: '光子爆裂', description: '与鹈鹕共同召唤 Bug 与光轮，追击左右及高处的真实目标', seconds: 6 } : {}),
+    ...(action.id === 'ultimate' ? { description: '光子独立聚光，虫群与光轮沿鼠标方向冲出，再转弯追击目标。' } : {}),
   })),
-  ...(Object.keys(NPCS) as NpcKind[]).flatMap((actor) => NPC_ACTIONS[actor].map((action) => ({
-    ...action, id: `${actor}.${action.id}`, actor, action: action.id, group: action.release > 0 ? '特色技能' : '基础动作',
-  }))),
+  ...(Object.keys(NPCS) as NpcKind[]).flatMap((actor) => NPCS[actor].forms.flatMap((form) => NPC_ACTIONS[actor].map((action) => ({
+    ...action, id: `${actor}.${form.id}.${action.id}`, actor, action: action.id, npcForm: form.id,
+    group: action.id === 'attack' ? '普通攻击' : action.release > 0 ? '特色技能' : '基础动作',
+  })))),
   ...entries('pelican', '基础动作', [
     ['idle', '待机', '观察呼吸、重心与配饰的轻微摆动', 5],
     ['walk', '走路', '慢速步态与脚底贴地', 4],
@@ -145,12 +147,6 @@ export function showcaseEntry(id: string): ShowcaseEntry {
   return entry;
 }
 
-export function parseAppMode(params: URLSearchParams): 'index' | 'game' | 'showcase' | 'resources' | 'lab' | 'intro' | 'facility' {
-  const mode = params.get('mode') ?? (params.has('level') || params.has('seed') ? 'game' : 'index');
-  if (mode !== 'index' && mode !== 'game' && mode !== 'showcase' && mode !== 'resources' && mode !== 'lab' && mode !== 'intro' && mode !== 'facility') throw new Error(`未知页面模式：${mode}`);
-  return mode;
-}
-
 export interface ShowcaseCard {
   readonly id: number;
   entryId: string;
@@ -168,6 +164,7 @@ export interface ShowcaseCard {
   attackMotion: 'still' | 'walk' | 'run';
   /** 配置变化后重建该卡片的演示，其他卡片保持原进度。 */
   revision: number;
+  npcTransformationRevision: number;
   resource: ResourceOptions | null;
 }
 
@@ -241,17 +238,29 @@ export const CHARACTER_CATALOG: ShowcaseCatalog = {
     id: 'grassy-photon', title: 'Grassy · 光子同行', description: '光子跟随人形，地面和空中均可召唤真实追踪弹；3 / E 释放光子，2 释放服务器超载。',
     cards: [{ entryId: 'human.rodin-animated-game.photon_burst' }],
   }, {
-    id: 'grassy-flight', title: '推进飞行', description: '起飞、悬停、前飞与降落；飞行时保持键盘背负。',
-    cards: ['takeoff', 'hover', 'fly_forward', 'land'].map((action) => ({ entryId: `human.rodin-animated-game.${action}` })),
+    id: 'grassy-fast-flight', title: 'Grassy · 快速飞行', description: '大幅前倾、双腿后收与加长推进尾流；手动飞行默认快速，按住 Shift 减速，空中可继续攻击。',
+    cards: [{ entryId: 'human.rodin-animated-game.fly_fast' }],
+  }, {
+    id: 'grassy-flight', title: '推进飞行', description: '起飞、悬停、前飞、快速飞行与降落；飞行时保持键盘背负。',
+    cards: ['takeoff', 'hover', 'fly_forward', 'fly_fast', 'land'].map((action) => ({ entryId: `human.rodin-animated-game.${action}` })),
   }, {
     id: 'sam-tibo', title: 'Sam & Tibo', description: 'The Model Router 与 The Reset Master · 在横版游戏场景中展示动作、技能与受击效果，可切换左右朝向和地上地下。',
-    cards: [{ entryId: 'sam.idle' }, { entryId: 'tibo.idle' }],
+    cards: [{ entryId: 'sam.monster.idle' }, { entryId: 'tibo.monster.idle' }],
+  }, {
+    id: 'npc-weapons', title: 'Sam & Tibo · 武器与普攻', description: '手持法杖发射单枚脉冲，重置锤近身挥击；双形态共用武器与普通攻击。',
+    cards: [{ entryId: 'sam.monster.attack' }, { entryId: 'tibo.monster.attack' }],
   }, {
     id: 'sam', title: 'Sam · The Model Router', description: NPCS.sam.description,
-    cards: [{ entryId: 'sam.idle' }],
+    cards: [{ entryId: 'sam.monster.idle' }],
+  }, {
+    id: 'npc-transform', title: 'Sam & Tibo · 原地变身', description: '全身逐步变为人形或怪物，保持身高和当前动作；支持重播、暂停和慢放检查。',
+    cards: [{ entryId: 'sam.monster.idle' }, { entryId: 'tibo.monster.idle' }],
+  }, {
+    id: 'sam-forms', title: 'Sam · 双形态', description: '并排比较 Sam 的白鼬与人形，同一身高与动作，保留模型路由、Token 导弹和 AGI 降临。',
+    cards: [{ entryId: 'sam.monster.idle' }, { entryId: 'sam.human.idle' }],
   }, {
     id: 'tibo', title: 'Tibo · The Reset Master', description: NPCS.tibo.description,
-    cards: [{ entryId: 'tibo.idle' }],
+    cards: [{ entryId: 'tibo.monster.idle' }],
   }, {
     id: 'fish-varieties', title: '七种鱼类', description: '并排观察小鱼、金鱼、锦鲤、神仙鱼、鲶鱼、鲈鱼与虹鳟的轮廓和游动',
     cards: FISH_SPECIES.map((species) => ({ entryId: `fish.species.${species.id}` })),

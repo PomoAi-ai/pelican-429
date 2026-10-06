@@ -70,6 +70,7 @@ export function fillPelicanAnimInput(out: PelicanAnimInput, e: Entity, dx: numbe
   out.vx = b.vx;
   out.vy = b.vy;
   out.facing = e.facing;
+  out.turning = p.moveX !== 0 || e.attack !== undefined || p.humanCombat.action !== null || p.shotTicks >= 0;
   out.dx = dx;
   out.gaitMode = p.moveGear;
   if (e.attack) {
@@ -205,6 +206,7 @@ export function createPelicanViewFactory(options: PelicanViewOptions): EntityVie
       vx: 0,
       vy: 0,
       facing: 1,
+      turning: false,
       attackPhase: null,
       attackProgress: 0,
       dx: 0,

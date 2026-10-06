@@ -15,6 +15,8 @@ import { createDummyViewFactory, slopeSinkOffset } from '../src/render/entity-vi
 import { createTileMap } from '../src/world/tile-map.ts';
 import { SHAPE_SLOPE_R } from '../src/world/tile-shapes.ts';
 import { DEFAULT_TILES, TILE_STONE } from '../src/world/tile-types.ts';
+import { generateFreeWorld } from '../src/world/free-world.ts';
+import { createFishSchool } from '../src/entities/fish.ts';
 
 function makeFish(id: number, x: number, y: number, seed = id * 7919, state: FishState = 'swim', facing: 1 | -1 = 1): Fish {
   return { id, lake: 0, seed, body: createBody({ x, y, halfWidth: 0.2, height: 0.25 }), state, timer: 0, facing, dirX: facing, dirY: 0 };
@@ -46,6 +48,21 @@ function instance(mesh: THREE.InstancedMesh, i: number) {
 }
 
 describe('fish-view', () => {
+  test('真实大世界的完整鱼群能初始化并连续更新', () => {
+    for (const size of ['small', 'medium', 'large'] as const) {
+      const level = generateFreeWorld(392740869, size);
+      const school = createFishSchool(level.fishSpawns, level.fluid, TUNING.fish);
+      const view = createFishView(school);
+      try {
+        if (size === 'medium') assert.ok(school.fish.length > 64, '复现超过旧容量的真实鱼群');
+        assert.doesNotThrow(() => {
+          view.update(1, 0);
+          view.update(.5, .016);
+        }, size);
+      } finally { view.dispose(); level.fluid.dispose(); }
+    }
+  });
+
   test('混合鱼群增删和重排后，各批次仍显示对应鱼的位置', () => {
     const fish = FISH_SPECIES.map((species, i) => makeFish(i + 1, i + 2, 3, species.sampleSeed));
     const school: FishSchool = { fish: fish.slice(0, 3) };

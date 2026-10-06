@@ -87,6 +87,13 @@ export function createGrassyEffects(model: THREE.Group, smashClip: THREE.Animati
   const smash = createKeyboardSmash(attackRoot, smashClip, model.getObjectByName('KeyboardWeapon')!.scale.clone());
   const bolts = createCodeBolts(attackRoot);
   const bugs = createBugSwarm(attackRoot);
+  const previewProjectiles = [
+    { root: bolts.root, muzzle: new THREE.Vector3(0, 1.65, 0.58) },
+    { root: bugs.root, muzzle: new THREE.Vector3(0, 1.70, 0.58) },
+  ];
+  for (const projectile of previewProjectiles) projectile.root.matrixAutoUpdate = false;
+  const muzzleDelta = new THREE.Vector3();
+  const previewTranslation = new THREE.Matrix4();
   const servers = createServerOverload(attackRoot);
   const thrusters = GRASSY_EFFECT_SOCKETS.slice(1).map((name) => createThruster(model.getObjectByName(name)!));
   const roots = [attackRoot, ...thrusters.map((thruster) => thruster.root)];
@@ -102,6 +109,16 @@ export function createGrassyEffects(model: THREE.Group, smashClip: THREE.Animati
       bolts.root.visible = projectilePreview && action === 'codex_attack';
       bugs.root.visible = projectilePreview && action === 'bug_attack';
       servers.root.visible = action === 'server_overload';
+      for (const projectile of previewProjectiles) {
+        projectile.root.matrix.identity();
+        if (projectilePreview && flight && projectile.root.visible) {
+          // 起点随握持姿势移动；离手弹道保持向前，不能随快飞前倾扎入脚下。
+          muzzleDelta.copy(projectile.muzzle).applyMatrix4(attackTransform).sub(projectile.muzzle);
+          previewTranslation.makeTranslation(muzzleDelta.x, muzzleDelta.y, muzzleDelta.z);
+          projectile.root.matrix.copy(attackTransform).invert().multiply(previewTranslation);
+        }
+        projectile.root.matrixWorldNeedsUpdate = true;
+      }
       if (smash.root.visible) smash.update(progress, strikeSide);
       if (bolts.root.visible) bolts.update(progress);
       if (bugs.root.visible) bugs.update(progress);
@@ -117,10 +134,14 @@ export function createGrassyEffects(model: THREE.Group, smashClip: THREE.Animati
       const flightAction = flight ? flight.action : action;
       const flightTime = flight ? flight.time : time;
       const flightProgress = flight ? flightTime / grassyAction(flight.action).seconds : progress;
-      const thrust = flightAction === 'hover' ? 0.8 : flightAction === 'fly_forward' ? 1.15 : flightAction === 'takeoff' ? ease((flightProgress - 0.15) / 0.4) * 0.8 : flightAction === 'land' ? (1 - ease((flightProgress - 0.05) / 0.65)) * 0.8 : 0;
+      const fastFlight = flightAction === 'fly_fast';
+      const thrust = flightAction === 'hover' ? 0.8 : fastFlight ? 2.1 : flightAction === 'fly_forward' ? 1.15 : flightAction === 'takeoff' ? ease((flightProgress - 0.15) / 0.4) * 0.8 : flightAction === 'land' ? (1 - ease((flightProgress - 0.05) / 0.65)) * 0.8 : 0;
       for (let i = 0; i < thrusters.length; i++) {
         // 施法双臂自由活动，升力由腰背承担；护腕不朝敌人或键盘喷出长尾焰。
-        thrusters[i]!.update(flightTime, thrust * (flight ? i < 2 ? 0.16 : 1.3 : 1));
+        const thruster = thrusters[i]!;
+        // 0.8 秒快飞对应现有 1.2 秒粒子周期，增强流速后循环仍连续。
+        thruster.update(flightTime * (fastFlight ? 1.5 : 1), thrust * (flight ? i < 2 ? 0.16 : 1.3 : 1));
+        if (fastFlight && (!flight || i >= 2)) thruster.root.scale.y *= 1.45;
       }
     },
     dispose() {

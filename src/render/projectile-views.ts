@@ -162,6 +162,17 @@ export function createProjectileViews(): ProjectileViews {
     new THREE.SpriteMaterial({ map: glowTex, color, blending: THREE.AdditiveBlending, transparent: true, depthWrite: false, toneMapped: false });
   const enemyGlow = glowMat(ENEMY_GLOW);
   const returnGlow = glowMat(RETURN_GLOW);
+  const bossShotGeo = new THREE.BoxGeometry(1, 1, 1);
+  const bossShots = {
+    'sam-pulse': { color: '#a9f8ff', shape: [2.8, .8, .8] },
+    'tibo-fries': { color: '#ffbb48', shape: [2.4, .7, .7] },
+    'sam-routing': { color: '#6cf3ff', shape: [4, .45, .45] },
+    'sam-token': { color: '#97caff', shape: [1.7, 1.3, .55] },
+  };
+  const bossMaterials = Object.fromEntries(Object.entries(bossShots).map(([id, look]) => [id, {
+    body: new THREE.MeshStandardMaterial({ color: look.color, emissive: look.color, emissiveIntensity: 1.4, roughness: .25 }),
+    glow: glowMat(look.color),
+  }]));
 
   const water: EntityViewFactory = (entity) => {
     const r = requireKind(entity, 'waterShot');
@@ -235,11 +246,14 @@ export function createProjectileViews(): ProjectileViews {
   const enemy: EntityViewFactory = (entity) => {
     const r = requireKind(entity, 'enemyShot');
     const returned = entity.projectile?.returned === true;
+    const id = entity.projectile!.def.id;
+    const bossShot = Object.hasOwn(bossShots, id) ? bossShots[id as keyof typeof bossShots] : null;
+    const materials = bossShot ? bossMaterials[id]! : null;
     const group = new THREE.Group();
     group.name = `enemy-shot-${entity.id}`;
-    const ball = new THREE.Mesh(goGeo, returned ? returnMat : enemyMat);
+    const ball = new THREE.Mesh(bossShot ? bossShotGeo : goGeo, returned ? returnMat : materials ? materials.body : enemyMat);
     ball.scale.setScalar(r);
-    const glow = new THREE.Sprite(returned ? returnGlow : enemyGlow);
+    const glow = new THREE.Sprite(returned ? returnGlow : materials ? materials.glow : enemyGlow);
     group.add(ball, glow);
     let time = entity.id * 0.53;
     return {
@@ -247,9 +261,13 @@ export function createProjectileViews(): ProjectileViews {
       sync(e, alpha, frameDt) {
         time += frameDt;
         group.position.set(centerX(e, alpha), centerY(e, alpha), PROJECTILE_Z);
-        // 黏球：不规则搏动 + 自转。
-        ball.scale.set(r * (1 + 0.12 * Math.sin(time * 9)), r * (1 + 0.12 * Math.sin(time * 9 + 2)), r);
-        ball.rotation.z = time * 3;
+        if (bossShot) {
+          ball.scale.set(r * bossShot.shape[0]!, r * bossShot.shape[1]!, r * bossShot.shape[2]!);
+          ball.rotation.z = Math.atan2(e.body.vy, e.body.vx) + (id === 'tibo-fries' ? time * 6 : 0);
+        } else {
+          ball.scale.set(r * (1 + 0.12 * Math.sin(time * 9)), r * (1 + 0.12 * Math.sin(time * 9 + 2)), r);
+          ball.rotation.z = time * 3;
+        }
         glow.scale.setScalar(r * (returned ? 9 : 7) * (1 + 0.15 * Math.sin(time * 6)));
       },
       dispose() {
@@ -271,7 +289,8 @@ export function createProjectileViews(): ProjectileViews {
       drones.dispose();
       fishPool.dispose();
       fishKit.dispose();
-      for (const g of [waterGeo, mistGeo, goGeo]) g.dispose();
+      for (const g of [waterGeo, mistGeo, goGeo, bossShotGeo]) g.dispose();
+      for (const material of Object.values(bossMaterials)) { material.body.dispose(); material.glow.dispose(); }
       for (const m of [waterMat, waterCoreMat, causticMat, highlightMat, beadMat, mistMat, enemyMat, returnMat, enemyGlow, returnGlow]) m.dispose();
       glowTex.dispose();
     },

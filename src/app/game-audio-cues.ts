@@ -1,29 +1,31 @@
 import { ENEMY_RULES } from '../config/enemy-rules.ts';
 import { FORTRESS_STRUCTURE } from '../config/facility-structure.ts';
-import { HUMAN_SKILLS } from '../config/human-combat.ts';
+import { FACILITY_SCENES } from '../config/facility-scenes.ts';
 import type { SimEvent } from '../core/game-events.ts';
 import type { ProjectileKind } from '../core/weapon-ids.ts';
 import type { Entity } from '../entities/entity.ts';
 import { getPlayer } from '../sim/sim-world.ts';
 import type { SimWorld } from '../sim/sim-world.ts';
 import { TILE_PLATFORM } from '../world/tile-types.ts';
-import type { GameSound } from './fortress-score.ts';
+import type { GameSound } from '../config/game-audio.ts';
 
 export interface SoundCue { sound: GameSound; x: number; y: number; strength?: number; pitch?: number }
 
 function snapshot(e: Entity) {
   const p = e.pelican;
   return {
-    attack: e.attack, elapsed: e.attack?.elapsed ?? -1, grounded: e.body.onGround,
+    attack: e.attack, grounded: e.body.onGround,
     x: e.body.x, y: e.body.y, vx: e.body.vx, vy: e.body.vy,
     jumping: p?.jumping, flight: p?.flightMode, dash: p?.weapon.dashTicks ?? 0,
     gulp: p?.weapon.gulpTicks ?? 0, action: p?.humanCombat.action,
     actionTicks: p?.humanCombat.ticks ?? 0, transform: p?.transformTicks ?? -1,
-    airborne: e.enemy?.airborne, pelican: p,
+    pelican: p,
   };
 }
 type Snapshot = ReturnType<typeof snapshot>;
-const ENEMY_PITCH = { gatekeeper: 0.88, lineHound: 1.25, watchWasp: 1.6, loadmaster: 0.58 } as const;
+const ENEMY_PITCH: Record<string, number> = { gatekeeper: 0.88, lineHound: 1.25, watchWasp: 1.6, loadmaster: 0.58 };
+const ENEMY_ACTION_PITCH: Record<string, number> = Object.fromEntries(Object.entries(ENEMY_RULES).flatMap(([kind, rule]) =>
+  rule.skills.map(skill => [skill.id, ENEMY_PITCH[kind]!])));
 
 /** 只观察模拟结果；声音既不消费输入，也不改变战斗或动画时间轴。 */
 export class GameAudioCues {
@@ -63,14 +65,6 @@ export class GameAudioCues {
       next.set(e.id, snapshot(e));
       if (!old || e.health!.hp <= 0 || world.respawnTicks > 0 || (e.id === player.id && respawned)) continue;
       if (e.enemy) {
-        const pitch = ENEMY_PITCH[e.enemy.kind];
-        if (e.attack && e.attack !== old.attack) emit(e, 'enemyWindup', 1, pitch);
-        if (e.attack && e.enemy.skill !== null) {
-          const skill = ENEMY_RULES[e.enemy.kind].skills[e.enemy.skill];
-          const landed = old.airborne && !e.enemy.airborne && e.body.onGround;
-          const released = e.attack.elapsed >= skill.startup && (old.attack !== e.attack || old.elapsed < skill.startup);
-          if ((skill.mode === 'slam' ? landed : released) && skill.mode !== 'bomb' && skill.mode !== 'thermite') emit(e, 'enemyStrike', 1, pitch);
-        }
         if (e.enemy.kind === 'watchWasp') pulse(e, 'rotor', 24, 0.4);
         else if (e.body.onGround && Math.abs(e.body.x - old.x) > 0.015) pulse(e, 'stepMetal', e.enemy.kind === 'loadmaster' ? 36 : 22, 0.55);
         continue;
@@ -83,10 +77,7 @@ export class GameAudioCues {
       if (p.weapon.dashTicks > old.dash) emit(e, 'dash');
       if (p.weapon.gulpTicks > old.gulp) emit(e, 'gulp');
       if (p.humanCombat.action === 'keyboard_smash' && e.attack !== old.attack) emit(e, 'keyboard');
-      if (p.humanCombat.action === 'server_overload') {
-        if (old.action !== 'server_overload' || p.humanCombat.ticks < old.actionTicks) emit(e, 'overloadCharge');
-        if (old.action === 'server_overload' && old.actionTicks < HUMAN_SKILLS.server_overload.release && p.humanCombat.ticks >= HUMAN_SKILLS.server_overload.release) emit(e, 'overloadBurst');
-      }
+      if (p.humanCombat.action === 'server_overload' && (old.action !== 'server_overload' || p.humanCombat.ticks < old.actionTicks)) emit(e, 'overloadCharge');
       if (p.flightMode === 'fly') pulse(e, p.form === 'human' ? 'jet' : 'wing', p.form === 'human' ? 18 : 24, 0.6);
       else if (p.flightMode === 'glide') pulse(e, 'glide', 42, 0.4);
       if (p.ride.mode === 'riding') {
@@ -96,7 +87,9 @@ export class GameAudioCues {
         const tx = Math.max(0, Math.min(world.map.width - 1, Math.floor(e.body.x)));
         const ty = Math.max(0, Math.min(world.map.height - 1, Math.floor(e.body.y - 0.05)));
         const tile = world.map.get(tx, ty);
-        const metal = world.level.lethalCoolant !== undefined && e.body.x >= FORTRESS_STRUCTURE.bounds.left;
+        const metal = world.level.facilities
+          ? world.level.facilities.some(facility => e.body.x >= facility.x && e.body.x < facility.x + FACILITY_SCENES[facility.id].width && e.body.y >= facility.y)
+          : world.level.lethalCoolant !== undefined && e.body.x >= FORTRESS_STRUCTURE.bounds.left;
         pulse(e, tile === TILE_PLATFORM ? 'stepGrate' : metal ? 'stepMetal' : 'stepStone', p.moveGear === 'run' ? 15 : 23, p.form === 'human' ? 0.65 : 0.45);
       }
     }
@@ -112,6 +105,10 @@ export class GameAudioCues {
     const volleys = new Set<string>();
     for (const event of events) {
       switch (event.type) {
+        case 'combatAction':
+          if (event.action === 'server_overload') emit('overloadBurst', event);
+          else cues.push({ sound: event.phase === 'started' ? 'enemyWindup' : 'enemyStrike', x: event.x, y: event.y, strength: 1, pitch: ENEMY_ACTION_PITCH[event.action]! });
+          break;
         case 'projectileFired': {
           const volley = `${event.ownerId}:${event.kind}`;
           if (event.kind === 'fishShot' || event.kind === 'bugShot') {

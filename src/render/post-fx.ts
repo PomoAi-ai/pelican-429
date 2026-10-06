@@ -60,6 +60,9 @@ export interface GradeUniforms {
   readonly uVignette: THREE.IUniform<number>;
   readonly uVignetteStart: THREE.IUniform<number>;
   readonly uAspect: THREE.IUniform<number>;
+  /** xy = 屏幕 UV 中心，z = 以屏幕高度为单位的影响半径；0 关闭。 */
+  readonly uGravityLens: THREE.IUniform<THREE.Vector3>;
+  readonly uHalfTexel: THREE.IUniform<THREE.Vector2>;
 }
 
 /**
@@ -79,13 +82,34 @@ export const GRADE_FRAGMENT = /* glsl */ `
   uniform float uVignette;
   uniform float uVignetteStart;
   uniform float uAspect;
+  uniform vec3 uGravityLens;
+  uniform vec2 uHalfTexel;
   #include <tonemapping_pars_fragment>
   #include <colorspace_pars_fragment>
   varying vec2 vUv;
   void main() {
-    vec4 src = texture2D( tDiffuse, vUv );
+    vec2 sceneUv = vUv;
+    if ( uGravityLens.z > 0.0 ) {
+      vec2 aspect = vec2( uAspect, 1.0 );
+      vec2 offset = ( vUv - uGravityLens.xy ) * aspect;
+      float radius = clamp( length( offset ) / uGravityLens.z, 0.0, 1.0 );
+      // Wendland 在中心最强，外缘的权重及前两阶导数归零，角色进入黑芯后仍连续变形。
+      float falloff = 1.0 - radius;
+      float lens = falloff * falloff * falloff * falloff * ( 1.0 + 4.0 * radius );
+      // 旋转集中到黑芯，避免把视界外的吸积盘本身拧成旋涡。
+      float angle = lens * lens * 2.4;
+      float cs = cos( angle );
+      float sn = sin( angle );
+      vec2 bent = mat2( cs, sn, -sn, cs ) * offset * ( 1.0 - lens * 0.5 );
+      float stretch = lens * lens * 0.25;
+      bent *= vec2( 1.0 - stretch, 1.0 + stretch );
+      vec2 edge = min( vUv, 1.0 - vUv ) * aspect;
+      float edgeFade = smoothstep( 0.0, 0.08, min( edge.x, edge.y ) );
+      sceneUv = clamp( vUv + ( bent - offset ) / aspect * edgeFade, uHalfTexel, 1.0 - uHalfTexel );
+    }
+    vec4 src = texture2D( tDiffuse, sceneUv );
     if ( uBloom > 0.0 ) {
-      vec4 b = texture2D( tBloom, vUv );
+      vec4 b = texture2D( tBloom, sceneUv );
       src.rgb += b.rgb * b.a;
     }
     #ifdef LINEAR_TONE_MAPPING
@@ -109,7 +133,7 @@ export const GRADE_FRAGMENT = /* glsl */ `
     vec3 c = src.rgb;
     // Negative HDR alpha marks thin plumage; positive opacity/additive effects retain full AO.
     float aoWeight = clamp( 1.0 + min( src.a, 0.0 ), 0.0, 1.0 );
-    if ( uAoIntensity > 0.0 ) c *= mix( 1.0, texture2D( tAO, vUv ).r, uAoIntensity * aoWeight );
+    if ( uAoIntensity > 0.0 ) c *= mix( 1.0, texture2D( tAO, sceneUv ).r, uAoIntensity * aoWeight );
     c *= uTint;
     float l = dot( c, vec3( 0.2126, 0.7152, 0.0722 ) );
     c = mix( vec3( l ), c, uSaturation );
@@ -139,6 +163,8 @@ class GradeOutputPass extends OutputPass {
       uVignette: { value: 0 },
       uVignetteStart: { value: 0.5 },
       uAspect: { value: 1 },
+      uGravityLens: { value: new THREE.Vector3() },
+      uHalfTexel: { value: new THREE.Vector2(0.5, 0.5) },
     };
     Object.assign(u, extra);
     if (this.material.uniforms !== u) throw new Error('post-fx: OutputPass material no longer shares its uniforms object (three API changed?)');
@@ -355,6 +381,8 @@ export interface PostFx {
   setAntialias(mode: AntialiasMode): void;
   /** CSS 像素尺寸 + 像素比。 */
   setSize(width: number, height: number, pixelRatio: number): void;
+  /** 世界空间引力透镜；整幅场景一起折射，包含角色与场景遮挡。 */
+  setGravityLens(lens: { readonly center: THREE.Vector3; readonly radius: number } | null): void;
   render(deltaTime?: number): void;
   /** 已完成色调映射与 sRGB 编码的最终画面，合成时直接复制像素。 */
   renderTexture(): THREE.Texture;
@@ -414,6 +442,29 @@ export function createPostFx(input: PostFxInput): PostFx {
   gu.uVignetteStart.value = g.vignetteStart;
   gu.tAO.value = ao.gtaoMap;
   gu.tBloom.value = bloom.bloomTexture;
+
+  let gravityLens: Parameters<PostFx['setGravityLens']>[0] = null;
+  const lensCenter = new THREE.Vector3();
+  const lensEdge = new THREE.Vector3();
+  const updateGravityLens = (): void => {
+    gu.uGravityLens.value.z = 0;
+    if (!gravityLens) return;
+    // 后期早于 RenderPass 执行投影，因此必须先同步本帧相机的位置与朝向。
+    camera.updateWorldMatrix(true, false);
+    lensCenter.copy(gravityLens.center).applyMatrix4(camera.matrixWorldInverse);
+    if (lensCenter.z >= -camera.near || lensCenter.z <= -camera.far) return;
+    lensEdge.copy(lensCenter);
+    lensEdge.y += gravityLens.radius;
+    lensCenter.applyMatrix4(camera.projectionMatrix);
+    lensEdge.applyMatrix4(camera.projectionMatrix);
+    const radius = Math.abs(lensEdge.y - lensCenter.y) * 0.5;
+    const x = lensCenter.x * 0.5 + 0.5;
+    const y = lensCenter.y * 0.5 + 0.5;
+    const dx = Math.max(-x, 0, x - 1) * gu.uAspect.value;
+    const dy = Math.max(-y, 0, y - 1);
+    if (Math.hypot(dx, dy) >= radius) return;
+    gu.uGravityLens.value.set(x, y, radius);
+  };
 
   const named: Array<readonly [string, Pass]> = [
     ['render', renderPass],
@@ -487,13 +538,19 @@ export function createPostFx(input: PostFxInput): PostFx {
       composer.setPixelRatio(pixelRatio);
       composer.setSize(width, height);
       gu.uAspect.value = width / height;
+      gu.uHalfTexel.value.set(0.5 / sceneTarget.width, 0.5 / sceneTarget.height);
+    },
+    setGravityLens(lens) {
+      gravityLens = lens;
     },
     render(deltaTime) {
       if (disposed) throw new Error('post-fx: render after dispose');
+      updateGravityLens();
       composer.renderToScreen = true;
       composer.render(deltaTime);
     },
     renderTexture() {
+      updateGravityLens();
       composer.renderToScreen = false;
       // 保持深度与 HDR 场景目标固定，避免后期读取上一张预览的缓冲。
       composer.readBuffer = sceneTarget;

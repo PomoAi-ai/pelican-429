@@ -15,6 +15,7 @@ import { createBackdrop, shadowHalfExtent } from '../src/render/stage.ts';
 import { createOrbViews } from '../src/render/orb-view.ts';
 import { createOrbFx, ORB_FX_POOL_SIZE } from '../src/render/orb-fx.ts';
 import { createHud } from '../src/ui/hud.ts';
+import { setLanguage } from '../src/ui/language.ts';
 import type { SimEvent } from '../src/core/game-events.ts';
 import { createBody } from '../src/physics/body.ts';
 import { createViewRegistry } from '../src/render/view-registry.ts';
@@ -41,8 +42,23 @@ function mouseEvent(type: string, button: number, clientX = 50, clientY = 50): E
   return e;
 }
 
-function setupInput() {
-  const target = new EventTarget();
+/**
+ * 只区分 window 上的捕获与冒泡两段：事件从页面内元素传上来时，
+ * 内部 UI 可能已 stopPropagation，此时只有捕获阶段的监听器能收到。
+ */
+function fakeWindow() {
+  const capture = new EventTarget();
+  const bubble = new EventTarget();
+  const phase = (o?: boolean | AddEventListenerOptions) => ((typeof o === 'boolean' ? o : o?.capture) ? capture : bubble);
+  return {
+    addEventListener: (type: string, fn: EventListener, o?: boolean | AddEventListenerOptions) => phase(o).addEventListener(type, fn),
+    removeEventListener: (type: string, fn: EventListener, o?: boolean | EventListenerOptions) => phase(o).removeEventListener(type, fn),
+    dispatchEvent: (e: Event) => capture.dispatchEvent(e) && bubble.dispatchEvent(e),
+    dispatchStoppedInside: (e: Event) => capture.dispatchEvent(e),
+  };
+}
+
+function setupInput<T extends EventTarget>(target: T = new EventTarget() as T) {
   const canvas = Object.assign(new EventTarget(), {
     getBoundingClientRect: () => ({ left: 0, top: 0, right: 100, bottom: 100 }),
     focused: 0,
@@ -147,6 +163,21 @@ describe('keyboard-mouse', () => {
     target.dispatchEvent(mouseEvent('mousemove', 0, 20, 30));
     canvas.dispatchEvent(new Event('mouseleave'));
     assert.equal(binding.pointer.inside, false);
+  });
+
+  test('焦点在拦截 keyup 冒泡的 UI 内松开方向键，移动仍被释放', () => {
+    const { target, tracker } = setupInput(fakeWindow());
+    target.dispatchEvent(keyEvent('keydown', 'KeyA'));
+    target.dispatchStoppedInside(keyEvent('keyup', 'KeyA'));
+    assert.equal(tracker.isHeld('moveLeft'), false);
+  });
+
+  test('松开 Meta 释放全部按键（macOS 按住 Meta 期间其他键不发 keyup）', () => {
+    const { target, tracker } = setupInput();
+    target.dispatchEvent(keyEvent('keydown', 'KeyA'));
+    target.dispatchEvent(keyEvent('keydown', 'MetaLeft', { metaKey: true }));
+    target.dispatchEvent(keyEvent('keyup', 'MetaLeft'));
+    assert.equal(tracker.isHeld('moveLeft'), false);
   });
 
   test('失焦与页面隐藏时释放全部按键；dispose 后不再响应', () => {
@@ -471,10 +502,12 @@ describe('tile-view 外观 / 草皮', () => {
 describe('tile-view 流式加载', () => {
   // 256×256 → 8×8 区块；视野 (100,100,40,40) 覆盖区块 cx/cy ∈ [3,4]。
   const VIEW = Object.freeze({ x: 100, y: 100, w: 40, h: 40 });
+  // 计数/滞回/脏区块断言与机器速度无关：放开时间预算（预算本身见 chunk-streamer 测试）。
+  const UNTIMED = 1e6;
 
   test('可视区块立即构建，余量区块按每帧上限补齐', () => {
     const map = createTileMap(256, 256, DEFAULT_TILES);
-    const view = createTileView(map, { marginChunks: 1, keepChunks: 2, maxBuildsPerFrame: 4 });
+    const view = createTileView(map, { marginChunks: 1, keepChunks: 2, maxBuildsPerFrame: 4 , maxBuildMsPerFrame: UNTIMED });
     assert.equal(view.update(VIEW), 4 + 4, '4 visible + 4 margin');
     assert.equal(view.loadedChunks, 8);
     assert.equal(view.pendingChunks, 8);
@@ -501,7 +534,7 @@ describe('tile-view 流式加载', () => {
 
   test('超出保留范围才卸载（滞回），视野移动时新区块立即构建', () => {
     const map = createTileMap(256, 256, DEFAULT_TILES);
-    const view = createTileView(map, { marginChunks: 1, keepChunks: 2, maxBuildsPerFrame: 64 });
+    const view = createTileView(map, { marginChunks: 1, keepChunks: 2, maxBuildsPerFrame: 64 , maxBuildMsPerFrame: UNTIMED });
     view.update(VIEW);
     assert.equal(view.loadedChunks, 16); // cx,cy ∈ [2,5]
     // 右移一个区块：视野 cx ∈ [4,5]，余量 [3,6]，保留 [2,7] → 不卸载任何区块。
@@ -523,7 +556,7 @@ describe('tile-view 流式加载', () => {
 
   test('已加载脏区块（及其 8 邻）重建；未加载脏区块等到进入视野时按当前数据构建', () => {
     const map = createTileMap(256, 256, DEFAULT_TILES);
-    const view = createTileView(map, { maxBuildsPerFrame: 64 });
+    const view = createTileView(map, { maxBuildsPerFrame: 64 , maxBuildMsPerFrame: UNTIMED });
     view.update(VIEW);
     map.set(110, 110, TILE_DIRT); // 区块 (3,3)，8 邻 cx,cy ∈ [2,4] 均已加载
     assert.equal(view.update(VIEW), 9);
@@ -710,6 +743,7 @@ describe('hud 飞行能量条', () => {
   const stats = { fps: 60, tick: 0, droppedTicks: 0 };
 
   test('按 flightTicks/flightMaxTicks 显示，<25% 变红，max=0 隐藏；玩家缺失即抛', () => {
+    setLanguage('zh');
     withFakeDocument(() => {
       const root = new FakeElement('div');
       const hud = createHud(root as unknown as HTMLElement, () => ({ x: 0, y: 0 }));
@@ -718,7 +752,7 @@ describe('hud 飞行能量条', () => {
       assert.ok(p);
       p.flightMaxTicks = 300;
       p.flightTicks = 150;
-      const frame = { entities: [player], alpha: 1, frameDt: 1 / 60, stats, playerId: 1 };
+      const frame = { entities: [player], alpha: 1, frameDt: 1 / 60, stats, headSubmerged: false, playerId: 1 };
       hud.update(frame);
       const panel = root.find('hud-flight');
       const fill = root.find('hud-flight-fill');
@@ -748,7 +782,7 @@ describe('hud 飞行能量条', () => {
       const p = player.pelican;
       assert.ok(p);
       p.shootCooldownTicks = 5;
-      hud.update({ entities: [player], alpha: 1, frameDt: 1 / 60, stats, playerId: 1 });
+      hud.update({ entities: [player], alpha: 1, frameDt: 1 / 60, stats, headSubmerged: false, playerId: 1 });
       const orb = root.find('hud-orb-fill');
       assert.ok(orb);
       assert.equal(orb.style.width, '75.0%');

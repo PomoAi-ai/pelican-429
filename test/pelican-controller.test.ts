@@ -215,19 +215,25 @@ test('控制器: 落地前按跳（缓冲窗口内）落地即起跳', () => {
   assert.ok(jumpedAgain, '缓冲跳跃应在落地时触发');
 });
 
-test('控制器: 下+跳 穿过单向平台；在实心地面上下+跳不起跳也不下穿', () => {
-  const w = world(FLAT);
+for (const form of ['pelican', 'human'] as const) for (const ride of ['off', 'riding'] as const)
+test(`控制器: ${form}/${ride} 单按 S 下平台，实心地面不会下穿`, () => {
+  const w = world(FLAT, TUNING);
   settle(w);
   const p = getPlayer(w);
+  p.pelican!.form = form;
+  p.pelican!.ride.mode = ride;
   // 站到平台上
   p.body.x = 10;
   p.body.y = 5.5;
   settle(w);
   assert.equal(p.body.y, 5);
-  stepSim(w, input({ downHeld: true, jumpPressed: true, jumpHeld: true }));
-  assert.ok(p.body.vy <= 0);
+  stepSim(w, input({ downHeld: true }));
+  assert.ok(p.body.y < 5, '单按下方向立即离开平台，不需要跳跃输入');
   steps(w, 40, { downHeld: true });
   assert.equal(p.body.y, 1);
+  assert.equal(p.pelican!.ride.mode, ride);
+  steps(w, 30, { downHeld: true });
+  assert.equal(p.body.y, 1, '持续按 S 不能穿过实心地面');
   // 地面上的下+跳：普通跳跃
   stepSim(w, input({ downHeld: true, jumpPressed: true, jumpHeld: true }));
   assert.ok(p.body.vy > 10);

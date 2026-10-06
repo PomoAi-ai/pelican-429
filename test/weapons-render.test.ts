@@ -20,6 +20,7 @@ import { createProjectileViews } from '../src/render/projectile-views.ts';
 import { DROP_CAPACITY, createProjectileFx } from '../src/render/projectile-fx.ts';
 import { isLightMappable } from '../src/render/light-texture.ts';
 import { createWeaponHud } from '../src/ui/weapon-hud.ts';
+import { setLanguage } from '../src/ui/language.ts';
 import { FakeElement, withFakeDocument } from './helpers/fake-dom.ts';
 import { GEO, REST } from './helpers/pelican-fixtures.ts';
 import { pelicanRestPose } from '../src/render/pelican/pelican-pose.ts';
@@ -213,12 +214,13 @@ describe('projectile views / fx', () => {
 describe('weapon HUD', () => {
   const W = TUNING.weapons;
   test('普攻水量、独立技能冷却、骑车禁用和吞弹提示', () => {
+    setLanguage('zh');
     withFakeDocument(() => {
       const root = new FakeElement('div');
       const hud = createWeaponHud(root as unknown as HTMLElement, { weapons: W, onTransform: () => {}, onSkill: () => {} });
       const player = createPelicanEntity(1, { x: 0, y: 0 }, TUNING);
       const p = player.pelican!;
-      const frame = { entities: [player], playerId: 1, frameDt: DT, photonCooldownTicks: 0, photonChargeTicks: 0, photonActiveTicks: 0 };
+      const frame = { entities: [player], playerId: 1, frameDt: DT, photonCooldownTicks: 0, photonChargeTicks: 0, photonActiveTicks: 0, transformUnlocked: true };
       hud.update(frame);
       const slots = root.find('hud-weapon-slots')!;
       assert.equal(slots.children.length, 4);

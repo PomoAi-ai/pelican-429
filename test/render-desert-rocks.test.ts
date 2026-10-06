@@ -321,7 +321,7 @@ describe('020 世界装配', () => {
     const level = w;
     const sim = createSimWorld({ level, tuning: TUNING });
     const scene = new THREE.Scene();
-    const views = createWorldViews({ scene, level, fish: sim.fish, windMode: 'storm' });
+    const views = createWorldViews({ caveBackground: new THREE.Texture(), scene, level, fish: sim.fish, windMode: 'storm' });
     const d = level.deserts[0]!;
     const rockTris = createRockParts().map((g) => g.index!.count / 3);
     const desertTris = createDesertParts().map((g) => g.index!.count / 3);

@@ -1,6 +1,102 @@
 /** Copy shared by the character, resource and scene showcase views. */
 export const SHOWCASE_ENGLISH: Record<string, string> = {
+  '服务器阵列过热转红，能量柱与碎片冲击波爆发。释放全程及结束后 2 秒无敌，受击显示免伤。': 'Servers overheat red, releasing an energy column and waves of debris. Invincible throughout the cast and for 2 seconds afterward; blocked hits display Immune.',
+  '超载效果概念': 'Overload concept',
+  '服务器超载 · 过热阵列与数据冲击波（概念图）': 'Server overload · Overheating array and data shockwave (concept)',
+  '光子独立聚光，虫群与光轮沿鼠标方向冲出，再转弯追击目标。': 'Photon charges independently. Bugs and light rings launch toward the cursor, then turn to pursue targets.',
+  'Bug 与光轮沿鼠标方向喷射，拖着导弹尾迹冲出后转弯寻找敌人。': 'Bugs and light rings launch toward the cursor with missile trails, then turn to seek enemies.',
+  '法杖脉冲': 'Staff pulse', '重置锤击': 'Reset mallet',
+  'Sam & Tibo · 武器与普攻': 'Sam & Tibo · Weapons and basic attacks',
+  '手持法杖发射单枚脉冲，重置锤近身挥击；双形态共用武器与普通攻击。': 'The handheld staff fires a single pulse; the Reset Mallet strikes up close. Both forms share their weapon and basic attack.',
+  '手持法杖亮起节点，沿起手瞄准的固定方向发射一枚数据脉冲，可跳跃或走位躲避。': 'The handheld staff lights its nodes before firing one pulse toward the position aimed at during windup. Jump or move to dodge.',
+  '左手重置锤向后蓄力，再向前方短距离砸落；锤头棘轮在收招时倒转归位。': 'Wind up the left-hand Reset Mallet and smash a short distance ahead. Its ratchet reverses during recovery.',
+  '吐水与四技能': 'Water spit and four skills', '悬浮阵列与等离子冲击': 'Floating array and plasma impact', 'SVG 原画': 'SVG concept art', '四分之三': 'Three-quarter view',
+  'gpt6.1astra版本': 'GPT 6.1 Astra version', 'gpt6.1sol版本': 'GPT 6.1 Sol version', 'Sonnet 5.5版本': 'Sonnet 5.5 version', 'Opus 5.5 版': 'Opus 5.5 version',
+  'Rodin 版': 'Rodin version', 'Rodin 精修版': 'Refined Rodin version',
+  '精细版 GLB': 'Detailed GLB', '游戏标准版 GLB': 'Game standard GLB', '游戏轻量版 GLB': 'Game light GLB',
+  '正在准备预览…': 'Preparing preview…', '滚动到此处以加载': 'Scroll here to load', '离屏暂停 · 保留当前进度': 'Paused offscreen · Progress preserved',
+  '同步组等待全部预览就绪': 'Waiting for all synchronized previews', '同步对比已暂停：请让全部画面可见并等待资源加载': 'Synchronized comparison paused: keep all previews visible and wait for assets to load',
+  '同步对比 · 统一起点与速度': 'Synchronized comparison · Shared start and speed',
+  '角色草地场景：点击空白或按左右方向键切换轻微角度': 'Character meadow: click empty space or press left and right arrows to change the view angle',
+  'Boss 模型尚未就绪，请加载完成后播放声音。': 'The boss model is not ready. Wait for loading before playing audio.',
+  '角色尚未加载完成，暂时无法播放声音。': 'The character is still loading. Audio is not available yet.',
+  '生命归零 · 等待归位': 'No health remaining · Waiting to reset', '已清除': 'Cleared', '准备': 'Windup', '攻击': 'Attack', '收招': 'Recovery',
+  '自由游动': 'Swimming freely', '演示结束': 'Demo ended', '演示完成': 'Demo complete', '骨骼动画': 'Skeletal animation', '静态': 'Static',
+  '光子聚光': 'Photon focusing', '虫群光轮追击': 'Bugs and light rings pursuing', '跑动': 'Running', '下落': 'Falling',
+  '已吞入 · 凝聚反击': 'Swallowed · Charging counter', '反吐完成': 'Counter spit complete', '等待来袭弹': 'Waiting for incoming projectiles',
+  '突进演示': 'Dash demo', '吐水普攻': 'Water spit attack', '上车中': 'Mounting', '下车中': 'Dismounting', '起跳': 'Jumping', '振翅飞行': 'Flapping flight', '鹈鹕原始比例': 'Original pelican scale',
+  '变身': 'Transform', '切换人形和怪物形态': 'Switch between human and monster forms', '重播变身': 'Replay transformation',
+  '▶ 播放声音': '▶ Play sound', '■ 停止声音': '■ Stop sound', '变为怪物': 'Become monster', '变为人形': 'Become human',
+  '四形状并列': 'Four shapes', '阶梯': 'Steps', '材质邻接': 'Material joins',
+  '完整洞穴按游戏规则生成地面与洞顶装饰；单件变体请通过完整目录查看。': 'The complete cave uses game rules for floor and ceiling decorations. Inspect individual variants in the full catalog.',
+  'A/D 移动 · Shift 慢走 · Space 跳跃 / 持续推进飞行 · J/K 单手键盘 · 右键 Codex · 1 Bug · 2 超载 · 3/E 光子 · R 骑车 · F 变身': 'A/D move · Shift walk · Space jump / hold to fly · J/K keyboard attack · RMB Codex · 1 Bug · 2 overload · 3/E Photon · R ride · F transform',
+  'A/D 移动 · Space 跳跃 · Shift 慢走 · J/K 普攻 · 右键副攻 · 1–3 技能 · E 大招 · R 骑车 · F 变身': 'A/D move · Space jump · Shift walk · J/K attack · RMB secondary · 1–3 skills · E ultimate · R ride · F transform',
+  '光子爆裂': 'Photon burst', '光子技能': 'Photon skills', '普通攻击': 'Basic attack', '吐水': 'Water spit',
+  '四个技能': 'Four skills', '鱼群轰炸': 'Fish barrage', '振翅突进': 'Wing dash', '吞弹反击': 'Swallow counter',
+  '受击': 'Hit reaction', '欧米动作': 'OMI actions', '目标跟随': 'Target tracking', '欧米': 'OMI', '欧米 OMI-01': 'OMI-01',
+  '前倾快跑': 'Forward-lean sprint', '光子同行': 'Photon companion', '原地变身': 'Transform in place',
+  '光子跟随 Grassy，按 3 / E 召唤虫群与光轮追击目标；与鹈鹕形态共享冷却。': 'Photon follows Grassy. Press 3 / E to summon bugs and light rings that pursue targets; cooldown is shared with the pelican form.',
+  '与鹈鹕共同召唤 Bug 与光轮，追击左右及高处的真实目标': 'Summon bugs and light rings with the pelican to pursue real targets on both sides and above',
+  '连续吐水，观察水弹命中、水花和目标受击': 'Spit water repeatedly to inspect projectile hits, splashes, and target reactions',
+  '鱼群沿不同弧线落下，弹跳并命中三个目标': 'Fish fall along different arcs, bounce, and hit three targets',
+  '展开翅膀向前突进，将路径上的目标击飞': 'Spread your wings and dash forward, launching targets in your path',
+  '吸入射击目标的来弹，再将凝聚弹反吐命中': 'Swallow incoming projectiles and spit a condensed projectile back at the shooter',
+  '光子召唤漫天 Bug 与光轮，分批追击四周目标': 'Photon summons waves of bugs and light rings to pursue surrounding targets',
+  '主角往返跳跃，欧米使用实战头眼追踪与机械步态': 'The player jumps back and forth while OMI uses its in-game head tracking and mechanical gait',
+  '欧米、巡线犬、FPV 哨蜂和搬山；共享第一章模型与双技能，支持正面和侧面检查。': 'OMI, Line Hound, FPV Watch Wasp, and Loadmaster use their chapter-one models and two skills; inspect front and side views.',
+  '欧米 OMI-01 · 呼吸与双技能': 'OMI-01 · Breathing and two skills',
+  '大头双钳机器人：待机呼吸与眼部扫描、主角跟随、夹臂横扫、突进夹击。': 'A big-headed robot with twin clamps: idle breathing, eye scanning, player tracking, clamp sweep, and dash clamp.',
+  '普通吐水、鱼群轰炸、振翅突进、吞弹反击与光子爆裂；每个场景均有真实受击目标。': 'Water spit, fish barrage, wing dash, swallow counter, and Photon burst, each with real targets to hit.',
+  '比较走路、跑步、前倾快跑和起跳落地；可以暂停、慢放与旋转观察。': 'Compare walking, running, forward-lean sprinting, jumps, and landings; pause, slow down, and rotate to inspect.',
+  '身体前倾、快速蹬地与屈膝回收；横版往返跑动时平滑转身，手动控制默认奔跑，按住 Shift 慢走。': 'Lean forward, push off quickly, and tuck the knees. Turn smoothly while running side to side; manual control runs by default, with Shift to walk.',
+  '完整动作、单手键盘连击、实体弹体与真实受击目标；支持移动和空中施法，也可手动控制。': 'Full movement, one-handed keyboard combos, solid projectiles, and real targets. Attack while moving or flying, or take manual control.',
+  '光子跟随人形，地面和空中均可召唤真实追踪弹；3 / E 释放光子，2 释放服务器超载。': 'Photon follows the human form and summons homing projectiles on the ground or in the air. Use 3 / E for Photon and 2 for server overload.',
+  '全身逐步变为人形或怪物，保持身高和当前动作；支持重播、暂停和慢放检查。': 'Gradually transform the whole body between human and monster, preserving height and action. Replay, pause or slow down to inspect.',
+  '提博 · 鼹鼠与人形共用侧分棕发、开朗笑容、黑色帽衫与重置胸章。': 'Tibo · Mole and human forms share side-parted brown hair, a cheerful smile, a black hoodie, and a reset badge.',
+  '抬手打招呼，再恢复站姿。': 'Raise a hand to greet, then return to standing.',
+  '真实模型': 'Game model', '倾斜飞行': 'Banking flight', '铝热剂火雨': 'Thermite rain', '超载效果新版': 'Updated overload effect',
+  '吐水普攻与三个技能': 'Water spit and three skills', '光子爆裂大招': 'Photon burst ultimate',
+  '细修版与 2D 原画对照': 'Refined model and 2D concept comparison', '细修版与 3D 参考对照': 'Refined model and 3D reference comparison',
+  '早期模型与 2D 原画对照': 'Early model and 2D concept comparison', '早期模型与 3D 参考对照': 'Early model and 3D reference comparison',
+  '早期演变六帧': 'Six early evolution frames', '第三版演变六帧': 'Six version-three evolution frames', '修订稿': 'Revision', '快跑': 'Sprint',
+  '胸肩自然吸气与缓慢呼气，放松摆臂并间歇眨眼，双脚保持接地。': 'The chest and shoulders breathe naturally, the arms sway, and the eyes blink while both feet stay grounded.',
+  '落脚缓冲、蹬地腾空、屈膝回收与大幅交替摆臂，键盘固定在背架上。': 'Cushion each landing, push off, tuck the knees, and swing the arms while the keyboard stays secured to the back.',
+  '加速后身体明显前倾，快速蹬地、屈膝收腿与大幅摆臂；键盘随背架稳定贴合。': 'Lean forward as speed builds, push off quickly, tuck the legs, and swing the arms; the keyboard remains secured to the back.',
+  '键盘连发立体 </> 代码弹，{}、=>、if() 字符与蓝白粒子沿弹道飞出。': 'The keyboard fires solid </> code projectiles, with {}, =>, if() characters and blue-white particles following the trajectory.',
+  '按已确认的参考图校准头脸、发型与服装体积，比较三维轮廓和曲面。静态模型。': 'Head, face, hair, and clothing volumes calibrated to the approved references for comparing 3D contours and surfaces. Static model.',
+  '将四向原画映射到立体网格，比较颜色、细节与转动时的表现。静态模型。': 'Four-view concept art mapped onto a 3D mesh to compare colors, details, and rotation. Static model.',
+  '完整脸部、发束与服装细节，供近景检查。': 'Full facial, hair, and clothing details for close inspection.',
+  '独立制作的精细静态模型：重塑脸型、眼睑与分层发束，补充针织、牛仔布和鞋面细节。': 'An independently made detailed static model with a reshaped face, eyelids, layered hair, knitwear, denim, and shoe details.',
+  '保留人物轮廓与主要细节，适用于游戏正常视距。': 'Retains the silhouette and main details for normal gameplay distances.',
+  '保留相同造型与高度，减少细小几何。': 'Preserves the same design and height with less fine geometry.',
+  'Sonnet 5.5 从零重建的独立模型：头发、毛衣、牛仔裤缝线与手指细节。': 'An independent Sonnet 5.5 model built from scratch, with detailed hair, sweater, jeans seams, and fingers.',
+  'Sonnet 5.5 从零重建的独立模型，游戏正常视距。': 'An independent Sonnet 5.5 model built from scratch for normal gameplay distances.',
+  'Sonnet 5.5 从零重建的独立模型，更远视距与多实例。': 'An independent Sonnet 5.5 model built from scratch for distant views and multiple instances.',
+  'Opus 5.5 重新建模：距离场雕刻的脸与眼睑、按发流排布的发簇、罗纹毛衣、卷边牛仔裤与板鞋。': 'Opus 5.5 remodeling with a distance-field sculpted face and eyelids, flowing hair clumps, ribbed sweater, cuffed jeans, and sneakers.',
+  'Opus 5.5 版按部位减面，脸部、缝线与鞋侧条纹烘焙进贴图，游戏正常视距。': 'Opus 5.5 model reduced per body part, with facial details, seams, and shoe stripes baked into textures for normal gameplay distances.',
+  'Opus 5.5 版同一造型的轻量档，更远视距与多实例。': 'A lightweight Opus 5.5 model of the same design for distant views and multiple instances.',
+  'Hyper3D Rodin 四向原画生成：四边面全身，头部用四向头像裁图单独生成后接到领口，发束与五官细节更足；12.4 万面，2K 烘焙贴图。': 'Hyper3D Rodin generated from four-view art: a quad body and separately generated head joined at the collar, with fuller hair and facial details; 124,000 faces and 2K baked textures.',
+  'Rodin 版减面到 2.6 万面，重新展开 UV 并从高模烘焙 1K 颜色与法线，游戏正常视距。': 'Rodin reduced to 26,000 faces with new UVs and 1K color and normal maps baked from the high-resolution model for normal gameplay distances.',
+  'Rodin 版减面到 1.4 万面、512 烘焙贴图，更远视距与多实例。': 'Rodin reduced to 14,000 faces with 512-pixel baked textures for distant views and multiple instances.',
+  '保留 Rodin 原始 50 万面与无损 2K PBR 贴图，校准侧脸、眼睛、发束、手部与材质；全高 3.1 格，静态模型。': 'Preserves Rodin’s original 500,000 faces and lossless 2K PBR textures, with calibrated profile, eyes, hair, hands, and materials; 3.1 tiles tall, static model.',
+  '从同一精修高模减面到约 4.5 万面，保留校准后的轮廓与 PBR 材质，适用于游戏正常视距。': 'Reduced from the same refined high-resolution model to about 45,000 faces, preserving calibrated contours and PBR materials for normal gameplay distances.',
+  '从同一精修高模减面到约 2 万面，保留相同造型与 3.1 格高度，供远视距与多实例比较。': 'Reduced from the same refined high-resolution model to about 20,000 faces, preserving the design and 3.1-tile height for distant views and multiple instances.',
+  '角色场景': 'Character stage', '搜索角色目录': 'Search character catalog', '☰ 目录': '☰ Catalog',
+  '点击添加到场景': 'Click to add to stage', '添加到场景，保留已有角色': 'Add to the stage and keep existing characters',
+  '演示组合': 'Demo collections', '点击角色添加到场景；可重复添加。': 'Click a character to add it; duplicates are allowed.',
+  '角色展示场景': 'Character stage', '场景环境': 'Stage environment', '场景镜头缩放': 'Stage camera zoom',
+  '点击控制切换动作 · 点击空白切换角度': 'Select controls to change actions · Click empty space to change angle',
+  '当前角色操作栏': 'Selected character controls', '图片资料': 'Reference images',
+  '关闭角色操作栏': 'Close character controls',
+  '场景中还没有角色': 'No characters in the stage', '点击左侧角色即可添加。': 'Click a character on the left to add it.',
+  '正在准备场景…': 'Preparing stage…', '清空场景': 'Clear stage', '从场景移除': 'Remove from stage',
+  '控制': 'Controls', '收起': 'Collapse', '↺ 重播': '↺ Replay',
+  '返回游戏 ↗': 'Back to game ↗',
   '展示方式': 'View', '横版实战': 'Side-scrolling arena', '模型查看': 'Model inspection', '移动施法': 'Attack movement', '静止': 'Standing',
+  '形态': 'Form', '怪物形态': 'Monster form', '人形态': 'Human form', '双形态': 'Two forms',
+  'Sam · 双形态': 'Sam · Two forms',
+  '山姆 · 白鼬与人形共用棕色短发、蓝灰眼睛、灰毛衣与路由胸章。': 'Sam · Stoat and human forms share brown hair, blue-gray eyes, a gray sweater, and a routing badge.',
+  '并排比较 Sam 的白鼬与人形，同一身高与动作，保留模型路由、Token 导弹和 AGI 降临。': 'Compare Sam’s stoat and human forms at the same height, with shared actions, Model Routing, Token Missiles, and AGI Arrival.',
   '钳卫': 'Gatekeeper', '巡线犬': 'Line Hound', '哨蜂': 'Watch Wasp', '搬山': 'Loadmaster',
   '堡垒运维队': 'Fortress maintenance team', '堡垒运维队 · 四怪': 'Fortress · Four enemies', '堡垒运维队 · 八技能': 'Fortress · Eight skills',
   '夹臂横扫': 'Clamp sweep', '突进夹击': 'Dash clamp', '直线扑冲': 'Pounce', '落地震击': 'Landing shock',
@@ -156,9 +252,9 @@ export const SHOWCASE_ENGLISH: Record<string, string> = {
   'Grassy · 骑自行车': 'Grassy · Riding a bicycle', '坐稳车座、握住车把、双脚交替踩踏；车轮与链条同步转动，键盘保持背负。': 'Sit on the saddle, hold the handlebars, and pedal alternately. Wheels and chain rotate together while the keyboard stays on the back.',
   '普通攻击 · 砸键盘': 'Basic attack · Keyboard smash', '单手握住键盘短端，向左抡击、反手右挥；可切换起飞、悬停和前飞施法。': 'Grip one short end of the keyboard, swing left and backhand right; switch to attacks during takeoff, hovering, or forward flight.',
   '键盘左右连击、蓝白实体光弹、紫绿虫群与服务器超载；粒子与实体共同构成完整攻击效果。': 'Left and right keyboard strikes, blue white energy projectiles, a purple green bug swarm, and server overload combine solid forms with particles.',
-  '施法姿态': 'Casting stance', '地面施法': 'Ground casting', '起飞施法': 'Takeoff casting', '悬停施法': 'Hover casting', '前飞施法': 'Forward-flight casting',
+  '施法姿态': 'Casting stance', '地面施法': 'Ground casting', '起飞施法': 'Takeoff casting', '悬停施法': 'Hover casting', '前飞施法': 'Forward-flight casting', '快飞施法': 'Fast-flight casting',
   'Grassy · 空中战斗': 'Grassy · Airborne combat', '起飞、悬停和前飞中施放四种键盘攻击；推进器持续工作，实体弹体与粒子同时可见。': 'Use four keyboard attacks during takeoff, hovering, and forward flight; thrusters keep running alongside solid projectiles and particles.',
-  '起飞、悬停、前飞与降落；飞行时保持键盘背负。': 'Take off, hover, fly forward, and land while keeping the keyboard on the back.',
+  '起飞、悬停、前飞、快速飞行与降落；飞行时保持键盘背负。': 'Take off, hover, fly forward, boost, and land while keeping the keyboard on the back.',
   'The Model Router 与 The Reset Master · 在横版游戏场景中展示动作、技能与受击效果，可切换左右朝向和地上地下。': 'The Model Router and The Reset Master demonstrate actions, skills, and impacts in the side-scrolling game world. Switch direction and surface or underground environments.',
   '七种鱼类': 'Seven fish species', '并排观察小鱼、金鱼、锦鲤、神仙鱼、鲶鱼、鲈鱼与虹鳟的轮廓和游动': 'Compare minnows, goldfish, koi, angelfish, catfish, bass, and rainbow trout side by side.',
   'Grassy · 历史版本': 'Grassy · Historical versions', '旧原画、比例稿、模型与工程归档': 'Archived concept art, proportions, models, and project files',
@@ -217,10 +313,10 @@ export const SHOWCASE_ENGLISH: Record<string, string> = {
   '模型路由攻击': 'Model Routing Attack', '头顶 GPT-6 Astra 核心斜射蓝金光线；命中后，目标身上显现 GPT-5.6 Luna 或 GPT-4o mini。光线沿固定方向飞行，可以跳跃躲避。': 'The overhead GPT-6 Astra core fires blue-gold beams downward. GPT-5.6 Luna or GPT-4o mini appears on the target only on impact. Jump to dodge the fixed paths.',
   '目标躲避': 'Target dodge',
   '算力激涌': 'Compute Surge', '算力凝成 Token 导弹，沿高低弧线连续发射，命中后爆散成数据碎块。': 'Form Token missiles, launch them in staggered arcs, and shatter them into data fragments on impact.',
-  'AGI 降临': 'AGI Advent', '召来 AGI 天穹，巨型光柱与蓝金冲击波连续击退两侧训练靶。': 'Summon an AGI canopy, a towering beam, and blue-gold shockwaves that repeatedly knock back both training targets.',
+  'AGI 降临': 'AGI Advent', '召来 AGI 天穹，两轮密集路由光弹向四周环形发射，最后向左右齐射高低弧线 Token，并伴随地面冲击。': 'Summon an AGI canopy with two dense rings of routing bolts in all directions, followed by high- and low-arc Token missiles to both sides, alongside ground shocks.',
   '薯条攻击': 'Fries Attack', '抛出金黄薯条与俏皮文字，金橙弹道连续命中训练靶，文字为攻击助威。': 'Toss golden fries and playful words as golden volleys hit the training targets, cheered on by comic text.',
   '额度返场': 'Quota Encore', '按下重置按钮补满额度，绿色能量命中前方训练靶，爆出金色碎片。': 'Press the reset button to refill the quota, then hit the targets ahead with green energy and golden fragments.',
-  '重置降临': 'Reset Descends', '巨型重置按钮降临，绿金冲击连续覆盖两侧训练靶，弹起并爆散粒子。': 'A giant reset button descends; green-gold waves repeatedly strike both training targets, launching them amid bursts of particles.',
+  '重置降临': 'Reset Descends', '巨型重置按钮两次重砸，每次向四周齐射一圈密集薯条，两轮错角覆盖上下左右，并伴随地面冲击。': 'The giant reset button strikes twice, each time firing a dense ring of fries in all directions. The staggered rings cover above, below, left and right, alongside ground shocks.',
   '观察角度': 'View angle', '自由视角 / 各卡不同': 'Free view / Varies by card', '恢复正面': 'Reset to front',
   '点击换角度 · 拖动旋转': 'Click to change angle · Drag to rotate',
   '模型视角': 'Model view', '自由视角': 'Free view', '视角复位': 'Reset view',
@@ -286,6 +382,9 @@ export const SHOWCASE_ENGLISH: Record<string, string> = {
   '服务器超载': 'Server overload', '服务器阵列过热转红，白热能量柱爆发，多层冲击波裹挟实体碎片向外扩散。': 'The server array overheats to red, a brilliant energy column erupts, and layered shockwaves carry solid debris outward.',
   '起飞': 'Takeoff', '推进器启动，双腿离地并进入悬停姿势，键盘背负。': 'Thrusters ignite, lifting both legs into a hover while the keyboard remains on the back.',
   '悬停': 'Hover', '护腕和背部推进器稳定输出，屈膝悬停并轻微调整平衡。': 'Wrist and back thrusters hold a steady hover while knees and posture adjust balance.',
+  'Grassy · 快速飞行': 'Grassy · Fast flight',
+  '大幅前倾、双腿后收与加长推进尾流；手动飞行默认快速，按住 Shift 减速，空中可继续攻击。': 'Lean forward, tuck your legs back, and extend the thruster trails. Manual flight is fast by default; hold Shift to slow down and keep attacking in the air.',
+  '快速飞行': 'Fast flight', '身体大幅前倾、双腿向后收拢，推进尾流拉长；快速穿行时仍可释放技能。': 'Lean far forward, tuck the legs back, and stretch the thruster trails while continuing to cast skills at speed.',
   '向前飞行': 'Fly forward', '身体前倾、双腿后收，推进尾流增强，键盘保持背负。': 'Lean forward, draw legs back, and boost the thruster trail with keyboard on the back.',
   '降落': 'Land', '降低推进输出、双脚接地并屈膝缓冲，推进器熄灭。': 'Reduce thrust, touch down with bent knees, and let the thrusters fade.',
   '白鼬山姆 · 棕色短发、蓝灰眼睛、灰毛衣与路由胸章。': 'Sam the ermine · Short brown hair, blue gray eyes, gray sweater, and routing badge.',
@@ -295,6 +394,16 @@ export const SHOWCASE_ENGLISH: Record<string, string> = {
 };
 
 const patterns: ReadonlyArray<readonly [RegExp, string]> = [
+  [/^(\d+)\/(\d+) 目标受击$/, '$1/$2 targets hit'], [/^生命 (\d+)\/(\d+)$/, 'HP $1/$2'],
+  [/^(\d+(?:\.\d+)?) 格$/, '$1 tiles'],
+  [/^进入游戏：(.+)$/, 'Enter game: $1'],
+  [/^(.+) (.+) 效果预览$/, '$1 $2 effect preview'],
+  [/^(.+) 效果预览$/, '$1 effect preview'],
+  [/^([①②③④]) (.+)$/, '$1 $2'],
+  [/^查看(.+)全部变体，每批最多 (\d+) 张（替换当前预览）$/, 'View all $1 variants, up to $2 per batch (replaces current previews)'],
+  [/^场景中 (\d+) 个角色 · 角度 (-?\d+)° · 点击空白切换$/, '$1 characters in stage · Angle $2° · Click empty space to change'],
+  [/^场景中 (\d+) 个$/, '$1 in stage'], [/^场景最多 (\d+) 个角色，请先移除一个$/, 'Up to $1 characters; remove one first'],
+  [/^单独查看(.+)$/, 'View $1 solo'], [/^添加(.+)到场景$/, 'Add $1 to stage'],
   [/^(\d+) 张预览$/, '$1 previews'], [/^(\d+) 个动作$/, '$1 actions'], [/^(\d+) 个变体$/, '$1 variants'],
   [/^最多同时预览 (\d+) 张卡，请先关闭一张$/, 'Up to $1 cards at once; close one first'],
   [/^已达 (\d+) 张上限，请先关闭一张预览$/, 'Limit of $1 cards reached; close one preview'],
@@ -312,7 +421,6 @@ const patterns: ReadonlyArray<readonly [RegExp, string]> = [
   [/^最多 (\d+) 张预览卡 · (变体|动作)在右侧切换$/, 'Up to $1 preview cards · Change $2 on the right'],
   [/^(\d+) 个历史模型$/, '$1 historical models'],
   [/^(\d+) 种 · 第 (\d+) \/ (\d+) 批 · (\d+)–(\d+)$/, '$1 variants · Batch $2 / $3 · $4–$5'],
-  [/^查看(.+)全部变体，每批最多 (\d+) 张（替换当前预览）$/, 'View all $1 variants, up to $2 per batch (replaces current previews)'],
   [/^场景组合 · (.*)$/, 'Scene composition · $1'],
   [/^青线：可站立$/, 'Cyan: walkable'],
   [/^八个自然样本 (\d+)–(\d+)$/, 'Eight natural samples $1–$2'],
@@ -337,20 +445,21 @@ export function translateShowcaseText(source: string): string | undefined {
   const exact = SHOWCASE_ENGLISH[source];
   if (exact) return exact;
   const categoryCount = source.match(/^(装备概念|战斗效果概念|空中技能概念|历史模型多视图|早期角色卡|场景比例对照|头身比例稿|早期四方向|3\.1 比例试稿|四方向修订稿|母版试稿|角色卡|四方向参考|2D 原画|3D 参考|模型多视图|演变对照|历史版本|骑行素材|骑行模型) (\d+)$/);
-  if (categoryCount) return `${SHOWCASE_ENGLISH[categoryCount[1]!] ?? categoryCount[1]} ${categoryCount[2]}`;
+  if (categoryCount) return `${translateShowcaseText(categoryCount[1]!) ?? categoryCount[1]} ${categoryCount[2]}`;
   const actionDescription = source.match(/^(精细版|游戏标准版|游戏轻量版)：(.+)$/);
-  if (actionDescription) return `${SHOWCASE_ENGLISH[actionDescription[1]!]}: ${SHOWCASE_ENGLISH[actionDescription[2]!] ?? actionDescription[2]}`;
-  const actorAction = source.match(/^(.+) · (呼吸|走路|跑步|骑自行车|跳跃|普通攻击 · 砸键盘|Codex 攻击|Bug 攻击|服务器超载|起飞|悬停|向前飞行|降落)$/);
-  if (actorAction) return `${SHOWCASE_ENGLISH[actorAction[1]!] ?? actorAction[1]} · ${SHOWCASE_ENGLISH[actorAction[2]!]}`;
+  if (actionDescription) return `${translateShowcaseText(actionDescription[1]!)}: ${translateShowcaseText(actionDescription[2]!) ?? actionDescription[2]}`;
+  const actorAction = source.match(/^(.+) · (呼吸|走路|跑步|骑自行车|跳跃|普通攻击 · 砸键盘|Codex 攻击|Bug 攻击|服务器超载|起飞|悬停|向前飞行|快速飞行|降落)$/);
+  if (actorAction) return `${translateShowcaseText(actorAction[1]!) ?? actorAction[1]} · ${translateShowcaseText(actorAction[2]!)}`;
   const loadingAction = source.match(/^(.+) · 正在加载模型…$/);
-  if (loadingAction) return `${SHOWCASE_ENGLISH[loadingAction[1]!] ?? loadingAction[1]} · Loading model…`;
+  if (loadingAction) return `${translateShowcaseText(loadingAction[1]!) ?? loadingAction[1]} · Loading model…`;
   for (const [pattern, replacement] of patterns) if (pattern.test(source)) {
-    const translated = source.replace(pattern, replacement);
+    const captures = source.match(pattern)!;
+    const translated = replacement.replace(/\$(\d+)/g, (_, index: string) => translateShowcaseText(captures[Number(index)]!) ?? captures[Number(index)]!);
     return translated.replace(/历史角色|资源|角色|变体|动作|装备概念|战斗效果概念|空中技能概念|历史模型多视图|早期角色卡|场景比例对照|头身比例稿|早期四方向|3\.1 比例试稿|四方向修订稿|母版试稿|角色卡|四方向参考|2D 原画|3D 参考|模型多视图|演变对照|历史版本|骑行素材/g, (part) => SHOWCASE_ENGLISH[part] ?? ({ 资源: 'asset', 历史角色: 'historical character', 角色: 'character', 变体: 'variant', 动作: 'action' })[part]!);
   }
   if (source.includes(' · ')) {
     const pieces = source.split(' · ');
-    const translated = pieces.map((piece) => SHOWCASE_ENGLISH[piece] ?? piece.replace(/^种子 (\d+)$/, 'Seed $1'));
+    const translated = pieces.map((piece) => translateShowcaseText(piece) ?? piece);
     if (translated.some((piece, index) => piece !== pieces[index])) return translated.join(' · ');
   }
   return undefined;

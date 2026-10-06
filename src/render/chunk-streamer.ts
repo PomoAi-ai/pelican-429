@@ -4,8 +4,11 @@
  * update(view, dirty)：
  * - view 缺省为全量模式：重建脏区块，构建全部未加载区块，pending 恒为 0。
  * - 流式模式：① 已加载的脏区块进入重建队列（未加载的丢弃，进入范围时按当前数据构建），每帧最多
- *   maxRebuilds 个，余下顺延；② 超出视野外扩 keep 圈的区块卸载；③ 与视野相交的区块立即构建；
- *   视野外扩 margin 圈内的未加载区块按到视野中心距离排序，每帧最多 maxBuilds 个（margin ≤ keep 形成滞回）。
+ *   maxRebuilds 个，余下顺延；② 超出视野外扩 keep 圈的区块卸载；③ 视野外扩 margin 圈内的未加载区块
+ *   按“视野内优先、再按到视野中心距离”排序，每帧最多 maxBuilds 个（margin ≤ keep 形成滞回）。
+ * - 首次流式 update（关卡首帧）同步构建全部视野内区块，避免开场空洞；之后视野内区块也排队。
+ * - budgetMs：重建与构建各自至少推进一个（保证进展），之后本帧实际耗时达到预算即顺延——
+ *   快速飞行/传送时把一屏区块摊到多帧，而不是堆进同一帧。
  * 返回本次构建 + 重建的区块数。
  */
 import type { Rect } from '../core/math.ts';
@@ -24,6 +27,8 @@ export interface ChunkStreamerOptions {
   readonly maxBuilds: number;
   /** 每次 update 最多重建的脏区块数（默认不限）。 */
   readonly maxRebuilds?: number;
+  /** 首帧之后每次 update 的构建耗时预算（毫秒，实测 performance.now；默认不限）。 */
+  readonly budgetMs?: number;
   build(cx: number, cy: number): void;
   clear(cx: number, cy: number): void;
 }
@@ -59,12 +64,15 @@ export function createChunkStreamer(options: ChunkStreamerOptions): ChunkStreame
   const maxRebuilds = options.maxRebuilds === undefined ? Infinity : intMin('maxRebuilds', options.maxRebuilds, 1);
   const chunkSize = options.chunkSize ?? CHUNK_SIZE;
   if (!(chunkSize > 0 && Number.isFinite(chunkSize))) throw new Error(`${label}: invalid chunkSize ${chunkSize}`);
+  const budgetMs = options.budgetMs ?? Infinity;
+  if (!(budgetMs > 0)) throw new Error(`${label}: budgetMs must be > 0, got ${budgetMs}`);
   if (keep < margin) throw new Error(`${label}: keepChunks (${keep}) must be >= marginChunks (${margin})`);
 
   const loaded = new Set<number>();
   /** 顺延的重建队列（插入序）。 */
   const rebuild = new Set<number>();
   let pending = 0;
+  let primed = false;
   const key = (cx: number, cy: number): number => cy * chunksX + cx;
   const cxOf = (k: number): number => k % chunksX;
   const cyOf = (k: number): number => Math.floor(k / chunksX);
@@ -89,10 +97,10 @@ export function createChunkStreamer(options: ChunkStreamerOptions): ChunkStreame
     }
   }
 
-  function flushRebuilds(limit: number): number {
+  function flushRebuilds(limit: number, overBudget: () => boolean): number {
     let n = 0;
     for (const k of [...rebuild]) {
-      if (n >= limit) break;
+      if (n >= limit || (n > 0 && overBudget())) break;
       load(k);
       n++;
     }
@@ -111,7 +119,7 @@ export function createChunkStreamer(options: ChunkStreamerOptions): ChunkStreame
 
   function updateAll(dirty: readonly ChunkCoord[]): number {
     queueDirty(dirty);
-    let built = flushRebuilds(maxRebuilds);
+    let built = flushRebuilds(maxRebuilds, () => false);
     for (let cy = 0; cy < chunksY; cy++) {
       for (let cx = 0; cx < chunksX; cx++) {
         const k = key(cx, cy);
@@ -128,35 +136,42 @@ export function createChunkStreamer(options: ChunkStreamerOptions): ChunkStreame
     if (![view.x, view.y, view.w, view.h].every(Number.isFinite) || view.w < 0 || view.h < 0) {
       throw new Error(`${label}: invalid view rect (${view.x},${view.y},${view.w},${view.h})`);
     }
+    const start = performance.now();
+    const overBudget = (): boolean => performance.now() - start >= budgetMs;
+    const first = !primed;
+    primed = true;
     queueDirty(dirty);
-    let built = flushRebuilds(maxRebuilds);
+    let built = flushRebuilds(maxRebuilds, overBudget);
     const visible = rangeOf(view, 0);
     const marginRange = rangeOf(view, margin);
     const keepRange = rangeOf(view, keep);
     for (const k of [...loaded]) if (!inRange(keepRange, cxOf(k), cyOf(k))) unload(k);
     const centerX = (view.x + view.w / 2) / chunkSize;
     const centerY = (view.y + view.h / 2) / chunkSize;
-    const candidates: Array<{ k: number; cx: number; cy: number; d: number }> = [];
+    const candidates: Array<{ k: number; cx: number; cy: number; vis: number; d: number }> = [];
     for (let cy = marginRange.cy0; cy <= marginRange.cy1; cy++) {
       for (let cx = marginRange.cx0; cx <= marginRange.cx1; cx++) {
         const k = key(cx, cy);
         if (loaded.has(k)) continue;
-        if (inRange(visible, cx, cy)) {
+        const vis = inRange(visible, cx, cy);
+        if (first && vis) {
           load(k);
           built++;
         } else {
           const dx = cx + 0.5 - centerX;
           const dy = cy + 0.5 - centerY;
-          candidates.push({ k, cx, cy, d: dx * dx + dy * dy });
+          candidates.push({ k, cx, cy, vis: vis ? 0 : 1, d: dx * dx + dy * dy });
         }
       }
     }
-    candidates.sort((a, b) => a.d - b.d || a.cy - b.cy || a.cx - b.cx);
-    const n = Math.min(maxBuilds, candidates.length);
-    for (let i = 0; i < n; i++) {
-      load((candidates[i] as { k: number }).k);
-      built++;
+    candidates.sort((a, b) => a.vis - b.vis || a.d - b.d || a.cy - b.cy || a.cx - b.cx);
+    let n = 0;
+    for (const c of candidates) {
+      if (n >= maxBuilds || (n > 0 && !first && overBudget())) break;
+      load(c.k);
+      n++;
     }
+    built += n;
     pending = candidates.length - n + rebuild.size;
     return built;
   }

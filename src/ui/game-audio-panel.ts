@@ -1,9 +1,8 @@
 import { getLanguage, onLanguageChange } from './language.ts';
-import type { GameSound } from '../app/fortress-score.ts';
-import './game-audio.css';
+import { AUDIO_VOLUMES } from '../config/game-audio.ts';
+import type { AudioChannel, GameSound } from '../config/game-audio.ts';
 
 export type AudioStatus = 'locked' | 'playing' | 'muted' | 'paused';
-export type AudioChannel = 'music' | 'effects' | 'ambience';
 
 const SAMPLES: readonly [GameSound, string, string][] = [
   ['water', '吐水', 'Water shot'], ['fish', '鱼群轰炸', 'Fish barrage'],
@@ -32,10 +31,11 @@ export function createGameAudioPanel(parent: HTMLElement, actions: {
   toggle.addEventListener('click', actions.toggle);
   panel.append(title, status, toggle);
   const translate: Array<() => void> = [];
-  for (const [channel, zh, en, value] of [
-    ['music', '背景音乐', 'Music', 55], ['effects', '技能与动作', 'Skills & actions', 80],
-    ['ambience', '机房环境', 'Ambience', 32],
+  for (const [channel, zh, en] of [
+    ['music', '背景音乐', 'Music'], ['effects', '技能与动作', 'Skills & actions'],
+    ['ambience', '环境声音', 'Ambience'],
   ] as const) {
+    const value = Math.round(AUDIO_VOLUMES[channel] * 100);
     const label = document.createElement('label');
     const name = document.createElement('span');
     const input = document.createElement('input');
@@ -63,16 +63,33 @@ export function createGameAudioPanel(parent: HTMLElement, actions: {
   const preview = document.createElement('button'); preview.type = 'button';
   preview.addEventListener('click', () => actions.preview(SAMPLES[select.selectedIndex]![0]));
   previewLabel.append(previewName, select, preview); panel.append(previewLabel);
+  const library = document.createElement('a');
+  library.href = './?mode=sounds';
+  panel.append(library);
   root.append(summary, panel); parent.append(root);
+  const consumedKeys = new Set<string>();
+  root.addEventListener('keydown', (event) => {
+    if (!event.repeat) consumedKeys.add(event.code);
+    if (event.key === 'Escape') { root.open = false; summary.focus(); }
+  });
+  root.addEventListener('keyup', (event) => {
+    if (consumedKeys.delete(event.code)) event.stopPropagation();
+  });
+  root.addEventListener('focusout', (event) => {
+    if (!root.contains(event.relatedTarget as Node | null)) consumedKeys.clear();
+  });
   // 调音和试听是界面操作，不能同时驱动攻击或快捷键。
-  for (const type of ['pointerdown', 'pointerup', 'mousedown', 'mouseup', 'keydown', 'keyup', 'wheel']) {
+  for (const type of ['pointerdown', 'mousedown', 'keydown', 'wheel']) {
     root.addEventListener(type, (event) => event.stopPropagation());
   }
   let current: AudioStatus = 'locked';
+  let trackTitle = '冷启动 · 机房堡垒';
+  let trackTitleEn = 'COLD BOOT · Fortress';
   const sync = (): void => {
     const en = getLanguage() === 'en';
     summary.textContent = en ? 'Sound' : '声音';
-    title.textContent = en ? 'COLD BOOT · Fortress' : '冷启动 · 机房堡垒';
+    library.textContent = en ? 'Sound library · Browse samples' : '声音目录 · 逐项试听';
+    title.textContent = en ? trackTitleEn : trackTitle;
     status.textContent = (en ? {
       locked: 'Click the game or enable sound to listen.', playing: 'Playing · follows exploration and combat',
       muted: 'Sound off', paused: 'Sound paused with the game',
@@ -93,6 +110,7 @@ export function createGameAudioPanel(parent: HTMLElement, actions: {
   const unsubscribe = onLanguageChange(sync);
   return {
     root,
+    setTrack(zh: string, en: string): void { trackTitle = zh; trackTitleEn = en; sync(); },
     setStatus(next: AudioStatus): void { if (next !== current) { current = next; sync(); } },
     dispose(): void { unsubscribe(); root.remove(); },
   };

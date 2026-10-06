@@ -1,11 +1,13 @@
+import type { Texture } from 'three';
 import { FacilityKit } from './facility-kit.ts';
+import { createFacilityWallMaterial } from './facility-wall-material.ts';
 import { FACILITY_PLATFORMS } from '../config/facility-scenes.ts';
 
-export function createCathedralView() {
+export function createCathedralView(background: Texture) {
   const kit = new FacilityKit();
   kit.root.name = 'compute-cathedral';
   for (const [left, right, y, z, depth] of FACILITY_PLATFORMS.cathedral) kit.platform(left, right, y, z, depth);
-  buildHall(kit);
+  buildHall(kit, background);
   buildComputeTowers(kit);
   buildBalconies(kit);
   buildCoreGate(kit);
@@ -16,8 +18,9 @@ export function createCathedralView() {
   return kit.finish();
 }
 
-function buildHall(k: FacilityKit) {
-  const wall = k.material(0x1a3041);
+function buildHall(k: FacilityKit, background: Texture) {
+  const wall = createFacilityWallMaterial(background);
+  k.materials.push(wall);
   const recess = k.material(0x0b1926);
   const window = k.material(0x34718b, 0.25, 0x173a53);
   k.box(90, 53, -19, 180, 82, 2, wall);

@@ -1,3 +1,5 @@
+import type { Texture } from 'three';
+import { loadInteriorBackgroundTexture } from '../render/free-world-interior-textures.ts';
 import { CHARACTER_CATALOG, CHARACTER_HISTORY_CATALOG } from '../config/showcase.ts';
 import type { ShowcaseCard } from '../config/showcase.ts';
 import { RESOURCE_CATALOG, LAB_CATALOG } from '../render/resource-catalog.ts';
@@ -13,6 +15,8 @@ import { loadGrassyAsset, disposeGrassyAssets } from '../render/grassy/grassy-ri
 import { loadEnemyAsset, disposeEnemyAssets } from '../render/enemy-rig.ts';
 import { isEnemyKind } from '../config/enemy-models.ts';
 import { disposeNpcAssets } from '../render/npc/npc-rig.ts';
+import { startCharacterStage } from './character-stage-app.ts';
+import { CHARACTER_STAGE_PARAMS, readCharacterStageLocation } from '../ui/character-stage-location.ts';
 
 export async function startShowcase(mode: 'showcase' | 'resources' | 'lab'): Promise<void> {
   validateTuning(TUNING);
@@ -28,6 +32,7 @@ export async function startShowcase(mode: 'showcase' | 'resources' | 'lab'): Pro
   const app = document.getElementById('app')!;
   const loading = document.getElementById('loading')!;
   const model = createShowcaseModel(catalog);
+  const stageLocation = mode === 'showcase' && !isHistory ? readCharacterStageLocation(params, catalog) : null;
   if (mode === 'showcase') { model.clear(); model.selectActor('human', true); }
   if (mode === 'lab' || (mode === 'showcase' && params.has('demo'))) {
     const demoId = params.get('demo') ?? 'compositions';
@@ -37,15 +42,36 @@ export async function startShowcase(mode: 'showcase' | 'resources' | 'lab'): Pro
   }
   params.delete('demo');
   params.delete('library');
+  for (const key of CHARACTER_STAGE_PARAMS) params.delete(key);
   params.set('mode', 'game');
   const returnUrl = `${location.pathname}${params.size ? `?${params}` : ''}`;
-  const panel = createShowcasePanel(app, model, returnUrl);
+  if (mode === 'showcase' && !isHistory) {
+    if (stageLocation) {
+      model.clear();
+      for (const card of stageLocation.cards) {
+        model.addActor(model.entry(card.entryId).actor);
+        model.update(model.cards[model.cards.length - 1]!, { ...card, environment: stageLocation.environment });
+      }
+    }
+    startCharacterStage(app, model, returnUrl, stageLocation ?? { zoom: 1, angle: 0, environment: model.cards[0]?.environment ?? 'surface' });
+    return;
+  }
+  const panel = createShowcasePanel(app, model, returnUrl, async (card, enabled) => {
+    const session = sessions.get(card.id);
+    if (!session?.setSoundEnabled) throw new Error('Boss 模型尚未就绪，请加载完成后播放声音。');
+    if (enabled) {
+      for (const [id, other] of sessions) if (id !== card.id && other.setSoundEnabled) void other.setSoundEnabled(false);
+    }
+    await session.setSoundEnabled(enabled);
+  });
   const host = createShowcaseRenderer(app);
+  let caveBackground: Texture | null = null;
   const sessions = new Map<number, ShowcaseSession>();
   const sessionKeys = new Map<number, string>();
   const preparing = new Set<number>();
   const sessionKey = (card: ShowcaseCard): string => {
     const entry = model.entry(card.entryId);
+    if (entry.npcForm) return entry.actor;
     return entry.grassyAnimation ? `human:${card.humanView}:${entry.grassyAnimation.variant}` : entry.actor;
   };
   const input = createShowcaseInput(() => {
@@ -70,12 +96,15 @@ export async function startShowcase(mode: 'showcase' | 'resources' | 'lab'): Pro
     cancelAnimationFrame(raf);
     unsubscribe(); input.dispose();
     for (const session of sessions.values()) session.dispose();
-    sessions.clear(); host.dispose(); panel.dispose();
+    sessions.clear();
+    caveBackground?.dispose();
+    host.dispose(); panel.dispose();
     disposeGrassyAssets(); disposeEnemyAssets();
     if (mode === 'showcase') { disposeGrassyStaticAssets(); disposeNpcAssets(); }
     window.removeEventListener('error', onError);
     window.removeEventListener('unhandledrejection', onRejection);
     window.removeEventListener('pagehide', dispose);
+    document.removeEventListener('visibilitychange', onVisibility);
   };
   const fail = (error: unknown): void => {
     dispose();
@@ -89,8 +118,17 @@ export async function startShowcase(mode: 'showcase' | 'resources' | 'lab'): Pro
   window.addEventListener('error', onError);
   window.addEventListener('unhandledrejection', onRejection);
   window.addEventListener('pagehide', dispose);
+  const onVisibility = (): void => {
+    if (document.hidden) for (const session of sessions.values()) session.advance(0, false, null);
+  };
+  document.addEventListener('visibilitychange', onVisibility);
 
-  try { await loadGrassyAsset('game'); }
+  try {
+    await loadGrassyAsset('game');
+    if (stopped) return;
+    caveBackground = await loadInteriorBackgroundTexture(host.renderer, 'cave');
+    if (stopped) { caveBackground.dispose(); return; }
+  }
   catch (error) { fail(error); return; }
   if (stopped) return;
   last = performance.now();
@@ -126,12 +164,12 @@ export async function startShowcase(mode: 'showcase' | 'resources' | 'lab'): Pro
           void asset.then(() => {
             preparing.delete(card.id);
             if (!stopped && model.cards.includes(card) && sessionKey(card) === key) {
-              sessions.set(card.id, createShowcaseSession(host.renderer, card));
+              sessions.set(card.id, createShowcaseSession(host.renderer, card, caveBackground!));
               sessionKeys.set(card.id, key);
             }
           }).catch(fail);
         } else {
-          sessions.set(card.id, createShowcaseSession(host.renderer, card));
+          sessions.set(card.id, createShowcaseSession(host.renderer, card, caveBackground!));
           sessionKeys.set(card.id, key);
         }
         elapsed = 0; last = performance.now();
@@ -159,7 +197,7 @@ export async function startShowcase(mode: 'showcase' | 'resources' | 'lab'): Pro
       for (const { card, view, rect, visible } of cards) {
         const session = sessions.get(card.id);
         if (!session) { view.update(visible ? '正在准备预览…' : '滚动到此处以加载', 0, true); continue; }
-        if (!visible) { view.update('离屏暂停 · 保留当前进度', session.progress, true); continue; }
+        if (!visible) { session.advance(0, false, null); view.update('离屏暂停 · 保留当前进度', session.progress, true); continue; }
         const playing = card.playing && !syncWaiting;
         const manual = card.manual ? () => session.aim(input.pointer.x, input.pointer.y, rect) : null;
         const dt = session.advance(elapsed, playing, manual ? () => input.consume(input.pointer.inside ? manual() : null) : null);

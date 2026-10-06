@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { characterTextureTier, loadCharacterModel, type TextureTier } from './character-model.ts';
 import type { GLTF } from 'three/addons/loaders/GLTFLoader.js';
 import { clone } from 'three/addons/utils/SkeletonUtils.js';
 import { ENEMY_RULES } from '../config/enemy-rules.ts';
@@ -10,8 +10,9 @@ import { DRONE_APPEARANCES } from '../config/drone-appearance.ts';
 const ACTIONS = ['idle', 'move', 'skill1', 'skill2', 'hit'] as const;
 export type EnemyAction = typeof ACTIONS[number];
 interface EnemyAsset { scene: THREE.Group; clips: Record<EnemyAction, THREE.AnimationClip> }
-const assets = new Map<EnemyKind, EnemyAsset>();
-const loading = new Map<EnemyKind, Promise<void>>();
+type EnemyAssetKey = `${EnemyKind}:${TextureTier}`;
+const assets = new Map<EnemyAssetKey, EnemyAsset>();
+const loading = new Map<EnemyAssetKey, Promise<void>>();
 
 function disposeScene(scene: THREE.Group): void {
   const geometries = new Set<THREE.BufferGeometry>();
@@ -61,14 +62,15 @@ function readAsset(kind: EnemyKind, gltf: GLTF): EnemyAsset {
   } catch (error) { disposeScene(gltf.scene); throw error; }
 }
 
-export function loadEnemyAsset(kind: EnemyKind): Promise<void> {
-  let pending = loading.get(kind);
+export function loadEnemyAsset(kind: EnemyKind, tier: TextureTier = characterTextureTier()): Promise<void> {
+  const key: EnemyAssetKey = `${kind}:${tier}`;
+  let pending = loading.get(key);
   if (!pending) {
-    pending = new GLTFLoader().loadAsync(`${ENEMY_MODEL_DIRS[kind]}/model.glb`).then((gltf) => {
-      if (loading.get(kind) !== pending) { disposeScene(gltf.scene); return; }
-      assets.set(kind, readAsset(kind, gltf));
+    pending = loadCharacterModel(`${ENEMY_MODEL_DIRS[kind]}/model.glb`, tier).then((gltf) => {
+      if (loading.get(key) !== pending) { disposeScene(gltf.scene); return; }
+      assets.set(key, readAsset(kind, gltf));
     });
-    loading.set(kind, pending);
+    loading.set(key, pending);
   }
   return pending;
 }
@@ -79,8 +81,8 @@ export function disposeEnemyAssets(): void {
 }
 
 /** GLB 几何与纹理由缓存持有，独立材质使受击闪光不会影响同类敌人。 */
-export function createEnemyRig(kind: EnemyKind, appearanceIndex = 0) {
-  const asset = assets.get(kind);
+export function createEnemyRig(kind: EnemyKind, appearanceIndex = 0, tier: TextureTier = characterTextureTier()) {
+  const asset = assets.get(`${kind}:${tier}`);
   if (!asset) throw new Error(`${ENEMY_RULES[kind].name} 尚未加载：${ENEMY_MODEL_DIRS[kind]}/model.glb`);
   const model = clone(asset.scene) as THREE.Group;
   const root = new THREE.Group();
@@ -135,14 +137,14 @@ export function createEnemyRig(kind: EnemyKind, appearanceIndex = 0) {
   return {
     root,
     pose(action: EnemyAction, seconds: number, flash: number, warning: number, lookTarget: THREE.Vector3 | null) {
+      // 切换前恢复采样姿势，让 Mixer 正确还原旧动作并保存新动作的静止值。
+      for (const entry of gaze) entry.bone.quaternion.copy(entry.animated);
       if (action !== current) {
         mixer.stopAllAction();
         actions[action].reset().setLoop(THREE.LoopOnce, 1).play();
         actions[action].clampWhenFinished = true;
         current = action;
       }
-      // Mixer 对未变化的通道可能不再赋值，恢复采样姿势，防止注视叠加累积。
-      for (const entry of gaze) entry.bone.quaternion.copy(entry.animated);
       actions[action].time = seconds;
       mixer.update(0);
       for (const entry of gaze) entry.animated.copy(entry.bone.quaternion);

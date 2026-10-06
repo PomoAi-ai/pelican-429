@@ -21,6 +21,7 @@ import type { Minimap } from '../ui/minimap.ts';
 import { createLocalSettingsStore, createSettingsController, loadSettings } from '../ui/settings-model.ts';
 import type { LoadedSettings, SettingsController, SettingsRuntime, SettingsStore } from '../ui/settings-model.ts';
 import { createSettingsPanel } from '../ui/settings-panel.ts';
+import { gameHost } from '../ui/mobile-game-viewport.ts';
 import type { SettingsPanel } from '../ui/settings-panel.ts';
 
 export interface StartupSettings {
@@ -50,6 +51,8 @@ export function loadStartupSettings(params: URLSearchParams): StartupSettings {
     snow: DEFAULT_PRECIP.manual.snow,
     water: DEFAULT_WATER_PALETTE,
     perfPanel: false,
+    minimapVisible: true,
+    minimapOpacity: 75,
     tileGrid: false,
     mapTeleport: false,
     dummyShoot: false,
@@ -59,6 +62,7 @@ export function loadStartupSettings(params: URLSearchParams): StartupSettings {
 
 export interface SettingsWiringInput {
   readonly chapter: boolean;
+  readonly gm: boolean;
   readonly startup: StartupSettings;
   readonly stage: Stage;
   readonly world: SimWorld;
@@ -100,6 +104,8 @@ function createSettingsRuntime(input: SettingsWiringInput): SettingsRuntime {
       snow: world.env.manual.snow,
       water: worldViews.water.paletteName,
       perfPanel: perfPanel.visible,
+      minimapVisible: input.minimap.visible,
+      minimapOpacity: input.minimap.opacity,
       tileGrid: tileGrid.visible,
       mapTeleport: input.minimap.teleportEnabled,
       dummyShoot: dummyShooting(world),
@@ -122,6 +128,8 @@ function createSettingsRuntime(input: SettingsWiringInput): SettingsRuntime {
       worldLight.setWaterPalette(waterPalette(name));
     },
     setPerfPanel: (on) => perfPanel.setVisible(on),
+    setMinimapVisible: (on) => input.minimap.setVisible(on),
+    setMinimapOpacity: (opacity) => input.minimap.setOpacity(opacity),
     setTileGrid: (on) => tileGrid.setVisible(on),
     setMapTeleport: (on) => input.minimap.setTeleportEnabled(on),
     setDummyShoot: (on) => void setDummyShooting(world, on),
@@ -146,14 +154,15 @@ export function createSettingsWiring(input: SettingsWiringInput): SettingsWiring
   });
   const settingsPanel = createSettingsPanel({
     chapter: input.chapter,
+    gm: input.gm,
     parent: document.body,
     controller: settings,
     seed: input.seed,
-    onNewWorld: (seed) => location.assign(`${location.pathname}${newWorldSearch(location.search, seed, settings.current())}`),
+    onNewWorld: (seed) => gameHost().location.assign(`${location.pathname}${newWorldSearch(location.search, seed, settings.current())}`),
     onShowcase: () => {
       const params = new URLSearchParams(location.search);
       params.set('mode', 'showcase');
-      location.assign(`${location.pathname}?${params}`);
+      gameHost().location.assign(`${location.pathname}?${params}`);
     },
   });
   input.disposers.push(() => settingsPanel.dispose());

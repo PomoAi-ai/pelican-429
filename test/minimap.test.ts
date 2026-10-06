@@ -39,6 +39,7 @@ import { createTileMap } from '../src/world/tile-map.ts';
 import type { TileMap } from '../src/world/tile-map.ts';
 import { createFluidMap } from '../src/world/fluid-map.ts';
 import type { FluidMap } from '../src/world/fluid-map.ts';
+import { stepFluid } from '../src/world/fluid-sim.ts';
 import {
   BUILTIN_TILES,
   DEFAULT_TILES,
@@ -286,6 +287,19 @@ describe('minimap 增量重绘', () => {
     assert.equal(px(r, H, 40, 2, 0, 0), opaque(waterOver(skyColor(2, H), 255)));
   });
 
+  test('液体模拟流动后，小地图清除旧水格并显示新水格', () => {
+    const H = 4;
+    const w = world(4, H, 1);
+    w.fluid.set(2, 3, 255);
+    const r = createMinimapRaster(w.source, { noise: 0 });
+    assert.equal(r.scanFluid(), 0);
+    stepFluid(w.fluid, { maxCellsPerStep: 100, minSpread: 2 }, 0);
+    assert.equal(r.scanFluid(), 1);
+    r.flush();
+    assert.equal(px(r, H, 2, 3, 0, 0), opaque(skyColor(3, H)));
+    assert.equal(px(r, H, 2, 2, 0, 0), opaque(waterOver(skyColor(2, H), 255)));
+  });
+
   test('栅格不消费 TileMap/FluidMap 的破坏性脏区块（tile-view/water-view 不受影响）', () => {
     const w = world(64, 64, 2);
     w.tiles.takeDirtyChunks();
@@ -508,6 +522,27 @@ function miniOptions(fake: FakeDom, w: World, extra: Record<string, unknown> = {
 const frameAt = (x: number, y: number, dt = 1 / 60) => ({ player: { x, y, facing: 1 as const }, dummies: [{ x: x + 3, y }], dt });
 
 describe('minimap DOM', () => {
+  test('隐藏小地图后仍可打开大地图，关闭大地图不改变隐藏偏好', () => {
+    const fake = createFakeDom();
+    const w = world(64, 32, 4);
+    const mm = withDoc(fake, () => createMinimap(miniOptions(fake, w)));
+    const mini = fake.body.find('minimap') as FakeNode;
+    const canvas = fake.body.find('minimap-canvas') as FakeNode;
+    mm.setVisible(false);
+    mm.update(frameAt(30, 6));
+    assert.equal(canvas.calls.filter(c => c.name === 'drawImage').length, 0);
+    mm.toggleBigMap(true);
+    mm.update(frameAt(30, 6));
+    assert.equal((fake.body.find('minimap-big-canvas') as FakeNode).calls.filter(c => c.name === 'drawImage').length, 1);
+    mm.toggleBigMap(false);
+    assert.equal(mm.visible, false);
+    assert.equal(mini.hidden, true);
+    mm.setVisible(true);
+    mm.update(frameAt(30, 6));
+    assert.equal(canvas.calls.filter(c => c.name === 'drawImage').length, 1);
+    mm.dispose();
+  });
+
   test('创建：右上角小窗 + 隐藏的大地图，离屏底图一次生成', () => {
     const fake = createFakeDom();
     const w = world(64, 32, 4);
@@ -516,14 +551,14 @@ describe('minimap DOM', () => {
     const mini = fake.body.find('minimap') as FakeNode;
     assert.equal(mini.style.top, '12px');
     assert.equal(mini.style.right, '12px');
-    assert.equal(mini.style.width, '220px');
+    assert.equal(mini.style.width, '288px');
     assert.equal((fake.body.find('minimap-big') as FakeNode).hidden, true);
     const base = fake.created[0] as FakeNode;
     assert.equal(base.width, 64 * P);
     assert.equal(base.height, 32 * P);
     assert.deepEqual(base.calls.filter((c) => c.name === 'putImageData').map((c) => c.args.length), [3]);
     assert.equal(mm.bigMapOpen, false);
-    assert.ok(Math.abs(mm.zoom - 220 / 120) < 1e-9);
+    assert.ok(Math.abs(mm.zoom - 288 / 120) < 1e-9);
     mm.dispose();
   });
 

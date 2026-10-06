@@ -14,7 +14,6 @@
 .facility-chapter-exit { position: absolute; left: 0; top: 0; max-width: 230px; padding: 6px 11px; border: 1px solid #ddba7555; border-radius: 6px; background: #151e22eb; color: #ebcf97; font-size: 11px; text-align: center; box-shadow: 0 4px 12px #0004; }
 .facility-chapter-exit::after { position: absolute; left: calc(50% - 4px); bottom: -5px; width: 7px; height: 7px; content: ''; transform: rotate(45deg); border-right: 1px solid #ddba7555; border-bottom: 1px solid #ddba7555; background: #151e22; }
 .facility-chapter-hud [hidden] { display: none; }
-.facility-chapter-danger { position: absolute; top: 0; left: 0; padding: 5px 10px; color: #f0d49c; background: #142b2be8; border: 1px solid #bc995e88; border-radius: 5px; font-size: 11px; white-space: nowrap; }
 .facility-chapter-death { position: absolute; top: 43%; left: 50%; transform: translate(-50%, -50%); width: min(360px, 85vw); padding: 22px; text-align: center; background: #101c23ed; border: 1px solid #d7957188; border-radius: 10px; box-shadow: 0 0 100px 30px #05121588; }
 .facility-chapter-death strong { color: #ffd3a1; font-size: 20px; }
 .facility-chapter-death p { margin: 10px 0 0; color: #c0d6d3; }

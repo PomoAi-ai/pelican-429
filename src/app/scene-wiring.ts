@@ -11,9 +11,12 @@ import type { Entity } from '../entities/entity.ts';
 import { hutIntroBox, introShot } from '../render/camera-intro.ts';
 import { cameraFloorY, createCameraRig } from '../render/camera-rig.ts';
 import type { CameraRig } from '../render/camera-rig.ts';
-import { createDummyViewFactory } from '../render/entity-views.ts';
+import { createDummyViewFactory, createPelicanViewFactory } from '../render/entity-views.ts';
 import { createPlayerViewFactory } from '../render/player-view.ts';
 import { createEnemyViewFactory } from '../render/enemy-view.ts';
+import { createWandererView } from '../render/npc/wanderer-view.ts';
+import { createBossView } from '../render/npc/boss-view.ts';
+import { createHealthPackView } from '../render/health-pack-view.ts';
 import { createOrbFx } from '../render/orb-fx.ts';
 import { createOrbViews } from '../render/orb-view.ts';
 import type { PelicanRig } from '../render/pelican/pelican-rig.ts';
@@ -23,13 +26,16 @@ import { createGrassyProjectileViews } from '../render/grassy/grassy-projectile-
 import type { Stage } from '../render/stage.ts';
 import type { TreeRideQuery } from '../render/tree-ride.ts';
 import { createViewRegistry } from '../render/view-registry.ts';
+import type { EntityView } from '../render/view-registry.ts';
 import type { ScreenPoint } from '../ui/hud.ts';
 import { CAVE_NONE } from '../world/level.ts';
 import type { LevelData } from '../world/level.ts';
 import { pickHomeHut } from '../world/spawn-home.ts';
+import type { WindController } from '../world/wind.ts';
+import { skyExposed } from '../world/sky-exposure.ts';
 
 /** 实体视图：鹈鹕 rig、光球、视图注册表、光球特效；鹈鹕/假人按地形做斜坡脚底偏移。 */
-export function createEntityViews(stage: Stage, level: LevelData, disposers: Array<() => void>, actors: () => readonly Entity[], treeRide: TreeRideQuery, rig: PelicanRig, grassyVariant?: GrassyAnimatedVariant, grassyGait?: 'run' | 'sprint') {
+export function createEntityViews(stage: { scene: THREE.Object3D }, level: LevelData, disposers: Array<() => void>, actors: () => readonly Entity[], treeRide: TreeRideQuery, wind: WindController, rig: PelicanRig, grassyVariant?: GrassyAnimatedVariant | null, grassyGait?: 'run' | 'sprint') {
   rig.root.traverse((node) => {
     if (!(node as THREE.Mesh).isMesh) return;
     // 021：鹈鹕自身材质保留最低可见度（全黑洞内也能看到轮廓；光照图挂接时读取）。
@@ -43,11 +49,34 @@ export function createEntityViews(stage: Stage, level: LevelData, disposers: Arr
   disposers.push(() => projectiles.dispose());
   const grassyProjectiles = createGrassyProjectileViews();
   disposers.push(() => grassyProjectiles.dispose());
+  // 预建的 Boss 视图隐藏挂在场景里，参与加载期预热；登场时直接取用，免得当帧克隆模型、绘制字幕。
+  const prebuiltBosses = new Map<Entity['kind'], EntityView>();
+  disposers.push(() => { for (const view of prebuiltBosses.values()) view.dispose(); });
+  const takeBossView = (entity: Entity): EntityView => {
+    const view = prebuiltBosses.get(entity.kind);
+    if (view === undefined) return createBossView(entity);
+    prebuiltBosses.delete(entity.kind);
+    view.object.visible = true;
+    return view;
+  };
+  const prebuildBoss = (entity: Entity): THREE.Object3D => {
+    const view = createBossView(entity);
+    view.object.visible = false;
+    stage.scene.add(view.object);
+    prebuiltBosses.set(entity.kind, view);
+    return view.object;
+  };
   const views = createViewRegistry(stage.scene, {
-    pelican: createPlayerViewFactory({ rig, tuning: TUNING, terrain: level.map, actors, fishRelay: projectiles.fishRelay, treeRide, grassyVariant, grassyGait }),
+    pelican: grassyVariant === null
+      ? createPelicanViewFactory({ rig, tuning: TUNING, terrain: level.map, actors, fishRelay: projectiles.fishRelay, treeRide })
+      : createPlayerViewFactory({ rig, tuning: TUNING, terrain: level.map, actors, fishRelay: projectiles.fishRelay, treeRide, grassyVariant, grassyGait,
+        windAt: (x, y) => skyExposed(level.map, x, y) ? wind.sway(x) : 0 }),
     trainingDummy: createDummyViewFactory({ tuning: TUNING, terrain: level.map, treeRide }),
     gatekeeper: createEnemyViewFactory(level.map), lineHound: createEnemyViewFactory(level.map),
     watchWasp: createEnemyViewFactory(level.map), loadmaster: createEnemyViewFactory(level.map),
+    sam: entity => entity.npc ? createWandererView(entity) : takeBossView(entity),
+    tibo: entity => entity.npc ? createWandererView(entity) : takeBossView(entity),
+    healthPack: createHealthPackView,
     orb: orbs.factory,
     ...projectiles.factories,
     codexShot: grassyProjectiles.factory, bugShot: grassyProjectiles.factory,
@@ -58,18 +87,25 @@ export function createEntityViews(stage: Stage, level: LevelData, disposers: Arr
   // 任务 018：水花/拖尾/滴水/蓄力吸入粒子与落地蹦跳的鱼。
   const projectileFx = createProjectileFx({ scene: stage.scene, tuning: TUNING, terrain: level.map, fluid: level.fluid, makeFish: () => projectiles.makeFish(), fishVariant: (id) => projectiles.fishVariant(id) });
   disposers.push(() => projectileFx.dispose());
-  return { views, orbs, orbFx, projectileFx };
+  return { views, orbs, orbFx, projectileFx, prebuildBoss };
 }
 
 export type EntityViewSet = ReturnType<typeof createEntityViews>;
 
-/** 世界坐标 (x,y,0) → 画布所在页面坐标；在相机后方返回 null。 */
-export function createProjector(camera: THREE.Camera, canvas: HTMLCanvasElement): (x: number, y: number) => ScreenPoint | null {
+/**
+ * 世界坐标 (x,y,0) → 画布所在页面坐标；在相机后方返回 null。
+ * 画布矩形只在尺寸变化时重读：HUD 每帧交替投影与写 transform，逐次 getBoundingClientRect 会反复强制重排。
+ */
+export function createProjector(camera: THREE.Camera, canvas: HTMLCanvasElement, disposers: Array<() => void>): (x: number, y: number) => ScreenPoint | null {
   const projected = new THREE.Vector3();
+  let rect = canvas.getBoundingClientRect();
+  // 画布固定铺满 #app，位置只随导航高度变化，而那同时改变尺寸。
+  const observer = new ResizeObserver(() => { rect = canvas.getBoundingClientRect(); });
+  observer.observe(canvas);
+  disposers.push(() => observer.disconnect());
   return (x, y) => {
     projected.set(x, y, 0).project(camera);
     if (projected.z > 1) return null;
-    const rect = canvas.getBoundingClientRect();
     return { x: (projected.x * 0.5 + 0.5) * rect.width + rect.left, y: (-projected.y * 0.5 + 0.5) * rect.height + rect.top };
   };
 }

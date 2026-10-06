@@ -19,7 +19,7 @@ void main() {
   }
   vec3 color = mix(vec3(0.04, 0.23, 0.19), vec3(0.18, 0.47, 0.36), wave * 0.32);
   color += vec3(0.22, 0.4, 0.31) * ripple * 0.42;
-  gl_FragColor = vec4(color, 0.42 + ripple * 0.12);
+  gl_FragColor = vec4(color, 0.85 + ripple * 0.12);
   #include <tonemapping_fragment>
   #include <colorspace_fragment>
 }`;
@@ -35,8 +35,8 @@ export function createFortressCoolant(k: FacilityKit) {
   k.root.add(root);
   const time = { value: 0 };
   const liquidMaterial = new THREE.MeshStandardMaterial({
-    color: 0x388b7d, emissive: 0x164b3b, emissiveIntensity: 0.15,
-    roughness: 0.2, metalness: 0.05, transparent: true, opacity: 0.28, depthWrite: false,
+    color: 0x246658, emissive: 0x164b3b, emissiveIntensity: 0.15,
+    roughness: 0.45, metalness: 0.05, transparent: true, opacity: 0.82, depthWrite: false,
   });
   const liquidGeometry = new THREE.BoxGeometry(pool.w, pool.h, depth);
   const liquid = new THREE.Mesh(liquidGeometry, liquidMaterial);
@@ -79,7 +79,7 @@ export function createFortressCoolant(k: FacilityKit) {
     }
   }
   k.panel('COOLANT / DANGER', pool.x + 1.1, surfaceY + 2, -0.7, 4.2, 0.65);
-  for (const x of [30, 90, 150]) k.light(x, surfaceY + 0.4, 0.2, 0x78c1a0, 55, 30);
+  for (const x of [62, 122, 182]) k.light(x, surfaceY + 0.4, 0.2, 0x78c1a0, 55, 30);
 
   return {
     update(value: number): void {

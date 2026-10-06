@@ -45,12 +45,13 @@ export function createHumanShowcaseSession(renderer: THREE.WebGLRenderer, card: 
   }
 
   function duration(): number {
-    return rig && entry.grassyAnimation ? rig.actions[entry.grassyAnimation.clip].getClip().duration : 0;
+    return rig && entry.grassyAnimation ? entry.grassyAnimation.clip === 'codex_attack'
+      ? grassyAction('codex_attack').seconds : rig.actions[entry.grassyAnimation.clip].getClip().duration : 0;
   }
 
-  function animate(): void {
+  function animate(frameDt: number): void {
     const { clip, flight } = entry.grassyAnimation!;
-    animateGrassy(rig!, clip, time, flight ? { action: flight, time } : null);
+    animateGrassy(rig!, clip, time, frameDt, null, flight ? { action: flight, time } : null);
   }
 
   function show(): void {
@@ -68,7 +69,7 @@ export function createHumanShowcaseSession(renderer: THREE.WebGLRenderer, card: 
       if (animation) {
         rig = createGrassyRig(animation.variant);
         model = rig;
-        animate();
+        animate(0);
       } else model = createGrassyStaticModel(staticVariant!.id);
       stage.scene.add(model.root);
     });
@@ -85,7 +86,7 @@ export function createHumanShowcaseSession(renderer: THREE.WebGLRenderer, card: 
     stage.scene.background = new THREE.Color(underground ? '#172b3b' : '#d6e5df');
     floorMaterial.color.set(underground ? '#465567' : '#a8c6b7');
     stage.hemiLight.intensity = TUNING.render.hemi * (underground ? 0.65 : 1);
-    if (rig && entry.grassyAnimation) animate();
+    if (rig && entry.grassyAnimation) { rig.motionPose.reset(); animate(0); }
   }
   show();
   reset();
@@ -110,7 +111,7 @@ export function createHumanShowcaseSession(renderer: THREE.WebGLRenderer, card: 
       if (!rig || !entry.grassyAnimation || !playing || time >= duration()) return 0;
       const dt = Math.min(Math.min(elapsed, TUNING.sim.maxFrameTime) * card.speed, duration() - time);
       time += dt;
-      animate();
+      animate(dt);
       return dt;
     },
     render(rect: DOMRect, _dt: number, worldScale: boolean): THREE.Texture {
@@ -129,17 +130,13 @@ export function createHumanShowcaseSession(renderer: THREE.WebGLRenderer, card: 
       cameraUp.set(0, Math.cos(viewPitch), -Math.sin(viewPitch));
       if (!worldScale && action && 'viewBounds' in action) {
         const flight = entry.grassyAnimation!.flight;
-        // 飞行上身的轻微前倾会向上抬高远端弹道，取景包含组合后的完整范围。
+        // 空中组合需要为抬高的发射点和后收双腿保留取景余量。
         const min: [number, number, number] = [...action.viewBounds.min];
         const max: [number, number, number] = [...action.viewBounds.max];
         if (flight) {
           min[0] -= 0.35; max[0] += 0.35;
           min[1] -= 0.7; max[1] += 0.9;
           min[2] -= 0.8; max[2] += 0.8;
-          if (flight === 'fly_forward') {
-            min[1] -= 0.3 * max[2];
-            max[1] += 0.3 * Math.abs(min[2]);
-          }
         }
         target.set((min[0] + max[0]) / 2, (min[1] + max[1]) / 2, (min[2] + max[2]) / 2).applyAxisAngle(yawAxis, viewYaw);
         // 随模型旋转弹道范围，以最小透视距离容纳完整技能，侧面与背面也不裁掉远端。

@@ -15,6 +15,7 @@ import { createPostFx } from './post-fx.ts';
 import type { PostFx } from './post-fx.ts';
 import { fitShadowCamera } from './shadow-fit.ts';
 import type { ShadowFit } from './shadow-fit.ts';
+import { configureCharacterTextures, disposeCharacterTextures } from './character-model.ts';
 
 const SHADOW_HALF_EXTENT_MIN = 14;
 
@@ -256,6 +257,7 @@ export function createStageRenderer(tuning: Tuning): THREE.WebGLRenderer {
   renderer.toneMappingExposure = r.exposure;
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = SHADOW_TYPE[l.shadow.type];
+  configureCharacterTextures(renderer);
   return renderer;
 }
 
@@ -280,6 +282,7 @@ export function createStage(container: HTMLElement, tuning: Tuning, options: Sta
   stage.dispose = () => {
     observer.disconnect();
     disposeView();
+    disposeCharacterTextures();
     renderer.dispose();
     canvas.remove();
   };

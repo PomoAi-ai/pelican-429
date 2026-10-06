@@ -23,7 +23,6 @@ import type { CaveFx } from './cave-fx.ts';
 import { createCaveWallView } from './cave-wall-view.ts';
 import type { CaveWallView } from './cave-wall-view.ts';
 import { createSkyIslandBackdrop } from './sky-island-backdrop.ts';
-import type { SkyIslandBackdrop } from './sky-island-backdrop.ts';
 import { createSkyIslandView, islandGroundProfile } from './sky-island-view.ts';
 import type { SkyIslandView } from './sky-island-view.ts';
 import { createFishView } from './fish-view.ts';
@@ -44,6 +43,7 @@ import type { TreeView } from './tree-view.ts';
 import type { WaterPaletteName } from '../config/water-palettes.ts';
 import { createWaterView } from './water-view.ts';
 import { createWaterRipples } from './water-ripples.ts';
+import { createPlayerBreathFx } from './player-breath-fx.ts';
 import type { WaterRipples } from './water-ripples.ts';
 import { createWaterFloraView } from './water-flora-view.ts';
 import type { WaterFloraView } from './water-flora-view.ts';
@@ -71,6 +71,10 @@ import type { WindUniformName, WindUniformValues } from './wind.ts';
 type WaterView = ReturnType<typeof createWaterView>;
 
 export interface WorldViewsInput {
+  readonly caveBackground: THREE.Texture | null;
+  /** 图片背景自带远岛时关闭程序剪影。 */
+  readonly islandBackdrop?: boolean;
+  readonly terrainTextureSize?: 256 | 512;
   readonly scene: THREE.Object3D;
   readonly level: LevelData;
   /** 模拟世界的小鱼（SimWorld.fish）。 */
@@ -156,7 +160,6 @@ export interface WorldViews {
   readonly caveDecor: CaveDecorView;
   readonly caveFx: CaveFx;
   readonly skyIslands: SkyIslandView;
-  readonly islandBackdrop: SkyIslandBackdrop;
   /** 树平台随动查询（实体视图用；风取本帧写入 GPU 的同一组 uniform —— 实体视图须在 update 之后 sync）。 */
   readonly treeRide: TreeRideQuery;
   /** 本帧模拟事件（光球爆点压草）。 */
@@ -219,13 +222,14 @@ export function createWorldViews(input: WorldViewsInput): WorldViews {
   const decorEnv = createDecorEnv(level, ground, groundColumns);
   // 浮空岛正面的攀附由空岛视图画（向上爬的岛体版本），瓦片视图跳过岛体列。
   const onIsland = (tx: number, ty: number): boolean => level.islands.some((s) => tx >= s.x0 && tx <= s.x1 && ty >= (s.bottoms[tx - s.x0] as number) && ty < (s.tops[tx - s.x0] as number));
-  const tiles = add(createTileView(level.map, { floraEnv: createFloraEnv({ lakes: level.lakes, trees: level.trees, deserts: level.deserts, rockClear: rockGrassClearance(decorEnv) }), lakes: level.lakes, bareAir: covered, noClimbers: onIsland }));
+  const tiles = add(createTileView(level.map, { textureSize: input.terrainTextureSize, floraEnv: createFloraEnv({ lakes: level.lakes, trees: level.trees, deserts: level.deserts, rockClear: rockGrassClearance(decorEnv) }), lakes: level.lakes, bareAir: covered, noClimbers: onIsland }));
   // 021：岛上树的根盘贴岛顶（树视图用岛感知轮廓；其余视图仍用真实地表）。
   const trees = add(createTreeView(level.trees, { ground: islandGroundProfile(level.map, level.islands, groundColumns, ground, level.lakes) }));
   const water = add(createWaterView(level.fluid, input.waterPalette ? { palette: input.waterPalette } : {}));
   const weeds = add(createWaterWeedView(level, { ground }));
   const waterFlora = add(createWaterFloraView(level, { ground, leeward: (input.wind?.rules ?? input.weather ?? DEFAULT_WEATHER).direction }));
   const ripples = add(createWaterRipples({ fluid: level.fluid }));
+  const breath = add(createPlayerBreathFx(level.fluid));
   const structures = add(createStructureView(level.structures, { map: level.map }));
   const decor = add(createSurfaceDecorView(level, { ground, columns: groundColumns, env: decorEnv }));
   const tumbleweeds = createTumbleweedFx({ deserts: level.deserts });
@@ -234,15 +238,16 @@ export function createWorldViews(input: WorldViewsInput): WorldViews {
   const dust = createSandDustFx({ deserts: level.deserts, ground });
   scene.add(dust.mesh);
   disposers.push(() => dust.dispose());
-  const caveWall = add(createCaveWallView(level.map, level.caves));
+  const caveWall = add(createCaveWallView(level.map, level.caves, input.caveBackground));
   const caveDecor = add(createCaveDecorView(level.map, level.caves, level.fluid.cells));
   const caveFx = add(createCaveFx(level.map, level.caves, level.fluid.cells, level.seed ?? 0));
   const skyIslands = add(createSkyIslandView(level.islands));
-  const islandBackdrop = createSkyIslandBackdrop({ width: level.map.width, surface: groundColumns, seed: (level.seed ?? 0) ^ 0xb4c, haze: '#cfe3ea' });
-  if (level.islands.length > 0) {
+  const islandBackdrop = input.islandBackdrop !== false && level.islands.length > 0
+    ? createSkyIslandBackdrop({ width: level.map.width, surface: groundColumns, seed: (level.seed ?? 0) ^ 0xb4c, haze: '#cfe3ea' }) : null;
+  if (islandBackdrop) {
     scene.add(islandBackdrop.mesh);
+    disposers.push(() => islandBackdrop.dispose());
   }
-  disposers.push(() => islandBackdrop.dispose());
   const fish = add(createFishView(school));
   const petals = createPetalFx({ scene });
   disposers.push(() => petals.dispose());
@@ -301,7 +306,6 @@ export function createWorldViews(input: WorldViewsInput): WorldViews {
     caveDecor,
     caveFx,
     skyIslands,
-    islandBackdrop,
     treeRide,
     handleEvents(events) {
       grass.handleEvents(events, lastTime);
@@ -328,7 +332,9 @@ export function createWorldViews(input: WorldViewsInput): WorldViews {
       const pelican = input.pelican?.() ?? null;
       waterFlora.update(view, time, dt, { fluid: level.fluid, windAt: windSway, pelican });
       ripples.update(time, dt, { pelican, windAt: windSway });
-      grass.update(input.actors?.() ?? [], time, dt, windSway);
+      const actors = input.actors?.() ?? [];
+      breath.update(actors.find((actor) => actor.pelican !== undefined), dt, alpha);
+      grass.update(actors, time, dt, windSway);
       fish.update(alpha, time);
       petals.update(dt, trees.blossomEmitters(), ground, windSway);
       weatherFx.update(view, dt, ground);
@@ -357,7 +363,7 @@ export function createWorldViews(input: WorldViewsInput): WorldViews {
         tumbleweeds: tumbleweeds.active,
         dust: { streams: dust.streams, devil: dust.devil.active },
         caves: { wallBands: caveWall.loaded, wallCells: caveWall.instances, decor: caveDecor.counts(), points: caveFx.points, ripples: caveFx.ripples },
-        islands: { parts: skyIslands.parts, roots: skyIslands.roots, backdrop: level.islands.length > 0 ? islandBackdrop.count : 0 },
+        islands: { parts: skyIslands.parts, roots: skyIslands.roots, backdrop: islandBackdrop?.count ?? 0 },
       };
     },
     dispose() {

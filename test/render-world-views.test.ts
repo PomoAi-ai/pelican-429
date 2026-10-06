@@ -51,7 +51,7 @@ function setup() {
   const level = generateWorld(TUNING.worldgen.seed, TUNING.worldgen);
   const world = createSimWorld({ level, tuning: TUNING });
   const scene = new THREE.Scene();
-  const views = createWorldViews({ scene, level, fish: world.fish });
+  const views = createWorldViews({ caveBackground: new THREE.Texture(), scene, level, fish: world.fish });
   shared = { level, world, scene, views };
   return shared;
 }
@@ -202,6 +202,6 @@ describe('world-views 默认世界装配', () => {
     assert.equal(scene.children.length, 0, `left: ${scene.children.map((c) => c.name).join(',')}`);
     shared = null;
     const level = generateWorld(1, TUNING.worldgen);
-    assert.throws(() => createWorldViews({ scene, level, fish: undefined as never }), /fish school/);
+    assert.throws(() => createWorldViews({ caveBackground: new THREE.Texture(), scene, level, fish: undefined as never }), /fish school/);
   });
 });

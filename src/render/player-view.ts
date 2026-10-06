@@ -6,14 +6,18 @@ import { createPelicanViewFactory, rideProgress } from './entity-views.ts';
 import type { PelicanViewOptions } from './entity-views.ts';
 import { createGrassyRig } from './grassy/grassy-rig.ts';
 import { animateGrassy } from './grassy/grassy-animator.ts';
+import { createGrassyDeath } from './grassy/grassy-death.ts';
 import { createPlayerTransformation } from './player-transform.ts';
 import type { EntityViewFactory } from './view-registry.ts';
+import { createTeleportEffect } from './teleport-effect.ts';
+import { caption } from './npc/npc-effects.ts';
 
 /** Both forms use their production rigs and share the pelican view's terrain and platform placement. */
-export function createPlayerViewFactory(options: PelicanViewOptions & { grassyVariant?: GrassyAnimatedVariant; grassyGait?: 'run' | 'sprint' }): EntityViewFactory {
+export function createPlayerViewFactory(options: PelicanViewOptions & { windAt(x: number, y: number): number; grassyVariant?: GrassyAnimatedVariant; grassyGait?: 'run' | 'sprint' }): EntityViewFactory {
   const createBird = createPelicanViewFactory(options);
   return (entity) => {
     const human = createGrassyRig(options.grassyVariant ?? 'game');
+    const animateDeath = createGrassyDeath(human);
     human.effects.setProjectilePreview(false);
     const bird = createBird(entity);
     const facingYaw = bird.object.getObjectByName('pelican-yaw')!;
@@ -21,6 +25,12 @@ export function createPlayerViewFactory(options: PelicanViewOptions & { grassyVa
     const root = new THREE.Group();
     root.name = 'player-forms';
     root.add(bird.object, human.root, transformation.root);
+    const invincible = caption(['无敌', 'Invincible'], '#ffe3a0', 2.6, true);
+    invincible.name = 'overload-invincible-label';
+    invincible.visible = false;
+    root.add(invincible);
+    const teleport = createTeleportEffect([bird.object, human.root]);
+    root.add(teleport.root);
     const bicycleScale = human.cycle.root.scale.clone();
     const animatedRoot = human.root.getObjectByName('root')!;
     const restRootY = animatedRoot.position.y;
@@ -31,6 +41,8 @@ export function createPlayerViewFactory(options: PelicanViewOptions & { grassyVa
     let landingTime = 1;
     let wasFlying = false;
     let wasGrounded = entity.body.onGround;
+    let deathTime = 0;
+    let wasDead = false;
 
     function animateHuman(e: Entity, alpha: number, frameDt: number): void {
       const p = e.pelican!;
@@ -48,7 +60,8 @@ export function createPlayerViewFactory(options: PelicanViewOptions & { grassyVa
         action = 'ride';
         sample = (p.ride.ticks + alpha) * step;
       } else if (flying) {
-        action = flightTime < 1.2 ? 'takeoff' : Math.abs(e.body.vx) > 0.5 ? 'fly_forward' : 'hover';
+        const fastSpeed = (options.tuning.player.flight.humanSpeed + options.tuning.player.flight.humanFastSpeed) / 2;
+        action = flightTime < 1.2 ? 'takeoff' : Math.abs(e.body.vx) > fastSpeed ? 'fly_fast' : Math.abs(e.body.vx) > 0.5 ? 'fly_forward' : 'hover';
         sample = flightTime;
       } else if (!e.body.onGround) {
         action = 'jump';
@@ -65,6 +78,10 @@ export function createPlayerViewFactory(options: PelicanViewOptions & { grassyVa
       }
       const motion: GrassyMotionState | null = action === 'idle' || action === 'ride' ? null : { action, time: sample };
       const combat = p.humanCombat;
+      const air = {
+        forward: (e.body.vx / options.tuning.player.runSpeed - options.windAt(e.body.x, e.body.y + e.body.height)) * e.facing,
+        lift: -e.body.vy / Math.sqrt(2 * options.tuning.physics.gravity * options.tuning.player.jumpHeight),
+      };
       if (combat.action === 'keyboard_smash' && e.attack?.def.id === HUMAN_MELEE_ATTACK.id) {
         const { startup, active, recovery } = e.attack.def;
         const ticks = e.attack.elapsed + alpha;
@@ -77,9 +94,9 @@ export function createPlayerViewFactory(options: PelicanViewOptions & { grassyVa
         const duration = human.actions.keyboard_smash.getClip().duration;
         const clipTime = progress * duration;
         const weight = THREE.MathUtils.smoothstep((ticks - activeEnd) / recovery, 0, 1);
-        animateGrassy(human, 'keyboard_smash', clipTime, motion, { side: combat.smashSide, recovery: weight });
-      } else if (combat.action !== null) animateGrassy(human, combat.action, (combat.ticks + alpha) * step, motion);
-      else animateGrassy(human, action, action === 'idle' ? time : sample);
+        animateGrassy(human, 'keyboard_smash', clipTime, frameDt, air, motion, { side: combat.smashSide, recovery: weight });
+      } else if (combat.action !== null) animateGrassy(human, combat.action, (combat.ticks + alpha) * step, frameDt, air, motion);
+      else animateGrassy(human, action, action === 'idle' ? time : sample, frameDt, air);
 
       if (p.ride.mode === 'mounting' || p.ride.mode === 'dismounting') {
         const progress = rideProgress(p.ride, options.tuning, alpha);
@@ -94,20 +111,47 @@ export function createPlayerViewFactory(options: PelicanViewOptions & { grassyVa
       object: root,
       sync(e, alpha, frameDt): void {
         transformation.restore();
-        bird.sync(e, alpha, frameDt);
+        const dead = e.health!.hp <= 0;
+        bird.sync(e, alpha, dead ? 0 : frameDt);
         const p = e.pelican!;
         human.root.position.copy(bird.object.position);
         // 两种形态共用已缓动的转身角；人的模型朝前轴比鹈鹕偏转九十度。
         human.root.rotation.set(0, facingYaw.rotation.y + Math.PI / 2, bird.object.rotation.z, 'ZYX');
         human.root.visible = p.form === 'human';
         bird.object.visible = p.form === 'pelican';
-        if (human.root.visible || p.transformTicks >= 0) animateHuman(e, alpha, frameDt);
+        if (dead) {
+          deathTime = wasDead ? deathTime + frameDt : 0;
+          if (human.root.visible) animateDeath(deathTime, frameDt, p.inWater, e.facing);
+          else {
+            const fall = THREE.MathUtils.smoothstep(deathTime, .15, p.inWater ? 1.05 : .78);
+            bird.object.rotation.z += e.facing * fall * Math.PI * .48;
+            bird.object.position.y += .42 * fall;
+          }
+        } else {
+          if (wasDead) {
+            human.motionPose.reset();
+            motionTime = flightTime = airborneTime = 0;
+            landingTime = 1;
+            wasFlying = false;
+            wasGrounded = e.body.onGround;
+          }
+          if (human.root.visible || p.transformTicks >= 0) animateHuman(e, alpha, frameDt);
+        }
+        wasDead = dead;
+        invincible.visible = !dead && e.health!.overloadInvulnTicks > 0;
+        invincible.position.copy(bird.object.position);
+        invincible.position.y += e.body.height + .35;
+        invincible.position.z = .9;
         transformation.root.position.copy(bird.object.position);
         transformation.root.rotation.z = bird.object.rotation.z;
         const progress = p.transformTicks < 0 ? -1 : (p.transformTicks + alpha) / PLAYER_TRANSFORM.durationTicks;
         transformation.update(progress, p.transformFrom);
+        teleport.update(e.teleport, alpha, step, e.body.height, e.body.halfWidth);
       },
       dispose(): void {
+        invincible.material.map!.dispose();
+        invincible.material.dispose();
+        teleport.dispose();
         transformation.dispose();
         human.dispose();
         bird.dispose();

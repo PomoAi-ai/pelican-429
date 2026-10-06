@@ -351,7 +351,7 @@ describe('pelican view · 骑行端到端', () => {
 
 describe('pelican animator · 骑行通道', () => {
   const base = (over: Partial<PelicanAnimInput> = {}): PelicanAnimInput => ({
-    state: 'run', stateTime: 0, vx: 6, vy: 0, facing: 1, attackPhase: null, attackProgress: 0, dx: 0.1, attackId: null,
+    state: 'run', stateTime: 0, vx: 6, vy: 0, facing: 1, turning: true, attackPhase: null, attackProgress: 0, dx: 0.1, attackId: null,
     shotPhase: null, shotProgress: 0, x: 0, y: 0, groundAt: null, ride: { mode: 'off', progress: 0, pedaling: false, cause: null }, ...over,
   });
 
@@ -405,7 +405,7 @@ describe('pelican rig · 上下车扫描', () => {
                 x += dx;
                 const air = !['idle', 'run', 'attack'].includes(state);
                 const pose = anim.update({
-                  state, stateTime: i / 60, vx: dx * 60, vy: state === 'fall' ? -6 : 5, facing, attackPhase: state === 'attack' ? 'active' : null,
+                  state, stateTime: i / 60, vx: dx * 60, vy: state === 'fall' ? -6 : 5, facing, turning: true, attackPhase: state === 'attack' ? 'active' : null,
                   attackProgress: 0.5, dx, attackId: state === 'attack' ? 'peck' : null, shotPhase: null, shotProgress: 0,
                   x, y: ground(x) + (air ? 1.5 : 0), groundAt: ground, ride: { mode, progress: i / 36, pedaling: false, cause: mode === 'dismounting' ? 'manual' : null },
                 }, 1 / 60);

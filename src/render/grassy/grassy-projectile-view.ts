@@ -21,7 +21,24 @@ export function createGrassyProjectileViews() {
         slot = { kind: entity.kind, root, active: false, update(time) { bolt.update(time, Math.min(2.8, time * 20)); } };
       } else {
         const bugs = createMechanicalBugs(root, 1);
-        slot = { kind: entity.kind, root, active: false, update(time) { bugs.set(0, origin, 0.5, time, 0.85); bugs.flush(); } };
+        const exhaust = new THREE.Group();
+        exhaust.name = 'bug-missile-exhaust';
+        exhaust.position.z = -0.28;
+        const sheath = new THREE.Mesh(
+          new THREE.ConeGeometry(0.14, 0.90, 12).rotateX(-Math.PI / 2).translate(0, 0, -0.45),
+          new THREE.MeshBasicMaterial({ color: '#a3ed44', transparent: true, opacity: 0.48, depthWrite: false, toneMapped: false }),
+        );
+        const core = new THREE.Mesh(
+          new THREE.ConeGeometry(0.065, 0.56, 10).rotateX(-Math.PI / 2).translate(0, 0, -0.28),
+          new THREE.MeshBasicMaterial({ color: '#efffd2', transparent: true, opacity: 0.9, depthWrite: false, toneMapped: false }),
+        );
+        exhaust.add(sheath, core);
+        root.add(exhaust);
+        slot = { kind: entity.kind, root, active: false, update(time) {
+          bugs.set(0, origin, 0.5, time, 0.85);
+          bugs.flush();
+          exhaust.scale.set(1, 1, 0.9 + Math.sin(time * 47) * 0.12);
+        } };
       }
       slots.push(slot);
     }

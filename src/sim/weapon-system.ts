@@ -8,6 +8,7 @@
  * 纯逻辑，按实体/鱼数组顺序处理，确定性。
  */
 import { PELICAN_SKILLS } from '../config/pelican-skills.ts';
+import { HUMAN_BUG_GUIDANCE } from '../config/human-combat.ts';
 import type { Vec2 } from '../core/math.ts';
 import { overlaps } from '../core/math.ts';
 import type { Rect } from '../core/math.ts';
@@ -26,6 +27,11 @@ const getEntity = (world: SimWorld, id: number): Entity | undefined => world.ent
 
 /** 统一消费本 tick 的多发请求，敌方单发也经过同一入口。 */
 export function collectProjectileRequests(e: Entity): ProjectileRequest[] {
+  if (e.boss) {
+    const requests = e.boss.shotRequests;
+    e.boss.shotRequests = [];
+    return requests;
+  }
   if (e.enemy) {
     const requests = e.enemy.shotRequests;
     e.enemy.shotRequests = [];
@@ -59,19 +65,20 @@ export function spawnProjectiles(world: SimWorld, requests: readonly ProjectileR
   }
 }
 
-/** Bug projectiles turn toward living targets, while collision and damage use the normal projectile path. */
+/** 先保留鼠标指定的离膛方向，再由每只虫弹独立寻敌；碰撞与伤害沿用普通投射物路径。 */
 export function steerHumanProjectiles(world: SimWorld): void {
   for (const e of world.entities) {
     if (e.kind !== 'bugShot' || e.removed) continue;
     const p = e.projectile!;
+    if (p.def.lifeTicks - p.lifeTicks < HUMAN_BUG_GUIDANCE.launchTicks) continue;
     const center = projectileCenter(e);
     let target = world.entities.find((other) => other.id === p.targetId && !other.removed && other.health!.hp > 0);
     if (!target) {
-      let distance = 14;
+      p.targetId = undefined;
+      let distance: number = HUMAN_BUG_GUIDANCE.seekRadius;
       for (const other of world.entities) {
         if (other.removed || other.id === p.ownerId || other.team === e.team || !other.health || other.health.hp <= 0) continue;
         const dx = other.body.x - center.x;
-        if (dx * e.facing < -0.5) continue;
         const next = Math.hypot(dx, other.body.y + other.body.height / 2 - center.y);
         if (next < distance) { target = other; distance = next; }
       }
@@ -81,7 +88,7 @@ export function steerHumanProjectiles(world: SimWorld): void {
     const wanted = Math.atan2(target.body.y + target.body.height / 2 - center.y, target.body.x - center.x);
     const current = Math.atan2(e.body.vy, e.body.vx);
     const delta = Math.atan2(Math.sin(wanted - current), Math.cos(wanted - current));
-    const angle = current + Math.max(-0.09, Math.min(0.09, delta));
+    const angle = current + Math.max(-HUMAN_BUG_GUIDANCE.turnRadians, Math.min(HUMAN_BUG_GUIDANCE.turnRadians, delta));
     e.body.vx = Math.cos(angle) * p.def.speed;
     e.body.vy = Math.sin(angle) * p.def.speed;
   }

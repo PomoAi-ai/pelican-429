@@ -1,7 +1,9 @@
-import { FINALE_CUES as C, FINALE_LINEAGE, FINALE_TOKEN_RECORDS, LINEAGE_WEIGHT, tokenLabel } from '../config/intro-finale.ts';
-import { clamp, glow, MONO, smooth, type EditionFrame } from './intro-edition-shared.ts';
+import {
+  FINALE_CUES as C, FINALE_LINEAGE, FINALE_TOKEN_RECORDS, FINALE_UNDERTONE, LINEAGE_WEIGHT, tokenLabel,
+} from '../config/intro-finale.ts';
+import { clamp, glow, MONO, smooth, type EditionFrame, type ScoreFrame } from './intro-edition-shared.ts';
 import { CYAN, GOLD, IVORY, STORM, envelope, hit, label, mix, note, star, type Point } from './intro-finale-geometry.ts';
-import { goneAt } from './intro-finale-storm.ts';
+import { goneAt, tornLabel } from './intro-finale-storm.ts';
 
 /** 同一小节里的名字在谱线上下交替分四层，才不会叠在一起。 */
 const TIERS = [-1.75, 1.2, -2.75, 2.2] as const;
@@ -26,7 +28,7 @@ const BACK = .3;
  * 风暴里每劈一次，token 就退回上一个纪录，那之后的模型全部变灰：被降智，就是被打回过去。
  * staff 是主谱线本身的坐标，所以音符跟着谱线展开、折成电路、被风暴撕裂和坠落。
  */
-export function lineage(f: EditionFrame, staff: (u: number) => Point): void {
+export function lineage(f: ScoreFrame, staff: (u: number) => Point): void {
   const { ctx, width: w, height: h, seconds: t } = f;
   if (t < FINALE_LINEAGE[0]!.at - HOP || t >= C.blackout) return;
   const narrow = w < 700;
@@ -93,6 +95,49 @@ export function lineage(f: EditionFrame, staff: (u: number) => Point): void {
       label(ctx, struck ? `÷${Math.round(other.tokens! / record.tokens!)}` : `×${Math.round(record.tokens! / other.tokens!)}`,
         bx, by - size * (struck ? 3.6 - age * 3 : 6.2 + age * 3), Math.min(16, w * .034), w * .2, struck ? STORM : GOLD, MONO, 700);
     }
+  }
+  ctx.restore();
+}
+
+/** 伏笔撑到第一道闪电，罪证随谱带坠进黑场，翻转在 ASTRA 星座成形前让位。 */
+const UNDERTONE_END = { omen: C.storm, strike: C.blackout, flip: C.astra } as const;
+
+/**
+ * 暗线：社区抓到的原始字段挂在第二声部上，只有字段和数字。伏笔是从谱线底下渗出来的灰字；
+ * 罪证被闪电砸在谱线上方，跟谱带一起被撕开、坠落；高潮时翻转成金色。
+ */
+export function undertone(f: ScoreFrame, staff: (u: number) => Point): void {
+  const { ctx, width: w, seconds: t } = f;
+  const live = FINALE_UNDERTONE.filter(({ at, act }) => t >= at && t < UNDERTONE_END[act]);
+  if (live.length === 0) return;
+  const narrow = w < 700;
+  const size = Math.min(12, w * .026); const fade = 1 - goneAt(t); const tick = Math.floor(t * 18);
+  ctx.save();
+  // 窄屏只放最新的一条，避免和雷击大字、主旋律名字挤在一起。
+  for (const entry of narrow ? live.slice(-1) : live) {
+    const [x, y] = staff(entry.u);
+    const lx = narrow ? w * .5 : x; const fit = narrow ? w * .8 : w * .26;
+    const pop = hit(t, entry.at, 8);
+    const out = 1 - smooth(UNDERTONE_END[entry.act] - .3, UNDERTONE_END[entry.act], t);
+    if (entry.act === 'omen') {
+      ctx.globalAlpha = smooth(entry.at, entry.at + .25, t) * out * .6;
+      label(ctx, entry.text, lx, y + size * 2.2, size, fit, '#7f959b', MONO, 500);
+      continue;
+    }
+    const ly = y - size * 2.4;
+    if (entry.act === 'strike') {
+      ctx.globalAlpha = fade * (.75 + pop * .25);
+      if (pop > .05) glow(ctx, lx, ly, size * 5 * pop, '#ff3d7f50');
+      tornLabel(ctx, entry.text, lx, ly, size * (1.15 + pop * .6), fit, IVORY, .1 + pop * .9, tick * 5 + FINALE_UNDERTONE.indexOf(entry) * 37, MONO, 700);
+      continue;
+    }
+    ctx.globalAlpha = smooth(entry.at, entry.at + .15, t) * out;
+    if (pop > .05) glow(ctx, lx, ly, size * 6 * pop, '#f8d79150');
+    // 高潮的金色天空和谱带都很亮，金字要压一层深色描底才读得出来；谱带按 screen 叠加，深色描底得切回普通叠加才画得上。
+    ctx.save(); ctx.globalCompositeOperation = 'source-over';
+    ctx.shadowColor = '#140d04'; ctx.shadowBlur = 10;
+    label(ctx, entry.text, lx, ly, size * (1.15 + pop * .5), fit, GOLD, MONO, 700);
+    ctx.restore();
   }
   ctx.restore();
 }

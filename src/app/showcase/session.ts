@@ -22,7 +22,7 @@ import { createNpcShowcaseSession } from './npc-session.ts';
 import { createLumaCompanion } from '../../render/luma/luma-companion.ts';
 import { DUMMY_HEALTH_LAYER } from '../../render/entity-views.ts';
 
-function createSceneContent(stage: ReturnType<typeof createStageView>, rig: ReturnType<typeof createPelicanRig>, card: ShowcaseCard) {
+function createSceneContent(stage: ReturnType<typeof createStageView>, rig: ReturnType<typeof createPelicanRig>, card: ShowcaseCard, caveBackground: THREE.Texture) {
   const disposers: Array<() => void> = [];
   const background = stage.scene.background;
   disposers.push(() => { stage.scene.background = background; });
@@ -34,6 +34,7 @@ function createSceneContent(stage: ReturnType<typeof createStageView>, rig: Retu
     const { world } = scenario;
     const level = world.level;
     const worldViews = createWorldViews({
+      caveBackground,
       scene: stage.scene, level, fish: world.fish, ground: scenario.groundColumns ?? levelGroundColumns(level), windMode: card.resource?.wind ?? 'calm',
       pelican: () => getPlayer(world).body, actors: () => world.entities, waterPalette: palette,
     });
@@ -41,7 +42,7 @@ function createSceneContent(stage: ReturnType<typeof createStageView>, rig: Retu
     disposers.push(() => worldViews.dispose());
     const clip = scenario.entry.grassyAnimation?.clip;
     const gait = !card.manual && (clip === 'run' || clip === 'sprint') ? clip : undefined;
-    const entityViews = createEntityViews(stage, level, disposers, () => world.entities, worldViews.treeRide, rig, scenario.entry.grassyAnimation?.variant, gait);
+    const entityViews = createEntityViews(stage, level, disposers, () => world.entities, worldViews.treeRide, worldViews.weather.wind, rig, scenario.entry.grassyAnimation?.variant, gait);
     const luma = !card.resource && (scenario.entry.actor === 'pelican' || scenario.entry.actor === 'human' || scenario.entry.actor === 'luma')
       ? createLumaCompanion(stage.scene, getPlayer(world)) : null;
     if (luma) disposers.push(() => luma.dispose());
@@ -124,13 +125,13 @@ function createSceneContent(stage: ReturnType<typeof createStageView>, rig: Retu
   }
 }
 
-export function createShowcaseSession(renderer: THREE.WebGLRenderer, card: ShowcaseCard) {
+export function createShowcaseSession(renderer: THREE.WebGLRenderer, card: ShowcaseCard, caveBackground: THREE.Texture) {
   if (!card.resource) {
     const entry = showcaseEntry(card.entryId);
     const actor = entry.actor;
     if (actor === 'human' && (!entry.grassyAnimation || card.humanView === 'model')) return createHumanShowcaseSession(renderer, card);
-    if (actor === 'luma' && entry.action !== 'ultimate') return createLumaShowcaseSession(renderer, card);
-    if (actor === 'sam' || actor === 'tibo') return createNpcShowcaseSession(renderer, card);
+    if (actor === 'luma') return createLumaShowcaseSession(renderer, card);
+    if (actor === 'sam' || actor === 'tibo') return createNpcShowcaseSession(renderer, card, caveBackground);
   }
   const stage = createStageView(renderer, TUNING, { quality: 'high', antialias: 'msaa' });
   stage.camera.layers.enable(DUMMY_HEALTH_LAYER);
@@ -138,7 +139,7 @@ export function createShowcaseSession(renderer: THREE.WebGLRenderer, card: Showc
   try { rig = createPelicanRig({ scale: TUNING.render.pelicanScale }); }
   catch (error) { stage.dispose(); throw error; }
   let content: ReturnType<typeof createSceneContent>;
-  try { content = createSceneContent(stage, rig, card); }
+  try { content = createSceneContent(stage, rig, card, caveBackground); }
   catch (error) { rig.dispose(); stage.dispose(); throw error; }
   let revision = card.revision;
   let disposed = false;
@@ -150,7 +151,7 @@ export function createShowcaseSession(renderer: THREE.WebGLRenderer, card: Showc
     get status() { return content.scenario.status() + (content.runner.complete && !card.manual ? ' · 演示完成' : ''); },
     reset() {
       content.dispose();
-      content = createSceneContent(stage, rig, card);
+      content = createSceneContent(stage, rig, card, caveBackground);
       revision = card.revision;
     },
     advance(elapsed: number, playing: boolean, manual: (() => InputFrame) | null): number {
@@ -169,4 +170,6 @@ export function createShowcaseSession(renderer: THREE.WebGLRenderer, card: Showc
   };
 }
 
-export type ShowcaseSession = ReturnType<typeof createShowcaseSession>;
+export type ShowcaseSession = ReturnType<typeof createShowcaseSession> & {
+  setSoundEnabled?: (enabled: boolean) => Promise<void>;
+};

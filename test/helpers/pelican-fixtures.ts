@@ -64,7 +64,7 @@ export function feetMidpoint(r: PelicanRig): THREE.Vector3 {
 
 export function input(over: Partial<PelicanAnimInput> = {}): PelicanAnimInput {
   return {
-    state: 'idle', stateTime: 0, vx: 0, vy: 0, facing: 1, attackPhase: null, attackProgress: 0, dx: 0,
+    state: 'idle', stateTime: 0, vx: 0, vy: 0, facing: 1, turning: true, attackPhase: null, attackProgress: 0, dx: 0,
     attackId: null, shotPhase: null, shotProgress: 0, x: 0, y: 0, groundAt: null,
     ride: { mode: 'off', progress: 0, pedaling: false, cause: null }, ...over,
   };

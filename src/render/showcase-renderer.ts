@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { FullScreenQuad } from 'three/addons/postprocessing/Pass.js';
 import { TUNING } from '../config/tuning.ts';
 import { createStageRenderer } from './stage.ts';
+import { disposeCharacterTextures } from './character-model.ts';
 
 export interface ShowcaseRenderer {
   readonly renderer: THREE.WebGLRenderer;
@@ -58,6 +59,7 @@ export function createShowcaseRenderer(parent: HTMLElement): ShowcaseRenderer {
     dispose() {
       quad.dispose();
       material.dispose();
+      disposeCharacterTextures();
       renderer.dispose();
       canvas.remove();
     },

@@ -80,7 +80,7 @@ export function fishTailPhase0(seed: number): number {
 }
 
 export interface FishViewOptions {
-  /** 实例上限（默认 64）；鱼数超过即抛。 */
+  /** 实例上限（默认容纳初始完整鱼群，至少预留 64）；鱼数超过即抛。 */
   readonly capacity?: number;
 }
 
@@ -139,7 +139,7 @@ function tailAmplitude(f: Fish): number {
 }
 
 export function createFishView(school: FishSchool, options: FishViewOptions = {}): FishView {
-  const capacity = options.capacity ?? DEFAULT_CAPACITY;
+  const capacity = options.capacity ?? Math.max(DEFAULT_CAPACITY, school.fish.length);
   if (!(Number.isInteger(capacity) && capacity >= 1)) throw new Error(`fish-view: capacity must be a positive integer, got ${capacity}`);
 
   const material = createFishMaterial();

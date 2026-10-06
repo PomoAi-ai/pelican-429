@@ -1,4 +1,6 @@
-import { FINALE_CUES as C, FINALE_CLAUDE_CLIMB, FINALE_CODE, FINALE_NOTE_KEYS, FINALE_OPEN_MODELS, FINALE_RETRY_TIMES } from '../config/intro-finale.ts';
+import {
+  FINALE_CUES as C, FINALE_CLAUDE_CLIMB, FINALE_CODE, FINALE_HARVEST_LOG, FINALE_NOTE_KEYS, FINALE_OPEN_MODELS, FINALE_RETRY_TIMES,
+} from '../config/intro-finale.ts';
 import { FINALE_MODELS } from '../config/intro-models.ts';
 import { clamp, glow, MONO, SANS, SERIF, seeded, smooth, TAU, type EditionFrame } from './intro-edition-shared.ts';
 import {
@@ -94,7 +96,7 @@ const STRIKES = [
 ] as const;
 
 /** 横向切片各自错位，再叠一层红青色差：故障感来自形状被撕开，而不是换一种字体颜色。 */
-function tornLabel(ctx: CanvasRenderingContext2D, value: string, x: number, y: number, size: number, maxWidth: number,
+export function tornLabel(ctx: CanvasRenderingContext2D, value: string, x: number, y: number, size: number, maxWidth: number,
   color: string, tear: number, seed: number, font = SANS, weight = 800): void {
   const slices = 7; const top = y - size * .8; const slice = size * 1.6 / slices;
   const split = tear * size * .12;
@@ -273,6 +275,14 @@ export function retry(f: EditionFrame): void {
   ctx.fillStyle = IVORY; ctx.fillRect(cursor + 2, y - s * .55, cw * .8, s * 1.1);
   ctx.globalAlpha = smooth(C.retry[0] + .2, C.retry[0] + .5, t) * .75;
   label(ctx, f.language === 'zh' ? '再来一次。' : 'Once more.', w * .5, y + s * 2.3, Math.min(17, w * .036), w * .8, '#d9cdb0', SERIF);
+  // 暗线在黑暗里先亮回来：每个音名落下时打出一行采票日志，最新一行最亮。
+  const line = Math.min(11, w * .026);
+  C.retry.forEach((at, i) => {
+    if (t < at) return;
+    const latest = i === lit - 1;
+    ctx.globalAlpha = smooth(at, at + .08, t) * (latest ? .9 : .45);
+    label(ctx, `> ${FINALE_HARVEST_LOG[i]}`, left, y + s * 3.3 + i * line * 1.6, line, w * .6, latest ? CYAN : '#7f959b', MONO, 500, 'left');
+  });
   if (charge > 0) {
     // 光从四周向音符收拢，越接近 24 秒越快、越亮。
     const reach = Math.hypot(w, h) * .6;

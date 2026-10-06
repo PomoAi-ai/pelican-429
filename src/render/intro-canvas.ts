@@ -423,7 +423,7 @@ function feather(ctx: CanvasRenderingContext2D, seconds: number, w: number, h: n
 
 /** 每一帧完全由播放时间决定，拖动、重播与暂停无需恢复绘图状态。 */
 export function drawIntro(ctx: CanvasRenderingContext2D, timeSeconds: number,
-  images: IntroImages, width: number, height: number): void {
+  images: IntroImages, fortress: HTMLCanvasElement, width: number, height: number): void {
   const t = timeSeconds * INTRO_SCORE_RATE;
   const stageHeight = Math.max(1, height - 74);
   ctx.save();
@@ -443,7 +443,7 @@ export function drawIntro(ctx: CanvasRenderingContext2D, timeSeconds: number,
     heading(ctx, t, width, stageHeight);
     autonomous(ctx, t, width, stageHeight);
   }
-  if (timeSeconds >= STORY_AT) drawStory(ctx, timeSeconds, images, width, stageHeight);
+  if (timeSeconds >= STORY_AT) drawStory(ctx, timeSeconds, images, fortress, width, stageHeight);
   feather(ctx, timeSeconds, width, stageHeight);
   ctx.restore();
 }

@@ -42,25 +42,61 @@ export function createPhotonModelKit() {
   const white = new THREE.MeshBasicMaterial({ color: '#f4ffff', toneMapped: false });
   const dark = new THREE.MeshBasicMaterial({ color: '#233651' });
   const wingMaterial = new THREE.MeshBasicMaterial({ color: '#c9edff', transparent: true, opacity: 0.55, depthWrite: false, toneMapped: false });
+  const exhaustGeometry = new THREE.PlaneGeometry(0.42, 0.90).translate(0, -0.45, 0);
+  const exhaustMaterial = new THREE.ShaderMaterial({
+    vertexShader: /* glsl */`
+      varying vec2 vUv;
+      void main() {
+        vUv = uv;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+      }
+    `,
+    fragmentShader: /* glsl */`
+      varying vec2 vUv;
+      void main() {
+        float x = abs(vUv.x * 2.0 - 1.0);
+        float width = 0.16 + vUv.y * 0.70;
+        float sheath = 1.0 - smoothstep(0.0, width, x);
+        float core = (1.0 - smoothstep(0.0, width * 0.22, x)) * pow(vUv.y, 2.0);
+        float alpha = (sheath * 0.48 + core * 0.52) * smoothstep(0.0, 0.4, vUv.y);
+        if (alpha < 0.003) discard;
+        vec3 color = mix(vec3(0.48, 0.20, 1.0), vec3(0.12, 0.82, 1.0), vUv.y);
+        gl_FragColor = vec4(mix(color, vec3(1.6, 1.9, 2.0), core), alpha);
+        #include <colorspace_fragment>
+      }
+    `,
+    transparent: true, depthWrite: false, toneMapped: false,
+    side: THREE.DoubleSide, forceSinglePass: true,
+  });
   return {
     create(shape: PhotonShape, color: number) {
       const root = new THREE.Group();
       const spin = new THREE.Group();
       root.add(spin);
       spin.add(new THREE.Mesh(shape === 'wheel' ? wheel : bug, colors[color]!));
-      if (shape === 'bug') spin.add(new THREE.Mesh(face, dark), new THREE.Mesh(eyes, white), new THREE.Mesh(wing, wingMaterial));
+      const exhaust = new THREE.Group();
+      if (shape === 'bug') {
+        spin.add(new THREE.Mesh(face, dark), new THREE.Mesh(eyes, white), new THREE.Mesh(wing, wingMaterial));
+        const jet = new THREE.Mesh(exhaustGeometry, exhaustMaterial);
+        const crossJet = new THREE.Mesh(exhaustGeometry, exhaustMaterial);
+        crossJet.rotation.y = Math.PI / 2;
+        exhaust.position.set(0, -0.20, -0.025);
+        exhaust.add(jet, crossJet);
+        root.add(exhaust);
+      }
       return {
         root,
         animate(time: number) {
           spin.rotation.set(shape === 'wheel' ? Math.sin(time * 3.1) * 0.65 : Math.sin(time * 17) * 0.12,
             shape === 'wheel' ? Math.sin(time * 2.3) * 0.65 : Math.sin(time * 13) * 0.20,
             shape === 'wheel' ? time * 6 : Math.sin(time * 11) * 0.15);
+          exhaust.scale.set(1, 0.88 + Math.sin(time * 29) * 0.12, 1);
         },
       };
     },
     dispose() {
-      for (const geometry of [wheel, bug, face, eyes, wing]) geometry.dispose();
-      for (const material of [...colors, white, dark, wingMaterial]) material.dispose();
+      for (const geometry of [wheel, bug, face, eyes, wing, exhaustGeometry]) geometry.dispose();
+      for (const material of [...colors, white, dark, wingMaterial, exhaustMaterial]) material.dispose();
     },
   };
 }
@@ -84,6 +120,7 @@ export function createPhotonProjectileViews() {
         const x = lerp(e.body.prevX, e.body.x, alpha);
         const y = lerp(e.body.prevY, e.body.y, alpha) + e.body.height / 2;
         model.root.position.set(x, y, 0.55);
+        if (shape === 'bug') model.root.rotation.z = Math.atan2(e.body.vy, e.body.vx) - Math.PI / 2;
         time += dt;
         model.animate(time);
         if (dt > 0) {

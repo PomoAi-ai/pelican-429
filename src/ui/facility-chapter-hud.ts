@@ -3,7 +3,6 @@ import type { FacilityChapterId } from '../config/facility-scenes.ts';
 import type { ScreenPoint } from './hud.ts';
 import { FACILITY_EN } from './facility-minimap.ts';
 import { getLanguage, onLanguageChange } from './language.ts';
-import { FORTRESS_CHASM, FORTRESS_COOLANT } from '../config/facility-structure.ts';
 
 export interface FacilityChapterHud {
   update(respawning: boolean): void;
@@ -19,7 +18,11 @@ function element<T extends keyof HTMLElementTagNameMap>(tag: T, className: strin
 
 function chapterLink(parent: HTMLElement, id: FacilityChapterId, label: string) {
   const link = element('a', 'facility-chapter-link', parent);
-  link.href = `./?mode=game&level=facility&scene=${id}`;
+  const params = new URLSearchParams(location.search);
+  if (params.get('free') === '1') {
+    params.set('scene', id);
+    link.href = `./?${params}`;
+  } else link.href = `./?mode=game&level=facility&scene=${id}`;
   link.textContent = label;
   return link;
 }
@@ -49,7 +52,6 @@ export function createFacilityChapterHud(parent: HTMLElement, id: FacilityChapte
   const exit = element('div', 'facility-chapter-exit', root);
   exit.hidden = true;
   exit.textContent = '出口';
-  const danger = id === 'fortress' ? element('div', 'facility-chapter-danger', root) : null;
   const death = element('div', 'facility-chapter-death', root);
   death.setAttribute('role', 'alert');
   death.hidden = true;
@@ -58,6 +60,7 @@ export function createFacilityChapterHud(parent: HTMLElement, id: FacilityChapte
   const syncLanguage = (): void => {
     const en = getLanguage() === 'en';
     panel.setAttribute('aria-label', en ? 'Scene preview' : '场景预览');
+    header.querySelector('.facility-chapter-number')!.textContent = `${en ? 'SCENE' : '场景'} ${scene.number}`;
     header.querySelector('h1')!.textContent = en ? FACILITY_EN[id].name : scene.name;
     panel.querySelector('.facility-chapter-description')!.textContent = en ? 'Scene preview · Free exploration' : '场景预览 · 自由探索';
     resetLink.textContent = en ? 'Reset position' : '重置位置';
@@ -68,8 +71,7 @@ export function createFacilityChapterHud(parent: HTMLElement, id: FacilityChapte
       hint.lastChild!.textContent = ` ${actions[index]}`;
     });
     exit.textContent = en ? 'Exit' : '出口';
-    if (danger) danger.textContent = en ? 'LETHAL COOLANT · JUMP ACROSS' : '致命冷却液 · 沿踏台跳过';
-    deathTitle.textContent = en ? 'LETHAL COOLANT · YOU DIED' : '触碰冷却液 · 已死亡';
+    deathTitle.textContent = en ? 'YOU DIED' : '已死亡';
     deathHint.textContent = en ? 'Returning to the outpost entrance…' : '正在返回前哨入口…';
   };
   syncLanguage();
@@ -81,12 +83,6 @@ export function createFacilityChapterHud(parent: HTMLElement, id: FacilityChapte
   return {
     update(respawning: boolean): void {
       death.hidden = !respawning;
-      if (danger) {
-        const pool = FORTRESS_COOLANT;
-        const warning = project((FORTRESS_CHASM.left + FORTRESS_CHASM.right) / 2, pool.y + pool.h + 1.4);
-        danger.hidden = warning === null;
-        if (warning) danger.style.transform = `translate(${warning.x.toFixed(1)}px, ${warning.y.toFixed(1)}px) translate(-50%, -100%)`;
-      }
       const position = project(chapter.exit.x, chapter.exit.y + 4);
       exit.hidden = position === null;
       if (position) exit.style.transform = `translate(${position.x.toFixed(1)}px, ${position.y.toFixed(1)}px) translate(-50%, -100%)`;

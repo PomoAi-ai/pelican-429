@@ -5,6 +5,7 @@
  */
 import type { Rect, Vec2 } from '../core/math.ts';
 import { validateEnemyRules } from './enemy-rules.ts';
+import { validateBossRules } from './boss-rules.ts';
 import { validateWorldgenTuning } from './worldgen-rules.ts';
 import { flightMaxRise, validateCaveIslandTuning } from './cave-island-rules.ts';
 import type { WorldgenTuning } from './worldgen-rules.ts';
@@ -27,6 +28,20 @@ export interface HitDefTuning {
   readonly knockback: Readonly<Vec2>;
   readonly hitstun: number;
   readonly hitstop: number;
+  /** 大招命中，见 combat/attacks.ts HitDef.ultimate。 */
+  readonly ultimate?: boolean;
+}
+
+/** Boss 防御：减伤倍率与韧性，由 combat/combat-system.ts 的 applyHit 结算。 */
+export interface GuardRule {
+  /** 霸体期间的伤害倍率。 */
+  readonly armoredScale: number;
+  readonly ultimateScale: number;
+  /** 窗口内累计伤害达到该值才进入硬直。 */
+  readonly poise: number;
+  readonly poiseWindowTicks: number;
+  /** 硬直后不能再次被打出硬直的时长。 */
+  readonly staggerImmuneTicks: number;
 }
 
 export interface AttackTuning extends HitDefTuning {
@@ -145,7 +160,7 @@ export interface Tuning {
   readonly sim: { readonly step: number; readonly maxFrameTime: number; readonly maxTicksPerFrame: number };
   readonly physics: { readonly gravity: number; readonly maxFallSpeed: number };
   readonly player: PlayerTuning;
-  readonly attacks: { readonly peck: AttackTuning; readonly orb: OrbTuning };
+  readonly attacks: { readonly peck: AttackTuning; readonly orb: OrbTuning; readonly stomp: HitDefTuning };
   /** 远程武器表（任务 018，见 config/weapon-rules）：1 喷水 / 2 吐鱼 / 3 光球（蓄力扩展）/ 4 吞弹反吐 + 敌方射击。 */
   readonly weapons: WeaponsTuning;
   readonly combat: { readonly hitFlashTicks: number; readonly invulnTicks: number };
@@ -182,6 +197,7 @@ export const TUNING: Tuning = deepFreeze({
   physics: { gravity: 70, maxFallSpeed: 30 },
   player: DEFAULT_PLAYER,
   attacks: {
+    stomp: { id: 'stomp', damage: 18, knockback: { x: 0, y: -4 }, hitstun: 18, hitstop: 4 },
     peck: {
       id: 'peck',
       startup: 6,
@@ -391,6 +407,7 @@ function validateCollision(path: string, c: CollisionTuning): void {
 /** 校验全部调参，非法即抛（错误信息含字段路径）。 */
 export function validateTuning(t: Tuning): void {
   validateEnemyRules();
+  validateBossRules();
   positive('sim.step', t.sim.step);
   positive('sim.maxFrameTime', t.sim.maxFrameTime);
   if (t.sim.maxFrameTime < t.sim.step) fail('sim.maxFrameTime', 'must be >= sim.step', t.sim.maxFrameTime);
@@ -407,6 +424,7 @@ export function validateTuning(t: Tuning): void {
   validateCaveIslandTuning({ halfWidth: p.halfWidth, rideHeight: p.bike.rideHeight, rideReach: p.bike.bumperReach + p.bike.speed * t.sim.step, bumperHeight: p.bike.bumperHeight, flightRise: t.worldgen.flightRise, realFlightRise });
 
   validateAttack('attacks.peck', t.attacks.peck);
+  validateHitDef('attacks.stomp', t.attacks.stomp);
   validateOrb('attacks.orb', t.attacks.orb);
   validateWeaponsTuning(t.weapons, 'weapons');
 

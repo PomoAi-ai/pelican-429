@@ -4,8 +4,10 @@
  */
 import type { EnemyKind } from '../config/enemy-rules.ts';
 import type { EnemyData } from './enemy.ts';
+import type { BossData } from './boss.ts';
+import type { NpcKind } from '../config/npc.ts';
 import type { Tuning } from '../config/tuning.ts';
-import type { PlayerForm } from '../config/player-form.ts';
+import { PLAYER_BREATH, type PlayerForm } from '../config/player-form.ts';
 import type { ProjectileDef } from '../config/weapon-rules.ts';
 import type { Vec2 } from '../core/math.ts';
 import type { DismountCause, DismountEvent, MountEvent } from '../core/game-events.ts';
@@ -22,6 +24,8 @@ import { createShooterData } from './enemy-shooter.ts';
 import type { ShooterData } from './enemy-shooter.ts';
 import { createHumanCombat } from './human-combat.ts';
 import type { HumanCombatData } from './human-combat.ts';
+import type { WandererData } from './wanderer.ts';
+import type { TeleportState } from './teleport.ts';
 
 export type { Health, Team } from '../combat/combat-system.ts';
 export type { DismountCause } from '../core/game-events.ts';
@@ -30,7 +34,7 @@ export type { Mouthful, WeaponState } from './pelican-weapons.ts';
 export type { ShooterData } from './enemy-shooter.ts';
 
 /** 投射物实体的 kind 即其 ProjectileKind（orb/waterShot/fishShot/enemyShot，见 core/weapon-ids）。 */
-export type EntityKind = 'pelican' | 'trainingDummy' | EnemyKind | 'orb' | 'waterShot' | 'fishShot' | 'enemyShot' | 'photonBug' | 'photonWheel' | 'codexShot' | 'bugShot' | 'droneBomb' | 'droneThermite';
+export type EntityKind = 'pelican' | 'trainingDummy' | 'healthPack' | EnemyKind | NpcKind | 'orb' | 'waterShot' | 'fishShot' | 'enemyShot' | 'photonBug' | 'photonWheel' | 'codexShot' | 'bugShot' | 'droneBomb' | 'droneThermite';
 
 /** 鹈鹕表现状态（渲染层 animator 依赖该字面量集合，勿随意改名）。 */
 export type PelicanState = 'idle' | 'run' | 'jump' | 'fall' | 'attack' | 'fly' | 'glide' | 'swim';
@@ -153,10 +157,15 @@ export interface PelicanData {
   inWater: boolean;
   /** 身体浸没比例 [0,1]。 */
   submersion: number;
+  /** 双形态共用氧气；头部露出真实液面后逐渐恢复。 */
+  oxygenTicks: number;
+  oxygenMaxTicks: number;
   /** 下穿平台后须松开再按跳跃才能进入飞行。 */
   flightNeedsRepress: boolean;
   /** 走/跑档位（pelican-gear）：地面随 Shift，空中沿用起跳档位（按 Shift 可升为跑）。 */
   moveGear: MoveGear;
+  /** 当前有效移动输入，用于松键时停住视觉转身。 */
+  moveX: -1 | 0 | 1;
   /** 行进中由走升为跑：按 gearShiftAccel 平滑加速，直到跑速/松方向/降档。 */
   gearShiftUp: boolean;
   /** 骑行组件（初始 mode 'off'）。 */
@@ -180,6 +189,10 @@ export interface Entity extends Combatant {
   pelican?: PelicanData;
   dummy?: DummyData;
   enemy?: EnemyData;
+  boss?: BossData;
+  npc?: WandererData;
+  teleport?: TeleportState;
+  healthPack?: { readonly healAmount: number };
   projectile?: ProjectileData;
   /** 敌方射击组件（任务 018；训练假人默认关闭）。 */
   shooter?: ShooterData;
@@ -228,8 +241,11 @@ export function createPelicanEntity(id: number, spawn: Vec2, tuning: Tuning): En
       weapon: createWeaponState(tuning),
       inWater: false,
       submersion: 0,
+      oxygenTicks: Math.round(PLAYER_BREATH.seconds / tuning.sim.step),
+      oxygenMaxTicks: Math.round(PLAYER_BREATH.seconds / tuning.sim.step),
       flightNeedsRepress: false,
       moveGear: 'walk',
+      moveX: 0,
       gearShiftUp: false,
       ride: createRideData(),
     },

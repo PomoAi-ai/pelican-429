@@ -128,7 +128,7 @@ export const MINIMAP_CHUNK_TILES = 16;
 
 export interface MinimapSource {
   readonly tiles: Pick<TileMap, 'width' | 'height' | 'registry' | 'get' | 'shapeAt'>;
-  readonly fluid: Pick<FluidMap, 'width' | 'height' | 'cells'>;
+  readonly fluid: Pick<FluidMap, 'width' | 'height' | 'cells' | 'revision'>;
   readonly trees: readonly TreeInstance[];
   readonly structures: readonly FishingHut[];
   /** 沙漠（020）：其外扩范围内的沙画成 DESERT_SAND_COLOR；缺省 = 无沙漠（测试关卡）。 */
@@ -320,6 +320,7 @@ export function createMinimapRaster(source: MinimapSource, options: MinimapRaste
     return h >>> 0;
   };
   for (let cy = 0; cy < chunksY; cy++) for (let cx = 0; cx < chunksX; cx++) fluidHash[cy * chunksX + cx] = hashChunk(cx, cy);
+  let fluidRevision = fluid.revision;
 
   const dirty = new Set<number>();
   const shade = (c: Rgb, tx: number, ty: number): Rgb => {
@@ -403,6 +404,8 @@ export function createMinimapRaster(source: MinimapSource, options: MinimapRaste
       for (let cy = 0; cy <= Math.floor((Math.max(prev, next) - 1) / C); cy++) dirty.add(cy * chunksX + cx);
     },
     scanFluid() {
+      if (fluidRevision === fluid.revision) return 0;
+      fluidRevision = fluid.revision;
       let n = 0;
       for (let cy = 0; cy < chunksY; cy++) {
         for (let cx = 0; cx < chunksX; cx++) {

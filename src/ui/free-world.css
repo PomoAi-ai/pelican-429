@@ -1,0 +1,27 @@
+body.free-world { --dev-nav-height: 100px; }
+body.free-world #dev-navigation { height: 48px; }
+.free-world-toolbar { position: fixed; z-index: 29; inset: 48px 0 auto; height: 52px; display: flex; align-items: center; gap: 10px; margin: 0; padding: 0 20px; overflow-x: auto; scrollbar-width: thin; border-bottom: 1px solid #526f6459; background: linear-gradient(100deg, #1d302c, #15242a); color: #dce9df; font-size: 12px; pointer-events: auto; }
+.free-world-toolbar > * { flex-shrink: 0; }
+.free-world-title { padding-right: 6px; font-size: 13px; letter-spacing: .05em; color: #d8efb8; }
+.free-world-toolbar label { display: flex; align-items: center; gap: 7px; white-space: nowrap; color: #a8bdb4; }
+.free-world-toolbar input, .free-world-toolbar select, .free-world-toolbar button { min-height: 32px; border: 1px solid #627d6c80; border-radius: 6px; background: #10201e; color: #e3eddf; font: inherit; }
+.free-world-toolbar select { width: 164px; padding: 5px 24px 5px 8px; }
+.free-world-toolbar .free-world-size { width: 182px; }
+.free-world-toolbar .free-world-seed { width: 128px; padding: 5px 8px; font-variant-numeric: tabular-nums; }
+.free-world-toolbar button { padding: 5px 11px; cursor: pointer; white-space: nowrap; }
+.free-world-toolbar button:hover { border-color: #b2d695; background: #2b4438; }
+.free-world-toolbar .free-world-random { border-color: #accd91; background: #c5dda9; color: #18261d; font-weight: 650; }
+.free-world-toolbar .free-world-random:hover { background: #d9ebc6; }
+.free-world-toolbar .free-world-gm { margin-left: 4px; padding-left: 14px; border-left: 1px solid #71827666; cursor: pointer; }
+.free-world-gm input { width: 16px; min-height: 16px; margin: 0; accent-color: #c5dda9; cursor: pointer; }
+.free-world-toolbar :is(input, select, button):focus-visible { outline: 2px solid #c9e5ac; outline-offset: 2px; }
+.free-world-toolbar [hidden] { display: none; }
+.free-world-hint { margin-left: auto; padding-left: 8px; color: #9eafa4; font-size: 11px; white-space: nowrap; }
+@media (max-width: 1680px) { .free-world-hint { display: none; } }
+@media (max-width: 700px) {
+  .free-world-toolbar { gap: 8px; padding: 0 10px; }
+  .free-world-title { font-size: 12px; }
+  .free-world-toolbar select { width: 142px; }
+}
+
+body.free-world .facility-chapter-panel { display: none; }

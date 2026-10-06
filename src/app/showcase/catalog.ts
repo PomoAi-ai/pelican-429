@@ -22,16 +22,17 @@ export function createShowcaseScenario(id: string, environment: ShowcaseEnvironm
   const world = createSimWorld({ level, tuning: TUNING, precipMode: 'manual', precipState: { rain: 'none', snow: 'none' } });
   const ctx: ScenarioContext = { world, entry, groundY, facing };
   const driver = entry.actor === 'human' ? prepareHuman(ctx, attackMotion)
-    : entry.actor === 'luma' && entry.action === 'ultimate' ? preparePelican(ctx) : adapters[entry.actor as SimulatedActor](ctx);
+    : adapters[entry.actor as SimulatedActor](ctx);
   let ticks = 0;
   return {
     ...ctx,
     height: driver.height, width: driver.width,
     durationTicks: Math.round((entry.actor === 'human' ? 8 : entry.seconds) / TUNING.sim.step),
     get elapsedTicks() { return ticks; },
-    step(input) {
+    step(input, aim) {
       const scripted = driver.input(ticks);
-      stepSim(world, input ?? scripted);
+      const controls = input ?? scripted;
+      stepSim(world, aim === undefined ? controls : { ...controls, aim });
       ticks++;
     },
     focus: driver.focus,

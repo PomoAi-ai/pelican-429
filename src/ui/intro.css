@@ -1,11 +1,15 @@
 body.intro-active { background: #000; }
-body.intro-active #dev-navigation { display: none; }
-body.intro-active #app, body.intro-active .overlay { top: 0; }
 body.intro-active #loading { background: #000; }
-.intro-stage { position: absolute; inset: 0; overflow: hidden; background: #000; color: #d8e9e6; }
-body #app .intro-canvas { width: 100%; height: 100%; cursor: default; }
+.intro-stage { position: absolute; inset: 0; z-index: 15; overflow: hidden; background: #000; color: #d8e9e6; }
+.intro-stage[data-state="entering"] { z-index: 15; }
+.intro-stage[data-state="entering"] .intro-controls,
+.intro-stage[data-state="entering"] .intro-chapter { display: none; }
+body #app .intro-canvas { width: 100%; height: 100%; cursor: pointer; }
 .intro-stage [hidden] { display: none; }
 .intro-ready { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 24px 24px 90px; text-align: center; background: #000; }
+/* 自动播放通常在瞬间开始；稍等再显示开场页，只有被浏览器拦下时才看得到「开始播放」。 */
+.intro-stage[data-state="starting"][data-loading="false"] .intro-ready { animation: intro-ready-late .3s .6s both; }
+@keyframes intro-ready-late { from { opacity: 0; } }
 .intro-kicker { margin: 0 0 24px; font: 10px/1.6 ui-monospace, 'SF Mono', Menlo, monospace; letter-spacing: .25em; color: #718a88; }
 .intro-ready h1 { margin: 0; font-family: Georgia, 'Times New Roman', serif; font-size: clamp(48px, 8.4vw, 112px); line-height: .98; font-weight: 400; letter-spacing: -.055em; color: #e9ece3; }
 .intro-ready h1 em { color: #e8c3a1; font-weight: 400; }
@@ -27,20 +31,21 @@ body #app .intro-canvas { width: 100%; height: 100%; cursor: default; }
 .intro-resume:hover { background: color-mix(in srgb, var(--edition-bg, #000) 50%, transparent); }
 .intro-resume:focus-visible { outline: 2px solid #fff; outline-offset: 4px; }
 .intro-controls-idle .intro-controls:focus-within, .intro-is-paused .intro-controls { opacity: 1; pointer-events: auto; }
-.intro-progress-row { display: flex; align-items: center; height: 22px; }
+.intro-progress-row { position: relative; display: flex; align-items: center; height: 22px; margin-top: 16px; }
+/* 场景节点钉在进度线上：圆点落在对应时刻，名字浮在线的上方，点一下跳到那一幕。 */
+.intro-scenes { position: absolute; inset: 0; pointer-events: none; }
+.intro-scenes button { position: absolute; top: 50%; width: 20px; height: 20px; padding: 0; border: 0; background: transparent; transform: translate(-50%, -50%); cursor: pointer; pointer-events: auto; }
+.intro-scenes button::before { content: ''; position: absolute; left: 50%; top: 50%; width: 5px; height: 5px; margin: -2.5px; border-radius: 50%; background: #4d625b; box-shadow: 0 0 0 2px #000; }
+.intro-scenes span { position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); font-size: 10px; color: #7f9690; white-space: nowrap; }
+.intro-scenes button:first-child span { left: 50%; transform: none; }
+.intro-scenes button:hover::before, .intro-scenes button[aria-current="true"]::before { background: #e4f4ee; }
+.intro-scenes button:hover span, .intro-scenes button[aria-current="true"] span { color: #e4f4ee; }
 #intro-seek { --intro-progress: 0%; appearance: none; -webkit-appearance: none; width: 100%; height: 2px; margin: 0; background: linear-gradient(to right, #9bcfc0 var(--intro-progress), #29332f var(--intro-progress)); cursor: pointer; }
 #intro-seek::-webkit-slider-thumb { appearance: none; -webkit-appearance: none; width: 9px; height: 9px; background: #c4e8db; border-radius: 50%; box-shadow: 0 0 12px #a1dac55c; }
 #intro-seek::-moz-range-thumb { width: 9px; height: 9px; border: 0; background: #c4e8db; border-radius: 50%; }
-.intro-control-row { min-height: 32px; display: flex; flex-wrap: wrap; align-items: center; column-gap: 18px; font-size: 11px; }
+.intro-control-row { min-height: 32px; display: flex; align-items: center; justify-content: space-between; font-size: 11px; }
 .intro-control-row button { border: 0; padding: 8px 2px; background: transparent; cursor: pointer; white-space: nowrap; color: #afc2bd; }
-.intro-control-row a { text-decoration: none; color: #7f9690; white-space: nowrap; padding: 8px 0; }
-.intro-control-row button:hover, .intro-control-row a:hover { color: #fff; }
-.intro-scenes { display: flex; align-items: center; gap: 14px; }
-.intro-control-row .intro-scenes button { color: #7f9690; }
-.intro-control-row .intro-scenes button:hover { color: #fff; }
-.intro-control-row .intro-scenes button[aria-current="true"] { color: #e4f4ee; box-shadow: inset 0 -1px 0 #9bcfc0; }
-.intro-divider { width: 1px; height: 12px; background: #35433d; }
-.intro-phase { color: #758d85; margin-left: auto; font-size: 11px; letter-spacing: .08em; }
+.intro-control-row button:hover { color: #fff; }
 .intro-time { color: #718980; font: 10px/1.4 ui-monospace, monospace; white-space: nowrap; }
 .intro-stage button:disabled { opacity: .45; cursor: wait; }
 .intro-stage button:focus-visible, .intro-stage a:focus-visible, #intro-seek:focus-visible { outline: 1px solid #b5e3ce; outline-offset: 5px; }
@@ -55,12 +60,9 @@ body #app .intro-canvas { width: 100%; height: 100%; cursor: default; }
 @keyframes intro-chapter-reveal { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
 @media (max-width: 640px) {
   .intro-controls { padding-left: 16px; padding-right: 16px; }
-  .intro-control-row { gap: 0 12px; }
-  .intro-scenes { order: 1; flex: 1 0 100%; min-width: 0; overflow-x: auto; scrollbar-width: none; }
-  .intro-scenes::-webkit-scrollbar { display: none; }
-  .intro-phase { display: none; }
-  .intro-time { margin-left: auto; }
-  .intro-back span, .intro-divider { display: none; }
+  /* 窄屏上几幕挤在后半段，名字会叠在一起；只留圆点，名字仍留给读屏。 */
+  .intro-progress-row { margin-top: 0; }
+  .intro-scenes span { clip-path: inset(50%); }
   .intro-control-row button { min-height: 38px; }
   .intro-chapter { bottom: 17%; left: 6%; right: 6%; padding: 16px 20px; }
   .intro-chapter h2 { font-size: 20px; letter-spacing: .12em; }
@@ -124,11 +126,6 @@ body #app .intro-edition-preview canvas { display:block; width:100%; height:100%
   .intro-stage[data-edition="finale"] .intro-ready h1 { font-size:58px; }
 }
 
-.intro-languages { position:absolute; z-index:4; top:22px; right:28px; display:flex; gap:4px; padding:4px; border:1px solid #edcb8738; border-radius:24px; background:#06090fc9; }
-.intro-languages button { border:0; border-radius:20px; padding:7px 13px; color:#b7bbc3; background:transparent; font:11px Arial,sans-serif; cursor:pointer; }
-.intro-languages button[aria-pressed="true"] { background:#edcb87; color:#14100a; }
-.intro-languages button:focus-visible { outline:2px solid #fff; outline-offset:3px; }
-@media(max-width:650px) { .intro-languages { top:18px; right:18px; } }
 
 .intro-stage[data-edition="finale"] .intro-mission-hud { left:6%; right:6%; bottom:112px; grid-template-columns:minmax(0,1fr) auto; align-items:end; gap:22px 32px; padding:0; border:0; border-radius:0; background:none; pointer-events:none; }
 .intro-mission-hud:not([hidden]) { display:grid; }

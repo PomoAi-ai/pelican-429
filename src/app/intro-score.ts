@@ -116,6 +116,8 @@ class PreludeScore {
   private readonly host: PreludeAudioHost;
   private readonly modulationAt: number;
   private readonly musicEnd: number;
+  /** 每段噪声从缓冲区的不同位置读起：镲、军鼓这类同一刻起奏的几层噪声若读同一段样本，会同相叠成尖峰。 */
+  private grains = 0;
 
   constructor(host: PreludeAudioHost) {
     this.host = host;
@@ -582,6 +584,7 @@ class PreludeScore {
     const { context } = this.host;
     const source = this.host.track(context.createBufferSource());
     source.buffer = this.host.noise;
+    source.loop = true;
     const filter = this.host.keep(context.createBiquadFilter());
     filter.type = type;
     filter.frequency.value = frequency;
@@ -592,7 +595,7 @@ class PreludeScore {
     source.connect(filter);
     filter.connect(gain);
     gain.connect(this.host.bus);
-    source.start(this.host.at(at), 0, duration / this.host.scoreRate);
+    source.start(this.host.at(at), this.grains++ * 0.618 % this.host.noise.duration, duration / this.host.scoreRate);
   }
 }
 

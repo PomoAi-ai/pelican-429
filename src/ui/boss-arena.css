@@ -1,0 +1,26 @@
+.boss-arena-hud { position: fixed; z-index: 12; inset: var(--dev-nav-height) 0 auto; pointer-events: none; color: #f3f5e8; font-family: system-ui, sans-serif; }
+.boss-arena-toolbar { display: flex; align-items: center; justify-content: center; gap: 24px; min-height: 94px; padding: 10px 20px; background: linear-gradient(#08131be8, #08131b90, transparent); }
+.boss-arena-toolbar strong { font-size: 13px; letter-spacing: 2px; }
+.boss-arena-portraits { display: flex; gap: 12px; pointer-events: auto; }
+.boss-arena-portraits button { display: flex; align-items: center; gap: 10px; padding: 4px 16px 4px 4px; border: 1px solid #53636d; border-radius: 40px; background: #11232e; color: #d9e7ea; font: 600 14px system-ui, sans-serif; cursor: pointer; }
+.boss-arena-portraits button:hover, .boss-arena-portraits button[aria-pressed=true] { border-color: #dbed93; color: #eef9bd; background: #273a37; }
+.boss-arena-portraits button:focus-visible { outline: 3px solid #e1f4a0; outline-offset: 3px; }
+.boss-arena-portraits img { width: 54px; height: 54px; border-radius: 50%; object-fit: cover; object-position: top; background: #39454c; }
+.boss-arena-hint { max-width: 160px; font-size: 11px; line-height: 1.6; color: #b8c6c9; }
+.boss-arena-health { width: min(420px, 62vw); margin: 0 auto; text-align: center; font-size: 12px; text-shadow: 0 1px 4px #000; }
+.boss-arena-health progress { display: block; width: 100%; height: 9px; margin-top: 7px; accent-color: #f09174; }
+.boss-arena-health progress::-webkit-progress-bar { background: #16242f; border-radius: 6px; }
+.boss-arena-health progress::-webkit-progress-value { background: linear-gradient(90deg, #b34751, #f7ae7e); border-radius: 6px; }
+.boss-arena-announcement { position: fixed; top: 30%; left: 50%; transform: translateX(-50%); width: 90vw; text-align: center; text-shadow: 0 3px 20px #000b; }
+.boss-arena-announcement b { display: block; font-size: clamp(24px, 4vw, 46px); letter-spacing: 4px; }
+.boss-arena-announcement[data-phase=countdown] b { font-size: clamp(80px, 16vh, 150px); color: #edfac4; }
+.boss-arena-announcement span { display: block; margin-top: 10px; font-size: 13px; }
+.boss-arena-hud [hidden] { display: none; }
+body.boss-arena .hud-stats, body.boss-arena .hud-status { display: none; }
+@media (max-width: 700px) {
+  .boss-arena-toolbar { gap: 12px; padding: 8px; min-height: 76px; }
+  .boss-arena-hint { display: none; }
+  .boss-arena-portraits img { width: 44px; height: 44px; }
+  .boss-arena-portraits button { padding-right: 12px; }
+  .boss-arena-health { width: 64vw; }
+}

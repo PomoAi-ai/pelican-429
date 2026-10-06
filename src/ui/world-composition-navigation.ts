@@ -1,5 +1,6 @@
 import { TERRAIN_COMPOSITIONS } from '../config/terrain-compositions.ts';
 import type { WorldComposition } from '../world/worldgen-compositions.ts';
+import { gameHost } from './mobile-game-viewport.ts';
 
 /** 开发导航重载同一个世界，仅切换角色的检查起点，不更改地形生成。 */
 export function createWorldCompositionNavigation(parent: HTMLElement, compositions: readonly WorldComposition[], selected: WorldComposition | undefined, url: URL): () => void {
@@ -19,7 +20,7 @@ export function createWorldCompositionNavigation(parent: HTMLElement, compositio
   const change = (): void => {
     if (select.value === '') url.searchParams.delete('inspect');
     else url.searchParams.set('inspect', select.value);
-    location.assign(url.href);
+    gameHost().location.assign(url.href);
   };
   select.addEventListener('change', change);
   label.append(caption, select);

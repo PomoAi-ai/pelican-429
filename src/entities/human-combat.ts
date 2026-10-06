@@ -1,5 +1,5 @@
 import type { GrassyAttack } from '../config/grassy.ts';
-import { HUMAN_BUG_SHOT, HUMAN_CODEX_SHOT, HUMAN_OVERLOAD, HUMAN_SKILLS } from '../config/human-combat.ts';
+import { HUMAN_BUG_SHOT, HUMAN_CODEX_SHOT, HUMAN_OVERLOAD, HUMAN_OVERLOAD_POST_INVULN_TICKS, HUMAN_SKILLS } from '../config/human-combat.ts';
 import type { HumanSkill } from '../config/human-combat.ts';
 import { HUMAN_MELEE_ATTACK } from '../config/player-form.ts';
 import type { Vec2 } from '../core/math.ts';
@@ -24,8 +24,12 @@ export function createHumanCombat(): HumanCombatData {
   return { action: null, ticks: 0, smashSide: 1, cooldowns: [0, 0, 0], bufferedSkill: 0, bufferTicks: 0, bufferedAim: null, aim: null, hitIds: [] };
 }
 
-export function cancelHumanCombat(p: PelicanData): void {
-  const h = p.humanCombat;
+export function cancelHumanCombat(e: Entity): void {
+  const h = e.pelican!.humanCombat;
+  if (e.health!.hp <= 0) e.health!.overloadInvulnTicks = 0;
+  else if (h.action === 'server_overload') {
+    e.health!.overloadInvulnTicks = Math.min(e.health!.overloadInvulnTicks, HUMAN_OVERLOAD_POST_INVULN_TICKS + 1);
+  }
   h.action = null;
   h.ticks = h.bufferedSkill = h.bufferTicks = 0;
   h.aim = null;
@@ -36,7 +40,8 @@ export function cancelHumanCombat(p: PelicanData): void {
 export function bufferHumanSkill(p: PelicanData, input: PelicanInput): void {
   if (input.skillPressed === 0 || input.skillPressed === 4) return;
   p.humanCombat.bufferedSkill = input.skillPressed;
-  p.humanCombat.bufferTicks = 8;
+  // 包含本帧，保证接下来 12 tick 内恢复可释放时仍能接上右键。
+  p.humanCombat.bufferTicks = input.skillPressed === 1 ? 13 : 8;
   p.humanCombat.bufferedAim = input.aim === null ? null : { ...input.aim };
 }
 
@@ -61,7 +66,7 @@ export function updateHumanCombat(e: Entity, input: PelicanInput): void {
   for (let i = 0; i < h.cooldowns.length; i++) h.cooldowns[i] = Math.max(0, h.cooldowns[i]! - 1);
   if (p.form !== 'human') return;
   if (e.health!.hp <= 0 || e.health!.hitstunTicks > 0 || p.transformTicks >= 0) {
-    cancelHumanCombat(p);
+    cancelHumanCombat(e);
     e.attack = undefined;
     p.attackBufferTicks = 0;
     return;
@@ -78,14 +83,18 @@ export function updateHumanCombat(e: Entity, input: PelicanInput): void {
   }
 
   if (h.action === null && p.ride.mode === 'off') {
-    const slot = h.bufferedSkill;
+    const slot = h.bufferedSkill || (input.skill1Held ? 1 : 0);
     if (slot > 0 && h.cooldowns[slot - 1] === 0) {
       const action = (['codex_attack', 'bug_attack', 'server_overload'] as const)[slot - 1]!;
       h.action = action;
       h.ticks = 0;
-      h.aim = h.bufferedAim;
+      h.aim = h.bufferedSkill > 0 ? h.bufferedAim : input.aim;
       h.hitIds.length = 0;
       h.cooldowns[slot - 1] = HUMAN_SKILLS[action].cooldown;
+      if (action === 'server_overload') {
+        // 起手当帧也会递减一次，保留动作实际结束后的完整两秒。
+        e.health!.overloadInvulnTicks = HUMAN_SKILLS[action].ticks + HUMAN_OVERLOAD_POST_INVULN_TICKS + 1;
+      }
       h.bufferedSkill = h.bufferTicks = 0;
       p.attackBufferTicks = 0;
       if (h.aim !== null && h.aim.x !== e.body.x) e.facing = h.aim.x > e.body.x ? 1 : -1;

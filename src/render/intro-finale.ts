@@ -1,12 +1,12 @@
 import { FINALE_CUES as C, FINALE_CODE, FINALE_CODE_TIMES, FINALE_NOTE_KEYS, FINALE_OPEN_MODELS, FINALE_QUESTION_TYPING, FINALE_CLAUDE_CLIMB } from '../config/intro-finale.ts';
 import { INTRO_COPY } from '../config/intro-language.ts';
 import { CLAUDE_MODELS, FINALE_MODELS } from '../config/intro-models.ts';
-import { clamp, glow, MONO, room, SANS, seeded, SERIF, smooth, TAU, type EditionFrame } from './intro-edition-shared.ts';
+import { clamp, glow, MONO, room, SANS, seeded, SERIF, smooth, TAU, type EditionFrame, type ScoreFrame } from './intro-edition-shared.ts';
 import {
   CORAL, CYAN, GOLD, IVORY, STORM, STORM_VIOLET, VIOLET, constellationPoints, drawPath, envelope, hit,
   label, mix, note, ribbonPoint, star, stroke, type Point,
 } from './intro-finale-geometry.ts';
-import { lineage, tokenSurge } from './intro-finale-lineage.ts';
+import { lineage, tokenSurge, undertone } from './intro-finale-lineage.ts';
 import { agiMeter, fallAt, goneAt, modelRoster, retry, storm, stormForce } from './intro-finale-storm.ts';
 import { WINDOW_RECT } from './intro-story.ts';
 
@@ -82,7 +82,7 @@ function background(f: EditionFrame): void {
   ctx.restore();
 }
 
-export function drawFinaleScore(f: EditionFrame): void {
+export function drawFinaleScore(f: ScoreFrame): void {
   const { ctx, width: w, height: h, seconds: t } = f;
   const continuation = smooth(C.silence, C.end, t);
   const alpha = smooth(2.65, 3.35, t) * mix(1, .72, continuation) * (1 - goneAt(t));
@@ -168,6 +168,7 @@ export function drawFinaleScore(f: EditionFrame): void {
         particle % 7 === 0 ? IVORY : color, particle % 19 === 0);
     }
     if (voice === 0) lineage(f, (u) => point(u, 2));
+    if (voice === 1) undertone(f, (u) => point(u, 2));
   }
   ctx.restore();
 }

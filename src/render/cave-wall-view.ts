@@ -1,9 +1,9 @@
 /**
- * 洞穴背景墙（021）：只画"原本是实心、被挖空"的洞穴格（掩码 CAVE_CELL / CAVE_ENTRANCE；入口露天段 CAVE_OPEN 在地表之上，不画），
+ * 洞穴背景墙：只画"原本是实心、被挖空"的洞穴格（掩码 CAVE_CELL / CAVE_ENTRANCE；入口露天段 CAVE_OPEN 在地表之上，不画），
  * 外加紧邻的实心格一圈（墙伸到方块圆角背后，不露出天空/远山）。地表以上一律不画。
  * - 几何：全局 BatchedMesh（单位方片，实例 = 格平移，multi-draw = 1 draw call），每 CAVE_WALL_BAND 列一带流式增删实例
  *   （视野带立即建、余量带每帧 ≤ 1、超出 2 带卸载）；z = CAVE_WALL_Z（方块背面 BLOCK_BACK_Z 稍后），不投影、接收阴影。
- * - 材质：MeshStandard + onBeforeCompile 程序石纹（世界坐标值噪声斑块 + 层理 + 裂隙，暗石色），
+ * - 材质：MeshStandard + onBeforeCompile 洞室远景图（按洞室定位，边缘淡入隧道岩壁），
  *   有机边缘：按"墙掩码"纹理（R8，1 = 墙/实心，0 = 外部空气）在噪声扰动的坐标上线性采样，低于阈值即 discard
  *   （只在与外部空气相邻处（洞口）出现参差边缘）。光照图由 world-light 链式挂接（洞内自然变暗、发光源照亮）。
  */
@@ -18,7 +18,7 @@ import { BLOCK_BACK_Z } from './tile-geometry.ts';
 
 export const CAVE_WALL_BAND = 64;
 export const CAVE_WALL_Z = BLOCK_BACK_Z - 0.01;
-export const CAVE_WALL_PROGRAM_KEY = 'cave-wall-v1';
+export const CAVE_WALL_PROGRAM_KEY = 'cave-wall-room-image-v1';
 
 /** 墙格：被挖空的有顶洞穴格。 */
 export function isCarvedWall(mask: Uint8Array, i: number): boolean {
@@ -61,6 +61,8 @@ export function caveWallCells(map: TileQuery, caves: CaveInfo, band = CAVE_WALL_
 
 const FRAGMENT_PARS = `
 uniform sampler2D uWallMask;
+uniform sampler2D uWallImage;
+uniform sampler2D uWallRooms;
 uniform vec2 uWallSize;
 varying vec3 vCaveW;
 float cwHash( vec2 p ) { return fract( sin( dot( p, vec2( 127.1, 311.7 ) ) ) * 43758.5453 ); }
@@ -78,11 +80,15 @@ const FRAGMENT_COLOR = `
   if ( m < 0.55 + 0.25 * ( cwNoise( w * 3.1 ) - 0.5 ) ) discard;
   float n = 0.55 * cwNoise( w * 0.9 ) + 0.3 * cwNoise( w * 2.3 + 7.0 ) + 0.15 * cwNoise( w * 6.1 );
   float strata = 0.5 + 0.5 * sin( w.y * 2.1 + 1.7 * cwNoise( w * 0.35 ) * 6.2831 );
-  float crack = smoothstep( 0.02, 0.0, abs( cwNoise( w * 0.9 + 3.0 ) - 0.5 ) ) * smoothstep( 0.35, 0.6, cwNoise( w * 0.4 + 11.0 ) );
-  float grain = cwNoise( w * 9.0 ) - 0.5;
-  vec3 stone = mix( vec3( 0.13, 0.12, 0.15 ), vec3( 0.24, 0.22, 0.26 ), n );
-  stone *= 0.9 + 0.1 * strata + 0.08 * grain;
-  stone = mix( stone, vec3( 0.06, 0.055, 0.07 ), crack * 0.45 );
+  vec3 stone = mix( vec3( 0.13, 0.12, 0.15 ), vec3( 0.24, 0.22, 0.26 ), n ) * ( 0.9 + 0.1 * strata );
+  vec4 room = texture2D( uWallRooms, vec2( w.x / uWallSize.x, 0.5 ) );
+  if ( room.z > 0.0 ) {
+    vec2 uv = ( w - room.xy ) / room.zw + 0.5;
+    // 每个洞室只展示一幅正向图片，隧道和图片边缘保留原岩壁，不拉伸或镜像。
+    vec2 inset = min( uv, 1.0 - uv );
+    float picture = smoothstep( 0.0, 0.15, min( inset.x, inset.y ) );
+    stone = mix( stone, texture2D( uWallImage, vec2( uv.x, 1.0 - uv.y ) ).rgb * 0.65, picture );
+  }
   // 靠近洞口的边缘略暗（墙向后翻折的阴影感）。
   stone *= 0.75 + 0.25 * smoothstep( 0.55, 1.0, m );
   diffuseColor.rgb = stone;
@@ -100,14 +106,14 @@ const VERTEX_WORLD = `
   vCaveW = ( modelMatrix * cw ).xyz;
 }`;
 
-export function createCaveWallMaterial(maskTexture: THREE.DataTexture, width: number, height: number): THREE.MeshStandardMaterial {
+export function createCaveWallMaterial(maskTexture: THREE.DataTexture, roomTexture: THREE.DataTexture, width: number, height: number, background: THREE.Texture | null): THREE.MeshStandardMaterial {
   const material = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.95, metalness: 0 });
   material.name = 'cave-wall';
   // 地形材质：光照图暗部与方块收敛到同一地下色（render/light-texture lmTerrain）。
   material.userData.terrainDark = true;
   // 背景墙对鹈鹕微光只接收一部分（光晕以鹈鹕与近地面为主，墙上不出现明显圆形光斑）。
   material.userData.auraReceive = DEFAULT_AURA.wallReceive;
-  const uniforms = { uWallMask: { value: maskTexture }, uWallSize: { value: new THREE.Vector2(width, height) } };
+  const uniforms = { uWallRooms: { value: roomTexture }, uWallImage: { value: background }, uWallMask: { value: maskTexture }, uWallSize: { value: new THREE.Vector2(width, height) } };
   material.onBeforeCompile = (shader) => {
     Object.assign(shader.uniforms, uniforms);
     shader.vertexShader = injectAfter(injectAfter(shader.vertexShader, 'common', 'varying vec3 vCaveW;', 'cave-wall'), 'project_vertex', VERTEX_WORLD, 'cave-wall');
@@ -131,7 +137,7 @@ export interface CaveWallView {
  * 背景墙视图：一个全局 BatchedMesh（单位方片 1 个几何，实例 = 格；multi-draw = 1 draw call，逐实例视锥剔除），
  * 按 CAVE_WALL_BAND 列一带流式（与视野相交的带立即建，外扩 1 带每帧 ≤ 1 个，超出 2 带卸载）。
  */
-export function createCaveWallView(map: TileQuery, caves: CaveInfo): CaveWallView {
+export function createCaveWallView(map: TileQuery, caves: CaveInfo, background: THREE.Texture | null): CaveWallView {
   const { width, height } = map;
   const cells = caveWallCells(map, caves);
   const texture = new THREE.DataTexture(cells.mask, width, height, THREE.RedFormat, THREE.UnsignedByteType);
@@ -139,7 +145,24 @@ export function createCaveWallView(map: TileQuery, caves: CaveInfo): CaveWallVie
   texture.minFilter = THREE.LinearFilter;
   texture.unpackAlignment = 1;
   texture.needsUpdate = true;
-  const material = createCaveWallMaterial(texture, width, height);
+  const roomLayout = new Float32Array(width * 4);
+  for (let x = 0; x < width; x++) {
+    let nearest = null;
+    let distance = Infinity;
+    for (const room of caves.rooms) {
+      const dx = Math.abs(x + 0.5 - room.cx);
+      if (dx < distance) { nearest = room; distance = dx; }
+    }
+    if (nearest) {
+      // 图片内接洞室范围，保证相邻房间之间先淡回岩壁；3:2 保持岩层形状。
+      const pictureWidth = Math.min(nearest.rx * 2, nearest.ry * 3);
+      roomLayout.set([nearest.cx, nearest.cy, pictureWidth, pictureWidth / 1.5], x * 4);
+    }
+  }
+  const roomTexture = new THREE.DataTexture(roomLayout, width, 1, THREE.RGBAFormat, THREE.FloatType);
+  roomTexture.minFilter = roomTexture.magFilter = THREE.NearestFilter;
+  roomTexture.needsUpdate = true;
+  const material = createCaveWallMaterial(texture, roomTexture, width, height, background);
   const quad = new THREE.PlaneGeometry(1, 1);
   quad.translate(0.5, 0.5, 0);
   const root = new THREE.Group();
@@ -220,6 +243,7 @@ export function createCaveWallView(map: TileQuery, caves: CaveInfo): CaveWallVie
       quad.dispose();
       material.dispose();
       texture.dispose();
+      roomTexture.dispose();
       root.removeFromParent();
     },
   };

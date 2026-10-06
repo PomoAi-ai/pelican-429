@@ -134,12 +134,26 @@ function targetOf(fromRel: string, spec: string): { target: Group; resolved: str
   return { target: groupOf(rel), resolved: rel };
 }
 
+function dynamicImportEdges(code: string, rel: string): Edge[] {
+  const edges: Edge[] = [];
+  for (const match of code.matchAll(DYNAMIC_IMPORT)) {
+    const literal = /^\s*(['"])([^'"\\\r\n]+)\1\s*\)/.exec(code.slice(match.index + match[0].length));
+    if (literal === null) throw new Error(`architecture: dynamic import() in src/${rel} requires a literal path`);
+    const spec = literal[2]!;
+    const { target, resolved } = targetOf(rel, spec);
+    const group = groupOf(rel);
+    if ((group !== 'main' && group !== 'app') || target !== 'app') {
+      throw new Error(`architecture: dynamic import() in src/${rel} is only allowed from main/app to app`);
+    }
+    edges.push({ spec, target, typeOnly: false, resolved });
+  }
+  return edges;
+}
+
 function parse(abs: string): SourceFile {
   const rel = path.relative(SRC, abs);
   const code = stripComments(readFileSync(abs, 'utf8'));
-  if (DYNAMIC_IMPORT.test(code)) throw new Error(`architecture: dynamic import() in src/${rel} is not allowed`);
-  DYNAMIC_IMPORT.lastIndex = 0;
-  const edges: Edge[] = [];
+  const edges = dynamicImportEdges(code, rel);
   for (const m of code.matchAll(STATIC_IMPORT)) {
     const spec = m[4] as string;
     const { target, resolved } = targetOf(rel, spec);
@@ -172,6 +186,13 @@ test('architecture: 扫描器能识别已知依赖（防止规则空转）', () 
     assert.ok(groups.has(g), `layer ${g} should have files`);
   }
   assert.equal(stripComments("const a = 1; // window\n/* document */ const b = '//x';"), "const a = 1; \n               const b = '//x';");
+  assert.deepEqual(dynamicImportEdges(`const a = import('./app/game-app.ts'); const b = import("./app/story-app.ts");`, 'main.ts'), [
+    { spec: './app/game-app.ts', target: 'app', typeOnly: false, resolved: path.join('app', 'game-app.ts') },
+    { spec: './app/story-app.ts', target: 'app', typeOnly: false, resolved: path.join('app', 'story-app.ts') },
+  ]);
+  assert.throws(() => dynamicImportEdges('import(route)', 'main.ts'), /requires a literal path/);
+  assert.throws(() => dynamicImportEdges("import('../app/game-app.ts')", 'world/level.ts'), /only allowed from main\/app to app/);
+  assert.throws(() => dynamicImportEdges("import('./world/level.ts')", 'main.ts'), /only allowed from main\/app to app/);
 });
 
 test('architecture: 相对导入均指向存在的文件且带扩展名', () => {

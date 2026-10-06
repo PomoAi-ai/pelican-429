@@ -7,7 +7,8 @@ import { ceilingClear, probeObstacle } from '../src/physics/ride-probe.ts';
 import { LEVEL_LEGEND, parseLevel } from '../src/world/test-level.ts';
 import type { TileQuery } from '../src/world/tile-map.ts';
 
-const STEP = TUNING.player.stepUp;
+// 固定半格能力验证探测几何，避免玩家调参改变这些夹具的墙体含义。
+const STEP = 0.5;
 const BUMP = TUNING.player.bike.bumperHeight;
 const RIDE = TUNING.player.bike.rideHeight;
 const HW = TUNING.player.halfWidth;
@@ -27,10 +28,12 @@ const WALLS = mapOf([
   '####################',
 ]);
 
-test('probe: 前方一格墙返回到墙面的精确距离（两个方向）', () => {
+test('probe: 半格踏阶遇一格墙返回距离，一格踏阶可通过（两个方向）', () => {
   assert.equal(probeObstacle(WALLS, 8, 1, 1, 3, STEP, BUMP), 2);
   assert.equal(probeObstacle(WALLS, 6, 1, -1, 3, STEP, BUMP), 2);
   assert.equal(probeObstacle(WALLS, 8.5, 1, 1, 1.5, STEP, BUMP), 1.5);
+  assert.equal(probeObstacle(WALLS, 8, 1, 1, 3, TUNING.player.stepUp, BUMP), null);
+  assert.equal(probeObstacle(WALLS, 6, 1, -1, 3, TUNING.player.stepUp, BUMP), null);
 });
 
 test('probe: 超出 reach 的墙不算障碍', () => {

@@ -53,15 +53,15 @@ export interface MinimapOptions {
   readonly parent: HTMLElement;
   readonly source: MinimapSourceLive;
   readonly facilityChapter?: FacilityChapterId;
-  /** 屏幕尺寸（CSS px），大地图用。 */
+  /** 屏幕尺寸（CSS px），大地图及自适应小地图用。 */
   readonly viewport: () => { readonly width: number; readonly height: number };
   /** 键盘（Esc 关大地图、+/- 缩放）与全局鼠标（拖动）事件目标，通常 window。 */
   readonly keyTarget: EventTarget;
   readonly pixelRatio?: () => number;
-  /** 小窗 CSS 尺寸，默认 220×140。 */
+  /** 小窗 CSS 尺寸，默认屏幕宽高各18%。显式尺寸保持固定。 */
   readonly width?: number;
   readonly height?: number;
-  /** 初始缩放（每格 CSS px，[1,4]），默认 width/120（约 120 格宽）。 */
+  /** 初始缩放（[1,4]），默认 width/120；不足120格的小世界按宽度放大底图。 */
   readonly zoom?: number;
   /** 水量变化扫描间隔（秒，> 0），默认 0.5。 */
   readonly fluidScanInterval?: number;
@@ -75,6 +75,11 @@ export interface MinimapOptions {
 
 export interface Minimap {
   update(frame: MinimapFrame): void;
+  readonly visible: boolean;
+  setVisible(visible: boolean): void;
+  /** 小地图不透明度（百分比），不影响大地图或设置入口。 */
+  readonly opacity: number;
+  setOpacity(opacity: number): void;
   /** 切换大地图；传 open 则设为指定状态。 */
   toggleBigMap(open?: boolean): void;
   readonly bigMapOpen: boolean;
@@ -172,9 +177,9 @@ function buildMiniWindow(parent: HTMLElement, cssW: number, cssH: number): { min
   const mini = document.createElement('div');
   mini.className = 'minimap';
   setStyle(mini, {
-    position: 'fixed', top: '12px', right: '12px', width: `${cssW}px`, height: `${cssH}px`, borderRadius: '10px',
-    overflow: 'hidden', border: '2px solid rgba(12, 16, 22, 0.9)', background: 'rgba(12, 16, 22, 0.45)',
-    boxShadow: '0 2px 10px rgba(0, 0, 0, 0.35)', zIndex: '4', pointerEvents: 'auto', userSelect: 'none',
+    position: 'fixed', top: '12px', right: '12px', width: `${cssW}px`, height: `${cssH}px`, borderRadius: '4px',
+    overflow: 'hidden', border: '0', outline: '1px solid rgba(235, 225, 201, 0.5)', background: 'rgba(22, 24, 28, 0.65)',
+    boxShadow: '0 3px 14px rgba(0, 0, 0, 0.25)', zIndex: '4', pointerEvents: 'auto', userSelect: 'none',
   });
   const miniCanvas = document.createElement('canvas');
   miniCanvas.className = 'minimap-canvas';
@@ -276,11 +281,15 @@ function drawWorld(
 export function createMinimap(options: MinimapOptions): Minimap {
   const { parent, source, viewport, keyTarget } = options;
   if (!parent || !source || !viewport || !keyTarget) throw new Error('minimap: parent, source, viewport and keyTarget are required');
-  const cssW = options.width ?? 220;
-  const cssH = options.height ?? 140;
-  if (!(Number.isInteger(cssW) && cssW > 0 && Number.isInteger(cssH) && cssH > 0)) {
-    throw new Error(`minimap: width/height must be positive integers, got ${cssW}×${cssH}`);
+  for (const dimension of [options.width, options.height]) {
+    if (dimension !== undefined && !(Number.isInteger(dimension) && dimension > 0)) {
+      throw new Error(`minimap: width/height must be positive integers, got ${options.width}×${options.height}`);
+    }
   }
+  const initialViewport = viewport();
+  let cssW = options.width ?? initialViewport.width * 0.18;
+  let cssH = options.height ?? initialViewport.height * 0.18;
+  const initialWidth = cssW;
   const scanInterval = options.fluidScanInterval ?? 0.5;
   if (!(Number.isFinite(scanInterval) && scanInterval > 0)) throw new Error(`minimap: fluidScanInterval must be > 0, got ${scanInterval}`);
   const chapter = options.facilityChapter;
@@ -316,6 +325,7 @@ export function createMinimap(options: MinimapOptions): Minimap {
   let bigView: BigMapView | null = null;
   let drag: { x: number; y: number; startX: number; startY: number; moved: boolean } | null = null;
   let teleportEnabled = false;
+  let opacity = 100;
   let scanTimer = 0;
   let disposed = false;
   const limits = (): BigMapLimits => {
@@ -447,11 +457,27 @@ export function createMinimap(options: MinimapOptions): Minimap {
         const l = limits();
         fitCanvas(bigCanvas, l.screenW, l.screenH, dpr);
         drawWorld(layer, bigCtx, bigMapRect(bigView, l), bigView.scale, l.screenW, l.screenH, dpr, frame, MARKER_SIZE_BIG, null);
-      } else {
+      } else if (!mini.hidden) {
+        const v = viewport();
+        const nextW = options.width ?? v.width * 0.18;
+        const nextH = options.height ?? v.height * 0.18;
+        if (nextW !== cssW || nextH !== cssH) {
+          cssW = nextW;
+          cssH = nextH;
+          for (const node of [mini, miniCanvas]) setStyle(node, { width: `${cssW}px`, height: `${cssH}px` });
+        }
         fitCanvas(miniCanvas, cssW, cssH, dpr);
-        const rect = followView({ centerX: frame.player.x, centerY: frame.player.y, viewW: cssW, viewH: cssH, scale: zoom, worldW, worldH });
-        drawWorld(layer, miniCtx, rect, zoom, cssW, cssH, dpr, frame, MARKER_SIZE_MINI, OUTSIDE);
+        const scale = zoom * cssW / initialWidth * Math.max(1, 120 / worldW);
+        const rect = followView({ centerX: frame.player.x, centerY: frame.player.y, viewW: cssW, viewH: cssH, scale, worldW, worldH });
+        drawWorld(layer, miniCtx, rect, scale, cssW, cssH, dpr, frame, MARKER_SIZE_MINI, OUTSIDE);
       }
+    },
+    get visible() { return !mini.hidden; },
+    setVisible(visible) { mini.hidden = !visible; },
+    get opacity() { return opacity; },
+    setOpacity(value) {
+      opacity = value;
+      mini.style.opacity = String(value / 100);
     },
     toggleBigMap(open) {
       setOpen(open ?? bigView === null);

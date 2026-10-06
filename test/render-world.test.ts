@@ -33,6 +33,7 @@ function blankInput(): PelicanAnimInput {
     vx: 0,
     vy: 0,
     facing: 1,
+    turning: true,
     attackPhase: null,
     attackProgress: 0,
     dx: 0,
@@ -264,7 +265,7 @@ describe('HUD 冷却 0 与 tuning 约束一致（011 (f)）', () => {
       const root = new FakeElement('div');
       const hud = createHud(root as unknown as HTMLElement, () => ({ x: 0, y: 0 }), { orbCooldownTicks: zero.attacks.orb.cooldownTicks });
       const player = createPelicanEntity(1, { x: 0, y: 0 }, zero);
-      hud.update({ entities: [player], alpha: 1, frameDt: 1 / 60, stats: { fps: 60, tick: 0, droppedTicks: 0 }, playerId: 1 });
+      hud.update({ entities: [player], alpha: 1, frameDt: 1 / 60, stats: { fps: 60, tick: 0, droppedTicks: 0 }, headSubmerged: false, playerId: 1 });
       assert.equal(root.find('hud-orb-fill')?.style.width, '100.0%');
       hud.dispose();
     });

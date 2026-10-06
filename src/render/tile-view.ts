@@ -92,16 +92,22 @@ export const TILE_APPEARANCE: Readonly<Record<string, TileLook | null>> = Object
 });
 
 export const SLAB_HEIGHT = 0.25;
-/** 八格纹理周期下每格 64 像素，保持各预览独立材质的纹理尺寸。 */
-export const TILE_TEXTURE_SIZE = 512;
+/** 八格纹理周期下每格 32 像素，游戏与预览使用同一默认档。 */
+export const TILE_TEXTURE_SIZE = 256;
+/** 首帧之后每帧区块构建/重建的实测耗时预算（毫秒）：与树（4ms 估计）、水面共处一帧，留出渲染余量。 */
+const TILE_FRAME_BUDGET_MS = 3;
 
 export interface TileViewOptions {
+  /** 512 保留原始纹理生成精度，供近景对照。 */
+  readonly textureSize?: 256 | 512;
   /** 视野外预加载的区块圈数（默认 1）。 */
   readonly marginChunks?: number;
   /** 视野外保留的区块圈数，超出即卸载；必须 ≥ marginChunks（默认 2）。 */
   readonly keepChunks?: number;
-  /** 流式模式下每帧最多预加载的余量区块数（默认 4；视野内区块不受限）。 */
+  /** 流式模式下每帧最多构建的区块数（默认 4；首帧的视野内区块不受限，之后视野内优先）。 */
   readonly maxBuildsPerFrame?: number;
+  /** 首帧之后每帧构建/重建的耗时预算（毫秒，默认 TILE_FRAME_BUDGET_MS；重建与构建各至少一个）。 */
+  readonly maxBuildMsPerFrame?: number;
   /** 过渡规则表（默认 TILE_TRANSITIONS；创建时校验）。 */
   readonly transitions?: TransitionTable;
   /** 花草环境（近水芦苇、树下蘑菇/蕨；flora.createFloraEnv）；缺省 = 无水无树。 */
@@ -618,7 +624,7 @@ export function createTileView(map: TileMap, options: TileViewOptions = {}): Til
     table,
     byId,
     cells,
-    material: createTileMaterial(generateTileTextures(TILE_TEXTURE_SIZE)),
+    material: createTileMaterial(generateTileTextures(options.textureSize ?? TILE_TEXTURE_SIZE)),
     floraMaterial,
     baseGeometry: {
       block: createBlockGeometry(),
@@ -652,6 +658,7 @@ export function createTileView(map: TileMap, options: TileViewOptions = {}): Til
     margin: options.marginChunks ?? 1,
     keep: options.keepChunks ?? 2,
     maxBuilds: options.maxBuildsPerFrame ?? 4,
+    budgetMs: options.maxBuildMsPerFrame ?? TILE_FRAME_BUDGET_MS,
     build: (cx, cy) => buildChunk(ctx, cx, cy),
     clear: (cx, cy) => clearChunk(ctx, cx, cy),
   });

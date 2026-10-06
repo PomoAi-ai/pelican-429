@@ -5,9 +5,9 @@ import { loadGrassyAsset, disposeGrassyAssets } from '../render/grassy/grassy-ri
 import { FACILITY_SCENES, FACILITY_SCENE_IDS, parseFacilityScene } from '../config/facility-scenes.ts';
 import type { FacilitySceneId } from '../config/facility-scenes.ts';
 import { createFacilityEnvironment } from './facility-environment.ts';
-import { createFacilityPresentation } from './facility-presentation.ts';
+import { createFacilityPresentation, frameFacilityCamera } from './facility-presentation.ts';
 import { FACILITY_EN } from '../ui/facility-minimap.ts';
-import { getLanguage, onLanguageChange, setLanguage } from '../ui/language.ts';
+import { getLanguage, onLanguageChange } from '../ui/language.ts';
 
 function createFacilityPage(sceneId: FacilitySceneId): HTMLElement {
   const scene = FACILITY_SCENES[sceneId];
@@ -17,7 +17,6 @@ function createFacilityPage(sceneId: FacilitySceneId): HTMLElement {
   page.innerHTML = `
     <header class="facility-header">
       <div><p class="facility-eyebrow">SCENE PREVIEW / ${scene.number}</p><h1>${scene.name}</h1><p class="facility-subtitle">${scene.subtitle}</p></div>
-      <div class="facility-languages" role="group" aria-label="语言 / Language" style="display:flex;gap:8px;align-items:center"><button type="button" data-language="zh">中文</button><button type="button" data-language="en">English</button></div>
       <nav class="facility-scene-list" aria-label="机房场景选择">
         ${FACILITY_SCENE_IDS.map((id) => `<a href="./?mode=facility&amp;scene=${id}" ${id === sceneId ? 'aria-current="page"' : ''}><span>${FACILITY_SCENES[id].number}</span>${FACILITY_SCENES[id].name}</a>`).join('')}
       </nav>
@@ -57,9 +56,6 @@ export async function startFacility(onError: (error: unknown) => void): Promise<
   const travel = page.querySelector<HTMLInputElement>('.facility-travel input')!;
   const motion = page.querySelector<HTMLButtonElement>('[data-action="motion"]')!;
   const buttons = [...page.querySelectorAll<HTMLButtonElement>('[data-shot]')];
-  page.querySelectorAll<HTMLButtonElement>('[data-language]').forEach((button) => {
-    button.addEventListener('click', () => setLanguage(button.dataset.language as 'zh' | 'en'));
-  });
   const listeners = new AbortController();
   const disposers: Array<() => void> = [() => page.remove(), () => listeners.abort()];
   let frame = 0;
@@ -81,7 +77,7 @@ export async function startFacility(onError: (error: unknown) => void): Promise<
     if (signal.aborted) { facility.dispose(); return; }
     disposers.push(() => facility.dispose());
     stage.canvas.setAttribute('aria-label', '机房内外实时场景。方向键平移，加减号缩放，Home 查看全景。');
-    const environment = await createFacilityEnvironment(stage, sceneId);
+    const environment = await createFacilityEnvironment(stage, sceneId, { enemies: true, grassyVariant: 'game' });
     if (signal.aborted) { environment.dispose(); return; }
     disposers.push(() => environment.dispose());
     const target = { x: scene.overview.x as number, y: scene.overview.y as number, zoom: 1 };
@@ -118,7 +114,6 @@ export async function startFacility(onError: (error: unknown) => void): Promise<
     const syncLanguage = (): void => {
       const en = getLanguage() === 'en';
       const copy = FACILITY_EN[sceneId];
-      page.querySelectorAll<HTMLButtonElement>('[data-language]').forEach((button) => button.setAttribute('aria-pressed', String(button.dataset.language === getLanguage())));
       document.title = `${en ? copy.name : scene.name} · ${en ? 'PELICAN 429' : '鹈鹕 429'}`;
       page.querySelector('h1')!.textContent = en ? copy.name : scene.name;
       page.querySelector('.facility-subtitle')!.textContent = en ? copy.subtitle : scene.subtitle;
@@ -199,18 +194,10 @@ export async function startFacility(onError: (error: unknown) => void): Promise<
         current.x += (target.x - current.x) * blend;
         current.y += (target.y - current.y) * blend;
         current.zoom += (target.zoom - current.zoom) * blend;
-        const h = baseHeight() / current.zoom;
-        const w = h * stage.camera.aspect;
-        const distance = h / (2 * Math.tan(THREE.MathUtils.degToRad(stage.camera.fov) / 2));
-        // 竖屏全景会把相机拉远，裁剪范围随之覆盖建筑及自然后景。
-        stage.camera.far = distance + 256;
-        stage.camera.updateProjectionMatrix();
-        stage.camera.position.set(current.x, current.y, distance);
-        stage.camera.lookAt(current.x, current.y, 0);
-        stage.camera.updateMatrixWorld();
+        const view = frameFacilityCamera(stage, current.x, current.y, baseHeight() / current.zoom);
         const animationDt = paused || document.hidden ? 0 : dt;
         time += animationDt;
-        environment.update({ x: current.x - w / 2 - 3, y: current.y - h / 2 - 3, w: w + 6, h: h + 6 }, time, animationDt);
+        environment.update(view, time, animationDt);
         facility.update(time);
         stage.render();
         zoomOutput.value = `${Math.round(current.zoom * 100)}%`;

@@ -6,6 +6,7 @@ import * as THREE from 'three';
 import { TUNING } from '../src/config/tuning.ts';
 import { cameraFloorY, createCameraRig, focusHeight } from '../src/render/camera-rig.ts';
 import { createHud } from '../src/ui/hud.ts';
+import { setLanguage } from '../src/ui/language.ts';
 import { createPelicanEntity } from '../src/entities/entity.ts';
 import { FakeElement, withFakeDocument } from './helpers/fake-dom.ts';
 
@@ -48,7 +49,8 @@ describe('camera floor', () => {
 // ---------- HUD (f) ----------
 
 describe('hud (f) 光球冷却 0', () => {
-  test('orbCooldownTicks=0 不抛且冷却条常满；负数/小数仍抛；提示含水中操作', () => {
+  test('orbCooldownTicks=0 不抛且冷却条常满；负数/小数仍抛', () => {
+    setLanguage('zh');
     withFakeDocument(() => {
       const root = new FakeElement('div');
       const hud = createHud(root as unknown as HTMLElement, () => ({ x: 0, y: 0 }), { orbCooldownTicks: 0 });
@@ -57,14 +59,12 @@ describe('hud (f) 光球冷却 0', () => {
       assert.ok(p);
       for (const cd of [0, 3]) {
         p.shootCooldownTicks = cd;
-        hud.update({ entities: [player], alpha: 1, frameDt: 1 / 60, stats: { fps: 60, tick: 0, droppedTicks: 0 }, playerId: 1 });
+        hud.update({ entities: [player], alpha: 1, frameDt: 1 / 60, stats: { fps: 60, tick: 0, droppedTicks: 0 }, headSubmerged: false, playerId: 1 });
         const fill = root.find('hud-orb-fill');
         assert.ok(fill);
         assert.equal(fill.style.width, '100.0%');
         assert.equal(fill.classList.contains('hud-orb-ready'), true);
       }
-      const hints = root.find('hud-hints');
-      assert.ok(hints?.children.some((c) => c.textContent === '水中：空格跃出/上浮，S 下潜'));
       hud.dispose();
       assert.throws(() => createHud(new FakeElement('div') as unknown as HTMLElement, () => null, { orbCooldownTicks: -1 }), /hud: invalid orbCooldownTicks/);
       assert.throws(() => createHud(new FakeElement('div') as unknown as HTMLElement, () => null, { orbCooldownTicks: 1.5 }), /hud: invalid orbCooldownTicks/);

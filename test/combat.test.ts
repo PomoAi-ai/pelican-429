@@ -2,7 +2,10 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
 import { TUNING } from '../src/config/tuning.ts';
-import { PHOTON_ULTIMATE } from '../src/config/photon-ultimate.ts';
+import { PHOTON_BUG, PHOTON_WHEEL, PHOTON_ULTIMATE } from '../src/config/photon-ultimate.ts';
+import { HUMAN_BUG_SHOT, HUMAN_CODEX_SHOT } from '../src/config/human-combat.ts';
+import type { ProjectileDef } from '../src/config/weapon-rules.ts';
+import { createProjectileEntity, projectileHitSource, retireSpentProjectile } from '../src/entities/projectile.ts';
 import { EventQueue } from '../src/core/events.ts';
 import { attackHitbox, attackPhase, attackProgress, attackTotalTicks, startAttack, advanceAttack } from '../src/combat/attacks.ts';
 import type { AttackDef } from '../src/combat/attacks.ts';
@@ -12,6 +15,7 @@ import type { SimEvent } from '../src/core/game-events.ts';
 import type { SimEvent as LegacySimEvent } from '../src/combat/combat-system.ts';
 import { createBody } from '../src/physics/body.ts';
 import { createDummyEntity, createPelicanEntity } from '../src/entities/entity.ts';
+import { createEnemyEntity } from '../src/entities/enemy.ts';
 import type { Entity } from '../src/entities/entity.ts';
 import { LEVEL_LEGEND, TEST_LEVEL, parseLevel } from '../src/world/test-level.ts';
 import { computeSurface } from '../src/world/level.ts';
@@ -26,6 +30,59 @@ const CFG = TUNING.combat;
 // 旧导入路径（combat-system re-export）与 core/game-events 的事件类型一致。
 const _legacyCompat: LegacySimEvent extends SimEvent ? (SimEvent extends LegacySimEvent ? true : never) : never = true;
 void _legacyCompat;
+
+// 逐帧无条件回血、在战斗中累积计时或忽略环境伤害，都会破坏以下可观察结果。
+test('脱战每秒恢复0.7点，双形态均受生命上限与死亡状态约束', () => {
+  for (const form of ['human', 'pelican'] as const) for (const hp of [0, 50, 99.8, 100]) {
+    const w = createSimWorld({ level: levelData(ARENA), playerForm: form, windMode: 'calm' });
+    try {
+      const health = getPlayer(w).health!;
+      health.hp = hp;
+      steps(w, 59);
+      assert.equal(health.hp, hp);
+      steps(w, 1);
+      assert.ok(Math.abs(health.hp - (hp === 50 ? 50.7 : hp === 99.8 ? 100 : hp)) < 1e-9);
+      steps(w, 120);
+      assert.ok(Math.abs(health.hp - (hp === 50 ? 52.1 : hp === 99.8 ? 100 : hp)) < 1e-9);
+    } finally { w.fluid.dispose(); }
+  }
+});
+
+test('敌人追击和玩家主动出招中断恢复，真正脱战后重新等满一秒', () => {
+  const w = world();
+  try {
+    const player = getPlayer(w);
+    player.health!.hp = 50;
+    player.health!.invulnTicks = 999;
+    steps(w, 59);
+    const enemy = createEnemyEntity(w.nextId++, 'gatekeeper', { x: 9, y: 1 }, w.tuning);
+    w.entities.push(enemy);
+    steps(w, 120);
+    assert.equal(enemy.enemy!.engaged, true);
+    assert.equal(player.health!.hp, 50);
+    enemy.removed = true;
+    steps(w, 59);
+    assert.equal(player.health!.hp, 50);
+    steps(w, 1);
+    assert.equal(player.health!.hp, 50.7);
+    steps(w, 180, { attackPressed: true });
+    assert.equal(player.health!.hp, 50.7, '持续出招不算脱战');
+  } finally { w.fluid.dispose(); }
+});
+
+test('持续环境伤害不被自然回血抵消，离开危险后重新计时', () => {
+  const w = createSimWorld({ level: { ...levelData(ARENA), lethalCoolant: { x: 0, y: 0, w: 5, h: 6 } }, windMode: 'calm' });
+  try {
+    const player = getPlayer(w);
+    steps(w, 60);
+    assert.ok(Math.abs(player.health!.hp - 70) < 1e-9);
+    player.body.x = player.body.prevX = 20;
+    steps(w, 59);
+    assert.ok(Math.abs(player.health!.hp - 70) < 1e-9);
+    steps(w, 1);
+    assert.ok(Math.abs(player.health!.hp - 70.7) < 1e-9);
+  } finally { w.fluid.dispose(); }
+});
 
 // 鹈鹕在 x=2.5，假人在 x=4.5（距离 2，在啄击范围内：hitbox 右缘 = 2.5+0.4+1.4 = 4.3 > 4.0 假人左缘）
 const ARENA = [
@@ -143,6 +200,39 @@ test('combat: 同一次攻击对同一目标只命中一次', () => {
   assert.equal(dummy.health?.hp, TUNING.dummy.maxHp - PECK.damage);
 });
 
+test('combat: 免伤中真实重叠才发提示，持续攻击限频且不消耗后续正常命中', () => {
+  const { pelican, dummy, events } = duel();
+  const source = melee(pelican);
+  dummy.health!.invulnTicks = 90;
+  for (let tick = 0; tick < 60; tick++) {
+    assert.equal(resolveHits([source], [pelican, dummy], tick, events, CFG), 0);
+  }
+  const blocked = events.drain();
+  assert.equal(blocked.length, 2, '持续重叠每半秒最多提示一次，不逐 tick 刷屏');
+  assert.ok(blocked.every((event) => event.type === 'damageImmune' && event.targetId === dummy.id));
+  assert.equal(dummy.health!.hp, dummy.health!.maxHp);
+  assert.deepEqual(source.hitIds, [], '提示不伪装成伤害命中');
+  dummy.health!.invulnTicks = 0;
+  resolveHits([source], [dummy], 60, events, CFG);
+  const [hit] = events.drain();
+  assert.ok(hit && hit.type === 'hit');
+  assert.equal(hit.damage, PECK.damage);
+  assert.equal(dummy.health!.hp, dummy.health!.maxHp - PECK.damage);
+});
+
+test('combat: 没碰到、同队、零伤害和死亡目标不出现免伤提示', () => {
+  for (const circumstance of ['miss', 'friendly', 'zero', 'dead'] as const) {
+    const { pelican, dummy, events } = duel();
+    dummy.health!.invulnTicks = 90;
+    if (circumstance === 'miss') dummy.body.x += 10;
+    if (circumstance === 'friendly') dummy.team = pelican.team;
+    if (circumstance === 'dead') dummy.health!.hp = 0;
+    const source = melee(pelican);
+    resolveHits([circumstance === 'zero' ? { ...source, def: { ...source.def, damage: 0 } } : source], [dummy], 0, events, CFG);
+    assert.equal(events.size, 0, circumstance);
+  }
+});
+
 test('combat: 朝左攻击击退向左；同队不互伤', () => {
   const pelican = createPelicanEntity(1, { x: 6.5, y: 1 }, TUNING);
   const dummy = createDummyEntity(2, { x: 4.5, y: 1 }, TUNING);
@@ -196,6 +286,53 @@ test('combat: 命中源不伤自身/owner；hitIds 达 maxHits 即停止；cfg �
   resolveHits([{ ...src, maxHits: 5 }], [a, b], 6, events, cfg);
   assert.deepEqual(src.hitIds, [a.id, b.id]);
   assert.equal(a.health?.hp, a.health!.maxHp - TUNING.attacks.orb.damage);
+});
+
+// 去掉共享限额、把光轮另算一组或不消耗超额弹，都会恢复集中叠伤。
+test('密集小弹同帧最多三次伤害，超额弹仍碰撞消散且不能延迟补伤', () => {
+  for (const definitions of [[HUMAN_CODEX_SHOT], [HUMAN_BUG_SHOT], [PHOTON_BUG, PHOTON_WHEEL], [TUNING.weapons.fish.projectile]]) {
+    const target = createDummyEntity(2, { x: 4.5, y: 1 }, TUNING);
+    const events = new EventQueue<SimEvent>();
+    const shots = Array.from({ length: 12 }, (_, i) => createProjectileEntity(10 + i, {
+      ownerId: 1, team: 'player', def: definitions[i % definitions.length]!,
+      x: 4.5, y: 1.5, dirX: 1, dirY: 0, level: 1, returned: false,
+    }));
+    resolveHits(shots.map(e => projectileHitSource(e)!), [target], 0, events, CFG);
+    const damage = definitions.length === 2 ? 21 : definitions[0]!.damage * 3;
+    assert.equal(target.health!.hp, target.health!.maxHp - damage);
+    assert.equal(events.drain().filter(e => e.type === 'hit').length, 3);
+    for (const shot of shots) assert.equal(retireSpentProjectile(shot, events), true);
+    assert.equal(events.drain().filter(e => e.type === 'projectileImpact').length, 12);
+    resolveHits(shots.flatMap(e => { const source = projectileHitSource(e); return source ? [source] : []; }), [target], 30, events, CFG);
+    assert.equal(target.health!.hp, target.health!.maxHp - damage);
+  }
+});
+
+test('小弹限额使用滚动窗口，来源、技能及目标分别计数且不吞掉近战', () => {
+  const a = createDummyEntity(2, { x: 4.5, y: 1 }, TUNING);
+  const b = createDummyEntity(3, { x: 4.5, y: 1 }, TUNING);
+  const events = new EventQueue<SimEvent>();
+  let id = 10;
+  const hit = (tick: number, target = a, ownerId = 1, def: ProjectileDef = HUMAN_BUG_SHOT) => {
+    const shot = createProjectileEntity(id++, { ownerId, team: 'player', def, x: 4.5, y: 1.5, dirX: 1, dirY: 0, level: 1, returned: false });
+    resolveHits([projectileHitSource(shot)!], [target], tick, events, CFG);
+    return events.drain().filter(e => e.type === 'hit').length;
+  };
+  assert.equal(hit(0), 1);
+  assert.equal(hit(4), 1);
+  assert.equal(hit(8), 1);
+  assert.equal(hit(11), 0);
+  assert.equal(hit(11, b), 1);
+  assert.equal(hit(11, a, 9), 1);
+  assert.equal(hit(11, a, 1, HUMAN_CODEX_SHOT), 1);
+  assert.equal(hit(12), 1);
+  assert.equal(hit(12), 0);
+  assert.equal(hit(16), 1);
+  const attacker = createPelicanEntity(1, { x: 2.5, y: 1 }, TUNING);
+  attacker.attack = startAttack(PECK);
+  attacker.attack.elapsed = PECK.startup;
+  resolveHits([melee(attacker)], [a], 16, events, CFG);
+  assert.equal(events.drain().filter(e => e.type === 'hit').length, 1);
 });
 
 test('combat: applyHit 不把血量扣到负数；tickHealth 递减计时且命中当 tick 不递减', () => {
@@ -278,7 +415,7 @@ test('sim: 光子蓄力结束不直接扣血，分批追踪弹在飞行命中后
   const w = world(rows);
   const player = getPlayer(w);
   const foes = w.entities.filter((e) => e.dummy);
-  stepSim(w, input({ skillPressed: 4 }));
+  stepSim(w, input({ skillPressed: 4, aim: { x: 30, y: 4 } }));
   const started = w.events.drain();
   assert.equal(started[0]?.type, 'photonUltimateStarted');
   const hp = foes.map((foe) => foe.health!.hp);
@@ -297,9 +434,66 @@ test('sim: 光子蓄力结束不直接扣血，分批追踪弹在飞行命中后
       if (event.type === 'hit') hits.push({ tick, targetId: event.targetId, sourceId: event.sourceId });
     }
   }
-  assert.equal(new Set(hits.map((hit) => hit.targetId)).size, 2);
+  assert.deepEqual([...new Set(hits.map(hit => hit.targetId))], [foes.find(foe => foe.body.x > player.body.x)!.id]);
   assert.ok(new Set(hits.map((hit) => hit.tick)).size > 1, '攻击分多次到达');
   assert.ok(hits.every((hit) => hit.sourceId !== player.id && fired.has(hit.sourceId)), '伤害来自真实弹体');
+});
+
+test('sim: 光子在无敌人时仍按 hitstop 中按下技能的鼠标方向直飞', () => {
+  const rows = Array.from({ length: 20 }, () => '.'.repeat(50));
+  rows.push('#'.repeat(50));
+  rows[19] = '.'.repeat(24) + 'P' + '.'.repeat(25);
+  const w = world(rows);
+  try {
+    const aim = { x: 5, y: 15 };
+    w.hitstopTicks = 2;
+    stepSim(w, input({ skillPressed: 4, aim }));
+    aim.x = 45;
+    steps(w, 2, { aim });
+    w.hitstopTicks = 2;
+    stepSim(w, input({ skillPressed: 4, aim }));
+    stepSim(w, input());
+    steps(w, PHOTON_ULTIMATE.chargeTicks, { aim });
+    const missiles = w.entities.filter(e => e.kind === 'photonBug' || e.kind === 'photonWheel');
+    assert.equal(missiles.length, 2, '没有目标也要发射实体虫弹');
+    for (const missile of missiles) {
+      assert.ok(missile.body.vx < 0 && missile.body.vy > 0, '锁存的是原来左上方的鼠标位置');
+      const { vx, vy, x } = missile.body;
+      steps(w, 5);
+      assert.equal(missile.body.vx, vx);
+      assert.equal(missile.body.vy, vy);
+      assert.ok(missile.body.x < x);
+      assert.equal(missile.projectile!.targetId, undefined);
+    }
+  } finally { w.fluid.dispose(); }
+});
+
+test('sim: 光子虫先向鼠标冲出再转弯寻敌，目标死亡后寻找其他活敌', () => {
+  const rows = Array.from({ length: 20 }, () => '.'.repeat(50));
+  rows.push('#'.repeat(50));
+  rows[19] = '.'.repeat(20) + 'P.....D..D' + '.'.repeat(20);
+  const w = world(rows);
+  try {
+    stepSim(w, input({ skillPressed: 4, aim: { x: 4, y: 14 } }));
+    steps(w, PHOTON_ULTIMATE.chargeTicks);
+    const missile = w.entities.find(e => e.kind === 'photonBug')!;
+    const initial = { vx: missile.body.vx, vy: missile.body.vy };
+    steps(w, 10);
+    assert.equal(missile.body.vx, initial.vx, '发射阶段不能立即被敌人吸过去');
+    assert.equal(missile.body.vy, initial.vy);
+    steps(w, 22);
+    assert.ok(missile.body.vx > 0, '随后转向右边的敌人');
+    const target = w.entities.find(e => e.id === missile.projectile!.targetId)!;
+    const other = w.entities.find(e => e.dummy && e !== target)!;
+    assert.ok(target.dummy);
+    target.health!.hp = 0;
+    const before = Math.atan2(missile.body.vy, missile.body.vx);
+    stepSim(w, input());
+    assert.equal(missile.projectile!.targetId, other.id);
+    const after = Math.atan2(missile.body.vy, missile.body.vx);
+    const turn = Math.abs(Math.atan2(Math.sin(after - before), Math.cos(after - before)));
+    assert.ok(turn < 0.2, '换目标时也沿弧线转向');
+  } finally { w.fluid.dispose(); }
 });
 
 test('sim: 光子大招在 hitstop 锁存，充能及冷却在 hitstop 暂停', () => {
@@ -451,4 +645,23 @@ test('sim: 突进中死亡立即取消近战判定，不会伤到后来进入范
   assert.equal(w.events.drain().some((event) => event.type === 'hit'), false);
   assert.equal(player.attack, undefined);
   assert.equal(player.pelican!.weapon.dashTicks, 0);
+});
+
+// 若霸体被当成免伤，或仍写入硬直/击退，重装敌人的出招与反击窗口会失效。
+test('霸体仍扣血并闪光，只有硬直与击退被抵抗，解除后恢复正常受击', () => {
+  const target = { ...createDummyEntity(10, { x: 4, y: 2 }, TUNING), armored: true };
+  const initialHp = target.health!.hp;
+  target.body.vx = 2;
+  target.body.vy = -1;
+  applyHit(target, -1, PECK, 0, CFG);
+  assert.equal(target.health!.hp, initialHp - PECK.damage);
+  assert.equal(target.health!.flashTicks, CFG.hitFlashTicks);
+  assert.equal(target.health!.hitstunTicks, 0);
+  assert.equal(target.body.vx, 2);
+  assert.equal(target.body.vy, -1);
+  target.armored = false;
+  applyHit(target, -1, PECK, 1, CFG);
+  assert.equal(target.health!.hitstunTicks, PECK.hitstun);
+  assert.equal(target.body.vx, -PECK.knockback.x);
+  assert.equal(target.body.vy, PECK.knockback.y);
 });

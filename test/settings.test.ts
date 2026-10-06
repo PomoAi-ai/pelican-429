@@ -23,9 +23,10 @@ import { createLocalSettingsStore, createSettingsController, loadSettings } from
 import type { SettingsRuntime, SettingsStore } from '../src/ui/settings-model.ts';
 import { createSettingsPanel } from '../src/ui/settings-panel.ts';
 import { CONTROL_HINTS } from '../src/ui/hud.ts';
+import { setLanguage } from '../src/ui/language.ts';
 import { FakeElement, withFakeDocument } from './helpers/fake-dom.ts';
 
-const DEFAULTS: GameSettings = Object.freeze({ quality: 'high', antialias: 'smaa', wind: 'auto', windDirection: 'right', tornado: false, windPower: 1, tornadoPower: 2, tornadoCount: 3, rainPower: 1, snowPower: 1, precip: 'manual', rain: 'none', snow: 'none', water: 'clear', perfPanel: false, tileGrid: false, mapTeleport: false, dummyShoot: false });
+const DEFAULTS: GameSettings = Object.freeze({ quality: 'high', antialias: 'smaa', wind: 'auto', windDirection: 'right', tornado: false, windPower: 1, tornadoPower: 2, tornadoCount: 3, rainPower: 1, snowPower: 1, precip: 'manual', rain: 'none', snow: 'none', water: 'clear', perfPanel: false, minimapVisible: true, minimapOpacity: 75, tileGrid: false, mapTeleport: false, dummyShoot: false });
 
 const params = (q: string) => new URLSearchParams(q);
 
@@ -93,6 +94,8 @@ function fakeRuntime(start: GameSettings = DEFAULTS) {
       calls.push(`perfPanel:${v}`);
       state.perfPanel = v;
     },
+    setMinimapVisible: (v) => { calls.push(`minimapVisible:${v}`); state.minimapVisible = v; },
+    setMinimapOpacity: (v) => { calls.push(`minimapOpacity:${v}`); state.minimapOpacity = v; },
     setTileGrid: (v) => {
       calls.push(`tileGrid:${v}`);
       state.tileGrid = v;
@@ -122,7 +125,7 @@ describe('设置选项表（与网址参数共用）', () => {
     assert.deepEqual(values('perfPanel'), [false, true]);
     assert.deepEqual(values('dummyShoot'), [false, true]);
     const p = Object.fromEntries(SETTING_DEFS.map((d) => [d.key, d.param]));
-    assert.deepEqual(p, { quality: 'quality', antialias: 'aa', wind: 'wind', windDirection: 'windDirection', tornado: 'tornado', windPower: 'windPower', tornadoPower: 'tornadoPower', tornadoCount: 'tornadoCount', rainPower: 'rainPower', snowPower: 'snowPower', precip: 'precip', rain: 'rain', snow: 'snow', water: 'water', perfPanel: null, tileGrid: null, mapTeleport: null, dummyShoot: 'dummyShoot' });
+    assert.deepEqual(p, { quality: 'quality', antialias: 'aa', wind: 'wind', windDirection: 'windDirection', tornado: 'tornado', windPower: 'windPower', tornadoPower: 'tornadoPower', tornadoCount: 'tornadoCount', rainPower: 'rainPower', snowPower: 'snowPower', precip: 'precip', rain: 'rain', snow: 'snow', water: 'water', perfPanel: null, minimapVisible: null, minimapOpacity: null, tileGrid: null, mapTeleport: null, dummyShoot: 'dummyShoot' });
     assert.match(settingDef('antialias').options.find((o) => o.value === 'msaa')?.label ?? '', /MSAA/);
     assert.match(settingDef('antialias').note ?? '', /MSAA 较慢/);
     assert.throws(() => settingDef('nope' as SettingKey), /settings/);
@@ -130,7 +133,7 @@ describe('设置选项表（与网址参数共用）', () => {
 
   test('resolveSettings：网址参数优先于保存值，保存值优先于默认值；来源记录在 fromUrl', () => {
     const r = resolveSettings({ defaults: DEFAULTS, saved: { water: 'deep', quality: 'low' }, params: params('?water=emerald&aa=msaa&dummyShoot&precip=manual&rain=heavy&snow=light&wind=gale&windDirection=left&tornado') });
-    assert.deepEqual(r.settings, { quality: 'low', antialias: 'msaa', wind: 'gale', windDirection: 'left', tornado: true, windPower: 1, tornadoPower: 2, tornadoCount: 3, rainPower: 1, snowPower: 1, precip: 'manual', rain: 'heavy', snow: 'light', water: 'emerald', perfPanel: false, tileGrid: false, mapTeleport: false, dummyShoot: true });
+    assert.deepEqual(r.settings, { quality: 'low', antialias: 'msaa', wind: 'gale', windDirection: 'left', tornado: true, windPower: 1, tornadoPower: 2, tornadoCount: 3, rainPower: 1, snowPower: 1, precip: 'manual', rain: 'heavy', snow: 'light', water: 'emerald', perfPanel: false, minimapVisible: true, minimapOpacity: 75, tileGrid: false, mapTeleport: false, dummyShoot: true });
     assert.deepEqual([...r.fromUrl].sort(), ['antialias', 'dummyShoot', 'precip', 'rain', 'snow', 'tornado', 'water', 'wind', 'windDirection']);
   });
 
@@ -234,7 +237,7 @@ describe('设置控制器', () => {
     for (const [k, v] of cases) c.set(k, v as never);
     assert.deepEqual(calls, ['quality:low', 'antialias:msaa', 'wind:gale', 'windDirection:left', 'tornado:true', 'precip:auto', 'rain:heavy', 'snow:light', 'water:emerald', 'perfPanel:true', 'tileGrid:true', 'mapTeleport:true', 'dummyShoot:true']);
     assert.deepEqual(JSON.parse(store.value ?? ''), { quality: 'low', antialias: 'msaa', wind: 'gale', windDirection: 'left', tornado: true, precip: 'auto', rain: 'heavy', snow: 'light', water: 'emerald', perfPanel: true, tileGrid: true, mapTeleport: true, dummyShoot: true });
-    assert.deepEqual(c.current(), { windPower: 1, tornadoPower: 2, tornadoCount: 3, rainPower: 1, snowPower: 1, quality: 'low', antialias: 'msaa', wind: 'gale', windDirection: 'left', tornado: true, precip: 'auto', rain: 'heavy', snow: 'light', water: 'emerald', perfPanel: true, tileGrid: true, mapTeleport: true, dummyShoot: true });
+    assert.deepEqual(c.current(), { minimapVisible: true, minimapOpacity: 75, windPower: 1, tornadoPower: 2, tornadoCount: 3, rainPower: 1, snowPower: 1, quality: 'low', antialias: 'msaa', wind: 'gale', windDirection: 'left', tornado: true, precip: 'auto', rain: 'heavy', snow: 'light', water: 'emerald', perfPanel: true, tileGrid: true, mapTeleport: true, dummyShoot: true });
     assert.equal(loadSettings({ store, defaults: DEFAULTS, params: params('') }).settings.tileGrid, true, '下次启动恢复格子虚线开关');
     assert.equal(loadSettings({ store, defaults: DEFAULTS, params: params('') }).settings.mapTeleport, true);
     assert.equal(loadSettings({ store, defaults: DEFAULTS, params: params('') }).settings.precip, 'auto');
@@ -252,6 +255,19 @@ describe('设置控制器', () => {
     c.set('tileGrid', false);
     assert.equal(c.current().tileGrid, false);
     assert.equal(JSON.parse(store.value ?? '').tileGrid, false);
+  });
+
+  test('小地图显隐与不透明度即时应用，重启恢复保存值', () => {
+    const { rt, state } = fakeRuntime();
+    const store = memoryStore();
+    const controller = createSettingsController({ runtime: rt, store, saved: {}, issues: [] });
+    controller.set('minimapVisible', false);
+    controller.set('minimapOpacity', 40);
+    assert.equal(state.minimapVisible, false);
+    assert.equal(state.minimapOpacity, 40);
+    const restored = loadSettings({ store, defaults: DEFAULTS, params: params('') }).settings;
+    assert.equal(restored.minimapVisible, false);
+    assert.equal(restored.minimapOpacity, 40);
   });
 
   test('非法值即抛、不调用运行时、不写存储', () => {
@@ -324,10 +340,12 @@ describe('新世界与种子', () => {
 
   test('newWorldSearch：更换 seed 后清除旧关卡与地形定位，已有设置使用面板当前值', () => {
     const live: GameSettings = { ...DEFAULTS, water: 'deep', dummyShoot: false };
-    const q = new URLSearchParams(newWorldSearch('?debug&level=test&seed=1&inspect=716&water=clear&dummyShoot', 42, live));
+    const q = new URLSearchParams(newWorldSearch('?debug&level=test&seed=1&inspect=716&region=cave-11&scene=fortress&water=clear&dummyShoot', 42, live));
     assert.equal(q.get('seed'), '42');
     assert.equal(q.has('level'), false);
     assert.equal(q.has('inspect'), false, '新世界不能沿用旧种子的地形位置');
+    assert.equal(q.has('region'), false);
+    assert.equal(q.has('scene'), false);
     assert.equal(q.has('debug'), true);
     assert.equal(q.get('water'), 'deep');
     assert.equal(q.has('dummyShoot'), false, '关闭的开关参数删除');
@@ -358,14 +376,14 @@ describe('按键：settings（Esc / O）', () => {
 });
 
 describe('设置面板 DOM', () => {
-  function build(opts: { issues?: string[]; seed?: number | null } = {}) {
+  function build(opts: { issues?: string[]; seed?: number | null; gm?: boolean } = {}) {
     const { rt, calls } = fakeRuntime();
     const store = memoryStore();
     const c = createSettingsController({ runtime: rt, store, saved: {}, issues: opts.issues ?? [] });
     const parent = new FakeElement('div');
     const worlds: number[] = [];
     const panel = withFakeDocument(() =>
-      createSettingsPanel({ chapter: false, parent: parent as unknown as HTMLElement, controller: c, seed: opts.seed === undefined ? 7 : opts.seed, onNewWorld: (s) => worlds.push(s), onShowcase: () => {}, random: () => 0.5 }),
+      createSettingsPanel({ chapter: false, gm: opts.gm ?? true, parent: parent as unknown as HTMLElement, controller: c, seed: opts.seed === undefined ? 7 : opts.seed, onNewWorld: (s) => worlds.push(s), onShowcase: () => {}, random: () => 0.5 }),
     );
     return { rt, calls, c, parent, panel, worlds };
   }
@@ -381,6 +399,7 @@ describe('设置面板 DOM', () => {
   const option = (root: FakeElement, key: string, value: string) => all(root, 'settings-option').find((b) => b.dataset.key === key && b.dataset.value === value);
 
   test('齿轮按钮切换面板；分组与选项按表生成；当前值高亮', () => {
+    setLanguage('zh');
     const { parent, c, panel } = build();
     const gear = parent.find('settings-gear');
     const card = parent.find('settings-panel');
@@ -398,8 +417,8 @@ describe('设置面板 DOM', () => {
     assert.match(all(card, 'settings-note').map((n) => n.textContent).join(' '), /MSAA 较慢/);
   });
 
-  test('点击选项调用控制器（即时生效）并更新高亮；运行时被外部改动（P/T/V 键）也同步', () => {
-    const { parent, calls, c, panel, rt } = build();
+  test('普通游戏设置可开关帧率，点击即时生效且同步外部快捷键的状态', () => {
+    const { parent, calls, c, panel, rt } = build({ gm: false });
     c.setOpen(true);
     panel.update();
     option(parent, 'water', 'emerald')?.dispatch('click');
@@ -408,8 +427,11 @@ describe('设置面板 DOM', () => {
     panel.update();
     assert.ok(option(parent, 'water', 'emerald')?.classList.contains('settings-active'));
     assert.ok(!option(parent, 'water', 'clear')?.classList.contains('settings-active'));
+    assert.ok(option(parent, 'perfPanel', 'true')?.classList.contains('settings-active'));
+    rt.setPerfPanel(false);
     rt.setWind('storm');
     panel.update();
+    assert.ok(option(parent, 'perfPanel', 'false')?.classList.contains('settings-active'));
     assert.ok(option(parent, 'wind', 'storm')?.classList.contains('settings-active'));
   });
 

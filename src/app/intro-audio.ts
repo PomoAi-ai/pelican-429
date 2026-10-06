@@ -24,6 +24,9 @@ export class IntroAudio {
   private anchor = 0;
   private playing = false;
   private feed = 0;
+  private cancelStart!: () => void;
+  private readonly cancelled = new Promise<void>((resolve) => { this.cancelStart = resolve; });
+  private disposed = false;
 
   private readonly edition: IntroEdition;
   private readonly scoreRate: number;
@@ -45,9 +48,15 @@ export class IntroAudio {
     this.instruments = createPreludeInstruments(this.context);
   }
 
+  /** 自动播放被浏览器拦下时，在用户手势里再次 resume，挂起中的 start 随之继续。 */
+  unlock(): void {
+    void Promise.race([this.context.resume(), this.cancelled]).catch(this.onError);
+  }
+
   async start(timeSeconds: number): Promise<void> {
     this.pause();
-    await this.context.resume();
+    await Promise.race([this.context.resume(), this.cancelled]);
+    if (this.disposed) return;
     this.offset = timeSeconds;
     const scoreOffset = timeSeconds * this.scoreRate;
     const finale = this.edition.id === 'finale';
@@ -153,6 +162,9 @@ export class IntroAudio {
   }
 
   async dispose(): Promise<void> {
+    this.disposed = true;
+    // close 不保证结算受自动播放策略阻塞的 resume，先结束等待，禁止关闭后再调度音符。
+    this.cancelStart();
     this.pause();
     this.master.disconnect();
     await this.context.close();

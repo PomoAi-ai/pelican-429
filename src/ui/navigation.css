@@ -1,4 +1,6 @@
 :root { --dev-nav-height: 48px; }
+.minimap[hidden] { display: none !important; }
+#dev-navigation[hidden] { display: none; }
 #entry-index[hidden] { display: none; }
 #entry-index { position: fixed; inset: var(--dev-nav-height) 0 0; z-index: 2; overflow: auto; background: radial-gradient(ellipse at 15% 0, #233b35, transparent 60%), #10191e; }
 body #app, body .showcase-app, body .overlay { top: var(--dev-nav-height); }
@@ -7,8 +9,6 @@ body .hud-status { top: calc(var(--dev-nav-height) + 44px); }
 .minimap { transform: translateY(var(--dev-nav-height)); }
 .perf-panel { transform: translateY(var(--dev-nav-height)); }
 .minimap-big-hint { margin-top: var(--dev-nav-height); }
-body .settings-gear { top: calc(var(--dev-nav-height) + 162px); }
-body .settings-panel { top: calc(var(--dev-nav-height) + 204px); max-height: calc(100vh - var(--dev-nav-height) - 216px); }
 .entry-content { max-width: 1136px; margin: 0 auto; padding: clamp(40px, 9vh, 100px) 32px 32px; }
 .entry-eyebrow { color: #b8df9d; font: 11px/1.6 ui-monospace, monospace; letter-spacing: 3px; }
 .entry-content h1 { margin: 18px 0 12px; font-size: clamp(28px, 4vw, 46px); font-weight: 550; letter-spacing: 2px; }
@@ -34,6 +34,14 @@ body .settings-panel { top: calc(var(--dev-nav-height) + 204px); max-height: cal
 #dev-navigation a { padding: 7px 12px; border-radius: 6px; color: #b6c7c9; font-size: 12px; text-decoration: none; white-space: nowrap; }
 #dev-navigation a:hover { color: #eef3eb; background: #253730; }
 #dev-navigation a[aria-current=page] { color: #b8df9d; background: #293c2e; }
+.dev-group-toggle { anchor-name: --dev-scenes; padding: 7px 26px 7px 12px; border: 0; border-radius: 6px; color: #b6c7c9; background: transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23b6c7c9' stroke-width='1.5'/%3E%3C/svg%3E") no-repeat right 10px center / 9px 5px; font: inherit; font-size: 12px; white-space: nowrap; cursor: pointer; }
+.dev-group-toggle:hover, .dev-group-toggle:has(+ :popover-open) { color: #eef3eb; background-color: #253730; }
+.dev-links:has(.dev-group-menu a[aria-current=page]) .dev-group-toggle { color: #b8df9d; background-color: #293c2e; }
+.dev-group-toggle:focus-visible { outline: 2px solid #b8df9d; outline-offset: 2px; }
+/* 菜单放在 popover 顶层，避免被可横向滚动的 .dev-links 裁掉；不支持锚点定位的浏览器退回到导航左下方。 */
+.dev-group-menu { position: fixed; inset: auto; top: calc(var(--dev-nav-height) + 4px); left: 12px; position-anchor: --dev-scenes; margin: 0; padding: 6px; min-width: 180px; flex-direction: column; gap: 2px; border: 1px solid #354740; border-radius: 10px; background: #10191e; box-shadow: 0 16px 40px -12px #000000c0; }
+@supports (top: anchor(bottom)) { .dev-group-menu { top: calc(anchor(bottom) + 6px); left: anchor(left); } }
+.dev-group-menu:popover-open { display: flex; }
 .sc-sidebar-bottom .sc-home-link { display: block; margin: 10px 0 0; }
 @media (max-width: 700px) {
   .entry-content { padding: 30px 20px; }
@@ -43,12 +51,21 @@ body .settings-panel { top: calc(var(--dev-nav-height) + 204px); max-height: cal
   .entry-card > div { padding: 18px; }
   .entry-card h2 { font-size: 18px; }
   #dev-navigation { padding: 0 10px; gap: 10px; }
-  #dev-navigation a { padding: 7px 9px; font-size: 11px; }
+  #dev-navigation a, .dev-group-toggle { padding: 7px 9px; font-size: 11px; } .dev-group-toggle { padding-right: 22px; }
   .dev-brand { display: none; }
   .dev-world-position > span { display: none; }
   .dev-world-position select { max-width: 148px; }
 }
-.site-language { display: inline-flex; gap: 2px; margin-left: auto; padding: 2px; border: 1px solid #ffffff33; border-radius: 16px; }
-.site-language button { border: 0; border-radius: 12px; padding: 3px 8px; color: #bbb; background: transparent; font: inherit; cursor: pointer; }
-.site-language button[aria-pressed="true"] { color: #111; background: #ffe29a; }
-.site-language button:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+/* Native select keeps keyboard and screen-reader support; appearance is reset so the chevron matches the dark nav. */
+.site-language { margin-left: auto; padding: 5px 26px 5px 10px; border: 1px solid #ffffff33; border-radius: 16px; color: #d9e8d0; background: #10191e url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23b6c7c9' stroke-width='1.5'/%3E%3C/svg%3E") no-repeat right 10px center / 10px 6px; font: inherit; font-size: 12px; appearance: none; -webkit-appearance: none; cursor: pointer; }
+.site-language option { color: #eef3eb; background: #0e1b26; }
+.site-language:focus-visible { outline: 2px solid #b8df9d; outline-offset: 2px; }
+
+body:has(#game-navigation:not([open])) { --dev-nav-height: 0px; }
+#game-navigation #dev-navigation { height: 48px; }
+.game-navigation-handle { position: fixed; z-index: 31; top: var(--dev-nav-height); left: 50%; transform: translateX(-50%); display: flex; align-items: center; justify-content: center; gap: 8px; min-width: 76px; height: 28px; padding: 0 12px; border: 1px solid #b6c7c944; border-top: 0; border-radius: 0 0 12px 12px; background: #10191ed9; color: #d9e8d0; font-size: 11px; cursor: pointer; list-style: none; user-select: none; touch-action: manipulation; }
+.game-navigation-handle::-webkit-details-marker { display: none; }
+.game-navigation-handle::after { content: ''; width: 6px; height: 6px; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: translateY(-2px) rotate(45deg); }
+#game-navigation[open] > .game-navigation-handle::after { transform: translateY(2px) rotate(225deg); }
+.game-navigation-handle:hover { background: #253730; }
+.game-navigation-handle:focus-visible { outline: 2px solid #b8df9d; outline-offset: 2px; }

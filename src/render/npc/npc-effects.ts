@@ -1,5 +1,7 @@
 import * as THREE from 'three';
+import { getLanguage, onLanguageChange } from '../../core/language.ts';
 import { npcAction, SAM_ROUTING_SOURCE } from '../../config/npc.ts';
+import { SAM_CATCHPHRASE } from '../../config/npc-dialogue.ts';
 import type { NpcAction, NpcKind } from '../../config/npc.ts';
 import { createParticleCloud } from '../grassy/grassy-particles.ts';
 
@@ -21,26 +23,38 @@ function ring(parent: THREE.Group, color: string, thickness: number, ground = fa
 }
 
 /** 字幕是角色自己的游戏对白；Canvas 只制作透明字形，Sprite 保持任意观察角度可读。 */
-export function caption(text: string, color: string, width: number, small = false, comic = false) {
+export function caption(text: string | readonly [string, string], color: string, width: number, small = false, panel: 'none' | 'comic' = 'none') {
+  const comic = panel === 'comic';
   const canvas = document.createElement('canvas');
   canvas.width = 1024; canvas.height = small ? 192 : 256;
   const ctx = canvas.getContext('2d');
   if (!ctx) throw new Error('NPC 技能字幕无法创建 Canvas 2D context');
-  if (comic) {
-    ctx.beginPath();
-    ctx.moveTo(45, 42); ctx.lineTo(946, 12); ctx.lineTo(916, 67); ctx.lineTo(995, 83);
-    ctx.lineTo(955, 200); ctx.lineTo(177, 218); ctx.lineTo(55, 247); ctx.lineTo(93, 198); ctx.lineTo(24, 192);
-    ctx.closePath(); ctx.fillStyle = '#fff3bc'; ctx.fill();
-    ctx.lineWidth = 12; ctx.strokeStyle = '#e7a234'; ctx.stroke();
-  }
-  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-  ctx.font = `900 ${small ? 85 : comic ? 96 : 108}px "Arial Black", "PingFang SC", sans-serif`;
-  ctx.lineJoin = 'round'; ctx.strokeStyle = comic ? '#fff7d6' : '#051526'; ctx.lineWidth = comic ? 8 : 18;
-  ctx.strokeText(text, 512, canvas.height / 2, 952);
-  ctx.shadowColor = color; ctx.shadowBlur = comic ? 0 : 20; ctx.fillStyle = comic ? '#512607' : color;
-  ctx.fillText(text, 512, canvas.height / 2, comic ? 830 : 952);
   const texture = new THREE.CanvasTexture(canvas);
   texture.colorSpace = THREE.SRGBColorSpace;
+  const draw = (): void => {
+    const value = typeof text === 'string' ? text : text[getLanguage() === 'zh' ? 0 : 1];
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.shadowBlur = 0;
+    if (comic) {
+      ctx.beginPath();
+      ctx.moveTo(45, 42); ctx.lineTo(946, 12); ctx.lineTo(916, 67); ctx.lineTo(995, 83);
+      ctx.lineTo(955, 200); ctx.lineTo(177, 218); ctx.lineTo(55, 247); ctx.lineTo(93, 198); ctx.lineTo(24, 192);
+      ctx.closePath(); ctx.fillStyle = '#fff3bc'; ctx.fill();
+      ctx.lineWidth = 12; ctx.strokeStyle = '#e7a234'; ctx.stroke();
+    }
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.font = `900 ${small ? 85 : comic ? 96 : 108}px "Arial Black", "PingFang SC", sans-serif`;
+    ctx.lineJoin = 'round'; ctx.strokeStyle = comic ? '#fff7d6' : '#051526'; ctx.lineWidth = comic ? 8 : 18;
+    ctx.strokeText(value, 512, canvas.height / 2, 952);
+    ctx.shadowColor = color; ctx.shadowBlur = comic ? 0 : 20; ctx.fillStyle = comic ? '#512607' : color;
+    ctx.fillText(value, 512, canvas.height / 2, comic ? 830 : 952);
+    texture.needsUpdate = true;
+  };
+  draw();
+  if (typeof text !== 'string') {
+    const unsubscribe = onLanguageChange(draw);
+    texture.addEventListener('dispose', unsubscribe);
+  }
   const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: texture, transparent: true, depthWrite: false, depthTest: false, toneMapped: false }));
   sprite.scale.set(width, width * canvas.height / canvas.width, 1);
   sprite.renderOrder = 15;
@@ -105,10 +119,8 @@ function commitCloud(cloud: ReturnType<typeof createParticleCloud>) {
 
 function createModelRouting() {
   const root = new THREE.Group();
-  const source = crystal(root, GOLD, .38);
-  source.position.set(SAM_ROUTING_SOURCE.x, SAM_ROUTING_SOURCE.y, SAM_ROUTING_SOURCE.z);
-  const sourceRing = ring(root, GOLD, .025);
-  sourceRing.position.copy(source.position);
+  const projection = crystal(root, '#76e5ff', .28);
+  projection.position.set(SAM_ROUTING_SOURCE.x, SAM_ROUTING_SOURCE.y, SAM_ROUTING_SOURCE.z);
   const sourceLabel = caption('GPT-6 Astra', '#fff0bc', 5);
   sourceLabel.position.set(SAM_ROUTING_SOURCE.x, SAM_ROUTING_SOURCE.y + .9, SAM_ROUTING_SOURCE.z + .2);
   const cloud = createParticleCloud(48, GOLD);
@@ -118,11 +130,8 @@ function createModelRouting() {
     sample(t: number) {
       const fade = envelope(t, .12, 3.25, .25);
       root.visible = fade > 0;
-      source.scale.setScalar(fade * (1 + Math.sin(t * 10) * .12));
-      source.rotation.set(t * .5, t, -t * .4);
-      sourceRing.scale.setScalar(fade * (.54 + Math.sin(t * 8) * .03));
-      sourceRing.rotation.z = -t;
-      sourceRing.material.opacity = fade;
+      projection.rotation.y = t * .65;
+      projection.scale.setScalar(fade);
       sourceLabel.material.opacity = fade;
       for (let j = 0; j < 48; j++) {
         const angle = t * 2 + j * TAU / 48;
@@ -135,14 +144,17 @@ function createModelRouting() {
   };
 }
 
+export function createFry() {
+  return new THREE.Mesh(new THREE.BoxGeometry(.11, .52, .11), new THREE.MeshStandardMaterial({ color: '#f5bd4f', emissive: '#a85010', emissiveIntensity: .3, roughness: .7 }));
+}
+
 function createFriesAttack() {
   const root = new THREE.Group();
-  const friesGeometry = new THREE.BoxGeometry(.11, .52, .11);
-  const friesMaterial = new THREE.MeshStandardMaterial({ color: '#f5bd4f', emissive: '#a85010', emissiveIntensity: .3, roughness: .7 });
-  const fries = Array.from({ length: 14 }, () => { const fry = new THREE.Mesh(friesGeometry, friesMaterial); root.add(fry); return fry; });
-  const words = [caption('我午餐吃了薯条。', '#fff2c0', 3.1, false, true), caption('CRUNCH!', '#ffd26b', 2.05, false, true), caption('这波有点脆。', '#c0ffe5', 2.55, false, true)];
+  const source = createFry();
+  const fries = Array.from({ length: 14 }, (_, index) => { const fry = index === 0 ? source : source.clone(); root.add(fry); return fry; });
+  const words = [caption(['我午餐吃了薯条。', 'I had fries for lunch.'], '#fff2c0', 3.1, false, 'comic'), caption(['咔嚓！', 'CRUNCH!'], '#ffd26b', 2.05, false, 'comic'), caption(['这波有点脆。', 'Extra crispy!'], '#c0ffe5', 2.55, false, 'comic')];
   root.add(...words);
-  const title = caption('FRIES ATTACK', '#ffe1a0', 3.2, true); title.position.set(0, 3.55, 0); root.add(title);
+  const title = caption(['薯条攻击', 'FRIES ATTACK'], '#ffe1a0', 3.2, true); title.position.set(0, 3.55, 0); root.add(title);
   const burst = createParticleCloud(96, ORANGE); root.add(burst.points);
   return {
     root,
@@ -188,10 +200,10 @@ function createSurge(kind: NpcKind) {
     bar.position.set((i - 4.5) * .36, 3.1, 0); root.add(bar); return bar;
   });
   const cloud = createParticleCloud(240, color); root.add(cloud.points);
-  const title = caption(sam ? '算力' : 'QUOTA ENCORE', sam ? '#c7f8ff' : '#b6ffe2', sam ? 2.3 : 3.8, !sam);
+  const title = caption(sam ? ['算力', 'COMPUTE'] : ['额度返场', 'QUOTA ENCORE'], sam ? '#c7f8ff' : '#b6ffe2', sam ? 2.3 : 3.8, !sam);
   title.position.set(0, 3.75, .2); root.add(title);
-  const word = sam ? null : caption('再来一轮！', GOLD, 2.3, false, true);
-  if (word) { word.position.set(1.75, 1.35, 1); root.add(word); }
+  const word = caption(sam ? SAM_CATCHPHRASE : ['再来一轮！', 'ONE MORE ROUND!'], sam ? '#ff4655' : GOLD, 2.3, false, sam ? 'none' : 'comic');
+  word.position.set(sam ? 0 : 1.75, sam ? 4.3 : 1.35, 1); root.add(word);
   return {
     root,
     sample(t: number) {
@@ -202,7 +214,7 @@ function createSurge(kind: NpcKind) {
       core.rotation.set(sam ? t * .8 : -.12, sam ? t : 0, sam ? -t * 1.7 : 0);
       core.position.z = .65 + release * 1.6;
       title.material.opacity = fade;
-      if (word) word.material.opacity = envelope(t, 1.25, 2.55, .22);
+      word.material.opacity = envelope(t, 1.25, 2.55, .22);
       for (let i = 0; i < orbits.length; i++) {
         const r = orbits[i]!; r.rotation.set(i * Math.PI / 3 + t * .7, t * .8 + i, t);
         r.scale.setScalar((.35 + charge * .4 + release * 2) * fade);
@@ -293,9 +305,9 @@ function createArrival(kind: NpcKind) {
   });
   const energy = createParticleCloud(600, color); root.add(energy.points);
   const embers = createParticleCloud(180, GOLD); root.add(embers.points);
-  const title = caption(sam ? 'AGI · 降临' : '重置 · 降临', sam ? '#fff0c4' : '#beffdb', 5.3); title.position.set(0, 5.95, .6); root.add(title);
-  const subtitle = caption(sam ? 'AGI. ONLINE.' : 'RESET. REFILL. GO!', '#f4ffff', 4.9, true); subtitle.position.set(0, 5.35, .8); root.add(subtitle);
-  const cheers = (sam ? ['INTELLIGENCE', 'CONNECTED', 'BEYOND LIMITS'] : ['FULL AGAIN!', 'LET’S GO!', '再来一轮！']).map(text => caption(text, sam ? '#b9f6ff' : '#ffda8e', 2.15, sam, !sam));
+  const title = caption(sam ? ['AGI · 降临', 'AGI · ARRIVAL'] : ['重置 · 降临', 'RESET · ARRIVAL'], sam ? '#fff0c4' : '#beffdb', 5.3); title.position.set(0, 5.95, .6); root.add(title);
+  const subtitle = caption(sam ? ['AGI 已上线', 'AGI. ONLINE.'] : ['重置，补满，出发！', 'RESET. REFILL. GO!'], '#f4ffff', 4.9, true); subtitle.position.set(0, 5.35, .8); root.add(subtitle);
+  const cheers = (sam ? [['智能觉醒', 'INTELLIGENCE'], ['连接成功', 'CONNECTED'], ['突破极限', 'BEYOND LIMITS']] as const : [['额度已满！', 'FULL AGAIN!'], ['出发！', 'LET’S GO!'], ['再来一轮！', 'ONE MORE ROUND!']] as const).map(text => caption(text, sam ? '#b9f6ff' : '#ffda8e', 2.15, sam, sam ? 'none' : 'comic'));
   root.add(...cheers);
   return {
     root,
@@ -371,12 +383,26 @@ export function createNpcEffects(kind: NpcKind) {
   const light = new THREE.PointLight(kind === 'sam' ? CYAN : GREEN, 0, 9, 2); light.position.set(0, 2.4, 1.1);
   const dust = createParticleCloud(64, kind === 'sam' ? '#c4efff' : '#fff1c8');
   root.add(first.root, second.root, ultimate.root, light, dust.points);
+  const mutters = kind === 'sam'
+    ? [caption(['AGI 降临……', 'AGI is coming…'], '#c7f8ff', 2.2), caption(SAM_CATCHPHRASE, '#c7f8ff', 3.2)]
+    : [caption(['别急，智商正在等额度重置!', 'Hold on, our IQ is waiting for the quota to reset!'], '#fff2c0', 3.4)];
+  for (const mutter of mutters) {
+    mutter.position.set(kind === 'sam' ? 1.9 : 0, kind === 'sam' ? 2.75 : 3.2, 0);
+    mutter.visible = false; root.add(mutter);
+  }
+  let speechIndex = -1, speaking = false;
   let shake = 0, darken = 0;
   return {
     root,
     get shake() { return shake; },
     get darken() { return darken; },
-    sample(action: NpcAction, seconds: number) {
+    sample(action: NpcAction, seconds: number, idleSpeech: number) {
+      if (idleSpeech > 0 && !speaking) speechIndex = (speechIndex + 1) % mutters.length;
+      speaking = idleSpeech > 0;
+      for (const [index, mutter] of mutters.entries()) {
+        mutter.visible = speaking && index === speechIndex;
+        mutter.material.opacity = idleSpeech;
+      }
       const definition = npcAction(kind, action); const t = seconds;
       const active = t > 0 && t < definition.seconds;
       first.root.visible = action === 'skill1' && active;
@@ -386,7 +412,10 @@ export function createNpcEffects(kind: NpcKind) {
       if (second.root.visible) second.sample(t);
       if (ultimate.root.visible) ultimate.sample(t);
       shake = 0; darken = 0; light.intensity = 0;
-      if (active && definition.release > 0) {
+      if (active && action === 'attack') {
+        const flash = Math.max(0, t - definition.release);
+        light.intensity = t >= definition.release ? .8 * Math.exp(-flash * 18) : 0;
+      } else if (active && definition.release > 0) {
         const big = action === 'ultimate'; const impact = t - definition.release;
         darken = envelope(t, .08, definition.seconds - .1, big ? 1 : .35) * (big ? .88 : .4);
         shake = impact > 0 ? Math.exp(-impact * (big ? 3.5 : 8)) * (big ? .1 : .035) : 0;

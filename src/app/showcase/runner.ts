@@ -1,5 +1,6 @@
 import { TUNING } from '../../config/tuning.ts';
 import { createFixedStepper } from '../../core/fixed-step.ts';
+import type { Vec2 } from '../../core/math.ts';
 import type { InputFrame } from '../../sim/sim-world.ts';
 import type { ShowcaseScenario } from './scenario.ts';
 
@@ -12,11 +13,11 @@ export function createShowcaseRunner(scenario: ShowcaseScenario) {
     get alpha() { return alpha; },
     get time() { return time; },
     get complete() { return scenario.elapsedTicks >= scenario.durationTicks; },
-    advance(elapsed: number, speed: number, playing: boolean, manual: (() => InputFrame) | null): number {
+    advance(elapsed: number, speed: number, playing: boolean, manual: (() => InputFrame) | null, aim?: Vec2): number {
       if (!playing || (!manual && scenario.elapsedTicks >= scenario.durationTicks)) return 0;
       const dt = Math.min(elapsed, TUNING.sim.maxFrameTime) * speed;
       alpha = stepper.advance(dt, () => {
-        if (manual || scenario.elapsedTicks < scenario.durationTicks) scenario.step(manual ? manual() : undefined);
+        if (manual || scenario.elapsedTicks < scenario.durationTicks) scenario.step(manual ? manual() : undefined, aim);
       });
       time += dt;
       return dt;

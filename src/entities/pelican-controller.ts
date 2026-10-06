@@ -3,8 +3,8 @@
  * 移动层（idle/run/jump/fall/fly/glide/swim）+ 动作层（attack；未来受击/挖掘同层扩展）。
  * 飞行（泰拉瑞亚翅膀）：起跳上升段结束后按住跳跃且有能量 → 上升；否则空中下落时滑翔（按住下俯冲）。
  * flightMaxTicks=0 表示无翅膀，物理与旧版完全一致。
- * 下穿单向平台、跃出水面或按住跳跃离开水面后，须松开再按跳跃才能飞行（flightNeedsRepress）；
- * 飞行过后松键/耗尽直接滑翔，不回 jump。深水按住跳跃只划水上浮，到水面不会自动跃出（须重新按）。
+ * 下穿单向平台、游泳跃出水面或非起跳离水后，须松开再按跳跃才能飞行；浅水蹬地可直接接飞行。
+ * 飞行过后松键/耗尽直接滑翔，不回 jump。深水按住跳跃划水上浮，到水面连续跃出。
  * 游泳（格子水）：浸没比例按 enterDepth/exitDepth 滞回判定 inWater；水中浮力/阻尼替代重力、不能飞行，
  * 近水面跳跃跃出水面，深处跳跃为划水上浮；入水回满飞行能量（refillFlight）。
  * 骑车（任务 014，见 pelican-ride）：R 键上/下车；骑行时水平运动、跳高、出球点改用 player.bike，不能啄、不能飞，
@@ -36,7 +36,7 @@ export type AttackSource = 'keyboard' | 'mouse';
 /** 单 tick 的输入意图（sim 层以 InputFrame 名义再导出）。 */
 export interface PelicanInput {
   readonly moveX: -1 | 0 | 1;
-  /** 按住跑（Shift）：地面/空中走跑分档，见 pelican-gear；游泳、骑车忽略。 */
+  /** 奔跑/快飞意图（默认开启，Shift 慢走关闭）；游泳、骑车忽略。 */
   readonly runHeld: boolean;
   readonly jumpHeld: boolean;
   /** 自上一 tick 以来按下过跳跃（锁存）。 */
@@ -55,6 +55,8 @@ export interface PelicanInput {
   readonly transformPressed: boolean;
   /** 数字键直接释放技能，0 表示没有新输入。 */
   readonly skillPressed: 0 | 1 | 2 | 3 | 4;
+  /** 右键副攻按住时，在当前动作和冷却结束后连放。 */
+  readonly skill1Held: boolean;
 }
 
 export const NEUTRAL_INPUT: PelicanInput = Object.freeze({
@@ -71,6 +73,7 @@ export const NEUTRAL_INPUT: PelicanInput = Object.freeze({
   mountPressed: false,
   transformPressed: false,
   skillPressed: 0,
+  skill1Held: false,
 });
 
 const RUN_THRESHOLD = 0.1;
@@ -177,10 +180,13 @@ function updateWaterContact(p: PelicanData, b: Body, fluid: FluidQuery | null, t
 function waterJump(p: PelicanData, b: Body, tuning: Tuning): void {
   const sw = tuning.player.swim;
   if (p.submersion <= sw.jumpMaxDepth) {
-    b.vy = jumpVelocity(tuning.physics.gravity, sw.jumpHeight);
+    // 浅水踩底沿用地面跳跃；游泳出水补偿浸没深度与离散重力损失。
+    b.vy = b.onGround
+      ? jumpVelocity(tuning.physics.gravity, tuning.player.jumpHeight)
+      : jumpVelocity(tuning.physics.gravity, sw.jumpHeight + p.submersion * b.height) + tuning.physics.gravity * tuning.sim.step;
     p.jumping = true;
-    // 跃出水面：本次按键只用于出水，须松开再按才能飞。
-    p.flightNeedsRepress = true;
+    // 游泳出水须重新按键才能飞，浅水蹬地可直接衔接飞行。
+    p.flightNeedsRepress = !b.onGround;
   } else {
     b.vy = Math.max(b.vy, sw.strokeSpeed);
   }
@@ -212,6 +218,7 @@ export function updatePelican(
   const locked = p.ride.lockTicks > 0;
   if (locked) p.ride.lockTicks--;
   const input = stunned || p.transformTicks >= 0 ? NEUTRAL_INPUT : locked ? { ...rawInput, moveX: 0 as const, jumpHeld: false, jumpPressed: false } : rawInput;
+  p.moveX = input.moveX;
 
   // 着地：土狼时间与飞行能量回满；只在上一 tick 已在空中时递减土狼时间（离地首个空中 tick 仍是满值）。
   const wasGrounded = b.onGround;
@@ -223,8 +230,8 @@ export function updatePelican(
   if (!input.jumpHeld) p.flightNeedsRepress = false;
   const wasInWater = p.inWater;
   updateWaterContact(p, b, fluid, tuning);
-  // 离开水面时仍按住跳跃：须松开再按才能飞（与下穿一致）。
-  if (wasInWater && !p.inWater && input.jumpHeld) p.flightNeedsRepress = true;
+  // 非起跳离水仍需重新按键，浅水蹬地起跳保留连续飞行。
+  if (wasInWater && !p.inWater && input.jumpHeld && !p.jumping) p.flightNeedsRepress = true;
   if (p.inWater) {
     // 水中没有土狼时间；只有鹈鹕可借助水面恢复飞行能量。
     p.coyoteTicks = 0;
@@ -258,38 +265,46 @@ export function updatePelican(
   // 陆地/空中走跑分档（pelican-gear）。
   const shotLocked = weaponLocksFacing(p, tuning) || (p.form === 'human' && p.humanCombat.action !== null);
   const windSpeed = !b.onGround && !p.inWater ? airWind : 0;
+  const factor = e.attack ? e.attack.def.moveFactor : 1;
+  let humanAirMove = false;
   if (p.weapon.dashTicks > 0) {
     b.vx = p.weapon.dashSide * PELICAN_SKILLS.dashSpeed;
     b.vy = Math.max(0, b.vy);
     e.facing = p.weapon.dashSide;
   } else if (ride === 'riding') rideHorizontal(e, input, tuning, dt, shotLocked, windSpeed);
   else {
-    const factor = e.attack ? e.attack.def.moveFactor : 1;
     if (p.inWater) {
       const target = input.moveX * sw.swimSpeed * factor;
       const accel = input.moveX !== 0 ? sw.swimAccel : sw.swimDecel;
       b.vx = approach(b.vx, target, accel * dt);
     } else {
       updateMoveGear(p, b, input.moveX, input.runHeld, cfg);
-      gearHorizontal(p, b, input.moveX, factor, cfg, dt, windSpeed);
+      humanAirMove = p.form === 'human' && !b.onGround;
+      if (!humanAirMove) gearHorizontal(p, b, input.moveX, input.runHeld, factor, cfg, dt, windSpeed);
     }
     if (!e.attack && !shotLocked && input.moveX !== 0) e.facing = input.moveX;
   }
   // 骑行保险杠：记录 preMoveVx，车头前方净空不足即下车，否则把 vx 夹到车头不进墙。
   rideBumper(e, map, tuning, dt);
 
-  // 跳跃（含土狼时间、跳跃缓冲）；下+跳 在单向平台上改为下穿（下穿后须松开再按跳跃才能飞）。上车中屏蔽（缓冲保留）。
-  if (p.inWater) {
-    if (p.form === 'pelican' && p.jumpBufferTicks > 0) waterJump(p, b, tuning);
-  } else if (p.jumpBufferTicks > 0 && (b.onGround || p.coyoteTicks > 0) && p.ride.mode !== 'mounting') {
-    if (input.downHeld && b.onGround && standingOnOneWayOnly(b, map)) {
-      b.dropThroughTicks = cfg.dropThroughTicks;
-      p.flightNeedsRepress = true;
-    } else {
-      const height = p.ride.mode === 'riding' ? cfg.bike.jumpHeight : cfg.jumpHeight;
-      b.vy = jumpVelocity(tuning.physics.gravity, height);
-      p.jumping = true;
+  // 下方向优先穿过单向平台，避免同时按跳跃时反向起飞；实心支撑仍保留正常跳跃。
+  if (input.downHeld && b.onGround && p.ride.mode !== 'mounting' && standingOnOneWayOnly(b, map)) {
+    b.dropThroughTicks = cfg.dropThroughTicks;
+    b.onGround = false;
+    p.flightNeedsRepress = true;
+    p.jumpBufferTicks = 0;
+    p.coyoteTicks = 0;
+  } else if (p.inWater) {
+    if (p.jumpBufferTicks > 0 || (input.jumpHeld && !input.downHeld && !p.jumping && !p.flightNeedsRepress && p.submersion <= sw.jumpMaxDepth)) waterJump(p, b, tuning);
+    // 人形没有被动浮力，持续按住跳跃维持划水。
+    if (p.form === 'human' && input.jumpHeld && !input.downHeld && !p.jumping) {
+      b.vy = Math.max(b.vy, sw.strokeSpeed);
+      b.onGround = false;
     }
+  } else if (p.jumpBufferTicks > 0 && (b.onGround || p.coyoteTicks > 0) && p.ride.mode !== 'mounting') {
+    const height = p.ride.mode === 'riding' ? cfg.bike.jumpHeight : cfg.jumpHeight;
+    b.vy = jumpVelocity(tuning.physics.gravity, height);
+    p.jumping = true;
     b.onGround = false;
     p.jumpBufferTicks = 0;
     p.coyoteTicks = 0;
@@ -305,6 +320,8 @@ export function updatePelican(
   }
 
   updateFlight(p, b, input, tuning, dt);
+  // 人形空中选速使用当帧推进/滑翔判定，起飞、停推或俯冲时不沿用上一帧的模式。
+  if (humanAirMove) gearHorizontal(p, b, input.moveX, input.runHeld, factor, cfg, dt, windSpeed);
   if (p.inWater && !p.jumping) {
     // 人形保留水阻力与下沉限速，但不给浮力；换回鹈鹕的同一 tick 恢复漂浮。
     applyWaterForces(b, p.form === 'pelican' ? p.submersion : 0, sw, tuning.physics.gravity, input.downHeld ? sw.diveAccel : 0, dt);
@@ -324,8 +341,8 @@ export function resolvePelicanState(e: Entity): void {
   const b = e.body;
   let next: PelicanState;
   if (e.attack) next = 'attack';
-  else if (p.inWater && p.form === 'pelican') next = 'swim';
   else if (b.onGround) next = Math.abs(b.vx) > RUN_THRESHOLD ? 'run' : 'idle';
+  else if (p.inWater) next = 'swim';
   else if (p.flightMode === 'fly') next = 'fly';
   else if (b.vy > 0 && !p.flownThisAir) next = 'jump';
   else if (p.flightMode === 'glide') next = 'glide';

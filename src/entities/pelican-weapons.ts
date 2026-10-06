@@ -136,7 +136,7 @@ export function weaponLocksFacing(p: PelicanData, tuning: Tuning): boolean {
 export function bufferSkillInput(p: PelicanData, skill: 0 | 1 | 2 | 3 | 4): void {
   if (skill === 0 || skill === 4) return;
   p.weapon.bufferedSkill = skill;
-  p.weapon.skillBufferTicks = PELICAN_SKILLS.bufferTicks;
+  p.weapon.skillBufferTicks = PELICAN_SKILLS.bufferTicks + (skill === 1 ? 1 : 0);
 }
 
 /** 掠水：空中、未入水，脚底下方 skim.height 格内（身体中线所在列）有水。 */
@@ -239,6 +239,7 @@ function block(p: PelicanData, weapon: WeaponId, reason: WeaponBlockReason): voi
 
 export interface WeaponInput {
   readonly shootHeld: boolean;
+  readonly skill1Held: boolean;
   readonly aim: Vec2 | null;
 }
 
@@ -253,7 +254,7 @@ function finishGulp(e: Entity, p: PelicanData, tuning: Tuning): void {
 /** 死亡或中断战斗时同时撤销伤害判定、嘴部动作与未消费的输入。 */
 export function cancelPelicanCombat(e: Entity): void {
   const p = e.pelican!;
-  cancelHumanCombat(p);
+  cancelHumanCombat(e);
   e.attack = undefined;
   p.attackBufferTicks = 0;
   p.attackBufferFacing = 0;
@@ -299,11 +300,10 @@ export function updateWeapons(e: Entity, p: PelicanData, input: WeaponInput, flu
     if (w.skillBufferTicks > 0 && --w.skillBufferTicks === 0) w.bufferedSkill = 0;
     return;
   }
-  const skill = w.bufferedSkill;
-  if (skill > 0 && weaponIdle(p) && w.dashTicks === 0 && !e.attack) {
+  const skill = w.bufferedSkill || (input.skill1Held ? 1 : 0);
+  if (skill > 0 && w.cooldowns[skill - 1] === 0 && weaponIdle(p) && w.dashTicks === 0 && !e.attack) {
     w.bufferedSkill = 0;
     w.skillBufferTicks = 0;
-    if (w.cooldowns[skill - 1] !== 0) return;
     aimShot(e, p, input.aim, lockSide, tuning);
     if (skill === 1) {
       w.cooldowns[0] = PELICAN_SKILLS.fishCooldownTicks;

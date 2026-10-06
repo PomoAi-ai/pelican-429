@@ -1,7 +1,7 @@
 import {
   INTRO_BAN_AT, INTRO_DIZZY_AT, INTRO_DOWNGRADE_AT, INTRO_DREAM_CRESCENDO_AT, INTRO_DREAM_FREEZE_AT, INTRO_DREAM_MELODY,
   INTRO_DURATION, INTRO_GOAL_AT,
-  INTRO_HEARTBEAT_ECHO, INTRO_HEARTBEAT_PERIOD, INTRO_LANDING_AT, INTRO_STORY_BEAT, INTRO_WHEEL_APPROACH,
+  INTRO_HEARTBEAT_ECHO, INTRO_HEARTBEAT_PERIOD, INTRO_FORTRESS_REVEAL_AT, INTRO_STORY_BEAT, INTRO_WHEEL_APPROACH,
   INTRO_PELICAN_AT, INTRO_ROUTE_AT, INTRO_TRANSFORM_BEATS, INTRO_WHEEL_TRIES, introSceneAt,
 } from '../config/intro.ts';
 
@@ -51,6 +51,8 @@ const FLOOR = 0.0001;
 /** 故事音轨全部按真实秒排程，不受序章乐谱 30 拍处硬切的截断。 */
 class StoryScore {
   private readonly host: StoryAudioHost;
+  /** 每段噪声从缓冲区的不同位置读起：同一刻起奏的两段噪声若读同一段样本，会同相叠成尖峰。 */
+  private grains = 0;
 
   constructor(host: StoryAudioHost) {
     this.host = host;
@@ -81,7 +83,7 @@ class StoryScore {
       [RAIN_AT, 0], [NIGHT_AT, 0.16], [INTRO_BAN_AT - INTRO_STORY_BEAT - 0.04, 0.16],
       [INTRO_BAN_AT - INTRO_STORY_BEAT, 0], [INTRO_BAN_AT, 0], [INTRO_BAN_AT + 0.05, 0.16],
       [INTRO_DREAM_FREEZE_AT - 0.04, 0.16], [INTRO_DREAM_FREEZE_AT, 0],
-      [INTRO_DREAM_FREEZE_AT + INTRO_STORY_BEAT, 0], [WORLD_AT, 0.14], [INTRO_LANDING_AT, 0.07],
+      [INTRO_DREAM_FREEZE_AT + INTRO_STORY_BEAT, 0], [WORLD_AT, 0.14], [INTRO_FORTRESS_REVEAL_AT, 0.07],
       [INTRO_DURATION - 3, 0.07], [INTRO_DURATION, 0],
     ]);
     rain.connect(filter);
@@ -192,20 +194,25 @@ class StoryScore {
         type: 'triangle', frequency: 180 * lift, glide: 620 * lift, volume: 0.36, attack: INTRO_WHEEL_APPROACH * 0.6, release: 0.05, vibrato: 25,
       });
       // 吸住：一记金属咔哒，随后是被磁力吸着的低频嗡鸣。
-      this.hiss(at, 0.06, { filter: 'highpass', frequency: 3000, q: 0.7, volume: 0.5, attack: 0.002, release: 0.055 });
-      this.tone(at, 0.14, { type: 'triangle', frequency: 240, glide: 140, volume: 0.26, attack: 0.002, release: 0.13 });
+      // 最后一次两只轮子都归位，是车轮事件的收尾，叮得最响、余音最长：去掉闷击和甩飞，叮晚 30ms 落在飞入风声收尾之后，
+      // 峰值余量全让给叮；余音在定格前收住。
+      const final = index === INTRO_WHEEL_TRIES.length - 1;
+      this.hiss(at, 0.06, { filter: 'highpass', frequency: 3000, q: 0.7, volume: 0.4, attack: 0.002, release: 0.055 });
+      if (!final) this.tone(at, 0.14, { type: 'triangle', frequency: 240, glide: 140, volume: 0.26, attack: 0.002, release: 0.13 });
       // 「叮」是这一段的主角：880Hz 给出音身，高泛音给出亮度。
+      const ding = final ? at + 0.03 : at;
+      const ring = final ? 0.92 : 0.5;
       for (const [frequency, volume] of [[880, 0.16], [1760, 0.4], [2637, 0.22], [4857, 0.1]] as const) {
-        this.tone(at, 0.5, { type: 'sine', frequency: frequency * lift, volume, attack: 0.002, release: 0.48 });
+        this.tone(ding, ring, { type: 'sine', frequency: frequency * lift, volume: volume * (final ? 1.3 : 1), attack: 0.002, release: ring - 0.02 });
       }
       this.tone(at + 0.03, beat - 0.05, { type: 'triangle', frequency: 110, volume: 0.2, attack: 0.03, release: 0.12, vibrato: 12 });
-      // 甩飞：嗖声带一道下坠的音高，一次比一次重；最长半拍，最后一次也在定格前收住。
+      if (final) return;
+      // 甩飞：嗖声带一道下坠的音高，一次比一次重；最长半拍。
       this.hiss(at + beat, 0.3 + index * 0.04, {
         filter: 'bandpass', frequency: 2400, glide: 220, q: 1.3, volume: 0.55 + index * 0.05, attack: 0.008, release: 0.28 + index * 0.04,
       });
       this.tone(at + beat, 0.35, { type: 'triangle', frequency: 1000, glide: 160, volume: 0.3 + index * 0.02, attack: 0.005, release: 0.33 });
     });
-    this.lastFling(INTRO_WHEEL_TRIES.at(-1)! + beat);
     // 定格的那一锤：低频重击与闷响，半拍内收住，给后面的静拍留出空白。
     this.tone(INTRO_DREAM_FREEZE_AT, 0.48, { type: 'sine', frequency: 95, glide: 32, volume: 0.6, attack: 0.002, release: 0.45 });
     this.hiss(INTRO_DREAM_FREEZE_AT, 0.3, { filter: 'lowpass', frequency: 700, glide: 90, q: 0.8, volume: 0.35, attack: 0.002, release: 0.28 });
@@ -213,20 +220,6 @@ class StoryScore {
     const rise = INTRO_DREAM_FREEZE_AT + beat;
     this.hiss(rise, WORLD_AT - rise, { filter: 'bandpass', frequency: 200, glide: 8000, q: 1.2, volume: 0.22, attack: WORLD_AT - rise - 0.03, release: 0.03 });
     this.tone(rise, WORLD_AT - rise, { type: 'sawtooth', frequency: 110, glide: 880, volume: 0.025, attack: WORLD_AT - rise - 0.03, release: 0.03 });
-  }
-
-  /**
-   * 最后一次甩飞是梦境段的落点：低频轰声往下坠、钢圈撞出的低沉金属声、镲的长尾，
-   * 让车轮被甩出去的那一下有分量；所有尾音都收在半拍内，正好让给定格。
-   */
-  private lastFling(at: number): void {
-    this.tone(at, 0.5, { type: 'sine', frequency: 120, glide: 30, volume: 0.65, attack: 0.003, release: 0.47 });
-    this.tone(at, 0.35, { type: 'triangle', frequency: 70, glide: 40, volume: 0.18, attack: 0.003, release: 0.32 });
-    this.hiss(at, 0.25, { filter: 'lowpass', frequency: 900, glide: 120, q: 0.9, volume: 0.3, attack: 0.002, release: 0.24 });
-    for (const [frequency, volume] of [[311, 0.05], [587, 0.035], [1123, 0.022]] as const) {
-      this.tone(at, 0.5, { type: 'sine', frequency, volume, attack: 0.002, release: 0.48 });
-    }
-    this.hiss(at, 0.5, { filter: 'highpass', frequency: 5200, q: 0.5, volume: 0.09, attack: 0.004, release: 0.46 });
   }
 
   private dreamMusic(): void {
@@ -268,23 +261,20 @@ class StoryScore {
   }
 
   private world(): void {
-    const fall = INTRO_LANDING_AT - WORLD_AT;
-    this.hiss(WORLD_AT, fall, { filter: 'lowpass', frequency: 5000, glide: 220, q: 0.8, volume: 0.2, attack: 0.25, release: fall - 0.3 });
-    this.tone(WORLD_AT, fall, { type: 'sine', frequency: 620, glide: 90, volume: 0.03, attack: 0.1, release: fall - 0.15 });
-
-    this.tone(INTRO_LANDING_AT, 0.9, { type: 'sine', frequency: 92, glide: 30, volume: 0.6, attack: 0.003, release: 0.88 });
-    this.hiss(INTRO_LANDING_AT, 0.5, { filter: 'lowpass', frequency: 320, q: 0.7, volume: 0.4, attack: 0.003, release: 0.48 });
-    this.hiss(INTRO_LANDING_AT, 1.1, { filter: 'highpass', frequency: 3200, q: 0.5, volume: 0.06, attack: 0.003, release: 1.05 });
+    const reveal = INTRO_FORTRESS_REVEAL_AT - WORLD_AT;
+    // 上行气流与持续音揭示黑洞前哨；真实坠落留到游戏开始。
+    this.hiss(WORLD_AT, reveal, { filter: 'bandpass', frequency: 320, glide: 2400, q: 0.8, volume: 0.12, attack: 0.4, release: reveal - 0.45 });
+    this.tone(WORLD_AT, reveal, { type: 'sine', frequency: 130.81, glide: 261.63, volume: 0.03, attack: 0.3, release: reveal - 0.35 });
 
     if (this.host.accompaniment === 'finale') return;
     // 大调解决和弦与轻快的五声音阶动机。
-    const resolve = INTRO_LANDING_AT + 0.08;
+    const resolve = INTRO_FORTRESS_REVEAL_AT + 0.08;
     for (const frequency of [130.81, 164.81, 196, 261.63, 329.63]) {
       this.tone(resolve, INTRO_GOAL_AT - resolve, { type: 'sine', frequency, volume: 0.024, attack: 0.08, release: 1.2 });
     }
     const motif = [523.25, 587.33, 659.25, 783.99, 659.25, 880, 783.99, 659.25, 587.33, 659.25, 783.99, 1046.5] as const;
     let step = 0;
-    for (let at = INTRO_LANDING_AT + 1; at < INTRO_GOAL_AT - 0.01; at += INTRO_STORY_BEAT / 2, step++) {
+    for (let at = INTRO_FORTRESS_REVEAL_AT + 1; at < INTRO_GOAL_AT - 0.01; at += INTRO_STORY_BEAT / 2, step++) {
       this.tone(at, 0.22, { type: 'triangle', frequency: motif[step % motif.length]!, volume: step % 2 ? 0.026 : 0.036, attack: 0.004, release: 0.2 });
       if (step % 2 === 1) this.hat(at, 0.025);
     }
@@ -352,6 +342,8 @@ class StoryScore {
     const now = Math.max(at, this.host.from);
     const source = this.host.track(context.createBufferSource());
     source.buffer = noise;
+    // 读起点错开后可能接近缓冲区末尾，循环读取才能撑满整段时长。
+    source.loop = true;
     const filter = this.host.keep(context.createBiquadFilter());
     filter.type = hiss.filter;
     filter.Q.value = hiss.q;
@@ -362,7 +354,7 @@ class StoryScore {
     source.connect(filter);
     filter.connect(gain);
     gain.connect(this.host.bus);
-    source.start(this.host.at(now), (now - at) % noise.duration, at + duration - now);
+    source.start(this.host.at(now), (this.grains++ * 0.618 + now - at) % noise.duration, at + duration - now);
   }
 
   /** 折线包络：起点值按当前播放位置插值，之后只排程尚未到达的拐点。 */

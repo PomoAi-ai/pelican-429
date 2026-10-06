@@ -1,11 +1,11 @@
 import type { Instrument } from './intro-score.ts';
 import {
   FINALE_CODE, FINALE_CODE_TIMES, FINALE_CUES as CUES, FINALE_DURATION, FINALE_LINEAGE, FINALE_NOTE_KEYS, FINALE_QUESTION_TYPING,
-  FINALE_RETRY_TIMES, FINALE_SCORE_RATE, LINEAGE_WEIGHT,
+  FINALE_RETRY_TIMES, FINALE_SCORE_RATE, FINALE_UNDERTONE, LINEAGE_WEIGHT,
 } from '../config/intro-finale.ts';
 import {
   INTRO_BAN_AT, INTRO_DIZZY_AT, INTRO_DOWNGRADE_AT, INTRO_DREAM_FREEZE_AT,
-  INTRO_DURATION, INTRO_GOAL_AT, INTRO_LANDING_AT, INTRO_PELICAN_AT,
+  INTRO_DURATION, INTRO_GOAL_AT, INTRO_FORTRESS_REVEAL_AT, INTRO_PELICAN_AT,
   INTRO_ROUTE_AT, introSceneAt,
 } from '../config/intro.ts';
 
@@ -99,6 +99,7 @@ class FinaleScore {
     this.conversation();
     this.climb();
     this.lineage();
+    this.undertone();
     this.senses();
     this.brink();
     this.storm();
@@ -330,6 +331,20 @@ class FinaleScore {
         this.crash(at, 0.7, 0.035);
       }
       if (tokens) this.slide(at - EIGHTH, EIGHTH, pitch - 12, pitch, 'glass', 0.035, pan);
+    });
+  }
+
+  /**
+   * 暗线的声音：伏笔是 G 持续低音上一对低音钢琴三全音（B–F，正是 G7 里那组不稳定音），一次往下滑半音，
+   * 不抢主旋律的拍，只让耳朵觉得哪里不对；罪证与重击同拍，不另加声音；翻转各响一记高音钟。
+   */
+  private undertone(): void {
+    FINALE_UNDERTONE.filter(({ act }) => act === 'omen').forEach(({ at }, index) => {
+      this.tone(at, 0.7, 47 - index, 'piano', 0.05, -0.4);
+      this.tone(at, 0.7, 53 - index, 'piano', 0.035, -0.4);
+    });
+    FINALE_UNDERTONE.filter(({ act }) => act === 'flip').forEach(({ at }, index) => {
+      this.tone(at, 0.6, 84 + index * 4, 'glass', 0.04, index ? 0.5 : -0.5);
     });
   }
 
@@ -574,7 +589,7 @@ class FinaleScore {
     const ride = story(INTRO_PELICAN_AT);
     const freeze = story(INTRO_DREAM_FREEZE_AT);
     const world = story(introSceneAt('world'));
-    const landing = story(INTRO_LANDING_AT);
+    const reveal = story(INTRO_FORTRESS_REVEAL_AT);
     const goal = story(INTRO_GOAL_AT);
     const end = FINALE_MUSIC_END / FINALE_SCORE_RATE;
     // The same motif changes harmony with the story; the pedal crosses every visual cut.
@@ -594,15 +609,15 @@ class FinaleScore {
       { at: ride + 4, bass: 31, notes: [55, 59, 62] },
       { at: freeze, bass: 31, notes: [55, 59, 62] },
       { at: world, bass: 31, notes: [55, 62, 65] },
-      { at: landing, bass: 36, notes: [55, 60, 64] },
-      { at: landing + 2, bass: 29, notes: [53, 57, 60] },
+      { at: reveal, bass: 36, notes: [55, 60, 64] },
+      { at: reveal + 2, bass: 29, notes: [53, 57, 60] },
       { at: goal, bass: 36, notes: [55, 60, 64] },
     ];
     harmony.forEach((chord, index) => {
       const next = index + 1 < harmony.length ? harmony[index + 1]!.at : end;
       const duration = Math.min(next - chord.at + 0.2, end - chord.at);
       const tense = chord.at >= glitch && chord.at < dream;
-      const grand = chord.at >= landing;
+      const grand = chord.at >= reveal;
       chord.notes.forEach((pitch, voice) => {
         this.tone(chord.at, duration, pitch, 'strings', grand ? 0.072 : tense ? 0.037 : 0.05, (voice - 1) * 0.6);
       });
@@ -618,7 +633,7 @@ class FinaleScore {
     for (let at = CUES.silence - 0.25, step = 0; at < end; at += 0.25, step++) {
       const chord = harmony.findLast((entry) => at >= entry.at)!;
       const tense = at >= glitch && at < dream;
-      const grand = at >= landing;
+      const grand = at >= reveal;
       const energy = at < ride ? 0.65 : grand ? 1 : 0.82;
       const duration = Math.min(0.3, end - at);
       const pitch = chord.notes[figure[step % figure.length]!]! + 12;
@@ -652,7 +667,7 @@ class FinaleScore {
         this.player.noise(score(at), score(Math.min(0.6, remaining)), 5200, 'highpass', 0.032);
       }
     }
-    // 一锤定音：最后一个车轮甩飞后半拍，画面定格落在一记全奏重击上，余音收在这一拍里。
+    // 一锤定音：两只车轮归位后一拍，画面定格落在一记全奏重击上，余音收在这一拍里。
     const hammer = harmony.find((chord) => chord.at === freeze)!;
     this.player.kick(score(freeze), 0.22);
     this.tone(freeze, 0.5, hammer.bass, 'timpani', 0.24);

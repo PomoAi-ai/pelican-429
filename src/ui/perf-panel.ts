@@ -1,6 +1,6 @@
 /**
- * 性能面板（任务 019）：设置面板“调试 → 性能面板”开关，?debug 下也可按 P；左上方等宽小窗，显示 FPS、帧时间、CPU 帧内耗时与分段、draw call、三角形。
- * 文本每 PANEL_REFRESH_MS 刷新一次（避免每帧改 DOM）；隐藏时不刷新（main 也只在可见时计时）。不依赖 three/render。
+ * 性能面板：Cmd+Option+Z / Ctrl+Alt+Z 或设置面板切换，调试模式也可按 P；显示 FPS、帧时间、CPU 耗时、draw call、三角形。
+ * 默认显示简洁 FPS，点击展开完整信息；每 PANEL_REFRESH_MS 刷新一次，收起时不启用分段计时。
  */
 import type { PerfSnapshot } from '../core/frame-profiler.ts';
 import { getLanguage, onLanguageChange, type Language } from './language.ts';
@@ -18,61 +18,76 @@ export function formatPerfText(s: PerfSnapshot, language: Language = 'zh'): stri
 }
 
 export interface PerfPanel {
+  /** 完整信息是否展开；收起时仍显示 FPS。 */
   readonly visible: boolean;
   toggle(): void;
   setVisible(visible: boolean): void;
   /** 每帧调用；按 PANEL_REFRESH_MS 节流刷新文本。 */
-  update(snapshot: () => PerfSnapshot, nowMs: number): void;
+  update(snapshot: () => PerfSnapshot, nowMs: number, fps: number): void;
   dispose(): void;
 }
 
-/** keyTarget 非 null 时监听 P 键切换（?debug）；null 只由 setVisible/toggle 控制。 */
-export function createPerfPanel(parent: HTMLElement, keyTarget: Window | null): PerfPanel {
+/** 游戏场景始终支持 Cmd+Option+Z / Ctrl+Alt+Z，P 键仅在调试模式启用。 */
+export function createPerfPanel(parent: HTMLElement, keyTarget: Window, debug: boolean): PerfPanel {
   if (!parent?.isConnected) throw new Error('perf-panel: parent element is missing or detached');
-  const el = document.createElement('pre');
+  const el = document.createElement('button');
   el.className = 'perf-panel';
+  el.type = 'button';
+  el.setAttribute('aria-expanded', 'false');
+  let expanded = false;
   Object.assign(el.style, {
     position: 'fixed',
-    left: '12px',
-    top: '80px',
+    left: '24px',
+    top: '88px',
     margin: '0',
     padding: '6px 10px',
     borderRadius: '6px',
-    background: 'rgba(12, 16, 22, 0.72)',
+    background: 'transparent',
     color: '#d8f0c8',
     font: '11px/1.45 ui-monospace, "SF Mono", Menlo, monospace',
-    pointerEvents: 'none',
+    pointerEvents: 'auto',
+    cursor: 'pointer',
+    border: '0',
+    textAlign: 'left',
     zIndex: '5',
     whiteSpace: 'pre',
   } satisfies Partial<CSSStyleDeclaration>);
-  el.hidden = true;
+  el.textContent = 'FPS …';
+  el.addEventListener('click', () => panel.toggle());
   parent.append(el);
   let lastRefresh = Number.NEGATIVE_INFINITY;
   const onKey = (e: KeyboardEvent): void => {
-    if (e.code !== 'KeyP' || e.repeat || e.ctrlKey || e.metaKey || e.altKey) return;
-    panel.toggle();
+    const target = e.target as HTMLElement | null;
+    if (target?.isContentEditable || target?.tagName === 'INPUT' || target?.tagName === 'TEXTAREA' || target?.tagName === 'SELECT') return;
+    if (e.shiftKey) return;
+    const shortcut = e.code === 'KeyZ' && e.altKey && (e.ctrlKey || e.metaKey);
+    const debugShortcut = debug && e.code === 'KeyP' && !e.ctrlKey && !e.metaKey && !e.altKey;
+    if (!shortcut && !debugShortcut) return;
+    e.preventDefault();
+    if (!e.repeat) panel.toggle();
   };
-  keyTarget?.addEventListener('keydown', onKey);
+  keyTarget.addEventListener('keydown', onKey);
   const unsubscribeLanguage = onLanguageChange(() => { lastRefresh = Number.NEGATIVE_INFINITY; });
   const panel: PerfPanel = {
     get visible() {
-      return !el.hidden;
+      return expanded;
     },
     toggle() {
       panel.setVisible(!panel.visible);
     },
     setVisible(visible) {
-      if (visible === !el.hidden) return;
-      el.hidden = !visible;
+      if (visible === expanded) return;
+      expanded = visible;
+      el.setAttribute('aria-expanded', String(expanded));
       lastRefresh = Number.NEGATIVE_INFINITY;
     },
-    update(snapshot, nowMs) {
-      if (el.hidden || nowMs - lastRefresh < PANEL_REFRESH_MS) return;
+    update(snapshot, nowMs, fps) {
+      if (nowMs - lastRefresh < PANEL_REFRESH_MS) return;
       lastRefresh = nowMs;
-      el.textContent = formatPerfText(snapshot(), getLanguage());
+      el.textContent = expanded ? formatPerfText(snapshot(), getLanguage()) : `FPS ${fps.toFixed(0)}`;
     },
     dispose() {
-      keyTarget?.removeEventListener('keydown', onKey);
+      keyTarget.removeEventListener('keydown', onKey);
       unsubscribeLanguage();
       el.remove();
     },

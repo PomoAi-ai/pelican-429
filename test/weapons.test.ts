@@ -14,16 +14,48 @@ import { LEVEL_LEGEND, parseLevel } from '../src/world/test-level.ts';
 import { computeSurface } from '../src/world/level.ts';
 import type { FishSpawn, LevelData } from '../src/world/level.ts';
 import { createProjectileEntity, stepProjectile } from '../src/entities/projectile.ts';
-import { isSkimming } from '../src/entities/pelican-weapons.ts';
+import { cancelUnridableWeaponAction, isSkimming } from '../src/entities/pelican-weapons.ts';
 import { createSimWorld, getPlayer, setDummyShooting, stepSim, NEUTRAL_INPUT } from '../src/sim/sim-world.ts';
 import type { Entity, InputFrame, SimWorld } from '../src/sim/sim-world.ts';
 import { swimCatchPoint } from '../src/sim/weapon-system.ts';
+import { createActionTracker } from '../src/input/action-map.ts';
 
 const W = TUNING.weapons;
 const DT = TUNING.sim.step;
 const WATER = W.water.projectile;
 const FISH = W.fish.projectile;
 const ORB = TUNING.attacks.orb;
+
+test('右键按住按节奏连放，松开只完成当前一轮', () => {
+  for (const form of ['human', 'pelican'] as const) {
+    const w = world(open());
+    getPlayer(w).pelican!.form = getPlayer(w).pelican!.transformFrom = form;
+    const tracker = createActionTracker();
+    tracker.press('skill1', 'mouse');
+    const events = record(w, 180, (tick) => {
+      if (tick === 43) tracker.release('skill1');
+      return tracker.consume(null);
+    });
+    const kind = form === 'human' ? 'codexShot' : 'fishShot';
+    const shots = events.filter((e) => e.type === 'projectileFired' && e.kind === kind);
+    assert.equal(shots.length, 14, `${form}: 松开不额外排队释放`);
+    assert.equal(shots[0]!.at, form === 'human' ? 9 : 5);
+    assert.equal(shots[7]!.at, form === 'human' ? 51 : 41);
+  }
+});
+
+test('右键提前两百毫秒点击能接续，过早点击会过期', () => {
+  for (const form of ['human', 'pelican'] as const) {
+    for (const early of [false, true]) {
+      const w = world(open());
+      getPlayer(w).pelican!.form = getPlayer(w).pelican!.transformFrom = form;
+      const nextTap = early ? 2 : form === 'human' ? 30 : 24;
+      const events = record(w, 150, (tick) => input({ skillPressed: tick === 0 || tick === nextTap ? 1 : 0 }));
+      const kind = form === 'human' ? 'codexShot' : 'fishShot';
+      assert.equal(events.filter((e) => e.type === 'projectileFired' && e.kind === kind).length, early ? 7 : 14, `${form}: early=${early}`);
+    }
+  }
+});
 
 type Ev = SimEvent & { at: number };
 
@@ -288,9 +320,18 @@ test('技能冷却独立于吐水，hitstop 内锁存的鱼群只释放一次', 
   settle(w);
   w.hitstopTicks = 2;
   stepSim(w, input({ skillPressed: 1 }));
-  const evs = record(w, 90, (i) => input({ shootHeld: i > 35, skillPressed: i === 50 ? 1 : 0 }));
+  const evs = record(w, 90, (i) => input({ shootHeld: i > 35, skillPressed: i === 15 ? 1 : 0 }));
   assert.equal(evs.filter((e) => e.type === 'projectileFired' && e.kind === 'fishShot').length, PELICAN_SKILLS.fishCount);
   assert.ok(evs.some((e) => e.type === 'projectileFired' && e.kind === 'waterShot'));
+});
+
+test('持续左键吐水期间点击右键，鱼群会接在当前吐射后释放', () => {
+  const w = world(open());
+  settle(w);
+  const evs = record(w, 240, (i) => input({ shootHeld: true, skillPressed: i === 60 || i === 140 ? 1 : 0 }));
+  const fish = evs.filter((e) => e.type === 'projectileFired' && e.kind === 'fishShot');
+  assert.equal(new Set(fish.map((e) => e.at)).size, 2, '两次右键都应释放，不能被普攻收嘴吃掉');
+  assert.ok(evs.some((e) => e.type === 'projectileFired' && e.kind === 'waterShot' && e.at > fish.at(-1)!.at));
 });
 
 test('振翅突进穿过敌人并逐个击飞，同次突进不会重复打中目标', () => {
@@ -306,6 +347,47 @@ test('振翅突进穿过敌人并逐个击飞，同次突进不会重复打中�
   assert.equal(new Set(hits.map((e) => e.type === 'hit' ? e.targetId : -1)).size, 2);
   assert.ok(player.body.x > 10);
   assert.equal(airborne.size, 2);
+});
+
+test('突进免疫冷却液伤害，动作结束当帧恢复受伤', () => {
+  for (const ending of ['elapsed', 'wall', 'mount', 'transform'] as const) {
+    const w = createSimWorld({ level: { ...levelData(open()), lethalCoolant: { x: 0, y: 0, w: 64, h: 16 } } });
+    const player = settle(w);
+    const hp = player.health!.hp;
+    stepSim(w, input({ skillPressed: 2 }));
+    assert.equal(player.health!.hp, hp, `${ending}: 起手即免疫环境伤害`);
+    while (player.pelican!.weapon.dashTicks > 1) {
+      if (ending !== 'elapsed') break;
+      stepSim(w, NEUTRAL_INPUT);
+      assert.equal(player.health!.hp, hp, '计时到期前免疫环境伤害');
+    }
+    if (ending === 'wall') {
+      const x = Math.ceil(player.body.x + player.body.halfWidth);
+      for (let y = 1; y < 8; y++) w.map.set(x, y, 1);
+      player.body.x = x - player.body.halfWidth - 0.001;
+    }
+    if (ending === 'mount') cancelUnridableWeaponAction(player.pelican!, w.tuning);
+    stepSim(w, input({ transformPressed: ending === 'transform' }));
+    assert.equal(player.pelican!.weapon.dashTicks, 0, ending);
+    assert.ok(player.health!.hp < hp, `${ending}: 结束立即恢复环境伤害`);
+    w.fluid.dispose();
+  }
+});
+
+test('迎面敌弹在突进中不扣血不打断，突进后仍能命中', () => {
+  const w = world(open());
+  const player = settle(w);
+  incoming(w, 1);
+  record(w, PELICAN_SKILLS.dashTicks, i => input({ skillPressed: i === 0 ? 2 : 0 }));
+  assert.equal(player.health!.hp, player.health!.maxHp);
+  assert.equal(player.health!.hitstunTicks, 0);
+  assert.ok(player.body.x > 10, '突进穿过迎面弹体而不被打断');
+  steps(w, 1);
+  incoming(w, 1);
+  const after = record(w, 30, () => NEUTRAL_INPUT);
+  assert.ok(after.some(e => e.type === 'hit' && e.targetId === player.id));
+  assert.equal(player.health!.hp, player.health!.maxHp - W.shooter.projectile.damage);
+  w.fluid.dispose();
 });
 
 test('振翅突进被实心墙停止', () => {

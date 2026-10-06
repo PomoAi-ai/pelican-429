@@ -13,8 +13,20 @@ import { room, type EditionFrame } from './intro-edition-shared.ts';
 const DRAW = { finale: drawFinale, melody: drawMelody, world: drawWorld, jazz: drawJazz, relay: drawRelay, tides: drawTides,
   compiler: drawCompiler, cosmos: drawCosmos, dialogue: drawDialogue, fugue: drawFugue, dream: drawDream };
 
+/** 历史版本缩略图只绘制序奏，不创建堡垒 WebGL 场景。 */
+export function drawEditionPrelude(frame: EditionFrame): void {
+  const { ctx, width, height, edition } = frame;
+  ctx.save();
+  ctx.globalAlpha = 1;
+  ctx.globalCompositeOperation = 'source-over';
+  ctx.fillStyle = edition.background;
+  ctx.fillRect(0, 0, width, height);
+  DRAW[edition.id](frame);
+  ctx.restore();
+}
+
 export function drawEditionIntro(ctx: CanvasRenderingContext2D, seconds: number, images: IntroImages,
-  width: number, height: number, edition: IntroEdition, controls = true, language: IntroLanguage = 'zh'): void {
+  fortress: HTMLCanvasElement, width: number, height: number, edition: IntroEdition, controls = true, language: IntroLanguage = 'zh'): void {
   const stageHeight = Math.max(1, height - (controls ? 96 : 0));
   const frame: EditionFrame = { ctx, seconds: Math.min(seconds, edition.duration), progress: Math.min(1, seconds / edition.duration),
     width, height: stageHeight, edition, images, language };
@@ -24,11 +36,11 @@ export function drawEditionIntro(ctx: CanvasRenderingContext2D, seconds: number,
   ctx.fillStyle = seconds < edition.duration ? edition.background : '#000';
   ctx.fillRect(0,0,width,height);
   ctx.beginPath(); ctx.rect(0,0,width,stageHeight); ctx.clip();
-  if (seconds < edition.duration) DRAW[edition.id](frame);
+  if (seconds < edition.duration) drawEditionPrelude(frame);
   else {
     // 第一幕的入场淡入叠在刚揭开的房间上，避免转场完成后突然黑一帧。
     if (seconds < edition.duration + 1.2) room(frame, 1);
-    drawStory(ctx, editionStoryTime(seconds, edition), images, width, stageHeight, language);
+    drawStory(ctx, editionStoryTime(seconds, edition), images, fortress, width, stageHeight, language);
     if (edition.id === 'finale') {
       drawFinaleScore({ ...frame, seconds: Math.min(seconds, editionPlaybackTime(INTRO_DURATION, edition)) });
       drawStoryHud(ctx, editionStoryTime(seconds, edition), width, stageHeight, language);

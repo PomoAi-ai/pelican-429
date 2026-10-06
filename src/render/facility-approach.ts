@@ -6,12 +6,12 @@ import { createRockMaterial } from './rock-material.ts';
 import { climberInstance, createClimberAtlas, createClimberMaterial, createClimberMesh } from './face-climbers.ts';
 import type { ClimberInstance, ClimberVariant } from './face-climbers.ts';
 import { BLOCK_BACK_Z, BLOCK_FRONT_Z } from './tile-geometry.ts';
-import { FORTRESS_CHASM } from '../config/facility-structure.ts';
+import { FORTRESS_BLACKHOLE, FORTRESS_CHASM, FORTRESS_PLATEAU } from '../config/facility-structure.ts';
 import { createFortressCoolant } from './facility-coolant.ts';
 import { createFortressBlackhole } from './facility-blackhole.ts';
 
 /** Old stonework gives way to reinforced decks on the same standing surfaces. */
-export function createFortressApproach(k: FacilityKit, blackholeTexture: THREE.Texture) {
+export function createFortressApproach(k: FacilityKit) {
   const root = new THREE.Group();
   root.name = 'fortress-stone-approach';
   k.root.add(root);
@@ -60,19 +60,21 @@ export function createFortressApproach(k: FacilityKit, blackholeTexture: THREE.T
   const front = BLOCK_FRONT_Z + 0.08;
 
   // Repairs start at the cliff edge; the older cliff and moss remain exposed to the left.
-  k.box(19, 19.77, deckZ, 6, 0.46, depth, concrete);
-  k.box(19, 19.58, 0.76, 6, 0.24, 0.48, graphite);
-  k.box(19, 19.92, front, 6, 0.16, 0.12, edge);
-  k.box(18.8, 16.9, 0.65, 0.34, 4.4, 0.18, graphite);
-  for (const y of [15.1, 18.7]) k.box(18.8, y, 0.78, 0.62, 0.42, 0.14, concrete);
-  k.box(21.6, 10.1, 1.25, 0.65, 18.8, 0.5, concrete);
-  for (const y of [3, 8, 13, 18]) k.box(21.6, y, 1.54, 0.32, 0.12, 0.1, graphite);
-  k.box(19, 19.87, front + 0.08, 5.4, 0.08, 0.06, seamLight);
-  for (const x of [7.5, 12.3, 15.5]) foliage('hang2', x, 19.85, BLOCK_FRONT_Z + 0.04, 0.72);
-  foliage('hang1', 17.1, 19.78, front + 0.07, 0.48);
+  k.box(51, 19.77, deckZ, 6, 0.46, depth, concrete);
+  k.box(51, 19.58, 0.76, 6, 0.24, 0.48, graphite);
+  k.box(51, 19.92, front, 6, 0.16, 0.12, edge);
+  k.box(50.8, 16.9, 0.65, 0.34, 4.4, 0.18, graphite);
+  for (const y of [15.1, 18.7]) k.box(50.8, y, 0.78, 0.62, 0.42, 0.14, concrete);
+  k.box(53.6, 10.1, 1.25, 0.65, 18.8, 0.5, concrete);
+  for (const y of [3, 8, 13, 18]) k.box(53.6, y, 1.54, 0.32, 0.12, 0.1, graphite);
+  k.box(51, 19.87, front + 0.08, 5.4, 0.08, 0.06, seamLight);
+  for (const x of [39.5, 44.3, 47.5]) foliage('hang2', x, 19.85, BLOCK_FRONT_Z + 0.04, 0.72);
+  foliage('hang1', 49.1, 19.78, front + 0.07, 0.48);
+  // The flight-only plateau keeps the same overgrown cliff face as the old approach.
+  for (const x of [3.5, 8.2, 13.4]) foliage('hang2', x, FORTRESS_PLATEAU.top - 0.15, BLOCK_FRONT_Z + 0.04, 0.72);
 
   // Masonry, then metal-capped stone, then concrete: the material transition follows the route.
-  for (const [left, right, height] of [[-3, 1, 7], [9, 15, 3.2], [17, 21, 1.8]] as const) {
+  for (const [left, right, height] of [[29, 33, 7], [41, 47, 3.2], [49, 53, 1.8]] as const) {
     const rows = Math.ceil(height / 1.3);
     const count = Math.ceil((right - left) / 1.9);
     for (let row = 0; row < rows; row++) {
@@ -82,16 +84,16 @@ export function createFortressApproach(k: FacilityKit, blackholeTexture: THREE.T
           row === rows - 1 ? (hash01(col, row, 83) - 0.5) * 0.12 : 0);
       }
     }
-    for (let x = left + 0.5; x < right; x += 1.8) foliage('mat1', x, 20 + rows * 1.25, -3.45, left < 16 ? 0.8 : 0.4);
+    for (let x = left + 0.5; x < right; x += 1.8) foliage('mat1', x, 20 + rows * 1.25, -3.45, left < 48 ? 0.8 : 0.4);
   }
-  for (const [x, height] of [[-1.4, 11], [18.5, 4.3]] as const) {
+  for (const [x, height] of [[30.6, 11], [50.5, 4.3]] as const) {
     for (let y = 20.6; y < 20 + height; y += 1.2) rock(x, y, -3.2, 1.8, 1.14, 1.5);
     rock(x, 20 + height, -3.2, 2.2, 0.5, 1.9);
-    foliage('hang2', x - 0.65, 20 + height, -2.36, x < 0 ? 0.85 : 0.45);
+    foliage('hang2', x - 0.65, 20 + height, -2.36, x < 32 ? 0.85 : 0.45);
   }
-  k.box(19, 22.52, -4.1, 4.2, 0.14, 1.25, edge);
-  k.box(18.98, 22.15, -2.33, 0.16, 3.5, 0.16, graphite);
-  for (const [left, right] of [[41, 45], [49, 54]] as const) {
+  k.box(51, 22.52, -4.1, 4.2, 0.14, 1.25, edge);
+  k.box(50.98, 22.15, -2.33, 0.16, 3.5, 0.16, graphite);
+  for (const [left, right] of [[73, 77], [81, 86]] as const) {
     const x = (left + right) / 2;
     k.box(x, 20.9, -3.4, right - left, 1.8, 1, concrete);
     k.box(x, 20.9, -2.84, right - left - 0.35, 1.2, 0.12, graphite);
@@ -100,7 +102,7 @@ export function createFortressApproach(k: FacilityKit, blackholeTexture: THREE.T
   }
   const beacon = k.material(0xc6b189, 0.1, 0xb5a07c);
   beacon.emissiveIntensity = 0.95;
-  for (const x of [18.5, 40.5, 53]) {
+  for (const x of [50.5, 72.5, 85]) {
     if (x > FORTRESS_CHASM.right) {
       k.box(x, 22.3, -3.2, 1.7, 4.6, 1.6, concrete);
       k.box(x, 22.45, -2.34, 1.15, 3.55, 0.14, graphite);
@@ -127,13 +129,13 @@ export function createFortressApproach(k: FacilityKit, blackholeTexture: THREE.T
   const [stoneLeft, stoneRight, stoneY] = FORTRESS_CHASM.steppingStones[0];
   rock((stoneLeft + stoneRight) / 2, stoneY - 0.65, deckZ, stoneRight - stoneLeft - 0.15, 1, depth);
   foliage('hang1', stoneRight - 0.5, stoneY - 0.2, front + 0.04, 0.45);
-  deck(FORTRESS_CHASM.right, 56, 20);
-  for (const x of [39.4, 47, 54.6]) {
+  deck(FORTRESS_CHASM.right, 88, 20);
+  for (const x of [71.4, 79, 86.6]) {
     k.box(x, 11.1, -2.5, 0.55, 16.8, 0.7, graphite);
     k.box(x, 3, -2.5, 1.8, 1, 1.4, concrete);
   }
-  k.box(47, 18.8, -2.5, 18, 0.5, 0.7, edge);
-  for (const [left, right] of [[39.4, 47], [47, 54.6]] as const) {
+  k.box(79, 18.8, -2.5, 18, 0.5, 0.7, edge);
+  for (const [left, right] of [[71.4, 79], [79, 86.6]] as const) {
     k.beam([left, 5, -2.5], [right, 18.4, -2.5], 0.42, graphite);
     k.beam([left, 18.4, -2.5], [right, 5, -2.5], 0.26, edge);
   }
@@ -153,9 +155,9 @@ export function createFortressApproach(k: FacilityKit, blackholeTexture: THREE.T
   atlas.dispose();
   root.add(leaves);
   resources.push(leaves, leaves.geometry, leafMaterial);
-  const blackhole = createFortressBlackhole(blackholeTexture);
+  const blackhole = createFortressBlackhole();
   root.add(blackhole.root);
-  k.light(4, 28, -1.4, 0xc8e4ef, 85, 18);
+  k.light(FORTRESS_BLACKHOLE.position.x, 28, -1.4, 0xc8e4ef, 85, 18);
   const coolant = createFortressCoolant(k);
   return {
     update(value: number): void { time.value = value; blackhole.update(value); coolant.update(value); },

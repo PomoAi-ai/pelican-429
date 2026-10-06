@@ -86,8 +86,8 @@ export const INTRO_DREAM_CRESCENDO_AT = 37;
 /** 八音动机也决定可见音符的高低，避免画面和旋律各自跳动。 */
 export const INTRO_DREAM_MELODY = [659.25, 587.33, 523.25, 440, 523.25, 587.33, 783.99, 659.25] as const;
 
-/** 车轮尝试量化到半拍，逐次加密；最终失败的尾音在定格之前结束。 */
+/** 车轮尝试量化到半拍，逐次加密；前几次差一点装上就被甩飞，最后一次两只轮子全部归位，叮声在定格之前收住。 */
 export const INTRO_WHEEL_TRIES = [35, 36.25, 37.25, 38, 38.5, 39] as const;
 export const INTRO_WHEEL_APPROACH = INTRO_STORY_BEAT;
 export const INTRO_DREAM_FREEZE_AT = 40;
-export const INTRO_LANDING_AT = 43.5;
+export const INTRO_FORTRESS_REVEAL_AT = 43.5;

@@ -33,44 +33,44 @@ export const DRONE_PAYLOADS: Readonly<Record<'bomb' | 'thermite', ProjectileDef>
   bomb: {
     id: 'droneBomb', kind: 'droneBomb', trajectory: 'arc', radius: 0.2, speed: 1.5, lift: 0, gravity: 10,
     lifeTicks: 180, maxHits: 1, bounces: 0, restitution: 0, bounceFriction: 0, swallowable: false, stopsInWater: true, wetTicks: 0,
-    damage: 12, knockback: { x: 4, y: 4 }, hitstun: 12, hitstop: 2,
-    groundEffect: { halfWidth: 1.4, height: 1.6, durationTicks: 18, pulseTicks: 18 },
+    damage: 15, knockback: { x: 4, y: 4 }, hitstun: 12, hitstop: 2,
+    groundEffect: { halfWidth: 1.6, height: 1.6, durationTicks: 18, pulseTicks: 18 },
   },
   thermite: {
     id: 'droneThermite', kind: 'droneThermite', trajectory: 'arc', radius: 0.18, speed: 1.2, lift: 0, gravity: 8,
     lifeTicks: 180, maxHits: 1, bounces: 0, restitution: 0, bounceFriction: 0, swallowable: false, stopsInWater: true, wetTicks: 0,
     damage: 4, knockback: { x: 0, y: 0 }, hitstun: 0, hitstop: 0,
-    groundEffect: { halfWidth: 1.7, height: 0.85, durationTicks: 240, pulseTicks: 30 },
+    groundEffect: { halfWidth: 2.1, height: 0.85, durationTicks: 240, pulseTicks: 30 },
   },
 };
 
 export const ENEMY_RULES: Readonly<Record<EnemyKind, EnemyRule>> = {
   gatekeeper: {
-    name: '欧米 OMI-01', height: 2.6, halfWidth: 0.52, maxHp: 45, speed: 1.8, range: 10, leash: 9, cooldownTicks: 45,
+    name: '欧米 OMI-01', height: 2.6, halfWidth: 0.52, maxHp: 88, speed: 3.3, range: 14, leash: 28, cooldownTicks: 21,
     skills: [
-      skill('gatekeeper-sweep', '夹臂横扫', 'melee', 42, 8, 48, 10, { x: 0.25, y: 0.45, w: 1.7, h: 1.7 }, 2),
-      skill('gatekeeper-clamp', '突进夹击', 'dash', 30, 14, 54, 13, { x: 0.2, y: 0.35, w: 1.5, h: 1.8 }, 4, 7),
+      skill('gatekeeper-sweep', '夹臂横扫', 'melee', 22, 8, 16, 12, { x: 0.25, y: 0.45, w: 1.9, h: 1.7 }, 2.2),
+      skill('gatekeeper-clamp', '突进夹击', 'dash', 18, 18, 28, 16, { x: 0.2, y: 0.35, w: 1.5, h: 1.8 }, 4.8, 10),
     ],
   },
   lineHound: {
-    name: '巡线犬', height: 1.5, halfWidth: 0.85, maxHp: 35, speed: 2.6, range: 11, leash: 10, cooldownTicks: 48,
+    name: '巡线犬', height: 1.5, halfWidth: 0.85, maxHp: 68, speed: 4.8, range: 16, leash: 32, cooldownTicks: 18,
     skills: [
-      skill('lineHound-pounce', '直线扑冲', 'pounce', 30, 32, 54, 10, { x: 0.1, y: 0.15, w: 1.45, h: 1.1 }, 4.5, 6.5, 5),
-      skill('lineHound-slam', '落地震击', 'slam', 36, 10, 54, 12, { x: -2.2, y: 0, w: 4.4, h: 0.8 }, 2.5, 0, 7),
+      skill('lineHound-pounce', '直线扑冲', 'pounce', 18, 26, 22, 13, { x: 0.1, y: 0.15, w: 1.45, h: 1.1 }, 5.5, 10, 6),
+      skill('lineHound-slam', '落地震击', 'slam', 24, 10, 30, 16, { x: -2.7, y: 0, w: 5.4, h: 0.8 }, 2.8, 0, 8),
     ],
   },
   watchWasp: {
-    name: '哨蜂', height: 0.8, halfWidth: 0.75, maxHp: 30, speed: 2.4, range: 14, leash: 10, cooldownTicks: 55,
+    name: '哨蜂', height: 0.8, halfWidth: 0.75, maxHp: 58, speed: 16, range: 30, leash: 80, cooldownTicks: 20,
     skills: [
-      skill('watchWasp-bomb', '悬停投弹', 'bomb', 57, 1, 42, 0, { x: 0, y: 0, w: 1, h: 1 }, 0.7),
-      skill('watchWasp-thermite', '铝热剂投放', 'thermite', 72, 1, 60, 0, { x: 0, y: 0, w: 1, h: 1 }, 0.7),
+      skill('watchWasp-bomb', '悬停投弹', 'bomb', 30, 1, 22, 0, { x: 0, y: 0, w: 1, h: 1 }, 2.2),
+      skill('watchWasp-thermite', '铝热剂投放', 'thermite', 36, 42, 18, 0, { x: 0, y: 0, w: 1, h: 1 }, 2.2),
     ],
   },
   loadmaster: {
-    name: '搬山', height: 2.8, halfWidth: 1.05, maxHp: 100, speed: 1, range: 11, leash: 8, cooldownTicks: 60,
+    name: '搬山', height: 2.8, halfWidth: 1.05, maxHp: 196, speed: 1.8, range: 14, leash: 24, cooldownTicks: 32,
     skills: [
-      skill('loadmaster-smash', '前方下砸', 'melee', 72, 12, 90, 20, { x: 0.6, y: 0, w: 2.2, h: 2.7 }, 3),
-      skill('loadmaster-sweep', '低位横扫', 'melee', 54, 16, 72, 14, { x: 0.3, y: 0, w: 3.2, h: 0.8 }, 3.5),
+      skill('loadmaster-smash', '前方下砸', 'melee', 44, 12, 48, 28, { x: 0.6, y: 0, w: 3.1, h: 2.7 }, 3.8),
+      skill('loadmaster-sweep', '低位横扫', 'melee', 32, 18, 38, 19, { x: 0.3, y: 0, w: 4.2, h: 0.8 }, 4.7),
     ],
   },
 };

@@ -1,11 +1,13 @@
+import type { Texture } from 'three';
 import { FacilityKit } from './facility-kit.ts';
+import { createFacilityWallMaterial } from './facility-wall-material.ts';
 import { FACILITY_PLATFORMS } from '../config/facility-scenes.ts';
 
-export function createAbyssView() {
+export function createAbyssView(background: Texture) {
   const kit = new FacilityKit();
   kit.root.name = 'infiniband-abyss';
   for (const [left, right, y, z, depth] of FACILITY_PLATFORMS.abyss) kit.platform(left, right, y, z, depth);
-  buildShaft(kit);
+  buildShaft(kit, background);
   buildFoundations(kit);
   buildComputeBank(kit);
   buildNetworkBank(kit);
@@ -18,12 +20,11 @@ export function createAbyssView() {
   return kit.finish();
 }
 
-function buildShaft(k: FacilityKit) {
-  const wall = k.material(0x193344);
-  const depth = k.material(0x0c1e2a);
+function buildShaft(k: FacilityKit, background: Texture) {
+  const wall = createFacilityWallMaterial(background);
+  k.materials.push(wall);
   const cold = k.material(0x214e64, 0.5, 0x0b2738);
   k.box(88, 54, -25, 176, 108, 2, wall);
-  k.box(95, 51, -23.8, 58, 102, 0.3, depth);
   k.box(88, 103, -7, 179, 3, 33, k.dark);
   for (const x of [8, 39, 66, 104, 148, 171]) {
     k.box(x, 51, -18, 4, 102, 5, k.shell);

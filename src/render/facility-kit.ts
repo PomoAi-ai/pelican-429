@@ -1,8 +1,32 @@
 import * as THREE from 'three';
+import { getLanguage, onLanguageChange } from '../core/language.ts';
 import { createFacilitySignals } from './facility-signals.ts';
 import type { FacilitySignalKind, FacilitySignalPoint, FacilitySignalRoute } from './facility-signals.ts';
 import { createFacilityLighting } from './facility-lighting.ts';
 import type { FacilityLamp } from './facility-lighting.ts';
+
+const PANEL_ZH: Record<string, string> = {
+  'ENTRY →': '入口 →', 'EXIT →': '出口 →', 'ACCESS 01': '门禁 01', '01 / ACCESS': '01 / 门禁',
+  'ROOF ACCESS': '通往屋顶', 'CORE ACCESS': '核心入口', 'COOLANT / DANGER': '冷却液 / 危险',
+  'COOLANT': '冷却液', 'COOLANT / RESERVOIR': '冷却液 / 储液池', 'COLD WATER': '冷却水',
+  'HIGH VOLTAGE': '高压危险', 'POWER': '供电', 'SUPPLY  /  RETURN': '供液 / 回液',
+  'SUPPLY →  /  ← RETURN': '供液 → / ← 回液', 'HOT AIR RETURN': '热风回流',
+  'SERVICE AISLE / InfiniBand': '检修通道 / InfiniBand', 'COLD / SERVICE AISLE': '冷通道 / 检修通道',
+  'SERVICE / FOUNDATION': '检修 / 基础层', 'COOLANT / MAINTENANCE': '冷却液 / 检修',
+  'HOT RETURN / OVERHEAD FABRIC': '热风回流 / 顶部网络', 'COOLANT / CIRCULATION': '冷却液 / 循环',
+  'DEEP SHAFT': '深井', 'LIQUID COOLING': '液冷', 'THERMAL': '散热',
+  'COMPUTE CATHEDRAL': '算力大教堂', '01 / FINAL HALL': '01 / 终章大厅',
+  '01 / MOUNTAIN COMPUTE': '01 / 山体算力堡垒', 'PELICAN / COMPUTE CAMPUS': '鹈鹕 / 算力园区',
+  'GB300 / CORE': 'GB300 / 核心', 'GB300 / COMPUTE': 'GB300 / 算力', 'GB300 NVL72 / COMPUTE': 'GB300 NVL72 / 算力',
+  'FABRIC / SWITCHING': '网络 / 交换区', 'FABRIC / TRANSIT': '网络 / 中转区',
+  'CONNECT / SCALE': '互联 / 扩展', 'InfiniBand / FABRIC': 'InfiniBand / 网络',
+  'InfiniBand / LIVE TRAFFIC': 'InfiniBand / 实时流量', 'B1 / NETWORK': 'B1 / 网络',
+  'CORE / 72': '核心 / 72', 'CONTROL': '控制', 'CONTROL / 03': '控制 / 03',
+  'CDU / PRIMARY ↔ SECONDARY': 'CDU / 一次侧 ↔ 二次侧', 'SPINE / RISER': '主干 / 竖井',
+  'SYSTEM': '系统', 'ONLINE': '在线', 'STORAGE': '存储', 'NETWORK': '网络',
+  'IB SWITCH': 'IB 交换机', 'IB / LEAF': 'IB / 叶交换机', 'IB / SPINE': 'IB / 脊交换机',
+  'VALLEY / AI': '山谷 / AI',
+};
 
 export class FacilityKit {
   readonly root = new THREE.Group();
@@ -309,15 +333,21 @@ export class FacilityKit {
       canvas.height = rack ? 768 : 128;
       const context = canvas.getContext('2d');
       if (!context) throw new Error('Facility labels require a canvas 2D context');
-      context.fillStyle = '#142a34';
-      context.fillRect(0, 0, canvas.width, canvas.height);
-      context.fillStyle = '#a8d7db';
-      context.font = `bold ${rack ? 35 : 64}px sans-serif`;
-      context.textAlign = 'center';
-      context.fillText(text, canvas.width / 2, rack ? 60 : 87, canvas.width - 28);
-      if (rack) drawRackFace(context, text);
       const texture = new THREE.CanvasTexture(canvas);
       texture.colorSpace = THREE.SRGBColorSpace;
+      const zh = PANEL_ZH[text];
+      const draw = (): void => {
+        context.fillStyle = '#142a34';
+        context.fillRect(0, 0, canvas.width, canvas.height);
+        context.fillStyle = '#a8d7db';
+        context.font = `bold ${rack ? 35 : 64}px sans-serif`;
+        context.textAlign = 'center';
+        context.fillText(getLanguage() === 'zh' && zh !== undefined ? zh : text, canvas.width / 2, rack ? 60 : 87, canvas.width - 28);
+        if (rack) drawRackFace(context, text);
+        texture.needsUpdate = true;
+      };
+      draw();
+      if (zh !== undefined) texture.addEventListener('dispose', onLanguageChange(draw));
       this.textures.push(texture);
       material = new THREE.MeshStandardMaterial({ map: texture, roughness: 0.8, emissive: 0x37535b, emissiveMap: texture, emissiveIntensity: 0.3 });
       this.materials.push(material);

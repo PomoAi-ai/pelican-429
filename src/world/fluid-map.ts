@@ -24,6 +24,8 @@ export interface FluidMap extends FluidQuery {
   readonly chunksY: number;
   /** 行主序 ty*width+tx。 */
   readonly cells: Uint8Array;
+  /** 水量或实心镜像变化的版本；多个只读消费者可各自判断是否需要扫描。 */
+  readonly revision: number;
   /** 实心镜像（collision==='solid' 为 1；oneWay/none 为 0）。 */
   readonly solid: Uint8Array;
   /** 非整数/越界/超 0..255/实心格设非 0 → 抛；值变化时唤醒自身与四邻并标脏区块（同值为空操作）。 */
@@ -67,6 +69,7 @@ export function createFluidMap(tiles: TileMap): FluidMap {
   const dirty = new Set<number>();
   for (let i = 0; i < chunksX * chunksY; i++) dirty.add(i);
   let lostMass = 0;
+  let revision = 0;
 
   const inBounds = (tx: number, ty: number): boolean => tx >= 0 && ty >= 0 && tx < width && ty < height;
   const indexOf = (tx: number, ty: number): number => {
@@ -89,6 +92,7 @@ export function createFluidMap(tiles: TileMap): FluidMap {
     list[count++] = i;
   };
   const changed = (i: number): void => {
+    revision++;
     const tx = i % width;
     push(i);
     if (tx > 0) push(i - 1);
@@ -121,6 +125,9 @@ export function createFluidMap(tiles: TileMap): FluidMap {
     chunksX,
     chunksY,
     cells,
+    get revision() {
+      return revision;
+    },
     solid,
     amountAt(tx, ty) {
       if (!Number.isInteger(tx) || !Number.isInteger(ty)) throw new Error(`fluid-map: amountAt needs integer coords, got (${tx},${ty})`);

@@ -45,7 +45,6 @@ export function createCharacterAssets(parent: HTMLElement, actor: ShowcaseActor,
     return;
   }
   const base = isEnemyKind(actor) ? `${ENEMY_MODEL_DIRS[actor]}/` : `./characters/${actor}/`;
-  const assetUrl = (path: string): string => new URL(path, path.startsWith('./') ? window.location.href : new URL(base, window.location.href)).href;
   const source = element('a', header, '', '资源来源');
   source.href = historical ? `${base}history/README.md` : `${base}SOURCE.md`;
   source.target = '_blank'; source.rel = 'noopener';
@@ -90,7 +89,7 @@ export function createCharacterAssets(parent: HTMLElement, actor: ShowcaseActor,
     const asset = selected[index]!;
     dialogTitle.textContent = asset.label;
     error.hidden = true;
-    large.src = assetUrl(asset.path);
+    large.src = asset.path;
     large.alt = asset.label;
     original.href = large.src;
     position.textContent = `${index + 1} / ${selected.length}`;
@@ -121,7 +120,7 @@ export function createCharacterAssets(parent: HTMLElement, actor: ShowcaseActor,
       thumbnail.type = 'button';
       thumbnail.setAttribute('aria-label', `查看${asset.label}`);
       const image = element('img', thumbnail, '');
-      image.src = assetUrl(asset.thumbnail);
+      image.src = asset.thumbnail;
       image.alt = ''; image.loading = 'lazy'; image.decoding = 'async';
       image.addEventListener('error', () => { thumbnail.title = `资源加载失败：${asset.path}`; thumbnail.classList.add('sc-asset-error'); });
       element('span', thumbnail, '', asset.label);

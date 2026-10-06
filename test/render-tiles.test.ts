@@ -61,6 +61,35 @@ describe('chunk-streamer', () => {
     assert.throws(() => createChunkStreamer({ label: 'x', chunksX: 1, chunksY: 1, margin: 2, keep: 1, maxBuilds: 1, build() {}, clear() {} }), /x: keep/);
     assert.throws(() => spyStreamer().s.update({ x: Number.NaN, y: 0, w: 1, h: 1 }, []), /test: invalid view/);
   });
+
+  test('时间预算：首帧同步建完视野；之后超预算的构建每帧仍推进一个，视野内优先、近者先建；重建同样受预算', () => {
+    const built: string[] = [];
+    const s = createChunkStreamer({
+      label: 'test',
+      chunksX: 8,
+      chunksY: 8,
+      margin: 1,
+      keep: 2,
+      maxBuilds: 64,
+      budgetMs: 1,
+      build: (cx, cy) => {
+        built.push(`${cx},${cy}`);
+        const t = performance.now();
+        while (performance.now() - t < 2); // 单个区块耗时 > 预算
+      },
+      clear() {},
+    });
+    assert.equal(s.update(VIEW, []), 16, 'first frame ignores the budget');
+    built.length = 0;
+    const far = { x: 200, y: 100, w: 40, h: 40 }; // 视野区块 cx ∈ [6,7]、cy ∈ [3,4]，中心 (6.875, 3.75)
+    const perFrame: number[] = [];
+    while ((s.pending > 0 || perFrame.length === 0) && perFrame.length < 20) perFrame.push(s.update(far, []));
+    assert.deepEqual(perFrame, [1, 1, 1, 1, 1, 1, 1, 1]);
+    assert.deepEqual(built, ['6,3', '7,3', '6,4', '7,4', '6,2', '7,2', '6,5', '7,5']);
+    assert.equal(s.update(far, [{ cx: 6, cy: 3 }, { cx: 7, cy: 3 }]), 1);
+    assert.equal(s.update(far, []), 1, 'carry-over rebuild');
+    assert.equal(s.pending, 0);
+  });
 });
 
 describe('tile-view 质感', () => {

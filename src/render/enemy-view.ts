@@ -1,5 +1,6 @@
 import * as THREE from 'three';
-import { DRONE_PAYLOADS, ENEMY_RULES } from '../config/enemy-rules.ts';
+import { ENEMY_RULES } from '../config/enemy-rules.ts';
+import type { EnemyKind } from '../config/enemy-rules.ts';
 import { TUNING } from '../config/tuning.ts';
 import { clamp, lerp } from '../core/math.ts';
 import { createEnemyRig } from './enemy-rig.ts';
@@ -7,6 +8,15 @@ import type { EnemyAction } from './enemy-rig.ts';
 import type { EntityViewFactory } from './view-registry.ts';
 import { terrainHeightAt } from '../physics/tile-collision.ts';
 import type { TileQuery } from '../world/tile-map.ts';
+import { createThermiteStream } from './drone-thermite-view.ts';
+
+// GLB 的蓄力、命中、收招段已烘焙；分别缩放才能让动作与新版伤害时刻一致。
+const CLIP_PHASE_TICKS: Readonly<Record<EnemyKind, readonly [readonly [number, number, number], readonly [number, number, number]]>> = {
+  gatekeeper: [[42, 8, 48], [30, 14, 54]],
+  lineHound: [[30, 32, 54], [36, 10, 54]],
+  watchWasp: [[57, 1, 42], [72, 180, 1]],
+  loadmaster: [[72, 12, 90], [54, 16, 72]],
+};
 
 export function createEnemyViewFactory(terrain: TileQuery): EntityViewFactory {
   return (entity) => {
@@ -28,11 +38,8 @@ export function createEnemyViewFactory(terrain: TileQuery): EntityViewFactory {
     healthFill.position.copy(healthBack.position); healthFill.position.z += 0.01;
     healthBack.scale.set(1.05, 1.6, 1);
     root.add(healthBack, healthFill);
-    const warningGeometry = new THREE.PlaneGeometry(1, .06);
-    const warningMaterial = new THREE.MeshBasicMaterial({ color: '#ffad40', transparent: true, opacity: .8, depthWrite: false, side: THREE.DoubleSide, toneMapped: false });
-    const groundWarning = new THREE.Mesh(warningGeometry, warningMaterial);
-    groundWarning.visible = false;
-    root.add(groundWarning);
+    const thermiteStream = kind === 'watchWasp' ? createThermiteStream() : null;
+    if (thermiteStream) root.add(thermiteStream.root);
     const lookTarget = new THREE.Vector3();
     let clock = 0;
     let hitTime = 0;
@@ -58,24 +65,31 @@ export function createEnemyViewFactory(terrain: TileQuery): EntityViewFactory {
           action = e.enemy!.skill === 0 ? 'skill1' : 'skill2';
           const def = e.attack.def;
           const ticks = Math.max(0, e.attack.elapsed - 1 + alpha);
-          seconds = ticks / (def.startup + def.active + def.recovery) * rig.duration(action);
+          const [startup, active, recovery] = CLIP_PHASE_TICKS[kind][e.enemy!.skill!];
+          const clipTicks = ticks < def.startup ? ticks / def.startup * startup
+            : ticks < def.startup + def.active ? startup + (ticks - def.startup) / def.active * active
+            : startup + active + (ticks - def.startup - def.active) / def.recovery * recovery;
+          seconds = clipTicks / (startup + active + recovery) * rig.duration(action);
           warning = ticks < def.startup ? 0.5 + 0.5 * Math.sin(ticks * 0.6) : 0;
         }
+        if (e.armored) warning = 1;
         const target = e.enemy!.lookTarget;
         if (target) {
           lookTarget.set(target.x, target.y, 0);
+          root.parent!.localToWorld(lookTarget);
           rig.root.worldToLocal(lookTarget);
         }
         rig.pose(action, seconds, clamp(health.flashTicks / TUNING.combat.hitFlashTicks, 0, 1), warning, target ? lookTarget : null);
-        groundWarning.visible = false;
-        if (kind === 'watchWasp' && warning > 0) {
-          const ground = terrainHeightAt(terrain, e.body.x, e.body.y, terrain.height, true);
-          if (ground !== null) {
-            const effect = (e.enemy!.skill === 0 ? DRONE_PAYLOADS.bomb : DRONE_PAYLOADS.thermite).groundEffect!;
-            groundWarning.visible = true;
-            groundWarning.position.set(0, ground - root.position.y + .06, .65);
-            groundWarning.scale.x = effect.halfWidth * 2;
-            warningMaterial.opacity = .45 + warning * .5;
+        // 追击投弹的落点会前移，用机体蓄力灯预警；危险范围由真实载荷落地后的火区显示。
+        if (thermiteStream) {
+          thermiteStream.root.visible = false;
+          if (e.attack && e.enemy!.skill === 1 && e.attack.elapsed >= e.attack.def.startup && e.attack.elapsed < e.attack.def.startup + e.attack.def.active) {
+            const ground = terrainHeightAt(terrain, e.body.x, e.body.y, terrain.height, true);
+            if (ground !== null && root.position.y > ground) {
+              const elapsed = Math.max(0, e.attack.elapsed - e.attack.def.startup - 1 + alpha) * TUNING.sim.step;
+              // 喷口火花只贴近机体，不能画成通往正下方地面的虚假伤害束。
+              thermiteStream.sync(Math.min(.8, root.position.y - ground), elapsed, e.attack.def.active * TUNING.sim.step);
+            }
           }
         }
         const share = Math.max(0, health.hp / health.maxHp);
@@ -83,7 +97,7 @@ export function createEnemyViewFactory(terrain: TileQuery): EntityViewFactory {
         healthFill.position.x = -(1 - share) * 0.65;
         healthBack.visible = healthFill.visible = share < 1;
       },
-      dispose() { rig.dispose(); root.removeFromParent(); geometry.dispose(); backMaterial.dispose(); healthMaterial.dispose(); warningGeometry.dispose(); warningMaterial.dispose(); },
+      dispose() { rig.dispose(); thermiteStream?.dispose(); root.removeFromParent(); geometry.dispose(); backMaterial.dispose(); healthMaterial.dispose(); },
     };
   };
 }

@@ -2,7 +2,7 @@
  * 命中判定与受击结算。只依赖结构化的 Combatant / HitSource，不依赖具体实体类型；
  * 战斗参数（闪白/无敌帧）由调用方注入，不读全局 TUNING。
  */
-import type { CombatTuning, ContactDamageTuning } from '../config/tuning.ts';
+import type { CombatTuning, ContactDamageTuning, GuardRule } from '../config/tuning.ts';
 import type { EventQueue } from '../core/events.ts';
 import type { SimEvent } from '../core/game-events.ts';
 import { overlaps, rectCenter, rectIntersection } from '../core/math.ts';
@@ -18,8 +18,23 @@ export interface Health {
   hitstunTicks: number;
   flashTicks: number;
   invulnTicks: number;
+  /** 服务器超载全程及结束余效，连持续环境伤害也免疫。 */
+  overloadInvulnTicks: number;
   /** 最近一次受击的 tick；从未受击为 -1。 */
   lastHitTick: number;
+  /** 免伤提示按目标限频，持续接触和弹幕不会每 tick 堆叠飘字。 */
+  lastImmuneNoticeTick: number;
+  /** 小弹共享滚动命中窗口，避免同一技能的弹体各自叠满伤害。 */
+  barrageHits: { ownerId: number; group: string; tick: number }[];
+  /** Boss 的防御：没有该字段的目标全额受伤，每次命中都会硬直。 */
+  guard?: Guard;
+}
+
+export interface Guard {
+  readonly rule: GuardRule;
+  poiseDamage: number;
+  poiseStartTick: number;
+  immuneUntilTick: number;
 }
 
 export type Team = 'player' | 'enemy' | 'neutral';
@@ -31,6 +46,8 @@ export interface Combatant {
   facing: 1 | -1;
   health?: Health;
   attack?: AttackInstance;
+  /** 已承诺的重型出招抵抗硬直与击退，仍正常承受伤害。 */
+  armored?: boolean;
 }
 
 /**
@@ -54,14 +71,34 @@ export interface HitSource {
   readonly radial?: boolean;
   /** 覆盖 combat.invulnTicks 的受击无敌帧（接触伤害）。 */
   readonly invulnTicks?: number;
+  /** 同一技能的不同小弹共享额度；没有该字段的单次攻击不受影响。 */
+  readonly barrageGroup?: string;
 }
+
+const BARRAGE_WINDOW_TICKS = 12;
+const BARRAGE_MAX_HITS = 3;
 
 // 事件类型已移至 core/game-events.ts，此处 re-export 保持旧导入路径可用。
 export type { DummyResetEvent, HitEvent, ProjectileFiredEvent, ProjectileImpactEvent, SimEvent } from '../core/game-events.ts';
 
-export function createHealth(maxHp: number): Health {
+export function createHealth(maxHp: number, guard?: GuardRule): Health {
   if (!(Number.isFinite(maxHp) && maxHp > 0)) throw new Error(`createHealth: maxHp must be > 0, got ${maxHp}`);
-  return { hp: maxHp, maxHp, hitstunTicks: 0, flashTicks: 0, invulnTicks: 0, lastHitTick: -1 };
+  return { hp: maxHp, maxHp, hitstunTicks: 0, flashTicks: 0, invulnTicks: 0, overloadInvulnTicks: 0, lastHitTick: -1, lastImmuneNoticeTick: -Infinity, barrageHits: [],
+    ...(guard ? { guard: { rule: guard, poiseDamage: 0, poiseStartTick: -Infinity, immuneUntilTick: -Infinity } } : {}) };
+}
+
+/** 未破韧性的命中只扣血；破韧后清零累计并进入一段硬直免疫。 */
+function breaksPoise(g: Guard, damage: number, tick: number): boolean {
+  if (tick < g.immuneUntilTick) return false;
+  if (tick - g.poiseStartTick >= g.rule.poiseWindowTicks) {
+    g.poiseStartTick = tick;
+    g.poiseDamage = 0;
+  }
+  g.poiseDamage += damage;
+  if (g.poiseDamage < g.rule.poise) return false;
+  g.poiseDamage = 0;
+  g.immuneUntilTick = tick + g.rule.staggerImmuneTicks;
+  return true;
 }
 
 /** 近战命中源：仅攻击处于 active 阶段时存在。 */
@@ -84,18 +121,23 @@ export function contactHitSource(c: Combatant, cd: ContactDamageTuning): HitSour
   return { sourceId: c.id, ownerId: c.id, team: c.team, box, def: cd.hit, dir: c.facing, hitIds: [], maxHits: Infinity, radial: true, invulnTicks: cd.invulnTicks };
 }
 
-/** 结算一次命中：扣血（不低于 0）、击退（沿 dir）、硬直、闪白、无敌帧（invulnTicks 缺省取 cfg.invulnTicks）。 */
-export function applyHit(target: Combatant, dir: 1 | -1, def: HitDef, tick: number, cfg: CombatTuning, invulnTicks: number = cfg.invulnTicks): void {
+/** 结算一次命中：扣血（不低于 0）、击退（沿 dir）、硬直、闪白、无敌帧（invulnTicks 缺省取 cfg.invulnTicks）；返回防御结算后的伤害。 */
+export function applyHit(target: Combatant, dir: 1 | -1, def: HitDef, tick: number, cfg: CombatTuning, invulnTicks: number = cfg.invulnTicks): number {
   const h = target.health;
   if (!h) throw new Error(`applyHit: target ${target.id} has no health`);
-  h.hp = Math.max(0, h.hp - def.damage);
-  h.hitstunTicks = def.hitstun;
+  const g = h.guard;
+  const damage = g ? def.damage * (target.armored ? g.rule.armoredScale : 1) * (def.ultimate ? g.rule.ultimateScale : 1) : def.damage;
+  h.hp = Math.max(0, h.hp - damage);
   h.flashTicks = cfg.hitFlashTicks;
   h.invulnTicks = invulnTicks;
   h.lastHitTick = tick;
-  target.body.vx = def.knockback.x * dir;
-  target.body.vy = def.knockback.y;
-  target.body.onGround = false;
+  if (!target.armored && (!g || breaksPoise(g, damage, tick))) {
+    h.hitstunTicks = def.hitstun;
+    target.body.vx = def.knockback.x * dir;
+    target.body.vy = def.knockback.y;
+    target.body.onGround = false;
+  }
+  return damage;
 }
 
 function canBeHit(src: HitSource, target: Combatant): target is Combatant & { health: Health } {
@@ -106,9 +148,16 @@ function canBeHit(src: HitSource, target: Combatant): target is Combatant & { he
     h !== undefined &&
     target.team !== src.team &&
     h.hp > 0 &&
-    h.invulnTicks === 0 &&
     !src.hitIds.includes(target.id)
   );
+}
+
+/** 战斗和环境共用头顶提示，连续危险只按目标限频。 */
+export function emitDamageImmune(target: Combatant, tick: number, events: EventQueue<SimEvent>): void {
+  const health = target.health!;
+  if (tick - health.lastImmuneNoticeTick < 30) return;
+  health.lastImmuneNoticeTick = tick;
+  events.push({ type: 'damageImmune', targetId: target.id, x: target.body.x, y: target.body.y + target.body.height + 0.3 });
 }
 
 /**
@@ -129,11 +178,26 @@ export function resolveHits(
       if (!canBeHit(src, target)) continue;
       const hurt = bodyRect(target.body);
       if (!overlaps(src.box, hurt)) continue;
+      if (target.health.invulnTicks > 0 || target.health.overloadInvulnTicks > 0) {
+        if (src.def.damage > 0) emitDamageImmune(target, tick, events);
+        continue;
+      }
+      if (src.barrageGroup !== undefined && src.def.damage > 0) {
+        const health = target.health;
+        health.barrageHits = health.barrageHits.filter(hit => tick - hit.tick < BARRAGE_WINDOW_TICKS);
+        const hits = health.barrageHits.filter(hit => hit.ownerId === src.ownerId && hit.group === src.barrageGroup);
+        if (hits.length >= BARRAGE_MAX_HITS) {
+          // 消耗碰撞但不施加伤害、硬直或停帧，弹体照常消散，不能滞留补伤。
+          src.hitIds.push(target.id);
+          continue;
+        }
+        health.barrageHits.push({ ownerId: src.ownerId, group: src.barrageGroup, tick });
+      }
       const point = rectCenter(rectIntersection(src.box, hurt) ?? hurt);
       const dir = src.radial ? (target.body.x >= src.box.x + src.box.w / 2 ? 1 : -1) : src.dir;
-      applyHit(target, dir, src.def, tick, cfg, src.invulnTicks);
+      const damage = applyHit(target, dir, src.def, tick, cfg, src.invulnTicks);
       src.hitIds.push(target.id);
-      events.push({ type: 'hit', attackerId: src.ownerId, sourceId: src.sourceId, targetId: target.id, damage: src.def.damage, x: point.x, y: point.y });
+      events.push({ type: 'hit', attackerId: src.ownerId, sourceId: src.sourceId, targetId: target.id, damage, x: point.x, y: point.y });
       hitstop = Math.max(hitstop, src.def.hitstop);
     }
   }
@@ -142,6 +206,8 @@ export function resolveHits(
 
 /** 递减受击计时；命中当 tick（lastHitTick===tick）不递减，保证硬直/闪白时长精确。 */
 export function tickHealth(h: Health, tick: number): void {
+  if (h.hp <= 0) h.overloadInvulnTicks = 0;
+  else if (h.overloadInvulnTicks > 0) h.overloadInvulnTicks--;
   if (h.lastHitTick === tick) return;
   if (h.hitstunTicks > 0) h.hitstunTicks--;
   if (h.flashTicks > 0) h.flashTicks--;

@@ -11,13 +11,14 @@ import type { Entity } from '../src/entities/entity.ts';
 import { BAR_HALF_WIDTH, BAR_HEIGHT, BAR_OFFSET, BAR_OVERLAP_OPACITY, pelicanVisualRect, placeDummyBar } from '../src/ui/dummy-bar-layout.ts';
 import type { Rect } from '../src/ui/dummy-bar-layout.ts';
 import { CONTROL_HINTS, HINTS_AFTER_INPUT, HINTS_AUTO_HIDE, createHud } from '../src/ui/hud.ts';
+import { setLanguage } from '../src/ui/language.ts';
 import { FakeElement, withFakeDocument } from './helpers/fake-dom.ts';
 
 const DT = 1 / 60;
 const stats = { fps: 60, tick: 0, droppedTicks: 0 };
 
 function run(hud: ReturnType<typeof createHud>, entities: Entity[], seconds: number): void {
-  for (let t = 0; t < seconds - 1e-9; t += DT) hud.update({ entities, alpha: 1, frameDt: DT, stats, playerId: 1 });
+  for (let t = 0; t < seconds - 1e-9; t += DT) hud.update({ entities, alpha: 1, frameDt: DT, stats, headSubmerged: false, playerId: 1 });
 }
 
 describe('操作提示：自动淡出与 H 切换', () => {
@@ -35,6 +36,7 @@ describe('操作提示：自动淡出与 H 切换', () => {
   });
 
   test(`开局显示，${HINTS_AUTO_HIDE}s 后自动淡出并出现“H 帮助”角标；H 再显示（不再自动淡出），再按隐藏`, () => {
+    setLanguage('zh');
     withFakeDocument(() => {
       const root = new FakeElement('div');
       const hud = createHud(root as unknown as HTMLElement, () => ({ x: 0, y: 0 }));
@@ -75,7 +77,7 @@ describe('操作提示：自动淡出与 H 切换', () => {
       assert.equal(hud.hintsVisible, true);
       run(hud, [player], 0.3);
       assert.equal(hud.hintsVisible, false, '0.5 + 4 = 4.5s 淡出');
-      assert.throws(() => hud.update({ entities: [player], alpha: 1, frameDt: Number.NaN, stats, playerId: 1 }), /hud: invalid frameDt/);
+      assert.throws(() => hud.update({ entities: [player], alpha: 1, frameDt: Number.NaN, stats, headSubmerged: false, playerId: 1 }), /hud: invalid frameDt/);
       hud.dispose();
     });
   });
@@ -144,7 +146,7 @@ describe('假人血条避让鹈鹕', () => {
       assert.ok(Math.abs(x0 - 20) < 0.01 && Math.abs(y0 - baseY) < 0.01, `bar at ${x0},${y0}`);
       pel.body.x = pel.body.prevX = 20;
       pel.body.y = pel.body.prevY = 10 + d.body.height;
-      hud.update({ entities: ents, alpha: 1, frameDt: DT, stats, playerId: 1 });
+      hud.update({ entities: ents, alpha: 1, frameDt: DT, stats, headSubmerged: false, playerId: 1 });
       const [x1, y1] = pos();
       const target = placeDummyBar(d, 1, [pelicanVisualRect(pel, 1)]);
       const moved = Math.hypot(x1 - 20, y1 - baseY);

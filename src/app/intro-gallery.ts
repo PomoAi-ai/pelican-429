@@ -1,7 +1,7 @@
 import { INTRO_EDITIONS } from '../config/intro-editions.ts';
-import { drawEditionIntro } from '../render/intro-editions.ts';
+import { drawEditionPrelude } from '../render/intro-editions.ts';
 import type { IntroImages } from '../render/intro-story.ts';
-import { getLanguage, onLanguageChange, setLanguage } from '../ui/language.ts';
+import { getLanguage, onLanguageChange } from '../ui/language.ts';
 
 const EN_MUSIC = [
   'Bells · orchestral crescendo', 'Minimal piano · layered harmony', 'Swing piano · plucked bass',
@@ -31,15 +31,6 @@ export function showIntroGallery(images: IntroImages): void {
     </nav>
     <footer class="intro-gallery-footer"></footer>`;
   document.getElementById('app')!.append(gallery);
-  const languages = document.createElement('div');
-  languages.className = 'intro-languages';
-  languages.setAttribute('role', 'group');
-  languages.setAttribute('aria-label', '语言 / Language');
-  languages.innerHTML = '<button type="button" data-language="zh">中文</button><button type="button" data-language="en">English</button>';
-  gallery.append(languages);
-  languages.querySelectorAll<HTMLButtonElement>('button').forEach((button) => {
-    button.addEventListener('click', () => setLanguage(button.dataset.language as 'zh' | 'en'));
-  });
   const syncLanguage = (): void => {
     const en = getLanguage() === 'en';
     gallery.lang = en ? 'en' : 'zh-CN';
@@ -63,7 +54,6 @@ export function showIntroGallery(images: IntroImages): void {
     set('.intro-gallery-footer', en
       ? 'Each past version has its own overture and continues into the stormy night, malfunction, pelican dream and game world.'
       : '每个历史版本都有独立序奏，并衔接雨雪夜、失控、鹈鹕梦境与游戏世界。');
-    languages.querySelectorAll('button').forEach((button) => button.setAttribute('aria-pressed', String((button as HTMLElement).dataset.language === getLanguage())));
     document.title = en ? 'Past openings · PELICAN 429' : '历史版本 · 鹈鹕 429';
   };
   syncLanguage();
@@ -81,7 +71,7 @@ export function showIntroGallery(images: IntroImages): void {
       const ctx = canvas.getContext('2d');
       if (!ctx) throw new Error('历史版本页无法创建预览画布。');
       ctx.setTransform(dpr,0,0,dpr,0,0);
-      drawEditionIntro(ctx, edition.duration * .61, images, width, height, edition, false, getLanguage());
+      drawEditionPrelude({ ctx, seconds: edition.duration * .61, progress: .61, images, width, height, edition, language: getLanguage() });
     });
   };
   const resize = new ResizeObserver(paint);

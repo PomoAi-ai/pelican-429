@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { FACILITY_SCENES } from '../config/facility-scenes.ts';
 
 export interface FacilitySkyTextures {
   readonly sky: THREE.Texture;
@@ -39,7 +40,8 @@ export function createFacilitySky(textures: FacilitySkyTextures) {
       const aspect = projection[5]! / projection[0]!;
       const cover = Math.max(1.45, aspect / 1.5 * 1.08);
       const horizon = THREE.MathUtils.clamp(0.72 + (aspect - 16 / 9) * 0.11, 0.72, 0.82);
-      const travelX = THREE.MathUtils.clamp((camera.position.x - 84) / 84, -1, 1);
+      const halfWidth = FACILITY_SCENES.fortress.width / 2;
+      const travelX = THREE.MathUtils.clamp((camera.position.x - halfWidth) / halfWidth, -1, 1);
       const travelY = THREE.MathUtils.clamp((camera.position.y - 52.5) / 47.5, -1, 1);
       for (const { mesh, parallax, lift } of layers) {
         const distance = camera.position.z - mesh.position.z;

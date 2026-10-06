@@ -12,13 +12,13 @@ export interface FacilityShot {
 export const FACILITY_SCENES = {
   fortress: {
     name: '山体算力堡垒', number: '01', subtitle: '黑洞前哨 · 三层机房 · 屋顶冷却阵列',
-    width: 168, height: 100, floorY: 20,
-    overview: { label: '全景', caption: '山体算力堡垒', x: 84, y: 43, width: 180, height: 88 },
+    width: 200, height: 100, floorY: 20,
+    overview: { label: '全景', caption: '山体算力堡垒', x: 100, y: 43, width: 212, height: 88 },
     shots: [
-      { label: '黑洞前哨', caption: '黑洞吸积盘 · 冷却液断崖 · 悬空踏台', x: 23, y: 24, width: 66, height: 37 },
-      { label: '堡垒门禁', caption: '外部冷却 · 巨型门禁', x: 57, y: 34, width: 54, height: 48 },
-      { label: '多层机房', caption: 'GB300 计算阵列 · InfiniBand 网络区', x: 110, y: 47, width: 106, height: 62 },
-      { label: '屋顶设施', caption: '冷却机组与跨区桥架', x: 111, y: 71, width: 110, height: 34 },
+      { label: '黑洞前哨', caption: '黑洞吸积盘 · 冷却液断崖 · 悬空踏台', x: 55, y: 24, width: 66, height: 37 },
+      { label: '堡垒门禁', caption: '外部冷却 · 巨型门禁', x: 89, y: 34, width: 54, height: 48 },
+      { label: '多层机房', caption: 'GB300 计算阵列 · InfiniBand 网络区', x: 142, y: 47, width: 106, height: 62 },
+      { label: '屋顶设施', caption: '冷却机组与跨区桥架', x: 143, y: 71, width: 110, height: 34 },
     ],
   },
   cathedral: {
@@ -61,7 +61,7 @@ export const FACILITY_CHAPTERS: Readonly<Record<FacilityChapterId, {
   readonly exit: { readonly x: number; readonly y: number };
   readonly next: FacilityChapterId | null;
 }>> = {
-  fortress: { spawn: { x: 12, y: 20 }, exit: { x: 159, y: 20 }, next: 'cathedral' },
+  fortress: { spawn: { x: 44, y: 20 }, exit: { x: 191, y: 20 }, next: 'cathedral' },
   cathedral: { spawn: { x: 16, y: 14 }, exit: { x: 166, y: 14 }, next: 'abyss' },
   abyss: { spawn: { x: 16, y: 44 }, exit: { x: 169, y: 44 }, next: null },
 };
@@ -84,16 +84,16 @@ export function parseFacilityScene(params: URLSearchParams): FacilitySceneId {
 /** 玩家平面的踏板：[左端、右端（不含）、脚底高度、深度位置、踏板深度]。 */
 export const FACILITY_PLATFORMS = {
   fortress: [
-    [56, 168, 20, -0.25, 1.5], [54, 166, 74, -3.5, 15],
-    [46, 56, 8, -0.25, 1.5], [58, 70, 14, -0.25, 1.5],
-    [52, 68, 30, -0.25, 1.5],
-    [70, 99, 38, -0.25, 1.5], [105, 148, 38, -0.25, 1.5],
-    [70, 119, 56, -0.25, 1.5], [125, 149, 56, -0.25, 1.5],
-    [97, 105, 26, -0.25, 1.5], [101, 109, 32, -0.25, 1.5],
-    [116, 124, 44, -0.25, 1.5], [120, 128, 50, -0.25, 1.5],
-    [150, 162, 30, -0.25, 1.5], [150, 162, 46, -0.25, 1.5], [150, 162, 62, -0.25, 1.5],
+    [88, 200, 20, -0.25, 1.5], [86, 198, 74, -3.5, 15],
+    [78, 88, 8, -0.25, 1.5], [90, 102, 14, -0.25, 1.5],
+    [84, 100, 30, -0.25, 1.5],
+    [102, 131, 38, -0.25, 1.5], [137, 180, 38, -0.25, 1.5],
+    [102, 151, 56, -0.25, 1.5], [157, 181, 56, -0.25, 1.5],
+    [129, 137, 26, -0.25, 1.5], [133, 141, 32, -0.25, 1.5],
+    [148, 156, 44, -0.25, 1.5], [152, 160, 50, -0.25, 1.5],
+    [182, 194, 30, -0.25, 1.5], [182, 194, 46, -0.25, 1.5], [182, 194, 62, -0.25, 1.5],
     ...FORTRESS_CHASM.steppingStones.map(([left, right, y]) => [left, right, y, -0.25, 1.5] as const),
-    [38, 56, 20, -0.25, 1.5],
+    [70, 88, 20, -0.25, 1.5],
   ],
   cathedral: [
     [8, 172, 14, 0, 10],

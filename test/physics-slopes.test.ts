@@ -107,7 +107,7 @@ describe('Body: stepUp / groundSnap', () => {
     const c = createBody({ x: 1, y: 1, halfWidth: 0.5, height: 1, stepUp: 0.5, groundSnap: 0.25 });
     assert.equal(c.stepUp, 0.5);
     assert.equal(c.groundSnap, 0.25);
-    assert.throws(() => createBody({ x: 1, y: 1, halfWidth: 0.5, height: 1, stepUp: 0.6 }), /stepUp/);
+    assert.throws(() => createBody({ x: 1, y: 1, halfWidth: 0.5, height: 1, stepUp: 1.1 }), /stepUp/);
     assert.throws(() => createBody({ x: 1, y: 1, halfWidth: 0.5, height: 1, stepUp: -0.1 }), /stepUp/);
     assert.throws(() => createBody({ x: 1, y: 1, halfWidth: 0.5, height: 1, groundSnap: Number.NaN }), /groundSnap/);
     assert.throws(() => createBody({ x: 1, y: 1, halfWidth: 0.5, height: 1, groundSnap: 1 }), /groundSnap/);
@@ -373,7 +373,7 @@ describe('斜坡行走', () => {
 
   test('1 格整砖墙挡住（即使在地上且 stepUp=.5）', () => {
     const map = mapOf(WALL);
-    const b = pelicanBody({ x: 5, y: 1 });
+    const b = pelicanBody({ x: 5, y: 1, stepUp: 0.5 });
     tick(b, map);
     b.vx = P.runSpeed;
     let hit = false;
@@ -387,10 +387,10 @@ describe('斜坡行走', () => {
     assert.equal(b.y, 1);
   });
 
-  test('斜坡的高侧是 1 格竖墙：从坡顶反方向进入被挡', () => {
+  test('踏阶限半格时，斜坡的一格高侧仍阻挡', () => {
     // '/' 的右侧边高 1：从右往左走过来应被挡住
     const map = mapOf(['..........', '..........', '..........', '.......P..', '.../......', '##########']);
-    const b = pelicanBody({ x: 6, y: 1 });
+    const b = pelicanBody({ x: 6, y: 1, stepUp: 0.5 });
     tick(b, map);
     for (let i = 0; i < 60; i++) {
       b.vx = -P.runSpeed;
@@ -400,9 +400,9 @@ describe('斜坡行走', () => {
     assert.equal(b.y, 1);
   });
 
-  test('走下 1 格悬崖不吸附，照常下落', () => {
+  test('半格踏阶能力走下一格悬崖不吸附，照常下落', () => {
     const map = mapOf(ONE_DROP);
-    const b = pelicanBody({ x: 6, y: 2 });
+    const b = pelicanBody({ x: 6, y: 2, stepUp: 0.5 });
     tick(b, map);
     b.vx = P.runSpeed;
     let airborne = 0;

@@ -7,10 +7,11 @@
 import { SETTING_DEFS, SETTING_GROUPS, parseSeed } from '../config/game-settings.ts';
 import type { GameSettings, NumericSettingKey, SettingKey } from '../config/game-settings.ts';
 import type { SettingsController } from './settings-model.ts';
-import { getLanguage, onLanguageChange, setLanguage } from './language.ts';
+import { LANGUAGES, getLanguage, onLanguageChange, setLanguage, type Language } from './language.ts';
 
 const EN: Record<string, string> = {
   '画面': 'Graphics', '天气': 'Weather', '水': 'Water', '调试': 'Debug',
+  '显示小地图': 'Show minimap', '小地图不透明度': 'Minimap opacity', '0% 透明，100% 不透明': '0% transparent, 100% opaque',
   '画质': 'Quality', '抗锯齿': 'Antialiasing', 'MSAA 较慢（约慢一倍），默认 SMAA': 'MSAA is slower (about 2×); SMAA is the default',
   '风力': 'Wind', '暴风强度为大风的 2.5 倍；自动在微风与大风之间变化': 'Gale is 2.5× storm; auto varies between breeze and storm',
   '风力强度': 'Wind strength', '0 倍静止，5 倍超强；倍率叠加到所选风力': '0× still, 5× very strong; scales the selected wind',
@@ -19,7 +20,7 @@ const EN: Record<string, string> = {
   '降水模式': 'Precipitation mode', '手动模式可分别调节雨雪，同时开启就是雨夹雪；自动模式按天气时间表变化': 'Manual controls rain and snow separately; both make sleet. Auto follows the weather schedule',
   '雨量强度': 'Rain strength', '叠加所选雨量，自动天气同样生效': 'Scales rain, including auto weather', '雨量': 'Rain',
   '雪量强度': 'Snow strength', '叠加所选雪量，自动天气同样生效': 'Scales snow, including auto weather', '雪量': 'Snow',
-  '水色': 'Water color', '性能面板': 'Performance panel', '格子虚线': 'Tile grid', '每格对应一个真实瓦片': 'Each cell is one world tile',
+  '水色': 'Water color', '显示帧率（FPS）': 'Show FPS', '快捷键：Cmd+Option+Z / Ctrl+Alt+Z': 'Shortcut: Cmd+Option+Z / Ctrl+Alt+Z', '格子虚线': 'Tile grid', '每格对应一个真实瓦片': 'Each cell is one world tile',
   '地图点击传送': 'Map click teleport', '关闭设置后按 M 打开全地图，点击位置传送；拖动仍为平移': 'Close settings, press M and click the map to teleport; drag to pan',
   '假人射击': 'Dummy shooting', '高': 'High', '低': 'Low', '无风': 'Calm', '微风': 'Breeze', '中风': 'Moderate',
   '大风': 'Storm', '暴风': 'Gale', '自动': 'Auto', '← 向左': '← Left', '向右 →': 'Right →', '手动': 'Manual',
@@ -30,7 +31,8 @@ const EN: Record<string, string> = {
   '语言': 'Language', '世界': 'World', '种子': 'Seed', '留空随机': 'Leave blank for random', '世界种子': 'World seed',
   '新世界': 'New world', '重新加载页面生成新世界（设置会保留）': 'Reloads the page with a new world (settings are kept)',
   '角色展示场 ↗': 'Character showcase ↗', '选择角色，在预览卡内切换动作，并排查看地上 / 地下效果；返回时重新进入原种子世界。': 'Choose a character, preview actions and compare above / below ground. Returning reloads the original seed.',
-  'Esc / O 关闭并继续': 'Esc / O close and resume',
+  '关闭 ×': 'Close ×', '关闭并继续': 'Close and resume',
+  '无法保存设置（浏览器存储不可用），本次修改仍然生效': 'Settings could not be saved (browser storage is unavailable); your changes still apply for this session',
 };
 const tr = (text: string): string => getLanguage() === 'en' ? EN[text] ?? text : text;
 const issueText = (issue: string): string => {
@@ -42,11 +44,12 @@ const issueText = (issue: string): string => {
     const equal = detail.indexOf(' = ');
     return `Cleared invalid saved setting: ${tr(detail.slice(0, equal))}${detail.slice(equal)}`;
   }
-  return issue;
+  return tr(issue);
 };
 
 export interface SettingsPanelOptions {
   readonly chapter: boolean;
+  readonly gm: boolean;
   readonly parent: HTMLElement;
   readonly controller: SettingsController;
   /** 当前世界种子（测试关卡为 null）。 */
@@ -90,7 +93,7 @@ export function createSettingsPanel(options: SettingsPanelOptions): SettingsPane
 
   const gear = el('button', 'settings-gear');
   gear.type = 'button';
-  gear.textContent = '⚙';
+  gear.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m9 3 1-2h4l1 2 2 1 2-1 2 4-2 2v2l2 2-2 4-2-1-2 1-1 2h-4l-1-2-2-1-2 1-2-4 2-2V9L3 7l2-4 2 1Z" transform="translate(0 2)"/><circle cx="12" cy="12" r="3"/></svg>';
   gear.title = tr('设置（Esc / O）');
   gear.setAttribute('aria-label', gear.title);
   const onGear = (): void => controller.toggle();
@@ -105,7 +108,7 @@ export function createSettingsPanel(options: SettingsPanelOptions): SettingsPane
   label(el('span', 'settings-paused', header), '已暂停');
   const close = el('button', 'settings-close', header);
   close.type = 'button';
-  close.textContent = '×';
+  label(close, '关闭 ×');
   close.title = tr('关闭（Esc / O）');
   close.setAttribute('aria-label', tr('关闭设置'));
   close.addEventListener('click', () => controller.setOpen(false));
@@ -118,15 +121,15 @@ export function createSettingsPanel(options: SettingsPanelOptions): SettingsPane
   const languageRow = el('div', 'settings-row', card);
   label(el('span', 'settings-label', languageRow), '语言');
   const languageSelect = el('select', 'settings-language-select', languageRow);
-  for (const [value, text] of [['zh', '中文'], ['en', 'English']] as const) {
+  for (const { id, label: text } of LANGUAGES) {
     const option = el('option', '', languageSelect);
-    option.value = value;
+    option.value = id;
     option.textContent = text;
   }
   languageSelect.value = getLanguage();
-  languageSelect.addEventListener('change', () => setLanguage(languageSelect.value as 'zh' | 'en'));
+  languageSelect.addEventListener('change', () => setLanguage(languageSelect.value as Language));
   for (const group of SETTING_GROUPS) {
-    if (options.chapter && (group.id === 'weather' || group.id === 'debug')) continue;
+    if ((options.chapter && group.id === 'weather') || (!options.gm && group.id === 'debug')) continue;
     const defs = SETTING_DEFS.filter((d) => d.group === group.id);
     if (defs.length === 0) continue;
     const box = el('div', 'settings-group', card);
@@ -189,13 +192,19 @@ export function createSettingsPanel(options: SettingsPanelOptions): SettingsPane
   label(go, '新世界');
   const seedError = el('div', 'settings-seed-error', world);
   seedError.hidden = true;
+  let invalidSeed = '';
+  const translateSeedError = (): void => {
+    seedError.textContent = getLanguage() === 'en' ? `Invalid seed: “${invalidSeed}” (enter an integer from 0 to 4294967295)` : `种子无效：“${invalidSeed}”（需 0–4294967295 的整数）`;
+  };
   label(el('div', 'settings-note', world), '重新加载页面生成新世界（设置会保留）');
   const showcase = el('button', 'settings-new-world', world);
   showcase.type = 'button';
   label(showcase, '角色展示场 ↗');
   showcase.addEventListener('click', options.onShowcase);
   label(el('div', 'settings-note', world), '选择角色，在预览卡内切换动作，并排查看地上 / 地下效果；返回时重新进入原种子世界。');
-  label(el('div', 'settings-footer', card), 'Esc / O 关闭并继续');
+  const resume = label(el('button', 'settings-footer', card), '关闭并继续');
+  resume.type = 'button';
+  resume.addEventListener('click', () => controller.setOpen(false));
 
   const newWorld = (): void => {
     const raw = seedInput.value.trim();
@@ -203,7 +212,8 @@ export function createSettingsPanel(options: SettingsPanelOptions): SettingsPane
     try {
       seed = raw === '' ? Math.floor(random() * 0x100000000) : parseSeed(raw);
     } catch {
-      seedError.textContent = getLanguage() === 'en' ? `Invalid seed: “${raw}” (enter an integer from 0 to 4294967295)` : `种子无效：“${raw}”（需 0–4294967295 的整数）`;
+      invalidSeed = raw;
+      translateSeedError();
       seedError.hidden = false;
       return;
     }
@@ -261,6 +271,7 @@ export function createSettingsPanel(options: SettingsPanelOptions): SettingsPane
     seedInput.setAttribute('aria-label', tr('世界种子'));
     for (const slider of sliders) slider.input.setAttribute('aria-label', tr(SETTING_DEFS.find((d) => d.key === slider.key)!.title));
     languageSelect.value = getLanguage();
+    if (!seedError.hidden) translateSeedError();
     shownIssues = -1;
     refresh(true);
   };

@@ -2,14 +2,14 @@ import type { AttackTuning } from './tuning.ts';
 
 /** 第一章技能：秒数由固定 60 Hz 模拟换算。 */
 export const PELICAN_SKILLS = Object.freeze({
-  fishCooldownTicks: 240,
+  fishCooldownTicks: 36,
   fishCount: 7,
   dashCooldownTicks: 180,
   dashTicks: 22,
   dashSpeed: 23,
   swallowCooldownTicks: 300,
   swallowCapacity: 3,
-  bufferTicks: 8,
+  bufferTicks: 12,
 });
 
 export const WING_DASH_ATTACK: AttackTuning = Object.freeze({

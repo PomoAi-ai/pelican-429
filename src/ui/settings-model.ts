@@ -24,6 +24,8 @@ export interface SettingsRuntime {
   setSnow(v: GameSettings['snow']): void;
   setWater(v: GameSettings['water']): void;
   setPerfPanel(v: boolean): void;
+  setMinimapVisible(v: boolean): void;
+  setMinimapOpacity(v: number): void;
   setTileGrid(v: boolean): void;
   setMapTeleport(v: boolean): void;
   setDummyShoot(v: boolean): void;
@@ -45,6 +47,8 @@ const APPLY: { readonly [K in SettingKey]: (rt: SettingsRuntime, v: GameSettings
   snow: (rt, v) => rt.setSnow(v),
   water: (rt, v) => rt.setWater(v),
   perfPanel: (rt, v) => rt.setPerfPanel(v),
+  minimapVisible: (rt, v) => rt.setMinimapVisible(v),
+  minimapOpacity: (rt, v) => rt.setMinimapOpacity(v),
   tileGrid: (rt, v) => rt.setTileGrid(v),
   mapTeleport: (rt, v) => rt.setMapTeleport(v),
   dummyShoot: (rt, v) => rt.setDummyShoot(v),

@@ -4,8 +4,9 @@ import assert from 'node:assert/strict';
 import { TUNING, validateTuning } from '../src/config/tuning.ts';
 import { HUMAN_BODY_HEIGHT, PLAYER_TRANSFORM } from '../src/config/player-form.ts';
 import type { Tuning } from '../src/config/tuning.ts';
-import { createBody } from '../src/physics/body.ts';
+import { bodyRect, createBody } from '../src/physics/body.ts';
 import { applyWaterForces, submersion, waterSpanInColumn } from '../src/physics/fluid-contact.ts';
+import { overlapsSolid } from '../src/physics/tile-collision.ts';
 import { FLUID_FULL } from '../src/world/fluid-map.ts';
 import type { FluidMap } from '../src/world/fluid-map.ts';
 import { LEVEL_LEGEND, parseLevel } from '../src/world/test-level.ts';
@@ -13,6 +14,9 @@ import { createSimWorld, getPlayer, pourFluid, stepSim, NEUTRAL_INPUT } from '..
 import type { InputFrame, SimEvent, SimWorld } from '../src/sim/sim-world.ts';
 import { pelicanState } from '../src/entities/pelican-controller.ts';
 import type { PelicanState } from '../src/entities/pelican-controller.ts';
+import { TILE_PLATFORM, TILE_STONE } from '../src/world/tile-types.ts';
+
+import { SHAPE_HALF } from '../src/world/tile-shapes.ts';
 
 const SWIM = TUNING.player.swim;
 const H = TUNING.player.height;
@@ -224,17 +228,93 @@ describe('鹈鹕游泳', () => {
     assert.ok(again.states.includes('fly'), again.states.join(','));
   });
 
-  test('深水按住空格上浮到水面后不会自动跃出（需重新按）', () => {
-    const w = pool();
-    const p = getPlayer(w);
-    trace(w, 180);
-    p.body.y = 4;
-    p.body.vy = 0;
-    const t = trace(w, 240, (i) => ({ jumpPressed: i === 0, jumpHeld: true }));
-    assert.ok(t.inWater.every((v) => v), '始终在水中');
-    assert.ok(Math.max(...t.y) < SURFACE, `maxY=${Math.max(...t.y)}`);
-    assert.ok(!t.states.includes('fly') && !t.states.includes('jump'), t.states.join(','));
-    assert.equal(p.pelican?.inWater, true);
+  test('双形态从深水按住跳跃可连续跃出并登上高出水面一格半的实心岸边', () => {
+    for (const form of ['human', 'pelican'] as const) {
+      const w = pool();
+      const player = getPlayer(w);
+      player.pelican!.form = player.pelican!.transformFrom = form;
+      Object.assign(player.body, { height: form === 'human' ? HUMAN_BODY_HEIGHT : H, x: 8, y: 4, prevY: 4, vy: 0 });
+      for (let x = 9; x <= 28; x++) for (let y = 3; y < SURFACE + 2; y++) {
+        w.map.set(x, y, TILE_STONE);
+        w.fluid.set(x, y, 0);
+        if (y === SURFACE + 1) w.map.setShape(x, y, SHAPE_HALF);
+      }
+      let peak = player.body.y;
+      let landed = false;
+      for (let i = 0; i < 360; i++) {
+        stepSim(w, input({ jumpHeld: true, jumpPressed: i === 0, moveX: 1 }));
+        assert.notEqual(player.pelican!.flightMode, 'fly', '出水不依赖飞行');
+        peak = Math.max(peak, player.body.y);
+        if (player.body.onGround && player.body.y === SURFACE + 1.5) {
+          landed = true;
+          break;
+        }
+      }
+      assert.ok(peak >= SURFACE + 1.5, `${form}: maxY=${peak}`);
+      assert.ok(landed, `${form}: 未能登岸，x=${player.body.x}, y=${player.body.y}`);
+      assert.ok(peak < SURFACE + 1.7, `${form}: 跳高超过一格半附近，maxY=${peak}`);
+    }
+  });
+
+  test('双形态在浅水踩底时正常起跳，按住跳跃可直接衔接飞行', () => {
+    for (const form of ['human', 'pelican'] as const) {
+      const w = pool();
+      const player = getPlayer(w);
+      player.pelican!.form = player.pelican!.transformFrom = form;
+      for (let x = 1; x <= 28; x++) for (let y = 4; y < SURFACE; y++) w.fluid.set(x, y, 0);
+      Object.assign(player.body, { height: form === 'human' ? HUMAN_BODY_HEIGHT : H, y: 3, prevY: 3, vy: 0, onGround: true });
+      const leap = trace(w, 100, i => ({ jumpHeld: true, jumpPressed: i === 0 }));
+      assert.ok(leap.y.some(y => y > 7), `${form}: 浅水应保留正常地面跳高`);
+      assert.ok(leap.states.includes('fly'), `${form}: 持续按住应能接飞行`);
+    }
+  });
+
+  test('双形态在陆地和水底能左右走上一格台阶，更高墙和低顶仍阻挡', () => {
+    for (const form of ['human', 'pelican'] as const) for (const wet of [false, true]) for (const dir of [-1, 1] as const) for (const obstacle of ['step', 'wall', 'ceiling'] as const) {
+      const w = pool();
+      const player = getPlayer(w);
+      player.pelican!.form = player.pelican!.transformFrom = form;
+      for (const entity of w.entities) if (entity.dummy) entity.removed = true;
+      if (!wet) w.fluid.cells.fill(0);
+      Object.assign(player.body, { height: form === 'human' ? HUMAN_BODY_HEIGHT : H, x: 14.5, y: 3, prevY: 3, vy: 0, onGround: true });
+      for (let i = 0; i < 6; i++) {
+        const x = dir === 1 ? 16 + i : 12 - i;
+        for (let y = 3; y < (obstacle === 'wall' ? 5 : 4); y++) {
+          w.map.set(x, y, TILE_STONE);
+          w.fluid.set(x, y, 0);
+        }
+      }
+      if (obstacle === 'ceiling') for (let x = 7; x <= 21; x++) {
+        w.map.set(x, 6, TILE_STONE);
+        w.fluid.set(x, 6, 0);
+      }
+      const label = `${form}, wet=${wet}, dir=${dir}, ${obstacle}`;
+      let pausedOnRamp = false;
+      for (let tick = 0; tick < 90; tick++) {
+        const { x, y } = player.body;
+        stepSim(w, input({ moveX: dir, downHeld: wet && form === 'pelican' }));
+        assert.equal(overlapsSolid(bodyRect(player.body), w.map), false, `${label}: 踏阶不能进入实心`);
+        assert.ok(player.body.y - y <= Math.abs(player.body.x - x) + 1e-4, `${label}: 台阶应随水平位移平滑升高`);
+        if (obstacle === 'step' && !pausedOnRamp && player.body.y > 3.15 && player.body.y < 3.5) {
+          pausedOnRamp = true;
+          trace(w, 30, () => ({ downHeld: wet && form === 'pelican' }));
+          const stoppedY = player.body.y;
+          assert.ok(stoppedY > 3 && stoppedY < 4, `${label}: 停在坡中途`);
+          trace(w, 15, () => ({ downHeld: wet && form === 'pelican' }));
+          assert.equal(player.body.y, stoppedY, `${label}: 停步后不继续抬升或回落`);
+        }
+      }
+      assert.equal(player.body.onGround, true, label);
+      if (obstacle === 'step') {
+        assert.ok(pausedOnRamp, `${label}: 必须经过连续坡面`);
+        assert.ok((player.body.x - 14.5) * dir > 2, label);
+        assert.equal(player.body.y, 4, label);
+        assert.equal(pelicanState(player), 'run', label);
+      } else {
+        assert.ok((player.body.x - 14.5) * dir < 1.5, label);
+        assert.equal(player.body.y, 3, label);
+      }
+    }
   });
 
   test('入水回满飞行能量并清除 flownThisAir', () => {
@@ -289,22 +369,59 @@ describe('鹈鹕游泳', () => {
 });
 
 describe('人形落水与变身', () => {
-  test('人形在水面和深水均下沉，按住或反复跳跃不能划水上浮或启动推进飞行', () => {
-    for (const depth of [0.3, 0.8]) for (const jump of ['none', 'hold', 'repeat']) {
+  test('人形在水面和深水松开跳跃仍下沉，水中使用游泳状态而非推进飞行', () => {
+    for (const depth of [0.3, 0.8]) {
       const w = pool();
       const player = getPlayer(w);
       const p = player.pelican!;
       p.form = p.transformFrom = 'human';
       const start = SURFACE - depth * HUMAN_BODY_HEIGHT;
       Object.assign(player.body, { height: HUMAN_BODY_HEIGHT, y: start, prevY: start, vy: 0, onGround: false });
-      const fall = trace(w, 30, (i) => ({ jumpHeld: jump !== 'none', jumpPressed: jump === 'repeat' ? i % 5 === 0 : jump === 'hold' && i === 0 }));
-      assert.ok(player.body.y < start - 0.5, `${depth}/${jump}: y=${player.body.y}`);
-      assert.ok(fall.vy.every((vy) => vy <= 0), `${depth}/${jump}: 不应获得向上速度`);
+      const fall = trace(w, 30);
+      assert.ok(player.body.y < start - 0.5, `${depth}: y=${player.body.y}`);
+      assert.ok(fall.vy.every((vy) => vy <= 0), `${depth}: 不应自动上浮`);
       assert.equal(p.flightMode, 'none');
-      assert.equal(pelicanState(player), 'fall');
+      assert.equal(pelicanState(player), 'swim');
       trace(w, 180);
       assert.equal(player.body.y, 3, '人形沉到池底');
       assert.equal(player.body.onGround, true);
+    }
+  });
+
+  // 禁止人形 waterJump 或只响应单次按键，会让玩家按住跳跃仍被困池底。
+  test('人形在池底按住跳跃可持续上浮，松手后恢复下沉', () => {
+    const w = pool();
+    const player = getPlayer(w);
+    player.pelican!.form = player.pelican!.transformFrom = 'human';
+    Object.assign(player.body, { height: HUMAN_BODY_HEIGHT, y: 3, prevY: 3, vy: 0, onGround: true });
+    const rise = trace(w, 180, i => ({ jumpHeld: true, jumpPressed: i === 0 }));
+    assert.ok(player.body.y > 7, `y=${player.body.y}`);
+    assert.ok(rise.states.includes('swim'));
+    assert.ok(!rise.states.includes('fly'));
+    const surfaceY = player.body.y;
+    trace(w, 45);
+    assert.ok(player.body.y < surfaceY - .5);
+  });
+
+  // 单向栈桥必须能从底部穿过，脚底越过桥面后再由真实碰撞落稳。
+  test('双形态都能从水下栈桥底上浮，在水面重新按跳跃后穿过并站上栈桥', () => {
+    for (const form of ['human', 'pelican'] as const) {
+      const w = pool();
+      const player = getPlayer(w);
+      player.pelican!.form = player.pelican!.transformFrom = form;
+      Object.assign(player.body, { height: form === 'human' ? HUMAN_BODY_HEIGHT : H, y: 3, prevY: 3, vy: 0, onGround: true });
+      for (let x = 3; x <= 8; x++) w.map.set(x, SURFACE, TILE_PLATFORM);
+      for (let i = 0; i < 360; i++) {
+        stepSim(w, input({ jumpHeld: true, jumpPressed: i === 0 }));
+        if (player.pelican!.inWater && player.pelican!.submersion <= .4) break;
+      }
+      assert.ok(player.body.y + player.body.height > SURFACE, `${form}: 未能上浮`);
+      stepSim(w, input());
+      const leap = trace(w, 70, i => ({ jumpHeld: true, jumpPressed: i === 0 }));
+      assert.ok(Math.max(...leap.y) > SURFACE + 1, `${form}: 未越过桥面`);
+      assert.equal(player.body.y, SURFACE + 1, form);
+      assert.equal(player.body.onGround, true, form);
+      assert.equal(player.pelican!.inWater, false, form);
     }
   });
 

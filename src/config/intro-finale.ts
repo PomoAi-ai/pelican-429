@@ -87,6 +87,35 @@ export const FINALE_LINEAGE: readonly LineageEntry[] = [
 export const FINALE_TOKEN_RECORDS = FINALE_LINEAGE.flatMap(({ tokens }) => tokens === undefined ? [] : [tokens]);
 export const tokenLabel = (tokens: number): string =>
   tokens < 1e5 ? `${Math.round(tokens / 1024)}K` : tokens < 1e6 ? `${tokens / 1e3}K` : `${tokens / 1e6}M`;
+/**
+ * 暗线：第二声部挂的是社区在 GPT-6 发布后的降智事件里抓到的原始字段，只上原文，不加解释。
+ * 响应头 x-codex-turn-state 长 292 是满血票、长 312 是降智信号；被降智时报错里漏出带 degrade2 的内部引擎名；
+ * 网关 v0.2.6 合入采票注入后两小时内撤回。
+ * u 是它在第二声部上的位置，避开主旋律名字所在的段和正中的雷击大字。
+ */
+export interface UndertoneEntry {
+  readonly at: number;
+  readonly text: string;
+  /** 伏笔在攀升后半悄悄爬上谱；罪证被闪电砸上谱、随谱带坠落；翻转在高潮落成满血。 */
+  readonly act: 'omen' | 'strike' | 'flip';
+  readonly u: number;
+}
+
+export const FINALE_UNDERTONE: readonly UndertoneEntry[] = [
+  { at: FINALE_CUES.senses + .5, text: 'x-codex-turn-state', act: 'omen', u: .1 },
+  { at: FINALE_CUES.senses + 1.25, text: 'gAAAAA…', act: 'omen', u: .24 },
+  { at: FINALE_CUES.senses + 2, text: 'len=292', act: 'omen', u: .38 },
+  { at: FINALE_CUES.strikes[0], text: 'server_is_overloaded', act: 'strike', u: .16 },
+  { at: FINALE_CUES.strikes[1], text: 'astra → luna', act: 'strike', u: .84 },
+  { at: FINALE_CUES.strikes[2], text: 'len=312', act: 'strike', u: .3 },
+  { at: FINALE_CUES.strikes[3], text: '…-degrade2-luna-1p-codexswic-ev3', act: 'strike', u: .7 },
+  { at: FINALE_CUES.collapse, text: 'v0.2.6 → 404', act: 'strike', u: .5 },
+  { at: FINALE_CUES.rise, text: '312 → 292 ✓', act: 'flip', u: .3 },
+  { at: FINALE_CUES.opus, text: 'luna → astra ✓', act: 'flip', u: .7 },
+];
+/** 黑场里重敲的四个音名各打出一行采票日志，与 FINALE_CUES.retry 一一对应。 */
+export const FINALE_HARVEST_LOG = ['harvest', 'len=292 ✓', 'ttl 3600', 'inject'] as const;
+
 /** 攀升四个重拍上的 Claude：3.5 Sonnet（编程拐点）、3.7 Sonnet（混合推理，随 Claude Code 预览）、Opus 4（Claude Code 正式版）、Opus 4.5。 */
 export const FINALE_CLAUDE_CLIMB = [CLAUDE_MODELS.sonnet35, CLAUDE_MODELS.sonnet37, CLAUDE_MODELS.opus4, CLAUDE_MODELS.opus45];
 export const FINALE_OPEN_MODELS = OPEN_WEIGHT_MODELS.map((name, index) => ({

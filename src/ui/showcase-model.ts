@@ -1,6 +1,7 @@
 import { isEnemyKind } from '../config/enemy-models.ts';
 import { CHARACTER_CATALOG } from '../config/showcase.ts';
 import type { ShowcaseCatalog, ShowcaseCard, ShowcaseDemo } from '../config/showcase.ts';
+import type { NpcForm } from '../config/npc.ts';
 
 export function createShowcaseModel(catalog: ShowcaseCatalog = CHARACTER_CATALOG) {
   const entry = (id: string) => {
@@ -19,7 +20,7 @@ export function createShowcaseModel(catalog: ShowcaseCatalog = CHARACTER_CATALOG
     if (cards.length >= catalog.maxCards) return;
     const card: ShowcaseCard = {
       id: nextId++, entryId, environment: 'surface', facing: 1, modelYaw: isEnemyKind(entry(entryId).actor) ? Math.PI / 2 : Math.PI / 4, modelPitch: 0, speed: 1, zoom: 1,
-      playing: true, loop: entry(entryId).loop ?? true, manual: false, targetDodge: false, humanView: 'world', attackMotion: 'still', revision: 0,
+      playing: true, loop: entry(entryId).loop ?? true, manual: false, targetDodge: false, humanView: 'world', attackMotion: 'still', revision: 0, npcTransformationRevision: 0,
       resource: catalog.mode !== 'showcase' ? { layout: 'flat', shapeIndex: 0, sampleIndex: 0, sampleCount: 1, yaw: 0, pitch: 0, habitat: 'open', assembly: false, composition: null, vegetation: 'all', seed: 429, wind: 'breeze', reference: false, context: entry(entryId).actor !== 'aquatic', grid: false, platforms: true, inspectionLight: true } : null,
       ...(from ? { environment: from.environment, facing: from.facing, humanView: from.humanView, attackMotion: from.attackMotion, targetDodge: from.targetDodge, modelYaw: from.modelYaw, modelPitch: from.modelPitch, speed: from.speed, zoom: from.zoom, playing: from.playing, loop: from.loop, resource: from.resource ? { ...from.resource } : null } : {}),
     };
@@ -34,6 +35,20 @@ export function createShowcaseModel(catalog: ShowcaseCatalog = CHARACTER_CATALOG
     get worldScale() { return worldScale; },
     get full() { return cards.length >= catalog.maxCards; },
     subscribe(listener: () => void) { listeners.add(listener); return () => listeners.delete(listener); },
+    showActor(actor: string) {
+      const entryId = catalog.subjects.find((item) => item.id === actor)!.defaultEntry;
+      cards.length = 0;
+      add(entryId);
+      activeDemo = null;
+      synchronized = false;
+      notify();
+    },
+    addActor(actor: string) {
+      add(catalog.subjects.find((item) => item.id === actor)!.defaultEntry);
+      activeDemo = null;
+      synchronized = false;
+      notify();
+    },
     selectActor(actor: string, selected: boolean) {
       const previousCount = cards.length;
       if (selected && !cards.some((c) => entry(c.entryId).actor === actor)) add(catalog.subjects.find((a) => a.id === actor)!.defaultEntry);
@@ -102,6 +117,19 @@ export function createShowcaseModel(catalog: ShowcaseCatalog = CHARACTER_CATALOG
       notify();
     },
     scale(on: boolean) { worldScale = on; notify(); },
+    changeNpcForm(card: ShowcaseCard, form: NpcForm) {
+      const current = entry(card.entryId);
+      const next = catalog.entries.find(item => item.actor === current.actor && item.action === current.action && item.npcForm === form)!;
+      card.entryId = next.id;
+      synchronized = false;
+      notify();
+    },
+    replayNpcTransformation(card: ShowcaseCard) {
+      card.npcTransformationRevision++;
+      card.playing = true;
+      synchronized = false;
+      notify();
+    },
     changeAction(card: ShowcaseCard, entryId: string) {
       const nextEntry = entry(entryId);
       if (card.resource?.composition && !(nextEntry.actor === 'terrain' && nextEntry.supportsShapes)) {

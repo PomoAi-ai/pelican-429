@@ -442,6 +442,7 @@ export function createWorldLight(input: WorldLightInput): WorldLight {
   setWaterPalette(input.waterPalette ?? waterPalette(DEFAULT_WATER_PALETTE));
   /** 瓦片变化（实心 ↔ 非实心）或水介质变化后，水下深度图全量重算（罕见事件；1200×160 约 1 ms）。 */
   let waterDirty = false;
+  let fluidRevision = fluid.revision;
 
   const unsubscribe = map.onChange((tx, ty) => {
     lightMap.refreshCell(tx, ty);
@@ -471,6 +472,8 @@ export function createWorldLight(input: WorldLightInput): WorldLight {
     const options: LightMapPatchOptions = { floor, terrain, water, auraReceive };
     material.onBeforeCompile = (shader, renderer) => {
       prev.call(material, shader, renderer);
+      // 传送克隆会委托原材质的编译链，同一光照已注入时不能再次声明 GLSL。
+      if (shader.uniforms.uLightMap === uniforms.uLightMap) return;
       injectLightMap(shader, uniforms, cfg.dynamicMax, name, options);
     };
     material.customProgramCacheKey = () =>
@@ -506,17 +509,21 @@ export function createWorldLight(input: WorldLightInput): WorldLight {
           const mats = mesh.material;
           if (Array.isArray(mats)) for (const m of mats) patchMaterial(m);
           else if (mats) patchMaterial(mats);
-          return;
         }
+      });
+      scene.traverseVisible((node) => {
         const pl = node as THREE.PointLight;
-        if (pl.isPointLight && pl.visible && pl.intensity > 0 && dyn < lights.length) {
+        if (pl.isPointLight && pl.intensity > 0 && dyn < lights.length) {
           pl.getWorldPosition(tmp);
           (lights[dyn] as THREE.Vector4).set(tmp.x, tmp.y, cfg.dynamicRadius, 1);
           dyn++;
         }
       });
       uniforms.uDynCount.value = dyn;
-      if (frame % cfg.fluidScanFrames === 0 && lightMap.syncWater(fluid.cells)) waterDirty = true;
+      if (frame % cfg.fluidScanFrames === 0 && fluidRevision !== fluid.revision) {
+        fluidRevision = fluid.revision;
+        if (lightMap.syncWater(fluid.cells)) waterDirty = true;
+      }
       const range = lightMap.flush();
       if (range) {
         packLightColumns(lightMap.light, data, width, height, range.x0, range.x1, scratch);

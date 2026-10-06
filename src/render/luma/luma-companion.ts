@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { GRASSY_HEIGHT } from '../../config/grassy.ts';
 import type { LumaAction } from '../../config/luma.ts';
 import { PHOTON_ULTIMATE } from '../../config/photon-ultimate.ts';
 import { TUNING } from '../../config/tuning.ts';
@@ -17,12 +18,14 @@ export interface LumaCompanion {
 }
 
 /** 在玩家周围游弋，角色资产与展示场共用。 */
-export function createLumaCompanion(scene: THREE.Scene, player: Entity): LumaCompanion {
+export function createLumaCompanion(scene: THREE.Object3D, player: Entity): LumaCompanion {
   const chargeSeconds = PHOTON_ULTIMATE.chargeTicks * TUNING.sim.step;
   const rig = createLumaRig();
   const trail = createLumaTrail(scene);
   const ultimate = createLumaUltimate(scene);
   const emitter = new THREE.Vector3();
+  const lightPosition = new THREE.Vector3();
+  const facePosition = new THREE.Vector3();
   const scale = 1.3;
   rig.root.scale.setScalar(scale);
   rig.root.position.set(player.body.x + player.facing * 1.7, player.body.y + player.body.height * 0.8, 0.25);
@@ -107,7 +110,15 @@ export function createLumaCompanion(scene: THREE.Scene, player: Entity): LumaCom
       rig.root.rotation.z += (-Math.tanh(speedX * 0.2) * 0.2 - rig.root.rotation.z) * turn;
       action = photonActive ? 'ultimate' : moving ? 'guide' : 'idle';
       animateLuma(rig, action, action === 'ultimate' ? ultimateTime : time);
+      if (human) {
+        rig.light.getWorldPosition(lightPosition);
+        scene.worldToLocal(lightPosition);
+        facePosition.set(lerp(body.prevX, body.x, alpha), lerp(body.prevY, body.y, alpha) + GRASSY_HEIGHT * 0.76, 0);
+        // 转身、跳跃跟随时可能掠过脸旁；近处减弱照射，光子自身的亮核保持可见。
+        rig.light.intensity *= THREE.MathUtils.smoothstep(lightPosition.distanceTo(facePosition), 0.75, 2.25);
+      }
       rig.motion.getWorldPosition(emitter);
+      scene.worldToLocal(emitter);
       ultimate.update(dt, emitter);
       trail.update(emitter, dt);
     },

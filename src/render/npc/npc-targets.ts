@@ -9,11 +9,12 @@ import { createParticleCloud } from '../grassy/grassy-particles.ts';
 import { createImpacts } from '../grassy/grassy-projectiles.ts';
 import { caption } from './npc-effects.ts';
 import { createTokenMissiles } from './npc-token-missiles.ts';
+import { createNpcBasicTargets } from './npc-basic-targets.ts';
+import { createNpcUltimateTargets } from './npc-ultimate-targets.ts';
 
 const HIT_OFFSETS = {
   skill1: [.28, .48, .68],
   skill2: [.32],
-  ultimate: [.82, 1.05, 1.28],
 } as const;
 const TRAIL_PARTICLES = 24;
 const FLIGHT_SECONDS = .28;
@@ -102,7 +103,7 @@ function routingVolley(facing: -1 | 1, targetDodge: boolean) {
 }
 
 /** 复用游戏假人；所有击退与粒子按绝对时间取样，暂停和重播不会残留上一轮状态。 */
-export function createNpcTargets(kind: NpcKind) {
+export function createNpcTargets(kind: NpcKind, showTargets: boolean) {
   const root = new THREE.Group();
   root.name = `${kind}-skill-targets`;
   const fx = new THREE.Group();
@@ -112,6 +113,8 @@ export function createNpcTargets(kind: NpcKind) {
   fx.add(...trails.map(trail => trail.points));
   const routingFx = kind === 'sam' ? createRoutingBeams(fx) : null;
   const tokenFx = kind === 'sam' ? createTokenMissiles(fx) : null;
+  const basicFx = createNpcBasicTargets(fx, kind);
+  let ultimateFx: ReturnType<typeof createNpcUltimateTargets> | null = null;
   let volley = routingVolley(1, false);
   let previousFacing: -1 | 1 = 1;
   let previousDodge = false;
@@ -121,6 +124,7 @@ export function createNpcTargets(kind: NpcKind) {
     const entity = createDummyEntity(index + 1, { x: 0, y: 0 }, TUNING);
     const view = makeDummy(entity);
     const anchor = new THREE.Group();
+    anchor.visible = showTargets;
     anchor.position.x = side * 2.9;
     anchor.add(view.object);
     root.add(anchor);
@@ -132,14 +136,41 @@ export function createNpcTargets(kind: NpcKind) {
     root,
     sample(action: NpcAction, seconds: number, facing: -1 | 1, targetDodge: boolean) {
       const skill = action === 'skill1' || action === 'skill2' || action === 'ultimate';
-      root.visible = skill;
+      root.visible = skill || action === 'attack';
+      if (ultimateFx) ultimateFx.root.visible = action === 'ultimate';
+      if (action === 'ultimate') {
+        if (!ultimateFx) {
+          ultimateFx = createNpcUltimateTargets(kind, showTargets);
+          root.add(ultimateFx.root);
+        }
+        fx.visible = false;
+        for (const target of targets) target.anchor.visible = false;
+        ultimateFx.sample(seconds, facing, targetDodge);
+        return;
+      }
+      basicFx.root.visible = action === 'attack';
+      targets.forEach((target, index) => { target.anchor.visible = action === 'attack' ? index === 0 : showTargets; });
+      if (action === 'attack') {
+        fx.visible = true;
+        routingFx?.hide();
+        tokenFx?.hide();
+        for (const trail of trails) trail.points.visible = false;
+        for (let index = 0; index < 6; index++) impacts.set(index, -1, 0, 0, 0, 0);
+        impacts.flush();
+        const pose = basicFx.sample(seconds, facing, targetDodge);
+        const target = targets[0]!;
+        target.entity.health!.flashTicks = pose.flash * TUNING.combat.hitFlashTicks;
+        target.view.sync(target.entity, 0, 0);
+        target.anchor.position.set(pose.x, pose.y, 0);
+        target.anchor.rotation.z = -facing * pose.kick * .24;
+        return;
+      }
       if (!skill) return;
       const definition = npcAction(kind, action);
       const active = seconds > 0 && seconds < definition.seconds;
       const offsets = HIT_OFFSETS[action];
-      const strong = action === 'ultimate';
-      const strength = strong ? 1.5 : action === 'skill2' ? 1.15 : .75;
-      const life = strong ? .58 : .42;
+      const strength = action === 'skill2' ? 1.15 : .75;
+      const life = .42;
       const tokenAttack = kind === 'sam' && action === 'skill2';
       fx.visible = active;
       routingFx?.hide();
@@ -175,8 +206,8 @@ export function createNpcTargets(kind: NpcKind) {
         const target = targets[sideIndex]!;
         const trail = trails[sideIndex]!;
         trail.points.material.uniforms.color!.value.set(hitColor);
-        const direction = strong ? target.side : facing;
-        const distance = strong ? 3.2 : 3.2 + sideIndex * 2;
+        const direction = facing;
+        const distance = 3.2 + sideIndex * 2;
         const hits = (tokenAttack ? [0, 1, 2] : offsets).map((offset, round) => {
           const slot = sideIndex * 3 + round;
           return definition.release + (tokenAttack
@@ -188,7 +219,7 @@ export function createNpcTargets(kind: NpcKind) {
           const age = seconds - hit;
           if (!active || age < 0) continue;
           kick += Math.sin(Math.min(age * 9, Math.PI)) * Math.exp(-age * 3.5) * strength;
-          hop += Math.sin(Math.min(age / .48, 1) * Math.PI) * (strong ? .28 : .07);
+          hop += Math.sin(Math.min(age / .48, 1) * Math.PI) * .07;
           flash = Math.max(flash, Math.exp(-age * 18));
         }
         // 闪白交给共享视图；父节点承接确定性的受击姿态，不累计视图内部的阻尼。
@@ -218,7 +249,7 @@ export function createNpcTargets(kind: NpcKind) {
             const progress = THREE.MathUtils.clamp(age, 0, 1);
             trail.positions.setXYZ(index,
               THREE.MathUtils.lerp(direction * .42, targetX, progress),
-              THREE.MathUtils.lerp(strong ? 2.1 : 1.65, targetY, progress) + Math.sin(progress * Math.PI) * .23,
+              THREE.MathUtils.lerp(1.65, targetY, progress) + Math.sin(progress * Math.PI) * .23,
               THREE.MathUtils.lerp(.35, targetZ, progress) + Math.sin(progress * Math.PI) * .28);
             trail.sizes.setX(index, (particle === 0 ? .3 : .13 - particle * .003) * strength);
             trail.alphas.setX(index, used && age >= 0 && age < 1 ? 1 - particle / TRAIL_PARTICLES : 0);
@@ -229,6 +260,8 @@ export function createNpcTargets(kind: NpcKind) {
       impacts.flush();
     },
     dispose() {
+      ultimateFx?.dispose();
+      basicFx.dispose();
       for (const target of targets) target.view.dispose();
       // 这里只释放本模块创建的效果资源，假人的几何与材质由其共享视图管理。
       const geometries = new Set<THREE.BufferGeometry>();

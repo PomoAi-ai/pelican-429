@@ -13,6 +13,8 @@ export interface EditionFrame {
   readonly edition: IntroEdition;
   readonly images: IntroImages;
 }
+/** 谱线只用到画布、尺寸和时间；首页乐谱带借此复用，不必加载序章图片与版本信息。 */
+export type ScoreFrame = Pick<EditionFrame, 'ctx' | 'width' | 'height' | 'seconds'>;
 export const TAU = Math.PI * 2;
 export const MONO = '"SFMono-Regular", Consolas, monospace';
 export const SERIF = 'Georgia, "Times New Roman", serif';

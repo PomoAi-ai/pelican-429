@@ -2,13 +2,13 @@ import type { IntroLanguage } from '../config/intro-language.ts';
 import {
   INTRO_BAN_AT, INTRO_DIZZY_AT, INTRO_DOWNGRADE_AT, INTRO_DREAM_CRESCENDO_AT, INTRO_DREAM_FREEZE_AT,
   INTRO_DREAM_MELODY, INTRO_DURATION, INTRO_GOAL_AT,
-  INTRO_HEARTBEAT_ECHO, INTRO_HEARTBEAT_PERIOD, INTRO_KEY_LOOP, INTRO_KEY_TIMES, INTRO_LANDING_AT,
+  INTRO_HEARTBEAT_ECHO, INTRO_HEARTBEAT_PERIOD, INTRO_KEY_LOOP, INTRO_KEY_TIMES,
   INTRO_PELICAN_AT, INTRO_ROUTE_AT, INTRO_STORY_BEAT, INTRO_TRANSFORM_BEATS,
   INTRO_WHEEL_APPROACH, INTRO_WHEEL_TRIES, introSceneAt, type IntroSceneId,
 } from '../config/intro.ts';
 import { MONO, SANS, TAU, ease, glow, noise } from './intro-canvas.ts';
 
-export type IntroImages = Readonly<Record<Exclude<IntroSceneId, 'prelude'>, HTMLImageElement> & {
+export type IntroImages = Readonly<Record<Exclude<IntroSceneId, 'prelude' | 'world'>, HTMLImageElement> & {
   transformation: HTMLImageElement;
 }>;
 
@@ -41,7 +41,6 @@ const hit = (s: number, at: number, decay: number): number => s >= at ? Math.exp
 const shake = (s: number, amount: number, seed: number): number =>
   (noise(Math.floor(s * 40) * 7 + seed) - 0.5) * 2 * amount;
 const wrap = (value: number, span: number): number => (value % span + span) % span;
-const lerp = (a: number, b: number, k: number): number => a + (b - a) * k;
 function overshoot(x: number): number {
   const u = Math.min(1, x) - 1;
   return 1 + 3.2 * u * u * u + 2.2 * u * u;
@@ -192,14 +191,14 @@ function glitchWords(ctx: CanvasRenderingContext2D, s: number, w: number, h: num
     ctx.strokeStyle = '#ff696daa'; ctx.lineWidth = 2; ctx.beginPath();
     ctx.moveTo(centerX - Math.min(w * .3, 200), centerY); ctx.lineTo(centerX + Math.min(w * .3, 200), centerY); ctx.stroke();
   } else {
-    const action = !routed ? 'SELECTED MODEL' : degraded ? (language === 'en' ? 'DOWNGRADED' : '降智') : (language === 'en' ? 'REROUTED' : '改路由');
+    const action = !routed ? (language === 'en' ? 'SELECTED MODEL' : '已选模型') : degraded ? (language === 'en' ? 'DOWNGRADED' : '降智') : (language === 'en' ? 'REROUTED' : '改路由');
     ctx.font = wordFont(action, !routed ? Math.min(14, w / 30) : Math.min(46, w / 10));
     ctx.fillStyle = !routed ? '#efd18d' : '#f1a394'; ctx.fillText(action, centerX, h * .29);
     ctx.font = `${Math.min(12, w / 31)}px ${MONO}`; ctx.fillStyle = !routed ? '#e9ce94' : '#aab9be';
-    ctx.fillText(!routed ? 'THE PROMISE' : degraded ? 'gpt-6-astra  →  gpt-5.6-luna' : 'gpt-6-astra', centerX, h * .61);
+    ctx.fillText(!routed ? (language === 'en' ? 'THE PROMISE' : '最初的承诺') : degraded ? 'gpt-6-astra  →  gpt-5.6-luna' : 'gpt-6-astra', centerX, h * .61);
     if (routed) {
       ctx.fillStyle = '#b4c4ca';
-      ctx.fillText(degraded ? 'CAPABILITY REDUCED' : 'REWRITING THE ROUTE', centerX, h * .7);
+      ctx.fillText(language === 'en' ? (degraded ? 'CAPABILITY REDUCED' : 'REWRITING THE ROUTE') : (degraded ? '能力已削减' : '正在改写路由'), centerX, h * .7);
     }
   }
   ctx.restore();
@@ -242,7 +241,7 @@ function banWord(ctx: CanvasRenderingContext2D, s: number, w: number, h: number,
   ctx.strokeStyle = '#ffd0c8';
   ctx.strokeText(word, 0, 0);
   ctx.font = `${Math.min(19, w / 23)}px ${MONO}`; ctx.fillStyle = '#f09a9a';
-  ctx.fillText('ACCOUNT BANNED', 0, size * .74);
+  ctx.fillText(language === 'en' ? 'ACCOUNT BANNED' : '账号已封禁', 0, size * .74);
   ctx.restore();
 }
 
@@ -480,12 +479,17 @@ function wheelPose(index: number, wheel: number, c: number): WheelPose | null {
   const bend = (noise(seed + 51) - 0.5) * 900;
   const control = [(from[0] + slot[0]) / 2 - Math.sin(heading) * bend,
     (from[1] + slot[1]) / 2 + Math.cos(heading) * bend] as const;
-  // 停在离轮位一小段的位置：差一点就装上。
-  const near = [slot[0] + Math.cos(heading) * 16, slot[1] + Math.sin(heading) * 16] as const;
+  // 停在离轮位一小段的位置：差一点就装上。最后一次两只轮子都正好落进轮位，之后跟着车一起转到定格。
+  const final = index === INTRO_WHEEL_TRIES.length - 1;
+  const near = final ? slot : [slot[0] + Math.cos(heading) * 16, slot[1] + Math.sin(heading) * 16] as const;
   if (c < at) {
     const k = (c - start) / INTRO_WHEEL_APPROACH;
     const [x, y] = bezier(from, control, near, k * k);
     return { x, y, r: WHEEL_R, spin: k * 9, alpha: 1 };
+  }
+  if (final) {
+    const age = c - at;
+    return { x: slot[0], y: slot[1] - Math.sin(age * 40) * 5 * Math.exp(-age * 12), r: WHEEL_R, spin: 9 + age * 14, alpha: 1 };
   }
   const failAt = at + INTRO_STORY_BEAT;
   if (c < failAt) {
@@ -523,7 +527,8 @@ function tries(ctx: CanvasRenderingContext2D, c: number): void {
   INTRO_WHEEL_TRIES.forEach((at, index) => {
     // 越往后残影越长，体现时空错乱在加剧。
     const trails = 1 + Math.floor(index / 2);
-    const moving = c < at || c >= at + INTRO_STORY_BEAT;
+    const final = index === INTRO_WHEEL_TRIES.length - 1;
+    const moving = c < at || (!final && c >= at + INTRO_STORY_BEAT);
     for (let wheel = 0; wheel < 2; wheel++) {
       for (let n = trails; n >= 1 && moving; n--) {
         const ghost = wheelPose(index, wheel, c - n * 0.035);
@@ -531,8 +536,18 @@ function tries(ctx: CanvasRenderingContext2D, c: number): void {
       }
       const pose = wheelPose(index, wheel, c);
       if (pose) drawWheel(ctx, pose.x, pose.y, pose.r, pose.spin, pose.alpha);
+      // 归位：两道金环从轮位炸开，和最响的那一声叮同拍。
+      const seated = c - at;
+      if (final && seated >= 0 && seated < 0.45) {
+        const slot = SLOTS[wheel]!;
+        ctx.strokeStyle = `rgba(255, 220, 140, ${1 - seated / 0.45})`;
+        ctx.lineWidth = 7 * (1 - seated / 0.45) + 1;
+        ctx.beginPath();
+        ctx.arc(slot[0], slot[1], WHEEL_R * (1 + seated * 4), 0, TAU);
+        ctx.stroke();
+      }
       const teleport = c - (at + INTRO_STORY_BEAT);
-      if (failMode(index, wheel) === 'teleport' && teleport >= 0 && teleport < 0.3) {
+      if (!final && failMode(index, wheel) === 'teleport' && teleport >= 0 && teleport < 0.3) {
         const slot = SLOTS[wheel]!;
         ctx.strokeStyle = `rgba(150, 230, 255, ${1 - teleport / 0.3})`;
         ctx.lineWidth = 5;
@@ -651,68 +666,22 @@ function dream(ctx: CanvasRenderingContext2D, s: number, image: HTMLImageElement
 
 // ── 第四幕：游戏世界 ────────────────────────────────────────────
 
-const VORTEX = [280, 260] as const;
-const FEET = [780, 620] as const;
-
-function dust(ctx: CanvasRenderingContext2D, age: number): void {
-  if (age < 0 || age > 0.9) return;
-  ctx.save();
-  ctx.fillStyle = '#eef4ff';
-  for (let i = 0; i < 22; i++) {
-    const angle = -Math.PI * (0.04 + noise(i + 900) * 0.92);
-    const speed = 150 + noise(i + 910) * 320;
-    ctx.globalAlpha = (1 - age / 0.9) * 0.85;
-    ctx.beginPath();
-    ctx.arc(FEET[0] + Math.cos(angle) * speed * age, FEET[1] + Math.sin(angle) * speed * age + 300 * age * age,
-      3 + noise(i + 920) * 4, 0, TAU);
-    ctx.fill();
-  }
-  ctx.restore();
-}
-
-function world(ctx: CanvasRenderingContext2D, s: number, image: HTMLImageElement, w: number, h: number): void {
-  const k = Math.min(1, (s - WORLD_AT) / (INTRO_LANDING_AT - WORLD_AT));
-  const pull = 1 - (1 - k) ** 3;
-  const land = hit(s, INTRO_LANDING_AT, 5);
-  const age = s - INTRO_LANDING_AT;
-  // 落地：画面先被压下再回弹，之后进入缓慢漂移。
-  const dip = age >= 0 ? Math.exp(-age * 5) * Math.cos(age * 13) : 0;
-  const drift = ease(INTRO_LANDING_AT, INTRO_LANDING_AT + 1.5, s);
-  ctx.save();
-  shoot(ctx, w, h, {
-    x: lerp(VORTEX[0], IMAGE_W / 2, pull) + Math.sin(s * 0.35) * 14 * drift,
-    y: lerp(VORTEX[1], IMAGE_H / 2, pull) + Math.sin(s * 0.27) * 8 * drift,
-    zoom: lerp(2.8, 1.03, pull) + land * 0.03,
-    angle: -((1 - pull) ** 2) * 2.2,
-    sx: shake(s, land * 14, 5),
-    sy: dip * 24 + shake(s, land * 10, 6),
-  });
-  ctx.drawImage(image, 0, 0, IMAGE_W, IMAGE_H);
-  weather(ctx, s, [0, 0, IMAGE_W, IMAGE_H], 70, 30);
-  if (age > 0.5) {
-    for (let i = 0; i < 3; i++) {
-      // 偶尔有车轮从远处飘过，被旋涡吸走。
-      const phase = wrap((age - 0.5) / 3.2 + i / 3, 1);
-      if (phase > 0.35) continue;
-      const f = phase / 0.35;
-      drawWheel(ctx, 1760 - f * 900, 170 + i * 90 + Math.sin(f * 3) * 30, 28 + i * 6, -s * 6, 0.55 * Math.sin(f * Math.PI));
-    }
-  }
-  dust(ctx, age);
-  ctx.restore();
-  flash(ctx, w, h, '#fff', 0.5 * hit(s, WORLD_AT, 7) + 0.55 * hit(s, INTRO_LANDING_AT, 9));
+function world(ctx: CanvasRenderingContext2D, s: number, canvas: HTMLCanvasElement, w: number, h: number): void {
+  // 堡垒由游戏共享场景实时绘制；序章只锁定落点，角色穿越和坠落交给游戏。
+  ctx.drawImage(canvas, 0, 0, w, h);
+  flash(ctx, w, h, '#fff', 0.5 * hit(s, WORLD_AT, 7));
   // 任务HUD依靠局部阴影保留可读性，关卡本身保持可见。
   flash(ctx, w, h, '#000', 0.12 * ease(INTRO_GOAL_AT, INTRO_GOAL_AT + 1.5, s));
 }
 
 /** 每帧完全由真实秒决定；结束后停在最后一帧。 */
 export function drawStory(ctx: CanvasRenderingContext2D, seconds: number, images: IntroImages,
-  w: number, h: number, language: IntroLanguage = 'zh'): void {
+  fortress: HTMLCanvasElement, w: number, h: number, language: IntroLanguage = 'zh'): void {
   const s = Math.min(seconds, INTRO_DURATION);
   if (s < GLITCH_AT) night(ctx, s, images.night, w, h);
   // 神经入侵在封禁重击时撕开房间，文字由动态层统一呈现。
   else if (s < DREAM_AT) glitch(ctx, s, s < INTRO_BAN_AT ? images.night : images.glitch, w, h, language);
   else if (s < INTRO_PELICAN_AT) transformation(ctx, s, images, w, h);
   else if (s < WORLD_AT) dream(ctx, s, images.dream, w, h);
-  else world(ctx, s, images.world, w, h);
+  else world(ctx, s, fortress, w, h);
 }

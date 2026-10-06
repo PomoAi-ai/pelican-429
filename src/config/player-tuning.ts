@@ -13,6 +13,9 @@ export interface FlightTuning {
   readonly riseSpeed: number;
   /** 趋近上升速度的加速度（瓦片/秒²）。 */
   readonly riseAccel: number;
+  /** 人形推进飞行及起飞后滑翔的普通/快速水平速度（瓦片/秒）。 */
+  readonly humanSpeed: number;
+  readonly humanFastSpeed: number;
   /** 滑翔终端下落速度（瓦片/秒，正数表示向下）。 */
   readonly glideMaxFall: number;
   /** 下落速度超过 glideMaxFall 时的减速度（瓦片/秒²）。 */
@@ -43,7 +46,7 @@ export interface SwimTuning {
   readonly maxSinkSpeed: number;
   /** 水中最大上浮速度（瓦片/秒）。 */
   readonly maxRiseSpeed: number;
-  /** 近水面起跳跃出水面的高度（瓦片）。 */
+  /** 近水面起跳后脚底高于水面的高度（瓦片）。 */
   readonly jumpHeight: number;
   /** 浸没比例 ≤ jumpMaxDepth 时跳跃为跃出水面，否则为划水上浮。 */
   readonly jumpMaxDepth: number;
@@ -120,7 +123,7 @@ export interface PlayerTuning {
   readonly coyoteTicks: number;
   readonly jumpBufferTicks: number;
   readonly dropThroughTicks: number;
-  /** 站在地上时 X 方向最多自动抬升的台阶高度（瓦片，[0, .5]；斜坡另按前沿进入长度抬升）。 */
+  /** 站在地上时 X 方向最多自动抬升的台阶高度（瓦片，[0, 1]；斜坡另按前沿进入长度抬升）。 */
   readonly stepUp: number;
   /** 上一 tick 在地上、本 tick 腾空且 vy ≤ 0 时，向下吸附回地面的最大距离（瓦片，[0, .5]）。 */
   readonly groundSnap: number;
@@ -134,6 +137,8 @@ export const PLAYER_FLIGHT: FlightTuning = {
   maxTicks: 300,
   riseSpeed: 9,
   riseAccel: 70,
+  humanSpeed: 8,
+  humanFastSpeed: 12,
   glideMaxFall: 5,
   glideBrake: 80,
   autoGlide: true,
@@ -161,7 +166,7 @@ export const DEFAULT_PLAYER: PlayerTuning = {
   coyoteTicks: 6,
   jumpBufferTicks: 6,
   dropThroughTicks: 12,
-  stepUp: 0.5,
+  stepUp: 1,
   groundSnap: 0.5,
   flight: PLAYER_FLIGHT,
   swim: {
@@ -175,7 +180,7 @@ export const DEFAULT_PLAYER: PlayerTuning = {
     diveAccel: 180,
     maxSinkSpeed: 6,
     maxRiseSpeed: 8,
-    jumpHeight: 3,
+    jumpHeight: 1.5,
     jumpMaxDepth: 0.6,
     strokeSpeed: 3,
     refillFlight: true,
@@ -207,6 +212,9 @@ function validateFlight(path: string, f: FlightTuning, maxFallSpeed: number): vo
   ticks(`${path}.maxTicks`, f.maxTicks);
   positive(`${path}.riseSpeed`, f.riseSpeed);
   positive(`${path}.riseAccel`, f.riseAccel);
+  positive(`${path}.humanSpeed`, f.humanSpeed);
+  positive(`${path}.humanFastSpeed`, f.humanFastSpeed);
+  if (!(f.humanFastSpeed > f.humanSpeed)) fail(`${path}.humanFastSpeed`, `must be > ${path}.humanSpeed (${f.humanSpeed})`, f.humanFastSpeed);
   positive(`${path}.glideMaxFall`, f.glideMaxFall);
   if (f.glideMaxFall > maxFallSpeed) fail(`${path}.glideMaxFall`, `must be <= physics.maxFallSpeed (${maxFallSpeed})`, f.glideMaxFall);
   positive(`${path}.glideBrake`, f.glideBrake);
@@ -286,7 +294,7 @@ function validatePlayerBasics(p: PlayerTuning): void {
   ticks('player.coyoteTicks', p.coyoteTicks);
   ticks('player.jumpBufferTicks', p.jumpBufferTicks);
   ticks('player.dropThroughTicks', p.dropThroughTicks, 1);
-  inRange('player.stepUp', p.stepUp, 0, 0.5);
+  inRange('player.stepUp', p.stepUp, 0, 1);
   inRange('player.groundSnap', p.groundSnap, 0, 0.5);
 }
 

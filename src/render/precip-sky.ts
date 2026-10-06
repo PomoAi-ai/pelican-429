@@ -90,6 +90,7 @@ export function precipSkyLook(v: PrecipVisual, flash: number): PrecipSkyLook {
 
 export interface PrecipSkyTargets {
   readonly scene: THREE.Scene;
+  readonly region?: { readonly tint: THREE.Color; readonly light: number };
   readonly keyLight: THREE.DirectionalLight;
   readonly hemiLight: THREE.HemisphereLight;
   readonly rimLight: THREE.DirectionalLight;
@@ -259,12 +260,15 @@ export function createPrecipSky(targets: PrecipSkyTargets, seed: number): Precip
       if (disposed) throw new Error('precip-sky: update after dispose');
       const l = precipSkyLook(fr.visual, fr.lightning.flash);
       look = l;
-      keyLight.intensity = base.key * l.key;
+      const region = targets.region;
+      const light = region?.light ?? 1;
+      keyLight.intensity = base.key * l.key * light;
       keyLight.color.copy(base.keyColor).lerp(PALETTE.cool, 0.5 * l.cloudAmount);
-      hemiLight.intensity = base.hemi * l.hemi;
+      hemiLight.intensity = base.hemi * l.hemi * light;
       hemiLight.color.copy(base.hemiSky).lerp(PALETTE.coolSky, l.cool);
-      rimLight.intensity = base.rim * l.rim;
-      scene.environmentIntensity = base.env * l.env;
+      if (region) { keyLight.color.multiply(region.tint); hemiLight.color.multiply(region.tint); }
+      rimLight.intensity = base.rim * l.rim * light;
+      scene.environmentIntensity = base.env * l.env * light;
       keyLight.shadow.intensity = base.shadow * l.shadow;
       const g = targets.grade;
       if (g) {
@@ -283,6 +287,7 @@ export function createPrecipSky(targets: PrecipSkyTargets, seed: number): Precip
       veil.scale.set(vh * fr.camera.aspect + 4, vh, 1);
       veilU.uAlpha.value = l.fog;
       veilU.uColor.value.copy(l.fogColor);
+      if (region) veilU.uColor.value.multiply(region.tint);
       // 闪电形状：闪光期间可见。
       const ln = fr.lightning;
       bolt.visible = ln.flash > 0.02 && ln.strike >= 0;

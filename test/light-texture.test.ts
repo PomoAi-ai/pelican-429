@@ -7,6 +7,7 @@ import * as THREE from 'three';
 import { DEFAULT_LIGHTING } from '../src/config/lighting-rules.ts';
 import { LIGHT_MAP_PROGRAM_TAG, LM_WATER_FRONT_Z, createWorldLight, injectLightMap, isLightMappable, packLightColumns } from '../src/render/light-texture.ts';
 import { WATER_FRONT_Z } from '../src/render/water-view.ts';
+import { createTeleportEffect } from '../src/render/teleport-effect.ts';
 import { WATER_PALETTES } from '../src/config/water-palettes.ts';
 import { decodeWaterDepth } from '../src/world/water-depth.ts';
 import type { LightMapUniforms } from '../src/render/light-texture.ts';
@@ -163,6 +164,35 @@ describe('light-texture：WorldLight', () => {
     assert.equal(sh.uniforms.uLightMap, wl.uniforms.uLightMap, 'shared uniforms');
     assert.equal(wl.patchMaterial(new THREE.ShaderMaterial()), false);
     wl.dispose();
+  });
+
+  test('传送克隆再次经过光照扫描时保留单次注入，结束后恢复原材质', () => {
+    const { map, fluid } = world();
+    const wl = createWorldLight({ map, fluid, trees: [], lighting: DEFAULT_LIGHTING });
+    const original = new THREE.MeshStandardMaterial();
+    const model = new THREE.Mesh(new THREE.BoxGeometry(), original);
+    const scene = new THREE.Scene();
+    scene.add(model);
+    const teleport = createTeleportEffect([model]);
+    try {
+      wl.update(scene, 1);
+      teleport.update({ from: { x: 4, y: 12 }, target: { x: 24, y: 12 }, ticks: 0, moveTicks: 24, moved: false }, 0, 1 / 60, 2, .5);
+      assert.notEqual(model.material, original);
+      const before = shaderOf(THREE.ShaderLib.standard);
+      model.material.onBeforeCompile(before as never, {} as THREE.WebGLRenderer);
+      wl.update(scene, 2);
+      const after = shaderOf(THREE.ShaderLib.standard);
+      model.material.onBeforeCompile(after as never, {} as THREE.WebGLRenderer);
+      assert.equal(after.vertexShader, before.vertexShader);
+      assert.equal(after.fragmentShader, before.fragmentShader);
+      assert.equal(after.uniforms.uLightMap, wl.uniforms.uLightMap);
+      assert.equal(after.uniforms.teleportDissolve, before.uniforms.teleportDissolve);
+      teleport.update(undefined, 0, 1 / 60, 2, .5);
+      assert.equal(model.material, original);
+    } finally {
+      teleport.dispose(); wl.dispose();
+      model.geometry.dispose(); original.dispose(); fluid.dispose();
+    }
   });
 
   test('update：遍历场景挂接（含不可见网格），点光源 → 动态光', () => {

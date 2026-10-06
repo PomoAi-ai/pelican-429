@@ -6,11 +6,14 @@ export const PHOTON_ULTIMATE = Object.freeze({
   cooldownTicks: 720,
   activeTicks: 180,
   volleyTicks: 12,
+  launchTicks: 14,
+  seekRadius: 18,
+  turnRadians: 0.14,
   radius: 12,
 });
 
 const base: ProjectileDef = {
-  id: 'photonBug', kind: 'photonBug', trajectory: 'straight', damage: 6,
+  id: 'photonBug', kind: 'photonBug', trajectory: 'straight', damage: 6, ultimate: true,
   knockback: { x: 2, y: 2 }, hitstun: 5, hitstop: 0,
   radius: 0.25, speed: 15, lift: 0, gravity: 0, lifeTicks: 160, maxHits: 1,
   bounces: 0, restitution: 0, bounceFriction: 0, swallowable: false, stopsInWater: false, wetTicks: 0,

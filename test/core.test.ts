@@ -421,7 +421,6 @@ describe('012 契约：swim/fluid/floorDepth', () => {
 describe('013 契约：player.stepUp/groundSnap、fish、render.slopeSink', () => {
   test('默认值合法且符合契约', () => {
     validateTuning(TUNING);
-    assert.equal(TUNING.player.stepUp, 0.5);
     assert.equal(TUNING.player.groundSnap, 0.5);
     assert.equal(TUNING.render.slopeSink, 0.7);
     assert.deepEqual(
@@ -445,14 +444,14 @@ describe('013 契约：player.stepUp/groundSnap、fish、render.slopeSink', () =
     assert.ok(Object.isFrozen(TUNING.fish));
   });
 
-  test('边界值合法：stepUp/groundSnap 取 0 与 .5、slopeSink 取 0 与 1、minWater 取 1 与 255', () => {
+  test('边界值合法：stepUp 取 0 与 1、groundSnap 取 0 与 .5、slopeSink 取 0 与 1、minWater 取 1 与 255', () => {
     const t = cloneTuning() as any;
     t.player.stepUp = 0;
     t.player.groundSnap = 0;
     t.render.slopeSink = 0;
     t.fish.minWater = 1;
     validateTuning(t);
-    t.player.stepUp = 0.5;
+    t.player.stepUp = 1;
     t.player.groundSnap = 0.5;
     t.render.slopeSink = 1;
     t.fish.minWater = 255;
@@ -460,7 +459,7 @@ describe('013 契约：player.stepUp/groundSnap、fish、render.slopeSink', () =
   });
 
   const cases: ReadonlyArray<[string, (t: any) => void, RegExp]> = [
-    ['player.stepUp 超过 .5', (t) => (t.player.stepUp = 0.6), /player\.stepUp/],
+    ['player.stepUp 超过 1', (t) => (t.player.stepUp = 1.1), /player\.stepUp/],
     ['player.stepUp 负数', (t) => (t.player.stepUp = -0.1), /player\.stepUp/],
     ['player.stepUp NaN', (t) => (t.player.stepUp = Number.NaN), /player\.stepUp/],
     ['player.groundSnap 超过 .5', (t) => (t.player.groundSnap = 1), /player\.groundSnap/],

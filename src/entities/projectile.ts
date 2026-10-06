@@ -22,6 +22,10 @@ import type { Entity, ProjectileData, ProjectileRequest } from './entity.ts';
 export const PROJECTILE_MAX_FALL = 40;
 /** 判定“在水里”时取中心下方这么一小段（瓦片）。 */
 const WATER_PROBE = 1e-3;
+const BARRAGE_GROUPS: Partial<Record<ProjectileKind, string>> = {
+  codexShot: 'codex', bugShot: 'bug', photonBug: 'photon', photonWheel: 'photon',
+  fishShot: 'fish', enemyShot: 'enemy',
+};
 
 export function requireProjectile(e: Entity): ProjectileData {
   if (!e.projectile) throw new Error(`projectile: entity ${e.id} (${e.kind}) has no projectile component`);
@@ -196,8 +200,11 @@ export function stepProjectile(e: Entity, map: TileQuery, dt: number, events: Ev
 export function projectileHitSource(e: Entity): HitSource | null {
   const pr = requireProjectile(e);
   if (e.removed) return null;
-  const effect = pr.def.groundEffect;
-  if (effect && (pr.impactTicks === null || pr.impactTicks % effect.pulseTicks !== 0)) return null;
+  const groundEffect = pr.def.groundEffect;
+  if (groundEffect && pr.impactTicks === null && pr.def.kind !== 'droneBomb') return null;
+  const effect = pr.impactTicks === null ? undefined : groundEffect;
+  if (effect && pr.impactTicks! % effect.pulseTicks !== 0) return null;
+  const barrageGroup = BARRAGE_GROUPS[pr.def.kind];
   return {
     sourceId: e.id,
     ownerId: pr.ownerId,
@@ -207,6 +214,7 @@ export function projectileHitSource(e: Entity): HitSource | null {
     dir: e.facing,
     hitIds: pr.hitIds,
     maxHits: effect ? Infinity : pr.def.maxHits,
+    ...(barrageGroup === undefined ? {} : { barrageGroup }),
     ...(effect ? { radial: true, invulnTicks: effect.pulseTicks - 1 } : {}),
   };
 }
@@ -214,7 +222,7 @@ export function projectileHitSource(e: Entity): HitSource | null {
 /** 命中数达到上限的投射物：标记移除并发 hit 类 projectileImpact。返回是否因此移除。 */
 export function retireSpentProjectile(e: Entity, events: EventQueue<SimEvent>): boolean {
   const pr = requireProjectile(e);
-  if (e.removed || pr.def.groundEffect || pr.hitIds.length < pr.def.maxHits) return false;
+  if (e.removed || pr.impactTicks !== null || pr.hitIds.length < pr.def.maxHits) return false;
   end(e, 'hit', events);
   return true;
 }

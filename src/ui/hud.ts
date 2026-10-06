@@ -1,5 +1,5 @@
 /**
- * HTML HUD 覆盖层：假人血条、命中飘字、性能统计、飞行能量条 / 光球冷却、操作提示。
+ * HTML HUD 覆盖层：假人血条、命中飘字、性能统计、飞行能量 / 氧气 / 光球冷却、操作提示。
  * - 操作提示（019）：开局显示，HINTS_AUTO_HIDE 秒或首次有效输入后 HINTS_AFTER_INPUT 秒自动淡出；H 切换显示/隐藏；
  *   隐藏时右下角留“H 帮助”角标。
  * - 假人血条（019）：世界空间锚定在假人头顶上方，与鹈鹕重叠时侧移/上抬，避不开则半透明（见 dummy-bar-layout）。
@@ -28,6 +28,7 @@ export interface HudStats {
 
 export interface HudFrame {
   readonly entities: readonly Entity[];
+  readonly headSubmerged: boolean;
   readonly alpha: number;
   readonly frameDt: number;
   readonly stats: HudStats;
@@ -59,12 +60,12 @@ export const CONTROL_HINTS: readonly string[] = Object.freeze([
   '空格 / W 跳跃（按住跳更高）',
   '鼠标左键 / J 普攻：鹈鹕吐水，主角砸键盘',
   'F 鹈鹕 / 主角双向变身',
-  'S + 空格 下平台',
-  '右键 鱼群轰炸 · 1 振翅突进 · 2 吞弹反击',
+  'S 下平台（站在悬浮平台时）',
+  '右键 鱼群轰炸 · 1 振翅突进（期间无敌，停止解除） · 2 吞弹反击',
   '3 / E 光子爆裂（Bug 与光轮分批追敌）',
   'R 上/下车（骑车时空中再按空格弃车起飞）',
   '空中按住空格飞行，松开滑翔，S 俯冲',
-  '水中：空格跃出/上浮，S 下潜',
+  '水中：按住空格 / W 上浮，水面再按跃出，S 下潜；氧气耗尽扣血',
   'M 大地图（滚轮 / + - 缩放）',
   'Esc / O 设置（打开时暂停）',
   'H 显示/隐藏本帮助',
@@ -74,12 +75,12 @@ const EN_CONTROL_HINTS = [
   'Space / W jump (hold to jump higher)',
   'Left click / J: pelican water spray / Grassy keyboard strike',
   'F transform between Pelican and Grassy',
-  'S + Space drop through platform',
-  'Right click fish barrage · 1 wing dash · 2 swallow & return',
+  'S drop through one-way platforms',
+  'Right click fish barrage · 1 wing dash (invincible until dash stops) · 2 swallow & return',
   '3 / E Photon Burst (bugs and wheels seek enemies)',
   'R mount / dismount (press Space in midair to launch)',
   'Hold Space in air to fly; release to glide; S to dive',
-  'In water: Space surface / jump, S dive',
+  'In water: hold Space / W to rise; press again at the surface to jump out. S dives; running out of oxygen drains health.',
   'M world map (wheel / + - to zoom)',
   'Esc / O settings (pauses the game)',
   'H show / hide this help',
@@ -112,8 +113,11 @@ function el(tag: string, className: string, parent: HTMLElement): HTMLElement {
   return node;
 }
 
-/** 固定状态面板：飞行能量条（+ 可选光球冷却）；update 找不到玩家或玩家无 pelican 数据即抛。 */
-function createStatusPanel(root: HTMLElement, orbCooldown: number | undefined): { update(entities: readonly Entity[], playerId: number): void; dispose(): void } {
+/** 固定状态面板：飞行、氧气与可选光球冷却；update 找不到玩家或玩家无 pelican 数据即抛。 */
+function createStatusPanel(root: HTMLElement, orbCooldown: number | undefined): { update(entities: readonly Entity[], playerId: number, headSubmerged: boolean): void; dispose(): void } {
+  const breathVeil = el('div', 'hud-breath-veil', root);
+  breathVeil.setAttribute('aria-hidden', 'true');
+  breathVeil.hidden = true;
   const panel = el('div', 'hud-status', root);
   const flight = el('div', 'hud-flight', panel);
   const flightLabel = el('div', 'hud-flight-label', flight);
@@ -122,6 +126,20 @@ function createStatusPanel(root: HTMLElement, orbCooldown: number | undefined): 
   let shownFlight = '';
   let shownFlightLow = false;
   flight.hidden = true;
+  const oxygen = el('div', 'hud-oxygen', panel);
+  const oxygenLabel = el('div', 'hud-oxygen-label', oxygen);
+  oxygenLabel.setAttribute('aria-live', 'polite');
+  const oxygenTrack = el('div', 'hud-oxygen-track', oxygen);
+  oxygenTrack.setAttribute('role', 'progressbar');
+  oxygenTrack.setAttribute('aria-valuemin', '0');
+  oxygenTrack.setAttribute('aria-valuemax', '100');
+  const oxygenFill = el('div', 'hud-oxygen-fill', oxygenTrack);
+  const bubbles = el('div', 'hud-oxygen-bubbles', oxygenTrack);
+  bubbles.setAttribute('aria-hidden', 'true');
+  const oxygenBubbles = Array.from({ length: 6 }, () => el('span', 'hud-oxygen-bubble', bubbles));
+  oxygen.hidden = true;
+  let shownOxygen = '';
+  let oxygenState: 'normal' | 'recovering' | 'low' | 'empty' | 'immune' = 'normal';
   let orbFill: HTMLElement | null = null;
   let orbLabel: HTMLElement | null = null;
   let shownOrb = '';
@@ -131,18 +149,44 @@ function createStatusPanel(root: HTMLElement, orbCooldown: number | undefined): 
     orbFill = el('div', 'hud-orb-fill', el('div', 'hud-orb-track', orb));
   }
   const translate = (): void => {
-    flightLabel.textContent = getLanguage() === 'en' ? 'Flight' : '飞行';
-    if (orbLabel) orbLabel.textContent = getLanguage() === 'en' ? 'Orb' : '光球';
+    const en = getLanguage() === 'en';
+    flightLabel.textContent = en ? 'Flight' : '飞行';
+    if (orbLabel) orbLabel.textContent = en ? 'Orb' : '光球';
+    oxygenLabel.textContent = oxygenState === 'empty' ? (en ? 'Drowning' : '缺氧扣血')
+      : oxygenState === 'immune' ? (en ? 'No oxygen · immune' : '缺氧·免伤')
+      : oxygenState === 'recovering' ? (en ? 'Recovering' : '恢复呼吸')
+      : oxygenState === 'low' ? (en ? 'Low oxygen' : '氧气不足') : (en ? 'Oxygen' : '氧气');
+    oxygenTrack.setAttribute('aria-label', en ? 'Oxygen' : '氧气');
   };
   translate();
   const unsubscribe = onLanguageChange(translate);
   return {
     dispose: unsubscribe,
-    update(entities, playerId) {
+    update(entities, playerId, headSubmerged) {
       const player = entities.find((e) => e.id === playerId && !e.removed);
       if (!player) throw new Error(`hud: player ${playerId} not found among ${entities.length} entities`);
       const p = player.pelican;
       if (!p) throw new Error(`hud: player ${playerId} (${player.kind}) has no pelican data`);
+      oxygen.hidden = !p.inWater && p.oxygenTicks === p.oxygenMaxTicks;
+      const oxygenRatio = p.oxygenTicks / p.oxygenMaxTicks;
+      const oxygenPercent = (oxygenRatio * 100).toFixed(1);
+      if (oxygenPercent !== shownOxygen) {
+        shownOxygen = oxygenPercent;
+        oxygenFill.style.width = `${oxygenPercent}%`;
+        oxygenTrack.setAttribute('aria-valuenow', oxygenPercent);
+        oxygenBubbles.forEach((bubble, i) => bubble.classList.toggle('hud-oxygen-bubble-full', i < Math.ceil(oxygenRatio * oxygenBubbles.length)));
+      }
+      const breathingUnderwater = headSubmerged && player.health!.hp > 0;
+      const nextOxygenState = !breathingUnderwater ? (oxygenRatio < 1 && player.health!.hp > 0 ? 'recovering' : 'normal')
+        : p.oxygenTicks === 0 ? (p.weapon.dashTicks > 0 || player.health!.overloadInvulnTicks > 0 ? 'immune' : 'empty')
+          : oxygenRatio < .25 ? 'low' : 'normal';
+      if (nextOxygenState !== oxygenState) {
+        oxygenState = nextOxygenState;
+        oxygen.classList.toggle('hud-oxygen-low', oxygenState === 'low' || oxygenState === 'empty' || oxygenState === 'immune');
+        breathVeil.hidden = oxygenState !== 'low' && oxygenState !== 'empty' && oxygenState !== 'immune';
+        breathVeil.classList.toggle('hud-breath-drowning', oxygenState === 'empty');
+        translate();
+      }
       const max = p.flightMaxTicks;
       if (max <= 0) {
         flight.hidden = true;
@@ -183,7 +227,7 @@ export function createHud(root: HTMLElement, project: WorldToScreen, options: Hu
   root.replaceChildren();
 
   const stats = el('div', 'hud-stats', root);
-  // 固定面板：飞行能量条（+ 可选光球冷却）。
+  // 固定面板：飞行能量、氧气与可选光球冷却。
   const status = createStatusPanel(root, orbCooldown);
   const hints = el('div', 'hud-hints', root);
   const hintEls = CONTROL_HINTS.map(() => el('div', 'hud-hint', hints));
@@ -192,8 +236,8 @@ export function createHud(root: HTMLElement, project: WorldToScreen, options: Hu
   let humanHints = false;
   const translate = (): void => {
     touchHelp.textContent = getLanguage() === 'en'
-      ? 'Left stick: tilt to walk, push to run, up to jump / fly, down to dive. Hold and drag Attack to aim. Tap secondary attack or skills to cast. Hold Jump to fly; down + Jump to drop through platforms.'
-      : '左摇杆轻推慢走、推远奔跑，上推跳跃 / 飞行，下推俯冲 / 下潜。右侧按住主攻，拖动瞄准；轻触副攻或技能直接释放。独立跳跃键可按住飞行。下推摇杆配合跳跃可穿过平台。';
+      ? 'Left stick: tilt to walk, push to run, up to jump / fly, down to drop through platforms / dive. Hold and drag Attack to aim. Tap secondary attack or skills to cast. In water, hold up to rise and push up again at the surface to jump out. Running out of oxygen drains health.'
+      : '左摇杆轻推慢走、推远奔跑，上推跳跃 / 飞行，下推下平台 / 俯冲 / 下潜。右侧按住主攻，拖动瞄准；轻触副攻或技能直接释放。水中持续上推上浮，水面再次上推跃出；氧气耗尽扣血。';
     const lines = getLanguage() === 'en' ? EN_CONTROL_HINTS : CONTROL_HINTS;
     hintEls.forEach((node, i) => { node.textContent = lines[i] as string; });
     if (humanHints) {
@@ -233,9 +277,12 @@ export function createHud(root: HTMLElement, project: WorldToScreen, options: Hu
   return {
     handleEvents(events) {
       for (const ev of events) {
-        if (ev.type === 'hit') {
+        if (ev.type === 'hit' || ev.type === 'heal' || ev.type === 'damageImmune') {
           const node = el('div', 'hud-popup', layer);
-          node.textContent = `-${ev.damage}`;
+          node.textContent = ev.type === 'damageImmune' ? (getLanguage() === 'en' ? 'Immune' : '免伤')
+            : ev.type === 'heal' ? `+${Math.ceil(ev.amount)}` : `-${Number(ev.damage.toFixed(2))}`;
+          node.classList.toggle('hud-popup-heal', ev.type === 'heal');
+          node.classList.toggle('hud-popup-immune', ev.type === 'damageImmune');
           popups.push({ el: node, x: ev.x, y: ev.y, age: 0 });
         } else if (ev.type === 'dummyReset') {
           const bar = bars.get(ev.id);
@@ -250,7 +297,7 @@ export function createHud(root: HTMLElement, project: WorldToScreen, options: Hu
     },
     update(frame) {
       const { entities, alpha, frameDt } = frame;
-      status.update(entities, frame.playerId);
+      status.update(entities, frame.playerId, frame.headSubmerged);
       const human = entities.find((entity) => entity.id === frame.playerId)!.pelican!.form === 'human';
       if (humanHints !== human) { humanHints = human; translate(); }
       if (!(Number.isFinite(frameDt) && frameDt >= 0)) throw new Error(`hud: invalid frameDt ${frameDt}`);
@@ -277,7 +324,7 @@ export function createHud(root: HTMLElement, project: WorldToScreen, options: Hu
         if (bar.shownHp !== h.hp) {
           bar.shownHp = h.hp;
           bar.fill.style.width = `${Math.max(0, (h.hp / h.maxHp) * 100).toFixed(1)}%`;
-          bar.label.textContent = `${Math.ceil(h.hp)} / ${h.maxHp}`;
+          bar.label.textContent = `${h.hp.toFixed(2)} / ${h.maxHp.toFixed(2)}`;
           bar.el.classList.toggle('hud-bar-empty', h.hp <= 0);
         }
         // 位置相对假人平滑（避让时滑过去，不跳变）；首帧直接到位。

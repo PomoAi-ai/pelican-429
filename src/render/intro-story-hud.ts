@@ -1,23 +1,24 @@
-import { INTRO_BAN_AT, INTRO_DOWNGRADE_AT, INTRO_GOAL_AT, INTRO_LANDING_AT, INTRO_PELICAN_AT, INTRO_ROUTE_AT, introSceneAt } from '../config/intro.ts';
+import { INTRO_BAN_AT, INTRO_DOWNGRADE_AT, INTRO_GOAL_AT, INTRO_FORTRESS_REVEAL_AT, INTRO_PELICAN_AT, INTRO_ROUTE_AT, introSceneAt } from '../config/intro.ts';
 import type { IntroLanguage } from '../config/intro-language.ts';
+import { FACILITY_SCENES } from '../config/facility-scenes.ts';
 import { label, stroke, CYAN, GOLD, CORAL } from './intro-finale-geometry.ts';
 import { MONO, SANS, smooth, TAU } from './intro-edition-shared.ts';
 
-/** Cinematic status follows the same story clock as the routing, transformation and landing. */
+/** Cinematic status follows the same story clock as the routing, transformation and fortress reveal. */
 export function drawStoryHud(ctx: CanvasRenderingContext2D, seconds: number, w: number, h: number, language: IntroLanguage): void {
   const start = introSceneAt('glitch');
   if (seconds < start) return;
   const zh = language === 'zh';
   const transformed = seconds >= INTRO_PELICAN_AT;
   const world = seconds >= introSceneAt('world');
-  const landed = seconds >= INTRO_LANDING_AT;
+  const revealed = seconds >= INTRO_FORTRESS_REVEAL_AT;
   const banned = seconds >= INTRO_BAN_AT && !transformed;
   const color = world ? GOLD : transformed ? CYAN : CORAL;
   const margin = Math.max(20, w * .045);
   const top = 82;
   const size = Math.min(12, w * .029);
   const width = Math.min(190, w * .39);
-  const chapter = world ? (zh ? '01 / 遗落边境' : '01 / LOST FRONTIER')
+  const chapter = world ? `${FACILITY_SCENES.fortress.number} / ${zh ? FACILITY_SCENES.fortress.name : 'MOUNTAIN COMPUTE FORTRESS'}`
     : transformed ? (zh ? '裂隙穿越 / 逃离路由' : 'RIFT RUN / ESCAPE THE ROUTE')
       : (zh ? '警报 / 前沿模型访问被切断' : 'ALERT / FRONTIER ACCESS CUT');
   const identity = transformed ? 'GRASSY / PELICAN' : 'GRASSY / HUMAN';
@@ -45,15 +46,12 @@ export function drawStoryHud(ctx: CanvasRenderingContext2D, seconds: number, w: 
     if (i < 3) stroke(ctx, [[x + 5, top + 29], [x + 13, top + 29]], color, .7);
   }
   if (seconds < INTRO_GOAL_AT) {
-    const objective = world ? (landed ? (zh ? '落地确认 · 向堡垒进发' : 'LANDED / REACH THE CITADEL') : (zh ? '进入关卡 · 锁定落点' : 'ENTERING LEVEL / ACQUIRE LANDING'))
+    const objective = world ? (revealed ? (zh ? '落点已锁定 · 准备穿越黑洞' : 'DESTINATION LOCKED / PREPARE TO CROSS THE BLACK HOLE') : (zh ? '黑洞前哨 · 正在锁定落点' : 'BLACK HOLE OUTPOST / ACQUIRING DESTINATION'))
       : transformed ? (zh ? '逃离神经裂隙' : 'ESCAPE THE NEURAL RIFT') : (zh ? '夺回被切断的前沿模型' : 'RECLAIM FRONTIER ACCESS');
     ctx.globalAlpha = .85;
     const y = h - 38;
     stroke(ctx, [[margin, y - 15], [margin + 24, y - 15]], color, 2);
     label(ctx, objective, margin + 36, y - 15, Math.min(16, w * .036), w - margin * 2 - 36, '#e7efe9', SANS, 600, 'left');
-    const progress = smooth(start, INTRO_GOAL_AT, seconds);
-    ctx.fillStyle = '#82999d33'; ctx.fillRect(margin, y + 7, w - margin * 2, 2);
-    ctx.fillStyle = color; ctx.fillRect(margin, y + 7, (w - margin * 2) * progress, 2);
   }
   ctx.restore();
 }

@@ -31,6 +31,8 @@ export interface PelicanAnimInput {
   vx: number;
   vy: number;
   facing: 1 | -1;
+  /** 松开移动输入时保留当前角度，其他动画仍继续。 */
+  turning: boolean;
   attackPhase: PelicanAttackPhase | null;
   /** Progress through the current attack phase, 0..1. */
   attackProgress: number;
@@ -575,7 +577,7 @@ export function createPelicanAnimator(tuning: PelicanAnimTuning, geometry: Pelic
     if (!started) {
       started = true;
       yaw = yawTarget;
-    } else {
+    } else if (i.turning) {
       yaw = damp(yaw, yawTarget, t.yawRate, dt);
     }
     clock += dt;

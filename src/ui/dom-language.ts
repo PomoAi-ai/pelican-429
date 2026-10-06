@@ -1,7 +1,15 @@
-import { getLanguage, onLanguageChange, setLanguage } from './language.ts';
+import { LANGUAGES, getLanguage, onLanguageChange, setLanguage, type Language } from './language.ts';
 import { translateShowcaseText } from './showcase-language.ts';
+import { HOME_ENGLISH } from './homepage-language.ts';
+import { SOUND_ENGLISH, translateSoundText } from './sound-language.ts';
 
 const english: Record<string, string> = {
+  ...HOME_ENGLISH,
+  ...SOUND_ENGLISH,
+  '世界地形定位': 'World terrain locations',
+  '重载当前种子的同一世界，并从所选地形旁开始': 'Reload the same world seed and start beside the selected terrain',
+  '返回出生点': 'Return to spawn',
+  '重头开始': 'Start over',
   '鹈鹕 429 / Pelican 429': 'Pelican 429',
   '功能入口': 'Explore sections', '开发导航': 'Development navigation',
   '山体算力堡垒的实时场景': 'Live view of the mountain compute fortress',
@@ -17,10 +25,12 @@ const english: Record<string, string> = {
   '自由查看山体堡垒、算力大教堂与光纤深渊。走动、跳跃和飞行，探索设备与检修通道。': 'Explore the mountain fortress, compute cathedral, and fiber abyss. Walk, jump, and fly through the equipment and service corridors.',
   'AGI 降智风暴 · 序章': 'AGI Brain-Drain Storm · Prelude',
   '四个音符把 AGI 推到 99%，一道 429 劈下，全场降智。黑暗里重新敲响，所有模型回归——前沿模型，人人有权使用。': "Four notes push AGI to 99%. A 429 strikes and every model gets dumbed down. Play it again in the dark and they all come back. Frontier AI is everyone's right.",
-  '演示场景': 'Demo scene',
+  '自由世界': 'Free world',
+  '自由世界 · 鹈鹕 429': 'Free world · Pelican 429',
   '演示场景 · 鹈鹕 429': 'Demo scene · Pelican 429',
   '切换鹈鹕与人形 Grassy，查看移动、飞行、游泳与战斗表现。': 'Switch between Pelican and human Grassy to inspect movement, flight, swimming, and combat.',
   '测试关卡': 'Test level',
+  '手机操控': 'Mobile controls', '场景测试': 'Scene tests', 'Boss 场': 'Boss arena',
   '进入固定小关卡，检查移动、物理与攻击效果。': 'Enter a fixed level to inspect movement, physics, and combat.',
   '角色卡': 'Character cards',
   '选择角色与动作，最多 8 张卡并排比较地上和地下效果。': 'Choose characters and actions; compare up to eight cards above and below ground.',
@@ -40,7 +50,7 @@ export function attachDomLanguage(): void {
   const originals = new WeakMap<Text, string>();
   const attributes = new WeakMap<Element, Map<string, string>>();
   const rendered = (source: string): string => {
-    const next = english[source.trim()] ?? translateShowcaseText(source.trim());
+    const next = english[source.trim()] ?? translateSoundText(source.trim()) ?? translateShowcaseText(source.trim());
     return next ? source.replace(source.trim(), next) : source;
   };
   const translate = (root: Node): void => {
@@ -65,10 +75,10 @@ export function attachDomLanguage(): void {
         let saved = attributes.get(element);
         if (!saved) { saved = new Map(); attributes.set(element, saved); }
         const old = saved.get(name);
-        if (!old || (current !== old && current !== english[old] && current !== translateShowcaseText(old))) saved.set(name, current);
+        if (!old || (current !== old && current !== rendered(old))) saved.set(name, current);
         const source = saved.get(name)!;
-        const next = getLanguage() === 'en' ? english[source] ?? translateShowcaseText(source) : undefined;
-        if (current !== (next ?? source)) element.setAttribute(name, next ?? source);
+        const next = getLanguage() === 'en' ? rendered(source) : source;
+        if (current !== next) element.setAttribute(name, next);
       }
     }
   };
@@ -83,20 +93,13 @@ export function attachDomLanguage(): void {
   observer.observe(document.documentElement, { subtree: true, childList: true, characterData: true, attributes: true, attributeFilter: ['aria-label', 'title', 'placeholder', 'alt'] });
   onLanguageChange(() => translate(document));
 
-  const picker = document.createElement('div');
+  const picker = document.createElement('select');
   picker.className = 'site-language';
-  picker.setAttribute('role', 'group');
   picker.setAttribute('aria-label', '语言 / Language');
-  for (const [language, label] of [['zh', '中文'], ['en', 'English']] as const) {
-    const button = document.createElement('button');
-    button.type = 'button';
-    button.textContent = label;
-    button.setAttribute('aria-pressed', String(getLanguage() === language));
-    button.addEventListener('click', () => {
-      setLanguage(language);
-      picker.querySelectorAll('button').forEach((item) => item.setAttribute('aria-pressed', String(item === button)));
-    });
-    picker.append(button);
-  }
+  for (const { id, label } of LANGUAGES) picker.add(new Option(label, id));
+  picker.value = getLanguage();
+  picker.addEventListener('change', () => setLanguage(picker.value as Language));
+  // The settings panel can also switch language, so keep the menu in sync.
+  onLanguageChange((language) => { picker.value = language; });
   document.getElementById('dev-navigation')!.append(picker);
 }

@@ -26,7 +26,7 @@ export interface ShowcaseScenario extends ScenarioContext {
   readonly durationTicks: number;
   readonly elapsedTicks: number;
   readonly height: number;
-  step(input?: InputFrame): void;
+  step(input?: InputFrame, aim?: Vec2): void;
   focus(): Vec2;
   status(): string;
   dispose(): void;

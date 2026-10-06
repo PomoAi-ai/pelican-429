@@ -90,7 +90,7 @@ describe('鹈鹕微光：颜色、衰减与合成', () => {
   });
 
   test('洞壁背板：auraReceive = wallReceive，着色器常量与缓存键随之；方块材质保持 1', () => {
-    const wall = createCaveWallMaterial(new THREE.DataTexture(new Uint8Array(4), 2, 2), 2, 2);
+    const wall = createCaveWallMaterial(new THREE.DataTexture(new Uint8Array(4), 2, 2), new THREE.DataTexture(), 2, 2, new THREE.Texture());
     assert.equal(wall.userData.auraReceive, DEFAULT_AURA.wallReceive);
     const wl = world();
     const key = wall.customProgramCacheKey();

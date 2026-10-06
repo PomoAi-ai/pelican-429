@@ -80,7 +80,7 @@ test('人形横版动作通过正式物理移动、骑行和降落', () => {
 
 test('人形键盘和光子攻击在移动和飞行中真实击中展示目标', () => {
   for (const attack of ['keyboard_smash', 'codex_attack', 'bug_attack', 'server_overload', 'photon_burst']) {
-    for (const facing of [-1, 1] as const) for (const flight of ['', '.fly_forward']) {
+    for (const facing of [-1, 1] as const) for (const flight of ['', '.fly_forward', '.fly_fast']) {
       const demo = createShowcaseScenario(`human.rodin-animated-game.${attack}${flight}`, 'surface', facing, 'run');
       const player = getPlayer(demo.world);
       let movingAttack = false;
@@ -103,7 +103,7 @@ test('人形键盘和光子攻击在移动和飞行中真实击中展示目标',
 });
 
 test('切换空中施法后不继承隐藏的跑步施法设置', () => {
-  for (const flight of ['takeoff', 'hover', 'fly_forward']) {
+  for (const flight of ['takeoff', 'hover', 'fly_forward', 'fly_fast']) {
     const normal = createShowcaseScenario(`human.rodin-animated-game.codex_attack.${flight}`, 'surface', 1);
     const switched = createShowcaseScenario(`human.rodin-animated-game.codex_attack.${flight}`, 'surface', 1, 'run');
     const expected = getPlayer(normal.world);
@@ -113,7 +113,7 @@ test('切换空中施法后不继承隐藏的跑步施法设置', () => {
       normal.step(); switched.step();
       assert.equal(player.body.x, expected.body.x, `${flight} 不应由隐藏的跑步设置改变位移`);
       assert.equal(player.body.y, expected.body.y);
-      if (flight !== 'fly_forward') assert.equal(player.body.x, startX, `${flight} 应保持水平悬停`);
+      if (flight === 'takeoff' || flight === 'hover') assert.equal(player.body.x, startX, `${flight} 应保持水平悬停`);
     }
     normal.dispose(); switched.dispose();
   }
@@ -137,17 +137,21 @@ test('吞弹反吐在两个朝向都通过真实来袭弹完成吞入和返还',
   }
 });
 
-test('吐水与四技能展示真实命中所有目标，突进击飞、高台追踪和重播可重复', () => {
+test('技能展示真实命中目标，突进击飞、光子定向追击高台和重播可重复', () => {
   for (const action of ['water', 'fish', 'dash', 'swallow', 'ultimate']) {
     for (const facing of [1, -1] as const) {
       const demo = createShowcaseScenario(`pelican.${action}`, 'surface', facing);
       const targets = demo.world.entities.filter((entity) => entity.kind === 'trainingDummy');
       const initial = targets.map((entity) => [entity.body.x, entity.body.y, entity.health!.hp]);
+      const expectedTargets = action === 'ultimate'
+        ? [targets.find(entity => entity.body.y > demo.groundY + 3 && (entity.body.x - getPlayer(demo.world).body.x) * facing > 0)!]
+        : targets;
+      const aim = action === 'ultimate' ? { x: expectedTargets[0]!.body.x, y: expectedTargets[0]!.body.y + expectedTargets[0]!.body.height / 2 } : undefined;
       const hits = new Set<number>();
       let launched = false;
       let highHit = false;
       for (let tick = 0; tick < demo.durationTicks; tick++) {
-        demo.step();
+        demo.step(undefined, aim);
         launched ||= targets.some((entity) => entity.body.y > entity.dummy!.home.y + 0.5);
         for (const event of demo.world.events.drain()) {
           if (event.type !== 'hit') continue;
@@ -157,10 +161,11 @@ test('吐水与四技能展示真实命中所有目标，突进击飞、高台�
           highHit ||= target.body.y > demo.groundY + 3;
         }
       }
-      assert.equal(hits.size, targets.length, `${action} ${facing} 所有目标都应实际受击`);
+      assert.ok(expectedTargets.every(entity => hits.has(entity.id)), `${action} ${facing} 发射方向上的目标应实际受击`);
       if (action === 'dash') assert.equal(launched, true);
       if (action === 'ultimate') assert.equal(highHit, true);
-      assert.ok(targets.every((entity) => entity.health!.hp < entity.health!.maxHp));
+      // 定向光子可能击倒同一假人并触发归位回血，以真实命中事件验收。
+      if (action !== 'ultimate') assert.ok(targets.every((entity) => entity.health!.hp < entity.health!.maxHp));
       demo.dispose();
       const fresh = createShowcaseScenario(`pelican.${action}`, 'surface', facing);
       assert.deepEqual(fresh.world.entities.filter((entity) => entity.kind === 'trainingDummy').map((entity) => [entity.body.x, entity.body.y, entity.health!.hp]), initial);
@@ -192,6 +197,28 @@ test('假人实际受击归零后恢复生命，小鱼从搁浅恢复游动', ()
 // 资源预览和角色预览共用容量与独立卡片状态。
 import { createShowcaseModel } from '../src/ui/showcase-model.ts';
 import { CHARACTER_CATALOG } from '../src/config/showcase.ts';
+import { readCharacterStageLocation, writeCharacterStageLocation } from '../src/ui/character-stage-location.ts';
+
+test('切换贴图档位的链接保留多个角色、形态动作、暂停和镜头', () => {
+  const model = createShowcaseModel();
+  model.showActor('sam');
+  model.changeAction(model.cards[0]!, 'sam.human.skill2');
+  model.update(model.cards[0]!, { playing: false, facing: -1, speed: .25, loop: false });
+  model.addActor('sam');
+  model.changeAction(model.cards[1]!, 'sam.monster.walk');
+  model.addActor('watchWasp');
+  model.setModelView(model.cards[2]!, -Math.PI / 2, .25);
+  const view = { zoom: 8, angle: -8, environment: 'underground' as const };
+  const params = new URLSearchParams('mode=showcase&textures=web');
+  writeCharacterStageLocation(params, model.cards, view);
+  params.set('textures', 'ktx2');
+  const restored = readCharacterStageLocation(new URLSearchParams(params.toString()), CHARACTER_CATALOG)!;
+  assert.deepEqual(restored, { ...view, cards: model.cards.map(({ entryId, facing, playing, modelYaw, modelPitch, speed, loop }) => ({ entryId, facing, playing, modelYaw, modelPitch, speed, loop })) });
+  assert.equal(params.get('textures'), 'ktx2');
+  model.clear();
+  writeCharacterStageLocation(params, model.cards, view);
+  assert.deepEqual(readCharacterStageLocation(params, CHARACTER_CATALOG), { ...view, cards: [] });
+});
 import { FISH_SPECIES, fishSpeciesIndex } from '../src/config/fish-appearance.ts';
 import { RESOURCE_CATALOG } from '../src/render/resource-catalog.ts';
 import { createResourceScenario } from '../src/app/showcase/resource-scenario.ts';
@@ -511,6 +538,62 @@ test('树枝瓦片展示使用树生成器的平台结果并具有真实单向�
   demo.dispose();
 });
 
+
+test('角色目录切换替换场景，Add 保留已有实例且独立控制', () => {
+  const model = createShowcaseModel();
+  model.showActor('human');
+  const first = model.cards[0]!;
+  model.update(first, { playing: false });
+  model.addActor('human');
+  assert.equal(model.cards.length, 2);
+  assert.notEqual(model.cards[1]!.id, first.id);
+  assert.equal(first.playing, false);
+  assert.equal(model.cards[1]!.playing, true);
+  model.addActor('luma');
+  assert.equal(model.cards[0], first);
+  model.showActor('sam');
+  assert.deepEqual(model.cards.map((card) => card.entryId), ['sam.monster.idle']);
+  for (let i = 0; i < model.catalog.maxCards; i++) model.addActor('sam');
+  assert.equal(model.cards.length, model.catalog.maxCards);
+  model.showActor('pelican');
+  assert.deepEqual(model.cards.map((card) => card.entryId), ['pelican.idle']);
+});
+
+test('NPC 双向切换形态保留暂停的慢速技能和动作进度', () => {
+  const model = createShowcaseModel();
+  model.showActor('sam');
+  const card = model.cards[0]!;
+  model.changeAction(card, 'sam.monster.skill2');
+  model.update(card, { playing: false, speed: .25, loop: true, facing: -1, environment: 'underground', targetDodge: true });
+  const before = { ...card };
+  for (const form of ['human', 'monster', 'monster'] as const) {
+    model.changeNpcForm(card, form);
+    assert.deepEqual(card, { ...before, entryId: `sam.${form}.skill2` });
+  }
+});
+
+test('NPC 重播变身仅恢复目标卡播放，复制继承形态但不继承重播请求', () => {
+  const model = createShowcaseModel();
+  model.showActor('sam');
+  model.addActor('sam');
+  const card = model.cards[0]!;
+  const other = model.cards[1]!;
+  model.changeAction(card, 'sam.monster.skill1');
+  model.changeNpcForm(card, 'human');
+  model.update(card, { playing: false, speed: .25, loop: true, facing: -1 });
+  const before = { ...card };
+  const otherBefore = { ...other };
+  for (let replay = 1; replay <= 2; replay++) {
+    model.replayNpcTransformation(card);
+    assert.deepEqual(card, { ...before, playing: true, npcTransformationRevision: before.npcTransformationRevision + replay });
+    assert.deepEqual(other, otherBefore);
+  }
+  model.duplicate(card);
+  const copy = model.cards[2]!;
+  assert.notEqual(copy.id, card.id);
+  assert.deepEqual(copy, { ...card, id: copy.id, revision: 0, npcTransformationRevision: 0 });
+  assert.deepEqual(other, otherBefore);
+});
 
 test('鱼类对比可打开角色卡片，各品种创建对应的真实游动鱼且重复创建稳定', () => {
   const model = createShowcaseModel();

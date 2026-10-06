@@ -13,7 +13,7 @@ import { planTree } from '../../world/trees.ts';
 import { createWorldLighting } from '../lighting-wiring.ts';
 
 /** 演示只摆放角色，地形、植被和洞穴由正式可玩关卡及世界视图提供。 */
-export function createNpcWorld(stage: ReturnType<typeof createStageView>, environment: ShowcaseEnvironment) {
+export function createNpcWorld(stage: ReturnType<typeof createStageView>, environment: ShowcaseEnvironment, caveBackground: THREE.Texture) {
   const disposers: Array<() => void> = [];
   const dispose = (): void => { for (const release of disposers.splice(0).reverse()) release(); };
   try {
@@ -32,7 +32,7 @@ export function createNpcWorld(stage: ReturnType<typeof createStageView>, enviro
     root.name = 'npc-world';
     stage.scene.add(root);
     disposers.push(() => root.removeFromParent());
-    const views = createWorldViews({ scene: root, level, fish: world.fish, ground, windMode: 'calm', waterPalette: DEFAULT_WATER_PALETTE });
+    const views = createWorldViews({ caveBackground, scene: root, level, fish: world.fish, ground, windMode: 'calm', waterPalette: DEFAULT_WATER_PALETTE });
     disposers.push(() => views.dispose());
     views.weather.setEnabled(false);
     const lighting = createWorldLighting(level, world, DEFAULT_WATER_PALETTE, disposers);

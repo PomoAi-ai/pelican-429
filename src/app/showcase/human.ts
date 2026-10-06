@@ -17,8 +17,10 @@ export function prepareHuman(ctx: ScenarioContext, attackMotion: 'still' | 'walk
   const p = player.pelican!;
   const photon = entry.action === 'photon_burst';
   const attacking = isGrassyAttack(clip) || photon;
-  const airborne = flight !== undefined || clip === 'takeoff' || clip === 'hover' || clip === 'fly_forward' || clip === 'land';
-  const startsAloft = flight === 'hover' || flight === 'fly_forward' || clip === 'hover' || clip === 'fly_forward' || clip === 'land';
+  const fastAttack = flight === 'fly_fast';
+  const forward = clip === 'fly_forward' || clip === 'fly_fast' || flight === 'fly_forward' || flight === 'fly_fast';
+  const airborne = flight !== undefined || clip === 'takeoff' || clip === 'hover' || forward || clip === 'land';
+  const startsAloft = flight === 'hover' || clip === 'hover' || forward || clip === 'land';
   const originX = 24;
   p.form = p.transformFrom = 'human';
   player.body.height = HUMAN_BODY_HEIGHT;
@@ -35,10 +37,12 @@ export function prepareHuman(ctx: ScenarioContext, attackMotion: 'still' | 'walk
     }
     targets.push(addEntity(world, (id) => createDummyEntity(id, { x, y }, world.tuning)));
   };
+  // 快飞的远程目标位于折返通道外，避免起飞阶段先撞停在假人身上。
   for (const side of [-1, 1]) {
-    if (clip === 'keyboard_smash' || clip === 'server_overload') addTarget(side * 2, airborne ? 4 : 0);
-    addTarget(side * (attacking ? 8 : 12), 0);
-    addTarget(side * (attacking ? 8 : 12), 4);
+    if (clip === 'keyboard_smash' || (clip === 'server_overload' && !fastAttack)) addTarget(side * 2, airborne ? 4 : 0);
+    const distance = fastAttack ? 14 : attacking ? 8 : 12;
+    addTarget(side * distance, 0);
+    addTarget(side * distance, 4);
   }
   let direction = facing;
 
@@ -48,17 +52,19 @@ export function prepareHuman(ctx: ScenarioContext, attackMotion: 'still' | 'walk
     input(tick): InputFrame {
       if (player.body.x > (clip === 'ride' ? 31 : 34)) direction = -1;
       else if (player.body.x < (clip === 'ride' ? 17 : 14)) direction = 1;
-      const moving = clip === 'walk' || clip === 'run' || clip === 'sprint' || clip === 'ride' || clip === 'fly_forward' || flight === 'fly_forward' || (attacking && flight === undefined && attackMotion !== 'still');
+      const moving = clip === 'walk' || clip === 'run' || clip === 'sprint' || clip === 'ride' || forward || (attacking && flight === undefined && attackMotion !== 'still');
       const takeoff = clip === 'takeoff' || flight === 'takeoff';
       const lift = airborne && clip !== 'land' && (player.body.y < groundY + flightHeight || (takeoff && tick < 20));
-      const attack = attacking && tick >= 50 && (tick - 50) % 150 === 0;
+      // 快飞先完成起飞和首次掉头，让第一轮技能就能呈现高速飞行姿态。
+      const attackStart = fastAttack ? 90 : 50;
+      const attack = attacking && tick >= attackStart && (tick - attackStart) % 150 === 0;
       const aimTarget = targets
         .filter((target) => target.health!.hp > 0 && (target.body.x - player.body.x) * player.facing > 0)
         .sort((a, b) => Math.abs(a.body.y - player.body.y) - Math.abs(b.body.y - player.body.y) || Math.abs(a.body.x - player.body.x) - Math.abs(b.body.x - player.body.x))[0];
       return {
         ...NEUTRAL_INPUT,
         moveX: moving ? direction : 0,
-        runHeld: clip === 'run' || clip === 'sprint' || (attacking && flight === undefined && attackMotion === 'run'),
+        runHeld: clip === 'run' || clip === 'sprint' || clip === 'fly_fast' || flight === 'fly_fast' || (attacking && flight === undefined && attackMotion === 'run'),
         jumpPressed: (clip === 'jump' && tick === 20) || (takeoff && tick === 10),
         jumpHeld: clip === 'jump' ? tick >= 20 && tick < 34 : lift,
         downHeld: clip === 'land' || (clip === 'jump' && tick >= 34),
@@ -78,7 +84,7 @@ export function prepareHuman(ctx: ScenarioContext, attackMotion: 'still' | 'walk
       const hp = targets.reduce((sum, target) => sum + target.health!.hp, 0);
       const phase = world.photon.chargeTicks > 0 ? '光子聚光' : world.photon.activeTicks > 0 ? '虫群光轮追击'
         : p.humanCombat.action !== null ? grassyAction(p.humanCombat.action).label
-        : p.ride.mode !== 'off' ? '骑行' : p.flightMode !== 'none' ? '推进飞行'
+        : p.ride.mode !== 'off' ? '骑行' : p.flightMode !== 'none' ? Math.abs(player.body.vx) > (world.tuning.player.flight.humanSpeed + world.tuning.player.flight.humanFastSpeed) / 2 ? '快速飞行' : '推进飞行'
           : p.state === 'run' ? p.moveGear === 'run' ? '跑动' : '走路'
             : p.state === 'jump' ? '跳跃' : p.state === 'fall' ? '下落' : '呼吸';
       return `${phase} · ${hit}/${targets.length} 目标受击 · 生命 ${hp}/${targets.length * world.tuning.dummy.maxHp}`;

@@ -3,7 +3,8 @@ import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
 
 import { createFrameProfiler } from '../src/core/frame-profiler.ts';
-import { formatPerfText } from '../src/ui/perf-panel.ts';
+import { createPerfPanel, formatPerfText } from '../src/ui/perf-panel.ts';
+import { FakeElement, withFakeDocument } from './helpers/fake-dom.ts';
 
 function clock(values: number[]) {
   let i = 0;
@@ -56,6 +57,34 @@ describe('frame-profiler', () => {
 });
 
 describe('perf-panel', () => {
+  test('普通场景快捷键切换，长按只触发一次，编辑撤销与销毁后不拦截', () => withFakeDocument(() => {
+    // 若快捷键仍依赖调试模式，或丢失重复键/编辑控件过滤，此用例会失败。
+    for (const modifier of ['ctrlKey', 'metaKey']) {
+      const parent = Object.assign(new FakeElement('BODY'), { isConnected: true });
+      const keys = new FakeElement('WINDOW');
+      const panel = createPerfPanel(parent as unknown as HTMLElement, keys as unknown as Window, false);
+      const shortcut = { code: 'KeyZ', [modifier]: true, altKey: true };
+      assert.equal(keys.dispatch('keydown', { ...shortcut, altKey: false }).prevented, false);
+      assert.equal(panel.visible, false);
+      assert.equal(keys.dispatch('keydown', shortcut).prevented, true);
+      assert.equal(panel.visible, true);
+      keys.dispatch('keydown', { ...shortcut, repeat: true });
+      assert.equal(panel.visible, true);
+      for (const target of [new FakeElement('INPUT'), new FakeElement('TEXTAREA'), Object.assign(new FakeElement('DIV'), { isContentEditable: true })]) {
+        assert.equal(keys.dispatch('keydown', { ...shortcut, target }).prevented, false);
+        assert.equal(panel.visible, true);
+      }
+      assert.equal(keys.dispatch('keydown', { ...shortcut, shiftKey: true }).prevented, false);
+      keys.dispatch('keydown', { code: 'KeyP' });
+      assert.equal(panel.visible, true);
+      keys.dispatch('keydown', shortcut);
+      assert.equal(panel.visible, false);
+      panel.dispose();
+      assert.equal(keys.dispatch('keydown', shortcut).prevented, false);
+      assert.equal(panel.visible, false);
+    }
+  }));
+
   test('文本：FPS、帧时间、CPU 分段、draw call、三角形（千/百万）', () => {
     const text = formatPerfText({ frames: 60, fps: 59.94, frameTime: 16.68, cpu: 3.2, segments: { sim: 0.21, render: 1.6 }, calls: 252, triangles: 1_090_000 });
     assert.match(text, /FPS\s+59\.9/);

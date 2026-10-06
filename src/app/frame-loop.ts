@@ -12,6 +12,7 @@ import type { Vec2 } from '../core/math.ts';
 import type { Entity } from '../entities/entity.ts';
 import type { ActionTracker } from '../input/action-map.ts';
 import type { KeyboardMouseBinding } from '../input/keyboard-mouse.ts';
+import { waterSpanInColumn } from '../physics/fluid-contact.ts';
 import type { CameraRig } from '../render/camera-rig.ts';
 import type { LightShafts } from '../render/light-shafts.ts';
 import type { LumaCompanion } from '../render/luma/luma-companion.ts';
@@ -26,6 +27,7 @@ import type { PerfPanel } from '../ui/perf-panel.ts';
 import type { SettingsController } from '../ui/settings-model.ts';
 import type { SettingsPanel } from '../ui/settings-panel.ts';
 import type { WeaponHud } from '../ui/weapon-hud.ts';
+import { mainlineTransformUnlocked } from '../sim/mainline.ts';
 import type { LevelData } from '../world/level.ts';
 import { pourAtWorld } from './debug-tools.ts';
 import type { PourState } from './debug-tools.ts';
@@ -117,6 +119,9 @@ export function createFrameLoop(d: FrameLoopDeps): FrameLoop {
   /** 事件分发 + 视图/相机/光照更新（暂停时实体动画与模拟风场冻结，水等视觉效果继续）。 */
   const updateViews = (alpha: number, frameDt: number, paused: boolean, profiling: boolean): Entity => {
     const events = world.events.drain();
+    for (const event of events) {
+      if (event.type === 'teleported' && event.id === world.playerId) cameraRig.snapTo(event.x, event.y, getPlayer(world).facing);
+    }
     d.audio?.handleEvents(events, world);
     hud.handleEvents(events);
     weaponHud.handleEvents(events);
@@ -150,14 +155,16 @@ export function createFrameLoop(d: FrameLoopDeps): FrameLoop {
 
   /** HUD / 武器面板 / 小地图 / 设置面板。 */
   const updateUi = (pl: Entity, alpha: number, frameDt: number): void => {
+    const noseY = pl.body.y + pl.body.height * .9;
     hud.update({
       entities: world.entities,
+      headSubmerged: waterSpanInColumn(world.fluid, Math.floor(pl.body.x), noseY, noseY + .05) > 0,
       alpha,
       frameDt,
       stats: { fps, tick: world.tick, droppedTicks: stepper.stats.droppedTicks },
       playerId: world.playerId,
     });
-    weaponHud.update({ entities: world.entities, playerId: world.playerId, frameDt, photonCooldownTicks: world.photon.cooldownTicks, photonChargeTicks: world.photon.chargeTicks, photonActiveTicks: world.photon.activeTicks });
+    weaponHud.update({ entities: world.entities, playerId: world.playerId, frameDt, photonCooldownTicks: world.photon.cooldownTicks, photonChargeTicks: world.photon.chargeTicks, photonActiveTicks: world.photon.activeTicks, transformUnlocked: mainlineTransformUnlocked(world) });
     minimap.update({
       player: { x: lerp(pl.body.prevX, pl.body.x, alpha), y: lerp(pl.body.prevY, pl.body.y, alpha) + pl.body.height / 2, facing: pl.facing },
       dummies: world.entities.filter((e) => e.kind === 'trainingDummy' && !e.removed).map((e) => ({ x: e.body.x, y: e.body.y + e.body.height / 2 })),
@@ -190,8 +197,8 @@ export function createFrameLoop(d: FrameLoopDeps): FrameLoop {
     if (profiling) {
       prof.mark('ui');
       prof.end({ calls: info.render.calls, triangles: info.render.triangles });
-      perfPanel.update(perfSnapshot, now);
     }
+    perfPanel.update(perfSnapshot, now, fps);
   };
 
   return {

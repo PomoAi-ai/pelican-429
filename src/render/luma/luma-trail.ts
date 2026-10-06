@@ -11,7 +11,7 @@ export interface LumaTrail {
 }
 
 /** 出生点留在场景坐标中，角色转身或移动时不会把已经落下的光点带走。 */
-export function createLumaTrail(scene: THREE.Scene): LumaTrail {
+export function createLumaTrail(scene: THREE.Object3D): LumaTrail {
   const positions = new THREE.Float32BufferAttribute(new Float32Array(CAPACITY * 3), 3).setUsage(THREE.DynamicDrawUsage);
   const births = new THREE.Float32BufferAttribute(new Float32Array(CAPACITY).fill(-100), 1).setUsage(THREE.DynamicDrawUsage);
   const strengths = new THREE.Float32BufferAttribute(new Float32Array(CAPACITY), 1).setUsage(THREE.DynamicDrawUsage);

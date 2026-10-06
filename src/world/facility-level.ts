@@ -1,13 +1,14 @@
 import { mulberry32 } from '../core/rng.ts';
 import type { FacilitySceneId } from '../config/facility-scenes.ts';
 import { FACILITY_PLATFORMS, FACILITY_SCENES } from '../config/facility-scenes.ts';
-import { FORTRESS_CHASM, FORTRESS_COOLANT, FORTRESS_STRUCTURE } from '../config/facility-structure.ts';
+import { FORTRESS_BLACKHOLE, FORTRESS_CHASM, FORTRESS_COOLANT, FORTRESS_PLATEAU, FORTRESS_STRUCTURE } from '../config/facility-structure.ts';
 import { createFluidMap, FLUID_FULL } from './fluid-map.ts';
 import { computeSurface } from './level.ts';
 import type { LevelData } from './level.ts';
 import { createTileMap } from './tile-map.ts';
 import { DEFAULT_TILES, TILE_BRANCH, TILE_DIRT, TILE_GRASS, TILE_PLATFORM, TILE_STONE, TILE_TIMBER } from './tile-types.ts';
 import { planTree } from './trees.ts';
+import { enemySpawnFits, type EnemySpawn } from './enemy-spawns.ts';
 
 /** 室外桥梁与机房共用连续通路；设备模型位于后景，不改变角色的通行平面。 */
 function createOriginalLevel(): LevelData {
@@ -59,10 +60,10 @@ export function createFacilityLevel(sceneId: FacilitySceneId): LevelData {
   for (let x = 0; x < width; x++) {
     const canyon = sceneId === 'fortress' && x >= FORTRESS_CHASM.left && x < FORTRESS_CHASM.right;
     const outdoor = sceneId === 'fortress' && x < FORTRESS_CHASM.right;
-    const top = canyon ? FORTRESS_CHASM.bottom : outdoor ? floor + (x < 6 ? Math.floor((6 - x) / 2) : 0) : 2;
+    const top = canyon ? FORTRESS_CHASM.bottom : outdoor ? x < FORTRESS_PLATEAU.right ? FORTRESS_PLATEAU.top : floor : 2;
     for (let y = 0; y < top; y++) {
       // The old stone approach keeps its grass until the reinforced cliff-edge cap begins.
-      ids[y * width + x] = outdoor && x < 16 && y === top - 1 ? TILE_GRASS : TILE_STONE;
+      ids[y * width + x] = outdoor && x < 48 && y === top - 1 ? TILE_GRASS : TILE_STONE;
     }
   }
   // 工业踏板由共享建筑模型绘制，碰撞层只留下可站立面。
@@ -82,19 +83,38 @@ export function createFacilityLevel(sceneId: FacilitySceneId): LevelData {
   }
   map.load(ids);
   const fluid = createFluidMap(map);
+  const enemies: EnemySpawn[] = sceneId === 'fortress' ? [
+    { kind: 'gatekeeper', x: 98, y: 20 },
+    { kind: 'lineHound', x: 120, y: 20 },
+    { kind: 'watchWasp', x: 137, y: 24 },
+    { kind: 'watchWasp', x: 145, y: 23 },
+    { kind: 'watchWasp', x: 153, y: 24 },
+    { kind: 'loadmaster', x: 177, y: 20 },
+  ] : [];
+  const spawnMap = { map, fluid, ...(sceneId === 'fortress' ? { lethalCoolant: FORTRESS_COOLANT } : {}) };
+  const guards = ['gatekeeper', 'lineHound', 'loadmaster'] as const;
+  let guardIndex = 0;
+  for (const [left, right, platformY] of FACILITY_PLATFORMS[sceneId]) {
+    if (right - left < 8 || sceneId === 'fortress' && platformY <= floor) continue;
+    // 屋顶碰撞壳比装饰踏板高一格，守军必须出生在壳体上。
+    const y = sceneId === 'fortress' && platformY === 74 ? 75 : platformY;
+    for (let section = left; section < right - 4; section += 28) {
+      const kind = guards[guardIndex++ % guards.length]!;
+      const end = Math.min(right - 2, section + 26);
+      for (let x = Math.floor((section + end) / 2); x < end; x++) {
+        if (Math.hypot(x - (sceneId === 'fortress' ? 44 : 20), y - floor) < 24 || !enemySpawnFits(spawnMap, kind, x, y)) continue;
+        enemies.push({ kind, x, y });
+        if (right - left >= 20 && enemySpawnFits(spawnMap, 'watchWasp', x + 4, y + 4)) enemies.push({ kind: 'watchWasp', x: x + 4, y: y + 4 });
+        break;
+      }
+    }
+  }
   return {
     map, fluid, surface: computeSurface(map), seed: 429,
-    ...(sceneId === 'fortress' ? { lethalCoolant: FORTRESS_COOLANT } : {}),
-    spawn: { x: sceneId === 'fortress' ? 12 : 20, y: floor }, spawnFacing: 1,
+    ...(sceneId === 'fortress' ? { lethalCoolant: FORTRESS_COOLANT, blackhole: { x: FORTRESS_BLACKHOLE.position.x, y: FORTRESS_BLACKHOLE.position.y } } : {}),
+    spawn: { x: sceneId === 'fortress' ? 44 : 20, y: floor }, spawnFacing: 1,
     trees: [], lakes: [],
-    ...(sceneId === 'fortress' ? { enemies: [
-      { kind: 'gatekeeper' as const, x: 66, y: 20 },
-      { kind: 'lineHound' as const, x: 88, y: 20 },
-      { kind: 'watchWasp' as const, x: 105, y: 24 },
-      { kind: 'watchWasp' as const, x: 113, y: 23 },
-      { kind: 'watchWasp' as const, x: 121, y: 24 },
-      { kind: 'loadmaster' as const, x: 145, y: 20 },
-    ] } : {}),
+    enemies,
     dummies: [], structures: [], deserts: [], islands: [], fishSpawns: [],
     caves: { mask: new Uint8Array(width * height), entrances: [], rooms: [], pools: [], glows: [] },
   };

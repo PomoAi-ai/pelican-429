@@ -1,6 +1,24 @@
 /** 模拟层对外事件（纯类型）。逻辑层 push，渲染/UI 每帧 drain 后分发。 */
 import type { ProjectileEndReason, ProjectileKind, WeaponId } from './weapon-ids.ts';
 
+/** 玩家已完成瞬移，相机在同一渲染帧切到落点。 */
+export interface TeleportedEvent {
+  readonly type: 'teleported';
+  readonly id: number;
+  readonly x: number;
+  readonly y: number;
+}
+
+/** 动作实际起手或释放；在命中结算清理动作之前记录。 */
+export interface CombatActionEvent {
+  readonly type: 'combatAction';
+  readonly id: number;
+  readonly action: string;
+  readonly phase: 'started' | 'released';
+  readonly x: number;
+  readonly y: number;
+}
+
 export interface HitEvent {
   readonly type: 'hit';
   /** 攻击归属实体（近战为攻击者本身，投射物为发射者）。 */
@@ -14,15 +32,32 @@ export interface HitEvent {
   readonly y: number;
 }
 
+/** 攻击实际接触目标，但被受击免伤期挡下；不算伤害命中。 */
+export interface DamageImmuneEvent {
+  readonly type: 'damageImmune';
+  readonly targetId: number;
+  readonly x: number;
+  readonly y: number;
+}
+
 export interface DummyResetEvent {
   readonly type: 'dummyReset';
   readonly id: number;
 }
 
+/** 拾取血包后实际恢复的生命值（已按生命上限截断）。 */
+export interface HealEvent {
+  readonly type: 'heal';
+  readonly id: number;
+  readonly amount: number;
+  readonly x: number;
+  readonly y: number;
+}
+
 export interface TransformBlockedEvent {
   readonly type: 'transformBlocked';
   readonly id: number;
-  readonly reason: 'space';
+  readonly reason: 'space' | 'story';
 }
 
 export interface PhotonUltimateStartedEvent {
@@ -154,7 +189,11 @@ export interface DismountEvent {
 }
 
 export type SimEvent =
+  | TeleportedEvent
+  | CombatActionEvent
   | HitEvent
+  | DamageImmuneEvent
+  | HealEvent
   | TransformBlockedEvent
   | PhotonUltimateStartedEvent
   | PhotonUltimateBurstEvent

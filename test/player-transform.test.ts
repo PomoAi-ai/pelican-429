@@ -5,7 +5,7 @@ import { TUNING } from '../src/config/tuning.ts';
 import { createDummyEntity } from '../src/entities/entity.ts';
 import { bodyRect } from '../src/physics/body.ts';
 import { overlapsSolid } from '../src/physics/tile-collision.ts';
-import { teleportPlayer } from '../src/sim/player-teleport.ts';
+import { placePlayer, teleportPlayer } from '../src/sim/player-teleport.ts';
 import { addEntity, createSimWorld, getPlayer, NEUTRAL_INPUT, stepSim } from '../src/sim/sim-world.ts';
 import type { InputFrame, SimWorld } from '../src/sim/sim-world.ts';
 import { LEVEL_LEGEND, parseLevel } from '../src/world/test-level.ts';
@@ -54,7 +54,7 @@ test('双向变身在换形中点切换碰撞高度，保留同一玩家生命�
     steps(control, PLAYER_TRANSFORM.durationTicks - PLAYER_TRANSFORM.swapTick);
     assert.equal(p.transformTicks, -1);
     assert.equal(getPlayer(world), player);
-    assert.equal(player.health!.hp, 41);
+    assert.equal(player.health!.hp, getPlayer(control).health!.hp, '变身保留生命且不重置脱战回血计时');
     assert.equal(p.weapon.water, getPlayer(control).pelican!.weapon.water);
     assert.equal(p.weapon.fish, 3);
     assert.deepEqual(p.weapon.cooldowns, getPlayer(control).pelican!.weapon.cooldowns);
@@ -227,11 +227,38 @@ test('人形可双向通过三格门洞，并可在门洞中变身', () => {
   assert.ok(player.body.x > 12, '人形应穿过门洞进入房间');
   steps(world, 150, { moveX: -1 });
   assert.ok(player.body.x < 10, '人形应能从同一门洞离开');
-  assert.deepEqual(teleportPlayer(world, { x: 11.5, y: 1 }), { x: 11.5, y: 1 });
+  assert.deepEqual(placePlayer(world, { x: 11.5, y: 1 }), { x: 11.5, y: 1 });
   step(world, { transformPressed: true });
   steps(world, PLAYER_TRANSFORM.durationTicks);
   step(world, { transformPressed: true });
   steps(world, PLAYER_TRANSFORM.durationTicks);
   assert.equal(player.pelican!.form, 'human');
   assert.equal(overlapsSolid(bodyRect(player.body), world.map), false);
+});
+
+test('人形出生可切换鹈鹕并切回，死亡重生保持人形出生状态', () => {
+  const rows = Array.from({ length: 18 }, () => '.'.repeat(30));
+  rows.push('........P.....................', '#'.repeat(30));
+  const level = { ...parseLevel(rows, LEVEL_LEGEND), enemies: [] };
+  const world = createSimWorld({ level, playerForm: 'human' });
+  try {
+    const player = getPlayer(world);
+    assert.equal(player.pelican!.form, 'human');
+    assert.equal(player.body.height, HUMAN_BODY_HEIGHT);
+    for (const form of ['pelican', 'human', 'pelican'] as const) {
+      step(world, { transformPressed: true });
+      steps(world, PLAYER_TRANSFORM.durationTicks);
+      assert.equal(player.pelican!.form, form);
+      assert.equal(player.body.height, form === 'human' ? HUMAN_BODY_HEIGHT : TUNING.player.height);
+    }
+    player.health!.hp = 0;
+    step(world);
+    assert.ok(world.respawnTicks > 0);
+    steps(world, world.respawnTicks);
+    assert.equal(player.pelican!.form, 'human');
+    assert.equal(player.pelican!.transformFrom, 'human');
+    assert.equal(player.pelican!.transformTicks, -1);
+    assert.equal(player.body.height, HUMAN_BODY_HEIGHT);
+    assert.equal(player.health!.hp, player.health!.maxHp);
+  } finally { level.fluid.dispose(); }
 });

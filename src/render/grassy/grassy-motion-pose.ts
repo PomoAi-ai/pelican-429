@@ -2,19 +2,24 @@ import * as THREE from 'three';
 import { GRASSY_MOTIONS, grassyAction, isGrassyAttack } from '../../config/grassy.ts';
 import type { GrassyAction, GrassyMotionState } from '../../config/grassy.ts';
 
-const torsoNames = ['root', 'hips', 'spine'] as const;
+const torsoNames = ['root', 'hips', 'spine', 'neck'] as const;
 const legNames = ['thighL', 'shinL', 'footL', 'toeL', 'thighR', 'shinR', 'footR', 'toeR'] as const;
 const poseNames = [...torsoNames, ...legNames];
-export const GRASSY_MOTION_NODES = [...poseNames, 'chest', 'neck', 'KeyboardWeapon'] as const;
+export const GRASSY_MOTION_NODES = [...poseNames, 'chest', 'KeyboardWeapon'] as const;
 
 /** Movement owns the legs; attacks retain both hands and the keyboard's chest-relative grip. */
 export function createGrassyMotionPose(model: THREE.Group, clips: Record<GrassyAction, THREE.AnimationClip>) {
-  const nodes = GRASSY_MOTION_NODES.map((name) => {
+  const trackedNames = new Set<string>(GRASSY_MOTION_NODES);
+  model.traverse((node) => { if (node instanceof THREE.Bone) trackedNames.add(node.name); });
+  const movementNames = new Set<string>(poseNames);
+  const nodes = [...trackedNames].map((name) => {
     const node = model.getObjectByName(name)!;
     return {
       node,
       restPosition: node.position.clone(), restRotationInverse: node.quaternion.clone().invert(), restScale: node.scale.clone(),
       position: node.position.clone(), rotation: node.quaternion.clone(), scale: node.scale.clone(),
+      displayedPosition: node.position.clone(), displayedRotation: node.quaternion.clone(), displayedScale: node.scale.clone(),
+      fromPosition: node.position.clone(), fromRotation: node.quaternion.clone(), fromScale: node.scale.clone(),
     };
   });
   const chest = model.getObjectByName('chest')!;
@@ -34,8 +39,11 @@ export function createGrassyMotionPose(model: THREE.Group, clips: Record<GrassyA
   const axis = new THREE.Vector3();
   const vector = new THREE.Vector3();
   let applied = false;
+  let movement: GrassyAction | null = null;
+  let blendAge = 0.24;
   return {
     attackTransform,
+    reset() { movement = null; blendAge = 0.24; },
     restore() {
       // PropertyMixer can skip identical samples, so undo our edits before it samples again.
       if (applied) for (const saved of nodes) {
@@ -46,7 +54,7 @@ export function createGrassyMotionPose(model: THREE.Group, clips: Record<GrassyA
       applied = false;
       attackTransform.identity();
     },
-    apply(motion: GrassyMotionState | null, action: GrassyAction, progress: number, strike: { side: 0 | 1; recovery: number } | null) {
+    apply(motion: GrassyMotionState | null, action: GrassyAction, progress: number, strike: { side: 0 | 1; recovery: number } | null, frameDt: number) {
       for (const saved of nodes) {
         saved.position.copy(saved.node.position);
         saved.rotation.copy(saved.node.quaternion);
@@ -72,6 +80,34 @@ export function createGrassyMotionPose(model: THREE.Group, clips: Record<GrassyA
             node.scale.fromArray(sample.scale.evaluate(time));
           }
         }
+      }
+      const attacking = isGrassyAttack(action);
+      const nextMovement = motion ? motion.action : attacking ? 'idle' : action;
+      if (nextMovement !== movement) {
+        if (movement !== null) {
+          // 再次变速从屏幕上当前姿态接续，不能回到上一档的原始关键帧。
+          for (const saved of nodes) {
+            saved.fromPosition.copy(saved.displayedPosition);
+            saved.fromRotation.copy(saved.displayedRotation);
+            saved.fromScale.copy(saved.displayedScale);
+          }
+          blendAge = 0;
+        }
+        movement = nextMovement;
+      }
+      blendAge = Math.min(0.24, blendAge + frameDt);
+      const blend = THREE.MathUtils.smoothstep(blendAge, 0, 0.24);
+      for (const saved of nodes) {
+        const { node } = saved;
+        // 施法保留上身击打节奏；移动骨骼先衔接，键盘再随胸部变换以维持握持。
+        if (node.name !== 'KeyboardWeapon' && (!attacking || movementNames.has(node.name))) {
+          node.position.lerp(saved.fromPosition, 1 - blend);
+          node.quaternion.slerp(saved.fromRotation, 1 - blend);
+          node.scale.lerp(saved.fromScale, 1 - blend);
+        }
+        saved.displayedPosition.copy(node.position);
+        saved.displayedRotation.copy(node.quaternion);
+        saved.displayedScale.copy(node.scale);
       }
       if (strike !== null) {
         // A front-view lateral swing otherwise disappears into screen depth in the side-scrolling game.

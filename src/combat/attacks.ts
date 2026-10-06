@@ -15,6 +15,8 @@ export interface HitDef {
   readonly knockback: Readonly<Vec2>;
   readonly hitstun: number;
   readonly hitstop: number;
+  /** 大招命中；带防御的目标按 ultimateScale 结算。 */
+  readonly ultimate?: boolean;
 }
 
 export interface AttackDef extends HitDef {

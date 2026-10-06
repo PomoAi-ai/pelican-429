@@ -4,8 +4,8 @@
  * 视野在 x 方向外扩 TREE_VIEW_PAD（树冠/枝最大水平伸展），y 方向不参与判定。
  *
  * 分帧构建（以"棵"为单位）：
- * - 与视野相交的桶若未就绪，本帧同步补完（不留空洞）；
- * - 视野外扩 margin 桶内的未就绪桶按到视野中心的距离排队，每帧按估计耗时（TREE_BUILD_COST，毫秒计数近似）
+ * - 首次 update（关卡首帧）：与视野相交的桶同步补完（开场不留空洞）；
+ * - 视野外扩 margin 桶内（含视野内）的未就绪桶按到视野中心的距离排队，每帧按估计耗时（TREE_BUILD_COST，毫秒计数近似）
  *   逐棵构建，累计到 maxBuildMsPerFrame（默认 4ms）为止；桶内全部树建完再合并上屏（合并耗时也计入）；
  *   每帧至少推进一项，保证有进展；
  * - 超出 keep 桶的已加载/半成品桶卸载（margin ≤ keep 形成滞回）。
@@ -178,6 +178,7 @@ export function createTreeView(trees: readonly TreeInstance[], options: TreeView
   let lastBuilt = 0;
   let lastCost = 0;
   let pendingTrees = 0;
+  let primed = false;
   /** 平台瓦片索引（键 tileKey）与每桶登记的键（卸载时删除）。 */
   const rides = new Map<string, TreeRideTile>();
   const rideKeys = new Map<number, TreeRideTile[]>();
@@ -255,8 +256,8 @@ export function createTreeView(trees: readonly TreeInstance[], options: TreeView
     for (const cx of [...groups.keys(), ...pending.keys()]) if (cx < k0 || cx > k1) unload(cx);
     let built = 0;
     let cost = 0;
-    // 视野内：同步补完。
-    for (let cx = v0; cx <= v1; cx++) {
+    // 首帧视野内：同步补完；之后快速飞行/传送进入的视野桶也走预算队列（近者先建），不把一屏树堆进同一帧。
+    for (let cx = v0; cx <= v1 && !primed; cx++) {
       if (!buckets.has(cx) || groups.has(cx)) continue;
       for (;;) {
         const r = step(cx);
@@ -265,7 +266,8 @@ export function createTreeView(trees: readonly TreeInstance[], options: TreeView
         if (r.done) break;
       }
     }
-    // 余量内：按距离排队，按预算逐棵构建。
+    primed = true;
+    // 余量内（含视野内）：按距离排队，按预算逐棵构建。
     const centre = (x0 + x1) / 2 / bucketWidth;
     const queue: number[] = [];
     for (let cx = m0; cx <= m1; cx++) if (buckets.has(cx) && !groups.has(cx)) queue.push(cx);

@@ -1,9 +1,10 @@
-.game-audio { position: relative; pointer-events: auto; font-size: 11px; color: #edf5ed; }
+.game-audio { position: relative; z-index: 36; pointer-events: auto; font-size: 11px; color: #edf5ed; }
+.control-surface:has(.game-audio[open]) { z-index: 9; }
 .game-audio summary { cursor: pointer; list-style: none; padding: 7px 12px; border: 1px solid #fff3; border-radius: 8px; background: #183329e8; }
 .game-audio summary::-webkit-details-marker { display: none; }
 .game-audio[open] summary { border-color: #efcb82; color: #efcb82; }
 .game-audio summary:focus-visible, .game-audio input:focus-visible, .game-audio select:focus-visible { outline: 2px solid #efcb82; outline-offset: 3px; }
-.game-audio-body { position: absolute; right: 0; top: calc(100% + 9px); z-index: 20; width: min(300px, calc(100vw - 48px)); box-sizing: border-box; padding: 16px; border: 1px solid #8da69480; border-radius: 12px; background: #11251ff5; box-shadow: 0 12px 35px #0006; }
+.game-audio-body { position: absolute; right: 0; top: calc(100% + 9px); z-index: 20; width: min(300px, calc(100vw - 48px)); max-height: calc(100dvh - var(--game-top) - 64px); overflow-y: auto; box-sizing: border-box; padding: 16px; border: 1px solid #8da69480; border-radius: 12px; background: #11251ff5; box-shadow: 0 12px 35px #0006; }
 .game-audio-body strong { display: block; font-size: 13px; letter-spacing: 1px; }
 .game-audio-body p { color: #b7c9bf; line-height: 1.6; margin: 8px 0 12px; }
 .game-audio-body label { display: grid; grid-template-columns: 80px 1fr 34px; align-items: center; gap: 7px; margin-top: 15px; }

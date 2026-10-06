@@ -285,7 +285,8 @@ function emitEntityTrails(e: Entity, alpha: number, dt: number, fx: FxEmitters, 
       });
     }
   } else if (e.kind === 'enemyShot') {
-    if (rnd() < dt * 30) sparks.emit({ x, y: y + b.height / 2, z: FX_Z, vx: between(-0.3, 0.3), vy: between(-0.3, 0.3), vz: 0, life: 0.35, size0: 0.07, size1: 0, gravity: -1, drag: 2, color: e.projectile?.returned ? GOLD : ENEMY });
+    const color = e.projectile!.returned ? GOLD : e.projectile!.def.id === 'sam-pulse' ? '#a9f8ff' : ENEMY;
+    if (rnd() < dt * 30) sparks.emit({ x, y: y + b.height / 2, z: FX_Z, vx: between(-0.3, 0.3), vy: between(-0.3, 0.3), vz: 0, life: 0.35, size0: 0.07, size1: 0, gravity: -1, drag: 2, color });
   }
   // 湿：从身体上滴水（约 14 滴/秒）。
   if (e.wetTicks !== undefined && e.wetTicks > 0 && rnd() < dt * 14) {
@@ -392,7 +393,7 @@ export function createProjectileFx(options: ProjectileFxOptions): ProjectileFx {
 
   const onImpact = (ev: Extract<SimEvent, { type: 'projectileImpact' }>): void => {
     const speed = Math.hypot(ev.vx, ev.vy);
-    if ((ev.kind === 'droneBomb' || ev.kind === 'droneThermite') && ev.reason === 'terrain') {
+    if ((ev.kind === 'droneBomb' || ev.kind === 'droneThermite') && (ev.reason === 'terrain' || ev.reason === 'hit')) {
       burst(ev.x, ev.y, ev.kind === 'droneBomb' ? 28 : 18, '#ffd591', 1, 4, .06, .45);
       return;
     }
