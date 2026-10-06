@@ -1,2 +1,7 @@
 node_modules/
 dist/
+__pycache__/
+*.pyc
+*.blend1
+output/videos/
+assets/characters/enemies/watch-wasp/compact-local-backup/
