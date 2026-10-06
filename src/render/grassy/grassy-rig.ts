@@ -33,6 +33,37 @@ export interface GrassyRig {
 
 const EYELIDS = ['EyelidUpper_L', 'EyelidLower_L', 'EyelidUpper_R', 'EyelidLower_R'] as const;
 
+/** 呆毛绕固定发根弯折，局部圆柱外完全保留原有发梢形变。 */
+function bendGrassyHairTuft(mesh: THREE.SkinnedMesh): void {
+  const centerX = .025, centerZ = .14, rootY = 2.94, tipY = 3.10, radius = .13;
+  const positions = mesh.geometry.getAttribute('position');
+  const morphs = mesh.geometry.morphAttributes.position!;
+  const dictionary = mesh.morphTargetDictionary!;
+  for (let i = 0; i < positions.count; i++) {
+    const x = positions.getX(i), y = positions.getY(i), z = positions.getZ(i);
+    const radial = Math.hypot(x - centerX, z - centerZ) / radius;
+    const blend = 1 - THREE.MathUtils.smoothstep(radial, .65, 1);
+    if (y <= rootY || blend === 0) continue;
+    const height = y - rootY;
+    const bend = THREE.MathUtils.smoothstep(y, rootY, tipY);
+    for (const name of ['Front', 'Crown', 'Rear']) {
+      for (const channel of ['Sway', 'Lift']) {
+        const attribute = morphs[dictionary[`Hair${name}${channel}`]!]!;
+        // 以弧线转动整段呆毛，避免只平移最顶端造成拉长尖刺。
+        const angle = (channel === 'Sway' ? -.85 : .60) * bend;
+        // 下落气流从发束前侧根部扶起呆毛，正 lift 不能把最高点压低。
+        const fromRootZ = z - (channel === 'Lift' ? .24 : centerZ);
+        const dy = name === 'Crown' ? height * (Math.cos(angle) - 1) - fromRootZ * Math.sin(angle) : 0;
+        const dz = name === 'Crown' ? height * Math.sin(angle) + fromRootZ * (Math.cos(angle) - 1) : 0;
+        attribute.setY(i, THREE.MathUtils.lerp(attribute.getY(i), dy, blend));
+        attribute.setZ(i, THREE.MathUtils.lerp(attribute.getZ(i), dz, blend));
+      }
+    }
+  }
+  mesh.geometry.computeBoundingBox();
+  mesh.geometry.computeBoundingSphere();
+}
+
 /** 原生形变同时参与蒙皮和阴影，局部权重固定发根与脸部。 */
 function addHairSway(model: THREE.SkinnedMesh): void {
   const geometry = model.geometry;
@@ -53,6 +84,7 @@ function addHairSway(model: THREE.SkinnedMesh): void {
     }
     return [crown * front * .65, crown * (1 - front), rear * .65];
   }, 1.15);
+  bendGrassyHairTuft(model);
 }
 
 function enhanceBreathing(source: THREE.AnimationClip): THREE.AnimationClip {
