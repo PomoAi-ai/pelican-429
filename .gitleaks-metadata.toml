@@ -5,7 +5,7 @@ title = "Private production metadata"
 [[rules]]
 id = "local-production-path"
 description = "Local user, volume or user-specific temporary path"
-regex = '''(?i)(?:/(?:Users|home|Volumes)/[^\s"'<>`]+|/(?:private/)?var/folders/[^\s"'<>`]+|[A-Z]:\\+(?:Users|Documents and Settings)\\+[^\s"'<>`]+)'''
+regex = '''(?i)(?:^|[^a-z0-9_./\\-])(?:file://)?(?:/(?:Users|home|Volumes)/[^\s"'<>`]+|/(?:private/)?var/folders/[^\s"'<>`]+|[A-Z]:\\+(?:Users|Documents and Settings)\\+[^\s"'<>`]+)'''
 
 [[rules]]
 id = "private-rodin-workspace"
