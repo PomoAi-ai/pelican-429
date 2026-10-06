@@ -1,0 +1,47 @@
+{
+  "idle": {
+    "minimumSoleZ": 0.0,
+    "maximumTrouserEdgeLengthRatio": 1.002490520477295,
+    "loopEndpointDifference": 0.0
+  },
+  "walk": {
+    "minimumSoleZ": -9.786833743419265e-08,
+    "maximumTrouserEdgeLengthRatio": 3.0671329498291016,
+    "loopEndpointDifference": 0.0
+  },
+  "run": {
+    "minimumSoleZ": -1.4901161193847656e-07,
+    "maximumTrouserEdgeLengthRatio": 3.583354949951172,
+    "loopEndpointDifference": 0.0
+  },
+  "jump": {
+    "minimumSoleZ": -8.721097799480049e-08,
+    "maximumTrouserEdgeLengthRatio": 2.9936342239379883,
+    "loopEndpointDifference": 0.0
+  },
+  "greet": {
+    "minimumSoleZ": 0.0,
+    "maximumTrouserEdgeLengthRatio": 1.0,
+    "loopEndpointDifference": 0.0
+  },
+  "skill1": {
+    "minimumSoleZ": 0.0,
+    "maximumTrouserEdgeLengthRatio": 1.0,
+    "loopEndpointDifference": 0.0
+  },
+  "skill2": {
+    "minimumSoleZ": 0.0,
+    "maximumTrouserEdgeLengthRatio": 1.0,
+    "loopEndpointDifference": 0.0
+  },
+  "ultimate": {
+    "minimumSoleZ": 0.0,
+    "maximumTrouserEdgeLengthRatio": 1.0,
+    "loopEndpointDifference": 0.0
+  },
+  "mesh": {
+    "originalVertices": 20242,
+    "eyelidVertices": 1476,
+    "sourceFaceMorphMaximumDelta": 0.0
+  }
+}

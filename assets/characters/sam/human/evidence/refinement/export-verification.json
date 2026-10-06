@@ -1,0 +1,43 @@
+{
+  "kind": "sam",
+  "primitiveVertexAttributesUnchanged": {
+    "0": {
+      "POSITION": true,
+      "NORMAL": true,
+      "TEXCOORD_0": true,
+      "COLOR_0": true,
+      "JOINTS_0": true,
+      "WEIGHTS_0": true
+    },
+    "1": {
+      "POSITION": true,
+      "NORMAL": true,
+      "TEXCOORD_0": true,
+      "COLOR_0": true,
+      "JOINTS_0": true,
+      "WEIGHTS_0": true
+    },
+    "2": {
+      "POSITION": true,
+      "NORMAL": true,
+      "TEXCOORD_0": true,
+      "COLOR_0": true,
+      "JOINTS_0": true,
+      "WEIGHTS_0": true
+    }
+  },
+  "triangleIndicesUnchanged": true,
+  "materialsAndEmbeddedImagesUnchanged": true,
+  "inverseBindMatricesUnchanged": true,
+  "animationSamplesUnchanged": {
+    "greet": true,
+    "idle": true,
+    "jump": true,
+    "run": true,
+    "skill1": true,
+    "skill2": true,
+    "ultimate": true,
+    "walk": true
+  },
+  "glbSha256": "5671cec0487e3c08c9adadf4c90e787dc0a2a8167ef54be7b4cd22a86c9a8616"
+}

@@ -1,0 +1,394 @@
+{
+  "imageMagick": "Version: ImageMagick 7.1.2-11 Q16-HDRI aarch64 23470 https://imagemagick.org",
+  "webp": "1.6.0\nlibsharpyuv: 0.4.2",
+  "textureLimit": 1024,
+  "meshopt": "0.22.0",
+  "models": [
+    {
+      "source": "./characters/human/models-equipped/grassy-equipped-game.glb",
+      "output": "./characters/human/models-equipped/grassy-equipped-game.web-1k.glb",
+      "sourceSha256": "26740374569e91858e12254b02763cd61382c425b63b493e01f5adc6258fa2a6",
+      "sourceBytes": 6502192,
+      "outputBytes": 3568568,
+      "sourceBufferBytes": 2991312,
+      "storedBufferBytes": 1868736,
+      "images": [
+        {
+          "name": "rodin-refined-normal",
+          "width": 1024,
+          "height": 1024,
+          "outputWidth": 1024,
+          "outputHeight": 1024,
+          "kind": "normal",
+          "sourceBytes": 1365437,
+          "outputBytes": 937450,
+          "sourceRgbaMipBytes": 5592404,
+          "outputRgbaMipBytes": 5592404
+        },
+        {
+          "name": "rodin-refined-base-color",
+          "width": 1024,
+          "height": 1024,
+          "outputWidth": 1024,
+          "outputHeight": 1024,
+          "kind": "color",
+          "sourceBytes": 1280187,
+          "outputBytes": 161064,
+          "sourceRgbaMipBytes": 5592404,
+          "outputRgbaMipBytes": 5592404
+        },
+        {
+          "name": "rodin-refined-roughness",
+          "width": 1024,
+          "height": 1024,
+          "outputWidth": 1024,
+          "outputHeight": 1024,
+          "kind": "data",
+          "sourceBytes": 587130,
+          "outputBytes": 264990,
+          "sourceRgbaMipBytes": 5592404,
+          "outputRgbaMipBytes": 5592404
+        }
+      ]
+    },
+    {
+      "source": "./characters/sam/sam.glb",
+      "output": "./characters/sam/sam.web-1k.glb",
+      "sourceSha256": "c16b0dca30d998468504121e7cadfadae263a9290dda44292281a08e954d244f",
+      "sourceBytes": 15780124,
+      "outputBytes": 2743100,
+      "sourceBufferBytes": 1553264,
+      "storedBufferBytes": 813314,
+      "images": [
+        {
+          "name": "texture_normal",
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 1024,
+          "outputHeight": 1024,
+          "kind": "normal",
+          "sourceBytes": 6351265,
+          "outputBytes": 1266584,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 5592404
+        },
+        {
+          "name": "texture_diffuse",
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 1024,
+          "outputHeight": 1024,
+          "kind": "color",
+          "sourceBytes": 5382682,
+          "outputBytes": 171486,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 5592404
+        },
+        {
+          "name": "texture_metallic-texture_roughness",
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 1024,
+          "outputHeight": 1024,
+          "kind": "data",
+          "sourceBytes": 2429643,
+          "outputBytes": 418106,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 5592404
+        }
+      ]
+    },
+    {
+      "source": "./characters/sam/human/sam-human.glb",
+      "output": "./characters/sam/human/sam-human.web-1k.glb",
+      "sourceSha256": "5671cec0487e3c08c9adadf4c90e787dc0a2a8167ef54be7b4cd22a86c9a8616",
+      "sourceBytes": 13947808,
+      "outputBytes": 2476680,
+      "sourceBufferBytes": 1918852,
+      "storedBufferBytes": 882121,
+      "images": [
+        {
+          "name": "texture_normal",
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 1024,
+          "outputHeight": 1024,
+          "kind": "normal",
+          "sourceBytes": 4955395,
+          "outputBytes": 962974,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 5592404
+        },
+        {
+          "name": "texture_diffuse",
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 1024,
+          "outputHeight": 1024,
+          "kind": "color",
+          "sourceBytes": 4691987,
+          "outputBytes": 154580,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 5592404
+        },
+        {
+          "name": "texture_metallic-texture_roughness",
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 1024,
+          "outputHeight": 1024,
+          "kind": "data",
+          "sourceBytes": 2315482,
+          "outputBytes": 399568,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 5592404
+        }
+      ]
+    },
+    {
+      "source": "./characters/tibo/tibo.glb",
+      "output": "./characters/tibo/tibo.web-1k.glb",
+      "sourceSha256": "3bd5d7e1cdd97e430809b39f39c9a8295f8e0d5becdc849f8b229eacc950acdd",
+      "sourceBytes": 13698712,
+      "outputBytes": 2378876,
+      "sourceBufferBytes": 1585272,
+      "storedBufferBytes": 833883,
+      "images": [
+        {
+          "name": "texture_normal",
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 1024,
+          "outputHeight": 1024,
+          "kind": "normal",
+          "sourceBytes": 4553915,
+          "outputBytes": 864262,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 5592404
+        },
+        {
+          "name": "texture_diffuse",
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 1024,
+          "outputHeight": 1024,
+          "kind": "color",
+          "sourceBytes": 4847306,
+          "outputBytes": 151432,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 5592404
+        },
+        {
+          "name": "texture_metallic-texture_roughness",
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 1024,
+          "outputHeight": 1024,
+          "kind": "data",
+          "sourceBytes": 2653047,
+          "outputBytes": 461756,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 5592404
+        }
+      ]
+    },
+    {
+      "source": "./characters/tibo/human/tibo-human.glb",
+      "output": "./characters/tibo/human/tibo-human.web-1k.glb",
+      "sourceSha256": "1515ddd1a41ff55c22a9c2e0dd595359da4dfb80fe2a4ea50bd5ae67c27a2012",
+      "sourceBytes": 12300412,
+      "outputBytes": 2250024,
+      "sourceBufferBytes": 1873079,
+      "storedBufferBytes": 855018,
+      "images": [
+        {
+          "name": "texture_normal",
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 1024,
+          "outputHeight": 1024,
+          "kind": "normal",
+          "sourceBytes": 3742933,
+          "outputBytes": 697848,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 5592404
+        },
+        {
+          "name": "texture_diffuse",
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 1024,
+          "outputHeight": 1024,
+          "kind": "color",
+          "sourceBytes": 3835299,
+          "outputBytes": 109658,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 5592404
+        },
+        {
+          "name": "texture_metallic-texture_roughness",
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 1024,
+          "outputHeight": 1024,
+          "kind": "data",
+          "sourceBytes": 2784072,
+          "outputBytes": 511820,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 5592404
+        }
+      ]
+    },
+    {
+      "source": "./characters/enemies/line-hound/model.glb",
+      "output": "./characters/enemies/line-hound/model.web-1k.glb",
+      "sourceSha256": "6ceace1185153006933b087abe3c2180df35a26094debc7b72e092176092d305",
+      "sourceBytes": 12550508,
+      "outputBytes": 2628912,
+      "sourceBufferBytes": 2433798,
+      "storedBufferBytes": 1236611,
+      "images": [
+        {
+          "name": "texture_normal",
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 1024,
+          "outputHeight": 1024,
+          "kind": "normal",
+          "sourceBytes": 3227287,
+          "outputBytes": 661902,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 5592404
+        },
+        {
+          "name": "texture_diffuse",
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 1024,
+          "outputHeight": 1024,
+          "kind": "color",
+          "sourceBytes": 3946151,
+          "outputBytes": 133408,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 5592404
+        },
+        {
+          "name": "texture_metallic-texture_roughness",
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 1024,
+          "outputHeight": 1024,
+          "kind": "data",
+          "sourceBytes": 2903409,
+          "outputBytes": 551384,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 5592404
+        }
+      ]
+    },
+    {
+      "source": "./characters/enemies/watch-wasp/model.glb",
+      "output": "./characters/enemies/watch-wasp/model.web-1k.glb",
+      "sourceSha256": "e977ceac0ae6ed459fec1a697a36fc387f064b40591bd6ffe857b0d7cb3a2ab1",
+      "sourceBytes": 9961248,
+      "outputBytes": 2263388,
+      "sourceBufferBytes": 2752264,
+      "storedBufferBytes": 1268026,
+      "images": [
+        {
+          "name": "texture_normal",
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 1024,
+          "outputHeight": 1024,
+          "kind": "normal",
+          "sourceBytes": 1883047,
+          "outputBytes": 384364,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 5592404
+        },
+        {
+          "name": "texture_diffuse",
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 1024,
+          "outputHeight": 1024,
+          "kind": "color",
+          "sourceBytes": 2814969,
+          "outputBytes": 82328,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 5592404
+        },
+        {
+          "name": "texture_metallic-texture_roughness",
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 1024,
+          "outputHeight": 1024,
+          "kind": "data",
+          "sourceBytes": 2459890,
+          "outputBytes": 453808,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 5592404
+        }
+      ]
+    },
+    {
+      "source": "./characters/enemies/loadmaster/model.glb",
+      "output": "./characters/enemies/loadmaster/model.web-1k.glb",
+      "sourceSha256": "abc8033a8dee8a1ac48d241f7b2ecbaa19f118469e30fd2dd7a684d8c5c1653a",
+      "sourceBytes": 9949840,
+      "outputBytes": 1961996,
+      "sourceBufferBytes": 2060388,
+      "storedBufferBytes": 999690,
+      "images": [
+        {
+          "name": "texture_normal",
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 1024,
+          "outputHeight": 1024,
+          "kind": "normal",
+          "sourceBytes": 2255208,
+          "outputBytes": 424606,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 5592404
+        },
+        {
+          "name": "texture_diffuse",
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 1024,
+          "outputHeight": 1024,
+          "kind": "color",
+          "sourceBytes": 3161375,
+          "outputBytes": 104184,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 5592404
+        },
+        {
+          "name": "texture_metallic-texture_roughness",
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 1024,
+          "outputHeight": 1024,
+          "kind": "data",
+          "sourceBytes": 2447422,
+          "outputBytes": 404066,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 5592404
+        }
+      ]
+    },
+    {
+      "source": "./characters/enemies/gatekeeper/model.glb",
+      "output": "./characters/enemies/gatekeeper/model.web-1k.glb",
+      "sourceSha256": "5a80107fc34704bd7286228e6efc19be2bbee8c27be5cfbb6043200979bf37c3",
+      "sourceBytes": 3629384,
+      "outputBytes": 1753840,
+      "sourceBufferBytes": 3490680,
+      "storedBufferBytes": 1547326,
+      "images": []
+    }
+  ]
+}

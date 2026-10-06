@@ -1,0 +1,100 @@
+{
+  "file": "public/characters/tibo/human/tibo-human.glb",
+  "bytes": 12304632,
+  "sha256": "6d3dfe464accdf279bb9e528e6a12b1a99fb2ca4797e3520b8acbedac384a7f0",
+  "gltfVersion": "2.0",
+  "jointCount": 16,
+  "boneNames": [
+    "root",
+    "hips",
+    "spine",
+    "head",
+    "upper_arm.L",
+    "forearm.L",
+    "hand.L",
+    "upper_arm.R",
+    "forearm.R",
+    "hand.R",
+    "thigh.L",
+    "shin.L",
+    "foot.L",
+    "thigh.R",
+    "shin.R",
+    "foot.R"
+  ],
+  "primitiveCount": 3,
+  "morphTargets": [
+    "Blink",
+    "BlinkTravel"
+  ],
+  "restBoundsGltf": {
+    "min": [
+      -0.599266529083252,
+      0,
+      -0.4556277096271515
+    ],
+    "max": [
+      0.5995702743530273,
+      2.6500000953674316,
+      0.4251174032688141
+    ]
+  },
+  "clips": [
+    {
+      "name": "greet",
+      "duration": 3,
+      "channels": 48,
+      "hasMorphChannel": false
+    },
+    {
+      "name": "idle",
+      "duration": 4,
+      "channels": 49,
+      "hasMorphChannel": true
+    },
+    {
+      "name": "jump",
+      "duration": 1.6,
+      "channels": 48,
+      "hasMorphChannel": false
+    },
+    {
+      "name": "run",
+      "duration": 0.8,
+      "channels": 48,
+      "hasMorphChannel": false
+    },
+    {
+      "name": "skill1",
+      "duration": 2.4,
+      "channels": 48,
+      "hasMorphChannel": false
+    },
+    {
+      "name": "skill2",
+      "duration": 3,
+      "channels": 48,
+      "hasMorphChannel": false
+    },
+    {
+      "name": "ultimate",
+      "duration": 6,
+      "channels": 48,
+      "hasMorphChannel": false
+    },
+    {
+      "name": "walk",
+      "duration": 1.2,
+      "channels": 48,
+      "hasMorphChannel": false
+    }
+  ],
+  "allFourViewBboxGatesPass": true,
+  "animationVerificationNote": "All-frame body/sole/loop diagnostics completed before final eyelid coverage and 1% head-depth refinement; body geometry and skeletal animation were unchanged. Final open/half/closed blink and four-view checks were repeated after refinement.",
+  "samRefactorVerification": {
+    "character": "sam-human",
+    "vertices": 22082,
+    "maximumWeightDifference": 0.0,
+    "modelFilesWritten": false
+  }
+}

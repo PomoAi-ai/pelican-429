@@ -1,0 +1,10 @@
+{
+  "reference": "reference.png",
+  "tier": "Gen-2.5-High",
+  "meshMode": "Raw",
+  "quality": 60000,
+  "textureDelight": true,
+  "status": "request-timed-out-without-generation-id",
+  "retry": false,
+  "note": "CLI request timed out. No generation ID returned; request was not retried to avoid duplicate credit charges. Current exported OMI is locally reconstructed mechanical geometry."
+}

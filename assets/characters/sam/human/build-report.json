@@ -1,0 +1,46 @@
+{
+  "sourceSha256": "e18e4efb7fbc68292e719a3f7b1b7410401c8400a441a5895af80c6a8626d1d9",
+  "height": 2.7,
+  "profileFit": {
+    "depthScale": 0.915,
+    "forwardShift": -0.075,
+    "neckBlendZ": [
+      1.72,
+      1.86
+    ]
+  },
+  "headProportion": 3.085714285714285,
+  "skin": {
+    "maximumInfluences": 4,
+    "normalizationMaxError": 2.220446049250313e-16,
+    "connectedHandVertices": 2112
+  },
+  "actions": {
+    "idle": 4.0,
+    "walk": 1.2,
+    "run": 0.8,
+    "jump": 1.6,
+    "greet": 3.0,
+    "skill1": 2.4,
+    "skill2": 3.0,
+    "ultimate": 6.0
+  },
+  "bones": [
+    "root",
+    "hips",
+    "spine",
+    "head",
+    "upper_arm.L",
+    "forearm.L",
+    "hand.L",
+    "upper_arm.R",
+    "forearm.R",
+    "hand.R",
+    "thigh.L",
+    "shin.L",
+    "foot.L",
+    "thigh.R",
+    "shin.R",
+    "foot.R"
+  ]
+}

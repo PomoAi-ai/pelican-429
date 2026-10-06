@@ -1,0 +1,18 @@
+{
+  "kind": "sam",
+  "originalVertexCount": 20606,
+  "refinedEyelidVertices": 1476,
+  "fixedRimMaximumMovement": 0,
+  "restGeometryUvWeightsMaterialsSha256": "729f39b56bf1a72195ff87c46698a3db30dc256f867040e093dab36ed74ded56",
+  "preservedClipSha256": {
+    "greet": "4cbbed1decc3969f4133597ffb6d61342a00de06c782992d6ac5b973ef779e50",
+    "idle": "145f3c174f9123876a7ed14a98fe9a592d610d7d3413226f1cefd6accddd17b8",
+    "jump": "f2968ff8bdc9cc64a799d9b9be060c81bc514b82e57b2b5db2811f1065a81c49",
+    "run": "a96fc21c1d9b1c8ad42dc1b0aaf6b49cd442b37c22c7a0f7e67e525ad744210c",
+    "skill1": "c0d57d7aac5b4a7e3db95a8639accf0df262bf2b2b5b9acbd52c9de2037066b7",
+    "skill2": "4aeea83cc234a0838e219d40c6331250ca528843617c14c10a3ccf3913f26a2e",
+    "ultimate": "208e78560b35544e28b08eeb835900ef95cc29667b62d8ba1f1402a529f2e26b",
+    "walk": "db7a2f7b364343d85d20a1cb363960f6bb9732caedbc68eff3ba5aa585cad1a3"
+  },
+  "bodyAndClipsUnchanged": true
+}

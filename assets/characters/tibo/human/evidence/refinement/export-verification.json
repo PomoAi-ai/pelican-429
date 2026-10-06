@@ -1,0 +1,43 @@
+{
+  "kind": "tibo",
+  "primitiveVertexAttributesUnchanged": {
+    "0": {
+      "POSITION": true,
+      "NORMAL": true,
+      "TEXCOORD_0": true,
+      "COLOR_0": true,
+      "JOINTS_0": true,
+      "WEIGHTS_0": true
+    },
+    "1": {
+      "POSITION": true,
+      "NORMAL": true,
+      "TEXCOORD_0": true,
+      "COLOR_0": true,
+      "JOINTS_0": true,
+      "WEIGHTS_0": true
+    },
+    "2": {
+      "POSITION": true,
+      "NORMAL": true,
+      "TEXCOORD_0": true,
+      "COLOR_0": true,
+      "JOINTS_0": true,
+      "WEIGHTS_0": true
+    }
+  },
+  "triangleIndicesUnchanged": true,
+  "materialsAndEmbeddedImagesUnchanged": true,
+  "inverseBindMatricesUnchanged": true,
+  "animationSamplesUnchanged": {
+    "greet": true,
+    "idle": true,
+    "jump": true,
+    "run": true,
+    "skill1": true,
+    "skill2": true,
+    "ultimate": true,
+    "walk": true
+  },
+  "glbSha256": "1515ddd1a41ff55c22a9c2e0dd595359da4dfb80fe2a4ea50bd5ae67c27a2012"
+}

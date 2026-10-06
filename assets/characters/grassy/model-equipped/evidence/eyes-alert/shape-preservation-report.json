@@ -1,0 +1,68 @@
+{
+  "game": {
+    "EyelidUpper_L": {
+      "Basis": true,
+      "BlinkHalf": false,
+      "Blink": true
+    },
+    "EyelidUpper_R": {
+      "Basis": true,
+      "BlinkHalf": false,
+      "Blink": true
+    },
+    "EyelidLower_L": {
+      "Basis": true,
+      "BlinkHalf": true,
+      "Blink": true
+    },
+    "EyelidLower_R": {
+      "Basis": true,
+      "BlinkHalf": true,
+      "Blink": true
+    }
+  },
+  "detailed": {
+    "EyelidUpper_L": {
+      "Basis": true,
+      "BlinkHalf": false,
+      "Blink": true
+    },
+    "EyelidUpper_R": {
+      "Basis": true,
+      "BlinkHalf": false,
+      "Blink": true
+    },
+    "EyelidLower_L": {
+      "Basis": true,
+      "BlinkHalf": true,
+      "Blink": true
+    },
+    "EyelidLower_R": {
+      "Basis": true,
+      "BlinkHalf": true,
+      "Blink": true
+    }
+  },
+  "light": {
+    "EyelidUpper_L": {
+      "Basis": true,
+      "BlinkHalf": false,
+      "Blink": true
+    },
+    "EyelidUpper_R": {
+      "Basis": true,
+      "BlinkHalf": false,
+      "Blink": true
+    },
+    "EyelidLower_L": {
+      "Basis": true,
+      "BlinkHalf": true,
+      "Blink": true
+    },
+    "EyelidLower_R": {
+      "Basis": true,
+      "BlinkHalf": true,
+      "Blink": true
+    }
+  }
+}

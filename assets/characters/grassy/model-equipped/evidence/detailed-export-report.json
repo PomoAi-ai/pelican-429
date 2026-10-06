@@ -185,12 +185,16 @@
       "duration": 1.2,
       "loop": true
     },
+    "fly_fast": {
+      "duration": 0.8,
+      "loop": true
+    },
     "land": {
       "duration": 1.2,
       "loop": false
     }
   },
-  "bytes": 40215720,
+  "bytes": 40285320,
   "glb": "public/characters/human/models-equipped/grassy-equipped-detailed.glb",
   "blend": "assets/characters/grassy/model-equipped/grassy-equipped-detailed.blend",
   "motion": null

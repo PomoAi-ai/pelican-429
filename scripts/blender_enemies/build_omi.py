@@ -124,13 +124,34 @@ def build_geometry():
         cylinder('Temple circular housing',(0,y-sign*.035,2.16),(0,y+sign*.035,2.16),.133,navy,'head')
         ring('Temple amber ring',(0,y+sign*.041,2.16),.094,.008,amber,'head','Y')
     ellipsoid('Torso graphite core',(0,0,1.40),(.215,.30,.34),black,'chest')
-    # Segmented breastplate frames the reference's teal central abdomen.
-    plate('Chest upper ceramic bridge',[(-.32,1.70),(.32,1.70),(.29,1.49),(.18,1.44),(-.18,1.44),(-.29,1.49)],.20,.24,white,'chest')
-    for s in [-1,1]:
-        plate('Chest ceramic side',[(s*.30,1.59),(s*.18,1.49),(s*.14,1.24),(s*.25,1.18),(s*.32,1.35)],.225,.22,white,'chest',.026)
+    # Curved U-shaped shell follows the torso instead of a flat extruded chest box.
+    vertices=[]; faces=[]; columns=40; rows=12
+    for layer in range(2):
+        for j in range(rows+1):
+            t=j/rows
+            for i in range(columns+1):
+                angle=(-1+2*i/columns)*1.32
+                side=abs(math.sin(angle)); z=(1.73-.06*side*side)*t+(1.49-.29*smooth((side-.4)/.6))*(1-t)
+                width=.31+.015*t
+                y=width*math.sin(angle)
+                x=.29-.065*side*side-layer*.045
+                vertices.append((x,y,z))
+    stride=columns+1; count=stride*(rows+1)
+    for layer in range(2):
+        for j in range(rows):
+            for i in range(columns):
+                a=layer*count+j*stride+i
+                face=(a,a+1,a+stride+1,a+stride)
+                faces.append(face if layer==0 else tuple(reversed(face)))
+    boundary=list(range(stride))+[j*stride+columns for j in range(1,rows+1)]+list(range(rows*stride+columns-1,rows*stride-1,-1))+[j*stride for j in range(rows-1,0,-1)]
+    for i,a in enumerate(boundary):
+        b=boundary[(i+1)%len(boundary)]; faces.append((a,b,b+count,a+count))
+    mesh=bpy.data.meshes.new('Curved U chest shell');mesh.from_pydata(vertices,[],faces);mesh.update()
+    obj=bpy.data.objects.new('Sculpted ceramic chest armor',mesh);bpy.context.collection.objects.link(obj)
+    finish(obj,'Sculpted ceramic chest armor',white,'chest')
     plate('Teal abdomen shield',[(-.16,1.48),(.16,1.48),(.22,1.35),(.13,1.13),(-.13,1.13),(-.22,1.35)],.238,.065,teal,'chest',.035)
     ellipsoid('Pelvis flexible body',(0,0,1.02),(.20,.29,.15),black,'pelvis')
-    plate('Pelvis ceramic shield',[(-.27,1.10),(-.15,1.03),(0,.85),(.15,1.03),(.27,1.10),(.22,1.17),(-.22,1.17)],.19,.28,white,'pelvis',.035)
+    plate('Pelvis ceramic shield',[(-.27,1.10),(-.22,1.17),(.22,1.17),(.27,1.10),(.10,.90),(-.10,.90)],.205,.28,white,'pelvis',.02)
     for side,s in [('L',1),('R',-1)]:
         arm,fore,hand,thigh,shin,foot=[f'{p}.{side}' for p in ['arm','forearm','hand','thigh','shin','foot']]
         shoulder,elbow,wrist,hip,knee,ankle=[Vector(JOINTS[p]) for p in [arm,fore,hand,thigh,shin,foot]]
@@ -156,11 +177,11 @@ def build_geometry():
         shell('Thigh ceramic armor '+side,hip+Vector((0,0,-.06)),knee+Vector((0,0,.075)),.155,.145,white,thigh)
         shell('Shin ceramic armor '+side,knee+Vector((0,0,-.065)),ankle+Vector((0,0,.045)),.137,.13,white,shin)
         # Flattened broad boot soles are stable at z=0, matching the design reference.
-        boot=ellipsoid('Boot ceramic '+side,(.065,s*.235,.13),(.255,.18,.15),white,foot)
+        boot=ellipsoid('Boot ceramic '+side,(.065,s*.235,.15),(.265,.205,.165),white,foot)
         for v in boot.data.vertices: v.co.z=max(.028,v.co.z)
-        toe=ellipsoid('Navy toe cap '+side,(.21,s*.235,.083),(.12,.17,.095),navy,foot)
+        toe=ellipsoid('Navy toe cap '+side,(.21,s*.235,.083),(.14,.195,.10),navy,foot)
         for v in toe.data.vertices: v.co.z=max(.015,v.co.z)
-        sole=ellipsoid('Boot rubber sole '+side,(.065,s*.235,.032),(.257,.182,.033),black,foot)
+        sole=ellipsoid('Boot rubber sole '+side,(.065,s*.235,.032),(.27,.207,.033),black,foot)
         for v in sole.data.vertices: v.co.z=max(0,v.co.z)
     return len(PARTS)
 
@@ -214,6 +235,8 @@ def feet(rig,t,stride,lift,crouch=0):
 
 def animate(rig,name,f,d):
     t=f/d;wave=math.sin(t*math.tau)
+    for side,sign in [('L',1),('R',-1)]:
+        turn(rig,f'hand.{side}',(0,0,1),sign*(.65 if name.startswith('skill') else .35))
     if name=='idle':
         shift(rig,'chest',(0,0,.008*(1-math.cos(t*math.tau))))
         # Smooth travel between held glances, returning exactly to the first pose.
@@ -242,7 +265,7 @@ def animate(rig,name,f,d):
                 turn(rig,f'arm.{side}',(0,1,0),-1.05*a-.35*b)
                 turn(rig,f'forearm.{side}',(0,1,0),-.40*a+.3*b)
         for side in ['L','R']:
-            for jaw,s in [('inner',-1),('outer',1)]:turn(rig,f'claw_{jaw}.{side}',(1,0,0),s*(-.25*a+.55*b))
+            for jaw,s in [('inner',-1),('outer',1)]:turn(rig,f'claw_{jaw}.{side}',(1,0,0),s*(.25*a-.55*b))
 
 
 def main():
@@ -269,7 +292,7 @@ def main():
     bpy.context.view_layer.objects.active=rig
     bpy.ops.export_scene.gltf(filepath=str(OUT/'model.glb'),export_format='GLB',use_selection=True,export_yup=True,
         export_animations=True,export_animation_mode='ACTIONS',export_force_sampling=True,export_skins=True,export_materials='EXPORT',export_apply=False)
-    camera=setup_studio(H);scene.view_settings.view_transform='AgX';scene.cycles.samples=48;scene.render.resolution_x=900;scene.render.resolution_y=1000
+    camera=setup_studio(H);scene.view_settings.view_transform='AgX';scene.cycles.samples=24;scene.render.resolution_x=900;scene.render.resolution_y=1000
     camera.data.ortho_scale=H*1.19;target=Vector((0,0,H*.5))
     for name,pos in [('front',(3,0,.5)),('side',(0,-3,.5)),('thumbnail',(2.2,-3,1.0))]:
         camera.location=Vector(pos)*H;camera.rotation_euler=(target-camera.location).to_track_quat('-Z','Y').to_euler()

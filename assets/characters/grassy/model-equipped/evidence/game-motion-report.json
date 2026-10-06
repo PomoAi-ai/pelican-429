@@ -90,6 +90,13 @@
     "maximumBodyZ": 3.614046812057495,
     "endpointVertexDifference": 0.0
   },
+  "fly_fast": {
+    "seconds": 0.8,
+    "loop": true,
+    "minimumSoleZ": 0.8830004930496216,
+    "maximumBodyZ": 3.4612607955932617,
+    "endpointVertexDifference": 0.0
+  },
   "land": {
     "seconds": 1.2,
     "loop": false,

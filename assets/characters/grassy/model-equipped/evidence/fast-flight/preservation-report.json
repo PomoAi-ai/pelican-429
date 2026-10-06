@@ -1,0 +1,104 @@
+{
+  "game": {
+    "oldClipCount": 14,
+    "newClipCount": 15,
+    "changedExistingClips": [],
+    "bodyAttributesAndIndicesUnchanged": true,
+    "flyFastSeconds": 0.8,
+    "blinkMeshes": [
+      {
+        "name": "EyelidLower_L",
+        "weights": [
+          0
+        ]
+      },
+      {
+        "name": "EyelidLower_R",
+        "weights": [
+          0
+        ]
+      },
+      {
+        "name": "EyelidUpper_L",
+        "weights": [
+          0
+        ]
+      },
+      {
+        "name": "EyelidUpper_R",
+        "weights": [
+          0
+        ]
+      }
+    ],
+    "bytes": 6468956
+  },
+  "detailed": {
+    "oldClipCount": 14,
+    "newClipCount": 15,
+    "changedExistingClips": [],
+    "bodyAttributesAndIndicesUnchanged": true,
+    "flyFastSeconds": 0.8,
+    "blinkMeshes": [
+      {
+        "name": "EyelidLower_L",
+        "weights": [
+          0
+        ]
+      },
+      {
+        "name": "EyelidLower_R",
+        "weights": [
+          0
+        ]
+      },
+      {
+        "name": "EyelidUpper_L",
+        "weights": [
+          0
+        ]
+      },
+      {
+        "name": "EyelidUpper_R",
+        "weights": [
+          0
+        ]
+      }
+    ],
+    "bytes": 40236540
+  },
+  "light": {
+    "oldClipCount": 14,
+    "newClipCount": 15,
+    "changedExistingClips": [],
+    "bodyAttributesAndIndicesUnchanged": true,
+    "flyFastSeconds": 0.8,
+    "blinkMeshes": [
+      {
+        "name": "EyelidLower_L",
+        "weights": [
+          0
+        ]
+      },
+      {
+        "name": "EyelidLower_R",
+        "weights": [
+          0
+        ]
+      },
+      {
+        "name": "EyelidUpper_L",
+        "weights": [
+          0
+        ]
+      },
+      {
+        "name": "EyelidUpper_R",
+        "weights": [
+          0
+        ]
+      }
+    ],
+    "bytes": 2843944
+  }
+}

@@ -1,0 +1,326 @@
+{
+  "game": {
+    "oldClipCount": 15,
+    "newClipCount": 15,
+    "changedExistingClips": [],
+    "bodyAttributesAndIndicesUnchanged": true,
+    "lids": [
+      {
+        "name": "EyelidLower_L",
+        "targets": [
+          "BlinkHalf",
+          "Blink"
+        ],
+        "weights": [
+          0,
+          0
+        ],
+        "materials": [
+          {
+            "name": "Grassy eyelid skin from original atlas",
+            "alphaMode": "BLEND",
+            "colorType": "VEC4",
+            "alphaMin": 0,
+            "alphaMax": 1,
+            "intermediateAlpha": true
+          }
+        ]
+      },
+      {
+        "name": "EyelidLower_R",
+        "targets": [
+          "BlinkHalf",
+          "Blink"
+        ],
+        "weights": [
+          0,
+          0
+        ],
+        "materials": [
+          {
+            "name": "Grassy eyelid skin from original atlas",
+            "alphaMode": "BLEND",
+            "colorType": "VEC4",
+            "alphaMin": 0,
+            "alphaMax": 1,
+            "intermediateAlpha": true
+          }
+        ]
+      },
+      {
+        "name": "EyelidUpper_L",
+        "targets": [
+          "BlinkHalf",
+          "Blink"
+        ],
+        "weights": [
+          0,
+          0
+        ],
+        "materials": [
+          {
+            "name": "Grassy eyelid skin from original atlas",
+            "alphaMode": "BLEND",
+            "colorType": "VEC4",
+            "alphaMin": 0,
+            "alphaMax": 1,
+            "intermediateAlpha": true
+          },
+          {
+            "name": "Grassy soft eyelid crease",
+            "alphaMode": "OPAQUE",
+            "colorType": "VEC4",
+            "alphaMin": 1,
+            "alphaMax": 1,
+            "intermediateAlpha": false
+          }
+        ]
+      },
+      {
+        "name": "EyelidUpper_R",
+        "targets": [
+          "BlinkHalf",
+          "Blink"
+        ],
+        "weights": [
+          0,
+          0
+        ],
+        "materials": [
+          {
+            "name": "Grassy eyelid skin from original atlas",
+            "alphaMode": "BLEND",
+            "colorType": "VEC4",
+            "alphaMin": 0,
+            "alphaMax": 1,
+            "intermediateAlpha": true
+          },
+          {
+            "name": "Grassy soft eyelid crease",
+            "alphaMode": "OPAQUE",
+            "colorType": "VEC4",
+            "alphaMin": 1,
+            "alphaMax": 1,
+            "intermediateAlpha": false
+          }
+        ]
+      }
+    ]
+  },
+  "detailed": {
+    "oldClipCount": 15,
+    "newClipCount": 15,
+    "changedExistingClips": [],
+    "bodyAttributesAndIndicesUnchanged": true,
+    "lids": [
+      {
+        "name": "EyelidLower_L",
+        "targets": [
+          "BlinkHalf",
+          "Blink"
+        ],
+        "weights": [
+          0,
+          0
+        ],
+        "materials": [
+          {
+            "name": "Grassy eyelid skin from original atlas",
+            "alphaMode": "BLEND",
+            "colorType": "VEC4",
+            "alphaMin": 0,
+            "alphaMax": 1,
+            "intermediateAlpha": true
+          }
+        ]
+      },
+      {
+        "name": "EyelidLower_R",
+        "targets": [
+          "BlinkHalf",
+          "Blink"
+        ],
+        "weights": [
+          0,
+          0
+        ],
+        "materials": [
+          {
+            "name": "Grassy eyelid skin from original atlas",
+            "alphaMode": "BLEND",
+            "colorType": "VEC4",
+            "alphaMin": 0,
+            "alphaMax": 1,
+            "intermediateAlpha": true
+          }
+        ]
+      },
+      {
+        "name": "EyelidUpper_L",
+        "targets": [
+          "BlinkHalf",
+          "Blink"
+        ],
+        "weights": [
+          0,
+          0
+        ],
+        "materials": [
+          {
+            "name": "Grassy eyelid skin from original atlas",
+            "alphaMode": "BLEND",
+            "colorType": "VEC4",
+            "alphaMin": 0,
+            "alphaMax": 1,
+            "intermediateAlpha": true
+          },
+          {
+            "name": "Grassy soft eyelid crease",
+            "alphaMode": "OPAQUE",
+            "colorType": "VEC4",
+            "alphaMin": 1,
+            "alphaMax": 1,
+            "intermediateAlpha": false
+          }
+        ]
+      },
+      {
+        "name": "EyelidUpper_R",
+        "targets": [
+          "BlinkHalf",
+          "Blink"
+        ],
+        "weights": [
+          0,
+          0
+        ],
+        "materials": [
+          {
+            "name": "Grassy eyelid skin from original atlas",
+            "alphaMode": "BLEND",
+            "colorType": "VEC4",
+            "alphaMin": 0,
+            "alphaMax": 1,
+            "intermediateAlpha": true
+          },
+          {
+            "name": "Grassy soft eyelid crease",
+            "alphaMode": "OPAQUE",
+            "colorType": "VEC4",
+            "alphaMin": 1,
+            "alphaMax": 1,
+            "intermediateAlpha": false
+          }
+        ]
+      }
+    ]
+  },
+  "light": {
+    "oldClipCount": 15,
+    "newClipCount": 15,
+    "changedExistingClips": [],
+    "bodyAttributesAndIndicesUnchanged": true,
+    "lids": [
+      {
+        "name": "EyelidLower_L",
+        "targets": [
+          "BlinkHalf",
+          "Blink"
+        ],
+        "weights": [
+          0,
+          0
+        ],
+        "materials": [
+          {
+            "name": "Grassy eyelid skin from original atlas",
+            "alphaMode": "BLEND",
+            "colorType": "VEC4",
+            "alphaMin": 0,
+            "alphaMax": 1,
+            "intermediateAlpha": true
+          }
+        ]
+      },
+      {
+        "name": "EyelidLower_R",
+        "targets": [
+          "BlinkHalf",
+          "Blink"
+        ],
+        "weights": [
+          0,
+          0
+        ],
+        "materials": [
+          {
+            "name": "Grassy eyelid skin from original atlas",
+            "alphaMode": "BLEND",
+            "colorType": "VEC4",
+            "alphaMin": 0,
+            "alphaMax": 1,
+            "intermediateAlpha": true
+          }
+        ]
+      },
+      {
+        "name": "EyelidUpper_L",
+        "targets": [
+          "BlinkHalf",
+          "Blink"
+        ],
+        "weights": [
+          0,
+          0
+        ],
+        "materials": [
+          {
+            "name": "Grassy eyelid skin from original atlas",
+            "alphaMode": "BLEND",
+            "colorType": "VEC4",
+            "alphaMin": 0,
+            "alphaMax": 1,
+            "intermediateAlpha": true
+          },
+          {
+            "name": "Grassy soft eyelid crease",
+            "alphaMode": "OPAQUE",
+            "colorType": "VEC4",
+            "alphaMin": 1,
+            "alphaMax": 1,
+            "intermediateAlpha": false
+          }
+        ]
+      },
+      {
+        "name": "EyelidUpper_R",
+        "targets": [
+          "BlinkHalf",
+          "Blink"
+        ],
+        "weights": [
+          0,
+          0
+        ],
+        "materials": [
+          {
+            "name": "Grassy eyelid skin from original atlas",
+            "alphaMode": "BLEND",
+            "colorType": "VEC4",
+            "alphaMin": 0,
+            "alphaMax": 1,
+            "intermediateAlpha": true
+          },
+          {
+            "name": "Grassy soft eyelid crease",
+            "alphaMode": "OPAQUE",
+            "colorType": "VEC4",
+            "alphaMin": 1,
+            "alphaMax": 1,
+            "intermediateAlpha": false
+          }
+        ]
+      }
+    ]
+  }
+}

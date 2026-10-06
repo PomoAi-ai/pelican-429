@@ -1,53 +1,133 @@
 {
-  "sourceBounds": [
-    [
-      -0.3540300726890564,
-      -0.565280020236969,
-      -0.9477850198745728
-    ],
-    [
-      0.35645008087158203,
-      0.5647249817848206,
-      0.9503260254859924
-    ]
-  ],
-  "yawDegrees": 90,
-  "skin": [
-    {
-      "mesh": "model",
-      "vertices": 33718,
-      "maxInfluences": 2
-    }
-  ],
-  "kind": "gatekeeper",
+  "name": "OMI-01",
   "height": 2.6,
   "forward": "+X",
-  "up": "Y in glTF; Z in Blender",
-  "source": "assets/characters/enemies/gatekeeper/rodin-original/source.glb",
-  "bones": [
-    "root",
-    "pelvis",
-    "chest",
-    "head",
-    "arm.L",
-    "forearm.L",
-    "hand.L",
-    "arm.R",
-    "forearm.R",
-    "hand.R",
-    "thigh.L",
-    "shin.L",
-    "foot.L",
-    "thigh.R",
-    "shin.R",
-    "foot.R"
-  ],
+  "up": "glTF Y / Blender Z",
+  "source": "Local articulated mechanical reconstruction of approved-character.png",
+  "bones": {
+    "root": [
+      0,
+      0,
+      0
+    ],
+    "pelvis": [
+      0,
+      0,
+      1.02
+    ],
+    "chest": [
+      0,
+      0,
+      1.12
+    ],
+    "head": [
+      0,
+      0,
+      1.76
+    ],
+    "eye": [
+      0,
+      0,
+      2.16
+    ],
+    "arm.L": [
+      0,
+      0.4,
+      1.57
+    ],
+    "forearm.L": [
+      0,
+      0.51,
+      1.22
+    ],
+    "hand.L": [
+      0.01,
+      0.57,
+      0.91
+    ],
+    "thigh.L": [
+      0,
+      0.235,
+      1.02
+    ],
+    "shin.L": [
+      0,
+      0.235,
+      0.58
+    ],
+    "foot.L": [
+      -0.015,
+      0.235,
+      0.19
+    ],
+    "claw_inner.L": [
+      0.015,
+      0.48,
+      0.91
+    ],
+    "claw_outer.L": [
+      0.015,
+      0.6599999999999999,
+      0.91
+    ],
+    "arm.R": [
+      0,
+      -0.4,
+      1.57
+    ],
+    "forearm.R": [
+      0,
+      -0.51,
+      1.22
+    ],
+    "hand.R": [
+      0.01,
+      -0.57,
+      0.91
+    ],
+    "thigh.R": [
+      0,
+      -0.235,
+      1.02
+    ],
+    "shin.R": [
+      0,
+      -0.235,
+      0.58
+    ],
+    "foot.R": [
+      -0.015,
+      -0.235,
+      0.19
+    ],
+    "claw_inner.R": [
+      0.015,
+      -0.6599999999999999,
+      0.91
+    ],
+    "claw_outer.R": [
+      0.015,
+      -0.48,
+      0.91
+    ]
+  },
+  "parts": 90,
   "clips": {
-    "idle": 3.0,
-    "move": 0.8,
+    "idle": 4.0,
+    "move": 1.0,
     "skill1": 1.6333333333333333,
     "skill2": 1.6333333333333333,
     "hit": 0.6
   },
-  "triangles": 58758
+  "eye": {
+    "pivot": [
+      0,
+      0,
+      2.16
+    ],
+    "parent": "head",
+    "motion": "rotation around head center",
+    "boneLocalY": "Blender +Z / glTF +Y"
+  },
+  "skin": "Each armor component rigidly weighted to one joint"
 }

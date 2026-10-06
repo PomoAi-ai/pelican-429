@@ -1,0 +1,6 @@
+{
+  "tool": "image_gen built-in",
+  "input": "assets/concepts/omi-01-actions/approved-character.png",
+  "output": "reference.png",
+  "prompt": "Use case: precise-object-edit. Extract ONLY the CENTER FRONT robot from this approved character reference into a single full-body clean front-view 3D character model reference, square light neutral gray background. Preserve the exact robot identity and proportions: large rounded white helmet with flat dark charcoal face visor and one glowing orange circular eye; navy shoulder caps; white chest armor around teal abdominal plate; short mechanical limbs, white leg armor, navy toe caps; TWO articulated crab-like mechanical pincer hands, not human fingers. Arms slightly separated from body, feet apart, neutral relaxed standing, symmetric. Keep all orange joint rings and curved panel seams. One robot only, no boy, no side view, no labels, no floor markings, no shadows baked onto character, no redesign. High quality soft studio 3D rendering faithful to the original front robot."
+}

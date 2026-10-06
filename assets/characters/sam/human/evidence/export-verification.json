@@ -1,0 +1,54 @@
+{
+  "sha256": "2b16657b98d3d4ae522dd8e7f9328b5bea9691948b26a0ef67f29c95ea4f263d",
+  "bytes": 13951504,
+  "animations": [
+    {
+      "name": "greet",
+      "channels": 48,
+      "weightChannels": 0
+    },
+    {
+      "name": "idle",
+      "channels": 49,
+      "weightChannels": 1
+    },
+    {
+      "name": "jump",
+      "channels": 48,
+      "weightChannels": 0
+    },
+    {
+      "name": "run",
+      "channels": 48,
+      "weightChannels": 0
+    },
+    {
+      "name": "skill1",
+      "channels": 48,
+      "weightChannels": 0
+    },
+    {
+      "name": "skill2",
+      "channels": 48,
+      "weightChannels": 0
+    },
+    {
+      "name": "ultimate",
+      "channels": 48,
+      "weightChannels": 0
+    },
+    {
+      "name": "walk",
+      "channels": 48,
+      "weightChannels": 0
+    }
+  ],
+  "skins": 1,
+  "bones": 16,
+  "morphTargets": [
+    [
+      "Blink",
+      "BlinkTravel"
+    ]
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "kind": "tibo",
+  "originalVertexCount": 20242,
+  "refinedEyelidVertices": 1476,
+  "fixedRimMaximumMovement": 2.123415462559897e-09,
+  "restGeometryUvWeightsMaterialsSha256": "89a98471afb486e2e817989102b6c01f841a2f988c6f0f1079dd44913187d04f",
+  "preservedClipSha256": {
+    "greet": "4cbbed1decc3969f4133597ffb6d61342a00de06c782992d6ac5b973ef779e50",
+    "idle": "7b65e9b5ba5443f3475d157f27f69d46eb5881253c083d448be521e75668803b",
+    "jump": "c1ee71915c82e4ac1d76e1b00a82b5a4a6f1e0b6763885b5c655cfd8c3c0f9e6",
+    "run": "fc48a4ed7e98d7cfab547c6625d2358d99ae93e7153b039db24d9b8ea229c723",
+    "skill1": "49435d943243588179fa434a164c59714dbb1b986be24fc230c327928fd12fe4",
+    "skill2": "248ace592c65708977eecf7e56d26936852324f37611bc91032d2bbaceae3d3f",
+    "ultimate": "266901b67d1287ba1dd767bf3e0892c5a94835ad63f299534f8a8ff68ae04fe1",
+    "walk": "85ac2c6d11cf3a3fea22cc6b348dce23efda5ac0d94f655082887d15b73dfd47"
+  },
+  "bodyAndClipsUnchanged": true
+}

@@ -1,0 +1,824 @@
+{
+  "imageMagick": "Version: ImageMagick 7.1.2-11 Q16-HDRI aarch64 23470 https://imagemagick.org",
+  "ktxSoftware": "ktx version: v4.4.2",
+  "textureLimit": 512,
+  "meshopt": "0.22.0",
+  "models": [
+    {
+      "source": "./characters/human/models-equipped/grassy-equipped-game.glb",
+      "output": "./characters/human/models-equipped/grassy-equipped-game.ktx2-compact.glb",
+      "sourceSha256": "26740374569e91858e12254b02763cd61382c425b63b493e01f5adc6258fa2a6",
+      "sourceBytes": 6502192,
+      "outputBytes": 2176804,
+      "sourceBufferBytes": 2991312,
+      "storedBufferBytes": 1312799,
+      "images": [
+        {
+          "name": "rodin-refined-normal",
+          "compression": "UASTC",
+          "transferFunction": "linear",
+          "mipLevels": 10,
+          "width": 1024,
+          "height": 1024,
+          "outputWidth": 512,
+          "outputHeight": 512,
+          "kind": "normal",
+          "sourceBytes": 1365437,
+          "outputBytes": 231300,
+          "sourceRgbaMipBytes": 5592404,
+          "outputRgbaMipBytes": 1398100
+        },
+        {
+          "name": "rodin-refined-base-color",
+          "compression": "ETC1S",
+          "transferFunction": "sRGB",
+          "mipLevels": 10,
+          "width": 1024,
+          "height": 1024,
+          "outputWidth": 512,
+          "outputHeight": 512,
+          "kind": "color",
+          "sourceBytes": 1280187,
+          "outputBytes": 88579,
+          "sourceRgbaMipBytes": 5592404,
+          "outputRgbaMipBytes": 1398100
+        },
+        {
+          "name": "rodin-refined-roughness",
+          "compression": "UASTC",
+          "transferFunction": "linear",
+          "rdoLambda": 0.5,
+          "mipLevels": 10,
+          "width": 1024,
+          "height": 1024,
+          "outputWidth": 512,
+          "outputHeight": 512,
+          "kind": "data",
+          "sourceBytes": 587130,
+          "outputBytes": 174010,
+          "sourceRgbaMipBytes": 5592404,
+          "outputRgbaMipBytes": 1398100
+        }
+      ],
+      "before": "./characters/human/models-equipped/grassy-equipped-game.ktx2.glb",
+      "beforeBytes": 2698960,
+      "beforeSha256": "74e900beae01b49f20b0ad8f52134a25cafce3ddc05124c8caeebff95ea658e7",
+      "quantizedViews": 516,
+      "bufferErrors": {
+        "POSITION": {
+          "maxAbsoluteError": 0.0000152587890625,
+          "values": 165663
+        },
+        "TEXCOORD_0": {
+          "maxAbsoluteError": 0.00000762939453125,
+          "values": 90402
+        },
+        "morph:POSITION": {
+          "maxAbsoluteError": 0.000003814697265625,
+          "values": 7920
+        },
+        "morph:NORMAL": {
+          "maxAbsoluteError": 0.00000762939453125,
+          "values": 7920
+        },
+        "NORMAL": {
+          "maxAbsoluteError": 0.00000762939453125,
+          "values": 158946
+        },
+        "WEIGHTS_0": {
+          "maxAbsoluteError": 0.00000762939453125,
+          "values": 109376
+        },
+        "animation:rotation": {
+          "maxAbsoluteError": 0.00000762939453125,
+          "values": 38888
+        },
+        "animation:translation": {
+          "maxAbsoluteError": 0.000015020370483398438,
+          "values": 14868
+        },
+        "animation:scale": {
+          "maxAbsoluteError": 0.00000762939453125,
+          "values": 582
+        }
+      }
+    },
+    {
+      "source": "./characters/sam/sam.glb",
+      "output": "./characters/sam/sam.ktx2-compact.glb",
+      "sourceSha256": "c16b0dca30d998468504121e7cadfadae263a9290dda44292281a08e954d244f",
+      "sourceBytes": 15780124,
+      "outputBytes": 1118188,
+      "sourceBufferBytes": 1553264,
+      "storedBufferBytes": 542976,
+      "images": [
+        {
+          "name": "texture_normal",
+          "compression": "UASTC",
+          "transferFunction": "linear",
+          "mipLevels": 10,
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 512,
+          "outputHeight": 512,
+          "kind": "normal",
+          "sourceBytes": 6351265,
+          "outputBytes": 248810,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 1398100
+        },
+        {
+          "name": "texture_diffuse",
+          "compression": "ETC1S",
+          "transferFunction": "sRGB",
+          "mipLevels": 10,
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 512,
+          "outputHeight": 512,
+          "kind": "color",
+          "sourceBytes": 5382682,
+          "outputBytes": 93282,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 1398100
+        },
+        {
+          "name": "texture_metallic-texture_roughness",
+          "compression": "UASTC",
+          "transferFunction": "linear",
+          "rdoLambda": 0.5,
+          "mipLevels": 10,
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 512,
+          "outputHeight": 512,
+          "kind": "data",
+          "sourceBytes": 2429643,
+          "outputBytes": 155611,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 1398100
+        }
+      ],
+      "before": "./characters/sam/sam.ktx2.glb",
+      "beforeBytes": 1384636,
+      "beforeSha256": "efead35b7244852baf58c393982cb8747de7b3f3bbc24278266f67f90d8b36f6",
+      "quantizedViews": 79,
+      "bufferErrors": {
+        "POSITION": {
+          "maxAbsoluteError": 0.0000152587890625,
+          "values": 62460
+        },
+        "NORMAL": {
+          "maxAbsoluteError": 0.000003814697265625,
+          "values": 62460
+        },
+        "TEXCOORD_0": {
+          "maxAbsoluteError": 0.000003814697265625,
+          "values": 41640
+        },
+        "WEIGHTS_0": {
+          "maxAbsoluteError": 0.00000762939453125,
+          "values": 83280
+        },
+        "morph:POSITION": {
+          "maxAbsoluteError": 0.000003814697265625,
+          "values": 5214
+        },
+        "morph:NORMAL": {
+          "maxAbsoluteError": 0.00000762939453125,
+          "values": 29271
+        },
+        "animation:rotation": {
+          "maxAbsoluteError": 0.00000762939453125,
+          "values": 20400
+        },
+        "animation:scale": {
+          "maxAbsoluteError": 0.000007510185241699219,
+          "values": 363
+        },
+        "animation:weights": {
+          "maxAbsoluteError": 0.000006735324859619141,
+          "values": 242
+        },
+        "animation:translation": {
+          "maxAbsoluteError": 0.000003769993782043457,
+          "values": 801
+        }
+      }
+    },
+    {
+      "source": "./characters/sam/human/sam-human.glb",
+      "output": "./characters/sam/human/sam-human.ktx2-compact.glb",
+      "sourceSha256": "5671cec0487e3c08c9adadf4c90e787dc0a2a8167ef54be7b4cd22a86c9a8616",
+      "sourceBytes": 13947808,
+      "outputBytes": 1175344,
+      "sourceBufferBytes": 1918852,
+      "storedBufferBytes": 619905,
+      "images": [
+        {
+          "name": "texture_normal",
+          "compression": "UASTC",
+          "transferFunction": "linear",
+          "mipLevels": 10,
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 512,
+          "outputHeight": 512,
+          "kind": "normal",
+          "sourceBytes": 4955395,
+          "outputBytes": 218138,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 1398100
+        },
+        {
+          "name": "texture_diffuse",
+          "compression": "ETC1S",
+          "transferFunction": "sRGB",
+          "mipLevels": 10,
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 512,
+          "outputHeight": 512,
+          "kind": "color",
+          "sourceBytes": 4691987,
+          "outputBytes": 92323,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 1398100
+        },
+        {
+          "name": "texture_metallic-texture_roughness",
+          "compression": "UASTC",
+          "transferFunction": "linear",
+          "rdoLambda": 0.5,
+          "mipLevels": 10,
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 512,
+          "outputHeight": 512,
+          "kind": "data",
+          "sourceBytes": 2315482,
+          "outputBytes": 163398,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 1398100
+        }
+      ],
+      "before": "./characters/sam/human/sam-human.ktx2.glb",
+      "beforeBytes": 1433428,
+      "beforeSha256": "0669524183ba4015c5147b99581e8afc8ebce6091dfd1de5816a96a0d15c6fe7",
+      "quantizedViews": 78,
+      "bufferErrors": {
+        "POSITION": {
+          "maxAbsoluteError": 0.0000152587890625,
+          "values": 66501
+        },
+        "NORMAL": {
+          "maxAbsoluteError": 0.00000762939453125,
+          "values": 66501
+        },
+        "TEXCOORD_0": {
+          "maxAbsoluteError": 0.000003814697265625,
+          "values": 41218
+        },
+        "WEIGHTS_0": {
+          "maxAbsoluteError": 0.00000762939453125,
+          "values": 82436
+        },
+        "morph:NORMAL": {
+          "maxAbsoluteError": 0.00000762939453125,
+          "values": 33756
+        },
+        "COLOR_0": {
+          "maxAbsoluteError": 0.000003635883331298828,
+          "values": 4182
+        },
+        "morph:POSITION": {
+          "maxAbsoluteError": 0.000003814697265625,
+          "values": 6834
+        },
+        "animation:rotation": {
+          "maxAbsoluteError": 0.00000762939453125,
+          "values": 17088
+        },
+        "animation:scale": {
+          "maxAbsoluteError": 0.000007510185241699219,
+          "values": 363
+        },
+        "animation:weights": {
+          "maxAbsoluteError": 0.000006735324859619141,
+          "values": 242
+        },
+        "animation:translation": {
+          "maxAbsoluteError": 0.000003769993782043457,
+          "values": 801
+        }
+      }
+    },
+    {
+      "source": "./characters/tibo/tibo.glb",
+      "output": "./characters/tibo/tibo.ktx2-compact.glb",
+      "sourceSha256": "3bd5d7e1cdd97e430809b39f39c9a8295f8e0d5becdc849f8b229eacc950acdd",
+      "sourceBytes": 13698712,
+      "outputBytes": 1112552,
+      "sourceBufferBytes": 1585272,
+      "storedBufferBytes": 567820,
+      "images": [
+        {
+          "name": "texture_normal",
+          "compression": "UASTC",
+          "transferFunction": "linear",
+          "mipLevels": 10,
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 512,
+          "outputHeight": 512,
+          "kind": "normal",
+          "sourceBytes": 4553915,
+          "outputBytes": 204306,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 1398100
+        },
+        {
+          "name": "texture_diffuse",
+          "compression": "ETC1S",
+          "transferFunction": "sRGB",
+          "mipLevels": 10,
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 512,
+          "outputHeight": 512,
+          "kind": "color",
+          "sourceBytes": 4847306,
+          "outputBytes": 92677,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 1398100
+        },
+        {
+          "name": "texture_metallic-texture_roughness",
+          "compression": "UASTC",
+          "transferFunction": "linear",
+          "rdoLambda": 0.5,
+          "mipLevels": 10,
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 512,
+          "outputHeight": 512,
+          "kind": "data",
+          "sourceBytes": 2653047,
+          "outputBytes": 176624,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 1398100
+        }
+      ],
+      "before": "./characters/tibo/tibo.ktx2.glb",
+      "beforeBytes": 1375044,
+      "beforeSha256": "c0ebf61285b1e97f83f8e8958c639dcc0927d3858edf15c227509d6a1d10e015",
+      "quantizedViews": 64,
+      "bufferErrors": {
+        "POSITION": {
+          "maxAbsoluteError": 0.0000152587890625,
+          "values": 65181
+        },
+        "NORMAL": {
+          "maxAbsoluteError": 0.00000762939453125,
+          "values": 65181
+        },
+        "TEXCOORD_0": {
+          "maxAbsoluteError": 0.000003814697265625,
+          "values": 43454
+        },
+        "WEIGHTS_0": {
+          "maxAbsoluteError": 0.00000762939453125,
+          "values": 86908
+        },
+        "morph:POSITION": {
+          "maxAbsoluteError": 0.000003814697265625,
+          "values": 4902
+        },
+        "morph:NORMAL": {
+          "maxAbsoluteError": 0.00000762939453125,
+          "values": 30186
+        },
+        "animation:rotation": {
+          "maxAbsoluteError": 0.00000762939453125,
+          "values": 15428
+        },
+        "animation:scale": {
+          "maxAbsoluteError": 0.000007510185241699219,
+          "values": 363
+        },
+        "animation:weights": {
+          "maxAbsoluteError": 0.000006735324859619141,
+          "values": 242
+        },
+        "animation:translation": {
+          "maxAbsoluteError": 0.000003814697265625,
+          "values": 147
+        }
+      }
+    },
+    {
+      "source": "./characters/tibo/human/tibo-human.glb",
+      "output": "./characters/tibo/human/tibo-human.ktx2-compact.glb",
+      "sourceSha256": "1515ddd1a41ff55c22a9c2e0dd595359da4dfb80fe2a4ea50bd5ae67c27a2012",
+      "sourceBytes": 12300412,
+      "outputBytes": 1150988,
+      "sourceBufferBytes": 1873079,
+      "storedBufferBytes": 605296,
+      "images": [
+        {
+          "name": "texture_normal",
+          "compression": "UASTC",
+          "transferFunction": "linear",
+          "mipLevels": 10,
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 512,
+          "outputHeight": 512,
+          "kind": "normal",
+          "sourceBytes": 3742933,
+          "outputBytes": 191443,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 1398100
+        },
+        {
+          "name": "texture_diffuse",
+          "compression": "ETC1S",
+          "transferFunction": "sRGB",
+          "mipLevels": 10,
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 512,
+          "outputHeight": 512,
+          "kind": "color",
+          "sourceBytes": 3835299,
+          "outputBytes": 83952,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 1398100
+        },
+        {
+          "name": "texture_metallic-texture_roughness",
+          "compression": "UASTC",
+          "transferFunction": "linear",
+          "rdoLambda": 0.5,
+          "mipLevels": 10,
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 512,
+          "outputHeight": 512,
+          "kind": "data",
+          "sourceBytes": 2784072,
+          "outputBytes": 190620,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 1398100
+        }
+      ],
+      "before": "./characters/tibo/human/tibo-human.ktx2.glb",
+      "beforeBytes": 1396716,
+      "beforeSha256": "1ff022cf1b138e6b291d3b3b5e5706c544d12392bd60e7f7c5a8de945b084faf",
+      "quantizedViews": 71,
+      "bufferErrors": {
+        "POSITION": {
+          "maxAbsoluteError": 0.0000152587890625,
+          "values": 65400
+        },
+        "NORMAL": {
+          "maxAbsoluteError": 0.00000762939453125,
+          "values": 65400
+        },
+        "TEXCOORD_0": {
+          "maxAbsoluteError": 0.000003814697265625,
+          "values": 40484
+        },
+        "WEIGHTS_0": {
+          "maxAbsoluteError": 0.00000762939453125,
+          "values": 80968
+        },
+        "morph:NORMAL": {
+          "maxAbsoluteError": 0.00000762939453125,
+          "values": 32718
+        },
+        "COLOR_0": {
+          "maxAbsoluteError": 0.000003635883331298828,
+          "values": 4182
+        },
+        "morph:POSITION": {
+          "maxAbsoluteError": 0.000003814697265625,
+          "values": 6255
+        },
+        "animation:rotation": {
+          "maxAbsoluteError": 0.00000762939453125,
+          "values": 14836
+        },
+        "animation:scale": {
+          "maxAbsoluteError": 0.000007510185241699219,
+          "values": 363
+        },
+        "animation:weights": {
+          "maxAbsoluteError": 0.000006735324859619141,
+          "values": 242
+        },
+        "animation:translation": {
+          "maxAbsoluteError": 0.000003814697265625,
+          "values": 147
+        }
+      }
+    },
+    {
+      "source": "./characters/enemies/line-hound/model.glb",
+      "output": "./characters/enemies/line-hound/model.ktx2-compact.glb",
+      "sourceSha256": "6ceace1185153006933b087abe3c2180df35a26094debc7b72e092176092d305",
+      "sourceBytes": 12550508,
+      "outputBytes": 1464480,
+      "sourceBufferBytes": 2433798,
+      "storedBufferBytes": 884982,
+      "images": [
+        {
+          "name": "texture_normal",
+          "compression": "UASTC",
+          "transferFunction": "linear",
+          "mipLevels": 10,
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 512,
+          "outputHeight": 512,
+          "kind": "normal",
+          "sourceBytes": 3227287,
+          "outputBytes": 212087,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 1398100
+        },
+        {
+          "name": "texture_diffuse",
+          "compression": "ETC1S",
+          "transferFunction": "sRGB",
+          "mipLevels": 10,
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 512,
+          "outputHeight": 512,
+          "kind": "color",
+          "sourceBytes": 3946151,
+          "outputBytes": 91368,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 1398100
+        },
+        {
+          "name": "texture_metallic-texture_roughness",
+          "compression": "UASTC",
+          "transferFunction": "linear",
+          "rdoLambda": 0.5,
+          "mipLevels": 10,
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 512,
+          "outputHeight": 512,
+          "kind": "data",
+          "sourceBytes": 2903409,
+          "outputBytes": 228172,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 1398100
+        }
+      ],
+      "before": "./characters/enemies/line-hound/model.ktx2.glb",
+      "beforeBytes": 1813852,
+      "beforeSha256": "c29276b5b029edc36256320b49a4b2df518600623ab59ee40ddd42962bfc5533",
+      "quantizedViews": 44,
+      "bufferErrors": {
+        "POSITION": {
+          "maxAbsoluteError": 0.00000762939453125,
+          "values": 114909
+        },
+        "NORMAL": {
+          "maxAbsoluteError": 0.000003814697265625,
+          "values": 114909
+        },
+        "TEXCOORD_0": {
+          "maxAbsoluteError": 0.000003814697265625,
+          "values": 76606
+        },
+        "WEIGHTS_0": {
+          "maxAbsoluteError": 0.00000762939453125,
+          "values": 153212
+        },
+        "animation:rotation": {
+          "maxAbsoluteError": 0.00000762939453125,
+          "values": 14116
+        },
+        "animation:translation": {
+          "maxAbsoluteError": 0.000003762543201446533,
+          "values": 765
+        }
+      }
+    },
+    {
+      "source": "./characters/enemies/watch-wasp/model.glb",
+      "output": "./characters/enemies/watch-wasp/model.ktx2-compact.glb",
+      "sourceSha256": "e977ceac0ae6ed459fec1a697a36fc387f064b40591bd6ffe857b0d7cb3a2ab1",
+      "sourceBytes": 9961248,
+      "outputBytes": 1345928,
+      "sourceBufferBytes": 2752264,
+      "storedBufferBytes": 878536,
+      "images": [
+        {
+          "name": "texture_normal",
+          "compression": "UASTC",
+          "transferFunction": "linear",
+          "mipLevels": 10,
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 512,
+          "outputHeight": 512,
+          "kind": "normal",
+          "sourceBytes": 1883047,
+          "outputBytes": 130876,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 1398100
+        },
+        {
+          "name": "texture_diffuse",
+          "compression": "ETC1S",
+          "transferFunction": "sRGB",
+          "mipLevels": 10,
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 512,
+          "outputHeight": 512,
+          "kind": "color",
+          "sourceBytes": 2814969,
+          "outputBytes": 62642,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 1398100
+        },
+        {
+          "name": "texture_metallic-texture_roughness",
+          "compression": "UASTC",
+          "transferFunction": "linear",
+          "rdoLambda": 0.5,
+          "mipLevels": 10,
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 512,
+          "outputHeight": 512,
+          "kind": "data",
+          "sourceBytes": 2459890,
+          "outputBytes": 194123,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 1398100
+        }
+      ],
+      "before": "./characters/enemies/watch-wasp/model.ktx2.glb",
+      "beforeBytes": 1730540,
+      "beforeSha256": "df307c2f76cf1970f86fe5e8d3ead8a0394c74c6acc75f9185c001dbb283eb69",
+      "quantizedViews": 107,
+      "bufferErrors": {
+        "POSITION": {
+          "maxAbsoluteError": 0.00000762939453125,
+          "values": 137673
+        },
+        "NORMAL": {
+          "maxAbsoluteError": 0.000007361173629760742,
+          "values": 137553
+        },
+        "TEXCOORD_0": {
+          "maxAbsoluteError": 0.000007510185241699219,
+          "values": 89382
+        },
+        "animation:rotation": {
+          "maxAbsoluteError": 0.00000762939453125,
+          "values": 9660
+        },
+        "animation:translation": {
+          "maxAbsoluteError": 0.0000037476420402526855,
+          "values": 1428
+        }
+      }
+    },
+    {
+      "source": "./characters/enemies/loadmaster/model.glb",
+      "output": "./characters/enemies/loadmaster/model.ktx2-compact.glb",
+      "sourceSha256": "abc8033a8dee8a1ac48d241f7b2ecbaa19f118469e30fd2dd7a684d8c5c1653a",
+      "sourceBytes": 9949840,
+      "outputBytes": 1124084,
+      "sourceBufferBytes": 2060388,
+      "storedBufferBytes": 696036,
+      "images": [
+        {
+          "name": "texture_normal",
+          "compression": "UASTC",
+          "transferFunction": "linear",
+          "mipLevels": 10,
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 512,
+          "outputHeight": 512,
+          "kind": "normal",
+          "sourceBytes": 2255208,
+          "outputBytes": 140616,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 1398100
+        },
+        {
+          "name": "texture_diffuse",
+          "compression": "ETC1S",
+          "transferFunction": "sRGB",
+          "mipLevels": 10,
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 512,
+          "outputHeight": 512,
+          "kind": "color",
+          "sourceBytes": 3161375,
+          "outputBytes": 73697,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 1398100
+        },
+        {
+          "name": "texture_metallic-texture_roughness",
+          "compression": "UASTC",
+          "transferFunction": "linear",
+          "rdoLambda": 0.5,
+          "mipLevels": 10,
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 512,
+          "outputHeight": 512,
+          "kind": "data",
+          "sourceBytes": 2447422,
+          "outputBytes": 183780,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 1398100
+        }
+      ],
+      "before": "./characters/enemies/loadmaster/model.ktx2.glb",
+      "beforeBytes": 1427240,
+      "beforeSha256": "96e2e660ff489308be0bd446d5618b4bf23df37d384c9079ed4eb8d3b929d71e",
+      "quantizedViews": 22,
+      "bufferErrors": {
+        "POSITION": {
+          "maxAbsoluteError": 0.0000152587890625,
+          "values": 96786
+        },
+        "NORMAL": {
+          "maxAbsoluteError": 0.00000762939453125,
+          "values": 96786
+        },
+        "TEXCOORD_0": {
+          "maxAbsoluteError": 0.000003814697265625,
+          "values": 64524
+        },
+        "WEIGHTS_0": {
+          "maxAbsoluteError": 0.00000762939453125,
+          "values": 129048
+        },
+        "animation:rotation": {
+          "maxAbsoluteError": 0.00000762939453125,
+          "values": 8672
+        }
+      }
+    },
+    {
+      "source": "./characters/enemies/gatekeeper/model.glb",
+      "output": "./characters/enemies/gatekeeper/model.ktx2-compact.glb",
+      "sourceSha256": "5a80107fc34704bd7286228e6efc19be2bbee8c27be5cfbb6043200979bf37c3",
+      "sourceBytes": 3629384,
+      "outputBytes": 1241964,
+      "sourceBufferBytes": 3490680,
+      "storedBufferBytes": 1027101,
+      "images": [],
+      "before": "./characters/enemies/gatekeeper/model.ktx2.glb",
+      "beforeBytes": 1753840,
+      "beforeSha256": "39c91eabaa8d20e31aa6cf9e2f34b3df47657054b2576d9455b9ef6d2c768da3",
+      "quantizedViews": 294,
+      "bufferErrors": {
+        "POSITION": {
+          "maxAbsoluteError": 0.0000152587890625,
+          "values": 191850
+        },
+        "NORMAL": {
+          "maxAbsoluteError": 0.00000762939453125,
+          "values": 191850
+        },
+        "TEXCOORD_0": {
+          "maxAbsoluteError": 0.00000762939453125,
+          "values": 117774
+        },
+        "animation:rotation": {
+          "maxAbsoluteError": 0.00000762939453125,
+          "values": 15016
+        },
+        "animation:translation": {
+          "maxAbsoluteError": 0.000007510185241699219,
+          "values": 1500
+        }
+      }
+    }
+  ],
+  "modelCompression": {
+    "filter": "EXPONENTIAL",
+    "bits": 18,
+    "mode": "SharedComponent",
+    "topology": "unchanged",
+    "animationTimes": "unchanged",
+    "textures": "byte-identical"
+  }
+}

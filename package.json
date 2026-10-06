@@ -7,6 +7,12 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "assets:web": "node scripts/build-web-models.ts",
+    "assets:ktx2": "node scripts/build-web-models.ts --ktx2",
+    "assets:web-1k": "node scripts/build-web-models.ts --web-1k",
+    "assets:ktx2-256": "node scripts/build-web-models.ts --ktx2-256",
+    "assets:compact": "node scripts/build-compact-models.ts",
+    "assets:scene": "node scripts/build-scene-assets.ts",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit -p .",
     "test": "node --test \"test/**/*.test.ts\""
@@ -17,6 +23,7 @@
   "devDependencies": {
     "@types/node": "26.6.3",
     "@types/three": "0.180.0",
+    "meshoptimizer": "0.22.0",
     "typescript": "7.0.2",
     "vite": "8.1.5"
   }

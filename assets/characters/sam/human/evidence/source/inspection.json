@@ -1,0 +1,28 @@
+{
+  "source": "assets/characters/sam/human/rodin-original/source.glb",
+  "sourceSha256": "e18e4efb7fbc68292e719a3f7b1b7410401c8400a441a5895af80c6a8626d1d9",
+  "orientation": "Blender Z up, front -Y",
+  "bounds": {
+    "min": [
+      -0.5705344080924988,
+      -0.4011302590370178,
+      0.0
+    ],
+    "max": [
+      0.5561447143554688,
+      0.5231122970581055,
+      2.700000047683716
+    ]
+  },
+  "height": 2.700000047683716,
+  "meshes": [
+    {
+      "name": "model",
+      "vertices": 20606,
+      "triangles": 36167,
+      "materials": [
+        "model"
+      ]
+    }
+  ]
+}

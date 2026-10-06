@@ -78,3 +78,46 @@ Keep all FOUR Tibo human figures pixel-faithful in identity, proportions, pose, 
 Replace ONLY all empty background between and around the four complete figures with a uniform flat very light neutral warm-gray (#eeeeec) matte background, fully opaque. Remove all colored speckle, mottled gray patches, black areas, transparency noise and halo remnants from the background. Clean accurate silhouette edges. No contact shadows, no floor, no gradient, no vignette, no labels or text. Four separated full-body views aligned to exactly the original shared crown/sole baselines, unchanged. Front, left-facing profile, back, right-facing profile. Do not add badges to the back or right-facing profile. This is a clean production turnaround reference sheet on one solid flat neutral background, not a scene.
 ```
 
+
+
+## 独立四向 Rodin 输入（2026-10-06）
+
+- 从已批准的 turnaround.png 出发，使用内置 image_gen 每次隔离一个指定视图，共四次编辑；没有重新设计四向总稿，也没有程序裁图或像素编辑。
+- 文件：front.png、left.png、back.png、right.png，均为 1254 × 1254 PNG，单一完整人物，浅灰不透明背景。
+- 逐张视觉核查：人类耳鼻与双手、侧分棕发、棕眼、笑容与短胡茬、黑帽衫/蓝裤/白鞋保留。正面徽章在画面右侧（解剖左胸），朝左侧面可见，背面和朝右侧面没有徽章。
+- 比例视觉估计约 3.1–3.2 头身：可见面孔视图的头顶约 y25–30、下巴/胡须下缘约 y390–400、鞋底约 y1200–1215；四张角色尺度接近，未发生 Sam 上次单图隔离时的明显长身漂移。本轮无需追加比例重绘。
+- 这些是生成式建模参考，不是严格像素裁切或几何配准；最终 3D 仍须测量共同身高与轮廓。帽衫/牛仔中原总稿的轻微装饰纹理不视为新增服装设计，沿用上文纯色布料要求。
+- 仅补齐图片输入，未提交 Rodin、未制作或导出模型/动画。
+
+### front.png
+
+生成文件：`front.png`
+
+提示词：
+
+Use case: identity-preserve. The attached approved Tibo HUMAN four-view turnaround is the edit target. Produce ONE single-view full-body Rodin reconstruction reference by faithfully isolating the specified existing figure. This is an extraction/reframing edit, not a redesign. Preserve the exact Tibo character: friendly adult man with brown side-parted hair, brown eyes, thick expressive eyebrows, short brown beard/stubble and recognizable toothy smile; human skin/ears/nose/hands; black hoodie with drawstrings and kangaroo pocket, blue jeans, white low-top lace-up sneakers. Keep the same warm polished stylized 3D game rendering and pose. Preserve the approved figure's compact 3.1-head proportions EXACTLY; do not elongate the torso or legs during isolation. Hair crown to beard-bottom/chin is 32.3% of total crown-to-sole height. This ratio is more important than filling space. Square canvas, isolated complete figure centered horizontally, hair crown near 6% canvas height, chin/beard-bottom near 34.4%, sole baseline near 94%; head is intentionally large but the FACE remains the same adult bearded face, never a toddler redesign. Relaxed modeling stance with arms slightly clear of torso and feet apart, matching the selected view. Keep existing width-to-height and all local proportions, no perspective tilt. Plain uniform pale neutral gray #eeeeec background, opaque; no gradient, floor, cast shadow, halo, checkerboard, text, labels, watermark, props or additional figures. The reset badge is a small silver round badge with green/turquoise clockwise arrow on anatomical LEFT chest, no other logos. Extract ONLY the FIRST figure from the left: exact straight-on FRONT view, both eyes visible, both shoulders and hips square to camera, same smiling face and beard. Its single green reset badge is on anatomical LEFT chest = viewer RIGHT.
+
+### left.png
+
+生成文件：`left.png`
+
+提示词：
+
+Use case: identity-preserve. The attached approved Tibo HUMAN four-view turnaround is the edit target. Produce ONE single-view full-body Rodin reconstruction reference by faithfully isolating the specified existing figure. This is an extraction/reframing edit, not a redesign. Preserve the exact Tibo character: friendly adult man with brown side-parted hair, brown eyes, thick expressive eyebrows, short brown beard/stubble and recognizable toothy smile; human skin/ears/nose/hands; black hoodie with drawstrings and kangaroo pocket, blue jeans, white low-top lace-up sneakers. Keep the same warm polished stylized 3D game rendering and pose. Preserve the approved figure's compact 3.1-head proportions EXACTLY; do not elongate the torso or legs during isolation. Hair crown to beard-bottom/chin is 32.3% of total crown-to-sole height. This ratio is more important than filling space. Square canvas, isolated complete figure centered horizontally, hair crown near 6% canvas height, chin/beard-bottom near 34.4%, sole baseline near 94%; head is intentionally large but the FACE remains the same adult bearded face, never a toddler redesign. Relaxed modeling stance with arms slightly clear of torso and feet apart, matching the selected view. Keep existing width-to-height and all local proportions, no perspective tilt. Plain uniform pale neutral gray #eeeeec background, opaque; no gradient, floor, cast shadow, halo, checkerboard, text, labels, watermark, props or additional figures. The reset badge is a small silver round badge with green/turquoise clockwise arrow on anatomical LEFT chest, no other logos. Extract ONLY the SECOND figure from the left: strict LEFT-facing PROFILE, nose and shoe toes point toward the LEFT edge of the image, one eye visible. Preserve its exact asymmetric hair arrangement and profile, never mirror the right view. The badge on the anatomical LEFT chest is visible as a narrow near-front chest detail. Hood remains down behind the neck.
+
+### back.png
+
+生成文件：`back.png`
+
+提示词：
+
+Use case: identity-preserve. The attached approved Tibo HUMAN four-view turnaround is the edit target. Produce ONE single-view full-body Rodin reconstruction reference by faithfully isolating the specified existing figure. This is an extraction/reframing edit, not a redesign. Preserve the exact Tibo character: friendly adult man with brown side-parted hair, brown eyes, thick expressive eyebrows, short brown beard/stubble and recognizable toothy smile; human skin/ears/nose/hands; black hoodie with drawstrings and kangaroo pocket, blue jeans, white low-top lace-up sneakers. Keep the same warm polished stylized 3D game rendering and pose. Preserve the approved figure's compact 3.1-head proportions EXACTLY; do not elongate the torso or legs during isolation. Hair crown to beard-bottom/chin is 32.3% of total crown-to-sole height. This ratio is more important than filling space. Square canvas, isolated complete figure centered horizontally, hair crown near 6% canvas height, chin/beard-bottom near 34.4%, sole baseline near 94%; head is intentionally large but the FACE remains the same adult bearded face, never a toddler redesign. Relaxed modeling stance with arms slightly clear of torso and feet apart, matching the selected view. Keep existing width-to-height and all local proportions, no perspective tilt. Plain uniform pale neutral gray #eeeeec background, opaque; no gradient, floor, cast shadow, halo, checkerboard, text, labels, watermark, props or additional figures. The reset badge is a small silver round badge with green/turquoise clockwise arrow on anatomical LEFT chest, no other logos. Extract ONLY the THIRD figure from the left: exact BACK view, no face visible, same rear hair silhouette, hood down over upper back, rear jeans pockets, shoe heels. No badge on the back. Arms slightly apart and legs separated, exactly as approved.
+
+### right.png
+
+生成文件：`right.png`
+
+提示词：
+
+Use case: identity-preserve. The attached approved Tibo HUMAN four-view turnaround is the edit target. Produce ONE single-view full-body Rodin reconstruction reference by faithfully isolating the specified existing figure. This is an extraction/reframing edit, not a redesign. Preserve the exact Tibo character: friendly adult man with brown side-parted hair, brown eyes, thick expressive eyebrows, short brown beard/stubble and recognizable toothy smile; human skin/ears/nose/hands; black hoodie with drawstrings and kangaroo pocket, blue jeans, white low-top lace-up sneakers. Keep the same warm polished stylized 3D game rendering and pose. Preserve the approved figure's compact 3.1-head proportions EXACTLY; do not elongate the torso or legs during isolation. Hair crown to beard-bottom/chin is 32.3% of total crown-to-sole height. This ratio is more important than filling space. Square canvas, isolated complete figure centered horizontally, hair crown near 6% canvas height, chin/beard-bottom near 34.4%, sole baseline near 94%; head is intentionally large but the FACE remains the same adult bearded face, never a toddler redesign. Relaxed modeling stance with arms slightly clear of torso and feet apart, matching the selected view. Keep existing width-to-height and all local proportions, no perspective tilt. Plain uniform pale neutral gray #eeeeec background, opaque; no gradient, floor, cast shadow, halo, checkerboard, text, labels, watermark, props or additional figures. The reset badge is a small silver round badge with green/turquoise clockwise arrow on anatomical LEFT chest, no other logos. Extract ONLY the FOURTH figure from the left: strict RIGHT-facing PROFILE, nose and shoe toes point toward the RIGHT edge of the image, one eye visible. Preserve its exact asymmetric hair arrangement and profile, never mirror the left view. This is the anatomical RIGHT side: there must be NO chest badge visible. Hood down behind the neck.
+

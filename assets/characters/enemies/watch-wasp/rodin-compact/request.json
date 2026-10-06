@@ -1,0 +1,13 @@
+{
+  "service": "Hyper3D CLI",
+  "input": "assets/concepts/watch-wasp-final/production-input.png",
+  "tier": "Gen-2.5-High",
+  "meshMode": "Raw",
+  "quality": 60000,
+  "textureDelight": true,
+  "format": "glb",
+  "created": "2026-10-06",
+  "purpose": "Approved compact white quadcopter production model; one generation using existing subscription credits",
+  "prompt": "One modern compact quadcopter, exactly four open two-blade propellers and four silver cylindrical motors on a black carbon X frame. Preserve the reference white low sculpted armor panels, panel seams, small black side vents, front camera bezel and lens, cyan narrow lights and rear antenna. Single coherent drone only. Keep the body low and compact. No extra drones, no background geometry, no propeller guards, no landing platform.",
+  "sourceSha256": "9c80ebb3603efe8164630645bf8e0f5e33691267ab1027ee5c954fd25c829ca5"
+}

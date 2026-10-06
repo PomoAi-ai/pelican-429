@@ -1,0 +1,263 @@
+{
+  "source": "tibo-human-rigged.blend",
+  "sourceGeometryAlteredAfterRodinNormalization": true,
+  "profileFit": {
+    "depthScale": 0.99,
+    "forwardShift": 0.0,
+    "neckBlendZ": [
+      1.72,
+      1.86
+    ]
+  },
+  "referenceConflict": "Independent four-view concept images include mild perspective and pose differences; the comparison registers common height and body anchors, not pixel identity.",
+  "height": 2.65,
+  "headToBody": 3.106682297772567,
+  "maskMethod": "White emission render on transparent film; illustrated background estimated per row then boundary flood-fill. Reference masks are diagnostic only, source images are unmodified.",
+  "views": {
+    "front": {
+      "reference": {
+        "bbox": [
+          171,
+          68,
+          466,
+          733
+        ],
+        "size": [
+          296,
+          666
+        ],
+        "center": [
+          318.5,
+          400.5
+        ],
+        "centroid": [
+          316.41174574085386,
+          387.5171468811512
+        ]
+      },
+      "model": {
+        "bbox": [
+          169,
+          67,
+          470,
+          732
+        ],
+        "size": [
+          302,
+          666
+        ],
+        "center": [
+          319.5,
+          399.5
+        ],
+        "centroid": [
+          319.6227314938693,
+          405.3704610202572
+        ]
+      },
+      "bboxSizeError": [
+        0.020270270270270174,
+        0.0
+      ],
+      "bboxCenterDriftPx": [
+        1.0,
+        -1.0
+      ],
+      "bboxSizePass": true,
+      "bboxCenterPass": true,
+      "IoU": 0.8784415982820768,
+      "referenceRegistration": {
+        "scale": 0.5659309564233164,
+        "translation": [
+          -34.27277872099603,
+          53.084323712506944
+        ],
+        "originRule": "center between soles"
+      }
+    },
+    "back": {
+      "reference": {
+        "bbox": [
+          170,
+          67,
+          471,
+          733
+        ],
+        "size": [
+          302,
+          667
+        ],
+        "center": [
+          320.5,
+          400.0
+        ],
+        "centroid": [
+          320.175507357093,
+          391.05348423954564
+        ]
+      },
+      "model": {
+        "bbox": [
+          169,
+          67,
+          470,
+          732
+        ],
+        "size": [
+          302,
+          666
+        ],
+        "center": [
+          319.5,
+          399.5
+        ],
+        "centroid": [
+          319.3761794958565,
+          405.37331486538596
+        ]
+      },
+      "bboxSizeError": [
+        0.0,
+        -0.0014992503748125774
+      ],
+      "bboxCenterDriftPx": [
+        -1.0,
+        -0.5
+      ],
+      "bboxSizePass": true,
+      "bboxCenterPass": true,
+      "IoU": 0.8810470233254543,
+      "referenceRegistration": {
+        "scale": 0.5742176284811943,
+        "translation": [
+          -39.747344243468206,
+          52.311225954636825
+        ],
+        "originRule": "center between soles"
+      }
+    },
+    "left": {
+      "reference": {
+        "bbox": [
+          213,
+          67,
+          434,
+          733
+        ],
+        "size": [
+          222,
+          667
+        ],
+        "center": [
+          323.5,
+          400.0
+        ],
+        "centroid": [
+          325.4923964341898,
+          354.1988463555322
+        ]
+      },
+      "model": {
+        "bbox": [
+          213,
+          67,
+          434,
+          732
+        ],
+        "size": [
+          222,
+          666
+        ],
+        "center": [
+          323.5,
+          399.5
+        ],
+        "centroid": [
+          325.3181756711069,
+          367.44642414407105
+        ]
+      },
+      "bboxSizeError": [
+        0.0,
+        -0.0014992503748125774
+      ],
+      "bboxCenterDriftPx": [
+        0.0,
+        -0.5
+      ],
+      "bboxSizePass": true,
+      "bboxCenterPass": true,
+      "IoU": 0.867873041691636,
+      "referenceRegistration": {
+        "scale": 0.5592841163310962,
+        "translation": [
+          -23.400447427293045,
+          53.243847874720245
+        ],
+        "originRule": "middle torso silhouette midpoint"
+      }
+    },
+    "right": {
+      "reference": {
+        "bbox": [
+          211,
+          67,
+          423,
+          733
+        ],
+        "size": [
+          213,
+          667
+        ],
+        "center": [
+          317.0,
+          400.0
+        ],
+        "centroid": [
+          314.26043397749396,
+          356.554662646598
+        ]
+      },
+      "model": {
+        "bbox": [
+          205,
+          67,
+          426,
+          732
+        ],
+        "size": [
+          222,
+          666
+        ],
+        "center": [
+          315.5,
+          399.5
+        ],
+        "centroid": [
+          313.68111793542573,
+          367.44952949794333
+        ]
+      },
+      "bboxSizeError": [
+        0.04225352112676051,
+        -0.0014992503748125774
+      ],
+      "bboxCenterDriftPx": [
+        -1.5,
+        -0.5
+      ],
+      "bboxSizePass": true,
+      "bboxCenterPass": true,
+      "IoU": 0.8728981474463777,
+      "referenceRegistration": {
+        "scale": 0.5668934240362812,
+        "translation": [
+          -38.56009070294783,
+          53.62811791383217
+        ],
+        "originRule": "middle torso silhouette midpoint"
+      }
+    }
+  },
+  "allBboxGatesPass": true
+}

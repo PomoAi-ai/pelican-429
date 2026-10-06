@@ -1,0 +1,28 @@
+{
+  "source": "assets/characters/tibo/human/rodin-original/source.glb",
+  "sourceSha256": "163e79c467c1ef57277cc4ced0dc44fdf6a9c30fb234044cf4d9c7ca17776206",
+  "orientation": "Blender Z up, front -Y",
+  "bounds": {
+    "min": [
+      -0.599266529083252,
+      -0.42941153049468994,
+      0.0
+    ],
+    "max": [
+      0.5995702743530273,
+      0.4602300226688385,
+      2.6500000953674316
+    ]
+  },
+  "height": 2.6500000953674316,
+  "meshes": [
+    {
+      "name": "model",
+      "vertices": 20242,
+      "triangles": 35270,
+      "materials": [
+        "model"
+      ]
+    }
+  ]
+}

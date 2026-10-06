@@ -1,0 +1,158 @@
+{
+  "game": {
+    "oldClipCount": 15,
+    "newClipCount": 15,
+    "changedExistingClips": [],
+    "bodyAttributesAndIndicesUnchanged": true,
+    "lids": [
+      {
+        "name": "EyelidLower_L",
+        "targets": [
+          "BlinkHalf",
+          "Blink"
+        ],
+        "weights": [
+          0,
+          0
+        ]
+      },
+      {
+        "name": "EyelidLower_R",
+        "targets": [
+          "BlinkHalf",
+          "Blink"
+        ],
+        "weights": [
+          0,
+          0
+        ]
+      },
+      {
+        "name": "EyelidUpper_L",
+        "targets": [
+          "BlinkHalf",
+          "Blink"
+        ],
+        "weights": [
+          0,
+          0
+        ]
+      },
+      {
+        "name": "EyelidUpper_R",
+        "targets": [
+          "BlinkHalf",
+          "Blink"
+        ],
+        "weights": [
+          0,
+          0
+        ]
+      }
+    ]
+  },
+  "detailed": {
+    "oldClipCount": 15,
+    "newClipCount": 15,
+    "changedExistingClips": [],
+    "bodyAttributesAndIndicesUnchanged": true,
+    "lids": [
+      {
+        "name": "EyelidLower_L",
+        "targets": [
+          "BlinkHalf",
+          "Blink"
+        ],
+        "weights": [
+          0,
+          0
+        ]
+      },
+      {
+        "name": "EyelidLower_R",
+        "targets": [
+          "BlinkHalf",
+          "Blink"
+        ],
+        "weights": [
+          0,
+          0
+        ]
+      },
+      {
+        "name": "EyelidUpper_L",
+        "targets": [
+          "BlinkHalf",
+          "Blink"
+        ],
+        "weights": [
+          0,
+          0
+        ]
+      },
+      {
+        "name": "EyelidUpper_R",
+        "targets": [
+          "BlinkHalf",
+          "Blink"
+        ],
+        "weights": [
+          0,
+          0
+        ]
+      }
+    ]
+  },
+  "light": {
+    "oldClipCount": 15,
+    "newClipCount": 15,
+    "changedExistingClips": [],
+    "bodyAttributesAndIndicesUnchanged": true,
+    "lids": [
+      {
+        "name": "EyelidLower_L",
+        "targets": [
+          "BlinkHalf",
+          "Blink"
+        ],
+        "weights": [
+          0,
+          0
+        ]
+      },
+      {
+        "name": "EyelidLower_R",
+        "targets": [
+          "BlinkHalf",
+          "Blink"
+        ],
+        "weights": [
+          0,
+          0
+        ]
+      },
+      {
+        "name": "EyelidUpper_L",
+        "targets": [
+          "BlinkHalf",
+          "Blink"
+        ],
+        "weights": [
+          0,
+          0
+        ]
+      },
+      {
+        "name": "EyelidUpper_R",
+        "targets": [
+          "BlinkHalf",
+          "Blink"
+        ],
+        "weights": [
+          0,
+          0
+        ]
+      }
+    ]
+  }
+}

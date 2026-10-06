@@ -17,7 +17,7 @@ HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
 sys.path.insert(0, str(HERE))
 sys.dont_write_bytecode = True
-from animation import CLIP_FRAMES, PROPORTIONS, bake_actions, build_armature
+from animation import CLIP_FRAMES, PROPORTIONS, bake_actions, build_armature, joint_positions
 from studio import render_views, setup_studio
 
 HEIGHTS = {'sam': 2.7, 'tibo': 2.65}
@@ -289,7 +289,7 @@ def main():
     normalize(objects, kind, height)
     calibrate_shape(objects, kind, height)
     reduce_geometry(objects)
-    rig = build_armature(kind, height)
+    rig = build_armature(kind, height, joint_positions(kind, height))
     skin_report = bind_rodin_meshes(objects, rig, kind, height)
     actions = bake_actions(rig, kind, shoe_soles(objects, kind, height))
     walk_report = measure_walk(objects, rig, actions, height)

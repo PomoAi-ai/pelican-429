@@ -44,7 +44,7 @@ def joint_positions(kind, height):
             for name, point in positions.items()}
 
 
-def build_armature(kind, height):
+def build_armature(kind, height, joints):
     """Z-up, facing -Y; every bone points +Z, with local Y as its long axis."""
     parents = {"hips": "root", "spine": "hips", "head": "spine", "tail": "hips"}
     for side in ("L", "R"):
@@ -63,7 +63,7 @@ def build_armature(kind, height):
     rig.select_set(True)
     bpy.context.view_layer.objects.active = rig
     bpy.ops.object.mode_set(mode="EDIT")
-    for name, position in joint_positions(kind, height).items():
+    for name, position in joints.items():
         bone = data.edit_bones.new(name)
         bone.head = position
         bone.tail = Vector(position) + Vector((0, 0, height * .045))
@@ -100,7 +100,7 @@ def _idle(bones, phase, kind):
     bones["head"].rotation_euler.z = .024 * math.sin(phase * 2)
     for side, sign in (("L", 1), ("R", -1)):
         bones[f"upper_arm.{side}"].rotation_euler.z = sign * .028 * breath
-    if kind == "sam":
+    if "tail" in bones:
         bones["tail"].rotation_euler.y = .045 * math.sin(phase)
 
 
@@ -114,7 +114,7 @@ def _walk(bones, phase, kind, height):
         swing = math.sin(phase + offset)
         bones[f"upper_arm.{side}"].rotation_euler.x = .24 * swing
         bones[f"forearm.{side}"].rotation_euler.x = -.10 - .07 * max(0, swing) ** 2
-    if kind == "sam":
+    if "tail" in bones:
         bones["tail"].rotation_euler.y = .07 * math.sin(phase)
 
 
@@ -145,8 +145,7 @@ def _foot_target(t, height, rest_ankle, sole):
 
 def _pose_legs(rig, kind, targets):
     """Bake two-bone IK into the existing pivot rig; no runtime constraints are exported."""
-    height = rig["character_height"]
-    joints = {name: Vector(point) for name, point in joint_positions(kind, height).items()}
+    joints = {bone.name: bone.head_local.copy() for bone in rig.data.bones}
     root_rest = rig.data.bones["root"].matrix_local
     hip_rest = rig.data.bones["hips"].matrix_local
     root_pose = root_rest @ rig.pose.bones["root"].matrix_basis
@@ -193,7 +192,7 @@ def _run(bones, phase, kind, height):
         swing = math.sin(phase + offset)
         bones[f"upper_arm.{side}"].rotation_euler.x = .48 * swing
         bones[f"forearm.{side}"].rotation_euler.x = -.70 - .10 * swing
-    if kind == "sam":
+    if "tail" in bones:
         bones["tail"].rotation_euler.y = .12 * math.sin(phase)
         bones["tail"].rotation_euler.x = .06
 
@@ -219,7 +218,7 @@ def _run_foot_target(t, height, rest_ankle, sole):
 
 def _locomotion_legs(rig, t, kind, soles, action):
     height = rig["character_height"]
-    joints = joint_positions(kind, height)
+    joints = {bone.name: bone.head_local.copy() for bone in rig.data.bones}
     target = _foot_target if action == "walk" else _run_foot_target
     targets = {side: target(t + offset, height, Vector(joints[f"foot.{side}"]), soles[side])
                for side, offset in (("L", 0), ("R", .5))}
@@ -240,9 +239,9 @@ def _jump(rig, t, kind, soles):
         bones[f"upper_arm.{side}"].rotation_euler.x = .28 * crouch - .42 * air
         bones[f"upper_arm.{side}"].rotation_euler.z = sign * .06 * air
         bones[f"forearm.{side}"].rotation_euler.x = -.60 * air
-    if kind == "sam":
+    if "tail" in bones:
         bones["tail"].rotation_euler.x = -.09 * air + .08 * crouch
-    joints = joint_positions(kind, height)
+    joints = {bone.name: bone.head_local.copy() for bone in rig.data.bones}
     targets = {}
     for side in ("L", "R"):
         ankle = Vector(joints[f"foot.{side}"])
@@ -264,7 +263,7 @@ def _greet(bones, t, kind):
     bones["hand.R"].rotation_euler.y = -.16 * raised
     bones["head"].rotation_euler.z = -.045 * raised
     bones["head"].rotation_euler.x = .025 * raised
-    if kind == "sam":
+    if "tail" in bones:
         bones["tail"].rotation_euler.y = .06 * raised * math.sin(t * math.tau)
 
 
@@ -281,7 +280,8 @@ def _route(bones, t):
         bones[f"hand.{side}"].rotation_euler.x = -.20 * raised - .16 * choice
     bones["head"].rotation_euler.y = .09 * (left - right)
     bones["head"].rotation_euler.x = .035 * raised
-    bones["tail"].rotation_euler.y = .045 * raised * math.sin(t * math.tau)
+    if "tail" in bones:
+        bones["tail"].rotation_euler.y = .045 * raised * math.sin(t * math.tau)
 
 
 def _compute(bones, t):
@@ -294,7 +294,8 @@ def _compute(bones, t):
         bones[f"hand.{side}"].rotation_euler.y = sign * .23 * raised
         bones[f"hand.{side}"].rotation_euler.x = -.20 * raised
     bones["head"].rotation_euler.x = .06 * raised - .08 * push
-    bones["tail"].rotation_euler.y = .07 * raised * math.sin(t * math.tau)
+    if "tail" in bones:
+        bones["tail"].rotation_euler.y = .07 * raised * math.sin(t * math.tau)
 
 
 def _taunt(bones, t):
@@ -324,7 +325,8 @@ def _ultimate(bones, t, kind, height):
             bones[f"hand.{side}"].rotation_euler.x = -.14 * raised
             bones[f"hand.{side}"].rotation_euler.y = sign * .25 * raised
         bones["head"].rotation_euler.x = -.13 * raised
-        bones["tail"].rotation_euler.y = .10 * raised * math.sin(t * math.tau)
+        if "tail" in bones:
+            bones["tail"].rotation_euler.y = .10 * raised * math.sin(t * math.tau)
     else:
         # Raising then pressing gives the reset gesture distinct anticipation and impact.
         press = _smooth(.40, .47, t) * (1 - _smooth(.65, .84, t))
@@ -343,7 +345,7 @@ def _reset_paw(rig, t):
     if raised == 0:
         return
     height = rig["character_height"]
-    joints = {name: Vector(point) for name, point in joint_positions("tibo", height).items()}
+    joints = {bone.name: bone.head_local.copy() for bone in rig.data.bones}
     upper, forearm, hand = "upper_arm.L", "forearm.L", "hand.L"
     shoulder, elbow_rest, wrist_rest = (joints[name] for name in (upper, forearm, hand))
     press = _pulse(t, .42, .63)

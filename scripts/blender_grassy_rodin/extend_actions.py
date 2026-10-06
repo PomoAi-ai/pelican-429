@@ -31,7 +31,7 @@ CLIPS = {
     'jump': (48, False), 'keyboard_smash': (60, False), 'codex_attack': (48, False),
     'bug_attack': (60, False), 'server_overload': (96, False),
     'takeoff': (36, False), 'hover': (72, True),
-    'fly_forward': (36, True), 'land': (36, False),
+    'fly_forward': (36, True), 'fly_fast': (24, True), 'land': (36, False),
 }
 ATTACKS = ('keyboard_smash', 'codex_attack', 'bug_attack', 'server_overload')
 PHASES = {
@@ -361,6 +361,8 @@ def body_parameters(clip, t):
         return .52+.025*math.sin(phase), -.025, .008*math.sin(phase), 1
     if clip == 'fly_forward':
         return .52+.016*math.sin(phase), .25, .012*math.sin(phase), 1
+    if clip == 'fly_fast':
+        return .64+.012*math.sin(phase), .94+.018*math.cos(phase), .012*math.sin(phase), 1
     raise RuntimeError(f'Unknown extended clip: {clip}')
 
 
@@ -437,6 +439,10 @@ def apply_pose(rig, clip, t, soles):
     d = {'root': Matrix.Translation((0,0,z))}
     d['hips'] = d['root'] @ base.local_edit('hips', R('Z', twist))
     d['spine'] = d['hips'] @ base.local_edit('spine', R('X', lean))
+    if clip == 'fly_fast':
+        # Share the flight pitch between pelvis and spine instead of folding at the waist.
+        d['hips'] = d['root'] @ base.local_edit('hips', R('X', .28) @ R('Z', twist))
+        d['spine'] = d['hips'] @ base.local_edit('spine', R('X', lean-.28))
     d['chest'] = d['spine'] @ base.local_edit('chest', R('Z', -twist*1.25))
     if clip == 'keyboard_smash':
         shift = curve(t, ((0,0),(.22,-.04),(.30,-.08),(22/60,.09),(.48,.06),(.60,.08),(42/60,-.09),(.80,-.04),(1,0)))
@@ -459,6 +465,8 @@ def apply_pose(rig, clip, t, soles):
             swing, elbow, out = .76*math.cos(limb_phase-.10), -1.0+.18*math.cos(limb_phase), .035
         elif clip == 'sprint':
             swing, elbow, out = .94*math.cos(limb_phase-.10), -1.13+.16*math.cos(limb_phase), .045
+        elif clip == 'fly_fast':
+            swing, elbow, out = .06+.015*math.sin(limb_phase), -.18-.025*math.sin(limb_phase), .14
         elif clip == 'jump':
             swing = curve(t, ((0,0),(.14,.30),(.32,-.90),(.52,-.52),(.78,-.25),(1,0)))
             elbow, out = -.14*math.sin(math.pi*t)**2, .15*math.sin(math.pi*t)**2
@@ -474,6 +482,9 @@ def apply_pose(rig, clip, t, soles):
         hip = d['hips'] @ Vector(base.JOINTS[f'thigh.{side}'][0])
         if clip in ('run', 'sprint'):
             ankle, foot_rotation = running_foot(t+offset, soles, side, clip == 'sprint')
+        elif clip == 'fly_fast':
+            ankle, foot_rotation = sole_ankle(side,soles,.55+.025*math.sin(limb_phase),
+                z+.27+.015*math.sin(limb_phase),.75+.025*math.sin(limb_phase),sign*.015)
         elif clip == 'jump':
             air = curve(t, ((0,0),(.20,0),(.32,1),(.62,1),(.79,0),(1,0)))
             clearance = max(0,z) + .14*air

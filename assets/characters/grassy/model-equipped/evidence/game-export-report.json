@@ -185,12 +185,16 @@
       "duration": 1.2,
       "loop": true
     },
+    "fly_fast": {
+      "duration": 0.8,
+      "loop": true
+    },
     "land": {
       "duration": 1.2,
       "loop": false
     }
   },
-  "bytes": 6448332,
+  "bytes": 6502192,
   "glb": "public/characters/human/models-equipped/grassy-equipped-game.glb",
   "blend": "assets/characters/grassy/model-equipped/grassy-equipped-game.blend",
   "motion": {
@@ -283,6 +287,13 @@
       "loop": true,
       "minimumSoleZ": 0.5840004682540894,
       "maximumBodyZ": 3.614046812057495,
+      "endpointVertexDifference": 0.0
+    },
+    "fly_fast": {
+      "seconds": 0.8,
+      "loop": true,
+      "minimumSoleZ": 0.8830004930496216,
+      "maximumBodyZ": 3.4612607955932617,
       "endpointVertexDifference": 0.0
     },
     "land": {

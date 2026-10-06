@@ -2,54 +2,54 @@
   "height": 0.8,
   "forward": "+X",
   "pivots": {
-    "rotor0": [
-      -0.343991756439209,
-      -0.6571634411811829,
-      0.28223690390586853
-    ],
-    "rotor1": [
-      -0.24943964183330536,
-      0.7569587230682373,
-      0.2812040150165558
-    ],
-    "rotor2": [
-      0.8852454423904419,
-      -0.7176831364631653,
-      0.2842501401901245
-    ],
-    "rotor3": [
-      0.8892983794212341,
-      0.6414209008216858,
-      0.28528299927711487
-    ],
     "root": [
-      0.0,
-      0.0,
-      0.19592276215553284
+      0,
+      0,
+      0.35
     ],
     "camera": [
-      0.7543026208877563,
-      0.0,
-      0.20571888983249664
+      0.8,
+      0,
+      0.33
+    ],
+    "rotor0": [
+      -0.6847,
+      -0.82807,
+      0.583
+    ],
+    "rotor1": [
+      -0.68894,
+      0.73981,
+      0.584
+    ],
+    "rotor2": [
+      0.76077,
+      -0.88587,
+      0.584
+    ],
+    "rotor3": [
+      0.76673,
+      0.94304,
+      0.584
     ]
   },
   "vertexCounts": {
-    "rotor0": 100,
-    "rotor1": 100,
-    "rotor2": 100,
-    "rotor3": 100,
-    "root": 47109,
-    "camera": 288
+    "root": 26450,
+    "camera": 418,
+    "rotor0": 676,
+    "rotor1": 676,
+    "rotor2": 676,
+    "rotor3": 676
   },
   "clips": {
     "idle": 2.0,
     "move": 2.0,
-    "skill1": 1.4166666666666667,
-    "skill2": 1.8166666666666667,
+    "skill1": 1.6666666666666667,
+    "skill2": 4.216666666666667,
     "hit": 0.6
   },
-  "source": "rodin-original/source.glb",
-  "color": "fixed white sculpted canopy / accent motor rings and blade tips / emissive accent lights / retained carbon chassis",
+  "source": "rodin-compact/source.glb",
+  "color": "retained Rodin production white armor and panel texture / independent emissive lights, motor rings and blade tips",
   "propellerVariants": [
     2,
     3
