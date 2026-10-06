@@ -1,6 +1,6 @@
 # FIX -- Pages 源码依赖与项目子路径
 
-## Status: verifying
+## Status: done
 ## Task: 207
 ## Related: N/A
 ## Baseline Commit: 74c55040f66b0a8fb812939ed798c8e8d5cd6b91
@@ -21,6 +21,7 @@
 - [x] 在 TypeScript 配置中添加 `vite/client`，补齐 Vite CSS 类型声明。
 - [x] 提交并推送最小修复 `9a4faca`，重新部署 Pages。
 - [x] 将项目入口、模型、角色图片与场景资源改为项目相对地址；角色图片解析区分项目相对路径与角色目录相对路径，保留工作区其他开发内容。
+- [x] 复核修正历史图库和展示场的首页链接、角色图片 CSS 选择器。
 
 ## Verification
 
@@ -31,5 +32,10 @@
 - [x] 独立审查确认音频接口兼容，没有新增吞异常或成功形兜底。
 - [x] GitHub Actions 的 `npm ci`、`npm run build`、Pages artifact 上传成功；没有在 CI 中运行测试。
 - [x] 子路径修复后，发布源码独立副本类型检查再次通过。
-- [ ] GitHub Actions 构建与部署通过。
-- [ ] 线上页面及资源可访问。
+- [x] 子路径修复后，现有 `test/showcase.test.ts` 28 项全部通过。
+- [x] 提交 `bba2d25` 的 GitHub Actions 构建与部署通过，运行记录：https://github.com/PomoAi-ai/pelican-429/actions/runs/37437606412 。
+- [x] 线上首页 HTTP 200，七张首页图片加载成功；导航保留项目子路径。浏览器进入测试关卡并完成鹈鹕到人形切换，模型正常显示，控制台无错误。
+
+## Follow-up
+
+三项既有架构规则失败未在发布修复中扩大处理。GitHub 另报告开发依赖 `source-map-js` 的高危拒绝服务告警，修复版本为 1.2.2：https://github.com/PomoAi-ai/pelican-429/security/dependabot/1 。
