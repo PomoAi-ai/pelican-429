@@ -739,3 +739,25 @@ test('Boss 瞬移恢复战斗后保留通用尾段，起手取消则不留假落
     } finally { fluid.dispose(); }
   }
 });
+
+
+test('手机 Boss 减伤和破韧门槛降低，普通与霸体大招命中仍按正确方向结算', () => {
+  for (const kind of ['tibo', 'sam'] as const) {
+    const desktop = createBossEntity(100, kind, { x: 145, y: 20 }, TUNING);
+    const mobile = createBossEntity(101, kind, { x: 145, y: 20 }, TUNING, true);
+    assert.equal(mobile.health!.maxHp, desktop.health!.maxHp / 3);
+    const hit = { ...TUNING.weapons.water.projectile, damage: BOSS_RULES[kind].guard.poise / 3 };
+    applyHit(desktop, 1, hit, 0, TUNING.combat);
+    applyHit(mobile, 1, hit, 0, TUNING.combat);
+    assert.equal(desktop.health!.hitstunTicks, 0);
+    assert.equal(mobile.health!.hitstunTicks, hit.hitstun);
+    desktop.armored = mobile.armored = true;
+    for (const ultimate of [false, true]) {
+      const def = { ...hit, damage: 60, ultimate };
+      const desktopDamage = applyHit(desktop, 1, def, 1, TUNING.combat);
+      const mobileDamage = applyHit(mobile, 1, def, 1, TUNING.combat);
+      assert.ok(Math.abs(mobileDamage - (ultimate ? 49.5 : 55)) < 1e-9);
+      assert.ok(mobileDamage > desktopDamage);
+    }
+  }
+});

@@ -4,6 +4,7 @@ import { attachDomLanguage } from './ui/dom-language.ts';
 import { STORY_SAVE_KEY } from './config/story-save.ts';
 import { getLanguage, onLanguageChange } from './ui/language.ts';
 import { mountMobileGameViewport } from './ui/mobile-game-viewport.ts';
+import { homeScreenInstallState } from './ui/home-screen-install.ts';
 
 function bootError(error: unknown): void {
   console.error(error);
@@ -33,6 +34,7 @@ function attachGameNavigation(navigation: HTMLElement): void {
 }
 
 async function boot(): Promise<void> {
+  homeScreenInstallState();
   const params = new URLSearchParams(location.search);
   const release = import.meta.env.PROD && import.meta.env.MODE !== 'full';
   const mode = parseAppMode(params, release);

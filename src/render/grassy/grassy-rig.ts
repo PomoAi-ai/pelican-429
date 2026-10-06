@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { createHairSway } from '../hair-sway.ts';
+import { addHairMorphs, createHairSway } from '../hair-sway.ts';
 import { characterTextureTier, loadCharacterModel, type TextureTier } from '../character-model.ts';
 import type { GLTF } from 'three/addons/loaders/GLTFLoader.js';
 import { clone } from 'three/addons/utils/SkeletonUtils.js';
@@ -36,37 +36,23 @@ const EYELIDS = ['EyelidUpper_L', 'EyelidLower_L', 'EyelidUpper_R', 'EyelidLower
 /** 原生形变同时参与蒙皮和阴影，局部权重固定发根与脸部。 */
 function addHairSway(model: THREE.SkinnedMesh): void {
   const geometry = model.geometry;
-  const positions = geometry.getAttribute('position');
-  const offsets = new Float32Array(positions.count * 3);
-  const liftOffsets = new Float32Array(positions.count * 3);
+  geometry.morphAttributes.position = [];
+  geometry.morphTargetsRelative = true;
   const rearTips = [
     [-.105, 2.323, -.456, .140, .180, .115], [.105, 2.323, -.456, .140, .180, .115],
     [0, 2.435, -.545, .215, .180, .100], [.005, 2.580, -.535, .150, .240, .105],
   ] as const;
-  for (let i = 0; i < positions.count; i++) {
-    const x = positions.getX(i), y = positions.getY(i), z = positions.getZ(i);
-    const crown = THREE.MathUtils.smoothstep(y, 2.90, 3.09);
+  addHairMorphs(model, (x, y, z) => {
+    // 原网格的冠层固定，只允许高出 3.02 的孤立发尖形变，避免改变头型。
+    const crown = THREE.MathUtils.smoothstep(y, 3.02, 3.10) * .55;
+    const front = THREE.MathUtils.smoothstep(z, -.18, .12);
     let rear = 0;
     for (const [cx, cy, cz, rx, ry, rz] of rearTips) {
       const distance = ((x - cx) / rx) ** 2 + ((y - cy) / ry) ** 2 + ((z - cz) / rz) ** 2;
       rear = Math.max(rear, Math.max(0, 1 - distance) ** 3);
     }
-    // 风主要把发梢轻轻带向脑后，避免横向拉长整片头发。
-    offsets[i * 3] = .014 * crown + .006 * rear;
-    offsets[i * 3 + 1] = .003 * crown - .004 * rear;
-    offsets[i * 3 + 2] = -.050 * crown - .026 * rear;
-    liftOffsets[i * 3 + 1] = .055 * crown + .025 * rear;
-    liftOffsets[i * 3 + 2] = -.012 * crown - .006 * rear;
-  }
-  const sway = new THREE.BufferAttribute(offsets, 3);
-  sway.name = 'HairSway';
-  const lift = new THREE.BufferAttribute(liftOffsets, 3);
-  lift.name = 'HairLift';
-  geometry.morphAttributes.position = [sway, lift];
-  geometry.morphTargetsRelative = true;
-  model.updateMorphTargets();
-  geometry.computeBoundingBox();
-  geometry.computeBoundingSphere();
+    return [crown * front * .65, crown * (1 - front), rear * .65];
+  }, 1.15);
 }
 
 function enhanceBreathing(source: THREE.AnimationClip): THREE.AnimationClip {
@@ -259,8 +245,7 @@ export function createGrassyRig(variant: GrassyAnimatedVariant, tier: TextureTie
   let openSeconds = 0.08 + Math.random() * 0.035;
   let secondBlink = false;
   const hair = model.getObjectByName(`grassy-rodin-refined-${variant}`) as THREE.SkinnedMesh;
-  const swayHair = createHairSway(hair);
-  const liftIndex = hair.morphTargetDictionary!.HairLift!;
+  const swayHair = createHairSway(hair, model.getObjectByName('head')!, root, 'grassy');
 
   let disposed = false;
   return {
@@ -284,10 +269,7 @@ export function createGrassyRig(variant: GrassyAnimatedVariant, tier: TextureTie
         lid.weights[lid.closedIndex] = Math.max(0, 2 * closed - 1);
       }
     },
-    swayHair(energy, airflow, lift, dt) {
-      swayHair(energy, airflow, dt);
-      hair.morphTargetInfluences![liftIndex] = THREE.MathUtils.damp(hair.morphTargetInfluences![liftIndex]!, lift, 9, dt);
-    },
+    swayHair,
     dispose() {
       if (disposed) return;
       disposed = true;

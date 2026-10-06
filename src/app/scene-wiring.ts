@@ -50,17 +50,18 @@ export function createEntityViews(stage: { scene: THREE.Object3D }, level: Level
   const grassyProjectiles = createGrassyProjectileViews();
   disposers.push(() => grassyProjectiles.dispose());
   // 预建的 Boss 视图隐藏挂在场景里，参与加载期预热；登场时直接取用，免得当帧克隆模型、绘制字幕。
+  const windAt = (x: number, y: number): number => skyExposed(level.map, x, y) ? wind.sway(x) : 0;
   const prebuiltBosses = new Map<Entity['kind'], EntityView>();
   disposers.push(() => { for (const view of prebuiltBosses.values()) view.dispose(); });
   const takeBossView = (entity: Entity): EntityView => {
     const view = prebuiltBosses.get(entity.kind);
-    if (view === undefined) return createBossView(entity);
+    if (view === undefined) return createBossView(entity, windAt);
     prebuiltBosses.delete(entity.kind);
     view.object.visible = true;
     return view;
   };
   const prebuildBoss = (entity: Entity): THREE.Object3D => {
-    const view = createBossView(entity);
+    const view = createBossView(entity, windAt);
     view.object.visible = false;
     stage.scene.add(view.object);
     prebuiltBosses.set(entity.kind, view);
@@ -68,9 +69,9 @@ export function createEntityViews(stage: { scene: THREE.Object3D }, level: Level
   };
   const views = createViewRegistry(stage.scene, {
     pelican: grassyVariant === null
-      ? createPelicanViewFactory({ rig, tuning: TUNING, terrain: level.map, actors, fishRelay: projectiles.fishRelay, treeRide })
+      ? createPelicanViewFactory({ rig, tuning: TUNING, terrain: level.map, actors, fishRelay: projectiles.fishRelay, treeRide, windAt })
       : createPlayerViewFactory({ rig, tuning: TUNING, terrain: level.map, actors, fishRelay: projectiles.fishRelay, treeRide, grassyVariant, grassyGait,
-        windAt: (x, y) => skyExposed(level.map, x, y) ? wind.sway(x) : 0 }),
+        windAt }),
     trainingDummy: createDummyViewFactory({ tuning: TUNING, terrain: level.map, treeRide }),
     gatekeeper: createEnemyViewFactory(level.map), lineHound: createEnemyViewFactory(level.map),
     watchWasp: createEnemyViewFactory(level.map), loadmaster: createEnemyViewFactory(level.map),

@@ -3,6 +3,7 @@ import { grassyAction } from '../../config/grassy.ts';
 import { HUMAN_SKILLS } from '../../config/human-combat.ts';
 import { TUNING } from '../../config/tuning.ts';
 import type { GrassyAction, GrassyFlightState, GrassyMotionState } from '../../config/grassy.ts';
+import { previewHairLift } from '../hair-sway.ts';
 import type { GrassyRig } from './grassy-rig.ts';
 
 /** Sample Blender clips at absolute time so paused previews retain their exact pose. */
@@ -49,9 +50,11 @@ export function animateGrassy(rig: GrassyRig, action: GrassyAction, time: number
     : hairAction === 'run' || hairAction === 'sprint' || hairAction === 'ride' || hairAction === 'fly_forward' || hairAction === 'fly_fast' ? 1 : 0 : air.forward, -1.2, 1.2);
   const gait = hairAction === 'walk' || hairAction === 'run' || hairAction === 'sprint';
   const phase = (motion ? motion.time : next.time) / rig.actions[hairAction].getClip().duration;
-  const lift = MathUtils.clamp((air === null ? 0 : air.lift)
-    + (gait ? Math.sin(phase * Math.PI * 4) * (hairAction === 'walk' ? .18 : .38) : 0), -1.2, 1.2);
-  const energy = .10 + .28 * Math.hypot(forward, lift);
+  const previewLift = air === null && (hairAction === 'jump' || hairAction === 'land' || hairAction === 'takeoff')
+    ? previewHairLift(rig.actions[hairAction].getClip(), motion ? motion.time : next.time) : 0;
+  const lift = MathUtils.clamp((air === null ? previewLift : air.lift)
+    + (gait ? Math.sin(phase * Math.PI * 4) * (hairAction === 'walk' ? .12 : .26) : 0), -1.2, 1.2);
+  const energy = .015 + .09 * Math.hypot(forward, lift);
   rig.swayHair(energy, forward, lift, frameDt);
   const flight: GrassyFlightState | null = motion && (motion.action === 'takeoff' || motion.action === 'hover' || motion.action === 'fly_forward' || motion.action === 'fly_fast')
     ? { action: motion.action, time: motion.time } : null;

@@ -272,22 +272,23 @@ test('骑行跳得比步行低（约 bike.jumpHeight）', () => {
   assert.equal(rideOf(ride).mode, 'riding');
 });
 
-test('骑行按住空格只是跳：不飞不滑翔，落地仍在骑行', () => {
+test('骑行持续按住跳跃会自动弃车飞行，无需松开重按', () => {
   const w = world(FLAT);
   settle(w);
   mount(w);
   const e = getPlayer(w);
   step(w, { jumpPressed: true, jumpHeld: true });
   assert.equal(e.body.onGround, false);
-  for (let i = 0; i < 150; i++) {
-    step(w, { jumpHeld: true });
-    assert.equal(e.pelican?.flightMode, 'none', `tick ${i}`);
-    assert.notEqual(pelicanState(e), 'fly');
-    assert.notEqual(pelicanState(e), 'glide');
-    assert.equal(rideOf(w).mode, 'riding');
-  }
-  assert.equal(e.body.onGround, true);
-  assert.equal(e.pelican?.flightTicks, e.pelican?.flightMaxTicks);
+  w.events.drain();
+  untilNotRiding(w, { jumpHeld: true }, 120);
+  assert.equal(rideOf(w).cause, 'takeoff');
+  assert.equal(e.pelican!.flightMode, 'fly');
+  assert.equal(pelicanState(e), 'fly');
+  assert.deepEqual(rideEvents(w).map((ev) => [ev.type, 'cause' in ev ? ev.cause : null]), [['dismount', 'takeoff']]);
+  steps(w, BIKE.dismountTicks, { jumpHeld: true });
+  assert.equal(rideOf(w).mode, 'off');
+  assert.equal(pelicanState(e), 'fly');
+  assert.equal(rideEvents(w).length, 0, '持续按住不会重复触发下车');
 });
 
 test('骑车起跳后空中再按一次跳 = 弃车起飞（同 tick 进入飞行）', () => {
@@ -329,7 +330,7 @@ test('无翅膀或没有飞行能量时空中再按跳不弃车', () => {
   assert.equal(rideOf(w).mode, 'riding');
 });
 
-test('骑行时啄击被清空；上车过程中攻击被屏蔽但缓冲保留', () => {
+test('骑行时可啄击；上车过程中攻击被屏蔽但缓冲保留', () => {
   const w = world(FLAT);
   settle(w);
   const e = getPlayer(w);
@@ -340,11 +341,9 @@ test('骑行时啄击被清空；上车过程中攻击被屏蔽但缓冲保留',
   steps(w, BIKE.mountTicks);
   assert.equal(rideOf(w).mode, 'riding');
   step(w, { attackPressed: true, attackSource: 'mouse', aim: { x: e.body.x + 5, y: e.body.y } });
-  assert.equal(e.attack, undefined);
-  assert.equal(e.pelican?.attackBufferTicks, 0);
-  steps(w, 10);
-  assert.equal(e.attack, undefined);
-  assert.notEqual(pelicanState(e), 'attack');
+  assert.equal(e.attack!.def.id, TUNING.attacks.peck.id);
+  assert.equal(e.pelican!.attackBufferTicks, 0);
+  assert.equal(rideOf(w).mode, 'riding');
 });
 
 test('骑行可远程攻击（默认喷水），出弹点为 bike.muzzle', () => {

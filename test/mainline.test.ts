@@ -78,6 +78,14 @@ test('两场 Boss 都接受真实投射物伤害并永久败退，Tibo 后恢复
     defeatBoss();
     const player = getPlayer(world);
     assert.equal(world.mainline!.phase, 'countdown');
+    assert.equal(player.pelican!.form, 'pelican');
+    assert.equal(player.pelican!.transformTicks, -1);
+    const revealCountdown = world.mainline!.countdownTicks;
+    for (let i = 0; i < 30; i++) stepSim(world, { ...NEUTRAL_INPUT, transformPressed: true });
+    assert.equal(player.pelican!.transformTicks, -1);
+    assert.equal(player.pelican!.form, 'pelican');
+    while (world.mainline!.revealTicks >= 0) stepSim(world, NEUTRAL_INPUT);
+    assert.equal(world.mainline!.countdownTicks, revealCountdown);
     assert.equal(player.pelican!.form, 'human');
     assert.equal(player.body.height, HUMAN_BODY_HEIGHT);
     assert.equal(player.pelican!.ride.mode, 'off');

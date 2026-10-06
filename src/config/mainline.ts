@@ -8,6 +8,7 @@ export interface MainlineCheckpoint {
 }
 
 export const MAINLINE_COUNTDOWN_SECONDS = 30;
+export const MAINLINE_REVEAL = { zoomSeconds: 3, holdSeconds: .4, returnSeconds: .8 } as const;
 export const MAINLINE_CORE = { triggerX: 164, playerX: 168, bossX: 180, y: 20 } as const;
 export const MAINLINE_ENEMIES: readonly { kind: EnemyKind; x: number; y: number }[] = [
   { kind: 'gatekeeper', x: 76, y: 20 },

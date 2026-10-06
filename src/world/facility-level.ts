@@ -68,7 +68,9 @@ export function createFacilityLevel(sceneId: FacilitySceneId): LevelData {
   }
   // 工业踏板由共享建筑模型绘制，碰撞层只留下可站立面。
   const platform = (x0: number, x1: number, y: number): void => {
-    for (let x = x0; x < x1; x++) ids[(y - 1) * width + x] = TILE_BRANCH;
+    // 冷却液上方的主路必须封底，避免下落操作把玩家送入液池。
+    const tile = sceneId === 'fortress' && y === floor && x0 >= FORTRESS_CHASM.right ? TILE_STONE : TILE_BRANCH;
+    for (let x = x0; x < x1; x++) ids[(y - 1) * width + x] = tile;
   };
   for (const [left, right, y] of FACILITY_PLATFORMS[sceneId]) platform(left, right, y);
   if (sceneId === 'fortress') {

@@ -74,7 +74,7 @@ const live: EntityView[] = [];
 after(() => live.forEach((v) => v.dispose()));
 
 function harness(w: SimWorld, withActors = true): Harness {
-  const factory = createPelicanViewFactory({ rig: rig(), tuning: w.tuning, terrain: w.map, ...(withActors ? { actors: () => w.entities } : {}) });
+  const factory = createPelicanViewFactory({ windAt: () => 0, rig: rig(), tuning: w.tuning, terrain: w.map, ...(withActors ? { actors: () => w.entities } : {}) });
   const player = getPlayer(w);
   const view = factory(player);
   live.push(view);

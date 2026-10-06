@@ -125,7 +125,7 @@ export interface WeaponBlockedEvent {
   readonly type: 'weaponBlocked';
   readonly id: number;
   readonly weapon: WeaponId;
-  readonly reason: 'empty' | 'riding';
+  readonly reason: 'empty';
 }
 
 /** 吞弹反吐：吞下了来袭投射物或小鱼。 */

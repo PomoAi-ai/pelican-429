@@ -1,3 +1,8 @@
+import { stepEnvironment } from '../src/sim/environment.ts';
+import { createPelicanEntity } from '../src/entities/entity.ts';
+import { createFreeWorldWeather } from '../src/world/free-world-weather.ts';
+import { modeState } from '../src/world/wind.ts';
+import { CAVE_CELL } from '../src/world/level.ts';
 // 022 降水（配置 + 逻辑层）：状态枚举、自动循环时间表（确定性）、调参 fail-fast、露天判定、环境命令与雨天嘴囊水量回复（确定性）。
 import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -362,4 +367,92 @@ describe('逻辑层：环境命令与雨天嘴囊水量回复', () => {
       if (i > 900) assert.deepEqual(a.env.precip, precipAutoAt(a.env.rules, (a.tick - 1) * TUNING.sim.step));
     }
   });
+});
+
+
+test('自由世界天气按位置和高度变化，手动覆盖保留；补水取实体当地天气', () => {
+  const rows = [...Array<string>(39).fill('.'.repeat(180)), '.....P' + '.'.repeat(174), '#'.repeat(180)];
+  const parsed = parseLevel(rows, LEVEL_LEGEND);
+  const level = { ...parsed, seed: 429,
+    lakes: [{ x0: 40, x1: 80, level: 1, perched: false }],
+    trees: [{ id: 1, kind: 'oak' as const, x: 100, baseY: 1, trunkHeight: 10, trunkRadius: 1, canopyHalfWidth: 5, canopyHeight: 5, visualSeed: 1, crownDx: 0, platforms: [] }],
+    deserts: [{ x0: 120, x1: 160, lo: 115, hi: 165, mesas: [] }],
+    islands: [{ id: 0, kind: 'island' as const, chain: -1, step: 0, toIsland: -1, x0: 40, x1: 80, top: 28, bottom: 18, tops: [], bottoms: [], trees: [], props: [], seed: 429 }],
+  };
+  const ground = new Int16Array(180).fill(1);
+  const local = createFreeWorldWeather(level, ground, DEFAULT_PRECIP);
+  const replay = createFreeWorldWeather(level, ground, DEFAULT_PRECIP);
+  const severe = { forest: 0, lake: 0, islands: 0, desert: 0 };
+  let clear = 0;
+  const lakeStates = new Set<string>();
+  const islandStates = new Set<string>();
+  for (let t = 0; t < autoCycleLength(DEFAULT_PRECIP); t++) {
+    const lake = local(60, 1, t).precip;
+    const island = local(60, 32, t).precip;
+    assert.deepEqual(local(140, 1, t).precip, { rain: 'none', snow: 'none' });
+    assert.deepEqual(replay(60, 1, t).precip, lake);
+    assert.equal(lake.snow, 'none');
+    assert.equal(island.rain, 'none');
+    if (lake.rain === 'heavy') severe.lake++;
+    if (island.snow === 'heavy') severe.islands++;
+    if (local(100, 1, t).precip.rain === 'heavy') severe.forest++;
+    if (local(140, 1, t).wind === 'gale') severe.desert++;
+    if (lake.rain === 'none') clear++;
+    assert.ok(['breeze', 'moderate'].includes(local(5, 1, t).wind));
+    lakeStates.add(lake.rain);
+    islandStates.add(island.snow);
+  }
+  assert.deepEqual([...lakeStates].sort(), ['heavy', 'medium', 'none']);
+  assert.deepEqual([...islandStates].sort(), ['heavy', 'light', 'medium', 'none']);
+  for (const [region, seconds] of Object.entries(severe)) assert.ok(seconds > 80, `${region} 应有持续的恶劣天气时段`);
+  assert.ok(clear > 20, '暴雨之间仍有晴天');
+  const facilityWeather = createFreeWorldWeather({ ...level, facilities: [
+    { id: 'fortress', x: 10, y: 1 }, { id: 'cathedral', x: 70, y: 1 }, { id: 'abyss', x: 130, y: 1 },
+  ] }, ground, DEFAULT_PRECIP);
+  let sleet = 0;
+  for (let t = 0; t < autoCycleLength(DEFAULT_PRECIP); t++) {
+    const fortress = facilityWeather(40, 5, t);
+    if (fortress.precip.rain === 'heavy' && fortress.precip.snow === 'heavy' && fortress.wind === 'gale') sleet++;
+    for (const x of [100, 160]) assert.deepEqual(facilityWeather(x, 5, t), { precip: { rain: 'none', snow: 'none' }, wind: 'calm' });
+  }
+  assert.ok(sleet > 80);
+  const inspectedLevel = { ...level, spawn: { x: 60, y: 1 } };
+  const w = createSimWorld({ level: inspectedLevel, freeWorldWeather: { level, ground }, precipMode: 'auto' });
+  const player = getPlayer(w);
+  player.body.x = 140;
+  const wet = createPelicanEntity(100, { x: 60, y: 1 }, TUNING);
+  w.entities.push(wet);
+  player.pelican!.weapon.water = wet.pelican!.weapon.water = 0;
+  let tick = 0;
+  while (local(60, 1, tick * TUNING.sim.step).precip.rain === 'none') tick++;
+  w.tick = tick;
+  for (let i = 0; i < 120; i++) { stepEnvironment(w); w.tick++; }
+  assert.equal(player.pelican!.weapon.water, 0);
+  assert.ok(wet.pelican!.weapon.water > 0, '湖边实体补水不受沙漠玩家天气影响');
+  player.body.x = 60;
+  assert.notEqual(setPrecipMode(w, 'auto').rain, 'none');
+  stepEnvironment(w);
+  assert.deepEqual(w.env.precip, local(60, 1, w.tick * TUNING.sim.step).precip, '检查起点移到湖边时仍按原始地貌下雨，不把新出生点变成营地');
+  level.caves.mask[180 + 60] = CAVE_CELL;
+  assert.deepEqual(setPrecipMode(w, 'auto'), { rain: 'none', snow: 'none' });
+  setPrecipIntensity(w, 'rain', 'heavy');
+  setPrecipIntensity(w, 'snow', 'light');
+  assert.deepEqual(setPrecipMode(w, 'manual'), { rain: 'heavy', snow: 'light' });
+  stepEnvironment(w);
+  assert.deepEqual(w.env.precip, { rain: 'heavy', snow: 'light' });
+  let stormTick = w.tick;
+  while (local(140, 1, stormTick * TUNING.sim.step).wind !== 'gale') stormTick++;
+  player.body.x = 140;
+  w.tick = stormTick;
+  stepEnvironment(w);
+  w.tick += Math.ceil(w.env.wind.rules.modeBlend / TUNING.sim.step);
+  stepEnvironment(w);
+  assert.deepEqual(w.env.wind.state, modeState(w.env.wind.rules, 'gale', w.tick * TUNING.sim.step), '手动降水不关闭自动区域风');
+  assert.deepEqual(w.env.precip, { rain: 'heavy', snow: 'light' });
+  player.body.x = 60;
+  stepEnvironment(w);
+  w.tick += Math.ceil(w.env.wind.rules.modeBlend / TUNING.sim.step);
+  stepEnvironment(w);
+  assert.equal(w.env.wind.sample(60).strength, 0, '进入洞穴后风平滑停下');
+  level.fluid.dispose();
 });

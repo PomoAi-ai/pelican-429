@@ -1,4 +1,4 @@
-import { TIBO_HEAL } from '../config/boss-rules.ts';
+import { BOSS_RULES, TIBO_HEAL } from '../config/boss-rules.ts';
 import type { EnemyKind } from '../config/enemy-rules.ts';
 import type { NpcKind } from '../config/npc.ts';
 import { HUMAN_BODY_HEIGHT } from '../config/player-form.ts';
@@ -55,7 +55,7 @@ export function captureMainlineProgress(world: SimWorld): MainlineProgress {
   const boss = world.entities.find(entity => entity.boss && !entity.removed && entity.health!.hp > 0);
   return {
     player: alive ? {
-      ...actorProgress(player), form: p.form, riding: p.ride.mode === 'riding' || p.ride.mode === 'mounting',
+      ...actorProgress(player), form: world.mainline!.revealTicks >= 0 ? 'human' : p.form, riding: p.ride.mode === 'riding' || p.ride.mode === 'mounting',
       flightTicks: p.flightTicks, water: p.weapon.water, fish: p.weapon.fish,
       weaponCooldowns: [...p.weapon.cooldowns], humanCooldowns: [...p.humanCombat.cooldowns],
       photonCooldownTicks: world.photon.cooldownTicks,
@@ -63,7 +63,8 @@ export function captureMainlineProgress(world: SimWorld): MainlineProgress {
     enemies: world.entities.filter(entity => entity.enemy && !entity.removed && entity.health!.hp > 0).map(entity => ({
       ...actorProgress(entity), kind: entity.enemy!.kind, home: { ...entity.enemy!.home },
     })),
-    boss: boss ? { ...actorProgress(boss), kind: boss.boss!.kind, healAvailable: boss.boss!.healCooldownTicks === 0 } : null,
+    // 存档沿用标准血量尺度，重载与切换操作模式都不会重复缩减。
+    boss: boss ? { ...actorProgress(boss), hp: boss.health!.hp * (BOSS_RULES[boss.boss!.kind].maxHp / boss.health!.maxHp), kind: boss.boss!.kind, healAvailable: boss.boss!.healCooldownTicks === 0 } : null,
   };
 }
 
@@ -110,8 +111,9 @@ export function restoreMainlineProgress(world: SimWorld, progress: MainlineProgr
   if (progress.boss !== null) {
     const saved = progress.boss;
     if (!boss || boss.boss!.kind !== saved.kind) throw new Error(`主线存档 Boss 与阶段不符：${saved.kind} / ${world.mainline!.phase}`);
-    restoredBoss = createBossEntity(boss.id, saved.kind, saved, world.tuning);
+    restoredBoss = createBossEntity(boss.id, saved.kind, saved, world.tuning, world.mobileBosses);
     restoreActor(restoredBoss, saved);
+    restoredBoss.health!.hp = saved.hp * (restoredBoss.health!.maxHp / BOSS_RULES[saved.kind].maxHp);
     // 存档只记冷却是否就绪；未就绪时从完整冷却重新计时，与闪现冷却不入档一致。
     restoredBoss.boss!.healCooldownTicks = saved.healAvailable ? 0 : TIBO_HEAL.cooldownTicks;
   }

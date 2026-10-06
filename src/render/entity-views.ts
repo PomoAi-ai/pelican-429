@@ -20,6 +20,7 @@ import type { PelicanSpitInput } from './pelican/pelican-attack-layer.ts';
 import { createPelicanPouch } from './pelican/pelican-pouch.ts';
 import type { FishVariantRelay } from './cartoon-fish.ts';
 import { fillSpitInput, mouthTimeline } from './pelican-weapon-view.ts';
+import { createPelicanScarf } from './pelican/pelican-scarf.ts';
 import { createPelicanBeakAvoid } from './pelican/pelican-beak-avoid.ts';
 import type { BeakAvoidInput } from './pelican/pelican-beak-avoid.ts';
 import { collectObstacleBoxes, supportOf, supportPosition, supportTopAt } from './entity-surroundings.ts';
@@ -130,6 +131,7 @@ function createFootSink(terrain: TileQuery | undefined, slopeSink: number): (b: 
 export interface PelicanViewOptions {
   readonly rig: PelicanRig;
   readonly tuning: Tuning;
+  readonly windAt: (x: number, y: number) => number;
   readonly animTuning?: PelicanAnimTuning;
   /** 地形查询（可选）：提供时启用斜坡脚底偏移。 */
   readonly terrain?: TileQuery;
@@ -160,6 +162,7 @@ export function createPelicanViewFactory(options: PelicanViewOptions): EntityVie
       throw new Error(`pelican view: rig kneeDirection ${rig.kneeDirection} differs from animTuning.kneeDirection ${animTuning.kneeDirection}`);
     }
     const animator = createPelicanAnimator(animTuning, rig.animGeometry);
+    const scarf = createPelicanScarf(rig.root);
     // 任务 018：远程攻击叠加层（颈后缩前甩、反冲）与嘴囊（挂在下颌上，随 rig 复用；视图销毁时摘下）。
     const attackLayer = createPelicanAttackLayer();
     const pouch = createPelicanPouch(rig.root, options.fishRelay);
@@ -257,8 +260,10 @@ export function createPelicanViewFactory(options: PelicanViewOptions): EntityVie
         collectObstacleBoxes(boxes, e, x, renderY, actors, terrain, tuning, alpha);
         beakAvoid.apply(pose, avoidInput, frameDt);
         rig.applyPose(pose);
+        scarf.update(input, pose, options.windAt(x, y + b.height), frameDt);
       },
       dispose() {
+        scarf.dispose();
         pouch.dispose();
         rig.root.removeFromParent();
         owner = null;

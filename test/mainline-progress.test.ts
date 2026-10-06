@@ -9,7 +9,7 @@ import { createProjectileEntity } from '../src/entities/projectile.ts';
 import { startTeleport } from '../src/entities/teleport.ts';
 import { captureMainlineProgress, restoreMainlineProgress } from '../src/sim/mainline-progress.ts';
 import { initializeMainline, mainlineCheckpoint } from '../src/sim/mainline.ts';
-import { addEntity, createSimWorld, getPlayer, NEUTRAL_INPUT, stepSim } from '../src/sim/sim-world.ts';
+import { addEntity, createSimWorld, getPlayer, NEUTRAL_INPUT, setMobileBossDifficulty, stepSim } from '../src/sim/sim-world.ts';
 import { createFacilityLevel } from '../src/world/facility-level.ts';
 
 function mainline(checkpoint?: MainlineCheckpoint) {
@@ -148,4 +148,37 @@ test('与 Boss 同一帧阵亡后立即保存，重载保留胜利并进入下�
       assert.equal(getPlayer(restored).pelican!.form, 'human');
     } finally { world.fluid.dispose(); restored.fluid.dispose(); }
   }
+});
+
+
+test('手机 Boss 切换和重复存档恢复保留生命比例，不累积削弱也不改变电脑难度', () => {
+  const checkpoint = { phase: 'tibo', countdownTicks: 0 } as const;
+  const world = mainline(checkpoint);
+  const restored = mainline(checkpoint);
+  try {
+    const boss = world.entities.find(entity => entity.boss)!;
+    boss.health!.hp = BOSS_RULES.tibo.maxHp / 2;
+    setMobileBossDifficulty(world, true);
+    assert.ok(Math.abs(boss.health!.hp - BOSS_RULES.tibo.maxHp / 6) < 1e-9);
+    const mobileHp = boss.health!.hp;
+    setMobileBossDifficulty(world, true);
+    assert.equal(boss.health!.hp, mobileHp);
+    let raw = '';
+    const storage = { getItem: () => raw, setItem: (_key: string, value: string) => { raw = value; } };
+    saveStory(storage, checkpoint, 'fortress', captureMainlineProgress(world));
+    const saved = loadStorySave(storage)!;
+    assert.ok(Math.abs(saved.progress!.boss!.hp - BOSS_RULES.tibo.maxHp / 2) < 1e-9);
+    setMobileBossDifficulty(restored, true);
+    restoreMainlineProgress(restored, saved.progress!);
+    restoreMainlineProgress(restored, captureMainlineProgress(restored));
+    const loaded = restored.entities.find(entity => entity.boss)!;
+    assert.ok(Math.abs(loaded.health!.hp - mobileHp) < 1e-9);
+    assert.equal(loaded.health!.maxHp, boss.health!.maxHp);
+    setMobileBossDifficulty(restored, false);
+    assert.equal(loaded.health!.maxHp, BOSS_RULES.tibo.maxHp);
+    assert.ok(Math.abs(loaded.health!.hp - BOSS_RULES.tibo.maxHp / 2) < 1e-9);
+    setMobileBossDifficulty(restored, true);
+    initializeMainline(restored, { phase: 'sam', countdownTicks: 0 });
+    assert.equal(restored.entities.find(entity => entity.boss)!.health!.maxHp, BOSS_RULES.sam.maxHp / 3);
+  } finally { world.fluid.dispose(); restored.fluid.dispose(); }
 });

@@ -7,7 +7,7 @@ import { TUNING, validateTuning } from '../config/tuning.ts';
 import { DEFAULT_BINDINGS, buildBindingLookup, validateBindings } from '../config/keybindings.ts';
 import { createFixedStepper } from '../core/fixed-step.ts';
 import { createFrameProfiler } from '../core/frame-profiler.ts';
-import { beginBlackholeArrival, createSimWorld, getPlayer, setDummyShooting, setPrecipIntensity, setPrecipMode, setTornado, setTornadoPower, setTornadoCount } from '../sim/sim-world.ts';
+import { beginBlackholeArrival, createSimWorld, getPlayer, setDummyShooting, setMobileBossDifficulty, setPrecipIntensity, setPrecipMode, setTornado, setTornadoPower, setTornadoCount } from '../sim/sim-world.ts';
 import type { TeleportState } from '../entities/teleport.ts';
 import { placePlayer, teleportPlayer } from '../sim/player-teleport.ts';
 import { createActionTracker } from '../input/action-map.ts';
@@ -140,7 +140,7 @@ async function start(story: StorySave | undefined, newStory: boolean, onReady?: 
   // 保留地图原出生点；重载创建全新的角色状态，检查起点不触发渔屋开场取景。
   const startLevel = inspected === undefined ? level : { ...level, spawn: { x: inspected.x0 + 1.5, y: inspected.baseY }, spawnFacing: undefined };
   // 设置：网址参数（非法即抛）> localStorage 保存值（非法项清除并提示）> 调参默认（见 app/settings-wiring）。
-  const startup = loadStartupSettings(params);
+  const startup = loadStartupSettings(params, freeWorld ? 'auto' : undefined);
   // 机房预览采用场景环境，不继承沙盒的天气和训练假人设置。
   const sceneSettings = bossArena ? {
     ...startup.loaded.settings, wind: 'calm' as const, precip: 'manual' as const, rain: 'none' as const, snow: 'none' as const,
@@ -153,7 +153,7 @@ async function start(story: StorySave | undefined, newStory: boolean, onReady?: 
     mapTeleport: gm,
     tileGrid: gm && sceneSettings.tileGrid, dummyShoot: gm && sceneSettings.dummyShoot,
   } : sceneSettings;
-  const world = createSimWorld({ level: startLevel, playerForm: 'human', tuning: TUNING, weather: { ...TUNING.render.weather, direction: initial.windDirection === 'right' ? 1 : -1 }, windMode: initial.wind });
+  const world = createSimWorld({ level: startLevel, freeWorldWeather: freeWorld ? { level, ground } : undefined, playerForm: 'human', tuning: TUNING, weather: { ...TUNING.render.weather, direction: initial.windDirection === 'right' ? 1 : -1 }, windMode: initial.wind });
   if (bossArena) initializeBossArena(world);
   if (freeWorld) {
     if (destination && region !== 'wilds') {
@@ -354,6 +354,7 @@ async function start(story: StorySave | undefined, newStory: boolean, onReady?: 
     onReset: () => tracker.releaseAll(),
     onFocusGame: () => canvas.focus(),
     forceMobile: params.get('mode') === 'controls',
+    onModeChange: mode => setMobileBossDifficulty(world, mode === 'mobile'),
   });
   disposers.push(() => controls.dispose());
   const audio = freeWorld || bossArena || chapter === 'fortress'
@@ -408,7 +409,7 @@ async function start(story: StorySave | undefined, newStory: boolean, onReady?: 
   if (initial.dummyShoot) setDummyShooting(world, true);
   // 性能面板：Cmd+Option+Z / Ctrl+Alt+Z 切换，调试模式也可按 P；只在面板可见时计时。
   const prof = createFrameProfiler(['sim', 'views', 'world', 'light', 'render', 'ui'], { now: () => performance.now() });
-  const perfPanel = createPerfPanel(document.body, window, debug);
+  const perfPanel = createPerfPanel(document.body, window, debug, import.meta.env.VITE_APP_VERSION);
   disposers.push(() => perfPanel.dispose());
   perfPanel.setVisible(initial.perfPanel);
   const tileGrid = createTileGrid(stage.scene, level.map.width, level.map.height);

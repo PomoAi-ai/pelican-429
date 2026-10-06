@@ -1,12 +1,14 @@
 import { LoopOnce, MathUtils } from 'three';
 import { BOSS_RULES } from '../../config/boss-rules.ts';
+import { TUNING } from '../../config/tuning.ts';
+import { previewHairLift } from '../hair-sway.ts';
 import { npcAction } from '../../config/npc.ts';
 import type { NpcAction } from '../../config/npc.ts';
 import type { NpcRig } from './npc-rig.ts';
 import type { NpcMotion } from './npc-pose.ts';
 
 /** 原片段与技能仍按绝对时间采样，姿态衔接和眨眼只按实际播放帧推进。 */
-export function animateNpc(rig: NpcRig, action: NpcAction, seconds: number, frameDt: number, facing: 1 | -1, motion: NpcMotion | null = null, idleFacing: number = 0): void {
+export function animateNpc(rig: NpcRig, action: NpcAction, seconds: number, frameDt: number, facing: 1 | -1, motion: NpcMotion | null = null, idleFacing: number = 0, wind: number = 0): void {
   rig.pose.restore();
   const moving = action === 'idle' || action === 'walk' || action === 'run';
   let clipAction = action;
@@ -37,9 +39,15 @@ export function animateNpc(rig: NpcRig, action: NpcAction, seconds: number, fram
   next.time = loop ? sampleTime % duration : Math.min(sampleTime, duration);
   rig.mixer.update(0);
   const idleSpeech = rig.pose.apply(clipAction, sampleTime, duration, frameDt, facing, motion, idleFacing);
-  const energy = clipAction === 'idle' ? .35 : clipAction === 'walk' ? .6 : 1;
-  const airflow = motion ? MathUtils.clamp(Math.abs(motion.vx) / BOSS_RULES[rig.kind].speed, 0, 1) * .5 : clipAction === 'run' ? .35 : 0;
-  rig.swayHair(motion?.flying ? 1 : energy, airflow, frameDt);
+  const airflow = MathUtils.clamp(motion
+    ? (motion.vx / BOSS_RULES[rig.kind].speed - wind) * facing
+    : clipAction === 'run' ? 1 : clipAction === 'walk' ? .4 : -wind * facing, -1.2, 1.2);
+  const gait = clipAction === 'walk' || clipAction === 'run';
+  const lift = MathUtils.clamp((motion ? -motion.vy / Math.sqrt(2 * TUNING.physics.gravity * TUNING.player.jumpHeight)
+    : clipAction === 'jump' ? previewHairLift(next.getClip(), next.time) : 0)
+    + (gait ? Math.sin(next.time / duration * Math.PI * 4) * (clipAction === 'walk' ? .08 : .20) : 0), -1.2, 1.2);
+  const energy = .01 + .07 * Math.hypot(airflow, lift);
+  rig.swayHair(energy, airflow, lift, frameDt);
   rig.flightHarness?.update(motion, frameDt);
   rig.weapon.sample(clipAction, loop ? next.time : seconds, rig.model);
   rig.effects.sample(clipAction, loop ? next.time : seconds, idleSpeech);

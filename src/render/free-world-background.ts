@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { FREE_WORLD_BACKGROUNDS, freeWorldBackgroundPath, type FreeWorldBackground } from '../config/free-world-backgrounds.ts';
 import type { LevelData } from '../world/level.ts';
-import { createBackgroundRegions, type BackgroundWeights } from './free-world-background-regions.ts';
+import { createBackgroundRegions, type BackgroundWeights } from '../world/free-world-background-regions.ts';
 import { acquireKtx2Loader } from './ktx2-loader.ts';
 import { createFacilitySky } from './facility-sky.ts';
 import type { Stage } from './stage.ts';

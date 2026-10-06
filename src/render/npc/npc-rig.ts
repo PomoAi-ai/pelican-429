@@ -35,7 +35,7 @@ export interface NpcRig {
   readonly flightHarness: ReturnType<typeof createNpcFlightHarness> | null;
   currentAction: NpcAction | null;
   locomotionPhase: number;
-  swayHair(energy: number, airflow: number, dt: number): void;
+  swayHair(energy: number, airflow: number, lift: number, dt: number): void;
   dispose(): void;
 }
 
@@ -114,7 +114,20 @@ function readAsset(kind: NpcKind, form: NpcForm, gltf: GLTF): NpcAsset {
     if (!hair || !hair.geometry.morphTargetsRelative || !hair.geometry.morphAttributes.position || !hair.geometry.morphAttributes.normal) {
       throw new Error(`${definition.name} 模型 ${path} 缺少可追加发梢形变的主体网格`);
     }
-    addCrownSway(hair, kind === 'sam' ? 2.48 : 2.47, definition.height);
+    const hairTrack = `${hair.name}.morphTargetInfluences`;
+    // 只绑定源资源的眨眼槽位；整数组轨道不能覆盖后来追加的发梢槽位。
+    for (const clip of Object.values(clips)) {
+      clip.tracks = clip.tracks.flatMap(track => {
+        if (track.name !== hairTrack) return [track];
+        const size = track.getValueSize();
+        return Array.from({ length: size }, (_, index) => new THREE.NumberKeyframeTrack(
+          `${track.name}[${index}]`, track.times,
+          track.times.map((_, frame) => track.values[frame * size + index]!), track.getInterpolation(),
+        ));
+      });
+    }
+    // 实际 Rodin 网格仅放开最顶部 6 cm / 3 cm 的突出发尖，整片发帽与头部保持固定。
+    addCrownSway(hair, kind === 'sam' ? 2.64 : 2.62, definition.height, kind);
     clips.attack = createNpcAttackClip(scene, kind);
     return { scene, clips, eyelidNames, hairName: hair.name };
   } catch (error) {
@@ -170,7 +183,7 @@ export function createNpcRig(kind: NpcKind, form: NpcForm, tier: TextureTier = c
   let disposed = false;
   return {
     kind, form, root, model, mixer, actions, effects, weapon, pose, flightHarness, currentAction: null, locomotionPhase: 0,
-    swayHair: createHairSway(model.getObjectByName(asset.hairName) as THREE.SkinnedMesh),
+    swayHair: createHairSway(model.getObjectByName(asset.hairName) as THREE.SkinnedMesh, model.getObjectByName('head')!, root, kind),
     dispose() {
       if (disposed) return;
       disposed = true;

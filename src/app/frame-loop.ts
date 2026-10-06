@@ -3,11 +3,13 @@
  * → 事件分发 → 实体/世界/降水视图 → 光照（微光）→ 渲染 → HUD/小地图/面板 → 性能面板计时。
  * rAF 调度、停止与错误层由 main 负责（frame 抛错即交给 main 的 showError）。
  */
+import { MAINLINE_REVEAL } from '../config/mainline.ts';
+import { PLAYER_TRANSFORM } from '../config/player-form.ts';
 import { PLAY_ACTIONS } from '../config/keybindings.ts';
 import { TUNING } from '../config/tuning.ts';
 import type { FixedStepper } from '../core/fixed-step.ts';
 import type { FrameProfiler } from '../core/frame-profiler.ts';
-import { lerp } from '../core/math.ts';
+import { clamp, lerp } from '../core/math.ts';
 import type { Vec2 } from '../core/math.ts';
 import type { Entity } from '../entities/entity.ts';
 import type { ActionTracker } from '../input/action-map.ts';
@@ -36,6 +38,7 @@ import type { EnvironmentViews } from './precip-wiring.ts';
 import type { EntityViewSet } from './scene-wiring.ts';
 import type { FacilityChapterHud } from '../ui/facility-chapter-hud.ts';
 import type { GameAudio } from './game-audio.ts';
+import { selectMobileAim } from './mobile-aim.ts';
 
 export interface FrameLoopDeps {
   readonly world: SimWorld;
@@ -92,12 +95,7 @@ export function createFrameLoop(d: FrameLoopDeps): FrameLoop {
     const p = input.pointer;
     let target: Vec2 | null = null;
     if (d.controls.mode === 'desktop' && p.inside) target = cameraRig.screenToWorld(p.clientX, p.clientY, aim);
-    else if (d.controls.mode === 'mobile' && d.controls.aim !== null) {
-      const player = getPlayer(world);
-      aim.x = player.body.x + d.controls.aim.x * 20;
-      aim.y = player.body.y + player.body.height / 2 + d.controls.aim.y * 20;
-      target = aim;
-    }
+    else if (d.controls.mode === 'mobile') target = selectMobileAim(getPlayer(world), world.entities, cameraRig.visibleRect());
     if (pour.active && p.inside) pourAtWorld(world, level, cameraRig.screenToWorld(p.clientX, p.clientY, pourAt));
     const controls = tracker.consume(target);
     stepSim(world, controls);
@@ -138,7 +136,15 @@ export function createFrameLoop(d: FrameLoopDeps): FrameLoop {
 
     const pl = getPlayer(world);
     d.luma.update(pl, alpha, animDt, world.photon.chargeTicks > 0 || world.photon.activeTicks > 0);
-    cameraRig.update(lerp(pl.body.prevX, pl.body.x, alpha), lerp(pl.body.prevY, pl.body.y, alpha), pl.facing, paused ? 0 : frameDt);
+    const reveal = world.mainline && world.mainline.revealTicks >= 0 ? world.mainline.revealTicks : -1;
+    const age = (reveal + alpha) * world.tuning.sim.step;
+    const returnAt = MAINLINE_REVEAL.zoomSeconds + (PLAYER_TRANSFORM.durationTicks + 1) * world.tuning.sim.step + MAINLINE_REVEAL.holdSeconds;
+    const amount = clamp(Math.min(age / MAINLINE_REVEAL.zoomSeconds, 1 - (age - returnAt) / MAINLINE_REVEAL.returnSeconds), 0, 1);
+    cameraRig.update(lerp(pl.body.prevX, pl.body.x, alpha), lerp(pl.body.prevY, pl.body.y, alpha), pl.facing, paused ? 0 : frameDt,
+      reveal < 0 ? undefined : {
+        shot: { x: pl.body.x, y: pl.body.y + 1.6, distance: Math.min(world.tuning.camera.distance, 7 / Math.min(1, stage.camera.aspect)) },
+        blend: amount * amount * (3 - 2 * amount),
+      });
     waterTime += frameDt;
     d.env.update(waterTime, worldDt, alpha);
     d.facility?.update(waterTime);

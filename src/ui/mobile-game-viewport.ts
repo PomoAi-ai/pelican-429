@@ -17,6 +17,26 @@ export function mountMobileGameViewport(): boolean {
       const base = document.createElement('base');
       base.target = '_top';
       document.head.append(base);
+      const host = gameHost();
+      const orientation = host.matchMedia('(orientation: portrait)');
+      const updateSafeArea = (): void => {
+        const style = host.getComputedStyle(host.document.body);
+        const portrait = orientation.matches;
+        const edges = portrait
+          ? [style.paddingRight, style.paddingBottom, style.paddingLeft, style.paddingTop]
+          : [style.paddingTop, style.paddingRight, style.paddingBottom, style.paddingLeft];
+        for (const [index, edge] of ['top', 'right', 'bottom', 'left'].entries()) {
+          document.documentElement.style.setProperty(`--game-safe-${edge}`, edges[index]!);
+        }
+      };
+      updateSafeArea();
+      window.addEventListener('resize', updateSafeArea);
+      orientation.addEventListener('change', updateSafeArea);
+      window.addEventListener('pageshow', () => {
+        orientation.addEventListener('change', updateSafeArea);
+        updateSafeArea();
+      });
+      window.addEventListener('pagehide', () => orientation.removeEventListener('change', updateSafeArea));
     }
     return false;
   }

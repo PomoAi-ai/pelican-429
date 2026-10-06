@@ -7,7 +7,7 @@
  * 飞行过后松键/耗尽直接滑翔，不回 jump。深水按住跳跃划水上浮，到水面连续跃出。
  * 游泳（格子水）：浸没比例按 enterDepth/exitDepth 滞回判定 inWater；水中浮力/阻尼替代重力、不能飞行，
  * 近水面跳跃跃出水面，深处跳跃为划水上浮；入水回满飞行能量（refillFlight）。
- * 骑车（任务 014，见 pelican-ride）：R 键上/下车；骑行时水平运动、跳高、出球点改用 player.bike，不能啄、不能飞，
+ * 骑车（任务 014，见 pelican-ride）：R 键上/下车；骑行时水平运动、跳高、出球点改用 player.bike，不能飞，
  * 空中再按跳跃弃车起飞；撞墙后 ride.lockTicks 期间屏蔽移动与跳跃输入。
  */
 import { PELICAN_SKILLS } from '../config/pelican-skills.ts';
@@ -248,7 +248,7 @@ export function updatePelican(
   updateRideIntent(e, input, map, tuning);
   const ride = p.ride.mode;
 
-  // 攻击：推进进行中的攻击；空闲且有缓冲时起手（空中也可攻击）。上车中屏蔽（缓冲保留），骑行时缓冲已被清空。
+  // 攻击：推进进行中的攻击；空闲且有缓冲时起手（空中也可攻击）。上车中屏蔽（缓冲保留），骑行时可正常攻击。
   updateHumanCombat(e, input);
   if (p.form === 'pelican' && e.attack && !advanceAttack(e.attack)) delete e.attack;
   if (p.form === 'pelican' && !e.attack && p.attackBufferTicks > 0 && ride !== 'mounting') {

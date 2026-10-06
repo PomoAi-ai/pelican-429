@@ -41,7 +41,7 @@ export function summonArenaBoss(world: SimWorld, kind: NpcKind): void {
   const player = world.entities.find(entity => entity.id === world.playerId)!;
   world.entities.splice(0, world.entities.length, player);
   world.events.drain();
-  const boss = createBossEntity(world.nextId++, kind, BOSS_ARENA_SPAWN, world.tuning);
+  const boss = createBossEntity(world.nextId++, kind, BOSS_ARENA_SPAWN, world.tuning, world.mobileBosses);
   moveAndCollide(boss.body, world.map, 0);
   world.entities.push(boss);
   Object.assign(world.bossArena!, { phase: 'countdown', countdownTicks: Math.ceil(3 / world.tuning.sim.step), bossId: boss.id, kind });

@@ -1,8 +1,9 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
+import { BOSS_RULES } from '../src/config/boss-rules.ts';
 import { createProjectileEntity } from '../src/entities/projectile.ts';
 import { initializeBossArena, summonArenaBoss } from '../src/sim/boss-arena.ts';
-import { createSimWorld, getPlayer, NEUTRAL_INPUT, stepSim } from '../src/sim/sim-world.ts';
+import { createSimWorld, getPlayer, NEUTRAL_INPUT, setMobileBossDifficulty, stepSim } from '../src/sim/sim-world.ts';
 import { createBossArenaLevel } from '../src/world/boss-arena.ts';
 
 function arena() {
@@ -179,4 +180,21 @@ test('普攻过程中战胜 Boss 会同步退出攻击动作，结束画面不�
   assert.equal(world.bossArena!.phase, 'won');
   assert.equal(player.attack, undefined);
   assert.equal(player.pelican!.state, 'idle');
+});
+
+
+test('Boss 场按当前手机难度召唤，切回电脑重赛恢复标准血量', () => {
+  const world = arena();
+  try {
+    setMobileBossDifficulty(world, true);
+    for (const kind of ['tibo', 'sam'] as const) {
+      summonArenaBoss(world, kind);
+      const boss = world.entities.find(entity => entity.boss)!;
+      assert.equal(boss.health!.hp, BOSS_RULES[kind].maxHp / 3);
+      assert.equal(boss.health!.maxHp, BOSS_RULES[kind].maxHp / 3);
+    }
+    setMobileBossDifficulty(world, false);
+    summonArenaBoss(world, 'tibo');
+    assert.equal(world.entities.find(entity => entity.boss)!.health!.hp, BOSS_RULES.tibo.maxHp);
+  } finally { world.fluid.dispose(); }
 });

@@ -41,8 +41,8 @@ export interface BossData {
   shotRequests: ProjectileRequest[];
 }
 
-export function createBossEntity(id: number, kind: NpcKind, position: Vec2, tuning: Tuning): Entity {
-  return {
+export function createBossEntity(id: number, kind: NpcKind, position: Vec2, tuning: Tuning, mobile = false): Entity {
+  const entity: Entity = {
     id, kind, team: 'enemy', facing: -1, armored: false,
     body: createBody({ ...position, halfWidth: 0.7, height: HUMAN_BODY_HEIGHT, stepUp: tuning.player.stepUp, groundSnap: tuning.player.groundSnap }),
     health: createHealth(BOSS_RULES[kind].maxHp, BOSS_RULES[kind].guard),
@@ -50,6 +50,25 @@ export function createBossEntity(id: number, kind: NpcKind, position: Vec2, tuni
     boss: { kind, action: 'idle', actionTicks: 0, actionRate: 1, cooldownTicks: 24, nextSkill: 0, basicPending: false, flying: false,
       aim: { ...position }, lastTarget: null, targetVx: 0, healCooldownTicks: 0, healing: false, blink: null, blinkCooldownTicks: 45, shotRequests: [] },
   };
+  if (mobile) setBossDifficulty(entity, true);
+  return entity;
+}
+
+/** 切换操作模式时保留剩余血量及破韧进度比例。Scale 是受伤倍率，降低防御要缩小减伤部分。 */
+export function setBossDifficulty(entity: Entity, mobile: boolean): void {
+  const base = BOSS_RULES[entity.boss!.kind];
+  const scale = mobile ? 1 / 3 : 1;
+  const health = entity.health!;
+  const maxHp = base.maxHp * scale;
+  health.hp *= maxHp / health.maxHp;
+  health.maxHp = maxHp;
+  const guard = health.guard!;
+  health.guard = { ...guard, poiseDamage: guard.poiseDamage * (base.guard.poise * scale / guard.rule.poise), rule: {
+    ...base.guard,
+    armoredScale: 1 - (1 - base.guard.armoredScale) * scale,
+    ultimateScale: 1 - (1 - base.guard.ultimateScale) * scale,
+    poise: base.guard.poise * scale,
+  } };
 }
 
 export function cancelBossSkill(entity: Entity): void {

@@ -236,8 +236,8 @@ export function createHud(root: HTMLElement, project: WorldToScreen, options: Hu
   let humanHints = false;
   const translate = (): void => {
     touchHelp.textContent = getLanguage() === 'en'
-      ? 'Left stick: tilt to walk, push to run, up to jump / fly, down to drop through platforms / dive. Hold and drag Attack to aim. Tap secondary attack or skills to cast. In water, hold up to rise and push up again at the surface to jump out. Running out of oxygen drains health.'
-      : '左摇杆轻推慢走、推远奔跑，上推跳跃 / 飞行，下推下平台 / 俯冲 / 下潜。右侧按住主攻，拖动瞄准；轻触副攻或技能直接释放。水中持续上推上浮，水面再次上推跃出；氧气耗尽扣血。';
+      ? 'Left stick: tilt to walk, push to run, up to jump / fly, down to drop through platforms / dive. Hold Attack to auto aim at the nearest enemy on screen. Tap secondary attack or skills to cast. In water, hold up to rise and push up again at the surface to jump out. Running out of oxygen drains health.'
+      : '左摇杆轻推慢走、推远奔跑，上推跳跃 / 飞行，下推下平台 / 俯冲 / 下潜。右侧按住主攻，自动瞄准屏内最近敌人；轻触副攻或技能直接释放。水中持续上推上浮，水面再次上推跃出；氧气耗尽扣血。';
     const lines = getLanguage() === 'en' ? EN_CONTROL_HINTS : CONTROL_HINTS;
     hintEls.forEach((node, i) => { node.textContent = lines[i] as string; });
     if (humanHints) {

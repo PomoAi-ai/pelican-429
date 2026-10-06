@@ -291,7 +291,7 @@ function harness(): Harness {
   const clock = { t: 0, strength: 1.3 };
   const query = ride(clock);
   const player = getPlayer(w);
-  const view = createPelicanViewFactory({ rig: rig(), tuning: TUNING, terrain: w.map, actors: () => w.entities, treeRide: query })(player);
+  const view = createPelicanViewFactory({ windAt: () => 0, rig: rig(), tuning: TUNING, terrain: w.map, actors: () => w.entities, treeRide: query })(player);
   live.push(view);
   return { w, clock, query, view, player };
 }

@@ -10,8 +10,8 @@ export const PANEL_REFRESH_MS = 250;
 const fmtCount = (n: number): string => (n >= 1e6 ? `${(n / 1e6).toFixed(2)}M` : n >= 1e3 ? `${(n / 1e3).toFixed(1)}k` : String(Math.round(n)));
 
 /** 面板文本（纯函数，测试用）。 */
-export function formatPerfText(s: PerfSnapshot, language: Language = 'zh'): string {
-  const lines = [`FPS    ${s.fps.toFixed(1)}`, `${language === 'en' ? 'Frame ' : '帧    '}${s.frameTime.toFixed(1)} ms`, `CPU    ${s.cpu.toFixed(2)} ms`];
+export function formatPerfText(s: PerfSnapshot, language: Language, version: string): string {
+  const lines = [`FPS    ${s.fps.toFixed(1)} · v${version}`, `${language === 'en' ? 'Frame ' : '帧    '}${s.frameTime.toFixed(1)} ms`, `CPU    ${s.cpu.toFixed(2)} ms`];
   for (const [k, v] of Object.entries(s.segments)) lines.push(`  ${k.padEnd(8)}${v.toFixed(2)}`);
   lines.push(`draw   ${Math.round(s.calls)}`, `tris   ${fmtCount(s.triangles)}`);
   return lines.join('\n');
@@ -28,7 +28,7 @@ export interface PerfPanel {
 }
 
 /** 游戏场景始终支持 Cmd+Option+Z / Ctrl+Alt+Z，P 键仅在调试模式启用。 */
-export function createPerfPanel(parent: HTMLElement, keyTarget: Window, debug: boolean): PerfPanel {
+export function createPerfPanel(parent: HTMLElement, keyTarget: Window, debug: boolean, version: string): PerfPanel {
   if (!parent?.isConnected) throw new Error('perf-panel: parent element is missing or detached');
   const el = document.createElement('button');
   el.className = 'perf-panel';
@@ -52,7 +52,7 @@ export function createPerfPanel(parent: HTMLElement, keyTarget: Window, debug: b
     zIndex: '5',
     whiteSpace: 'pre',
   } satisfies Partial<CSSStyleDeclaration>);
-  el.textContent = 'FPS …';
+  el.textContent = `FPS … · v${version}`;
   el.addEventListener('click', () => panel.toggle());
   parent.append(el);
   let lastRefresh = Number.NEGATIVE_INFINITY;
@@ -84,7 +84,7 @@ export function createPerfPanel(parent: HTMLElement, keyTarget: Window, debug: b
     update(snapshot, nowMs, fps) {
       if (nowMs - lastRefresh < PANEL_REFRESH_MS) return;
       lastRefresh = nowMs;
-      el.textContent = expanded ? formatPerfText(snapshot(), getLanguage()) : `FPS ${fps.toFixed(0)}`;
+      el.textContent = expanded ? formatPerfText(snapshot(), getLanguage(), version) : `FPS ${fps.toFixed(0)} · v${version}`;
     },
     dispose() {
       keyTarget.removeEventListener('keydown', onKey);

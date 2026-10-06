@@ -1,16 +1,19 @@
-import { MAINLINE_CORE, MAINLINE_COUNTDOWN_SECONDS, MAINLINE_ENEMIES } from '../config/mainline.ts';
+import { MAINLINE_CORE, MAINLINE_COUNTDOWN_SECONDS, MAINLINE_ENEMIES, MAINLINE_REVEAL } from '../config/mainline.ts';
 import type { MainlineCheckpoint, MainlinePhase } from '../config/mainline.ts';
-import { HUMAN_BODY_HEIGHT } from '../config/player-form.ts';
+import { HUMAN_BODY_HEIGHT, PLAYER_TRANSFORM } from '../config/player-form.ts';
 import { createBossEntity } from '../entities/boss.ts';
 import { cancelEnemySkill, createEnemyEntity } from '../entities/enemy.ts';
 import { createPelicanEntity } from '../entities/entity.ts';
 import { createWandererEntity } from '../entities/wanderer.ts';
 import { moveAndCollide } from '../physics/tile-collision.ts';
+import { NEUTRAL_INPUT } from '../entities/pelican-controller.ts';
+import { stepPlayerTransform } from './player-transform.ts';
 import type { SimWorld } from './sim-world.ts';
 
 export interface MainlineState {
   phase: MainlinePhase;
   countdownTicks: number;
+  revealTicks: number;
   bossId: number | null;
   readonly perimeterIds: number[];
 }
@@ -21,7 +24,7 @@ export function mainlineTransformUnlocked(world: SimWorld): boolean {
 }
 
 function spawnBoss(world: SimWorld, kind: 'tibo' | 'sam'): void {
-  const boss = createBossEntity(world.nextId++, kind, { x: MAINLINE_CORE.bossX, y: MAINLINE_CORE.y }, world.tuning);
+  const boss = createBossEntity(world.nextId++, kind, { x: MAINLINE_CORE.bossX, y: MAINLINE_CORE.y }, world.tuning, world.mobileBosses);
   world.entities.push(boss);
   world.mainline!.bossId = boss.id;
 }
@@ -64,7 +67,7 @@ function syncGarrisonHold(world: SimWorld): void {
 
 /** 主线显式启用，场景预览和自由世界不受其阶段限制。 */
 export function initializeMainline(world: SimWorld, checkpoint: MainlineCheckpoint = { phase: 'perimeter', countdownTicks: 0 }): void {
-  world.mainline = { ...checkpoint, bossId: null, perimeterIds: [] };
+  world.mainline = { ...checkpoint, revealTicks: -1, bossId: null, perimeterIds: [] };
   for (let i = world.entities.length - 1; i >= 0; i--) {
     const entity = world.entities[i]!;
     if (entity.enemy || entity.boss || entity.projectile || entity.npc) world.entities.splice(i, 1);
@@ -115,6 +118,11 @@ export function stepMainline(world: SimWorld): void {
       state.countdownTicks = state.phase === 'countdown' ? Math.round(MAINLINE_COUNTDOWN_SECONDS / world.tuning.sim.step) : 0;
       for (let i = world.entities.length - 1; i >= 0; i--) if (world.entities[i]!.projectile) world.entities.splice(i, 1);
       restoreMainlinePlayer(world);
+      if (state.phase === 'countdown') {
+        state.revealTicks = 0;
+        player.pelican!.form = player.pelican!.transformFrom = 'pelican';
+        player.body.height = world.tuning.player.height;
+      }
       if (state.phase === 'restored') spawnSamResident(world);
       world.hitstopTicks = 0;
     }
@@ -126,4 +134,19 @@ export function stepMainline(world: SimWorld): void {
       spawnBoss(world, 'sam');
     }
   }
+}
+
+/** 演出复用普通变身流程；镜头到位前不消费变身输入或战斗时间。 */
+export function stepMainlineReveal(world: SimWorld): boolean {
+  const state = world.mainline;
+  if (!state || state.revealTicks < 0) return false;
+  const zoomTicks = Math.round(MAINLINE_REVEAL.zoomSeconds / world.tuning.sim.step);
+  const endTicks = zoomTicks + PLAYER_TRANSFORM.durationTicks + 1
+    + Math.round((MAINLINE_REVEAL.holdSeconds + MAINLINE_REVEAL.returnSeconds) / world.tuning.sim.step);
+  if (state.revealTicks >= zoomTicks && state.revealTicks <= zoomTicks + PLAYER_TRANSFORM.durationTicks) {
+    stepPlayerTransform(world, { ...NEUTRAL_INPUT, transformPressed: state.revealTicks === zoomTicks });
+  }
+  state.revealTicks++;
+  if (state.revealTicks >= endTicks) state.revealTicks = -1;
+  return true;
 }

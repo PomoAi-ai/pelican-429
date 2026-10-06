@@ -41,7 +41,7 @@ export interface CameraRigOptions {
 export interface CameraRig {
   /** 立即对准目标（无平滑），用于出生/传送。 */
   snapTo(targetX: number, targetY: number, facing: 1 | -1): void;
-  update(targetX: number, targetY: number, facing: 1 | -1, dt: number): void;
+  update(targetX: number, targetY: number, facing: 1 | -1, dt: number, closeup?: { shot: CameraShot; blend: number }): void;
   /** 屏幕坐标（clientX/Y）→ 射线交 z=0 平面的世界坐标；视线与平面平行或画布无尺寸时返回 null。 */
   screenToWorld(clientX: number, clientY: number, out: Vec2): Vec2 | null;
   /** z=0 平面上的可视矩形（按夹紧后的相机位置 + 半视野），四周再扩 margin（瓦片，≥0）。 */
@@ -90,6 +90,7 @@ export function createCameraRig(options: CameraRigOptions): CameraRig {
   const goal = { x: 0, y: 0 };
   const focus = { x: 0, y: 0 };
   let lead = 0;
+  let closeup: { shot: CameraShot; blend: number } | undefined;
 
   const halfExtents = (distance: number): { hw: number; hh: number } => {
     const hh = distance * Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2);
@@ -104,6 +105,12 @@ export function createCameraRig(options: CameraRigOptions): CameraRig {
   /** 当前相机：跟随位置（常规距离夹紧）；开场取景时与取景（按其距离夹紧）按 introBlend 混合。 */
   const clamped = (): { x: number; y: number; hw: number; hh: number; distance: number } => {
     const follow = clampAt(focus.x, focus.y, cfg.distance);
+    if (closeup) {
+      const { shot, blend } = closeup;
+      const distance = lerp(cfg.distance, shot.distance, blend);
+      const extents = halfExtents(distance);
+      return { x: lerp(follow.x, shot.x, blend), y: lerp(follow.y, shot.y, blend), ...extents, distance };
+    }
     if (intro === null) return { ...follow, distance: cfg.distance };
     const k = introBlend(intro.t, introCfg.hold, introCfg.blend);
     const shot = clampAt(intro.shot.x, intro.shot.y, intro.shot.distance);
@@ -153,7 +160,8 @@ export function createCameraRig(options: CameraRigOptions): CameraRig {
       focus.y = goal.y;
       apply();
     },
-    update(targetX, targetY, facing, dt) {
+    update(targetX, targetY, facing, dt, shot) {
+      closeup = shot;
       if (!Number.isFinite(targetX) || !Number.isFinite(targetY) || !(dt >= 0)) {
         throw new Error(`camera-rig: invalid update target=(${targetX},${targetY}) dt=${dt}`);
       }

@@ -81,7 +81,7 @@ after(() => views.forEach((v) => v.dispose()));
 function harness(): Harness {
   const r = rig();
   const w = world();
-  const factory = createPelicanViewFactory({ rig: r, tuning: TUNING, terrain: w.map });
+  const factory = createPelicanViewFactory({ windAt: () => 0, rig: r, tuning: TUNING, terrain: w.map });
   const player = getPlayer(w);
   const view = factory(player);
   views.push(view);

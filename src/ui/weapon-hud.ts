@@ -127,8 +127,7 @@ export function createWeaponHud(root: HTMLElement, options: WeaponHudOptions): W
           ? en ? 'Defeat Tibo to unlock transformation' : '击败 Tibo 后解锁变身'
           : en ? 'More room is needed to transform' : '空间不足，换个开阔位置变身');
         else if (ev.type === 'weaponBlocked') showToast(en
-          ? ev.reason === 'riding' ? 'Dismount to use this skill' : 'Water refilling…'
-          : ev.reason === 'riding' ? '下车后释放此技能' : '水量恢复中…');
+          ? 'Water refilling…' : '水量恢复中…');
         else if (ev.type === 'swallowed') showToast(en ? 'Shot absorbed · use Swallow again to return early' : '已吸入敌弹 · 再次使用吞弹反击可提前反吐');
       }
     },

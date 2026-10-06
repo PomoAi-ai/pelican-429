@@ -790,9 +790,9 @@ for (const kind of Object.keys(ENEMY_RULES) as EnemyKind[]) test(`${kind} 自动
   } finally { a.dispose(); }
 });
 
-// 接地只检查实心砖时，载荷会穿过第一章玩家站立的平台，落到世界底部。
+// 预警与载荷必须在玩家实际站立的地面接地。
 for (const x of [137, 145, 153]) for (const index of [0, 1] as const) {
-  test(`第一章 x=${x} 技能 ${index + 1} 的预警和载荷落在玩家所在单向平台`, () => {
+  test(`第一章 x=${x} 技能 ${index + 1} 的预警和载荷落在玩家所在底层地面`, () => {
     const level = createFacilityLevel('fortress');
     const world = createSimWorld({ level, windMode: 'calm', precipMode: 'manual', precipState: { rain: 'none', snow: 'none' } });
     try {
@@ -825,16 +825,16 @@ test('载荷从平台下方上升时穿过，普通敌弹下落仍忽略单向�
   const world = createSimWorld({ level });
   try {
     const rising = createProjectileEntity(100, { def: { ...DRONE_PAYLOADS.bomb, speed: 12 }, ownerId: 99,
-      team: 'enemy', level: 1, returned: false, x: 145, y: 19.2, dirX: 0, dirY: 1 });
+      team: 'enemy', level: 1, returned: false, x: 145, y: 37.2, dirX: 0, dirY: 1 });
     for (let i = 0; i < 12; i++) stepProjectile(rising, world.map, world.tuning.sim.step, world.events);
-    assert.ok(rising.body.y > 20);
+    assert.ok(rising.body.y > 38);
     assert.equal(rising.projectile!.impactTicks, null);
     assert.equal(rising.removed, undefined);
     const normal = createProjectileEntity(101, { def: world.tuning.weapons.shooter.projectile, ownerId: 99,
-      team: 'enemy', level: 1, returned: false, x: 145, y: 23, dirX: 0, dirY: -1 });
+      team: 'enemy', level: 1, returned: false, x: 145, y: 41, dirX: 0, dirY: -1 });
     for (let i = 0; i < 60; i++) stepProjectile(normal, world.map, world.tuning.sim.step, world.events);
-    assert.ok(normal.body.y < 20);
+    assert.ok(normal.body.y < 38);
     assert.equal(normal.removed, undefined);
-    assert.ok(terrainHeightAt(world.map, 145, 23, world.map.height)! < 20, '原有只查实心地表的默认行为保留');
+    assert.ok(terrainHeightAt(world.map, 145, 41, world.map.height)! < 38, '原有只查实心地表的默认行为保留');
   } finally { level.fluid.dispose(); }
 });

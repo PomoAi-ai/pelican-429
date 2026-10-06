@@ -150,7 +150,7 @@ export interface WindController {
   setDirection(direction: WindDirection): void;
   /** 调试键 V：微风 → 大风 → 自动 循环；返回新模式。 */
   cycleMode(): WindMode;
-  update(t: number): void;
+  update(t: number, autoMode?: Exclude<WindMode, 'auto'>): void;
   sample(x: number): WindSample;
   /** windSway 的 JS 版（dirX · strength）。 */
   sway(x: number): number;
@@ -162,6 +162,7 @@ const MAX_DRIFT_DT = 0.25;
 export function createWindController(w: WeatherTuning, initial: WindMode): WindController {
   checkMode(initial);
   let mode = initial;
+  let autoMode: Exclude<WindMode, 'auto'> | undefined;
   let power = 1;
   let from: WindState | null = null;
   let switchAt = 0;
@@ -177,7 +178,7 @@ export function createWindController(w: WeatherTuning, initial: WindMode): WindC
   let fieldState = state;
 
   const stateAt = (t: number): WindState => {
-    const to = modeState(w, mode, t);
+    const to = modeState(w, mode === 'auto' ? autoMode ?? mode : mode, t);
     if (!from) return to;
     const k = w.modeBlend > 0 ? smooth01((t - switchAt) / w.modeBlend) : 1;
     if (k >= 1) {
@@ -231,8 +232,13 @@ export function createWindController(w: WeatherTuning, initial: WindMode): WindC
       ctl.setMode(next);
       return next;
     },
-    update(t) {
+    update(t, nextAutoMode) {
       checkTime(t);
+      if (mode === 'auto' && nextAutoMode !== autoMode) {
+        from = state;
+        switchAt = t;
+      }
+      autoMode = nextAutoMode;
       const dt = started ? Math.min(MAX_DRIFT_DT, Math.max(0, t - time)) : 0;
       time = t;
       started = true;

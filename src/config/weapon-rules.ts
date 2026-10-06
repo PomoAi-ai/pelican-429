@@ -60,8 +60,6 @@ export interface WeaponInfo {
   readonly name: string;
   /** HUD 图标字（单个汉字，画在圆形色块里）。 */
   readonly icon: string;
-  /** 骑车时可用。 */
-  readonly ridable: boolean;
 }
 
 /** 吐水普攻：资源“水量”（整数单位）。 */
@@ -140,7 +138,6 @@ export const DEFAULT_WEAPONS: WeaponsTuning = {
   water: {
     name: '嘴囊喷水',
     icon: '水',
-    ridable: true,
     windupTicks: 3,
     mouthHoldTicks: 3,
     mouthCloseTicks: 6,
@@ -177,7 +174,6 @@ export const DEFAULT_WEAPONS: WeaponsTuning = {
   fish: {
     name: '鱼群轰炸',
     icon: '鱼',
-    ridable: true,
     windupTicks: 5,
     mouthHoldTicks: 4,
     mouthCloseTicks: 7,
@@ -212,7 +208,6 @@ export const DEFAULT_WEAPONS: WeaponsTuning = {
   orb: {
     name: '光球',
     icon: '光',
-    ridable: true,
     radiusScale: [1, 1.4, 1.85],
     damageScale: [1, 1.75, 2.75],
     knockbackScale: [1, 1.4, 2],
@@ -221,7 +216,6 @@ export const DEFAULT_WEAPONS: WeaponsTuning = {
   swallow: {
     name: '吞弹反吐',
     icon: '吞',
-    ridable: false,
     windupTicks: 6,
     mouthHoldTicks: 6,
     mouthCloseTicks: 8,
@@ -339,7 +333,6 @@ export function validateProjectileDef(path: string, d: ProjectileDef, kind: Proj
 function validateInfo(path: string, w: WeaponInfo): void {
   text(`${path}.name`, w.name);
   if (typeof w.icon !== 'string' || [...w.icon].length !== 1) fail(`${path}.icon`, 'must be a single character', w.icon);
-  bool(`${path}.ridable`, w.ridable);
 }
 
 export function validateWeaponTimeline(path: string, t: WeaponTimeline): void {

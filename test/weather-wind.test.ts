@@ -329,3 +329,35 @@ describe('调参校验与 URL 参数', () => {
     });
   }
 });
+
+
+test('区域自动风目标保持时完成过渡，手动覆盖后恢复最新区域风且保留倍率与方向', () => {
+  const c = createWindController(W, 'auto');
+  c.update(0, 'calm');
+  c.update(W.modeBlend, 'calm');
+  assert.equal(c.sample(10).strength, 0);
+  const begin = W.modeBlend + 1;
+  c.update(begin, 'gale');
+  assert.equal(c.sample(10).strength, 0, '区域改变不让风瞬间跳强');
+  let previous = c.state.scale;
+  for (let i = 1; i <= 60; i++) {
+    c.update(begin + W.modeBlend * i / 60, 'gale');
+    assert.ok(c.state.scale >= previous);
+    previous = c.state.scale;
+  }
+  assert.deepEqual(c.state, modeState(W, 'gale', c.time));
+  c.setMode('breeze');
+  c.update(c.time + W.modeBlend, 'calm');
+  assert.deepEqual(c.state, modeState(W, 'breeze', c.time), '手动模式不跟随区域目标');
+  c.setMode('auto');
+  c.update(c.time + W.modeBlend, 'calm');
+  assert.equal(c.sample(10).strength, 0, '恢复自动采用手动期间最新目标');
+  c.setDirection('left');
+  c.update(c.time, 'gale');
+  c.update(c.time + W.modeBlend, 'gale');
+  const strength = c.sample(10).strength;
+  c.setPower(3);
+  assert.equal(c.sample(10).strength, strength * 3);
+  assert.ok(c.sway(10) < 0);
+  assert.equal(c.mode, 'auto');
+});

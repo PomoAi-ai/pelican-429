@@ -62,7 +62,7 @@ describe('perf-panel', () => {
     for (const modifier of ['ctrlKey', 'metaKey']) {
       const parent = Object.assign(new FakeElement('BODY'), { isConnected: true });
       const keys = new FakeElement('WINDOW');
-      const panel = createPerfPanel(parent as unknown as HTMLElement, keys as unknown as Window, false);
+      const panel = createPerfPanel(parent as unknown as HTMLElement, keys as unknown as Window, false, 'test');
       const shortcut = { code: 'KeyZ', [modifier]: true, altKey: true };
       assert.equal(keys.dispatch('keydown', { ...shortcut, altKey: false }).prevented, false);
       assert.equal(panel.visible, false);
@@ -86,7 +86,7 @@ describe('perf-panel', () => {
   }));
 
   test('文本：FPS、帧时间、CPU 分段、draw call、三角形（千/百万）', () => {
-    const text = formatPerfText({ frames: 60, fps: 59.94, frameTime: 16.68, cpu: 3.2, segments: { sim: 0.21, render: 1.6 }, calls: 252, triangles: 1_090_000 });
+    const text = formatPerfText({ frames: 60, fps: 59.94, frameTime: 16.68, cpu: 3.2, segments: { sim: 0.21, render: 1.6 }, calls: 252, triangles: 1_090_000 }, 'zh', 'test');
     assert.match(text, /FPS\s+59\.9/);
     assert.match(text, /帧\s+16\.7 ms/);
     assert.match(text, /CPU\s+3\.20 ms/);

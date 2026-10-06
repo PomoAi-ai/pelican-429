@@ -330,3 +330,17 @@ test('人形光子在hitstop缓存且变身共享冷却，不占用服务器技�
   step(world, { skillPressed: 4 });
   assert.equal(world.events.drain().filter((event) => event.type === 'photonUltimateStarted').length, 1);
 });
+
+test('骑车时人形三个技能均可造成实际伤害', () => {
+  for (const skill of [1, 2, 3] as const) {
+    const world = arena();
+    const player = getPlayer(world);
+    step(world, { mountPressed: true });
+    steps(world, world.tuning.player.bike.mountTicks);
+    const target = addEntity(world, id => createDummyEntity(id, { x: player.body.x + 4, y: 1 }, world.tuning));
+    step(world, { skillPressed: skill });
+    steps(world, HUMAN_SKILLS.server_overload.ticks + 10);
+    assert.ok(target.health!.hp < target.health!.maxHp, `技能 ${skill}`);
+    assert.equal(player.pelican!.ride.mode, 'riding');
+  }
+});

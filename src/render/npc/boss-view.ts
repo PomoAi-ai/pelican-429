@@ -3,13 +3,14 @@ import { BOSS_REBATE, BOSS_RULES } from '../../config/boss-rules.ts';
 import { npcAction } from '../../config/npc.ts';
 import { TUNING } from '../../config/tuning.ts';
 import { lerp } from '../../core/math.ts';
-import type { EntityViewFactory } from '../view-registry.ts';
+import type { Entity } from '../../entities/entity.ts';
+import type { EntityView } from '../view-registry.ts';
 import { animateNpc } from './npc-animator.ts';
 import { createNpcRig } from './npc-rig.ts';
 import { createTeleportEffect } from '../teleport-effect.ts';
 
 /** Boss 与展示场共享模型和动作；实战时间倍率同时驱动姿态与原动作特效。 */
-export const createBossView: EntityViewFactory = (entity) => {
+export function createBossView(entity: Entity, windAt: (x: number, y: number) => number): EntityView {
   const rig = createNpcRig(entity.boss!.kind, 'monster');
   const root = new THREE.Group();
   root.add(rig.root);
@@ -36,7 +37,7 @@ export const createBossView: EntityViewFactory = (entity) => {
       const boss = e.boss!;
       root.position.set(lerp(e.body.prevX, e.body.x, alpha), lerp(e.body.prevY, e.body.y, alpha), 0);
       const seconds = Math.max(0, boss.actionTicks - 1 + alpha) * TUNING.sim.step * boss.actionRate;
-      animateNpc(rig, boss.action, seconds, frameDt, e.facing, { flying: boss.flying && !e.body.onGround, vx: e.body.vx, vy: e.body.vy }, e.facing);
+      animateNpc(rig, boss.action, seconds, frameDt, e.facing, { flying: boss.flying && !e.body.onGround, vx: e.body.vx, vy: e.body.vy }, e.facing, windAt(e.body.x, e.body.y + e.body.height));
       rig.effects.root.rotation.y = -rig.root.rotation.y;
       const blink = boss.blink;
       teleport.update(e.teleport, alpha, TUNING.sim.step, e.body.height, e.body.halfWidth);
@@ -65,4 +66,4 @@ export const createBossView: EntityViewFactory = (entity) => {
       armorGeometry.dispose(); armorMaterial.dispose();
     },
   };
-};
+}

@@ -18,7 +18,7 @@ export interface Mouthful {
   readonly count: number;
 }
 
-export type WeaponBlockReason = 'empty' | 'riding';
+export type WeaponBlockReason = 'empty';
 
 /** 由 updateWeapons 写入、stepSim 补上实体 id 推入 world.events 的事件请求。 */
 export type WeaponEventRequest =
@@ -80,10 +80,6 @@ export function weaponTimeline(tuning: Tuning, id: WeaponId): WeaponTimeline {
 /** 时间轴总长（windup + hold + close）。 */
 export function timelineLength(t: WeaponTimeline): number {
   return t.windupTicks + t.mouthHoldTicks + t.mouthCloseTicks;
-}
-
-export function weaponRidable(tuning: Tuning, id: WeaponId): boolean {
-  return tuning.weapons[id].ridable;
 }
 
 /** 档位对应的光球定义（1 档 = attacks.orb 本身）。 */
@@ -310,13 +306,11 @@ export function updateWeapons(e: Entity, p: PelicanData, input: WeaponInput, flu
       w.shotLevel = 1;
       startTimeline(e, p, 'fish', tuning);
     } else if (skill === 2) {
-      if (p.ride.mode !== 'off') return;
       w.cooldowns[1] = PELICAN_SKILLS.dashCooldownTicks;
       w.dashTicks = PELICAN_SKILLS.dashTicks;
       w.dashSide = p.shotSide;
       e.attack = startAttack(WING_DASH_ATTACK);
     } else {
-      if (p.ride.mode !== 'off') { block(p, 'swallow', 'riding'); return; }
       w.cooldowns[2] = PELICAN_SKILLS.swallowCooldownTicks;
       w.gulpTicks = W.swallow.gulpTicks;
       w.mouthful = null;
@@ -338,14 +332,6 @@ export function updateWeapons(e: Entity, p: PelicanData, input: WeaponInput, flu
   p.shootAim = null;
   w.shotLevel = 1;
   startTimeline(e, p, 'water', tuning);
-}
-
-/** 上车取消当前吞弹和突进动作。 */
-export function cancelUnridableWeaponAction(p: PelicanData, tuning: Tuning): void {
-  p.weapon.gulpTicks = 0;
-  p.weapon.mouthful = null;
-  p.weapon.dashTicks = 0;
-  if (p.shotTicks >= 0 && !weaponRidable(tuning, p.weapon.shotWeapon)) p.shotTicks = -1;
 }
 
 /** 吞入后继续保持吸收窗口；最多三颗，伤害累积为一次反吐。 */

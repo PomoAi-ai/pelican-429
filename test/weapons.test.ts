@@ -14,7 +14,7 @@ import { LEVEL_LEGEND, parseLevel } from '../src/world/test-level.ts';
 import { computeSurface } from '../src/world/level.ts';
 import type { FishSpawn, LevelData } from '../src/world/level.ts';
 import { createProjectileEntity, stepProjectile } from '../src/entities/projectile.ts';
-import { cancelUnridableWeaponAction, isSkimming } from '../src/entities/pelican-weapons.ts';
+import { isSkimming } from '../src/entities/pelican-weapons.ts';
 import { createSimWorld, getPlayer, setDummyShooting, stepSim, NEUTRAL_INPUT } from '../src/sim/sim-world.ts';
 import type { Entity, InputFrame, SimWorld } from '../src/sim/sim-world.ts';
 import { swimCatchPoint } from '../src/sim/weapon-system.ts';
@@ -135,8 +135,6 @@ describe('weapons: 配置', () => {
     assert.equal(FISH.bounces, 1);
     assert.equal(ORB.trajectory, 'straight');
     assert.equal(W.shooter.projectile.swallowable, true);
-    assert.equal(W.swallow.ridable, false);
-    assert.ok(W.water.ridable && W.fish.ridable && W.orb.ridable);
     assert.ok(FISH.knockback.x > WATER.knockback.x, '鱼击退更大');
     assert.equal(W.swallow.returnScale, 1.5);
     assert.equal(W.fish.capacity, 5);
@@ -350,7 +348,7 @@ test('振翅突进穿过敌人并逐个击飞，同次突进不会重复打中�
 });
 
 test('突进免疫冷却液伤害，动作结束当帧恢复受伤', () => {
-  for (const ending of ['elapsed', 'wall', 'mount', 'transform'] as const) {
+  for (const ending of ['elapsed', 'wall', 'transform'] as const) {
     const w = createSimWorld({ level: { ...levelData(open()), lethalCoolant: { x: 0, y: 0, w: 64, h: 16 } } });
     const player = settle(w);
     const hp = player.health!.hp;
@@ -366,7 +364,6 @@ test('突进免疫冷却液伤害，动作结束当帧恢复受伤', () => {
       for (let y = 1; y < 8; y++) w.map.set(x, y, 1);
       player.body.x = x - player.body.halfWidth - 0.001;
     }
-    if (ending === 'mount') cancelUnridableWeaponAction(player.pelican!, w.tuning);
     stepSim(w, input({ transformPressed: ending === 'transform' }));
     assert.equal(player.pelican!.weapon.dashTicks, 0, ending);
     assert.ok(player.health!.hp < hp, `${ending}: 结束立即恢复环境伤害`);
@@ -437,7 +434,7 @@ test('吞入后再次按技能提前反吐，等待窗口结束也自动反吐',
   assert.ok(run(true) < run(false));
 });
 
-test('空口吞弹进入独立冷却，骑车时不能吞弹', () => {
+test('空口吞弹进入独立冷却，骑车时仍可吞弹反吐', () => {
   const w = world(open());
   const player = settle(w);
   const p = player.pelican!;
@@ -449,9 +446,11 @@ test('空口吞弹进入独立冷却，骑车时不能吞弹', () => {
   stepSim(w, input({ mountPressed: true }));
   steps(w, TUNING.player.bike.mountTicks);
   p.weapon.cooldowns[2] = 0;
-  const evs = record(w, 20, (i) => input({ skillPressed: i === 0 ? 3 : 0 }));
-  assert.ok(evs.some((e) => e.type === 'weaponBlocked' && e.reason === 'riding'));
-  assert.equal(p.weapon.gulpTicks, 0);
+  incoming(w, 1);
+  const evs = record(w, W.swallow.gulpTicks + 20, (i) => input({ skillPressed: i === 0 ? 3 : 0 }));
+  assert.equal(evs.filter(e => e.type === 'swallowed').length, 1);
+  assert.equal(evs.filter(e => e.type === 'projectileFired' && e.returned).length, 1);
+  assert.equal(p.ride.mode, 'riding');
 });
 
 test('同关卡同普攻、技能与敌弹输入序列结果确定', () => {
@@ -504,4 +503,40 @@ test('嘴部捕鱼沿用实际浸水位置，库存满时保留鱼群', () => {
   assert.equal(p.weapon.fish, 2);
   assert.equal(w.fish.fish.length, 0);
   assert.ok(w.events.drain().some((e) => e.type === 'fishCaught' && e.via === 'mouth'));
+});
+
+test('骑车突进穿过敌人并造成伤害', () => {
+  const w = world(open(r => { r[14] = row(64, '.', { 3: 'P', 6: 'D', 9: 'D' }); }));
+  const player = settle(w);
+  stepSim(w, input({ mountPressed: true }));
+  steps(w, TUNING.player.bike.mountTicks);
+  const events = record(w, 35, i => input({ skillPressed: i === 0 ? 2 : 0 }));
+  assert.equal(events.filter(e => e.type === 'hit').length, 2);
+  assert.ok(player.body.x > 10);
+  assert.equal(player.pelican!.ride.mode, 'riding');
+});
+
+test('吞入敌弹后上车仍自动反吐', () => {
+  const w = world(open());
+  const player = settle(w);
+  incoming(w, 1);
+  record(w, 10, i => input({ skillPressed: i === 0 ? 3 : 0 }));
+  assert.equal(player.pelican!.weapon.mouthful!.count, 1);
+  const events = record(w, W.swallow.gulpTicks + 20, i => input({ mountPressed: i === 0 }));
+  assert.equal(events.filter(e => e.type === 'projectileFired' && e.returned).length, 1);
+  assert.equal(player.pelican!.ride.mode, 'riding');
+});
+
+test('骑车突进撞墙后立即结束，后续帧保留撞车反弹', () => {
+  const w = world(open(r => { for (let i = 10; i <= 14; i++) r[i] = row(64, '.', { 3: i === 14 ? 'P' : '.', 7: '#' }); }));
+  const player = settle(w);
+  stepSim(w, input({ mountPressed: true }));
+  steps(w, TUNING.player.bike.mountTicks);
+  stepSim(w, input({ skillPressed: 2 }));
+  for (let i = 0; i < PELICAN_SKILLS.dashTicks && player.pelican!.ride.mode === 'riding'; i++) stepSim(w, NEUTRAL_INPUT);
+  assert.equal(player.pelican!.ride.cause, 'crash');
+  assert.equal(player.pelican!.weapon.dashTicks, 0);
+  assert.equal(player.attack, undefined);
+  stepSim(w, NEUTRAL_INPUT);
+  assert.ok(player.body.vx < 0);
 });

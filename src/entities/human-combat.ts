@@ -82,7 +82,7 @@ export function updateHumanCombat(e: Entity, input: PelicanInput): void {
     if (h.ticks >= cfg.ticks) h.action = null;
   }
 
-  if (h.action === null && p.ride.mode === 'off') {
+  if (h.action === null) {
     const slot = h.bufferedSkill || (input.skill1Held ? 1 : 0);
     if (slot > 0 && h.cooldowns[slot - 1] === 0) {
       const action = (['codex_attack', 'bug_attack', 'server_overload'] as const)[slot - 1]!;

@@ -79,7 +79,27 @@ for (const [scene, x, y, mainY] of [
   } finally { level.fluid.dispose(); }
 });
 
-test('堡垒主路保持安全，下穿后冷却液持续耗尽生命再返回入口', () => {
+// 把主路误改回单向平台，会让持续下落输入穿入冷却液。
+test('堡垒底层主路按住下落或下加跳跃仍保持落脚和满血', () => {
+  for (const x of [70.5, 77, 89, 130, 192, 199]) {
+    const level = createFacilityLevel('fortress');
+    const world = createSimWorld({ level: { ...level, enemies: [], spawn: { x, y: 20 } }, windMode: 'calm' });
+    const player = getPlayer(world);
+    try {
+      for (let tick = 0; tick < 3; tick++) stepSim(world, NEUTRAL_INPUT);
+      for (let tick = 0; tick < 180; tick++) {
+        stepSim(world, { ...NEUTRAL_INPUT, downHeld: true, jumpHeld: tick === 60, jumpPressed: tick === 60 });
+        assert.ok(player.body.y >= 20, `x=${x} 穿过底层主路，y=${player.body.y}`);
+      }
+      assert.equal(player.body.onGround, true);
+      assert.equal(player.body.y, 20);
+      assert.equal(player.health!.hp, player.health!.maxHp);
+      assert.equal(world.respawnTicks, 0);
+    } finally { level.fluid.dispose(); }
+  }
+});
+
+test('堡垒主路保持安全，落入地板下的冷却液仍持续耗尽生命再返回入口', () => {
   for (const x of [77, 130, 192]) {
     const level = createFacilityLevel('fortress');
     const world = createSimWorld({ level: { ...level, enemies: [] }, windMode: 'calm' });
@@ -89,12 +109,12 @@ test('堡垒主路保持安全，下穿后冷却液持续耗尽生命再返回�
       for (let tick = 0; tick < 60; tick++) stepSim(world, NEUTRAL_INPUT);
       assert.equal(player.body.y, 20);
       assert.equal(player.health!.hp, player.health!.maxHp, `x=${x} 主路被液池淹没`);
-      stepSim(world, { ...NEUTRAL_INPUT, downHeld: true, jumpHeld: true, jumpPressed: true });
+      Object.assign(player.body, { y: 16, prevY: 16 });
       for (let tick = 0; tick < 120 && world.respawnTicks === 0; tick++) stepSim(world, NEUTRAL_INPUT);
       assert.ok(player.health!.hp > 0 && player.health!.hp < player.health!.maxHp, `x=${x} 落水后应有逃脱时间`);
       assert.equal(world.respawnTicks, 0);
       for (let tick = 0; tick < 180 && world.respawnTicks === 0; tick++) stepSim(world, NEUTRAL_INPUT);
-      assert.equal(player.health!.hp, 0, `x=${x} 下穿主路后未触液死亡`);
+      assert.equal(player.health!.hp, 0, `x=${x} 落入冷却液后未死亡`);
       assert.ok(world.respawnTicks > 0);
       for (let tick = 0; tick < 120 && world.respawnTicks > 0; tick++) stepSim(world, NEUTRAL_INPUT);
       assert.equal(world.respawnTicks, 0);

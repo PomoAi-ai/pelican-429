@@ -13,7 +13,7 @@ import { createTeleportEffect } from './teleport-effect.ts';
 import { caption } from './npc/npc-effects.ts';
 
 /** Both forms use their production rigs and share the pelican view's terrain and platform placement. */
-export function createPlayerViewFactory(options: PelicanViewOptions & { windAt(x: number, y: number): number; grassyVariant?: GrassyAnimatedVariant; grassyGait?: 'run' | 'sprint' }): EntityViewFactory {
+export function createPlayerViewFactory(options: PelicanViewOptions & { grassyVariant?: GrassyAnimatedVariant; grassyGait?: 'run' | 'sprint' }): EntityViewFactory {
   const createBird = createPelicanViewFactory(options);
   return (entity) => {
     const human = createGrassyRig(options.grassyVariant ?? 'game');
@@ -98,6 +98,7 @@ export function createPlayerViewFactory(options: PelicanViewOptions & { windAt(x
       } else if (combat.action !== null) animateGrassy(human, combat.action, (combat.ticks + alpha) * step, frameDt, air, motion);
       else animateGrassy(human, action, action === 'idle' ? time : sample, frameDt, air);
 
+      if (combat.action !== null && action === 'ride') human.cycle.update(true, sample);
       if (p.ride.mode === 'mounting' || p.ride.mode === 'dismounting') {
         const progress = rideProgress(p.ride, options.tuning, alpha);
         const size = p.ride.mode === 'mounting' ? progress : 1 - progress;

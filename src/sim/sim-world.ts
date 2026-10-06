@@ -1,3 +1,4 @@
+import { createFreeWorldWeather } from '../world/free-world-weather.ts';
 import { HUMAN_BODY_HEIGHT } from '../config/player-form.ts';
 import type { PlayerForm } from '../config/player-form.ts';
 import { stepFreeWorldNpcs } from './free-world-npcs.ts';
@@ -12,8 +13,8 @@ import type { BossArenaState } from './boss-arena.ts';
  * hitstop 期间只推进计时（tick、hitstopTicks）并缓冲玩家输入，跳过控制器、物理、液体与小鱼，并令 prev=cur（渲染不插值抖动）。
  */
 import { ENEMY_RULES } from '../config/enemy-rules.ts';
-import { cancelBossSkill, updateBoss } from '../entities/boss.ts';
-import { mainlineTransformUnlocked, restoreMainlinePlayer, stepMainline } from './mainline.ts';
+import { cancelBossSkill, setBossDifficulty, updateBoss } from '../entities/boss.ts';
+import { mainlineTransformUnlocked, restoreMainlinePlayer, stepMainline, stepMainlineReveal } from './mainline.ts';
 import type { MainlineState } from './mainline.ts';
 import { jumpVelocity, validateTuning, TUNING } from '../config/tuning.ts';
 import { stepPhotonUltimate, steerPhotonProjectiles } from './photon-system.ts';
@@ -71,6 +72,7 @@ export type InputFrame = PelicanInput;
 export { NEUTRAL_INPUT };
 
 export interface SimWorld {
+  mobileBosses: boolean;
   bossArena?: BossArenaState;
   mainline?: MainlineState;
   tick: number;
@@ -107,6 +109,7 @@ export interface SimWorldOptions {
   /** 降水调参与初始模式（022；缺省 DEFAULT_PRECIP 与其 mode）。 */
   readonly precip?: PrecipTuning;
   readonly precipMode?: PrecipMode;
+  readonly freeWorldWeather?: { readonly level: LevelData; readonly ground: Int16Array };
   readonly precipState?: PrecipState;
   readonly weather?: WeatherTuning;
   readonly windMode?: WindMode;
@@ -117,6 +120,12 @@ function createPlayer(id: number, position: Vec2, tuning: Tuning, form: PlayerFo
   player.pelican!.form = player.pelican!.transformFrom = form;
   player.body.height = form === 'human' ? HUMAN_BODY_HEIGHT : tuning.player.height;
   return player;
+}
+
+export function setMobileBossDifficulty(world: SimWorld, mobile: boolean): void {
+  if (world.mobileBosses === mobile) return;
+  world.mobileBosses = mobile;
+  for (const entity of world.entities) if (entity.boss) setBossDifficulty(entity, mobile);
 }
 
 export function createSimWorld(options: SimWorldOptions): SimWorld {
@@ -131,7 +140,13 @@ export function createSimWorld(options: SimWorldOptions): SimWorld {
   const entities: Entity[] = [player];
   for (const pos of level.dummies) entities.push(createDummyEntity(nextId++, pos, tuning));
   for (const spawn of level.enemies ?? []) entities.push(createEnemyEntity(nextId++, spawn.kind, spawn, tuning, level.seed ?? 0));
+  const env = createEnvironment(options.precip, options.precipMode, options.precipState, options.weather ?? tuning.render.weather, options.windMode);
+  if (options.freeWorldWeather) {
+    env.localWeather = createFreeWorldWeather(options.freeWorldWeather.level, options.freeWorldWeather.ground, env.rules);
+    if (env.mode === 'auto') env.precip = env.localWeather(player.body.x, player.body.y, 0).precip;
+  }
   return {
+    mobileBosses: false,
     tick: 0,
     hitstopTicks: 0,
     respawnTicks: 0,
@@ -149,7 +164,7 @@ export function createSimWorld(options: SimWorldOptions): SimWorld {
     playerId: player.id,
     spawnForm,
     nextId,
-    env: createEnvironment(options.precip, options.precipMode, options.precipState, options.weather ?? tuning.render.weather, options.windMode),
+    env,
   };
 }
 
@@ -423,6 +438,12 @@ export function stepSim(world: SimWorld, input: InputFrame): void {
   const { tuning, map, entities, fluid } = world;
   const dt = tuning.sim.step;
   if (world.bossArena && stepBossArena(world)) {
+    for (const entity of entities) savePrev(entity.body);
+    for (const fish of world.fish.fish) savePrev(fish.body);
+    world.tick++;
+    return;
+  }
+  if (stepMainlineReveal(world)) {
     for (const entity of entities) savePrev(entity.body);
     for (const fish of world.fish.fish) savePrev(fish.body);
     world.tick++;

@@ -2,7 +2,7 @@
  * 设置面板接线（从 main.ts 拆出，任务 019 收尾）：启动时加载设置（网址 > 保存值 > 调参默认）、
  * 运行时接口（各项即时生效）、控制器（打开即暂停）与面板 DOM（Esc / O 或右上角齿轮）。
  */
-import { DEFAULT_PRECIP } from '../config/precip-rules.ts';
+import { DEFAULT_PRECIP, type PrecipMode } from '../config/precip-rules.ts';
 import { TUNING } from '../config/tuning.ts';
 import { DEFAULT_WATER_PALETTE, waterPalette } from '../config/water-palettes.ts';
 import { newWorldSearch } from '../config/game-settings.ts';
@@ -33,7 +33,7 @@ export interface StartupSettings {
  * 设置（任务 019 设置面板）：网址参数 ?quality= ?aa= ?wind= ?water= ?dummyShoot（非法即抛）
  * > localStorage 保存值（非法项清除并提示）> 调参默认。
  */
-export function loadStartupSettings(params: URLSearchParams): StartupSettings {
+export function loadStartupSettings(params: URLSearchParams, defaultPrecip: PrecipMode = DEFAULT_PRECIP.mode): StartupSettings {
   const store = createLocalSettingsStore(() => window.localStorage);
   const defaults: GameSettings = {
     quality: TUNING.render.lighting.quality,
@@ -46,7 +46,7 @@ export function loadStartupSettings(params: URLSearchParams): StartupSettings {
     tornadoCount: 3,
     rainPower: 1,
     snowPower: 1,
-    precip: DEFAULT_PRECIP.mode,
+    precip: defaultPrecip,
     rain: DEFAULT_PRECIP.manual.rain,
     snow: DEFAULT_PRECIP.manual.snow,
     water: DEFAULT_WATER_PALETTE,

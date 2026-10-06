@@ -2,11 +2,12 @@ import { defineConfig } from 'vite';
 import { readFileSync, readdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { join, relative } from 'node:path';
-import { WEB_MODEL_SOURCES, compactModelPath } from './src/config/web-models.ts';
+import { RELEASE_MODEL_PATHS } from './src/config/web-models.ts';
 import { NPCS } from './src/config/npc.ts';
 
 export default defineConfig(({ command, mode }) => ({
   base: './',
+  define: { 'import.meta.env.VITE_APP_VERSION': JSON.stringify(JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8')).version) },
   server: { host: '127.0.0.1', port: 5174 },
   preview: { host: '127.0.0.1', port: 4174 },
   build: { target: 'es2022', copyPublicDir: mode === 'full' },
@@ -15,7 +16,8 @@ export default defineConfig(({ command, mode }) => ({
     generateBundle() {
       const publicDir = fileURLToPath(new URL('./public/', import.meta.url));
       const files = [
-        ...WEB_MODEL_SOURCES.map(source => compactModelPath(source, 512)),
+        'app.webmanifest', 'icons/pelican-192.png', 'icons/pelican-512.png',
+        ...RELEASE_MODEL_PATHS,
         ...Object.values(NPCS).flatMap(npc => npc.forms.map(form => form.image)),
         'characters/luma/portrait.jpg', 'contact/x-avatar.jpg', 'ui/hud-icons.webp',
       ];

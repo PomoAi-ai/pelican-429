@@ -1,5 +1,6 @@
+import type { FreeWorldWeatherState } from '../world/free-world-weather.ts';
 /**
- * 模拟环境状态（任务 022）：降水是逻辑层的确定性输入 —— 状态由“模式 + tick 时刻”决定（auto 走 config/precip-rules 时间表），
+ * 模拟环境状态（任务 022）：降水是逻辑层的确定性输入 —— 状态由模式与 tick 时刻决定，自由世界自动模式同时采样当地地貌，
  * 模式只能经环境命令 setPrecipMode 改变（设置面板/URL/调试键 → main 调用；命令在两个 tick 之间生效，与 tick 号一起即可复现）。
  * 渲染层只读 world.env.precip 做视觉过渡，不反向写入。
  * 玩法联动：露天（world/sky-exposure：头顶上方无遮挡格）下雨时，鹈鹕嘴囊水量按 precip.refill 缓慢回复（小数余量逐实体累积，整数入账）。
@@ -18,6 +19,7 @@ import type { TileQuery } from '../world/tile-map.ts';
 
 export interface SimEnvironment {
   readonly rules: PrecipTuning;
+  localWeather?: (x: number, y: number, time: number) => FreeWorldWeatherState;
   /** 固定步长驱动，物理与场景共用的风场。 */
   readonly wind: WindController;
   /** 独立叠加的局部风场，不改变全局风力或雨雪通道。 */
@@ -38,6 +40,7 @@ export interface SimEnvironment {
 
 /** 环境命令与推进所需的最小世界接口（SimWorld 满足）。 */
 export interface EnvironmentHost {
+  readonly playerId: number;
   readonly env: SimEnvironment;
   readonly tick: number;
   readonly map: TileQuery;
@@ -54,9 +57,7 @@ export function createEnvironment(rules: PrecipTuning = DEFAULT_PRECIP, mode: Pr
   return { rules, wind: createWindController(weather, windMode), tornadoes: [], tornadoPower: 2, tornadoCount: 3, rainPower: 1, snowPower: 1, mode, manual: state, precip: resolvePrecipState(rules, mode, 0, state), rainCarry: new Map() };
 }
 
-type TornadoHost = EnvironmentHost & { readonly playerId: number };
-
-export function setTornado(world: TornadoHost, on: boolean): void {
+export function setTornado(world: EnvironmentHost, on: boolean): void {
   if (!on) world.env.tornadoes = [];
   else resizeTornadoes(world);
 }
@@ -66,12 +67,12 @@ export function setTornadoPower(world: EnvironmentHost, power: number): void {
   for (const tornado of world.env.tornadoes) tornado.power = power;
 }
 
-export function setTornadoCount(world: TornadoHost, count: number): void {
+export function setTornadoCount(world: EnvironmentHost, count: number): void {
   world.env.tornadoCount = count;
   if (world.env.tornadoes.length > 0) resizeTornadoes(world);
 }
 
-function resizeTornadoes(world: TornadoHost): void {
+function resizeTornadoes(world: EnvironmentHost): void {
   const env = world.env;
   env.tornadoes.splice(env.tornadoCount);
   const origin = world.entities.find((e) => e.id === world.playerId)!.body.x;
@@ -92,7 +93,7 @@ export function setPrecipMode(world: EnvironmentHost, mode: PrecipMode): PrecipS
   if (!isPrecipMode(mode)) throw new Error(`environment: invalid precip mode ${String(mode)}`);
   const env = world.env;
   env.mode = mode;
-  env.precip = resolvePrecipState(env.rules, mode, simTime(world), env.manual);
+  env.precip = playerPrecip(world);
   return env.precip;
 }
 
@@ -100,8 +101,19 @@ export function setPrecipMode(world: EnvironmentHost, mode: PrecipMode): PrecipS
 export function setPrecipIntensity(world: EnvironmentHost, kind: 'rain' | 'snow', level: PrecipLevel): PrecipState {
   const env = world.env;
   env.manual = { ...env.manual, [kind]: level };
-  env.precip = resolvePrecipState(env.rules, env.mode, simTime(world), env.manual);
+  env.precip = playerPrecip(world);
   return env.precip;
+}
+
+function precipAt(world: EnvironmentHost, entity: Entity): PrecipState {
+  const env = world.env;
+  return env.mode === 'auto' && env.localWeather
+    ? env.localWeather(entity.body.x, entity.body.y, simTime(world)).precip
+    : resolvePrecipState(env.rules, env.mode, simTime(world), env.manual);
+}
+
+function playerPrecip(world: EnvironmentHost): PrecipState {
+  return precipAt(world, world.entities.find(entity => entity.id === world.playerId)!);
 }
 
 /** 实体头顶是否露天（身体中线所在列、头顶高度）。 */
@@ -112,25 +124,22 @@ export function entityExposed(map: TileQuery, e: Entity): boolean {
 /** 每 tick：按时刻更新降水状态；下雨时给露天的鹈鹕回复嘴囊水量。 */
 export function stepEnvironment(world: EnvironmentHost): void {
   const env = world.env;
-  env.wind.update(simTime(world));
+  const player = world.entities.find(entity => entity.id === world.playerId)!;
+  const local = env.localWeather?.(player.body.x, player.body.y, simTime(world));
+  env.wind.update(simTime(world), local?.wind);
   for (const tornado of env.tornadoes) stepTornado(tornado, world.map, world.tuning.sim.step);
-  env.precip = resolvePrecipState(env.rules, env.mode, simTime(world), env.manual);
-  const rate = rainRefillRate(env.rules, env.precip) * env.rainPower;
-  if (rate <= 0) {
-    env.rainCarry.clear();
-    return;
-  }
-  const gain = rate * world.tuning.sim.step;
+  env.precip = env.mode === 'auto' && local ? local.precip : resolvePrecipState(env.rules, env.mode, simTime(world), env.manual);
   const cap = world.tuning.weapons.water.capacity;
   for (const e of world.entities) {
     const p = e.pelican;
     if (!p || e.removed) continue;
     const w = p.weapon;
-    if (w.water >= cap || !entityExposed(world.map, e)) {
+    const rate = rainRefillRate(env.rules, e.id === world.playerId ? env.precip : precipAt(world, e)) * env.rainPower;
+    if (rate <= 0 || w.water >= cap || !entityExposed(world.map, e)) {
       env.rainCarry.delete(e.id);
       continue;
     }
-    let carry = (env.rainCarry.get(e.id) ?? 0) + gain;
+    let carry = (env.rainCarry.get(e.id) ?? 0) + rate * world.tuning.sim.step;
     const whole = Math.floor(carry);
     carry -= whole;
     if (whole > 0) w.water = Math.min(cap, w.water + whole);
