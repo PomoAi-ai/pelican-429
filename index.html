@@ -3,9 +3,26 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <link rel="stylesheet" href="/src/ui/story.css" />
+    <link rel="stylesheet" href="/src/ui/boss-arena.css" />
+    <link rel="stylesheet" href="/src/ui/mobile-game-viewport.css" />
+    <meta name="description" content="鹈鹕 429：从一场 AGI 降智风暴开始的横版动作冒险。观看序章，探索山体堡垒，体验正在制作中的主线。" />
+    <meta name="theme-color" content="#09131c" />
+    <link rel="canonical" href="https://pelican429.pomoai.vip/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="鹈鹕 429 / Pelican 429" />
+    <meta property="og:title" content="鹈鹕 429 · 从一场降智风暴开始" />
+    <meta property="og:description" content="从一场 AGI 降智风暴开始的横版动作冒险，浏览器即开即玩，源码公开在 GitHub。" />
+    <meta property="og:url" content="https://pelican429.pomoai.vip/" />
     <title>鹈鹕 429 / Pelican 429</title>
     <link rel="stylesheet" href="/src/ui/showcase.css" />
+    <link rel="stylesheet" href="/src/ui/character-stage.css" />
+    <link rel="stylesheet" href="/src/ui/texture-compare.css" />
     <link rel="stylesheet" href="/src/ui/navigation.css" />
+    <link rel="stylesheet" href="/src/ui/free-world.css" />
+    <link rel="stylesheet" href="/src/ui/npc-dialogue.css" />
     <link rel="stylesheet" href="/src/ui/intro.css" />
     <link rel="stylesheet" href="/src/ui/facility.css" />
     <link rel="stylesheet" href="/src/ui/facility-chapter.css" />
@@ -61,6 +78,30 @@
       .hud-flight-low .hud-flight-label { color: #ff8a7a; }
       .hud-orb-fill { height: 100%; width: 100%; background: #b88a3c; }
       .hud-orb-fill.hud-orb-ready { background: linear-gradient(90deg, #ffb43c, #ffe29a); }
+      .hud-oxygen { display: flex; align-items: center; gap: 7px; min-height: 20px; color: #b4e7f7; }
+      .hud-oxygen[hidden] { display: none; }
+      .hud-oxygen-label { flex: 0 0 60px; font-size: 10px; white-space: nowrap; text-shadow: 0 1px 3px #000; }
+      .hud-oxygen-track { position: relative; flex: 1; min-width: 0; height: 12px; overflow: hidden; border: 1px solid #afdff18c; border-radius: 8px; background: #102235df; }
+      .hud-oxygen-fill { height: 100%; width: 100%; background: linear-gradient(90deg, #287da8, #65c7e9); transition: width 80ms linear; }
+      .hud-oxygen-bubbles { position: absolute; inset: 0; display: flex; align-items: center; justify-content: space-around; }
+      .hud-oxygen-bubble { box-sizing: border-box; width: 7px; height: 7px; border: 1px solid #d5f7ff80; border-radius: 50%; }
+      .hud-oxygen-bubble-full { background: #d7f7ffe0; }
+      .hud-oxygen-low { color: #ffb69e; }
+      .hud-oxygen-low .hud-oxygen-track { border-color: #ff9e86; }
+      .hud-oxygen-low .hud-oxygen-fill { background: linear-gradient(90deg, #b54c39, #ed8862); }
+      .hud-oxygen-low .hud-oxygen-bubble-full { background: #ffe0cf; }
+      .hud-breath-veil {
+        position: absolute; inset: 0; pointer-events: none;
+        background: radial-gradient(ellipse at center, transparent 42%, #17628970 100%);
+        animation: hud-breath-pulse 2.4s ease-in-out infinite;
+      }
+      .hud-breath-veil[hidden] { display: none; }
+      .hud-breath-drowning {
+        background: radial-gradient(ellipse at center, transparent 35%, #9e273b99 100%);
+        animation-duration: 1.2s;
+      }
+      @keyframes hud-breath-pulse { 0%, 100% { opacity: .35; } 50% { opacity: .85; } }
+      @media (prefers-reduced-motion: reduce) { .hud-breath-veil { animation: none; opacity: .6; } }
       /* 普攻水量与四个技能冷却。 */
       .hud-weapon {
         position: absolute; left: 12px; bottom: 12px; display: flex; flex-direction: column; gap: 6px;
@@ -122,31 +163,38 @@
         position: absolute; left: 0; top: 0; font-size: 22px; font-weight: 800; color: #ffe27a;
         text-shadow: 0 2px 0 #7a2b10, 0 0 6px rgba(0, 0, 0, 0.6); white-space: nowrap;
       }
-      /* 设置面板（任务 019）：右上角小地图下方齿轮 + 右侧卡片（不遮挡画面中央，切换效果可即时看到）。 */
-      .settings-gear {
-        position: fixed; top: 162px; right: 12px; width: 34px; height: 34px; padding: 0; border-radius: 10px;
-        border: 1px solid rgba(255, 255, 255, 0.18); background: var(--panel); color: var(--fg);
-        font-size: 19px; line-height: 32px; text-align: center; cursor: pointer; z-index: 4; user-select: none;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35); transition: background-color 120ms, transform 200ms;
+      .hud-popup-heal { color: #9dffc4; text-shadow: 0 2px 0 #145b3a, 0 0 8px #123e2b; }
+      .hud-popup-immune { font-size: 14px; color: #bfe5ff; text-shadow: 0 1px 0 #254663, 0 0 6px #182b40; }
+      /* 设置入口独立于小地图，隐藏地图或调节透明度后仍可操作。 */
+      .settings-gear, .control-menu-toggle {
+        display: grid; place-items: center; width: 32px; height: 32px; padding: 0; border-radius: 50%;
+        border: 2px solid #e4d0a7; background: #1b202ae8; color: #fff3d8;
+        font-size: 16px; line-height: 1; text-align: center; cursor: pointer; user-select: none;
+        box-shadow: 0 2px 8px #0007, inset 0 0 0 2px #443e37; transition: border-color 120ms, box-shadow 120ms;
       }
-      .settings-gear:hover { background: rgba(40, 48, 60, 0.82); }
-      .settings-gear.settings-gear-open { border-color: #ffe29a; transform: rotate(45deg); }
+      .settings-gear svg, .control-menu-toggle svg { display: block; width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; pointer-events: none; }
+      .settings-gear { position: fixed; top: calc(var(--dev-nav-height) + 12px); right: 12px; z-index: 7; }
+      .settings-gear::before, .control-menu-toggle::before { content: ''; position: absolute; inset: -8px; }
+      .settings-gear:hover, .control-menu-toggle:hover,
+      .settings-gear.settings-gear-open, .control-menu[open] > .control-menu-toggle { border-color: #ffe8ad; box-shadow: 0 0 13px #ffc86c60; }
       .settings-gear.settings-gear-alert::after {
         content: ''; position: absolute; right: -2px; top: -2px; width: 9px; height: 9px; border-radius: 50%; background: #ff8a6e;
       }
       .settings-panel {
-        position: fixed; top: 204px; right: 12px; width: 300px; max-height: calc(100vh - 216px); overflow-y: auto;
+        position: fixed; top: calc(var(--dev-nav-height) + 64px); right: 12px; width: min(340px, calc(100vw - 24px)); max-height: calc(100dvh - var(--dev-nav-height) - 76px); overflow-y: auto;
         padding: 10px 12px 12px; border-radius: 10px; background: rgba(12, 16, 22, 0.9); border: 1px solid rgba(255, 255, 255, 0.12);
-        box-shadow: 0 4px 18px rgba(0, 0, 0, 0.45); font-size: 13px; z-index: 8; user-select: none;
+        box-shadow: 0 4px 18px rgba(0, 0, 0, 0.45); font-size: 13px; z-index: 45; user-select: none;
       }
       .settings-panel[hidden] { display: none; }
-      .settings-header { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+      .settings-header { position: sticky; top: -10px; z-index: 1; display: flex; align-items: center; gap: 8px; margin: -10px -12px 6px; padding: 10px 12px; background: #10161e; border-bottom: 1px solid #ffffff20; }
       .settings-title { font-size: 15px; font-weight: 700; }
       .settings-paused { padding: 0 8px; border-radius: 9px; background: rgba(255, 210, 120, 0.2); color: #ffe29a; font-size: 11px; line-height: 18px; }
       .settings-close {
-        margin-left: auto; width: 24px; height: 24px; padding: 0; border: none; border-radius: 6px; background: transparent;
-        color: var(--muted); font-size: 18px; line-height: 24px; cursor: pointer;
+        margin-left: auto; min-height: 44px; padding: 8px 12px; border: 1px solid #ffe29a88; border-radius: 6px; background: #ffe29a18;
+        color: var(--fg); font: inherit; white-space: nowrap; cursor: pointer;
       }
+      .settings-gear:focus-visible, .control-menu-toggle:focus-visible, .settings-close:focus-visible, button.settings-footer:focus-visible { outline: 2px solid #ffe29a; outline-offset: 2px; }
+      button.settings-footer { width: 100%; min-height: 44px; border: 1px solid #ffe29a88; border-radius: 6px; background: #ffe29a18; color: var(--fg); font: inherit; cursor: pointer; }
       .settings-close:hover { background: rgba(255, 255, 255, 0.1); color: var(--fg); }
       .settings-issues {
         margin: 4px 0 8px; padding: 6px 8px; border-radius: 6px; background: rgba(216, 69, 58, 0.22); border: 1px solid rgba(255, 138, 110, 0.5);
@@ -161,7 +209,7 @@
       .settings-range { flex: 1; min-width: 0; accent-color: #ffe29a; cursor: pointer; }
       .settings-range-value { width: 46px; text-align: right; font-variant-numeric: tabular-nums; }
       .settings-option {
-        flex: 1; min-width: 0; padding: 3px 4px; border: 1px solid transparent; border-radius: 6px; background: transparent;
+        flex: 1; min-width: max-content; padding: 3px 4px; border: 1px solid transparent; border-radius: 6px; background: transparent;
         color: var(--muted); font: inherit; font-size: 12px; cursor: pointer; white-space: nowrap;
       }
       .settings-option:hover { color: var(--fg); background: rgba(255, 255, 255, 0.08); }
@@ -200,59 +248,179 @@
       }
     </style>
     <link rel="stylesheet" href="/src/ui/control-surface.css" />
+    <link rel="stylesheet" href="/src/ui/game-audio.css" />
+    <link rel="stylesheet" href="/src/ui/sound-gallery.css" />
+    <link rel="stylesheet" href="/src/ui/homepage.css" />
   </head>
   <body>
     <main id="entry-index" hidden>
-      <div class="entry-content">
-        <p class="entry-eyebrow">PELICAN 429 / PLAYGROUND</p>
-        <h1>今天，从哪里开始？</h1>
-        <p class="entry-intro">探索世界，检查关卡，或近距离观察角色动作与场景资源。</p>
-        <nav class="entry-links" aria-label="功能入口">
-          <a class="entry-card" href="./?mode=game&amp;level=facility&amp;scene=fortress">
-            <img src="/resources/facility-fortress.jpg" alt="山体算力堡垒的实时场景" />
-            <div><span class="entry-number">FACILITY / THREE SCENES</span><h2>机房自由探索 <span>↗</span></h2><p>自由查看山体堡垒、算力大教堂与光纤深渊。走动、跳跃和飞行，探索设备与检修通道。</p></div>
-          </a>
-          <a class="entry-card" href="./?mode=intro&amp;opening=finale">
-            <img src="/assets/chapter-one/01-grassy-coding-concept-v3-mac-studio.png" alt="Grassy 在雨雪夜的房间里编程" />
-            <div><span class="entry-number">00 / PRELUDE</span><h2>AGI 降智风暴 · 序章 <span>↗</span></h2><p>四个音符把 AGI 推到 99%，一道 429 劈下，全场降智。黑暗里重新敲响，所有模型回归——前沿模型，人人有权使用。</p></div>
-          </a>
-          <a class="entry-card" href="./?mode=game">
-            <img src="/showcase/pelican.jpg" alt="游戏中的鹈鹕" />
-            <div><span class="entry-number">01 / DEMO</span><h2>演示场景 <span>↗</span></h2><p>切换鹈鹕与人形 Grassy，查看移动、飞行、游泳与战斗表现。</p></div>
-          </a>
-          <a class="entry-card" href="./?mode=game&amp;level=test">
-            <img src="/showcase/dummy.jpg" alt="训练假人" />
-            <div><span class="entry-number">02 / SANDBOX</span><h2>测试关卡 <span>↗</span></h2><p>进入固定小关卡，检查移动、物理与攻击效果。</p></div>
-          </a>
-          <a class="entry-card" href="./?mode=showcase">
-            <img src="/showcase/fish.jpg" alt="小鱼角色" />
-            <div><span class="entry-number">03 / CHARACTERS</span><h2>角色卡 <span>↗</span></h2><p>选择角色与动作，最多 8 张卡并排比较地上和地下效果。</p></div>
-          </a>
-          <a class="entry-card" href="./?mode=lab">
-            <img src="/resources/terrain.jpg" alt="游戏瓦片和花草" />
-            <div><span>SCENE LAB</span><h2>场景功能展示</h2><p>瓦片形状、材质拼接、植被分层与全部游戏资源。</p></div>
-          </a>
-          <a class="entry-card" href="./?mode=resources">
-            <img src="/resources/tree.jpg" alt="游戏中的树木资源" />
-            <div><span class="entry-number">04 / RESOURCES</span><h2>场景资源 <span>↗</span></h2><p>泥土瓦片、自然花草、树木与建筑，切换材质、变体和环境并排对照。</p></div>
-          </a>
-        </nav>
-        <p class="entry-footnote">全局开发导航可随时切换入口 · 页面切换会重新开始场景</p>
+      <svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="icon-github" viewBox="0 0 16 16"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></symbol></svg>
+      <header class="home-header">
+        <a class="home-brand" href="./?" aria-label="鹈鹕 429 首页"><span class="home-brand-mark">P<span>429</span></span><span>PELICAN 429<small>一场越过边界的冒险</small></span></a>
+        <nav class="home-nav" aria-label="网站导航"><a href="#home-world">游戏介绍</a><a href="#home-journey">章节</a><a href="#home-cast">角色</a><a href="#home-open-source">开源</a><a href="#home-community">赞助</a><a href="./?mode=dev">资源展示</a><span class="home-social" role="group" aria-label="联系作者"><a href="https://github.com/PomoAi-ai/pelican-429" target="_blank" rel="noopener" aria-label="GitHub 仓库" title="GitHub 仓库"><svg aria-hidden="true"><use href="#icon-github"/></svg></a><a href="https://x.com/grassy429" target="_blank" rel="noopener" aria-label="在 X 上关注 @grassy429" title="在 X 上关注 @grassy429"><svg aria-hidden="true" viewBox="0 0 24 24"><path fill="currentColor" d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a><button type="button" popovertarget="home-wechat-pop" aria-label="微信交流群" title="微信交流群"><svg aria-hidden="true" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M9 3C4.6 3 1 6 1 9.7c0 2.1 1.2 4 3 5.2l-.7 2.6 2.9-1.5c.9.3 1.8.4 2.8.4h.4a5.6 5.6 0 0 1-.2-1.5c0-3.6 3.4-6.5 7.6-6.5h.4C16.4 5.3 13 3 9 3ZM6 6.4a1.1 1.1 0 1 0 0 2.2 1.1 1.1 0 0 0 0-2.2Zm6 0a1.1 1.1 0 1 0 0 2.2 1.1 1.1 0 0 0 0-2.2Z"/><path fill="currentColor" fill-rule="evenodd" d="M16.8 10C13.1 10 10 12.5 10 15.6s3.1 5.6 6.8 5.6c.8 0 1.5-.1 2.2-.3l2.4 1.3-.6-2.1c1.6-1 2.6-2.6 2.6-4.5 0-3.1-3-5.6-6.6-5.6Zm-2.3 2.9a.9.9 0 1 0 0 1.8.9.9 0 0 0 0-1.8Zm4.6 0a.9.9 0 1 0 0 1.8.9.9 0 0 0 0-1.8Z"/></svg></button></span><a class="home-nav-play" href="./?mode=story">进入游戏</a></nav>
+      </header>
+      <div id="home-wechat-pop" class="home-wechat-pop" popover><img data-home-src="./resources/home/wechat-group.webp" alt="鹈鹕 429 微信交流群二维码" width="180" height="180" /><p>微信扫码加入交流群</p></div>
+      <section class="home-hero" aria-labelledby="home-title">
+        <div class="home-hero-art" role="img" aria-label="鹈鹕站在黑洞前哨的石台上，远处是蓝天下的未来都市与海面"><img class="home-hero-poster" data-home-src="./resources/home/fortress-overview.webp" alt="" fetchpriority="high" /></div>
+        <div class="home-hero-shade"></div>
+        <div class="home-hero-copy">
+          <p class="home-pill"><span class="home-status-dot"></span>独立横版动作冒险 · 主线制作中</p>
+          <h1 id="home-title">鹈鹕 <span>429</span></h1>
+          <p class="home-hero-tagline">世界拒绝访问。<br>我们继续向前。</p>
+          <p class="home-hero-description">从一场 AGI 风暴，走进算力与废墟交织的世界。<br>变换形态，穿过边界，找回属于每个人的未来。</p>
+          <div class="home-actions"><a class="home-button home-button-primary" href="./?mode=story">进入游戏 <span aria-hidden="true">→</span></a><a class="home-button home-button-secondary" href="./?mode=intro&amp;opening=finale"><span aria-hidden="true">▶</span> 观看序章</a><a class="home-button home-button-ghost" href="https://github.com/PomoAi-ai/pelican-429" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#icon-github"/></svg> 源码</a></div>
+          <p class="home-hero-note">浏览器即开即玩 · 无需下载 · 推荐电脑键盘与鼠标</p>
+        </div>
+        <aside class="home-hero-contact" aria-label="联系作者"><a class="home-hero-author" href="https://x.com/grassy429" target="_blank" rel="noopener"><img data-home-src="./contact/x-avatar.jpg" alt="作者头像" width="48" height="48" /><span><strong>小草</strong><small>作者 · @grassy429</small></span></a><div class="home-hero-contact-links"><a href="https://x.com/grassy429" target="_blank" rel="noopener"><svg aria-hidden="true" viewBox="0 0 24 24"><path fill="currentColor" d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg> 关注 X</a><a href="https://github.com/PomoAi-ai/pelican-429" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#icon-github"/></svg> GitHub</a></div><figure class="home-hero-qr"><img data-home-src="./resources/home/wechat-group.webp" alt="鹈鹕 429 微信交流群二维码" width="132" height="132" /><figcaption>微信扫码<br>加入交流群</figcaption></figure></aside>
+        <canvas class="home-hero-score" aria-hidden="true"></canvas>
+        <a class="home-scroll-cue" href="#home-world" aria-label="向下探索"><span></span></a>
+      </section>
+      <section class="home-world home-section" id="home-world" aria-labelledby="home-world-title">
+        <div class="home-section-heading"><p class="home-eyebrow">01 / ABOUT THE WORLD</p><h2 id="home-world-title">一只鹈鹕，<br>一个不愿放弃的世界。</h2><p class="home-world-lead">当通往未来的道路被一道「429」切断，冒险才刚刚开始。</p><p>《鹈鹕 429》是一款正在制作中的横版动作冒险游戏。跟随 Grassy 与鹈鹕，在自然遗迹和巨大机房之间探索，寻找穿越封锁的下一条路。</p></div>
+        <div class="home-features"><article><span>01</span><h3>越过边界</h3><p>走动、跳跃与飞行，从检修通道深入庞大的算力设施。</p><small>EXPLORE</small></article><article><span>02</span><h3>换个形态前进</h3><p>切换鹈鹕与人形 Grassy，体验不同的移动与动作表现。</p><small>TRANSFORM</small></article><article><span>03</span><h3>为前路而战</h3><p>瞄准、攻击、释放技能，在演示场景中熟悉战斗节奏。</p><small>FIGHT</small></article></div>
+      </section>
+      <section class="home-journey home-section" id="home-journey" aria-labelledby="home-journey-title">
+        <div class="home-journey-heading"><div><p class="home-eyebrow">02 / START YOUR JOURNEY</p><h2 id="home-journey-title">先听故事，再走进世界。</h2></div><p>从序章出发，或直接体验正在生长的主线。</p></div>
+        <div class="home-chapters">
+          <a class="home-chapter home-prelude" href="./?mode=intro&amp;opening=finale"><div class="home-chapter-image"><img data-src="./resources/home/prelude-card.webp" alt="Grassy 在雨雪夜的房间中编程" decoding="async" fetchpriority="low" /><span class="home-chapter-badge">序章 · 可观看</span><span class="home-play-icon" aria-hidden="true">▶</span></div><div class="home-chapter-copy"><p class="home-eyebrow">PROLOGUE / 00</p><h3>AGI 降智风暴</h3><p>四个音符把 AGI 推向 99%，一道 429 劈下。黑暗里，新的旋律重新响起。</p><span class="home-text-link">观看序章动画 <span aria-hidden="true">→</span></span></div></a>
+          <a class="home-chapter home-mainline" href="./?mode=story"><div class="home-chapter-image"><img data-src="./resources/home/fortress-overview.webp" alt="山体算力堡垒全景：三层机房、屋顶冷却阵列与黑洞前哨" decoding="async" fetchpriority="low" /><span class="home-chapter-badge home-chapter-badge-live"><span class="home-status-dot"></span>主线 · 开发中试玩</span></div><div class="home-chapter-copy"><p class="home-eyebrow">CHAPTER ONE / 01</p><h3>深入山体堡垒</h3><p>从黑洞前哨出发，穿过堡垒门禁，深入多层机房：清理外围守卫、击退 Tibo、击败 Sam，让前沿模型重新开放。主线仍在制作中，剧情与关卡将持续完善。</p><span class="home-text-link">进入主线试玩 <span aria-hidden="true">→</span></span></div></a>
+        </div>
+        <aside class="home-controls" aria-label="游玩提示"><div><strong>出发前的小提示</strong><p>推荐使用电脑游玩；具体操作以游戏内提示为准。</p></div><div class="home-control-keys"><span><kbd>A</kbd><kbd>D</kbd> 移动</span><span><kbd>Space</kbd> 跳跃</span><span><kbd>F</kbd> 切换形态</span><span><kbd>鼠标</kbd> 瞄准与攻击</span></div></aside>
+      </section>
+      <section class="home-cast home-section" id="home-cast" aria-labelledby="home-cast-title">
+        <div class="home-journey-heading"><div><p class="home-eyebrow">03 / CAST</p><h2 id="home-cast-title">认识这趟旅程里的每一位。</h2></div><p>同伴、首领与堡垒守卫，全部来自游戏里的真实模型。</p></div>
+        <div class="home-cast-group">
+          <h3 class="home-cast-label">主角<small>HEROES</small></h3>
+          <div class="home-cast-grid home-cast-heroes">
+            <article class="home-cast-card"><div class="home-cast-art"><img data-src="./resources/home/pelican.webp" alt="戴绿帽、系红围巾的白色鹈鹕" decoding="async" fetchpriority="low" /></div><div class="home-cast-copy"><h4>鹈鹕</h4><p>吐水普攻、鱼群轰炸、振翅突进、吞弹反击</p></div></article>
+            <article class="home-cast-card"><div class="home-cast-art"><img data-src="./resources/home/grassy.webp" alt="穿红色上衣、背着键盘装备的少年 Grassy" decoding="async" fetchpriority="low" /></div><div class="home-cast-copy"><h4>Grassy · 人类</h4><p>正式装备角色 · 骑行、键盘战斗与推进飞行</p></div></article>
+            <article class="home-cast-card"><div class="home-cast-art home-cast-art-fill"><img data-src="./characters/luma/portrait.jpg" alt="在黑暗中发出青色微光的光子" decoding="async" fetchpriority="low" /></div><div class="home-cast-copy"><h4>光子</h4><p>像萤火虫一样的一团活的光，一路引导</p></div></article>
+          </div>
+        </div>
+        <div class="home-cast-group">
+          <h3 class="home-cast-label">首领<small>BOSSES</small></h3>
+          <div class="home-cast-grid home-cast-bosses">
+            <article class="home-cast-card home-cast-boss"><div class="home-cast-art home-cast-art-fill"><img data-src="./resources/home/tibo.webp" alt="穿黑色帽衫、戴重置胸章的 Tibo" decoding="async" fetchpriority="low" /></div><div class="home-cast-copy"><p class="home-eyebrow">BOSS / 01</p><h4>Tibo</h4><p class="home-cast-title">重置大师 · The Reset Master</p><p>机房核心的第一位首领，击退他才能解锁变身。</p><ul class="home-stack" aria-label="Tibo 的技能"><li>薯条攻击</li><li>额度返场</li><li>重置降临</li></ul></div></article>
+            <article class="home-cast-card home-cast-boss"><div class="home-cast-art home-cast-art-fill"><img data-src="./resources/home/sam.webp" alt="穿灰色毛衣、戴路由胸章的 Sam" decoding="async" fetchpriority="low" /></div><div class="home-cast-copy"><p class="home-eyebrow">BOSS / 02</p><h4>Sam</h4><p class="home-cast-title">模型路由者 · The Model Router</p><p>Tibo 之后抵达的对手，击败他，前沿模型才能重新开放。</p><ul class="home-stack" aria-label="Sam 的技能"><li>模型路由攻击</li><li>算力激涌</li><li>AGI 降临</li></ul></div></article>
+          </div>
+        </div>
+        <div class="home-cast-group">
+          <h3 class="home-cast-label">堡垒守卫<small>FORTRESS GUARDS</small></h3>
+          <div class="home-cast-grid home-cast-guards">
+            <article class="home-cast-card"><div class="home-cast-art"><img data-src="./resources/home/gatekeeper.webp" alt="大头双钳的白色机器人欧米 OMI-01" decoding="async" fetchpriority="low" /></div><div class="home-cast-copy"><h4>欧米 OMI-01</h4><p>夹臂横扫 · 突进夹击</p></div></article>
+            <article class="home-cast-card"><div class="home-cast-art"><img data-src="./resources/home/line-hound.webp" alt="四足机械犬巡线犬" decoding="async" fetchpriority="low" /></div><div class="home-cast-copy"><h4>巡线犬</h4><p>直线扑冲 · 落地震击</p></div></article>
+            <article class="home-cast-card"><div class="home-cast-art"><img data-src="./resources/home/watch-wasp.webp" alt="四旋翼无人机哨蜂" decoding="async" fetchpriority="low" /></div><div class="home-cast-copy"><h4>哨蜂</h4><p>悬停投弹 · 铝热剂投放</p></div></article>
+            <article class="home-cast-card"><div class="home-cast-art"><img data-src="./resources/home/loadmaster.webp" alt="带黄色机械臂的轮式搬运机器人搬山" decoding="async" fetchpriority="low" /></div><div class="home-cast-copy"><h4>搬山</h4><p>前方下砸 · 低位横扫</p></div></article>
+          </div>
+        </div>
+        <a class="home-text-link home-cast-more" href="./?mode=showcase">在角色展示场查看实时 3D 模型 <span aria-hidden="true">→</span></a>
+      </section>
+      <section class="home-open-source home-section" id="home-open-source" aria-labelledby="home-open-source-title">
+        <div class="home-open-source-card">
+          <div class="home-open-source-copy">
+            <p class="home-eyebrow">04 / SOURCE AVAILABLE</p>
+            <h2 id="home-open-source-title">源码公开，<br>欢迎一起建造。</h2>
+            <p>游戏逻辑、关卡生成与角色资源全部公开在 GitHub。提交 Issue、参与讨论，或直接 fork 一份，造出你自己的鹈鹕冒险。</p>
+            <ul class="home-stack" aria-label="技术栈"><li>TypeScript</li><li>three.js</li><li>Vite</li><li>种子化世界生成</li></ul>
+            <div class="home-license"><p class="home-license-title">许可协议：<span>Apache 2.0 + Commons Clause 1.0</span></p><ul class="home-license-list"><li class="home-license-yes">个人、团队、公司都可以免费使用、学习、修改和再分发</li><li class="home-license-yes">魔改、二次创作、做成你自己的作品免费发布，都没问题</li><li class="home-license-no">唯一的限制：不要把本项目或主要依赖它功能的东西拿去收费售卖</li></ul><p>分发时保留许可声明即可；有商业合作想法，欢迎联系作者另行授权。</p><a class="home-text-link" href="https://github.com/PomoAi-ai/pelican-429/blob/main/LICENSE" target="_blank" rel="noopener">阅读完整许可 <span aria-hidden="true">↗</span></a></div>
+            <div class="home-actions"><a class="home-button home-button-primary" href="https://github.com/PomoAi-ai/pelican-429" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#icon-github"/></svg> 在 GitHub 查看</a><a class="home-button home-button-secondary" href="https://github.com/PomoAi-ai/pelican-429/issues" target="_blank" rel="noopener">反馈问题 <span aria-hidden="true">↗</span></a></div>
+          </div>
+          <div class="home-terminal" aria-label="本地运行命令">
+            <div class="home-terminal-bar"><i></i><i></i><i></i><span>pelican-429</span></div>
+            <pre><code><span class="home-terminal-dim"># 克隆仓库</span>
+<b>$</b> git clone https://github.com/PomoAi-ai/pelican-429.git
+<b>$</b> cd pelican-429
+
+<span class="home-terminal-dim"># 安装依赖并启动</span>
+<b>$</b> npm install
+<b>$</b> npm run dev</code></pre>
+          </div>
+        </div>
+      </section>
+      <section class="home-community home-section" id="home-community" aria-labelledby="home-community-title">
+        <div class="home-journey-heading"><div><p class="home-eyebrow">05 / SPONSOR &amp; CONTACT</p><h2 id="home-community-title">赞助与联系</h2></div><p>感谢赞助方的支持；有问题、想法或建议，欢迎来聊。</p></div>
+        <div class="home-community-grid">
+          <article class="home-sponsor">
+            <p class="home-eyebrow">SPONSOR</p>
+            <h3>本项目由 PomoAI 中转站赞助</h3>
+            <p>PomoAI · 大模型 API 中转服务</p>
+            <div class="home-actions"><a class="home-button home-button-primary" href="https://www.pomoai.ai" target="_blank" rel="sponsored noopener">访问 www.pomoai.ai <span aria-hidden="true">↗</span></a></div>
+          </article>
+          <article class="home-contact">
+            <div>
+              <p class="home-eyebrow">CONTACT</p>
+              <h3>联系作者</h3>
+              <a class="home-author" href="https://x.com/grassy429" target="_blank" rel="noopener"><img data-src="./contact/x-avatar.jpg" alt="作者头像" width="56" height="56" decoding="async" fetchpriority="low" /><span><strong>小草</strong><small>@grassy429 · X</small></span></a>
+              <p>反馈问题、提出建议或交流想法，欢迎在 GitHub Issues 留言、在 X 上关注 @grassy429，或扫码加入微信交流群。</p>
+              <div class="home-actions"><a class="home-button home-button-secondary" href="https://github.com/PomoAi-ai/pelican-429/issues" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#icon-github"/></svg> GitHub Issues <span aria-hidden="true">↗</span></a><a class="home-button home-button-secondary" href="https://x.com/grassy429" target="_blank" rel="noopener"><svg aria-hidden="true" viewBox="0 0 24 24"><path fill="currentColor" d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg> @grassy429 <span aria-hidden="true">↗</span></a></div>
+            </div>
+            <figure class="home-qr"><img data-src="./resources/home/wechat-group.webp" alt="鹈鹕 429 微信交流群二维码" decoding="async" fetchpriority="low" /><figcaption>微信扫码加入交流群 · 二维码定期更新，失效请通过 Issues 联系</figcaption></figure>
+          </article>
+        </div>
+      </section>
+      <section class="home-credits home-section" id="home-credits" aria-labelledby="home-credits-title">
+        <div class="home-journey-heading"><div><p class="home-eyebrow">06 / CREDITS</p><h2 id="home-credits-title">特别感谢</h2></div><p>这只鹈鹕能飞起来，离不开这些伙伴。</p></div>
+        <div class="home-credits-grid">
+          <article class="home-credit home-credit-models"><p class="home-eyebrow">AI 协作</p><h3>感谢三个模型，全程封号 + 降智</h3><p>代码、关卡、剧情与无数次调试，都有它们在一起熬夜。</p><ul class="home-stack" aria-label="协作模型"><li>GPT-6 Astra</li><li>Claude Opus 5.5</li><li>Claude Sonnet 5.5</li></ul></article>
+          <article class="home-credit"><p class="home-eyebrow">3D 模型制作</p><h3>感谢付费 3D 模型制作服务</h3><p>角色与怪物的基础模型由 Hyper3D Rodin 付费生成，让每一位登场角色都有了真实的身体。</p><ul class="home-stack" aria-label="3D 模型服务"><li>Hyper3D Rodin</li></ul></article>
+          <article class="home-credit home-credit-wide"><p class="home-eyebrow">开源项目</p><h3>感谢各种开源项目</h3><p>站在开源社区的肩膀上：渲染、构建、类型系统与模型绑定动画，全部来自开源工具。</p><ul class="home-stack" aria-label="开源项目"><li>three.js</li><li>Vite</li><li>TypeScript</li><li>Node.js</li><li>Blender</li></ul></article>
+        </div>
+      </section>
+      <footer class="home-footer">
+        <div class="home-footer-top">
+          <div><a class="home-footer-title" href="./?"><span class="home-brand-mark">P<span>429</span></span>鹈鹕 429</a><p>前沿模型，人人有权使用。</p></div>
+          <nav class="home-footer-links" aria-label="页脚导航"><a href="./?mode=story">进入游戏</a><a href="./?mode=intro&amp;opening=finale">序章动画</a><a href="./?mode=dev">资源展示</a><a href="https://github.com/PomoAi-ai/pelican-429" target="_blank" rel="noopener">GitHub</a><a href="https://x.com/grassy429" target="_blank" rel="noopener">X</a><a href="https://www.pomoai.ai" target="_blank" rel="sponsored noopener">赞助 PomoAI</a><a href="#home-community">联系作者</a></nav>
+        </div>
+        <div class="home-footer-bottom"><span><span class="home-status-dot"></span>主线制作中，下一段旅程正在发生。</span><span>pelican429.pomoai.vip · <a href="https://github.com/PomoAi-ai/pelican-429/blob/main/LICENSE" target="_blank" rel="noopener">Apache 2.0 + Commons Clause</a></span></div>
+      </footer>
+      <div class="home-noise" aria-hidden="true">
+        <span class="omen" style="--x:4%;--y:8%;--r:-4deg;--s:22px">x-codex-turn-state</span>
+        <span class="strike" style="--x:58%;--y:4%;--r:3deg;--s:34px">len=312</span>
+        <span class="omen" style="--x:30%;--y:30%;--r:8deg;--s:15px">gAAAAA…</span>
+        <span class="flip" style="--x:76%;--y:26%;--r:-7deg;--s:44px">292</span>
+        <span class="strike" style="--x:8%;--y:44%;--r:-2deg;--s:18px">server_is_overloaded</span>
+        <span class="log" style="--x:46%;--y:46%;--r:1deg;--s:13px">&gt; harvest</span>
+        <span class="strike" style="--x:22%;--y:62%;--r:5deg;--s:24px">astra → luna</span>
+        <span class="omen" style="--x:62%;--y:58%;--r:-11deg;--s:16px">…-degrade2-luna-1p-codexswic-ev3</span>
+        <span class="log" style="--x:3%;--y:80%;--r:-6deg;--s:13px">&gt; len=292 ✓</span>
+        <span class="strike" style="--x:40%;--y:76%;--r:-3deg;--s:20px">v0.2.6 → 404</span>
+        <span class="flip" style="--x:66%;--y:80%;--r:4deg;--s:22px">312 → 292 ✓</span>
+        <span class="log" style="--x:88%;--y:66%;--r:9deg;--s:12px">&gt; ttl 3600</span>
+        <span class="flip" style="--x:84%;--y:6%;--r:12deg;--s:14px">luna → astra ✓</span>
+        <span class="log" style="--x:28%;--y:12%;--r:-9deg;--s:12px">&gt; inject</span>
+        <span class="omen" style="--x:52%;--y:90%;--r:2deg;--s:30px">312</span>
       </div>
+    </main>
+    <main id="dev-index" hidden>
+      <header class="home-header"><a class="home-brand" href="./">PELICAN 429 <small>返回首页</small></a><nav class="home-nav" aria-label="资源展示导航"><a class="home-nav-play" href="./?mode=story">进入游戏 <span aria-hidden="true">↗</span></a></nav></header>
+      <section class="home-section">
+        <p class="home-eyebrow">PELICAN 429 / DEV SCENES</p>
+        <h1>资源展示</h1>
+        <p class="dev-catalog-description">当前游戏的全部开发场景。查看角色与动作、场景资源、声音，或进入各个关卡自由探索。</p>
+        <nav id="dev-catalog" aria-label="全部开发场景"></nav>
+      </section>
     </main>
     <nav id="dev-navigation" aria-label="开发导航">
       <div class="dev-brand">PELICAN 429 <span>DEV</span></div>
       <div class="dev-links">
         <a href="./" data-page="index">首页</a>
+        <a href="./?mode=story" data-page="story">进入游戏</a>
+        <a href="./?mode=story&amp;restart=1">重头开始</a>
         <a href="./?mode=intro&amp;opening=finale" data-page="intro">序章动画</a>
-        <a href="./?mode=game&amp;level=facility&amp;scene=fortress" data-page="chapter-fortress">01 山体堡垒</a>
-        <a href="./?mode=game&amp;level=facility&amp;scene=cathedral" data-page="chapter-cathedral">02 算力大教堂</a>
-        <a href="./?mode=game&amp;level=facility&amp;scene=abyss" data-page="chapter-abyss">03 光纤深渊</a>
-        <a href="./?mode=facility" data-page="facility">机房预览</a>
-        <a href="./?mode=game" data-page="game">演示场景</a>
-        <a href="./?mode=game&amp;level=test" data-page="test">测试关卡</a>
+        <button type="button" class="dev-group-toggle" popovertarget="dev-scenes-menu">场景测试</button>
+        <div id="dev-scenes-menu" class="dev-group-menu" popover>
+          <a href="./?mode=game&amp;level=boss-arena" data-page="boss-arena">Boss 场</a>
+          <a href="./?mode=game&amp;level=facility&amp;scene=fortress" data-page="chapter-fortress">01 山体堡垒</a>
+          <a href="./?mode=game&amp;level=facility&amp;scene=cathedral" data-page="chapter-cathedral">02 算力大教堂</a>
+          <a href="./?mode=game&amp;level=facility&amp;scene=abyss" data-page="chapter-abyss">03 光纤深渊</a>
+          <a href="./?mode=facility" data-page="facility">机房预览</a>
+        </div>
+        <a href="./?mode=game" data-page="game">自由世界</a>
+        <a href="./?mode=controls&amp;level=test" data-page="controls">手机操控</a>
         <a href="./?mode=showcase" id="dev-showcase-link" data-page="showcase">角色展示场</a>
+        <a href="./?mode=compare" data-page="compare">画质对比</a>
         <a href="./?mode=resources" data-page="resources">场景资源</a>
+        <a href="./?mode=sounds" data-page="sounds">声音目录</a>
         <a href="./?mode=lab" data-page="lab">场景功能展示</a>
       </div>
     </nav>
