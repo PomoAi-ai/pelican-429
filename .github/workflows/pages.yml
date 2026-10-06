@@ -17,8 +17,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+        env:
+          GIT_LFS_SKIP_SMUDGE: '1'
         with:
-          lfs: true
+          lfs: false
           sparse-checkout-cone-mode: false
           sparse-checkout: |
             /*
@@ -39,6 +41,15 @@ jobs:
         with:
           node-version: 22
           cache: npm
+      - name: Fetch release models
+        run: |
+          model_paths=$(node --input-type=module <<'JS'
+          import { RELEASE_MODEL_PATHS } from './src/config/web-models.ts';
+          if (RELEASE_MODEL_PATHS.length === 0) throw new Error('Release model list is empty');
+          console.log(RELEASE_MODEL_PATHS.map(path => `public/${path.replace(/^\.\//, '')}`).join(','));
+          JS
+          )
+          git lfs pull --include="$model_paths" --exclude=""
       - uses: actions/configure-pages@v5
       - run: npm ci
       - run: npm run build

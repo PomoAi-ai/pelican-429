@@ -30,3 +30,6 @@ export function ktx256ModelPath(source: string): string {
 export function compactModelPath(source: string, textureSize: 512 | 256): string {
   return source.replace(/\.glb$/, textureSize === 512 ? '.ktx2-compact.glb' : '.ktx2-256-compact.glb');
 }
+
+/** 构建与 CI 按需拉取共用同一份正式模型清单。 */
+export const RELEASE_MODEL_PATHS: readonly string[] = WEB_MODEL_SOURCES.map(source => compactModelPath(source, 512));
