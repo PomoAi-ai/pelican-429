@@ -19,6 +19,22 @@ jobs:
       - uses: actions/checkout@v6
         with:
           lfs: true
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /*
+            !/*/
+            /src/
+            /public/
+            /assets/chapter-one/01-grassy-coding-concept-v3-mac-studio.webp
+            /assets/chapter-one/02-neural-breach-game-v3.webp
+            /assets/chapter-one/03-feather-transformation-v2.webp
+            /assets/chapter-one/03-neural-rift-game-v3.webp
+            /assets/characters/web-1k-models-report.json
+            /assets/characters/web-models-report.json
+            /assets/characters/ktx2-models-report.json
+            /assets/characters/ktx2-256-models-report.json
+            /assets/characters/ktx2-compact-models-report.json
+            /assets/characters/ktx2-256-compact-models-report.json
       - uses: actions/setup-node@v4
         with:
           node-version: 22
