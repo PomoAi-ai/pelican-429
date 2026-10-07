@@ -333,7 +333,6 @@ async function start(story: StorySave | undefined, newStory: boolean, onReady?: 
   hud.toggleHints();
   disposers.push(() => hud.dispose());
   const navigation = requireElement<HTMLDetailsElement>('game-navigation');
-  if (story) requireElement('dev-navigation').append(document.querySelector('.site-language')!);
   const releaseInput = (): void => tracker.releaseAll();
   navigation.addEventListener('focusin', releaseInput);
   disposers.push(() => navigation.removeEventListener('focusin', releaseInput));

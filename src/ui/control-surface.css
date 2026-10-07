@@ -14,7 +14,7 @@ body[data-controls] {
 body[data-controls] #app { inset: var(--dev-nav-height) 0 0; width: 100%; height: calc(100% - var(--dev-nav-height)); border-radius: 0; box-shadow: none; overflow: hidden; }
 body[data-controls] .hud-help-badge, body[data-controls] .hud-stats { display: none; }
 body[data-controls] .minimap { transform: translateY(calc(var(--dev-nav-height) + 48px)); }
-body[data-controls] .game-navigation-handle, body.intro-active .game-navigation-handle { display: none; }
+body[data-controls]:not(.intro-active) .game-navigation-handle { display: none; }
 .control-surface { position: fixed; inset: 0; z-index: 6; pointer-events: none; user-select: none; color: var(--control-ink); }
 body[data-controls=mobile] .control-surface, body[data-controls=mobile] #hud { inset: var(--game-safe-top) var(--game-safe-right) var(--game-safe-bottom) var(--game-safe-left); }
 body[data-controls=mobile] .settings-gear { top: calc(var(--dev-nav-height) + var(--game-safe-top) + 12px); right: calc(var(--game-safe-right) + 12px); }

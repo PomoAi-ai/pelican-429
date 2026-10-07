@@ -258,12 +258,6 @@
   </head>
   <body>
     <main id="entry-index" hidden>
-      <svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="icon-github" viewBox="0 0 16 16"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></symbol></svg>
-      <header class="home-header">
-        <a class="home-brand" href="./?" aria-label="鹈鹕 429 首页"><span class="home-brand-mark">P<span>429</span></span><span>PELICAN 429<small>一场越过边界的冒险</small></span></a>
-        <nav class="home-nav" aria-label="网站导航"><a href="#home-world">游戏介绍</a><a href="#home-journey">章节</a><a href="#home-cast">角色</a><a href="#home-open-source">开源</a><a href="#home-community">赞助</a><a href="./?mode=dev">资源展示</a><span class="home-social" role="group" aria-label="联系作者"><a href="https://github.com/PomoAi-ai/pelican-429" target="_blank" rel="noopener" aria-label="GitHub 仓库" title="GitHub 仓库"><svg aria-hidden="true"><use href="#icon-github"/></svg></a><a href="https://x.com/grassy429" target="_blank" rel="noopener" aria-label="在 X 上关注 @grassy429" title="在 X 上关注 @grassy429"><svg aria-hidden="true" viewBox="0 0 24 24"><path fill="currentColor" d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a><button type="button" popovertarget="home-wechat-pop" aria-label="微信交流群" title="微信交流群"><svg aria-hidden="true" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M9 3C4.6 3 1 6 1 9.7c0 2.1 1.2 4 3 5.2l-.7 2.6 2.9-1.5c.9.3 1.8.4 2.8.4h.4a5.6 5.6 0 0 1-.2-1.5c0-3.6 3.4-6.5 7.6-6.5h.4C16.4 5.3 13 3 9 3ZM6 6.4a1.1 1.1 0 1 0 0 2.2 1.1 1.1 0 0 0 0-2.2Zm6 0a1.1 1.1 0 1 0 0 2.2 1.1 1.1 0 0 0 0-2.2Z"/><path fill="currentColor" fill-rule="evenodd" d="M16.8 10C13.1 10 10 12.5 10 15.6s3.1 5.6 6.8 5.6c.8 0 1.5-.1 2.2-.3l2.4 1.3-.6-2.1c1.6-1 2.6-2.6 2.6-4.5 0-3.1-3-5.6-6.6-5.6Zm-2.3 2.9a.9.9 0 1 0 0 1.8.9.9 0 0 0 0-1.8Zm4.6 0a.9.9 0 1 0 0 1.8.9.9 0 0 0 0-1.8Z"/></svg></button></span><a class="home-nav-play" href="./?mode=story">进入游戏</a></nav>
-      </header>
-      <div id="home-wechat-pop" class="home-wechat-pop" popover><img data-home-src="./resources/home/wechat-group.webp" alt="鹈鹕 429 微信交流群二维码" width="180" height="180" /><p>微信扫码加入交流群</p></div>
       <section class="home-hero" aria-labelledby="home-title">
         <div class="home-hero-art" role="img" aria-label="鹈鹕站在黑洞前哨的石台上，远处是蓝天下的未来都市与海面"><img class="home-hero-poster" data-home-src="./resources/home/fortress-overview.webp" alt="" fetchpriority="high" /></div>
         <div class="home-hero-shade"></div>
@@ -396,7 +390,7 @@
       </div>
     </main>
     <main id="dev-index" hidden>
-      <header class="home-header"><a class="home-brand" href="./">PELICAN 429 <small>返回首页</small></a><nav class="home-nav" aria-label="资源展示导航"><a class="home-nav-play" href="./?mode=story">进入游戏 <span aria-hidden="true">↗</span></a></nav></header>
+
       <section class="home-section">
         <p class="home-eyebrow">PELICAN 429 / DEV SCENES</p>
         <h1>资源展示</h1>
@@ -404,30 +398,43 @@
         <nav id="dev-catalog" aria-label="全部开发场景"></nav>
       </section>
     </main>
-    <nav id="dev-navigation" aria-label="开发导航">
-      <div class="dev-brand">PELICAN 429 <span>DEV</span></div>
-      <div class="dev-links">
-        <a href="./" data-page="index">首页</a>
-        <a href="./?mode=story" data-page="story">进入游戏</a>
-        <a href="./?mode=story&amp;restart=1">重头开始</a>
-        <a href="./?mode=intro&amp;opening=finale" data-page="intro">序章动画</a>
-        <button type="button" class="dev-group-toggle" popovertarget="dev-scenes-menu">场景测试</button>
-        <div id="dev-scenes-menu" class="dev-group-menu" popover>
+      <svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="icon-github" viewBox="0 0 16 16"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></symbol></svg>
+      <header id="dev-navigation" class="home-header">
+        <a class="home-brand" href="./" data-page="index" aria-label="鹈鹕 429 首页"><span class="home-brand-mark">P<span>429</span></span><span>PELICAN 429<small>一场越过边界的冒险</small></span></a>
+        <nav class="home-nav dev-links" aria-label="网站导航"><a class="home-section-link" href="./#home-world">游戏介绍</a><a class="home-section-link" href="./#home-journey">章节</a><a class="home-section-link" href="./#home-cast">角色</a><a class="home-section-link" href="./#home-open-source">开源</a><a class="home-section-link" href="./#home-community">赞助</a><a class="home-primary-link home-index-link" href="./">首页</a>
+        <button type="button" class="home-resources-toggle" popovertarget="home-resources-menu"><span>资源</span><span aria-hidden="true"></span></button>
+        <div id="home-resources-menu" class="home-resources-menu" popover>
+          <a href="./?mode=catalog" data-page="catalog">资源总览</a>
+          <a href="./?mode=showcase" data-page="showcase" id="dev-showcase-link">角色展示场</a>
+          <a href="./?mode=showcase&amp;library=history" data-page="history">历史资料</a>
+          <a href="./?mode=compare" data-page="compare">画质对比</a>
+          <a href="./?mode=resources" data-page="resources">场景资源</a>
+          <a href="./?mode=sounds" data-page="sounds">声音目录</a>
+        </div>
+        <button type="button" class="home-resources-toggle home-scenes-toggle" popovertarget="home-scenes-menu"><span>场景</span><span aria-hidden="true"></span></button>
+        <div id="home-scenes-menu" class="home-resources-menu" popover>
+          <a href="./?mode=intro&amp;opening=finale" data-page="intro">序章动画</a>
+          <a href="./?mode=lab" data-page="lab">场景功能展示</a>
+          <a href="./?mode=controls&amp;level=test" data-page="controls">手机展示</a>
           <a href="./?mode=game&amp;level=boss-arena" data-page="boss-arena">Boss 场</a>
           <a href="./?mode=game&amp;level=facility&amp;scene=fortress" data-page="chapter-fortress">01 山体堡垒</a>
           <a href="./?mode=game&amp;level=facility&amp;scene=cathedral" data-page="chapter-cathedral">02 算力大教堂</a>
           <a href="./?mode=game&amp;level=facility&amp;scene=abyss" data-page="chapter-abyss">03 光纤深渊</a>
           <a href="./?mode=facility" data-page="facility">机房预览</a>
+          <a href="./?mode=dev" data-page="dev">全部开发场景</a>
         </div>
-        <a href="./?mode=game" data-page="game">自由世界</a>
-        <a href="./?mode=controls&amp;level=test" data-page="controls">手机操控</a>
-        <a href="./?mode=showcase" id="dev-showcase-link" data-page="showcase">角色展示场</a>
-        <a href="./?mode=compare" data-page="compare">画质对比</a>
-        <a href="./?mode=resources" data-page="resources">场景资源</a>
-        <a href="./?mode=sounds" data-page="sounds">声音目录</a>
-        <a href="./?mode=lab" data-page="lab">场景功能展示</a>
-      </div>
-    </nav>
+        <a class="home-primary-link" href="./?mode=game" data-page="game">自由世界</a>
+        <span class="home-play-control">
+          <a class="home-nav-play" href="./?mode=story" data-page="story">开始游戏</a>
+          <button type="button" class="home-resources-toggle home-play-toggle" popovertarget="home-play-menu" aria-label="更多游戏选项" hidden><span aria-hidden="true"></span></button>
+        </span>
+        <div id="home-play-menu" class="home-resources-menu" popover>
+          <a href="./?mode=story&amp;restart=1">重新开始</a>
+        </div>
+        <a class="home-primary-link" href="./?mode=about" data-page="about">帮助与关于</a>
+        <span class="home-social" role="group" aria-label="联系作者"><a href="https://github.com/PomoAi-ai/pelican-429" target="_blank" rel="noopener" aria-label="GitHub 仓库" title="GitHub 仓库"><svg aria-hidden="true"><use href="#icon-github"/></svg></a><a href="https://x.com/grassy429" target="_blank" rel="noopener" aria-label="在 X 上关注 @grassy429" title="在 X 上关注 @grassy429"><svg aria-hidden="true" viewBox="0 0 24 24"><path fill="currentColor" d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a><button type="button" popovertarget="home-wechat-pop" aria-label="微信交流群" title="微信交流群"><svg aria-hidden="true" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M9 3C4.6 3 1 6 1 9.7c0 2.1 1.2 4 3 5.2l-.7 2.6 2.9-1.5c.9.3 1.8.4 2.8.4h.4a5.6 5.6 0 0 1-.2-1.5c0-3.6 3.4-6.5 7.6-6.5h.4C16.4 5.3 13 3 9 3ZM6 6.4a1.1 1.1 0 1 0 0 2.2 1.1 1.1 0 0 0 0-2.2Zm6 0a1.1 1.1 0 1 0 0 2.2 1.1 1.1 0 0 0 0-2.2Z"/><path fill="currentColor" fill-rule="evenodd" d="M16.8 10C13.1 10 10 12.5 10 15.6s3.1 5.6 6.8 5.6c.8 0 1.5-.1 2.2-.3l2.4 1.3-.6-2.1c1.6-1 2.6-2.6 2.6-4.5 0-3.1-3-5.6-6.6-5.6Zm-2.3 2.9a.9.9 0 1 0 0 1.8.9.9 0 0 0 0-1.8Zm4.6 0a.9.9 0 1 0 0 1.8.9.9 0 0 0 0-1.8Z"/></svg></button></span></nav>
+      <div id="home-wechat-pop" class="home-wechat-pop" popover><img src="./resources/home/wechat-group.webp" alt="鹈鹕 429 微信交流群二维码" width="180" height="180" /><p>微信扫码加入交流群</p></div>
+      </header>
     <div id="app"></div>
     <div id="hud" aria-live="off"></div>
     <div id="loading" class="overlay" role="status">

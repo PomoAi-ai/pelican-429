@@ -6,44 +6,19 @@
 .home-noise .flip { color: #f8d791; font-weight: 700; text-shadow: 0 0 14px #f8d79160; }
 .home-noise .log { color: #8be6e2; opacity: 0.7; }
 
-body.site-home { --dev-nav-height: 0px; }
 #entry-index, #dev-index {
   --home-bg: #08111a; --home-surface: #0e1b26; --home-surface-2: #132431; --home-line: #ffffff17;
   --home-fg: #f2f1e8; --home-muted: #a7b6c0; --home-dim: #7d8f9b; --home-accent: #d6ed8d; --home-accent-strong: #e8ffa3;
   --home-gutter: max(6%, calc((100% - 1240px) / 2)); --home-radius: 18px;
 }
-#entry-index { inset: 0; background: var(--home-bg); color: var(--home-fg); scroll-behavior: smooth; }
+#entry-index { inset: var(--dev-nav-height) 0 0; background: var(--home-bg); color: var(--home-fg); scroll-behavior: smooth; }
 #entry-index a { color: inherit; text-decoration: none; }
 #entry-index a:focus-visible { outline: 2px solid var(--home-accent); outline-offset: 4px; border-radius: 6px; }
 #entry-index section { scroll-margin-top: 72px; }
 #entry-index svg { width: 18px; height: 18px; flex: none; }
 
-.home-header {
-  position: sticky; top: 0; z-index: 5; height: 72px; padding: 0 var(--home-gutter, 6%); display: flex; align-items: center; justify-content: space-between; gap: 24px;
-  background: linear-gradient(#08111acc, #08111a66); backdrop-filter: blur(14px) saturate(1.4); -webkit-backdrop-filter: blur(14px) saturate(1.4); border-bottom: 1px solid var(--home-line);
-}
-.home-brand { display: flex; align-items: center; gap: 12px; font-size: 13px; font-weight: 750; letter-spacing: 2.5px; }
-.home-brand small { display: block; margin-top: 4px; color: var(--home-dim); font-size: 10px; font-weight: 400; letter-spacing: 1.5px; }
-.home-brand-mark { display: inline-flex; align-items: baseline; font: italic 800 28px/1 Arial, sans-serif; letter-spacing: -2px; }
-.home-brand-mark span { font-size: 14px; color: var(--home-accent); letter-spacing: -0.5px; }
-.home-nav { display: flex; align-items: center; gap: 6px; font-size: 14px; }
-.home-nav > a { padding: 8px 14px; border-radius: 10px; color: #cfd8dd; transition: color 150ms, background 150ms; }
-.home-nav > a:hover { color: #fff; background: #ffffff10; }
-.home-social { display: inline-flex; align-items: center; gap: 2px; margin: 0 4px; padding: 3px; border-radius: 12px; border: 1px solid #d6ed8d40; background: #d6ed8d0d; }
-.home-social > a, .home-social > button { display: grid; place-items: center; width: 32px; height: 32px; padding: 0; border: 0; border-radius: 9px; color: #e6ecd8; background: transparent; cursor: pointer; transition: color 150ms, background 150ms; }
-.home-social > a:hover, .home-social > button:hover { color: #10180f; background: var(--home-accent); }
-#entry-index .home-social svg { width: 17px; height: 17px; }
-.home-social > button:focus-visible { outline: 2px solid var(--home-accent); outline-offset: 2px; }
-.home-wechat-pop { position: fixed; inset: 80px max(16px, var(--home-gutter)) auto auto; margin: 0; padding: 14px 14px 10px; border: 1px solid #d6ed8d55; border-radius: 16px; background: #0e1b26; color: var(--home-fg); box-shadow: 0 24px 60px -20px #000000d0; text-align: center; }
-.home-wechat-pop img { display: block; width: 180px; height: 180px; border-radius: 10px; background: #fff; padding: 8px; }
-.home-wechat-pop p { margin: 10px 0 0; color: var(--home-muted); font-size: 13px; }
-#entry-index .home-nav-play, #dev-index .home-nav-play { margin-left: 8px; padding: 9px 18px; color: #10180f; background: var(--home-accent); font-weight: 700; }
-#entry-index .home-nav-play:hover, #dev-index .home-nav-play:hover { background: var(--home-accent-strong); }
-#entry-index .site-language, #dev-index .site-language { margin-left: 0; padding: 7px 28px 7px 12px; border-color: #ffffff2e; border-radius: 10px; color: #cfd8dd; background-color: transparent; background-position: right 12px center; font-size: 14px; }
-#entry-index .site-language:hover, #dev-index .site-language:hover { color: #fff; background-color: #ffffff10; }
-
 /* 文案和联系卡叠在同一个满宽网格格子里：行高随文案、整体居中，卡片贴格子底边，底边与文案对齐；满宽格子也让 --home-gutter 的百分比仍按首屏宽度计算。 */
-.home-hero { position: relative; margin-top: -72px; min-height: max(640px, 100svh); isolation: isolate; display: grid; align-content: center; overflow: hidden; }
+.home-hero { position: relative; min-height: max(640px, calc(100svh - var(--dev-nav-height))); isolation: isolate; display: grid; align-content: center; overflow: hidden; }
 .home-hero-copy, .home-hero-contact { grid-area: 1 / 1; }
 .home-hero-art, .home-hero-shade { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -1; }
 /* 截图里鹈鹕在横向约 30% 处，整图右移、左缘淡出，让鹈鹕落在左侧文案的右边。 */
@@ -230,7 +205,6 @@ body.site-home { --dev-nav-height: 0px; }
 
 @media (max-width: 1080px) {
   .home-hero-contact { display: none; }
-  .home-nav > a:not(.home-nav-play) { display: none; }
   .home-world, .home-open-source-card { grid-template-columns: 1fr; gap: 40px; }
   .home-open-source-card { padding: 44px; }
   .home-controls { align-items: flex-start; flex-direction: column; }
@@ -239,11 +213,7 @@ body.site-home { --dev-nav-height: 0px; }
   .home-cast-guards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 640px) {
-  .home-header { height: 64px; padding: 0 16px; } .home-brand small { display: none; } .home-brand { font-size: 11px; letter-spacing: 1.5px; }
-.home-nav > a { padding: 8px 10px; } #entry-index .home-nav-play { margin-left: 4px; padding: 8px 14px; font-size: 13px; }
-  .home-header { gap: 12px; } .home-nav { gap: 4px; } .home-social { margin: 0 2px; } .home-social > a, .home-social > button { width: 30px; height: 30px; }
-  #entry-index .site-language, #dev-index .site-language { padding: 7px 24px 7px 9px; background-position: right 9px center; font-size: 13px; }
-  .home-hero { margin-top: -64px; min-height: max(680px, 100svh); align-content: end; }
+  .home-hero { min-height: max(680px, calc(100svh - var(--dev-nav-height))); align-content: end; }
   /* 竖屏只显示左侧：黑洞在左上，鹈鹕在画框约 65% 高度，文案从其下方开始。 */
   .home-hero-art { left: 0; height: 50%; -webkit-mask-image: none; mask-image: none; animation: none; }
   .home-hero-score { display: none; }
@@ -263,12 +233,10 @@ body.site-home { --dev-nav-height: 0px; }
   .home-noise { height: 220px; } .home-noise span { font-size: calc(var(--s) * 0.6); }
   .home-footer { padding: 44px 16px 28px; } .home-footer-top { flex-direction: column; align-items: flex-start; } .home-footer-links { gap: 20px; }
 }
-/* At phone width the language menu needs the room, so the logo mark stands in for the wordmark. */
-@media (max-width: 420px) { #entry-index .home-brand > span:not(.home-brand-mark) { display: none; } }
 @media (prefers-reduced-motion: reduce) { #entry-index { scroll-behavior: auto; } #entry-index *, #entry-index *::before, #entry-index *::after { transition: none !important; animation: none !important; } }
 
 #dev-index[hidden] { display: none; }
-#dev-index { position: fixed; inset: 0; z-index: 2; overflow: auto; background: var(--home-bg); color: var(--home-fg); }
+#dev-index { position: fixed; inset: var(--dev-nav-height) 0 0; z-index: 2; overflow: auto; background: var(--home-bg); color: var(--home-fg); }
 #dev-index a { color: inherit; text-decoration: none; }
 #dev-index a:focus-visible { outline: 2px solid var(--home-accent); outline-offset: 5px; }
 #dev-index h1 { margin: 16px 0; font-size: clamp(36px, 5vw, 64px); }

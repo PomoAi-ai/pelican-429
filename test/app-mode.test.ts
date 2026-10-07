@@ -5,6 +5,8 @@ import { parseAppMode } from '../src/config/app-mode.ts';
 test('发布版支持主线与场景游玩，但阻止需要本地素材的旧入口', () => {
   assert.equal(parseAppMode(new URLSearchParams(), true), 'index');
   assert.equal(parseAppMode(new URLSearchParams('mode=story'), true), 'story');
+  assert.equal(parseAppMode(new URLSearchParams('mode=catalog'), true), 'catalog');
+  assert.equal(parseAppMode(new URLSearchParams('mode=about'), true), 'about');
   assert.equal(parseAppMode(new URLSearchParams('level=facility&scene=fortress'), true), 'game');
   for (const mode of ['dev', 'showcase', 'compare', 'resources', 'lab', 'facility', 'sounds']) {
     const params = new URLSearchParams({ mode });

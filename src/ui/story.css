@@ -10,7 +10,6 @@
 .story-death { color: #ffd0a5; }
 .story-hud [hidden] { display: none; }
 .story-preload { position: absolute; bottom: 110px; left: 50%; transform: translateX(-50%); z-index: 7; padding: 6px 14px; border-radius: 8px; color: #d9ffee; background: #102522e6; font-size: 12px; }
-body.story-active > .site-language { position: fixed; right: 10px; top: 8px; z-index: 10; }
 @media (max-height: 520px), (max-width: 650px) { .story-hud { top: calc(var(--dev-nav-height) + 6px); width: min(340px, 50vw); padding: 6px 10px; } .story-hud h1 { font-size: 12px; } .story-hud .story-save-note { display: none; } .story-hud p { font-size: 10px; } }
 
 .story-hud.story-hud-complete { width: min(600px, calc(100vw - 40px)); box-sizing: border-box; display: flex; align-items: center; justify-content: center; gap: 16px; background: #091b24dc; }

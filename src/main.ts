@@ -5,6 +5,7 @@ import { STORY_SAVE_KEY } from './config/story-save.ts';
 import { getLanguage, onLanguageChange } from './ui/language.ts';
 import { mountMobileGameViewport } from './ui/mobile-game-viewport.ts';
 import { homeScreenInstallState } from './ui/home-screen-install.ts';
+import { mountSitePage } from './ui/site-pages.ts';
 
 function bootError(error: unknown): void {
   console.error(error);
@@ -13,9 +14,10 @@ function bootError(error: unknown): void {
   document.getElementById('error-message')!.textContent = error instanceof Error ? `${error.message}\n\n${error.stack}` : String(error);
 }
 
-function attachGameNavigation(navigation: HTMLElement): void {
+function attachGameNavigation(navigation: HTMLElement, game: boolean): void {
   const drawer = document.createElement('details');
   drawer.id = 'game-navigation';
+  drawer.open = !game;
   const handle = document.createElement('summary');
   handle.className = 'game-navigation-handle';
   const label = (): void => {
@@ -26,11 +28,18 @@ function attachGameNavigation(navigation: HTMLElement): void {
   onLanguageChange(label);
   navigation.before(drawer);
   drawer.append(handle, navigation);
+  drawer.addEventListener('toggle', () => {
+    if (!drawer.open) {
+      for (const popover of navigation.querySelectorAll<HTMLElement>(':popover-open')) popover.hidePopover();
+    }
+  });
   for (const type of ['keydown', 'keyup']) drawer.addEventListener(type, event => event.stopPropagation());
   const app = document.getElementById('app')!;
   const collapse = (): void => { drawer.open = false; };
-  app.addEventListener('pointerdown', collapse);
-  app.addEventListener('focusin', collapse);
+  if (game) {
+    app.addEventListener('pointerdown', collapse);
+    app.addEventListener('focusin', collapse);
+  }
 }
 
 async function boot(): Promise<void> {
@@ -53,12 +62,41 @@ async function boot(): Promise<void> {
     if (mountMobileGameViewport()) return;
   }
   const navigation = document.getElementById('dev-navigation')!;
-  if (mode === 'game' || mode === 'story' || mode === 'controls') attachGameNavigation(navigation);
+  navigation.dataset.context = mode === 'index' ? 'home' : mode === 'story' || mode === 'game' || mode === 'controls' ? 'game' : 'resources';
+  const currentPage = mode === 'showcase' && params.get('library') === 'history' ? 'history'
+    : mode === 'game' && params.get('level') === 'boss-arena' ? 'boss-arena'
+    : mode === 'game' && params.get('free') === '1' ? 'game'
+    : mode === 'game' && params.get('level') === 'facility' ? `chapter-${parseFacilityChapter(params)}` : mode;
+  navigation.querySelector<HTMLAnchorElement>(`[data-page="${currentPage}"]`)!.setAttribute('aria-current', 'page');
+  if (!release) {
+    const showcaseParams = new URLSearchParams(params);
+    showcaseParams.delete('demo');
+    showcaseParams.delete('library');
+    showcaseParams.set('mode', 'showcase');
+    (document.getElementById('dev-showcase-link') as HTMLAnchorElement).href = `${location.pathname}?${showcaseParams}`;
+  }
+  // 导航聚焦时的按键不传递给游戏控制器。
+  for (const type of ['keydown', 'keyup']) navigation.addEventListener(type, event => event.stopPropagation());
+  if (localStorage.getItem(STORY_SAVE_KEY) !== null) {
+    navigation.querySelector<HTMLElement>('.home-play-toggle')!.hidden = false;
+    for (const link of document.querySelectorAll<HTMLAnchorElement>('a[href="./?mode=story"]')) {
+      link.firstChild!.textContent = '继续游戏 ';
+    }
+  }
+  else {
+    navigation.querySelector('.home-play-toggle')!.remove();
+    document.getElementById('home-play-menu')!.remove();
+  }
+  if (mode !== 'index') attachGameNavigation(navigation, mode === 'game' || mode === 'story' || mode === 'controls');
+  if (mode === 'catalog' || mode === 'about') {
+    attachDomLanguage();
+    mountSitePage(mode, navigation);
+    return;
+  }
   if (mode === 'dev') {
     document.body.classList.add('site-home');
-    navigation.hidden = true;
     const catalog = document.getElementById('dev-catalog')!;
-    for (const source of navigation.querySelectorAll<HTMLAnchorElement>('.dev-links a:not([data-page="index"])')) {
+    for (const source of navigation.querySelectorAll<HTMLAnchorElement>('.home-primary-link, .home-resources-menu a:not([data-page="dev"])')) {
       const link = document.createElement('a');
       link.href = source.href;
       link.textContent = source.textContent;
@@ -69,12 +107,10 @@ async function boot(): Promise<void> {
     document.title = '资源展示 · 鹈鹕 429';
     // Attach after copying the links so the catalog keeps the Chinese originals to switch back to.
     attachDomLanguage();
-    document.querySelector('#dev-index .home-nav-play')!.before(navigation.querySelector('.site-language')!);
     return;
   }
   if (mode === 'story') {
     attachDomLanguage();
-    document.body.append(navigation.querySelector('.site-language')!);
     const { startStory } = await import('./app/story-app.ts');
     await startStory(bootError);
     return;
@@ -85,17 +121,10 @@ async function boot(): Promise<void> {
       image.removeAttribute('data-home-src');
     }
     document.body.classList.add('site-home');
-    navigation.hidden = true;
     document.getElementById('entry-index')!.hidden = false;
     document.getElementById('loading')!.hidden = true;
     document.title = '鹈鹕 429 · 从一场降智风暴开始';
-    if (localStorage.getItem(STORY_SAVE_KEY) !== null) {
-      for (const link of document.querySelectorAll('#entry-index a.home-nav-play, #entry-index a.home-button-primary, #entry-index .home-footer-links a[href="./?mode=story"]')) {
-        link.firstChild!.textContent = '继续游戏 ';
-      }
-    }
     attachDomLanguage();
-    document.querySelector('#entry-index .home-nav-play')!.before(navigation.querySelector('.site-language')!);
     // 首页原先 hidden，显式恢复锚点位置，避免平滑滚动途中误启动首屏场景。
     document.getElementById(location.hash.slice(1))?.scrollIntoView({ behavior: 'instant' });
     const hero = document.querySelector<HTMLElement>('#entry-index .home-hero')!;
@@ -140,19 +169,6 @@ async function boot(): Promise<void> {
     return;
   }
   attachDomLanguage();
-  const currentPage = mode === 'game' && params.get('level') === 'boss-arena' ? 'boss-arena'
-    : mode === 'game' && params.get('free') === '1' ? 'game'
-    : mode === 'game' && params.get('level') === 'facility' ? `chapter-${parseFacilityChapter(params)}` : mode;
-  navigation.querySelector<HTMLAnchorElement>(`[data-page="${currentPage}"]`)!.setAttribute('aria-current', 'page');
-  if (!release) {
-    const showcaseParams = new URLSearchParams(params);
-    showcaseParams.delete('demo');
-    showcaseParams.delete('library');
-    showcaseParams.set('mode', 'showcase');
-    (document.getElementById('dev-showcase-link') as HTMLAnchorElement).href = `${location.pathname}?${showcaseParams}`;
-  }
-  // 导航属于开发页面，聚焦链接时的按键不传递给游戏控制器。
-  navigation.addEventListener('keydown', (event) => event.stopPropagation());
   if (mode === 'compare') {
     const { startTextureCompare } = await import('./app/texture-compare-app.ts');
     await startTextureCompare(bootError);

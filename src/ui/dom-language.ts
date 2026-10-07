@@ -6,6 +6,9 @@ import { SOUND_ENGLISH, translateSoundText } from './sound-language.ts';
 const english: Record<string, string> = {
   ...HOME_ENGLISH,
   ...SOUND_ENGLISH,
+  '资源': 'Resources', '场景': 'Scenes', '资源总览': 'Resource library',
+  '帮助关于': 'Help & about', '帮助与关于': 'Help & about', '手机展示': 'Mobile showcase',
+  '开始游戏': 'Start game', '重新开始': 'Start over', '更多游戏选项': 'More game options',
   '世界地形定位': 'World terrain locations',
   '重载当前种子的同一世界，并从所选地形旁开始': 'Reload the same world seed and start beside the selected terrain',
   '返回出生点': 'Return to spawn',
@@ -36,7 +39,7 @@ const english: Record<string, string> = {
   '选择角色与动作，最多 8 张卡并排比较地上和地下效果。': 'Choose characters and actions; compare up to eight cards above and below ground.',
   '场景功能展示': 'Scene lab',
   '瓦片形状、材质拼接、植被分层与全部游戏资源。': 'Tile shapes, material transitions, vegetation layers, and all game assets.',
-  '场景资源': 'Scene assets',
+  '场景资源': 'Scene assets', '画质对比': 'Visual comparison',
   '泥土瓦片、自然花草、树木与建筑，切换材质、变体和环境并排对照。': 'Compare terrain, flowers, trees, and buildings across materials, variants, and environments.',
   '全局开发导航可随时切换入口 · 页面切换会重新开始场景': 'Use the global navigation to switch pages · Switching pages restarts the scene',
   '首页': 'Home', '序章动画': 'Prelude', '01 山体堡垒': '01 Mountain fortress',
@@ -101,5 +104,5 @@ export function attachDomLanguage(): void {
   picker.addEventListener('change', () => setLanguage(picker.value as Language));
   // The settings panel can also switch language, so keep the menu in sync.
   onLanguageChange((language) => { picker.value = language; });
-  document.getElementById('dev-navigation')!.append(picker);
+  document.querySelector('#dev-navigation .home-play-control')!.before(picker);
 }

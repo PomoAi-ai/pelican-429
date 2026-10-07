@@ -259,7 +259,7 @@ export function createControlSurface(parent: HTMLElement, options: ControlSurfac
   home.addEventListener('click', () => {
     menu.open = false;
     // 每次打开都重新克隆，链接文字跟随顶部导航的当前语言；story 模式下顶部导航只是隐藏，仍在 DOM 中。
-    const links = [...document.querySelectorAll<HTMLAnchorElement>('#dev-navigation .dev-links a')].map((link) => {
+    const links = [...document.querySelectorAll<HTMLAnchorElement>('#dev-navigation .home-primary-link, #dev-navigation .home-nav-play, #dev-navigation .home-resources-menu a')].map((link) => {
       const copy = link.cloneNode(true) as HTMLAnchorElement;
       copy.removeAttribute('id');
       return copy;

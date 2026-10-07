@@ -1,6 +1,5 @@
-body.free-world { --dev-nav-height: 100px; }
-body.free-world #dev-navigation { height: 48px; }
-.free-world-toolbar { position: fixed; z-index: 29; inset: 48px 0 auto; height: 52px; display: flex; align-items: center; gap: 10px; margin: 0; padding: 0 20px; overflow-x: auto; scrollbar-width: thin; border-bottom: 1px solid #526f6459; background: linear-gradient(100deg, #1d302c, #15242a); color: #dce9df; font-size: 12px; pointer-events: auto; }
+body.free-world { --dev-nav-height: calc(var(--site-nav-height) + 52px); }
+.free-world-toolbar { position: fixed; z-index: 29; inset: var(--site-nav-height) 0 auto; height: 52px; display: flex; align-items: center; gap: 10px; margin: 0; padding: 0 20px; overflow-x: auto; scrollbar-width: thin; border-bottom: 1px solid #526f6459; background: linear-gradient(100deg, #1d302c, #15242a); color: #dce9df; font-size: 12px; pointer-events: auto; }
 .free-world-toolbar > * { flex-shrink: 0; }
 .free-world-title { padding-right: 6px; font-size: 13px; letter-spacing: .05em; color: #d8efb8; }
 .free-world-toolbar label { display: flex; align-items: center; gap: 7px; white-space: nowrap; color: #a8bdb4; }

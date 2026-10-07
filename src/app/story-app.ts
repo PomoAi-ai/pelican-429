@@ -1,13 +1,15 @@
 import { replaceGameLocation } from '../ui/mobile-game-viewport.ts';
 import { loadStorySave, saveStory } from './story-save.ts';
 import { STORY_SAVE_KEY } from '../config/story-save.ts';
+import { confirmStoryRestart } from '../ui/restart-confirm.ts';
 
 export async function startStory(onError: (error: unknown) => void): Promise<void> {
   document.body.classList.add('story-active');
   const url = new URL(location.href);
   if (url.searchParams.get('restart') === '1') {
     // 在旧页面退出存档之后清除，避免 pagehide 把旧进度写回来。
-    window.localStorage.removeItem(STORY_SAVE_KEY);
+    const confirmed = await confirmStoryRestart();
+    if (confirmed) window.localStorage.removeItem(STORY_SAVE_KEY);
     url.searchParams.delete('restart');
     replaceGameLocation(url);
   }
