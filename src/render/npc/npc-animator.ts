@@ -46,7 +46,7 @@ export function animateNpc(rig: NpcRig, action: NpcAction, seconds: number, fram
   const lift = MathUtils.clamp((motion ? -motion.vy / Math.sqrt(2 * TUNING.physics.gravity * TUNING.player.jumpHeight)
     : clipAction === 'jump' ? previewHairLift(next.getClip(), next.time) : 0)
     + (gait ? Math.sin(next.time / duration * Math.PI * 4) * (clipAction === 'walk' ? .08 : .20) : 0), -1.2, 1.2);
-  const energy = .01 + .07 * Math.hypot(airflow, lift);
+  const energy = .045 + .07 * Math.hypot(airflow, lift);
   rig.swayHair(energy, airflow, lift, frameDt);
   rig.flightHarness?.update(motion, frameDt);
   rig.weapon.sample(clipAction, loop ? next.time : seconds, rig.model);

@@ -2,42 +2,84 @@ import * as THREE from 'three';
 
 const REGIONS = ['Front', 'Crown', 'Rear'] as const;
 
-/** 发根遮罩由各模型提供；每束分别弯折与抬升，转头只横向带动尖端。 */
-export function addHairMorphs(mesh: THREE.SkinnedMesh, mask: (x: number, y: number, z: number) => readonly [number, number, number], scale: number): void {
+export interface HairGuide {
+  readonly root: readonly [number, number, number];
+  readonly tip: readonly [number, number, number];
+  readonly radius: number;
+  readonly group: 0 | 1 | 2;
+  readonly bend: number;
+}
+
+/** 每撮围绕各自固定发根弯折，复用三组形变与转头槽位，不为发束增加整身纹理。 */
+export function addHairMorphs(mesh: THREE.SkinnedMesh, guides: readonly HairGuide[]): void {
   const geometry = mesh.geometry;
   const positions = geometry.getAttribute('position');
+  const normals = geometry.getAttribute('normal');
   const offsets = Array.from({ length: 7 }, () => new Float32Array(positions.count * 3));
+  const normalOffsets = Array.from({ length: 7 }, () => new Float32Array(positions.count * 3));
+  const directions = [new THREE.Vector3(0, 0, -1), new THREE.Vector3(0, 1, -.35).normalize(), new THREE.Vector3(1, 0, 0)];
+  const prepared = guides.map(guide => {
+    const root = new THREE.Vector3(...guide.root);
+    const axis = new THREE.Vector3(...guide.tip).sub(root);
+    const length = axis.length();
+    axis.divideScalar(length);
+    return { ...guide, root, axis, length, rotations: directions.map(direction => {
+      const rotation = new THREE.Vector3().crossVectors(axis, direction);
+      return { axis: rotation.clone().normalize(), strength: rotation.length() };
+    }) };
+  });
+  const point = new THREE.Vector3(), normal = new THREE.Vector3(), local = new THREE.Vector3(), radial = new THREE.Vector3();
+  const deformed = new THREE.Vector3(), turnedNormal = new THREE.Vector3();
   for (let i = 0; i < positions.count; i++) {
-    const regions = mask(positions.getX(i), positions.getY(i), positions.getZ(i));
-    for (let region = 0; region < regions.length; region++) {
-      const weight = regions[region]! * scale;
-      offsets[region * 2]![i * 3 + 2] = -.060 * weight;
-      offsets[region * 2 + 1]![i * 3 + 1] = .065 * weight;
-      offsets[region * 2 + 1]![i * 3 + 2] = -.008 * weight;
-      offsets[6]![i * 3] = offsets[6]![i * 3]! + .032 * weight;
+    point.fromBufferAttribute(positions, i);
+    normal.fromBufferAttribute(normals, i);
+    let totalWeight = 0;
+    for (const guide of prepared) {
+      local.copy(point).sub(guide.root);
+      const along = local.dot(guide.axis);
+      const progress = along / guide.length;
+      if (progress <= 0 || progress >= 1.25) continue;
+      const distance = radial.copy(local).addScaledVector(guide.axis, -along).length() / guide.radius;
+      const weight = THREE.MathUtils.smoothstep(progress, 0, .2)
+        * (1 - THREE.MathUtils.smoothstep(progress, 1, 1.25))
+        * (1 - THREE.MathUtils.smoothstep(distance, .25, 1));
+      if (weight === 0) continue;
+      totalWeight += weight;
+      const bend = guide.bend * THREE.MathUtils.smoothstep(progress, 0, .85);
+      for (let channel = 0; channel < 3; channel++) {
+        const rotation = guide.rotations[channel]!;
+        const angle = bend * rotation.strength * (channel === 2 ? .55 : 1);
+        deformed.copy(local).applyAxisAngle(rotation.axis, angle).sub(local).multiplyScalar(weight);
+        turnedNormal.copy(normal).applyAxisAngle(rotation.axis, angle).sub(normal).multiplyScalar(weight);
+        const slot = channel === 2 ? 6 : guide.group * 2 + channel;
+        for (let component = 0; component < 3; component++) {
+          offsets[slot]![i * 3 + component] = offsets[slot]![i * 3 + component]! + deformed.getComponent(component);
+          normalOffsets[slot]![i * 3 + component] = normalOffsets[slot]![i * 3 + component]! + turnedNormal.getComponent(component);
+        }
+      }
+    }
+    // 相邻引导以连续权重混合，不能硬切组别或叠加成更大的发帽位移。
+    if (totalWeight > 1) {
+      for (let slot = 0; slot < 7; slot++) {
+        for (let component = 0; component < 3; component++) {
+          offsets[slot]![i * 3 + component] = offsets[slot]![i * 3 + component]! / totalWeight;
+          normalOffsets[slot]![i * 3 + component] = normalOffsets[slot]![i * 3 + component]! / totalWeight;
+        }
+      }
     }
   }
+
   const names = [...REGIONS.flatMap(region => [`Hair${region}Sway`, `Hair${region}Lift`]), 'HairTurn'];
+  geometry.morphAttributes.normal ??= [];
   for (const [index, values] of offsets.entries()) {
     const attribute = new THREE.BufferAttribute(values, 3);
     attribute.name = names[index]!;
     geometry.morphAttributes.position!.push(attribute);
-    // NPC 的眨眼带法线形变；保持新增 position / normal 的槽位对应。
-    if (geometry.morphAttributes.normal) geometry.morphAttributes.normal.push(new THREE.BufferAttribute(new Float32Array(values.length), 3));
+    geometry.morphAttributes.normal.push(new THREE.BufferAttribute(normalOffsets[index]!, 3));
   }
   mesh.updateMorphTargets();
   geometry.computeBoundingBox();
   geometry.computeBoundingSphere();
-}
-
-export function addCrownSway(mesh: THREE.SkinnedMesh, rootHeight: number, tipHeight: number, kind: 'sam' | 'tibo'): void {
-  addHairMorphs(mesh, (x, y, z) => {
-    const tips = THREE.MathUtils.smoothstep(y, rootHeight, tipHeight);
-    const front = THREE.MathUtils.smoothstep(z, -.02, .23);
-    const rear = 1 - THREE.MathUtils.smoothstep(z, -.25, -.04);
-    const part = kind === 'tibo' ? .8 + .35 * THREE.MathUtils.smoothstep(x, -.25, .22) : .72;
-    return [tips * front * part, tips * (1 - front) * (1 - rear), tips * rear * .72];
-  }, kind === 'sam' ? .30 : .22);
 }
 
 /** 从实际动画轨迹取局部导数，不跨片段／循环端点求差，暂停与切换不会产生假速度。 */

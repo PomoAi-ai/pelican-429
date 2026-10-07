@@ -44,7 +44,14 @@ async function boot(): Promise<void> {
       if (url.origin === location.origin && url.searchParams.has('mode') && !RELEASE_MODES.includes(url.searchParams.get('mode')!)) link.remove();
     }
   }
-  if ((mode === 'game' || mode === 'story' || mode === 'controls') && mountMobileGameViewport()) return;
+  if (mode === 'game' || mode === 'story' || mode === 'controls') {
+    document.documentElement.classList.add('game-interface');
+    document.querySelector<HTMLMetaElement>('meta[name="viewport"]')!.content = 'width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover';
+    document.addEventListener('contextmenu', event => {
+      if (!(event.target instanceof Element && event.target.closest('input, textarea, [contenteditable="true"]'))) event.preventDefault();
+    });
+    if (mountMobileGameViewport()) return;
+  }
   const navigation = document.getElementById('dev-navigation')!;
   if (mode === 'game' || mode === 'story' || mode === 'controls') attachGameNavigation(navigation);
   if (mode === 'dev') {

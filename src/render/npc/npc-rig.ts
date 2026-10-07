@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { addCrownSway, createHairSway } from '../hair-sway.ts';
+import { addHairMorphs, createHairSway, type HairGuide } from '../hair-sway.ts';
 import { characterTextureTier, loadCharacterModel, type TextureTier } from '../character-model.ts';
 import type { GLTF } from 'three/addons/loaders/GLTFLoader.js';
 import { clone } from 'three/addons/utils/SkeletonUtils.js';
@@ -14,6 +14,50 @@ import { createNpcWeapon } from './npc-weapons.ts';
 import type { NpcWeapon } from './npc-weapons.ts';
 import { loadGrassyAsset } from '../grassy/grassy-rig.ts';
 import { createNpcFlightHarness } from './npc-flight-harness.ts';
+
+// 怪物与人形的发帽尺寸不同，逐撮保留独立的根尖坐标；不以整层高度选头发。
+const HAIR_GUIDES: Readonly<Record<NpcKind, Readonly<Record<NpcForm, readonly HairGuide[]>>>> = {
+  sam: {
+    monster: [
+      { root: [-0.138, 2.587, 0.302], tip: [-.19, 2.52, .40], radius: 0.054, group: 0, bend: 0.19 },
+      { root: [0.138, 2.587, 0.302], tip: [.19, 2.52, .40], radius: 0.054, group: 2, bend: 0.18 },
+      { root: [-0.205, 2.562, 0.033], tip: [-.28, 2.48, .01], radius: 0.047, group: 1, bend: 0.17 },
+      { root: [0.205, 2.562, 0.033], tip: [.28, 2.48, .01], radius: 0.047, group: 0, bend: 0.16 },
+      { root: [-0.133, 2.558, -0.22], tip: [-.17, 2.46, -.31], radius: 0.047, group: 2, bend: 0.18 },
+      { root: [0.133, 2.558, -0.22], tip: [.17, 2.46, -.31], radius: 0.047, group: 1, bend: 0.17 },
+      { root: [-0.07, 2.617, 0.182], tip: [-.07, 2.70, .22], radius: 0.054, group: 1, bend: 0.19 },
+    ],
+    human: [
+      { root: [-0.148, 2.585, 0.3], tip: [-.20, 2.51, .39], radius: 0.054, group: 0, bend: 0.19 },
+      { root: [0.148, 2.585, 0.3], tip: [.20, 2.51, .39], radius: 0.054, group: 2, bend: 0.18 },
+      { root: [-0.267, 2.56, 0.003], tip: [-.35, 2.47, -.02], radius: 0.047, group: 1, bend: 0.17 },
+      { root: [0.267, 2.56, 0.003], tip: [.35, 2.47, -.02], radius: 0.047, group: 0, bend: 0.16 },
+      { root: [-0.138, 2.565, -0.225], tip: [-.19, 2.46, -.33], radius: 0.047, group: 2, bend: 0.18 },
+      { root: [.14, 2.565, -.21], tip: [.195, 2.439, -.286], radius: .047, group: 1, bend: 0.17 },
+      { root: [-0.07, 2.617, 0.015], tip: [-.07, 2.70, .015], radius: 0.054, group: 1, bend: 0.19 },
+    ],
+  },
+  tibo: {
+    monster: [
+      { root: [-0.105, 2.537, 0.258], tip: [-.18, 2.44, .37], radius: 0.054, group: 0, bend: 0.21 },
+      { root: [0.122, 2.515, 0.255], tip: [.19, 2.41, .36], radius: 0.054, group: 2, bend: 0.19 },
+      { root: [-0.268, 2.47, -0.005], tip: [-.38, 2.38, -.02], radius: 0.047, group: 1, bend: 0.2 },
+      { root: [0.242, 2.47, -0.005], tip: [.34, 2.38, -.02], radius: 0.047, group: 0, bend: 0.18 },
+      { root: [-0.14, 2.465, -0.253], tip: [-.20, 2.36, -.35], radius: 0.05, group: 2, bend: 0.21 },
+      { root: [0.14, 2.465, -0.253], tip: [.20, 2.36, -.35], radius: 0.05, group: 1, bend: 0.19 },
+      { root: [0.01, 2.56, 0.06], tip: [.01, 2.65, .06], radius: 0.061, group: 1, bend: 0.2 },
+    ],
+    human: [
+      { root: [-0.107, 2.525, 0.277], tip: [-.19, 2.42, .39], radius: 0.054, group: 0, bend: 0.21 },
+      { root: [0.125, 2.512, 0.272], tip: [.20, 2.40, .37], radius: 0.054, group: 2, bend: 0.19 },
+      { root: [-0.282, 2.468, -0.018], tip: [-.41, 2.37, -.04], radius: 0.047, group: 1, bend: 0.2 },
+      { root: [0.26, 2.468, -0.018], tip: [.38, 2.37, -.04], radius: 0.047, group: 0, bend: 0.18 },
+      { root: [-0.14, 2.472, -0.273], tip: [-.20, 2.36, -.40], radius: 0.05, group: 2, bend: 0.21 },
+      { root: [0.14, 2.472, -0.273], tip: [.20, 2.36, -.40], radius: 0.05, group: 1, bend: 0.19 },
+      { root: [0.04, 2.56, -0.03], tip: [.04, 2.65, -.03], radius: 0.061, group: 1, bend: 0.2 },
+    ],
+  },
+};
 
 interface NpcAsset {
   readonly scene: THREE.Group;
@@ -126,8 +170,7 @@ function readAsset(kind: NpcKind, form: NpcForm, gltf: GLTF): NpcAsset {
         ));
       });
     }
-    // 实际 Rodin 网格仅放开最顶部 6 cm / 3 cm 的突出发尖，整片发帽与头部保持固定。
-    addCrownSway(hair, kind === 'sam' ? 2.64 : 2.62, definition.height, kind);
+    addHairMorphs(hair, HAIR_GUIDES[kind][form]);
     clips.attack = createNpcAttackClip(scene, kind);
     return { scene, clips, eyelidNames, hairName: hair.name };
   } catch (error) {

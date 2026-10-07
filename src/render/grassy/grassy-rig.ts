@@ -38,6 +38,8 @@ function bendGrassyHairTuft(mesh: THREE.SkinnedMesh): void {
   const centerX = .025, centerZ = .14, rootY = 2.94, tipY = 3.10, radius = .13;
   const positions = mesh.geometry.getAttribute('position');
   const morphs = mesh.geometry.morphAttributes.position!;
+  const normals = mesh.geometry.getAttribute('normal');
+  const normalMorphs = mesh.geometry.morphAttributes.normal!;
   const dictionary = mesh.morphTargetDictionary!;
   for (let i = 0; i < positions.count; i++) {
     const x = positions.getX(i), y = positions.getY(i), z = positions.getZ(i);
@@ -48,7 +50,9 @@ function bendGrassyHairTuft(mesh: THREE.SkinnedMesh): void {
     const bend = THREE.MathUtils.smoothstep(y, rootY, tipY);
     for (const name of ['Front', 'Crown', 'Rear']) {
       for (const channel of ['Sway', 'Lift']) {
-        const attribute = morphs[dictionary[`Hair${name}${channel}`]!]!;
+        const index = dictionary[`Hair${name}${channel}`]!;
+        const attribute = morphs[index]!;
+        const normalAttribute = normalMorphs[index]!;
         // 以弧线转动整段呆毛，避免只平移最顶端造成拉长尖刺。
         const angle = (channel === 'Sway' ? -.85 : .60) * bend;
         // 下落气流从发束前侧根部扶起呆毛，正 lift 不能把最高点压低。
@@ -57,6 +61,10 @@ function bendGrassyHairTuft(mesh: THREE.SkinnedMesh): void {
         const dz = name === 'Crown' ? height * Math.sin(angle) + fromRootZ * (Math.cos(angle) - 1) : 0;
         attribute.setY(i, THREE.MathUtils.lerp(attribute.getY(i), dy, blend));
         attribute.setZ(i, THREE.MathUtils.lerp(attribute.getZ(i), dz, blend));
+        const normalY = name === 'Crown' ? normals.getY(i) * (Math.cos(angle) - 1) - normals.getZ(i) * Math.sin(angle) : 0;
+        const normalZ = name === 'Crown' ? normals.getY(i) * Math.sin(angle) + normals.getZ(i) * (Math.cos(angle) - 1) : 0;
+        normalAttribute.setY(i, THREE.MathUtils.lerp(normalAttribute.getY(i), normalY, blend));
+        normalAttribute.setZ(i, THREE.MathUtils.lerp(normalAttribute.getZ(i), normalZ, blend));
       }
     }
   }
@@ -69,21 +77,18 @@ function addHairSway(model: THREE.SkinnedMesh): void {
   const geometry = model.geometry;
   geometry.morphAttributes.position = [];
   geometry.morphTargetsRelative = true;
-  const rearTips = [
-    [-.105, 2.323, -.456, .140, .180, .115], [.105, 2.323, -.456, .140, .180, .115],
-    [0, 2.435, -.545, .215, .180, .100], [.005, 2.580, -.535, .150, .240, .105],
-  ] as const;
-  addHairMorphs(model, (x, y, z) => {
-    // 原网格的冠层固定，只允许高出 3.02 的孤立发尖形变，避免改变头型。
-    const crown = THREE.MathUtils.smoothstep(y, 3.02, 3.10) * .55;
-    const front = THREE.MathUtils.smoothstep(z, -.18, .12);
-    let rear = 0;
-    for (const [cx, cy, cz, rx, ry, rz] of rearTips) {
-      const distance = ((x - cx) / rx) ** 2 + ((y - cy) / ry) ** 2 + ((z - cz) / rz) ** 2;
-      rear = Math.max(rear, Math.max(0, 1 - distance) ** 3);
-    }
-    return [crown * front * .65, crown * (1 - front), rear * .65];
-  }, 1.15);
+  // 只覆盖实际突出发帽的自由段：刘海两侧、冠侧三撮、后脑四撮。
+  addHairMorphs(model, [
+    { root: [-0.182, 2.812, 0.45], tip: [-.25, 2.70, .51], radius: 0.054, group: 0, bend: 0.19 },
+    { root: [0.214, 2.812, 0.367], tip: [.286, 2.73, .418], radius: 0.043, group: 2, bend: 0.17 },
+    { root: [-.35, 2.85, -.08], tip: [-.437, 2.778, -.087], radius: .05, group: 1, bend: 0.2 },
+    { root: [0.325, 2.895, -0.042], tip: [.43, 2.82, -.08], radius: 0.058, group: 0, bend: 0.18 },
+    { root: [-0.152, 2.975, -0.138], tip: [-.25, 3.02, -.10], radius: 0.054, group: 2, bend: 0.21 },
+    { root: [-0.105, 2.417, -0.438], tip: [-.105, 2.29, -.46], radius: 0.061, group: 0, bend: 0.18 },
+    { root: [0.105, 2.417, -0.438], tip: [.105, 2.29, -.46], radius: 0.061, group: 2, bend: 0.17 },
+    { root: [0.0, 2.547, -0.495], tip: [0, 2.42, -.54], radius: 0.072, group: 1, bend: 0.19 },
+    { root: [0.005, 2.72, -0.47], tip: [.005, 2.57, -.53], radius: 0.065, group: 2, bend: 0.2 },
+  ]);
   bendGrassyHairTuft(model);
 }
 
