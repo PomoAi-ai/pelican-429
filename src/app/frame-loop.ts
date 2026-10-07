@@ -12,6 +12,7 @@ import type { FrameProfiler } from '../core/frame-profiler.ts';
 import { clamp, lerp } from '../core/math.ts';
 import type { Vec2 } from '../core/math.ts';
 import type { Entity } from '../entities/entity.ts';
+import { getSkillWaitTicks } from '../entities/skill-wait.ts';
 import type { ActionTracker } from '../input/action-map.ts';
 import type { KeyboardMouseBinding } from '../input/keyboard-mouse.ts';
 import { waterSpanInColumn } from '../physics/fluid-contact.ts';
@@ -96,8 +97,21 @@ export function createFrameLoop(d: FrameLoopDeps): FrameLoop {
     let target: Vec2 | null = null;
     if (d.controls.mode === 'desktop' && p.inside) target = cameraRig.screenToWorld(p.clientX, p.clientY, aim);
     else if (d.controls.mode === 'mobile') target = selectMobileAim(getPlayer(world), world.entities, cameraRig.visibleRect());
+    const skill = weaponHud.consumeSkill();
+    let manualSkillAim: Vec2 | null = null;
+    if (skill !== null) {
+      tracker.press(skill.action, 'mouse', 'skill-touch');
+      tracker.release(skill.action, 'skill-touch');
+      if (skill.direction !== null) {
+        const player = getPlayer(world);
+        // 现有技能接受世界目标，用远点表示方向，避免复制各技能的出手位置规则。
+        manualSkillAim = { x: player.body.x + skill.direction.x * 1000,
+          y: player.body.y + player.body.height / 2 + skill.direction.y * 1000 };
+        target = manualSkillAim;
+      }
+    }
     if (pour.active && p.inside) pourAtWorld(world, level, cameraRig.screenToWorld(p.clientX, p.clientY, pourAt));
-    const controls = tracker.consume(target);
+    const controls = { ...tracker.consume(target), manualSkillAim };
     stepSim(world, controls);
     d.audio?.observe(world);
   };
@@ -170,7 +184,7 @@ export function createFrameLoop(d: FrameLoopDeps): FrameLoop {
       stats: { fps, tick: world.tick, droppedTicks: stepper.stats.droppedTicks },
       playerId: world.playerId,
     });
-    weaponHud.update({ entities: world.entities, playerId: world.playerId, frameDt, photonCooldownTicks: world.photon.cooldownTicks, photonChargeTicks: world.photon.chargeTicks, photonActiveTicks: world.photon.activeTicks, transformUnlocked: mainlineTransformUnlocked(world) });
+    weaponHud.update({ skillWaitTicks: [0, 1, 2, 3].map(index => getSkillWaitTicks(pl, index, TUNING, world.photon.cooldownTicks, world.photon.chargeTicks)), entities: world.entities, playerId: world.playerId, frameDt, photonCooldownTicks: world.photon.cooldownTicks, photonChargeTicks: world.photon.chargeTicks, photonActiveTicks: world.photon.activeTicks, transformUnlocked: mainlineTransformUnlocked(world) });
     minimap.update({
       player: { x: lerp(pl.body.prevX, pl.body.x, alpha), y: lerp(pl.body.prevY, pl.body.y, alpha) + pl.body.height / 2, facing: pl.facing },
       dummies: world.entities.filter((e) => e.kind === 'trainingDummy' && !e.removed).map((e) => ({ x: e.body.x, y: e.body.y + e.body.height / 2 })),
@@ -191,6 +205,7 @@ export function createFrameLoop(d: FrameLoopDeps): FrameLoop {
 
     handleUi();
     const paused = settings.paused;
+    if (paused) weaponHud.resetInput();
     d.audio?.update(world, paused);
     if (!paused && PLAY_ACTIONS.some((a) => tracker.isHeld(a))) hud.noteInput();
     // 暂停：模拟不步进（插值系数保持），实体动画冻结；风场随模拟暂停，水等视觉效果继续。

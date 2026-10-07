@@ -333,10 +333,10 @@ async function start(story: StorySave | undefined, newStory: boolean, onReady?: 
   hud.toggleHints();
   disposers.push(() => hud.dispose());
   const navigation = requireElement<HTMLDetailsElement>('game-navigation');
-  const releaseInput = (): void => tracker.releaseAll();
+  const releaseInput = (): void => { tracker.releaseAll(); weaponHud.resetInput(); };
   navigation.addEventListener('focusin', releaseInput);
   disposers.push(() => navigation.removeEventListener('focusin', releaseInput));
-  const weaponHud = createWeaponHud(hudRoot, { weapons: TUNING.weapons, onTransform: () => {
+  const weaponHud = createWeaponHud(hudRoot, { weapons: TUNING.weapons, project, onTransform: () => {
     tracker.press('transform', 'mouse', 'character-switch');
     tracker.release('transform', 'character-switch');
     canvas.focus();
@@ -346,13 +346,21 @@ async function start(story: StorySave | undefined, newStory: boolean, onReady?: 
     canvas.focus();
   } });
   disposers.push(() => weaponHud.dispose());
+  const resetSkillInput = (): void => weaponHud.resetInput();
+  const hideSkillInput = (): void => { if (document.hidden) resetSkillInput(); };
+  window.addEventListener('blur', resetSkillInput);
+  document.addEventListener('visibilitychange', hideSkillInput);
+  disposers.push(() => {
+    window.removeEventListener('blur', resetSkillInput);
+    document.removeEventListener('visibilitychange', hideSkillInput);
+  });
   const controls = createControlSurface(document.body, {
     canvas,
     onZoom: zoom => cameraRig.setZoom(zoom),
     navigation,
     onPress: (action, bindingKey) => tracker.press(action, 'mouse', bindingKey),
     onRelease: (action, bindingKey) => tracker.release(action, bindingKey),
-    onReset: () => tracker.releaseAll(),
+    onReset: () => { tracker.releaseAll(); weaponHud.resetInput(); },
     onFocusGame: () => canvas.focus(),
     forceMobile: params.get('mode') === 'controls',
     onModeChange: mode => setMobileBossDifficulty(world, mode === 'mobile'),

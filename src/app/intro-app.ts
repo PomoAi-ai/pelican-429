@@ -10,6 +10,7 @@ import { finaleChapterAt } from '../config/intro-finale.ts';
 import type { IntroImages } from '../render/intro-story.ts';
 import { IntroAudio } from './intro-audio.ts';
 import { getLanguage, onLanguageChange } from '../ui/language.ts';
+import { canFullscreen, isFullscreen, onFullscreenChange, toggleFullscreen } from '../ui/fullscreen.ts';
 import type { createIntroFortress } from './intro-fortress.ts';
 
 type PlayState = 'ready' | 'starting' | 'playing' | 'paused' | 'entering' | 'disposed';
@@ -84,6 +85,7 @@ function createStage(edition: IntroEdition): HTMLElement {
       </div>
       <div class="intro-control-row">
         <output class="intro-time" aria-label="播放时间">00:00 / ${formatTime(total)}</output>
+        <button type="button" class="intro-fullscreen" aria-pressed="false">全屏</button>
         <button type="button" class="intro-skip">跳过 →</button>
       </div>
     </div>
@@ -125,6 +127,7 @@ class IntroPlayer {
   private readonly begin: HTMLButtonElement;
   private readonly resume: HTMLButtonElement;
   private readonly skip: HTMLButtonElement;
+  private readonly fullscreen: HTMLButtonElement;
   private readonly seek: HTMLInputElement;
   private readonly sceneButtons: HTMLButtonElement[];
   private currentScene = -1;
@@ -162,6 +165,8 @@ class IntroPlayer {
     this.begin = this.stage.querySelector<HTMLButtonElement>('.intro-begin')!;
     this.resume = this.stage.querySelector<HTMLButtonElement>('.intro-resume')!;
     this.skip = this.stage.querySelector<HTMLButtonElement>('.intro-skip')!;
+    this.fullscreen = this.stage.querySelector<HTMLButtonElement>('.intro-fullscreen')!;
+    this.fullscreen.hidden = !canFullscreen();
     this.seek = this.stage.querySelector<HTMLInputElement>('#intro-seek')!;
     this.sceneButtons = [...this.stage.querySelectorAll<HTMLButtonElement>('.intro-scenes button')];
     this.timeOutput = this.stage.querySelector<HTMLOutputElement>('.intro-time')!;
@@ -214,6 +219,9 @@ class IntroPlayer {
       if (story) void this.enterStory(story).catch((error: unknown) => this.fail(error));
       else this.requestPlay(editionPlaybackTime(INTRO_GOAL_AT, this.edition));
     }, options);
+    // 全屏随页面保留，序章里进入后游戏接着全屏。
+    this.fullscreen.addEventListener('click', () => { toggleFullscreen().catch((error: unknown) => console.error('全屏失败', error)); }, options);
+    onFullscreenChange(() => this.syncLanguage(), this.events.signal);
     this.sceneButtons.forEach((button, index) => {
       button.addEventListener('click', () => this.requestPlay(editionPlaybackTime(INTRO_SCENES[index]!.at, this.edition)), options);
     });
@@ -346,6 +354,8 @@ class IntroPlayer {
     this.stage.querySelector('.intro-scenes')!.setAttribute('aria-label', copy.scenesLabel);
     this.sceneButtons.forEach((button, index) => { button.firstElementChild!.textContent = copy.scenes[index]!; });
     this.skip.textContent = copy.skip;
+    this.fullscreen.textContent = isFullscreen() ? copy.exitFullscreen : copy.fullscreen;
+    this.fullscreen.setAttribute('aria-pressed', String(isFullscreen()));
     if (this.edition.id === 'finale') {
       set('.intro-mission-status', copy.mission);
       set('.intro-chapter h2', copy.goal);

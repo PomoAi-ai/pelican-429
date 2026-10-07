@@ -19,12 +19,68 @@ import { createSimWorld, getPlayer, setDummyShooting, stepSim, NEUTRAL_INPUT } f
 import type { Entity, InputFrame, SimWorld } from '../src/sim/sim-world.ts';
 import { swimCatchPoint } from '../src/sim/weapon-system.ts';
 import { createActionTracker } from '../src/input/action-map.ts';
+import { getSkillWaitTicks } from '../src/entities/skill-wait.ts';
+import { takeMouthful } from '../src/entities/pelican-weapons.ts';
 
 const W = TUNING.weapons;
 const DT = TUNING.sim.step;
 const WATER = W.water.projectile;
 const FISH = W.fish.projectile;
 const ORB = TUNING.attacks.orb;
+
+test('技能等待同时覆盖前一动作和自身冷却，并与实际下一次起手同步', () => {
+  for (const nextSkill of [1, 2] as const) {
+    const w = world(open());
+    const player = settle(w);
+    player.pelican!.form = player.pelican!.transformFrom = 'human';
+    stepSim(w, input({ skillPressed: 2 }));
+    steps(w, 20);
+    const wait = getSkillWaitTicks(player, nextSkill - 1, TUNING, 0, 0);
+    assert.equal(wait, nextSkill === 1 ? 100 : 160);
+    steps(w, wait - 1);
+    assert.equal(getSkillWaitTicks(player, nextSkill - 1, TUNING, 0, 0), 1);
+    stepSim(w, input({ skillPressed: nextSkill }));
+    assert.equal(player.pelican!.humanCombat.action, nextSkill === 1 ? 'codex_attack' : 'bug_attack');
+    assert.equal(player.pelican!.humanCombat.ticks, 0);
+  }
+});
+
+test('键盘普攻后摇也阻塞人形技能，光子独立可释放', () => {
+  const w = world(open());
+  const player = settle(w);
+  player.pelican!.form = player.pelican!.transformFrom = 'human';
+  stepSim(w, input({ attackPressed: true }));
+  const wait = getSkillWaitTicks(player, 0, TUNING, 0, 0);
+  assert.ok(wait > 0);
+  assert.equal(getSkillWaitTicks(player, 3, TUNING, 0, 0), 0);
+  assert.equal(getSkillWaitTicks(player, 3, TUNING, 17, 9), 17);
+  steps(w, wait - 1);
+  assert.equal(getSkillWaitTicks(player, 0, TUNING, 0, 0), 1);
+  stepSim(w, input({ skillPressed: 1 }));
+  assert.equal(player.pelican!.humanCombat.action, 'codex_attack');
+});
+
+test('吞弹后其他技能要等吞窗和反吐完成，反吐重按无需等待', () => {
+  const w = world(open());
+  const player = settle(w);
+  const p = player.pelican!;
+  p.form = p.transformFrom = 'pelican';
+  stepSim(w, input({ skillPressed: 3 }));
+  takeMouthful(p, { source: 'orb', def: ORB });
+  const wait = getSkillWaitTicks(player, 0, TUNING, 0, 0);
+  assert.ok(wait > p.weapon.gulpTicks);
+  assert.equal(getSkillWaitTicks(player, 2, TUNING, 0, 0), 0);
+  player.health!.hitstunTicks = 5;
+  assert.equal(getSkillWaitTicks(player, 2, TUNING, 0, 0), 5);
+  player.health!.hitstunTicks = p.weapon.gulpTicks;
+  assert.equal(getSkillWaitTicks(player, 2, TUNING, 0, 0), p.weapon.cooldowns[2]);
+  player.health!.hitstunTicks = 0;
+  steps(w, wait - 1);
+  assert.equal(getSkillWaitTicks(player, 0, TUNING, 0, 0), 1);
+  stepSim(w, input({ skillPressed: 1 }));
+  assert.equal(p.weapon.shotWeapon, 'fish');
+  assert.equal(p.shotTicks, 0);
+});
 
 test('右键按住按节奏连放，松开只完成当前一轮', () => {
   for (const form of ['human', 'pelican'] as const) {
@@ -54,6 +110,38 @@ test('右键提前两百毫秒点击能接续，过早点击会过期', () => {
       const kind = form === 'human' ? 'codexShot' : 'fishShot';
       assert.equal(events.filter((e) => e.type === 'projectileFired' && e.kind === kind).length, early ? 7 : 14, `${form}: early=${early}`);
     }
+  }
+});
+
+test('手动方向在技能排队后仍用于实际发射', () => {
+  const w = world(open());
+  const player = settle(w);
+  stepSim(w, input({ skillPressed: 1 }));
+  steps(w, 23);
+  const manualSkillAim = { x: player.body.x, y: player.body.y + 100 };
+  stepSim(w, input({ skillPressed: 1, aim: manualSkillAim, manualSkillAim }));
+  w.events.drain();
+  const events = record(w, 30, () => input({ aim: { x: 60, y: 2 } }));
+  const shot = events.find(e => e.type === 'projectileFired' && e.kind === 'fishShot');
+  assert.ok(shot && shot.type === 'projectileFired');
+  assert.ok(shot.dirY > .9, '排队后的鱼群仍朝手动指定的上方发射');
+});
+
+test('吞弹保留手动反吐方向，再次拖动或点击可以覆盖', () => {
+  for (const redirect of ['none', 'drag', 'tap'] as const) {
+    const w = world(open());
+    settle(w);
+    incoming(w, 1);
+    const events = record(w, W.swallow.gulpTicks + 15, tick => {
+      const manualSkillAim = tick === 0 ? { x: 100, y: 100 } : redirect === 'drag' && tick === 10 ? { x: -100, y: 100 } : null;
+      return input({ skillPressed: tick === 0 || redirect !== 'none' && tick === 10 ? 3 : 0,
+        aim: manualSkillAim ?? { x: 60, y: 2 }, manualSkillAim });
+    });
+    const shot = events.find(e => e.type === 'projectileFired' && e.returned);
+    assert.ok(shot && shot.type === 'projectileFired');
+    if (redirect === 'tap') assert.ok(Math.abs(shot.dirY) < .1, '再次点击改用右侧附近目标');
+    else assert.ok(shot.dirY > .5, '延迟反吐不被每帧自动瞄准覆盖');
+    assert.equal(shot.dirX < 0, redirect === 'drag');
   }
 });
 

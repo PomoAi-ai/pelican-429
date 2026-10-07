@@ -26,6 +26,7 @@ export interface SettingsRuntime {
   setPerfPanel(v: boolean): void;
   setMinimapVisible(v: boolean): void;
   setMinimapOpacity(v: number): void;
+  setAimStyle(v: GameSettings['aimStyle']): void;
   setTileGrid(v: boolean): void;
   setMapTeleport(v: boolean): void;
   setDummyShoot(v: boolean): void;
@@ -49,6 +50,7 @@ const APPLY: { readonly [K in SettingKey]: (rt: SettingsRuntime, v: GameSettings
   perfPanel: (rt, v) => rt.setPerfPanel(v),
   minimapVisible: (rt, v) => rt.setMinimapVisible(v),
   minimapOpacity: (rt, v) => rt.setMinimapOpacity(v),
+  aimStyle: (rt, v) => rt.setAimStyle(v),
   tileGrid: (rt, v) => rt.setTileGrid(v),
   mapTeleport: (rt, v) => rt.setMapTeleport(v),
   dummyShoot: (rt, v) => rt.setDummyShoot(v),

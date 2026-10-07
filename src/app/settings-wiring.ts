@@ -53,6 +53,7 @@ export function loadStartupSettings(params: URLSearchParams, defaultPrecip: Prec
     perfPanel: false,
     minimapVisible: true,
     minimapOpacity: 75,
+    aimStyle: 'fan',
     tileGrid: false,
     mapTeleport: false,
     dummyShoot: false,
@@ -87,6 +88,8 @@ export interface SettingsWiring {
 /** 运行时接口：各项切换直接作用于舞台/世界视图/光照图/模拟，即时生效；当前值以运行时为准。 */
 function createSettingsRuntime(input: SettingsWiringInput): SettingsRuntime {
   const { stage, world, worldViews, worldLight, perfPanel, tileGrid } = input;
+  let aimStyle = input.startup.loaded.settings.aimStyle;
+  document.body.dataset.aimStyle = aimStyle;
   return {
     read: () => ({
       quality: stage.quality,
@@ -106,6 +109,7 @@ function createSettingsRuntime(input: SettingsWiringInput): SettingsRuntime {
       perfPanel: perfPanel.visible,
       minimapVisible: input.minimap.visible,
       minimapOpacity: input.minimap.opacity,
+      aimStyle,
       tileGrid: tileGrid.visible,
       mapTeleport: input.minimap.teleportEnabled,
       dummyShoot: dummyShooting(world),
@@ -130,6 +134,10 @@ function createSettingsRuntime(input: SettingsWiringInput): SettingsRuntime {
     setPerfPanel: (on) => perfPanel.setVisible(on),
     setMinimapVisible: (on) => input.minimap.setVisible(on),
     setMinimapOpacity: (opacity) => input.minimap.setOpacity(opacity),
+    setAimStyle: (style) => {
+      aimStyle = style;
+      document.body.dataset.aimStyle = style;
+    },
     setTileGrid: (on) => tileGrid.setVisible(on),
     setMapTeleport: (on) => input.minimap.setTeleportEnabled(on),
     setDummyShoot: (on) => void setDummyShooting(world, on),

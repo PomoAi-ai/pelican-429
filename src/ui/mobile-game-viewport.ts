@@ -30,13 +30,19 @@ export function mountMobileGameViewport(): boolean {
         }
       };
       updateSafeArea();
-      window.addEventListener('resize', updateSafeArea);
+      // iframe 旋转前后尺寸相同；观察宿主布局才能在安全区更新后同步控件。
+      const safeAreaObserver = new ResizeObserver(updateSafeArea);
+      safeAreaObserver.observe(host.document.body);
       orientation.addEventListener('change', updateSafeArea);
       window.addEventListener('pageshow', () => {
+        safeAreaObserver.observe(host.document.body);
         orientation.addEventListener('change', updateSafeArea);
         updateSafeArea();
       });
-      window.addEventListener('pagehide', () => orientation.removeEventListener('change', updateSafeArea));
+      window.addEventListener('pagehide', () => {
+        safeAreaObserver.disconnect();
+        orientation.removeEventListener('change', updateSafeArea);
+      });
     }
     return false;
   }

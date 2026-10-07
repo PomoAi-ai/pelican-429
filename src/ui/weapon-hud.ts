@@ -7,6 +7,10 @@ import type { SimEvent } from '../core/game-events.ts';
 import type { Entity } from '../entities/entity.ts';
 import { SKILL_ACTIONS } from '../config/keybindings.ts';
 import type { GameAction } from '../config/keybindings.ts';
+import type { Vec2 } from '../core/math.ts';
+import type { WorldToScreen } from './hud.ts';
+import { bindSkillTouch } from './skill-touch.ts';
+import type { SkillAimKind } from './skill-touch.ts';
 import { getLanguage, onLanguageChange } from './language.ts';
 
 export const TOAST_SECONDS = 1.2;
@@ -24,17 +28,21 @@ const HUMAN_SLOTS = [
   { key: '2', name: '服务器超载', en: 'Server overload', action: 'server_overload' },
 ] as const;
 
-export interface WeaponHudOptions { readonly weapons: WeaponsTuning; readonly onTransform: () => void; readonly onSkill: (action: GameAction) => void }
+export interface WeaponHudOptions { readonly weapons: WeaponsTuning; readonly onTransform: () => void; readonly onSkill: (action: GameAction) => void; readonly project: WorldToScreen }
+export interface MobileSkillCast { readonly action: GameAction; readonly direction: Vec2 | null }
 export interface WeaponHudFrame {
   readonly entities: readonly Entity[];
   readonly playerId: number;
   readonly frameDt: number;
+  readonly skillWaitTicks: readonly number[];
   readonly photonCooldownTicks: number;
   readonly photonChargeTicks: number;
   readonly photonActiveTicks: number;
   readonly transformUnlocked: boolean;
 }
 export interface WeaponHud {
+  consumeSkill(): MobileSkillCast | null;
+  resetInput(): void;
   handleEvents(events: readonly SimEvent[]): void;
   update(frame: WeaponHudFrame): void;
   readonly toast: string;
@@ -50,6 +58,11 @@ function el(tag: string, className: string, parent: HTMLElement): HTMLElement {
 
 export function createWeaponHud(root: HTMLElement, options: WeaponHudOptions): WeaponHud {
   const W = options.weapons;
+  const controller = new AbortController();
+  const { signal } = controller;
+  let pending: MobileSkillCast | null = null;
+  let humanForm = false;
+  let swallowing = false;
   const panel = el('div', 'hud-weapon', root);
   const main = el('div', 'hud-weapon-main', panel);
   const icon = el('div', 'hud-weapon-icon', main);
@@ -72,7 +85,7 @@ export function createWeaponHud(root: HTMLElement, options: WeaponHudOptions): W
   switchArrow.setAttribute('aria-hidden', 'true');
   el('span', 'hud-character-key', switchCharacter).textContent = 'F';
   const switchLabel = el('span', 'hud-character-label', switchCharacter);
-  switchCharacter.addEventListener('click', options.onTransform);
+  const transformTouch = bindSkillTouch(switchCharacter, () => 'none', options.onTransform, signal);
   const consumedKeys = new Set<string>();
   panel.addEventListener('keydown', (event) => {
     if (event.code !== 'Space' && event.code !== 'Enter') return;
@@ -89,7 +102,13 @@ export function createWeaponHud(root: HTMLElement, options: WeaponHudOptions): W
     const slot = el('button', 'hud-weapon-slot', slots) as HTMLButtonElement;
     slot.type = 'button';
     slot.setAttribute('data-slot', String(index + 1));
-    slot.addEventListener('click', () => options.onSkill(SKILL_ACTIONS[index]!));
+    const aimKind = (): SkillAimKind => humanForm && index === 2 ? 'none'
+      : !humanForm && (index === 1 || index === 2 && !swallowing) ? 'horizontal' : 'free';
+    const touch = bindSkillTouch(slot, aimKind, direction => {
+      const action = SKILL_ACTIONS[index]!;
+      if (document.body.dataset.controls === 'mobile') pending = { action, direction };
+      else options.onSkill(action);
+    }, signal);
     const artwork = el('span', 'hud-skill-icon', slot);
     artwork.setAttribute('aria-hidden', 'true');
     const key = el('span', 'hud-weapon-key', slot);
@@ -97,8 +116,27 @@ export function createWeaponHud(root: HTMLElement, options: WeaponHudOptions): W
     const label = el('span', 'hud-skill-name', slot);
     const state = el('span', 'hud-skill-state', slot);
     const progress = el('div', 'hud-skill-fill', el('div', 'hud-skill-track', slot));
-    return { slot, artwork, key, label, state, progress };
+    const cooldownRing = el('span', 'hud-skill-cooldown-ring', slot);
+    cooldownRing.setAttribute('aria-hidden', 'true');
+    return { slot, artwork, key, label, state, progress, cooldownRing, touch };
   });
+  const buttonStatus = el('span', 'hud-skill-aim-status hud-skill-button-status', panel);
+  buttonStatus.hidden = true;
+  const aimStatus = el('span', 'hud-skill-aim-status', root);
+  aimStatus.hidden = true;
+  const aimPreview = el('div', 'hud-skill-aim', root);
+  aimPreview.setAttribute('aria-hidden', 'true');
+  aimPreview.hidden = true;
+  el('span', 'hud-skill-aim-beam', aimPreview);
+  el('span', 'hud-skill-aim-tip', aimPreview);
+  const resetInput = (): void => {
+    pending = null;
+    transformTouch.reset();
+    for (const view of skills) view.touch.reset();
+    aimPreview.hidden = true;
+    aimStatus.hidden = true;
+    buttonStatus.hidden = true;
+  };
   const toastEl = el('div', 'hud-weapon-toast', root);
   toastEl.setAttribute('role', 'status');
   toastEl.hidden = true;
@@ -120,6 +158,8 @@ export function createWeaponHud(root: HTMLElement, options: WeaponHudOptions): W
     if (node.getAttribute(name) !== value) node.setAttribute(name, value);
   };
   return {
+    consumeSkill() { const cast = pending; pending = null; return cast; },
+    resetInput,
     handleEvents(events) {
       const en = getLanguage() === 'en';
       for (const ev of events) {
@@ -138,8 +178,12 @@ export function createWeaponHud(root: HTMLElement, options: WeaponHudOptions): W
       const w = p.weapon;
       const en = getLanguage() === 'en';
       const human = p.form === 'human';
+      if (humanForm !== human) resetInput();
+      humanForm = human;
+      swallowing = w.gulpTicks > 0;
       const transforming = p.transformTicks >= 0;
       switchCharacter.disabled = transforming || player.health!.hp <= 0;
+      if (switchCharacter.disabled) resetInput();
       // 剧情锁定仍接收点击以说明解锁条件，真正的变身限制由模拟层统一处理。
       setAttr(switchCharacter, 'aria-disabled', String(!frame.transformUnlocked || switchCharacter.disabled));
       setAttr(switchPortrait, 'data-icon', human ? 'pelican' : 'human');
@@ -167,6 +211,10 @@ export function createWeaponHud(root: HTMLElement, options: WeaponHudOptions): W
         const humanEquipment = human && i < 3;
         const skill = humanEquipment ? { ...humanSkill, cooldown: HUMAN_SKILLS[humanSkill.action].cooldown } : PELICAN_SKILL_SLOTS[i]!;
         const cooldown = humanEquipment ? p.humanCombat.cooldowns[i]! : i < 3 ? w.cooldowns[i]! : frame.photonCooldownTicks;
+        // 吞弹期间可再次按技能吐出，不能把此时的起手冷却当成禁用。
+        const cooldownTicks = !human && i === 2 && w.gulpTicks > 0 ? 0 : cooldown;
+        view.cooldownRing.hidden = cooldownTicks === 0;
+        view.cooldownRing.style.backgroundImage = `conic-gradient(from -90deg, #e5c789b3 ${Math.max(0, 1 - cooldownTicks / skill.cooldown) * 360}deg, #e5c7891a 0)`;
         const isActive = humanEquipment ? p.humanCombat.action === humanSkill.action : active[i]!;
         setAttr(view.artwork, 'data-icon', humanEquipment ? ['codex', 'bug', 'server'][i]! : ['fish', 'dash', 'swallow', 'photon'][i]!);
         const disabled = transforming || p.ride.mode !== 'off' && (humanEquipment || i === 1 || i === 2);
@@ -185,10 +233,47 @@ export function createWeaponHud(root: HTMLElement, options: WeaponHudOptions): W
         view.slot.classList.toggle('hud-weapon-ready', cooldown === 0 && !disabled);
         view.slot.classList.toggle('hud-weapon-disabled', disabled);
         view.slot.disabled = disabled || player.health!.hp <= 0;
+        if (view.slot.disabled) {
+          view.touch.reset();
+          if (pending?.action === SKILL_ACTIONS[i]) pending = null;
+        }
         setAttr(view.slot, 'aria-label', `${en ? skill.en : skill.name} · ${state}`);
         setAttr(view.slot, 'title', `${en ? skill.en : skill.name} · ${state}${!human && i === 1 ? en ? ' · Invincible while dashing; ends when the dash stops' : ' · 突进期间无敌，停止后立即解除' : ''}`);
         view.progress.style.width = `${(100 * (1 - cooldown / skill.cooldown)).toFixed(1)}%`;
       });
+      const aiming = skills.find(view => view.touch.direction !== null);
+      aimPreview.hidden = aiming === undefined;
+      aimStatus.hidden = aiming === undefined;
+      buttonStatus.hidden = aiming === undefined;
+      if (aiming) {
+        const waitTicks = frame.skillWaitTicks[skills.indexOf(aiming)]!;
+        const cooling = waitTicks > 0;
+        aimPreview.classList.toggle('hud-skill-aim-cooling', cooling);
+        for (const status of [aimStatus, buttonStatus]) {
+          status.classList.toggle('hud-skill-aim-cooling', cooling);
+          setText(status, cooling
+            ? `${(Math.ceil(waitTicks / 6) / 10).toFixed(1)}${en ? 's' : ' 秒'}`
+            : en ? 'Release to cast' : '松手释放');
+        }
+        const x = player.body.x;
+        const y = player.body.y + player.body.height / 2;
+        const start = options.project(x, y);
+        const direction = aiming.touch.direction!;
+        const end = options.project(x + direction.x, y + direction.y);
+        aimPreview.hidden = start === null || end === null;
+        aimStatus.hidden = aimPreview.hidden;
+        if (start && end) {
+          aimPreview.style.left = `${start.x}px`;
+          aimPreview.style.top = `${start.y}px`;
+          const length = 96 + aiming.touch.pull * 244;
+          const angle = Math.atan2(end.y - start.y, end.x - start.x);
+          aimPreview.style.width = `${length}px`;
+          aimStatus.style.left = `${start.x + Math.cos(angle) * length * .6}px`;
+          aimStatus.style.top = `${start.y + Math.sin(angle) * length * .6}px`;
+          aimPreview.style.setProperty('--aim-pull', String(aiming.touch.pull));
+          aimPreview.style.transform = `rotate(${angle}rad)`;
+        }
+      }
       if (toastText !== '') {
         toastAge += frame.frameDt;
         if (toastAge >= TOAST_SECONDS) { toastText = ''; toastEl.hidden = true; }
@@ -196,6 +281,6 @@ export function createWeaponHud(root: HTMLElement, options: WeaponHudOptions): W
       }
     },
     get toast() { return toastText; },
-    dispose() { unsubscribe(); switchCharacter.removeEventListener('click', options.onTransform); panel.remove(); toastEl.remove(); },
+    dispose() { resetInput(); controller.abort(); unsubscribe(); panel.remove(); toastEl.remove(); aimPreview.remove(); aimStatus.remove(); },
   };
 }

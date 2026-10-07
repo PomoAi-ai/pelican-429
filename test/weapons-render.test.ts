@@ -217,10 +217,10 @@ describe('weapon HUD', () => {
     setLanguage('zh');
     withFakeDocument(() => {
       const root = new FakeElement('div');
-      const hud = createWeaponHud(root as unknown as HTMLElement, { weapons: W, onTransform: () => {}, onSkill: () => {} });
+      const hud = createWeaponHud(root as unknown as HTMLElement, { weapons: W, onTransform: () => {}, onSkill: () => {}, project: () => null });
       const player = createPelicanEntity(1, { x: 0, y: 0 }, TUNING);
       const p = player.pelican!;
-      const frame = { entities: [player], playerId: 1, frameDt: DT, photonCooldownTicks: 0, photonChargeTicks: 0, photonActiveTicks: 0, transformUnlocked: true };
+      const frame = { skillWaitTicks: [0, 0, 0, 0], entities: [player], playerId: 1, frameDt: DT, photonCooldownTicks: 0, photonChargeTicks: 0, photonActiveTicks: 0, transformUnlocked: true };
       hud.update(frame);
       const slots = root.find('hud-weapon-slots')!;
       assert.equal(slots.children.length, 4);

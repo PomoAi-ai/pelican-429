@@ -5,13 +5,14 @@
  */
 import * as THREE from 'three';
 import type { Tuning } from '../config/tuning.ts';
-import { clamp, damp, lerp } from '../core/math.ts';
+import { approach, clamp, damp, lerp } from '../core/math.ts';
 import { attackPhase } from '../combat/attacks.ts';
 import type { AttackInstance, AttackPhase } from '../combat/attacks.ts';
 import type { Entity, RideData } from '../entities/entity.ts';
 import type { Body } from '../physics/body.ts';
-import { terrainHeightAt } from '../physics/tile-collision.ts';
+import { COLLISION_EPS, terrainHeightAt } from '../physics/tile-collision.ts';
 import type { TileQuery } from '../world/tile-map.ts';
+import { SHAPE_FULL } from '../world/tile-shapes.ts';
 import { createPelicanAnimator, DEFAULT_PELICAN_ANIM_TUNING } from './pelican/pelican-animator.ts';
 import type { PelicanAnimInput, PelicanAnimTuning } from './pelican/pelican-animator.ts';
 import type { PelicanRig } from './pelican/pelican-rig.ts';
@@ -103,7 +104,7 @@ const SLOPE_SINK_LAMBDA = 20;
 const SINK_PROBE = 0.5;
 
 /**
- * 斜坡脚底偏移目标（DESIGN 2.12）：onGround、slopeSink>0 且中心列 terrainHeightAt 有值时
+ * 斜坡脚底偏移目标：onGround、slopeSink>0 且中心列 terrainHeightAt 命中形状砖时
  * clamp(地面高 − y, −halfWidth, 0) × slopeSink；否则 0（无地形、空中、平地都为 0）。探测从 y + SINK_PROBE 往下找。
  */
 export function slopeSinkOffset(terrain: TileQuery | undefined, x: number, y: number, onGround: boolean, halfWidth: number, slopeSink: number): number {
@@ -111,6 +112,8 @@ export function slopeSinkOffset(terrain: TileQuery | undefined, x: number, y: nu
   if (!terrain || !onGround || slopeSink === 0) return 0;
   const ground = terrainHeightAt(terrain, x, y + SINK_PROBE);
   if (ground === null) return 0;
+  // 低侧整砖不是斜坡，按它下沉会让台阶边缘的脚陷进高侧砖面。
+  if (terrain.shapeAt(Math.floor(x), Math.ceil(ground) - 1) === SHAPE_FULL) return 0;
   return clamp(ground - y, -halfWidth, 0) * slopeSink;
 }
 
@@ -118,13 +121,26 @@ export function slopeSinkOffset(terrain: TileQuery | undefined, x: number, y: nu
 const GAIT_PROBE_UP = 1.2;
 const GAIT_PROBE_DEPTH = 3;
 
-/** 每个视图一个：返回平滑后的脚底偏移（加到渲染 y 上）。 */
-function createFootSink(terrain: TileQuery | undefined, slopeSink: number): (b: Body, x: number, y: number, frameDt: number) => number {
+/** 每个视图一个：斜坡贴地偏移与短暂的踏阶抬升补偿（加到渲染 y 上）。 */
+function createFootSink(terrain: TileQuery | undefined, slopeSink: number, body: Body): (b: Body, x: number, y: number, frameDt: number) => number {
   let offset = 0;
+  let stepOffset = 0;
+  let previousX = body.x;
+  let previousY = body.y;
+  let grounded = body.onGround;
   return (b, x, y, frameDt) => {
     if (!terrain) return 0;
+    const rise = y - previousY;
+    // 只缓动超过真实斜坡坡度的踏阶抬升，补偿在有限时间内归零；物理始终站在真实砖面上。
+    if (grounded && b.onGround && rise > Math.abs(x - previousX) + COLLISION_EPS && rise <= b.stepUp) {
+      stepOffset = Math.max(-b.stepUp, stepOffset - rise);
+    }
+    stepOffset = b.onGround ? approach(stepOffset, 0, frameDt / 0.12) : 0;
+    previousX = x;
+    previousY = y;
+    grounded = b.onGround;
     offset = damp(offset, slopeSinkOffset(terrain, x, y, b.onGround, b.halfWidth, slopeSink), SLOPE_SINK_LAMBDA, frameDt);
-    return offset;
+    return offset + stepOffset;
   };
 }
 
@@ -199,7 +215,7 @@ export function createPelicanViewFactory(options: PelicanViewOptions): EntityVie
           return g === null ? null : g - carryY;
         }
       : null;
-    const footSink = createFootSink(options.terrain, tuning.render.slopeSink);
+    const footSink = createFootSink(options.terrain, tuning.render.slopeSink, entity.body);
     // 根节点整体随树平移/倾斜：姿态（步态锁地的脚、骑车）都在根局部系，脚与地面采样随同一位移，贴着摇动的树枝。
     const treeRide = createTreeRideFollower(options.treeRide);
     let lastX: number | null = null;
@@ -348,7 +364,7 @@ export function createDummyViewFactory(options: DummyViewOptions): EntityViewFac
     let wet = 0;
     const dryColor = new THREE.Color(DUMMY_COLOR);
     const wetColor = new THREE.Color(DUMMY_WET_COLOR);
-    const footSink = createFootSink(options.terrain, tuning.render.slopeSink);
+    const footSink = createFootSink(options.terrain, tuning.render.slopeSink, entity.body);
     const treeRide = createTreeRideFollower(options.treeRide);
 
     return {

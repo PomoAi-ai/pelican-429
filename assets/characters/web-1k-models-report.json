@@ -54,11 +54,11 @@
     {
       "source": "./characters/sam/sam.glb",
       "output": "./characters/sam/sam.web-1k.glb",
-      "sourceSha256": "c16b0dca30d998468504121e7cadfadae263a9290dda44292281a08e954d244f",
-      "sourceBytes": 15780124,
-      "outputBytes": 2743100,
-      "sourceBufferBytes": 1553264,
-      "storedBufferBytes": 813314,
+      "sourceSha256": "96fe5e5d1f1525e887cb1a3ebc726d49f593164a47eca43d9c99a0fd5d297526",
+      "sourceBytes": 15943700,
+      "outputBytes": 2552540,
+      "sourceBufferBytes": 1717076,
+      "storedBufferBytes": 623531,
       "images": [
         {
           "name": "texture_normal",
@@ -96,16 +96,25 @@
           "sourceRgbaMipBytes": 22369620,
           "outputRgbaMipBytes": 5592404
         }
-      ]
+      ],
+      "bodyRebuild": {
+        "sourceBaseline": "2a5455a",
+        "textureBuffers": "copied byte-for-byte from existing texture tier",
+        "geometry": "old fused hair removed; boundary skin triangles clipped and vertices compacted",
+        "removedHairTriangles": 12411,
+        "splitBoundaryTriangles": 301,
+        "detachedCutTriangles": 0,
+        "finalBodyTriangles": 23500
+      }
     },
     {
       "source": "./characters/sam/human/sam-human.glb",
       "output": "./characters/sam/human/sam-human.web-1k.glb",
-      "sourceSha256": "5671cec0487e3c08c9adadf4c90e787dc0a2a8167ef54be7b4cd22a86c9a8616",
-      "sourceBytes": 13947808,
-      "outputBytes": 2476680,
-      "sourceBufferBytes": 1918852,
-      "storedBufferBytes": 882121,
+      "sourceSha256": "08656b0ade05f542f55291a2d44919546c5d9751c7f0a590f76ac2dce95709e0",
+      "sourceBytes": 13987108,
+      "outputBytes": 2271076,
+      "sourceBufferBytes": 1958356,
+      "storedBufferBytes": 676703,
       "images": [
         {
           "name": "texture_normal",
@@ -143,16 +152,25 @@
           "sourceRgbaMipBytes": 22369620,
           "outputRgbaMipBytes": 5592404
         }
-      ]
+      ],
+      "bodyRebuild": {
+        "sourceBaseline": "2a5455a",
+        "textureBuffers": "copied byte-for-byte from existing texture tier",
+        "geometry": "old fused hair removed; boundary skin triangles clipped and vertices compacted",
+        "removedHairTriangles": 14229,
+        "splitBoundaryTriangles": 360,
+        "detachedCutTriangles": 48,
+        "finalBodyTriangles": 22055
+      }
     },
     {
       "source": "./characters/tibo/tibo.glb",
       "output": "./characters/tibo/tibo.web-1k.glb",
-      "sourceSha256": "3bd5d7e1cdd97e430809b39f39c9a8295f8e0d5becdc849f8b229eacc950acdd",
-      "sourceBytes": 13698712,
-      "outputBytes": 2378876,
-      "sourceBufferBytes": 1585272,
-      "storedBufferBytes": 833883,
+      "sourceSha256": "3dcf3672700bfe202a033431a2afb7b6120be0d1417946947541aaae901f4886",
+      "sourceBytes": 13876028,
+      "outputBytes": 2182400,
+      "sourceBufferBytes": 1762868,
+      "storedBufferBytes": 638234,
       "images": [
         {
           "name": "texture_normal",
@@ -190,16 +208,25 @@
           "sourceRgbaMipBytes": 22369620,
           "outputRgbaMipBytes": 5592404
         }
-      ]
+      ],
+      "bodyRebuild": {
+        "sourceBaseline": "2a5455a",
+        "textureBuffers": "copied byte-for-byte from existing texture tier",
+        "geometry": "old fused hair removed; boundary skin triangles clipped and vertices compacted",
+        "removedHairTriangles": 12633,
+        "splitBoundaryTriangles": 361,
+        "detachedCutTriangles": 6,
+        "finalBodyTriangles": 24039
+      }
     },
     {
       "source": "./characters/tibo/human/tibo-human.glb",
       "output": "./characters/tibo/human/tibo-human.web-1k.glb",
-      "sourceSha256": "1515ddd1a41ff55c22a9c2e0dd595359da4dfb80fe2a4ea50bd5ae67c27a2012",
-      "sourceBytes": 12300412,
-      "outputBytes": 2250024,
-      "sourceBufferBytes": 1873079,
-      "storedBufferBytes": 855018,
+      "sourceSha256": "b87f4b512030a85cf0e28e004b368514533c3a5ee846510bfb9353eaae33273f",
+      "sourceBytes": 12375600,
+      "outputBytes": 2057056,
+      "sourceBufferBytes": 1948457,
+      "storedBufferBytes": 662225,
       "images": [
         {
           "name": "texture_normal",
@@ -237,7 +264,16 @@
           "sourceRgbaMipBytes": 22369620,
           "outputRgbaMipBytes": 5592404
         }
-      ]
+      ],
+      "bodyRebuild": {
+        "sourceBaseline": "2a5455a",
+        "textureBuffers": "copied byte-for-byte from existing texture tier",
+        "geometry": "old fused hair removed; boundary skin triangles clipped and vertices compacted",
+        "removedHairTriangles": 13508,
+        "splitBoundaryTriangles": 286,
+        "detachedCutTriangles": 0,
+        "finalBodyTriangles": 21906
+      }
     },
     {
       "source": "./characters/enemies/line-hound/model.glb",

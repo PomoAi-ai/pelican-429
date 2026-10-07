@@ -26,7 +26,7 @@ import { CONTROL_HINTS } from '../src/ui/hud.ts';
 import { setLanguage } from '../src/ui/language.ts';
 import { FakeElement, withFakeDocument } from './helpers/fake-dom.ts';
 
-const DEFAULTS: GameSettings = Object.freeze({ quality: 'high', antialias: 'smaa', wind: 'auto', windDirection: 'right', tornado: false, windPower: 1, tornadoPower: 2, tornadoCount: 3, rainPower: 1, snowPower: 1, precip: 'manual', rain: 'none', snow: 'none', water: 'clear', perfPanel: false, minimapVisible: true, minimapOpacity: 75, tileGrid: false, mapTeleport: false, dummyShoot: false });
+const DEFAULTS: GameSettings = Object.freeze({ quality: 'high', antialias: 'smaa', wind: 'auto', windDirection: 'right', tornado: false, windPower: 1, tornadoPower: 2, tornadoCount: 3, rainPower: 1, snowPower: 1, precip: 'manual', rain: 'none', snow: 'none', water: 'clear', perfPanel: false, minimapVisible: true, minimapOpacity: 75, aimStyle: 'fan', tileGrid: false, mapTeleport: false, dummyShoot: false });
 
 const params = (q: string) => new URLSearchParams(q);
 
@@ -95,6 +95,7 @@ function fakeRuntime(start: GameSettings = DEFAULTS) {
       state.perfPanel = v;
     },
     setMinimapVisible: (v) => { calls.push(`minimapVisible:${v}`); state.minimapVisible = v; },
+    setAimStyle: (v) => { calls.push(`aimStyle:${v}`); state.aimStyle = v; },
     setMinimapOpacity: (v) => { calls.push(`minimapOpacity:${v}`); state.minimapOpacity = v; },
     setTileGrid: (v) => {
       calls.push(`tileGrid:${v}`);
@@ -125,7 +126,7 @@ describe('设置选项表（与网址参数共用）', () => {
     assert.deepEqual(values('perfPanel'), [false, true]);
     assert.deepEqual(values('dummyShoot'), [false, true]);
     const p = Object.fromEntries(SETTING_DEFS.map((d) => [d.key, d.param]));
-    assert.deepEqual(p, { quality: 'quality', antialias: 'aa', wind: 'wind', windDirection: 'windDirection', tornado: 'tornado', windPower: 'windPower', tornadoPower: 'tornadoPower', tornadoCount: 'tornadoCount', rainPower: 'rainPower', snowPower: 'snowPower', precip: 'precip', rain: 'rain', snow: 'snow', water: 'water', perfPanel: null, minimapVisible: null, minimapOpacity: null, tileGrid: null, mapTeleport: null, dummyShoot: 'dummyShoot' });
+    assert.deepEqual(p, { quality: 'quality', antialias: 'aa', wind: 'wind', windDirection: 'windDirection', tornado: 'tornado', windPower: 'windPower', tornadoPower: 'tornadoPower', tornadoCount: 'tornadoCount', rainPower: 'rainPower', snowPower: 'snowPower', precip: 'precip', rain: 'rain', snow: 'snow', water: 'water', perfPanel: null, minimapVisible: null, minimapOpacity: null, aimStyle: 'aimStyle', tileGrid: null, mapTeleport: null, dummyShoot: 'dummyShoot' });
     assert.match(settingDef('antialias').options.find((o) => o.value === 'msaa')?.label ?? '', /MSAA/);
     assert.match(settingDef('antialias').note ?? '', /MSAA 较慢/);
     assert.throws(() => settingDef('nope' as SettingKey), /settings/);
@@ -133,7 +134,7 @@ describe('设置选项表（与网址参数共用）', () => {
 
   test('resolveSettings：网址参数优先于保存值，保存值优先于默认值；来源记录在 fromUrl', () => {
     const r = resolveSettings({ defaults: DEFAULTS, saved: { water: 'deep', quality: 'low' }, params: params('?water=emerald&aa=msaa&dummyShoot&precip=manual&rain=heavy&snow=light&wind=gale&windDirection=left&tornado') });
-    assert.deepEqual(r.settings, { quality: 'low', antialias: 'msaa', wind: 'gale', windDirection: 'left', tornado: true, windPower: 1, tornadoPower: 2, tornadoCount: 3, rainPower: 1, snowPower: 1, precip: 'manual', rain: 'heavy', snow: 'light', water: 'emerald', perfPanel: false, minimapVisible: true, minimapOpacity: 75, tileGrid: false, mapTeleport: false, dummyShoot: true });
+    assert.deepEqual(r.settings, { quality: 'low', antialias: 'msaa', wind: 'gale', windDirection: 'left', tornado: true, windPower: 1, tornadoPower: 2, tornadoCount: 3, rainPower: 1, snowPower: 1, precip: 'manual', rain: 'heavy', snow: 'light', water: 'emerald', perfPanel: false, minimapVisible: true, minimapOpacity: 75, aimStyle: 'fan', tileGrid: false, mapTeleport: false, dummyShoot: true });
     assert.deepEqual([...r.fromUrl].sort(), ['antialias', 'dummyShoot', 'precip', 'rain', 'snow', 'tornado', 'water', 'wind', 'windDirection']);
   });
 
@@ -237,7 +238,7 @@ describe('设置控制器', () => {
     for (const [k, v] of cases) c.set(k, v as never);
     assert.deepEqual(calls, ['quality:low', 'antialias:msaa', 'wind:gale', 'windDirection:left', 'tornado:true', 'precip:auto', 'rain:heavy', 'snow:light', 'water:emerald', 'perfPanel:true', 'tileGrid:true', 'mapTeleport:true', 'dummyShoot:true']);
     assert.deepEqual(JSON.parse(store.value ?? ''), { quality: 'low', antialias: 'msaa', wind: 'gale', windDirection: 'left', tornado: true, precip: 'auto', rain: 'heavy', snow: 'light', water: 'emerald', perfPanel: true, tileGrid: true, mapTeleport: true, dummyShoot: true });
-    assert.deepEqual(c.current(), { minimapVisible: true, minimapOpacity: 75, windPower: 1, tornadoPower: 2, tornadoCount: 3, rainPower: 1, snowPower: 1, quality: 'low', antialias: 'msaa', wind: 'gale', windDirection: 'left', tornado: true, precip: 'auto', rain: 'heavy', snow: 'light', water: 'emerald', perfPanel: true, tileGrid: true, mapTeleport: true, dummyShoot: true });
+    assert.deepEqual(c.current(), { minimapVisible: true, minimapOpacity: 75, aimStyle: 'fan', windPower: 1, tornadoPower: 2, tornadoCount: 3, rainPower: 1, snowPower: 1, quality: 'low', antialias: 'msaa', wind: 'gale', windDirection: 'left', tornado: true, precip: 'auto', rain: 'heavy', snow: 'light', water: 'emerald', perfPanel: true, tileGrid: true, mapTeleport: true, dummyShoot: true });
     assert.equal(loadSettings({ store, defaults: DEFAULTS, params: params('') }).settings.tileGrid, true, '下次启动恢复格子虚线开关');
     assert.equal(loadSettings({ store, defaults: DEFAULTS, params: params('') }).settings.mapTeleport, true);
     assert.equal(loadSettings({ store, defaults: DEFAULTS, params: params('') }).settings.precip, 'auto');

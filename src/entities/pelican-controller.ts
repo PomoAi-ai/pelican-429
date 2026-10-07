@@ -50,6 +50,8 @@ export interface PelicanInput {
   readonly shootHeld: boolean;
   /** 鼠标指向的世界坐标；无指针时为 null。 */
   readonly aim: Vec2 | null;
+  /** 触屏松手锁定的施法目标；null 表示沿用实时自动瞄准。 */
+  readonly manualSkillAim: Vec2 | null;
   /** 自上一 tick 以来按下过上/下车（锁存）。 */
   readonly mountPressed: boolean;
   readonly transformPressed: boolean;
@@ -70,6 +72,7 @@ export const NEUTRAL_INPUT: PelicanInput = Object.freeze({
   shootPressed: false,
   shootHeld: false,
   aim: null,
+  manualSkillAim: null,
   mountPressed: false,
   transformPressed: false,
   skillPressed: 0,
@@ -100,7 +103,7 @@ export function bufferPelicanInput(e: Entity, input: PelicanInput, tuning: Tunin
     p.attackBufferTicks = Math.max(1, (p.form === 'human' ? HUMAN_MELEE_ATTACK : tuning.attacks.peck).bufferWindow);
     p.attackBufferFacing = aimFacing(e.body, input);
   }
-  if (p.form === 'pelican') bufferSkillInput(p, input.skillPressed);
+  if (p.form === 'pelican') bufferSkillInput(p, input.skillPressed, input.manualSkillAim);
   else bufferHumanSkill(p, input);
   if (p.form === 'pelican' && input.shootPressed) {
     p.shootBufferTicks = Math.max(1, tuning.weapons.water.bufferWindow);

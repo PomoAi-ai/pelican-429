@@ -5,6 +5,7 @@ import { STORY_SAVE_KEY } from './config/story-save.ts';
 import { getLanguage, onLanguageChange } from './ui/language.ts';
 import { mountMobileGameViewport } from './ui/mobile-game-viewport.ts';
 import { homeScreenInstallState } from './ui/home-screen-install.ts';
+import { fullscreenOnFirstTap } from './ui/fullscreen.ts';
 import { mountSitePage } from './ui/site-pages.ts';
 
 function bootError(error: unknown): void {
@@ -60,6 +61,7 @@ async function boot(): Promise<void> {
       if (!(event.target instanceof Element && event.target.closest('input, textarea, [contenteditable="true"]'))) event.preventDefault();
     });
     if (mountMobileGameViewport()) return;
+    if (matchMedia('(pointer: coarse)').matches) fullscreenOnFirstTap();
   }
   const navigation = document.getElementById('dev-navigation')!;
   navigation.dataset.context = mode === 'index' ? 'home' : mode === 'story' || mode === 'game' || mode === 'controls' ? 'game' : 'resources';

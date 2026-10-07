@@ -109,7 +109,7 @@ body[data-controls] .hud-weapon-toast { left: 50%; top: calc(var(--dev-nav-heigh
 .control-pad:active { border-color: #fff0bc; box-shadow: 0 0 18px #ffcf7977; }
 .control-attack { left: 96px; bottom: 34px; width: 54px; height: 54px; }
 body[data-controls=mobile] .control-keyboard, body[data-controls=mobile] .control-primary-key { display: none !important; }
-body[data-controls=mobile] .control-move { display: block; position: absolute; left: max(28px, env(safe-area-inset-left)); bottom: 26px; width: 128px; height: 128px; transform: scale(var(--touch-scale)); transform-origin: bottom left; }
+body[data-controls=mobile] .control-move { display: block; position: absolute; left: 28px; bottom: 26px; width: 128px; height: 128px; transform: scale(var(--touch-scale)); transform-origin: bottom left; }
 .control-stick { position: relative; display: block; width: 128px; height: 128px; padding: 0; border: 2px solid #e5d8ba77; border-radius: 50%; color: #fff; background: #171c2940; touch-action: none; pointer-events: auto; box-shadow: inset 0 0 0 7px #19212b30, 0 2px 8px #0002; }
 .control-stick-ring { position: absolute; inset: 21px; border: 1px solid #eadbbf40; border-radius: 50%; }
 .control-stick-thumb { position: absolute; left: 40px; top: 40px; width: 44px; height: 44px; border-radius: 50%; background: radial-gradient(circle at 35% 25%, #dad4cbaa, #3d414bba); border: 2px solid #e9dfccad; box-shadow: 0 3px 12px #0004; }
@@ -122,9 +122,9 @@ body[data-controls=mobile] .control-ride::after { content: ''; display: block; w
 body[data-controls=mobile] .hud-weapon-slots { inset: 0; display: block; pointer-events: none; }
 body[data-controls=mobile] .hud-weapon-slot { position: absolute; width: 50px; height: 50px; transform: scale(var(--touch-scale)); transform-origin: right bottom; bottom: calc(24px + 143px * var(--touch-scale)); }
 body[data-controls=mobile] .hud-weapon-slot[data-slot='1'] { right: calc(24px + 99px * var(--touch-scale)); bottom: calc(24px + 78px * var(--touch-scale)); width: 61px; height: 61px; }
-body[data-controls=mobile] .hud-weapon-slot[data-slot='2'] { right: calc(24px + 141px * var(--touch-scale)); }
-body[data-controls=mobile] .hud-weapon-slot[data-slot='3'] { right: calc(24px + 79px * var(--touch-scale)); bottom: calc(24px + 158px * var(--touch-scale)); }
-body[data-controls=mobile] .hud-weapon-slot[data-slot='4'] { right: calc(24px + 17px * var(--touch-scale)); }
+body[data-controls=mobile] .hud-weapon-slot[data-slot='2'] { right: calc(24px + 153px * var(--touch-scale)); }
+body[data-controls=mobile] .hud-weapon-slot[data-slot='3'] { right: calc(24px + 83px * var(--touch-scale)); bottom: calc(24px + 170px * var(--touch-scale)); }
+body[data-controls=mobile] .hud-weapon-slot[data-slot='4'] { right: calc(24px + 13px * var(--touch-scale)); }
 body[data-controls=mobile] .hud-weapon-key, body[data-controls=mobile] .hud-character-key { display: none; }
 body[data-controls=mobile] .hud-weapon-main { left: 20px; top: calc(var(--dev-nav-height) + 16px); width: 230px; }
 body[data-controls=mobile] .hud-weapon-icon { width: 50px; height: 50px; }
@@ -147,5 +147,34 @@ body[data-controls] .hud-character-icon { position: absolute; inset: 4px; width:
 .hud-character-arrow { position: absolute; right: -3px; bottom: -1px; padding: 0 3px; border-radius: 8px; background: #1b202a; color: #ffe5ac; font-size: 17px; line-height: 19px; }
 body[data-controls] .hud-character-key { position: absolute; top: calc(100% + 7px); left: 0; right: 0; text-align: center; font: 10px ui-monospace, monospace; text-shadow: 0 1px 4px #000; }
 body[data-controls] .hud-character-label { display: none; }
-body[data-controls=mobile] .hud-character-switch { left: auto; right: calc(24px + 203px * var(--touch-scale)); bottom: calc(24px + 143px * var(--touch-scale)); width: 50px; height: 50px; transform: scale(var(--touch-scale)); transform-origin: bottom right; }
+body[data-controls=mobile] .hud-character-switch { left: auto; right: calc(24px + 221px * var(--touch-scale)); bottom: calc(24px + 143px * var(--touch-scale)); width: 50px; height: 50px; transform: scale(var(--touch-scale)); transform-origin: bottom right; }
 body[data-controls=mobile] .hud-character-switch:active:not(:disabled) { scale: .88; filter: brightness(1.35); box-shadow: 0 0 0 5px #ffd77e55; }
+body[data-controls=mobile] .hud-weapon-slot.control-pressed,
+body[data-controls=mobile] .hud-character-switch.control-pressed { scale: .88; filter: brightness(1.35); box-shadow: 0 0 0 5px #ffd77e55; }
+/* 提示长度只表达拖动幅度，三种造型共用同一方向与释放逻辑。 */
+.hud-skill-aim { --aim-pull: 0; position: fixed; height: 0; transform-origin: 0 0; pointer-events: none; z-index: 5; color: #fff0ce; filter: drop-shadow(0 1px 2px #17192388); }
+.hud-skill-aim-beam, .hud-skill-aim-tip { position: absolute; top: 0; transform: translateY(-50%); }
+/* 范围箭头：一体轮廓与半透明填充，箭头随拉动变长。 */
+.hud-skill-aim-beam { left: 24px; right: 0; height: calc(24px + var(--aim-pull) * 8px); background: center / 100% 100% no-repeat url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 34' preserveAspectRatio='none'%3E%3Cdefs%3E%3ClinearGradient id='g'%3E%3Cstop stop-color='%23f4e3b9' stop-opacity='.08'/%3E%3Cstop offset='1' stop-color='%23f4e3b9' stop-opacity='.3'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M1 9H176V2L198 17 176 32V25H1Z' fill='url(%23g)' stroke='%23fff0ce' stroke-opacity='.85' stroke-width='1.5' stroke-linejoin='round' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E"); }
+.hud-skill-aim-tip { display: none; }
+/* 落点圆环：只留端点和角色前方的短方向标。 */
+body[data-aim-style=ring] .hud-skill-aim-beam { left: 26px; right: auto; width: 10px; height: 10px; border: solid #fff0ce; border-width: 2px 2px 0 0; background: none; clip-path: none; transform: translateY(-50%) rotate(45deg); }
+body[data-aim-style=ring] .hud-skill-aim-beam::after { content: none; }
+body[data-aim-style=ring] .hud-skill-aim-tip { display: block; right: -18px; width: 36px; height: 36px; border: 2px solid #fff0cee6; border-radius: 50%; background: #20263233; box-shadow: inset 0 0 0 5px #ead6ad22; }
+body[data-aim-style=ring] .hud-skill-aim-tip::after { content: ''; position: absolute; inset: 8px; border: 1px solid #fff0ce80; border-radius: 50%; }
+/* 扇形用矢量圆弧保持轮廓，长度随同一拖动幅度变化。 */
+body[data-aim-style=fan] .hud-skill-aim-beam { left: 0; right: 0; height: auto; aspect-ratio: 340 / 160; background: center / 100% 100% no-repeat url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -80 340 160'%3E%3Cdefs%3E%3ClinearGradient id='g'%3E%3Cstop stop-color='%23e5c789' stop-opacity='0'/%3E%3Cstop offset='1' stop-color='%23e5c789' stop-opacity='.14'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M26-6 329-77A338 338 0 0 1 329 77L26 6' fill='url(%23g)' stroke='%23ead6ad' stroke-opacity='.35' stroke-width='1'/%3E%3Cpath d='M329-77A338 338 0 0 1 329 77' fill='none' stroke='%23fff0ce' stroke-opacity='.75' stroke-width='2'/%3E%3C/svg%3E"); }
+body[data-aim-style=fan] .hud-skill-aim-tip { display: block; left: 30px; right: 24px; height: 22px; background: center / 100% 100% no-repeat url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 280 22' preserveAspectRatio='none'%3E%3Cpath d='M0 11H277M266 2 277 11 266 20' fill='none' stroke='%23fff0ce' stroke-opacity='.9' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E"); }
+/* 拖动时沿用左摇杆的圆盘与拇指触点比例。 */
+body[data-controls=mobile] .hud-weapon-slot.control-aiming { scale: 1; filter: none; border-color: #ffe5ac; background-color: #242b3aaa; box-shadow: 0 2px 8px #0005, inset 0 0 0 3px #443e3766; }
+.hud-weapon-slot.control-aiming::after { content: ''; position: absolute; inset: -8px; border: 1px solid #eadbbf55; border-radius: 50%; background: #171c291a; pointer-events: none; }
+.hud-weapon-slot.control-aiming::before { content: ''; position: absolute; z-index: 4; left: calc(50% - 12px); top: calc(50% - 12px); width: 22px; height: 22px; border: 1px solid #e9dfccad; border-radius: 50%; background: radial-gradient(circle at 35% 25%, #dad4cbcc, #3d414bdd); box-shadow: 0 2px 6px #0005; transform: translate(var(--aim-x), var(--aim-y)); pointer-events: none; }
+
+/* 倒计时投影在箭杆上，文字独立保持水平，避免左右瞄准时倒置。 */
+.hud-skill-aim-status { position: fixed; z-index: 6; transform: translate(-50%, -50%); padding: 5px 12px; border: 1px solid #e5c78980; border-radius: 13px; background: #151923db; color: #fff0ce; box-shadow: 0 2px 6px #0003; font: 600 16px/1.4 system-ui, sans-serif; font-variant-numeric: tabular-nums; white-space: nowrap; pointer-events: none; }
+.hud-skill-aim-status.hud-skill-aim-cooling { color: #e1dcd2; border-color: #e1dcd233; }
+.hud-skill-aim.hud-skill-aim-cooling { opacity: .36; filter: grayscale(.8); }
+.hud-skill-cooldown-ring { display: none; position: absolute; inset: -4px; border: 2px solid transparent; border-radius: 50%; mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0); mask-composite: exclude; pointer-events: none; }
+.control-aiming .hud-skill-cooldown-ring:not([hidden]) { display: block; }
+
+.hud-skill-aim-status.hud-skill-button-status { position: absolute; right: calc(24px + 74px * var(--touch-scale)); bottom: calc(24px + 214px * var(--touch-scale)); transform: none; }

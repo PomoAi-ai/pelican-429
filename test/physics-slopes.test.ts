@@ -371,6 +371,50 @@ describe('斜坡行走', () => {
     assert.equal(b.y, 1);
   });
 
+  test('一格台阶双向通行：接触前不抬升、停步有真实支撑、离开后持续下落', () => {
+    const map = mapOf(WALL);
+    for (const dir of [-1, 1] as const) {
+      const b = pelicanBody({ x: dir === 1 ? 6.5 : 10.5, y: 1 });
+      tick(b, map);
+      b.vx = dir * P.walkSpeed;
+      for (let i = 0; i < 15; i++) tick(b, map);
+      b.vx = 0;
+      for (let i = 0; i < 30; i++) {
+        tick(b, map);
+        assert.equal(b.y, 1, `dir=${dir}: 未接触台阶时不能站在空气里`);
+        assert.equal(b.onGround, true);
+      }
+      b.vx = dir * P.walkSpeed;
+      for (let i = 0; i < 90 && dir * (b.x - 8.5) < 0; i++) {
+        tick(b, map);
+        assert.equal(b.wallContact, 0);
+        assert.equal(embedded(b, map), false);
+        assert.equal(b.onGround, true);
+        assert.ok(b.y === 1 || b.y === 2, '踏阶只由真实砖面支撑');
+      }
+      b.vx = 0;
+      for (let i = 0; i < 30; i++) {
+        tick(b, map);
+        assert.equal(b.y, 2, '台阶上停步不回落或抖动');
+        assert.equal(b.onGround, true);
+      }
+      b.vx = dir * P.walkSpeed;
+      let falling = false;
+      for (let i = 0; i < 60; i++) {
+        const y = b.y;
+        tick(b, map);
+        assert.ok(b.y <= y, '下台阶不反复抬升');
+        if (b.y > 1 && b.y < 2) {
+          falling = true;
+          assert.equal(b.onGround, false, '空气不能提供站立支撑');
+        }
+      }
+      assert.equal(falling, true);
+      assert.equal(b.y, 1);
+      assert.equal(b.onGround, true);
+    }
+  });
+
   test('1 格整砖墙挡住（即使在地上且 stepUp=.5）', () => {
     const map = mapOf(WALL);
     const b = pelicanBody({ x: 5, y: 1, stepUp: 0.5 });

@@ -236,8 +236,8 @@ export function createHud(root: HTMLElement, project: WorldToScreen, options: Hu
   let humanHints = false;
   const translate = (): void => {
     touchHelp.textContent = getLanguage() === 'en'
-      ? 'Left stick: tilt to walk, push to run, up to jump / fly, down to drop through platforms / dive. Hold Attack to auto aim at the nearest enemy on screen. Tap secondary attack or skills to cast. In water, hold up to rise and push up again at the surface to jump out. Running out of oxygen drains health.'
-      : '左摇杆轻推慢走、推远奔跑，上推跳跃 / 飞行，下推下平台 / 俯冲 / 下潜。右侧按住主攻，自动瞄准屏内最近敌人；轻触副攻或技能直接释放。水中持续上推上浮，水面再次上推跃出；氧气耗尽扣血。';
+      ? 'Left stick: tilt to walk, push to run, up to jump / fly, down to drop through platforms / dive. Hold Attack to auto aim at the nearest enemy on screen. Tap skills to auto aim. Directional skills can be dragged and released; pulling farther extends the aiming guide. Wing dash and the initial swallow face sideways; Server overload only needs a tap; Photon Burst seeks enemies after launch. In water, hold up to rise and push up again at the surface to jump out. Running out of oxygen drains health.'
+      : '左摇杆轻推慢走、推远奔跑，上推跳跃 / 飞行，下推下平台 / 俯冲 / 下潜。右侧按住主攻自动瞄准屏内最近敌人；轻触技能自动选敌；有方向的技能可拖动瞄准，拉得越远指示越长，松手释放。振翅突进和吞弹起手只朝左右；服务器超载直接点击释放，光子爆裂发射后继续追敌。水中持续上推上浮，水面再次上推跃出；氧气耗尽扣血。';
     const lines = getLanguage() === 'en' ? EN_CONTROL_HINTS : CONTROL_HINTS;
     hintEls.forEach((node, i) => { node.textContent = lines[i] as string; });
     if (humanHints) {

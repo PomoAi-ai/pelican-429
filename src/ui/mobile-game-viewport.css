@@ -1,9 +1,14 @@
 .game-interface, .game-interface body { touch-action: pan-x pan-y; -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
 .game-interface input, .game-interface textarea, .game-interface [contenteditable="true"] { -webkit-user-select: text; user-select: text; -webkit-touch-callout: default; }
 .mobile-game-host > :not(.mobile-game-frame) { display: none !important; }
-.mobile-game-frame { position: fixed; left: 0; top: 0; width: max(100dvw, 100dvh); height: min(100dvw, 100dvh); border: 0; transform-origin: top left; }
-@media (orientation: portrait) {
-  .mobile-game-frame { transform: translateX(100dvw) rotate(90deg); }
+.mobile-game-host { --mobile-viewport-width: 100dvw; --mobile-viewport-height: 100dvh; padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); }
+/* iOS 独立应用的 dvh 会少算状态栏；根页面也需铺满，否则 overflow:hidden 仍裁掉 iframe。 */
+@media (display-mode: standalone), (display-mode: fullscreen) {
+  html:has(> .mobile-game-host), .mobile-game-host { width: 100lvw; height: 100lvh; }
+  .mobile-game-host { --mobile-viewport-width: 100lvw; --mobile-viewport-height: 100lvh; }
 }
-.mobile-game-host { padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); }
+.mobile-game-frame { position: fixed; left: 0; top: 0; width: max(var(--mobile-viewport-width), var(--mobile-viewport-height)); height: min(var(--mobile-viewport-width), var(--mobile-viewport-height)); border: 0; transform-origin: top left; }
+@media (orientation: portrait) {
+  .mobile-game-frame { transform: translateX(var(--mobile-viewport-width)) rotate(90deg); }
+}
 :root { --game-safe-top: env(safe-area-inset-top, 0px); --game-safe-right: env(safe-area-inset-right, 0px); --game-safe-bottom: env(safe-area-inset-bottom, 0px); --game-safe-left: env(safe-area-inset-left, 0px); }

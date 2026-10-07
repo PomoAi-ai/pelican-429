@@ -10,6 +10,8 @@ import type { SettingsController } from './settings-model.ts';
 import { LANGUAGES, getLanguage, onLanguageChange, setLanguage, type Language } from './language.ts';
 
 const EN: Record<string, string> = {
+  '技能瞄准样式': 'Skill aim style', '范围箭头': 'Range arrow', '落点圆环': 'Target ring', '金色扇形': 'Golden fan',
+  '仅用于有方向的技能；拖动距离控制指示长度': 'Directional skills only; drag distance controls indicator length',
   '画面': 'Graphics', '天气': 'Weather', '水': 'Water', '调试': 'Debug',
   '显示小地图': 'Show minimap', '小地图不透明度': 'Minimap opacity', '0% 透明，100% 不透明': '0% transparent, 100% opaque',
   '画质': 'Quality', '抗锯齿': 'Antialiasing', 'MSAA 较慢（约慢一倍），默认 SMAA': 'MSAA is slower (about 2×); SMAA is the default',

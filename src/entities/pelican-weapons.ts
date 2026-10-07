@@ -45,6 +45,8 @@ export interface WeaponState {
   /** 鱼群、突进、吞弹的独立冷却。 */
   cooldowns: [number, number, number];
   bufferedSkill: 0 | 1 | 2 | 3;
+  bufferedAim: Vec2 | null;
+  gulpAim: Vec2 | null;
   skillBufferTicks: number;
   dashTicks: number;
   dashSide: 1 | -1;
@@ -65,6 +67,8 @@ export function createWeaponState(tuning: Tuning): WeaponState {
     mouthful: null,
     cooldowns: [0, 0, 0],
     bufferedSkill: 0,
+    bufferedAim: null,
+    gulpAim: null,
     skillBufferTicks: 0,
     dashTicks: 0,
     dashSide: 1,
@@ -129,9 +133,10 @@ export function weaponLocksFacing(p: PelicanData, tuning: Tuning): boolean {
 }
 
 /** hitstop 期间也锁存一次技能输入。 */
-export function bufferSkillInput(p: PelicanData, skill: 0 | 1 | 2 | 3 | 4): void {
+export function bufferSkillInput(p: PelicanData, skill: 0 | 1 | 2 | 3 | 4, aim: Vec2 | null): void {
   if (skill === 0 || skill === 4) return;
   p.weapon.bufferedSkill = skill;
+  p.weapon.bufferedAim = aim === null ? null : { ...aim };
   p.weapon.skillBufferTicks = PELICAN_SKILLS.bufferTicks + (skill === 1 ? 1 : 0);
 }
 
@@ -260,6 +265,7 @@ export function cancelPelicanCombat(e: Entity): void {
   p.shotRequests = [];
   const w = p.weapon;
   w.gulpTicks = w.dashTicks = w.bufferedSkill = w.skillBufferTicks = 0;
+  w.bufferedAim = w.gulpAim = null;
   w.mouthful = null;
   w.events = [];
 }
@@ -286,21 +292,25 @@ export function updateWeapons(e: Entity, p: PelicanData, input: WeaponInput, flu
   if (w.gulpTicks > 0) {
     w.gulpTicks--;
     if (w.gulpTicks === 0 || w.bufferedSkill === 3) {
+      const aim = w.bufferedSkill === 3 ? w.bufferedAim ?? input.aim : w.gulpAim ?? input.aim;
       w.bufferedSkill = 0;
       w.skillBufferTicks = 0;
-      aimShot(e, p, input.aim, lockSide, tuning);
+      w.bufferedAim = w.gulpAim = null;
+      aimShot(e, p, aim, lockSide, tuning);
       finishGulp(e, p, tuning);
     }
   }
   if (e.health!.hitstunTicks > 0) {
-    if (w.skillBufferTicks > 0 && --w.skillBufferTicks === 0) w.bufferedSkill = 0;
+    if (w.skillBufferTicks > 0 && --w.skillBufferTicks === 0) { w.bufferedSkill = 0; w.bufferedAim = null; }
     return;
   }
   const skill = w.bufferedSkill || (input.skill1Held ? 1 : 0);
   if (skill > 0 && w.cooldowns[skill - 1] === 0 && weaponIdle(p) && w.dashTicks === 0 && !e.attack) {
+    const manualAim = w.bufferedSkill > 0 ? w.bufferedAim : null;
     w.bufferedSkill = 0;
+    w.bufferedAim = null;
     w.skillBufferTicks = 0;
-    aimShot(e, p, input.aim, lockSide, tuning);
+    aimShot(e, p, manualAim ?? input.aim, lockSide, tuning);
     if (skill === 1) {
       w.cooldowns[0] = PELICAN_SKILLS.fishCooldownTicks;
       w.shotLevel = 1;
@@ -313,11 +323,12 @@ export function updateWeapons(e: Entity, p: PelicanData, input: WeaponInput, flu
     } else {
       w.cooldowns[2] = PELICAN_SKILLS.swallowCooldownTicks;
       w.gulpTicks = W.swallow.gulpTicks;
+      w.gulpAim = manualAim;
       w.mouthful = null;
     }
     return;
   }
-  if (w.skillBufferTicks > 0 && --w.skillBufferTicks === 0) w.bufferedSkill = 0;
+  if (w.skillBufferTicks > 0 && --w.skillBufferTicks === 0) { w.bufferedSkill = 0; w.bufferedAim = null; }
   const pressed = p.shootBufferTicks > 0;
   if (!(pressed || input.shootHeld) || p.shootCooldownTicks > 0 || !weaponIdle(p) || w.dashTicks > 0) return;
   const free = p.inWater && W.water.swimFree;

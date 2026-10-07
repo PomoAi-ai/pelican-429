@@ -289,24 +289,22 @@ describe('鹈鹕游泳', () => {
         w.fluid.set(x, 6, 0);
       }
       const label = `${form}, wet=${wet}, dir=${dir}, ${obstacle}`;
-      let pausedOnRamp = false;
+      let pausedOnStep = false;
       for (let tick = 0; tick < 90; tick++) {
-        const { x, y } = player.body;
         stepSim(w, input({ moveX: dir, downHeld: wet && form === 'pelican' }));
         assert.equal(overlapsSolid(bodyRect(player.body), w.map), false, `${label}: 踏阶不能进入实心`);
-        assert.ok(player.body.y - y <= Math.abs(player.body.x - x) + 1e-4, `${label}: 台阶应随水平位移平滑升高`);
-        if (obstacle === 'step' && !pausedOnRamp && player.body.y > 3.15 && player.body.y < 3.5) {
-          pausedOnRamp = true;
+        if (obstacle === 'step' && !pausedOnStep && player.body.y === 4) {
+          pausedOnStep = true;
           trace(w, 30, () => ({ downHeld: wet && form === 'pelican' }));
           const stoppedY = player.body.y;
-          assert.ok(stoppedY > 3 && stoppedY < 4, `${label}: 停在坡中途`);
+          assert.equal(stoppedY, 4, `${label}: 停在真实台阶顶面`);
           trace(w, 15, () => ({ downHeld: wet && form === 'pelican' }));
           assert.equal(player.body.y, stoppedY, `${label}: 停步后不继续抬升或回落`);
         }
       }
       assert.equal(player.body.onGround, true, label);
       if (obstacle === 'step') {
-        assert.ok(pausedOnRamp, `${label}: 必须经过连续坡面`);
+        assert.ok(pausedOnStep, `${label}: 必须踏上台阶`);
         assert.ok((player.body.x - 14.5) * dir > 2, label);
         assert.equal(player.body.y, 4, label);
         assert.equal(pelicanState(player), 'run', label);

@@ -8,14 +8,13 @@
  * - 水平移动：扫描含当前前沿列在内的各列；与身体相交的实心若低于允许抬升量则把身体抬到其顶上（含天花板检查），
  *   否则按墙处理。整砖只在上一 tick 着地时按 body.stepUp 抬升（超过抬升高度才视为墙）；
  *   形状砖另可抬升“本 tick 进入该列的水平长度”（坡度 ≤ 45°，空中也能被坡推上去）。
- * - 一格整砖踏阶：外侧有低一级地面时按 45° 坡面提前抬升，着地支撑与停步共享该坡面。
  * - 下落：从脚所在行开始逐行扫描，只取顶高不高于旧脚底的候选面，故高速下落也不会穿透坡面。
  * - 贴地吸附：上一 tick 着地、本 tick 未着地、vy≤0、未下穿时，向下 body.groundSnap 内找支撑面（下坡不腾空）。
  * 底边都是满宽，向上（天花板）碰撞与整砖相同。全整砖地图上行为与旧实现逐位一致（test/physics-slopes 对照）。
  */
 import type { Rect } from '../core/math.ts';
 import type { TileQuery } from '../world/tile-map.ts';
-import { SHAPE_FULL, SHAPE_HALF, shapeMaxTop, shapeTopAt } from '../world/tile-shapes.ts';
+import { SHAPE_FULL, shapeMaxTop, shapeTopAt } from '../world/tile-shapes.ts';
 import type { Body } from './body.ts';
 
 export const COLLISION_EPS = 1e-4;
@@ -56,7 +55,7 @@ function rectOverlapsSolid(map: TileQuery, x0: number, x1: number, y0: number, y
  * 可抬升则把 b.y 抬到相交实心的最高点并返回 true；否则返回 false（墙）。
  * front=true 表示身体本就占着该列（前沿列）：其中整砖若相交说明早已嵌入，沿用旧实现忽略之，只处理形状砖。
  */
-function enterColumn(b: Body, map: TileQuery, tx: number, x0: number, x1: number, front: boolean, entering: number, climb: number, distance: number): boolean {
+function enterColumn(b: Body, map: TileQuery, tx: number, x0: number, x1: number, front: boolean, entering: number, climb: number): boolean {
   const [ty0, ty1] = span(b.y, b.y + b.height);
   let fullTop = -Infinity;
   let shapedTop = -Infinity;
@@ -70,9 +69,7 @@ function enterColumn(b: Body, map: TileQuery, tx: number, x0: number, x1: number
     if (top > b.y + EPS && top > shapedTop) shapedTop = top;
   }
   if (fullTop === -Infinity && shapedTop === -Infinity) return true;
-  // 一格踏阶必须沿坡走上去，不能在缺少过渡支撑时退回瞬间抬升。
-  const fullClimb = b.stepUp >= 1 ? Math.min(climb, distance) : climb;
-  if (fullTop !== -Infinity && (climb === 0 || fullTop - b.y > fullClimb + EPS)) return false;
+  if (fullTop !== -Infinity && (climb === 0 || fullTop - b.y > climb + EPS)) return false;
   if (shapedTop !== -Infinity && shapedTop - b.y > Math.max(climb, entering) + EPS) return false;
   const top = Math.max(fullTop, shapedTop);
   if (rectOverlapsSolid(map, x0, x1, top, top + b.height)) return false;
@@ -80,40 +77,8 @@ function enterColumn(b: Body, map: TileQuery, tx: number, x0: number, x1: number
   return true;
 }
 
-/** 一格台阶外侧借用低侧地面形成 45° 踏阶坡面，提前抬升，避免模型进入实心后才上移。 */
-function stepRampSupport(b: Body, map: TileQuery, x: number, lo: number, hi: number): number | null {
-  if (b.stepUp < 1) return null;
-  let best: number | null = null;
-  const left = x - b.halfWidth;
-  const right = x + b.halfWidth;
-  for (let tx = Math.floor(left - 1); tx <= Math.floor(right + 1); tx++) {
-    const side = right <= tx + EPS ? -1 : left >= tx + 1 - EPS ? 1 : 0;
-    if (side === 0) continue;
-    const gap = side === -1 ? tx - right : left - tx - 1;
-    if (gap < -EPS || gap > 1) continue;
-    for (let ty = Math.floor(lo) - 1; ty <= Math.floor(hi); ty++) {
-      if (map.collisionAt(tx, ty) !== 'solid' || map.shapeAt(tx, ty) !== SHAPE_FULL) continue;
-      if (map.collisionAt(tx, ty + 1) === 'solid') continue;
-      if (map.collisionAt(tx + side, ty) === 'solid' && map.shapeAt(tx + side, ty) === SHAPE_HALF) {
-        if (gap > .5) continue;
-      } else {
-        if (map.collisionAt(tx + side, ty) !== 'none') continue;
-        if (map.collisionAt(tx + side, ty - 1) !== 'solid' || map.shapeAt(tx + side, ty - 1) !== SHAPE_FULL) continue;
-      }
-      const top = ty + 1 - Math.max(0, gap);
-      if (top < lo - EPS || top > hi + EPS || (best !== null && top <= best)) continue;
-      if (!rectOverlapsSolid(map, left, right, top, top + b.height)) best = top;
-    }
-  }
-  return best;
-}
-
 function moveX(b: Body, map: TileQuery, dx: number, wasGrounded: boolean): void {
   if (dx === 0) return;
-  if (wasGrounded && b.vy <= 0 && b.dropThroughTicks === 0) {
-    const ramp = stepRampSupport(b, map, b.x + dx, b.y, b.y + Math.abs(dx));
-    if (ramp !== null) b.y = ramp;
-  }
   const hw = b.halfWidth;
   const w = hw * 2;
   const climb = wasGrounded ? b.stepUp : 0;
@@ -125,7 +90,7 @@ function moveX(b: Body, map: TileQuery, dx: number, wasGrounded: boolean): void 
     for (let tx = first - 1; tx < newRight; tx++) {
       const front = tx < first;
       const right = Math.min(newRight, tx + 1);
-      if (!enterColumn(b, map, tx, right - w, right, front, right - Math.max(oldRight, tx), climb, Math.abs(dx))) {
+      if (!enterColumn(b, map, tx, right - w, right, front, right - Math.max(oldRight, tx), climb)) {
         if (!front) b.x = tx - hw;
         b.vx = 0;
         b.wallContact = 1;
@@ -140,7 +105,7 @@ function moveX(b: Body, map: TileQuery, dx: number, wasGrounded: boolean): void 
     for (let tx = first + 1; tx + 1 > newLeft; tx--) {
       const front = tx > first;
       const left = Math.max(newLeft, tx);
-      if (!enterColumn(b, map, tx, left, left + w, front, Math.min(oldLeft, tx + 1) - left, climb, Math.abs(dx))) {
+      if (!enterColumn(b, map, tx, left, left + w, front, Math.min(oldLeft, tx + 1) - left, climb)) {
         if (!front) b.x = tx + 1 + hw;
         b.vx = 0;
         b.wallContact = -1;
@@ -163,9 +128,7 @@ function supportTop(b: Body, map: TileQuery, tx: number, ty: number, x0: number,
  * 在 [lo, hi] 内找最高支撑面（从 hi 所在行往下逐行；同一行逐格判断，过高/嵌入的候选不遮挡合格候选）。
  * 行 ty 的候选顶面都在 (ty, ty+1]，故第一个有合格候选的行即最高。没有返回 null。
  */
-function highestSupport(b: Body, map: TileQuery, lo: number, hi: number, inRange: (top: number) => boolean, includeStepRamp = false): number | null {
-  const ramp = includeStepRamp ? stepRampSupport(b, map, b.x, lo, hi) : null;
-  const rampTop = ramp !== null && inRange(ramp) ? ramp : null;
+function highestSupport(b: Body, map: TileQuery, lo: number, hi: number, inRange: (top: number) => boolean): number | null {
   const x0 = b.x - b.halfWidth;
   const x1 = b.x + b.halfWidth;
   const [tx0, tx1] = span(x0, x1);
@@ -175,12 +138,12 @@ function highestSupport(b: Body, map: TileQuery, lo: number, hi: number, inRange
       const top = supportTop(b, map, tx, ty, x0, x1);
       if (top !== null && inRange(top) && (best === null || top > best)) best = top;
     }
-    if (best !== null) return rampTop === null ? best : Math.max(best, rampTop);
+    if (best !== null) return best;
   }
-  return rampTop;
+  return null;
 }
 
-function moveY(b: Body, map: TileQuery, dy: number, wasGrounded: boolean): void {
+function moveY(b: Body, map: TileQuery, dy: number): void {
   const x0 = b.x - b.halfWidth;
   const x1 = b.x + b.halfWidth;
   if (dy < 0) {
@@ -188,7 +151,7 @@ function moveY(b: Body, map: TileQuery, dy: number, wasGrounded: boolean): void 
     const newBottom = oldBottom + dy;
     const limit = oldBottom + EPS;
     // 从脚所在行开始（形状砖的顶面可能在该行内），只取顶面不高于旧脚底的候选；逐行扫描保证高速不穿透。
-    const top = highestSupport(b, map, newBottom, limit, (t) => t <= limit && t > newBottom, wasGrounded && b.dropThroughTicks === 0);
+    const top = highestSupport(b, map, newBottom, limit, (t) => t <= limit && t > newBottom);
     if (top !== null) {
       b.y = top;
       b.vy = 0;
@@ -213,7 +176,7 @@ function moveY(b: Body, map: TileQuery, dy: number, wasGrounded: boolean): void 
   } else if (b.vy <= 0) {
     // 静止站立：脚底恰在支撑面上（±EPS）时贴上去，保持 onGround 稳定。
     const y = b.y;
-    const top = highestSupport(b, map, y - EPS, y + EPS, (t) => Math.abs(y - t) <= EPS, wasGrounded && b.dropThroughTicks === 0);
+    const top = highestSupport(b, map, y - EPS, y + EPS, (t) => Math.abs(y - t) <= EPS);
     if (top !== null) {
       b.y = top;
       b.onGround = true;
@@ -227,12 +190,12 @@ export function moveAndCollide(b: Body, map: TileQuery, dt: number): void {
   b.onGround = false;
   b.wallContact = 0;
   moveX(b, map, b.vx * dt, wasGrounded);
-  moveY(b, map, b.vy * dt, wasGrounded);
+  moveY(b, map, b.vy * dt);
   // 贴地吸附：下坡/走下半砖不腾空；起跳（vy>0）、下穿、飞行（上一 tick 不在地上）都不吸附。
   if (wasGrounded && !b.onGround && b.vy <= 0 && b.dropThroughTicks === 0 && b.groundSnap > 0) {
     const y = b.y;
     const snap = b.groundSnap;
-    const top = highestSupport(b, map, y - snap, y + EPS, (t) => t - y <= EPS && y - t <= snap, true);
+    const top = highestSupport(b, map, y - snap, y + EPS, (t) => t - y <= EPS && y - t <= snap);
     if (top !== null) {
       b.y = top;
       b.vy = 0;
@@ -253,7 +216,7 @@ export function displaceBody(b: Body, map: TileQuery, dx: number, dy: number): {
   moveX(b, map, dx, onGround);
   b.onGround = onGround;
   if (dy !== 0) {
-    moveY(b, map, dy, onGround);
+    moveY(b, map, dy);
     b.onGround = onGround || (dy < 0 && b.onGround);
   }
   b.vx = vx;

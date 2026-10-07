@@ -66,39 +66,39 @@
       "quantizedViews": 516,
       "bufferErrors": {
         "POSITION": {
-          "maxAbsoluteError": 0.0000152587890625,
+          "maxAbsoluteError": 1.52587890625e-05,
           "values": 165663
         },
         "TEXCOORD_0": {
-          "maxAbsoluteError": 0.00000762939453125,
+          "maxAbsoluteError": 7.62939453125e-06,
           "values": 90402
         },
         "morph:POSITION": {
-          "maxAbsoluteError": 0.000003814697265625,
+          "maxAbsoluteError": 3.814697265625e-06,
           "values": 7920
         },
         "morph:NORMAL": {
-          "maxAbsoluteError": 0.00000762939453125,
+          "maxAbsoluteError": 7.62939453125e-06,
           "values": 7920
         },
         "NORMAL": {
-          "maxAbsoluteError": 0.00000762939453125,
+          "maxAbsoluteError": 7.62939453125e-06,
           "values": 158946
         },
         "WEIGHTS_0": {
-          "maxAbsoluteError": 0.00000762939453125,
+          "maxAbsoluteError": 7.62939453125e-06,
           "values": 109376
         },
         "animation:rotation": {
-          "maxAbsoluteError": 0.00000762939453125,
+          "maxAbsoluteError": 7.62939453125e-06,
           "values": 38888
         },
         "animation:translation": {
-          "maxAbsoluteError": 0.000015020370483398438,
+          "maxAbsoluteError": 1.5020370483398438e-05,
           "values": 14868
         },
         "animation:scale": {
-          "maxAbsoluteError": 0.00000762939453125,
+          "maxAbsoluteError": 7.62939453125e-06,
           "values": 582
         }
       }
@@ -106,11 +106,11 @@
     {
       "source": "./characters/sam/sam.glb",
       "output": "./characters/sam/sam.ktx2-compact.glb",
-      "sourceSha256": "c16b0dca30d998468504121e7cadfadae263a9290dda44292281a08e954d244f",
-      "sourceBytes": 15780124,
-      "outputBytes": 1118188,
-      "sourceBufferBytes": 1553264,
-      "storedBufferBytes": 542976,
+      "sourceSha256": "96fe5e5d1f1525e887cb1a3ebc726d49f593164a47eca43d9c99a0fd5d297526",
+      "sourceBytes": 15943700,
+      "outputBytes": 1006560,
+      "sourceBufferBytes": 1717076,
+      "storedBufferBytes": 434232,
       "images": [
         {
           "name": "texture_normal",
@@ -160,60 +160,72 @@
         }
       ],
       "before": "./characters/sam/sam.ktx2.glb",
-      "beforeBytes": 1384636,
-      "beforeSha256": "efead35b7244852baf58c393982cb8747de7b3f3bbc24278266f67f90d8b36f6",
-      "quantizedViews": 79,
-      "bufferErrors": {
-        "POSITION": {
-          "maxAbsoluteError": 0.0000152587890625,
-          "values": 62460
-        },
-        "NORMAL": {
-          "maxAbsoluteError": 0.000003814697265625,
-          "values": 62460
-        },
-        "TEXCOORD_0": {
-          "maxAbsoluteError": 0.000003814697265625,
-          "values": 41640
-        },
-        "WEIGHTS_0": {
-          "maxAbsoluteError": 0.00000762939453125,
-          "values": 83280
-        },
-        "morph:POSITION": {
-          "maxAbsoluteError": 0.000003814697265625,
-          "values": 5214
-        },
-        "morph:NORMAL": {
-          "maxAbsoluteError": 0.00000762939453125,
-          "values": 29271
-        },
-        "animation:rotation": {
-          "maxAbsoluteError": 0.00000762939453125,
-          "values": 20400
-        },
-        "animation:scale": {
-          "maxAbsoluteError": 0.000007510185241699219,
-          "values": 363
-        },
-        "animation:weights": {
-          "maxAbsoluteError": 0.000006735324859619141,
-          "values": 242
-        },
-        "animation:translation": {
-          "maxAbsoluteError": 0.000003769993782043457,
-          "values": 801
+      "beforeBytes": 1194072,
+      "beforeSha256": "09e31848ee9a3d070d29983ab2ddd98ce4646482b0627401759f48167b896a71",
+      "bodyRebuild": {
+        "sourceBaseline": "2a5455a",
+        "textureBuffers": "copied byte-for-byte from existing texture tier",
+        "geometry": "old fused hair removed; boundary skin triangles clipped and vertices compacted",
+        "removedHairTriangles": 12411,
+        "splitBoundaryTriangles": 301,
+        "detachedCutTriangles": 0,
+        "finalBodyTriangles": 23500,
+        "inheritedQuantization": {
+          "note": "Historical uncut-input quantization; new boundary vertices are interpolated, not requantized.",
+          "quantizedViews": 79,
+          "bufferErrors": {
+            "POSITION": {
+              "maxAbsoluteError": 1.52587890625e-05,
+              "values": 62460
+            },
+            "NORMAL": {
+              "maxAbsoluteError": 3.814697265625e-06,
+              "values": 62460
+            },
+            "TEXCOORD_0": {
+              "maxAbsoluteError": 3.814697265625e-06,
+              "values": 41640
+            },
+            "WEIGHTS_0": {
+              "maxAbsoluteError": 7.62939453125e-06,
+              "values": 83280
+            },
+            "morph:POSITION": {
+              "maxAbsoluteError": 3.814697265625e-06,
+              "values": 5214
+            },
+            "morph:NORMAL": {
+              "maxAbsoluteError": 7.62939453125e-06,
+              "values": 29271
+            },
+            "animation:rotation": {
+              "maxAbsoluteError": 7.62939453125e-06,
+              "values": 20400
+            },
+            "animation:scale": {
+              "maxAbsoluteError": 7.510185241699219e-06,
+              "values": 363
+            },
+            "animation:weights": {
+              "maxAbsoluteError": 6.735324859619141e-06,
+              "values": 242
+            },
+            "animation:translation": {
+              "maxAbsoluteError": 3.769993782043457e-06,
+              "values": 801
+            }
+          }
         }
       }
     },
     {
       "source": "./characters/sam/human/sam-human.glb",
       "output": "./characters/sam/human/sam-human.ktx2-compact.glb",
-      "sourceSha256": "5671cec0487e3c08c9adadf4c90e787dc0a2a8167ef54be7b4cd22a86c9a8616",
-      "sourceBytes": 13947808,
-      "outputBytes": 1175344,
-      "sourceBufferBytes": 1918852,
-      "storedBufferBytes": 619905,
+      "sourceSha256": "08656b0ade05f542f55291a2d44919546c5d9751c7f0a590f76ac2dce95709e0",
+      "sourceBytes": 13987108,
+      "outputBytes": 1080700,
+      "sourceBufferBytes": 1958356,
+      "storedBufferBytes": 527472,
       "images": [
         {
           "name": "texture_normal",
@@ -263,64 +275,76 @@
         }
       ],
       "before": "./characters/sam/human/sam-human.ktx2.glb",
-      "beforeBytes": 1433428,
-      "beforeSha256": "0669524183ba4015c5147b99581e8afc8ebce6091dfd1de5816a96a0d15c6fe7",
-      "quantizedViews": 78,
-      "bufferErrors": {
-        "POSITION": {
-          "maxAbsoluteError": 0.0000152587890625,
-          "values": 66501
-        },
-        "NORMAL": {
-          "maxAbsoluteError": 0.00000762939453125,
-          "values": 66501
-        },
-        "TEXCOORD_0": {
-          "maxAbsoluteError": 0.000003814697265625,
-          "values": 41218
-        },
-        "WEIGHTS_0": {
-          "maxAbsoluteError": 0.00000762939453125,
-          "values": 82436
-        },
-        "morph:NORMAL": {
-          "maxAbsoluteError": 0.00000762939453125,
-          "values": 33756
-        },
-        "COLOR_0": {
-          "maxAbsoluteError": 0.000003635883331298828,
-          "values": 4182
-        },
-        "morph:POSITION": {
-          "maxAbsoluteError": 0.000003814697265625,
-          "values": 6834
-        },
-        "animation:rotation": {
-          "maxAbsoluteError": 0.00000762939453125,
-          "values": 17088
-        },
-        "animation:scale": {
-          "maxAbsoluteError": 0.000007510185241699219,
-          "values": 363
-        },
-        "animation:weights": {
-          "maxAbsoluteError": 0.000006735324859619141,
-          "values": 242
-        },
-        "animation:translation": {
-          "maxAbsoluteError": 0.000003769993782043457,
-          "values": 801
+      "beforeBytes": 1227824,
+      "beforeSha256": "298f7c25f8d6ef72080943f46d79eeb43aabf61765dbe20fdc645707a199519c",
+      "bodyRebuild": {
+        "sourceBaseline": "2a5455a",
+        "textureBuffers": "copied byte-for-byte from existing texture tier",
+        "geometry": "old fused hair removed; boundary skin triangles clipped and vertices compacted",
+        "removedHairTriangles": 14229,
+        "splitBoundaryTriangles": 360,
+        "detachedCutTriangles": 48,
+        "finalBodyTriangles": 22055,
+        "inheritedQuantization": {
+          "note": "Historical uncut-input quantization; new boundary vertices are interpolated, not requantized.",
+          "quantizedViews": 78,
+          "bufferErrors": {
+            "POSITION": {
+              "maxAbsoluteError": 1.52587890625e-05,
+              "values": 66501
+            },
+            "NORMAL": {
+              "maxAbsoluteError": 7.62939453125e-06,
+              "values": 66501
+            },
+            "TEXCOORD_0": {
+              "maxAbsoluteError": 3.814697265625e-06,
+              "values": 41218
+            },
+            "WEIGHTS_0": {
+              "maxAbsoluteError": 7.62939453125e-06,
+              "values": 82436
+            },
+            "morph:NORMAL": {
+              "maxAbsoluteError": 7.62939453125e-06,
+              "values": 33756
+            },
+            "COLOR_0": {
+              "maxAbsoluteError": 3.635883331298828e-06,
+              "values": 4182
+            },
+            "morph:POSITION": {
+              "maxAbsoluteError": 3.814697265625e-06,
+              "values": 6834
+            },
+            "animation:rotation": {
+              "maxAbsoluteError": 7.62939453125e-06,
+              "values": 17088
+            },
+            "animation:scale": {
+              "maxAbsoluteError": 7.510185241699219e-06,
+              "values": 363
+            },
+            "animation:weights": {
+              "maxAbsoluteError": 6.735324859619141e-06,
+              "values": 242
+            },
+            "animation:translation": {
+              "maxAbsoluteError": 3.769993782043457e-06,
+              "values": 801
+            }
+          }
         }
       }
     },
     {
       "source": "./characters/tibo/tibo.glb",
       "output": "./characters/tibo/tibo.ktx2-compact.glb",
-      "sourceSha256": "3bd5d7e1cdd97e430809b39f39c9a8295f8e0d5becdc849f8b229eacc950acdd",
-      "sourceBytes": 13698712,
-      "outputBytes": 1112552,
-      "sourceBufferBytes": 1585272,
-      "storedBufferBytes": 567820,
+      "sourceSha256": "3dcf3672700bfe202a033431a2afb7b6120be0d1417946947541aaae901f4886",
+      "sourceBytes": 13876028,
+      "outputBytes": 988744,
+      "sourceBufferBytes": 1762868,
+      "storedBufferBytes": 446607,
       "images": [
         {
           "name": "texture_normal",
@@ -370,60 +394,72 @@
         }
       ],
       "before": "./characters/tibo/tibo.ktx2.glb",
-      "beforeBytes": 1375044,
-      "beforeSha256": "c0ebf61285b1e97f83f8e8958c639dcc0927d3858edf15c227509d6a1d10e015",
-      "quantizedViews": 64,
-      "bufferErrors": {
-        "POSITION": {
-          "maxAbsoluteError": 0.0000152587890625,
-          "values": 65181
-        },
-        "NORMAL": {
-          "maxAbsoluteError": 0.00000762939453125,
-          "values": 65181
-        },
-        "TEXCOORD_0": {
-          "maxAbsoluteError": 0.000003814697265625,
-          "values": 43454
-        },
-        "WEIGHTS_0": {
-          "maxAbsoluteError": 0.00000762939453125,
-          "values": 86908
-        },
-        "morph:POSITION": {
-          "maxAbsoluteError": 0.000003814697265625,
-          "values": 4902
-        },
-        "morph:NORMAL": {
-          "maxAbsoluteError": 0.00000762939453125,
-          "values": 30186
-        },
-        "animation:rotation": {
-          "maxAbsoluteError": 0.00000762939453125,
-          "values": 15428
-        },
-        "animation:scale": {
-          "maxAbsoluteError": 0.000007510185241699219,
-          "values": 363
-        },
-        "animation:weights": {
-          "maxAbsoluteError": 0.000006735324859619141,
-          "values": 242
-        },
-        "animation:translation": {
-          "maxAbsoluteError": 0.000003814697265625,
-          "values": 147
+      "beforeBytes": 1178568,
+      "beforeSha256": "950ecb8cdc05968a3b4a58f69881d48f143585bacf180fc18c411bef42612ebb",
+      "bodyRebuild": {
+        "sourceBaseline": "2a5455a",
+        "textureBuffers": "copied byte-for-byte from existing texture tier",
+        "geometry": "old fused hair removed; boundary skin triangles clipped and vertices compacted",
+        "removedHairTriangles": 12633,
+        "splitBoundaryTriangles": 361,
+        "detachedCutTriangles": 6,
+        "finalBodyTriangles": 24039,
+        "inheritedQuantization": {
+          "note": "Historical uncut-input quantization; new boundary vertices are interpolated, not requantized.",
+          "quantizedViews": 64,
+          "bufferErrors": {
+            "POSITION": {
+              "maxAbsoluteError": 1.52587890625e-05,
+              "values": 65181
+            },
+            "NORMAL": {
+              "maxAbsoluteError": 7.62939453125e-06,
+              "values": 65181
+            },
+            "TEXCOORD_0": {
+              "maxAbsoluteError": 3.814697265625e-06,
+              "values": 43454
+            },
+            "WEIGHTS_0": {
+              "maxAbsoluteError": 7.62939453125e-06,
+              "values": 86908
+            },
+            "morph:POSITION": {
+              "maxAbsoluteError": 3.814697265625e-06,
+              "values": 4902
+            },
+            "morph:NORMAL": {
+              "maxAbsoluteError": 7.62939453125e-06,
+              "values": 30186
+            },
+            "animation:rotation": {
+              "maxAbsoluteError": 7.62939453125e-06,
+              "values": 15428
+            },
+            "animation:scale": {
+              "maxAbsoluteError": 7.510185241699219e-06,
+              "values": 363
+            },
+            "animation:weights": {
+              "maxAbsoluteError": 6.735324859619141e-06,
+              "values": 242
+            },
+            "animation:translation": {
+              "maxAbsoluteError": 3.814697265625e-06,
+              "values": 147
+            }
+          }
         }
       }
     },
     {
       "source": "./characters/tibo/human/tibo-human.glb",
       "output": "./characters/tibo/human/tibo-human.ktx2-compact.glb",
-      "sourceSha256": "1515ddd1a41ff55c22a9c2e0dd595359da4dfb80fe2a4ea50bd5ae67c27a2012",
-      "sourceBytes": 12300412,
-      "outputBytes": 1150988,
-      "sourceBufferBytes": 1873079,
-      "storedBufferBytes": 605296,
+      "sourceSha256": "b87f4b512030a85cf0e28e004b368514533c3a5ee846510bfb9353eaae33273f",
+      "sourceBytes": 12375600,
+      "outputBytes": 1065032,
+      "sourceBufferBytes": 1948457,
+      "storedBufferBytes": 521503,
       "images": [
         {
           "name": "texture_normal",
@@ -473,53 +509,65 @@
         }
       ],
       "before": "./characters/tibo/human/tibo-human.ktx2.glb",
-      "beforeBytes": 1396716,
-      "beforeSha256": "1ff022cf1b138e6b291d3b3b5e5706c544d12392bd60e7f7c5a8de945b084faf",
-      "quantizedViews": 71,
-      "bufferErrors": {
-        "POSITION": {
-          "maxAbsoluteError": 0.0000152587890625,
-          "values": 65400
-        },
-        "NORMAL": {
-          "maxAbsoluteError": 0.00000762939453125,
-          "values": 65400
-        },
-        "TEXCOORD_0": {
-          "maxAbsoluteError": 0.000003814697265625,
-          "values": 40484
-        },
-        "WEIGHTS_0": {
-          "maxAbsoluteError": 0.00000762939453125,
-          "values": 80968
-        },
-        "morph:NORMAL": {
-          "maxAbsoluteError": 0.00000762939453125,
-          "values": 32718
-        },
-        "COLOR_0": {
-          "maxAbsoluteError": 0.000003635883331298828,
-          "values": 4182
-        },
-        "morph:POSITION": {
-          "maxAbsoluteError": 0.000003814697265625,
-          "values": 6255
-        },
-        "animation:rotation": {
-          "maxAbsoluteError": 0.00000762939453125,
-          "values": 14836
-        },
-        "animation:scale": {
-          "maxAbsoluteError": 0.000007510185241699219,
-          "values": 363
-        },
-        "animation:weights": {
-          "maxAbsoluteError": 0.000006735324859619141,
-          "values": 242
-        },
-        "animation:translation": {
-          "maxAbsoluteError": 0.000003814697265625,
-          "values": 147
+      "beforeBytes": 1203748,
+      "beforeSha256": "d730f7f8e19a79cff6ce09719eccc37767c2513821a95a326a056743e83955a4",
+      "bodyRebuild": {
+        "sourceBaseline": "2a5455a",
+        "textureBuffers": "copied byte-for-byte from existing texture tier",
+        "geometry": "old fused hair removed; boundary skin triangles clipped and vertices compacted",
+        "removedHairTriangles": 13512,
+        "splitBoundaryTriangles": 286,
+        "detachedCutTriangles": 0,
+        "finalBodyTriangles": 21903,
+        "inheritedQuantization": {
+          "note": "Historical uncut-input quantization; new boundary vertices are interpolated, not requantized.",
+          "quantizedViews": 71,
+          "bufferErrors": {
+            "POSITION": {
+              "maxAbsoluteError": 1.52587890625e-05,
+              "values": 65400
+            },
+            "NORMAL": {
+              "maxAbsoluteError": 7.62939453125e-06,
+              "values": 65400
+            },
+            "TEXCOORD_0": {
+              "maxAbsoluteError": 3.814697265625e-06,
+              "values": 40484
+            },
+            "WEIGHTS_0": {
+              "maxAbsoluteError": 7.62939453125e-06,
+              "values": 80968
+            },
+            "morph:NORMAL": {
+              "maxAbsoluteError": 7.62939453125e-06,
+              "values": 32718
+            },
+            "COLOR_0": {
+              "maxAbsoluteError": 3.635883331298828e-06,
+              "values": 4182
+            },
+            "morph:POSITION": {
+              "maxAbsoluteError": 3.814697265625e-06,
+              "values": 6255
+            },
+            "animation:rotation": {
+              "maxAbsoluteError": 7.62939453125e-06,
+              "values": 14836
+            },
+            "animation:scale": {
+              "maxAbsoluteError": 7.510185241699219e-06,
+              "values": 363
+            },
+            "animation:weights": {
+              "maxAbsoluteError": 6.735324859619141e-06,
+              "values": 242
+            },
+            "animation:translation": {
+              "maxAbsoluteError": 3.814697265625e-06,
+              "values": 147
+            }
+          }
         }
       }
     },
@@ -585,27 +633,27 @@
       "quantizedViews": 44,
       "bufferErrors": {
         "POSITION": {
-          "maxAbsoluteError": 0.00000762939453125,
+          "maxAbsoluteError": 7.62939453125e-06,
           "values": 114909
         },
         "NORMAL": {
-          "maxAbsoluteError": 0.000003814697265625,
+          "maxAbsoluteError": 3.814697265625e-06,
           "values": 114909
         },
         "TEXCOORD_0": {
-          "maxAbsoluteError": 0.000003814697265625,
+          "maxAbsoluteError": 3.814697265625e-06,
           "values": 76606
         },
         "WEIGHTS_0": {
-          "maxAbsoluteError": 0.00000762939453125,
+          "maxAbsoluteError": 7.62939453125e-06,
           "values": 153212
         },
         "animation:rotation": {
-          "maxAbsoluteError": 0.00000762939453125,
+          "maxAbsoluteError": 7.62939453125e-06,
           "values": 14116
         },
         "animation:translation": {
-          "maxAbsoluteError": 0.000003762543201446533,
+          "maxAbsoluteError": 3.762543201446533e-06,
           "values": 765
         }
       }
@@ -672,23 +720,23 @@
       "quantizedViews": 107,
       "bufferErrors": {
         "POSITION": {
-          "maxAbsoluteError": 0.00000762939453125,
+          "maxAbsoluteError": 7.62939453125e-06,
           "values": 137673
         },
         "NORMAL": {
-          "maxAbsoluteError": 0.000007361173629760742,
+          "maxAbsoluteError": 7.361173629760742e-06,
           "values": 137553
         },
         "TEXCOORD_0": {
-          "maxAbsoluteError": 0.000007510185241699219,
+          "maxAbsoluteError": 7.510185241699219e-06,
           "values": 89382
         },
         "animation:rotation": {
-          "maxAbsoluteError": 0.00000762939453125,
+          "maxAbsoluteError": 7.62939453125e-06,
           "values": 9660
         },
         "animation:translation": {
-          "maxAbsoluteError": 0.0000037476420402526855,
+          "maxAbsoluteError": 3.7476420402526855e-06,
           "values": 1428
         }
       }
@@ -755,23 +803,23 @@
       "quantizedViews": 22,
       "bufferErrors": {
         "POSITION": {
-          "maxAbsoluteError": 0.0000152587890625,
+          "maxAbsoluteError": 1.52587890625e-05,
           "values": 96786
         },
         "NORMAL": {
-          "maxAbsoluteError": 0.00000762939453125,
+          "maxAbsoluteError": 7.62939453125e-06,
           "values": 96786
         },
         "TEXCOORD_0": {
-          "maxAbsoluteError": 0.000003814697265625,
+          "maxAbsoluteError": 3.814697265625e-06,
           "values": 64524
         },
         "WEIGHTS_0": {
-          "maxAbsoluteError": 0.00000762939453125,
+          "maxAbsoluteError": 7.62939453125e-06,
           "values": 129048
         },
         "animation:rotation": {
-          "maxAbsoluteError": 0.00000762939453125,
+          "maxAbsoluteError": 7.62939453125e-06,
           "values": 8672
         }
       }
@@ -791,23 +839,23 @@
       "quantizedViews": 294,
       "bufferErrors": {
         "POSITION": {
-          "maxAbsoluteError": 0.0000152587890625,
+          "maxAbsoluteError": 1.52587890625e-05,
           "values": 191850
         },
         "NORMAL": {
-          "maxAbsoluteError": 0.00000762939453125,
+          "maxAbsoluteError": 7.62939453125e-06,
           "values": 191850
         },
         "TEXCOORD_0": {
-          "maxAbsoluteError": 0.00000762939453125,
+          "maxAbsoluteError": 7.62939453125e-06,
           "values": 117774
         },
         "animation:rotation": {
-          "maxAbsoluteError": 0.00000762939453125,
+          "maxAbsoluteError": 7.62939453125e-06,
           "values": 15016
         },
         "animation:translation": {
-          "maxAbsoluteError": 0.000007510185241699219,
+          "maxAbsoluteError": 7.510185241699219e-06,
           "values": 1500
         }
       }

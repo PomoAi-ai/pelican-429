@@ -31,5 +31,16 @@ export function compactModelPath(source: string, textureSize: 512 | 256): string
   return source.replace(/\.glb$/, textureSize === 512 ? '.ktx2-compact.glb' : '.ktx2-256-compact.glb');
 }
 
+/** 独立发束各规格共用，构建保留原始轻量资产。 */
+export const HAIR_MODEL_PATHS = {
+  'sam-monster': './characters/hair/sam-monster.glb',
+  'sam-human': './characters/hair/sam-human.glb',
+  'tibo-monster': './characters/hair/tibo-monster.glb',
+  'tibo-human': './characters/hair/tibo-human.glb',
+} as const;
+
 /** 构建与 CI 按需拉取共用同一份正式模型清单。 */
-export const RELEASE_MODEL_PATHS: readonly string[] = WEB_MODEL_SOURCES.map(source => compactModelPath(source, 512));
+export const RELEASE_MODEL_PATHS: readonly string[] = [
+  ...WEB_MODEL_SOURCES.map(source => compactModelPath(source, 512)),
+  ...Object.values(HAIR_MODEL_PATHS),
+];

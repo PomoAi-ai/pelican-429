@@ -118,6 +118,7 @@ export function createActionTracker(): ActionTracker {
         skillPressed,
         skill1Held: held('skill1'),
         aim: aim === null ? null : { x: aim.x, y: aim.y },
+        manualSkillAim: null,
       };
       for (const [a, s] of states) if (!UI_ACTIONS.includes(a)) s.pressed = false;
       return frame;

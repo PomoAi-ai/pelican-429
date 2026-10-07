@@ -32,6 +32,7 @@ export interface GameSettings {
   perfPanel: boolean;
   minimapVisible: boolean;
   minimapOpacity: number;
+  aimStyle: 'arrow' | 'ring' | 'fan';
   /** 显示与世界瓦片对齐的格子虚线。 */
   tileGrid: boolean;
   /** 允许全地图单击传送角色。 */
@@ -106,6 +107,7 @@ export const SETTING_DEFS: readonly AnySettingDef[] = Object.freeze([
   { key: 'snowPower', group: 'weather', title: '雪量强度', note: '叠加所选雪量，自动天气同样生效', param: 'snowPower', options: [], range: { min: 0, max: 5, step: 0.1, unit: '倍' } },
   { key: 'snow', group: 'weather', title: '雪量', param: 'snow', options: choices('snow', PRECIP_LEVELS, LABELS.snow, [...PRECIP_LEVELS]) },
   { key: 'water', group: 'water', title: '水色', param: 'water', options: choices('water', WATER_PALETTE_NAMES, LABELS.water, ['clear', 'emerald', 'deep']) },
+  { key: 'aimStyle', group: 'graphics', title: '技能瞄准样式', note: '仅用于有方向的技能；拖动距离控制指示长度', param: 'aimStyle', options: [{ value: 'arrow', label: '范围箭头' }, { value: 'ring', label: '落点圆环' }, { value: 'fan', label: '金色扇形' }] },
   { key: 'perfPanel', group: 'graphics', title: '显示帧率（FPS）', note: '快捷键：Cmd+Option+Z / Ctrl+Alt+Z', param: null, options: ON_OFF },
   { key: 'minimapVisible', group: 'graphics', title: '显示小地图', param: null, options: ON_OFF },
   { key: 'minimapOpacity', group: 'graphics', title: '小地图不透明度', note: '0% 透明，100% 不透明', param: null, options: [], range: { min: 0, max: 100, step: 5, unit: '%' } },

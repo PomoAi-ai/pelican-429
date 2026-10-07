@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { addHairMorphs, createHairSway, type HairGuide } from '../hair-sway.ts';
+import { createHairRig, loadHairAsset, type HairAsset } from '../hair-rig.ts';
 import { characterTextureTier, loadCharacterModel, type TextureTier } from '../character-model.ts';
 import type { GLTF } from 'three/addons/loaders/GLTFLoader.js';
 import { clone } from 'three/addons/utils/SkeletonUtils.js';
@@ -15,55 +15,11 @@ import type { NpcWeapon } from './npc-weapons.ts';
 import { loadGrassyAsset } from '../grassy/grassy-rig.ts';
 import { createNpcFlightHarness } from './npc-flight-harness.ts';
 
-// 怪物与人形的发帽尺寸不同，逐撮保留独立的根尖坐标；不以整层高度选头发。
-const HAIR_GUIDES: Readonly<Record<NpcKind, Readonly<Record<NpcForm, readonly HairGuide[]>>>> = {
-  sam: {
-    monster: [
-      { root: [-0.138, 2.587, 0.302], tip: [-.19, 2.52, .40], radius: 0.054, group: 0, bend: 0.19 },
-      { root: [0.138, 2.587, 0.302], tip: [.19, 2.52, .40], radius: 0.054, group: 2, bend: 0.18 },
-      { root: [-0.205, 2.562, 0.033], tip: [-.28, 2.48, .01], radius: 0.047, group: 1, bend: 0.17 },
-      { root: [0.205, 2.562, 0.033], tip: [.28, 2.48, .01], radius: 0.047, group: 0, bend: 0.16 },
-      { root: [-0.133, 2.558, -0.22], tip: [-.17, 2.46, -.31], radius: 0.047, group: 2, bend: 0.18 },
-      { root: [0.133, 2.558, -0.22], tip: [.17, 2.46, -.31], radius: 0.047, group: 1, bend: 0.17 },
-      { root: [-0.07, 2.617, 0.182], tip: [-.07, 2.70, .22], radius: 0.054, group: 1, bend: 0.19 },
-    ],
-    human: [
-      { root: [-0.148, 2.585, 0.3], tip: [-.20, 2.51, .39], radius: 0.054, group: 0, bend: 0.19 },
-      { root: [0.148, 2.585, 0.3], tip: [.20, 2.51, .39], radius: 0.054, group: 2, bend: 0.18 },
-      { root: [-0.267, 2.56, 0.003], tip: [-.35, 2.47, -.02], radius: 0.047, group: 1, bend: 0.17 },
-      { root: [0.267, 2.56, 0.003], tip: [.35, 2.47, -.02], radius: 0.047, group: 0, bend: 0.16 },
-      { root: [-0.138, 2.565, -0.225], tip: [-.19, 2.46, -.33], radius: 0.047, group: 2, bend: 0.18 },
-      { root: [.14, 2.565, -.21], tip: [.195, 2.439, -.286], radius: .047, group: 1, bend: 0.17 },
-      { root: [-0.07, 2.617, 0.015], tip: [-.07, 2.70, .015], radius: 0.054, group: 1, bend: 0.19 },
-    ],
-  },
-  tibo: {
-    monster: [
-      { root: [-0.105, 2.537, 0.258], tip: [-.18, 2.44, .37], radius: 0.054, group: 0, bend: 0.21 },
-      { root: [0.122, 2.515, 0.255], tip: [.19, 2.41, .36], radius: 0.054, group: 2, bend: 0.19 },
-      { root: [-0.268, 2.47, -0.005], tip: [-.38, 2.38, -.02], radius: 0.047, group: 1, bend: 0.2 },
-      { root: [0.242, 2.47, -0.005], tip: [.34, 2.38, -.02], radius: 0.047, group: 0, bend: 0.18 },
-      { root: [-0.14, 2.465, -0.253], tip: [-.20, 2.36, -.35], radius: 0.05, group: 2, bend: 0.21 },
-      { root: [0.14, 2.465, -0.253], tip: [.20, 2.36, -.35], radius: 0.05, group: 1, bend: 0.19 },
-      { root: [0.01, 2.56, 0.06], tip: [.01, 2.65, .06], radius: 0.061, group: 1, bend: 0.2 },
-    ],
-    human: [
-      { root: [-0.107, 2.525, 0.277], tip: [-.19, 2.42, .39], radius: 0.054, group: 0, bend: 0.21 },
-      { root: [0.125, 2.512, 0.272], tip: [.20, 2.40, .37], radius: 0.054, group: 2, bend: 0.19 },
-      { root: [-0.282, 2.468, -0.018], tip: [-.41, 2.37, -.04], radius: 0.047, group: 1, bend: 0.2 },
-      { root: [0.26, 2.468, -0.018], tip: [.38, 2.37, -.04], radius: 0.047, group: 0, bend: 0.18 },
-      { root: [-0.14, 2.472, -0.273], tip: [-.20, 2.36, -.40], radius: 0.05, group: 2, bend: 0.21 },
-      { root: [0.14, 2.472, -0.273], tip: [.20, 2.36, -.40], radius: 0.05, group: 1, bend: 0.19 },
-      { root: [0.04, 2.56, -0.03], tip: [.04, 2.65, -.03], radius: 0.061, group: 1, bend: 0.2 },
-    ],
-  },
-};
-
 interface NpcAsset {
   readonly scene: THREE.Group;
   readonly clips: Record<NpcAction, THREE.AnimationClip>;
   readonly eyelidNames: string[];
-  readonly hairName: string;
+  readonly hair: HairAsset;
 }
 
 export interface NpcRig {
@@ -108,7 +64,7 @@ function disposeScene(scene: THREE.Group): void {
   for (const skeleton of skeletons) skeleton.dispose();
 }
 
-function readAsset(kind: NpcKind, form: NpcForm, gltf: GLTF): NpcAsset {
+function readAsset(kind: NpcKind, form: NpcForm, gltf: GLTF): Omit<NpcAsset, 'hair'> {
   const definition = NPCS[kind];
   const { path } = npcModel(kind, form);
   const { scene, animations } = gltf;
@@ -147,32 +103,11 @@ function readAsset(kind: NpcKind, form: NpcForm, gltf: GLTF): NpcAsset {
     if (eyelidNames.length === 0) throw new Error(`${definition.name} 模型 ${path} 缺少 Blink / BlinkTravel 眼睑形变`);
     const bounds = new THREE.Box3().setFromObject(scene);
     const height = bounds.max.y - bounds.min.y;
-    if (bounds.isEmpty() || !Number.isFinite(height) || Math.abs(bounds.min.y) > 0.02 || Math.abs(height - definition.height) > 0.02) {
-      throw new Error(`${definition.name} 模型 ${path} 尺寸不符：脚底 ${bounds.min.y}、全高 ${height}；应为 0 和 ${definition.height}`);
+    if (bounds.isEmpty() || !Number.isFinite(height) || Math.abs(bounds.min.y) > 0.02) {
+      throw new Error(`${definition.name} 模型 ${path} 几何无效或脚底未归零：脚底 ${bounds.min.y}、包围盒全高 ${height}`);
     }
-    // 人形 glTF 将主体与眼睑拆成子网格，主体仍保留源材质名。
-    let hair: THREE.SkinnedMesh | undefined;
-    scene.traverse(node => {
-      if (node instanceof THREE.SkinnedMesh && !Array.isArray(node.material) && node.material.name === 'model') hair = node;
-    });
-    if (!hair || !hair.geometry.morphTargetsRelative || !hair.geometry.morphAttributes.position || !hair.geometry.morphAttributes.normal) {
-      throw new Error(`${definition.name} 模型 ${path} 缺少可追加发梢形变的主体网格`);
-    }
-    const hairTrack = `${hair.name}.morphTargetInfluences`;
-    // 只绑定源资源的眨眼槽位；整数组轨道不能覆盖后来追加的发梢槽位。
-    for (const clip of Object.values(clips)) {
-      clip.tracks = clip.tracks.flatMap(track => {
-        if (track.name !== hairTrack) return [track];
-        const size = track.getValueSize();
-        return Array.from({ length: size }, (_, index) => new THREE.NumberKeyframeTrack(
-          `${track.name}[${index}]`, track.times,
-          track.times.map((_, frame) => track.values[frame * size + index]!), track.getInterpolation(),
-        ));
-      });
-    }
-    addHairMorphs(hair, HAIR_GUIDES[kind][form]);
     clips.attack = createNpcAttackClip(scene, kind);
-    return { scene, clips, eyelidNames, hairName: hair.name };
+    return { scene, clips, eyelidNames };
   } catch (error) {
     disposeScene(scene);
     throw error;
@@ -184,13 +119,25 @@ export function loadNpcAsset(kind: NpcKind, form: NpcForm, tier: TextureTier = c
   const key: NpcAssetKey = `${kind}:${form}:${tier}`;
   let pending = loading.get(key);
   if (!pending) {
-    pending = Promise.all([loadCharacterModel(npcModel(kind, form).path, tier), kind === 'sam' ? loadGrassyAsset('game', tier) : Promise.resolve()]).then(([gltf]) => {
-      // 页面关闭后仍可能收到网络结果；旧请求不能重新占有缓存。
-      if (loading.get(key) !== pending) {
-        disposeScene(gltf.scene);
+    pending = Promise.allSettled([
+      loadCharacterModel(npcModel(kind, form).path, tier), loadHairAsset(`${kind}-${form}`),
+      kind === 'sam' ? loadGrassyAsset('game', tier) : Promise.resolve(),
+    ]).then(([body, hair, harness]) => {
+      // 页面关闭后仍可能收到网络结果；失败或退役的请求释放已加载资源。
+      if (body.status === 'rejected' || hair.status === 'rejected' || harness.status === 'rejected' || loading.get(key) !== pending) {
+        if (body.status === 'fulfilled') disposeScene(body.value.scene);
+        if (hair.status === 'fulfilled') hair.value.dispose();
+        if (body.status === 'rejected') throw body.reason;
+        if (hair.status === 'rejected') throw hair.reason;
+        if (harness.status === 'rejected') throw harness.reason;
         return;
       }
-      assets.set(key, readAsset(kind, form, gltf));
+      try {
+        assets.set(key, { ...readAsset(kind, form, body.value), hair: hair.value });
+      } catch (error) {
+        hair.value.dispose();
+        throw error;
+      }
     });
     loading.set(key, pending);
   }
@@ -199,7 +146,7 @@ export function loadNpcAsset(kind: NpcKind, form: NpcForm, tier: TextureTier = c
 
 /** 应用退出时先销毁实例，再释放缓存拥有的共享资源。 */
 export function disposeNpcAssets(): void {
-  for (const asset of assets.values()) disposeScene(asset.scene);
+  for (const asset of assets.values()) { disposeScene(asset.scene); asset.hair.dispose(); }
   assets.clear();
   loading.clear();
 }
@@ -223,10 +170,11 @@ export function createNpcRig(kind: NpcKind, form: NpcForm, tier: TextureTier = c
   const flightHarness = kind === 'sam' ? createNpcFlightHarness(model, tier) : null;
   const skeletons = new Set<THREE.Skeleton>();
   model.traverse((node) => { if (node instanceof THREE.SkinnedMesh) skeletons.add(node.skeleton); });
+  const hair = createHairRig(asset.hair, model.getObjectByName('head')!, model, `${kind}-${form}`);
   let disposed = false;
   return {
     kind, form, root, model, mixer, actions, effects, weapon, pose, flightHarness, currentAction: null, locomotionPhase: 0,
-    swayHair: createHairSway(model.getObjectByName(asset.hairName) as THREE.SkinnedMesh, model.getObjectByName('head')!, root, kind),
+    swayHair: hair.update,
     dispose() {
       if (disposed) return;
       disposed = true;
@@ -234,6 +182,7 @@ export function createNpcRig(kind: NpcKind, form: NpcForm, tier: TextureTier = c
       mixer.uncacheRoot(model);
       for (const skeleton of skeletons) skeleton.dispose();
       pose.dispose();
+      hair.dispose();
       effects.dispose();
       weapon.dispose();
       flightHarness?.dispose();

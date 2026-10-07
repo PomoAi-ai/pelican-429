@@ -3,6 +3,7 @@ import { getLanguage, onLanguageChange } from './language.ts';
 import { gameHost } from './mobile-game-viewport.ts';
 import { homeScreenInstallState } from './home-screen-install.ts';
 import { createGameZoom } from './game-zoom.ts';
+import { canFullscreen, isFullscreen, onFullscreenChange, toggleFullscreen } from './fullscreen.ts';
 
 export interface ControlSurface {
   readonly mode: 'desktop' | 'mobile';
@@ -85,10 +86,6 @@ export function createControlSurface(parent: HTMLElement, options: ControlSurfac
   const fullscreen = button(topActions, 'control-fullscreen', '全屏', 'Fullscreen');
   const addToHomeScreen = button(topActions, 'control-fullscreen', installLabel[0], installLabel[1]);
   const installation = homeScreenInstallState();
-  const fullscreenDocument = hostDocument as Document & {
-    webkitFullscreenElement?: Element;
-    webkitExitFullscreen?: () => Promise<void> | void;
-  };
   const standaloneMode = host.matchMedia('(display-mode: standalone)');
   const fullscreenMode = host.matchMedia('(display-mode: fullscreen)');
   // 浏览器窗口全屏也匹配 fullscreen；仅应用启动网址带来的标记可辅助区分。
@@ -200,10 +197,7 @@ export function createControlSurface(parent: HTMLElement, options: ControlSurfac
   const failure = node('p', 'control-fullscreen-error');
   failure.hidden = true;
   failure.setAttribute('role', 'alert');
-  const fullscreenRoot = hostDocument.documentElement as HTMLElement & {
-    webkitRequestFullscreen?: () => Promise<void> | void;
-  };
-  const isFullscreen = (): boolean => Boolean(hostDocument.fullscreenElement || fullscreenDocument.webkitFullscreenElement);
+  fullscreen.hidden = !canFullscreen();
   const updateFullscreen = (): void => {
     fullscreen.textContent = getLanguage() === 'en'
       ? (isFullscreen() ? 'Exit fullscreen' : 'Fullscreen')
@@ -211,36 +205,17 @@ export function createControlSurface(parent: HTMLElement, options: ControlSurfac
     fullscreen.setAttribute('aria-pressed', String(isFullscreen()));
   };
   labels.push(updateFullscreen);
-  hostDocument.addEventListener('fullscreenchange', updateFullscreen, { signal });
-  hostDocument.addEventListener('webkitfullscreenchange', updateFullscreen, { signal });
-  const showFullscreenError = (error: unknown): void => {
-    failure.textContent = `${getLanguage() === 'en' ? 'Fullscreen failed' : '全屏操作失败'}：${error instanceof Error ? error.message : String(error)}`;
-    failure.hidden = false;
-  };
+  onFullscreenChange(updateFullscreen, signal);
   fullscreen.addEventListener('click', () => {
     failure.hidden = true;
-    try {
-      let request: Promise<void> | void;
-      if (isFullscreen()) {
-        if (hostDocument.exitFullscreen) request = hostDocument.exitFullscreen();
-        else request = fullscreenDocument.webkitExitFullscreen!();
-      } else if (fullscreenRoot.requestFullscreen) {
-        request = fullscreenRoot.requestFullscreen({ navigationUI: 'hide' });
-      } else if (fullscreenRoot.webkitRequestFullscreen) {
-        request = fullscreenRoot.webkitRequestFullscreen();
-      } else {
-        throw new Error(getLanguage() === 'en'
-          ? 'This browser exposes neither requestFullscreen nor webkitRequestFullscreen.'
-          : '当前浏览器未提供 requestFullscreen 或 webkitRequestFullscreen 接口。');
-      }
-      Promise.resolve(request).then(() => {
-        updateFullscreen();
-        menu.open = false;
-        options.onFocusGame();
-      }, showFullscreenError);
-    } catch (error: unknown) {
-      showFullscreenError(error);
-    }
+    toggleFullscreen().then(() => {
+      updateFullscreen();
+      menu.open = false;
+      options.onFocusGame();
+    }, (error: unknown) => {
+      failure.textContent = `${getLanguage() === 'en' ? 'Fullscreen failed' : '全屏操作失败'}：${error instanceof Error ? error.message : String(error)}`;
+      failure.hidden = false;
+    });
   }, { signal });
   const home = button(bar, 'control-home', '首页 · 导航', 'Home · Pages');
   const zoom = createGameZoom(bar, options.canvas, options.onZoom);
@@ -370,6 +345,11 @@ export function createControlSurface(parent: HTMLElement, options: ControlSurfac
   translate();
   const unsubscribe = onLanguageChange(translate);
   parent.append(root);
+  // iPhone 网页无法全屏，主动提示一次装到主屏幕；之后只保留右上角入口。
+  if (isIOS && !canFullscreen() && !isStandalone() && !localStorage.getItem('pelican-home-screen-hint')) {
+    localStorage.setItem('pelican-home-screen-hint', '1');
+    homeScreenGuide.showModal();
+  }
   setMode(mode);
   window.addEventListener('resize', layout, { signal });
   return {
