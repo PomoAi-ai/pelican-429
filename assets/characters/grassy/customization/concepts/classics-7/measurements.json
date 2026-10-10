@@ -1,0 +1,50 @@
+{
+  "targetHeads": 3.3,
+  "worldHeightTiles": 3.1,
+  "items": [
+    {
+      "id": "C01",
+      "name": "刘备",
+      "crown_y": 115,
+      "chin_y": 376,
+      "sole_y": 956,
+      "frontVisibleOutlineHeads": 3.222,
+      "mode": "visible-outline-estimate",
+      "uncertainty_px": 8,
+      "note": "可见基础发冠与下巴轮廓估读，束髻和小山羊胡不计H。"
+    },
+    {
+      "id": "C02",
+      "name": "关羽",
+      "crown_y": 110,
+      "chin_y": 345,
+      "sole_y": 940,
+      "frontVisibleOutlineHeads": null,
+      "mode": "target-guide-only",
+      "uncertainty_px": 8,
+      "note": "头巾遮住头顶、长须遮住下颌；头部选点为估读，紫尺只作3.3H目标参考。"
+    },
+    {
+      "id": "C03",
+      "name": "张飞",
+      "crown_y": 126,
+      "chin_y": 366,
+      "sole_y": 944,
+      "frontVisibleOutlineHeads": null,
+      "mode": "target-guide-only",
+      "uncertainty_px": 8,
+      "note": "束髻不计H，下颌被短须覆盖；紫尺为目标参考，不认证裸头比例。"
+    },
+    {
+      "id": "C04",
+      "name": "孙悟空",
+      "crown_y": 88,
+      "chin_y": 351,
+      "sole_y": 955,
+      "frontVisibleOutlineHeads": 3.297,
+      "mode": "visible-outline-estimate",
+      "uncertainty_px": 8,
+      "note": "以基础头毛轮廓估读；高翘毛束、猴耳和尾巴不计H。"
+    }
+  ]
+}

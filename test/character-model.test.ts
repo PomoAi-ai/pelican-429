@@ -10,6 +10,8 @@ import { configureCharacterTextures, disposeCharacterTextures, loadCharacterMode
 import { createEnemyRig, disposeEnemyAssets, loadEnemyAsset } from '../src/render/enemy-rig.ts';
 import { createFacilityPresentation, disposePreloadedFortressTextures, preloadFortressTextures } from '../src/app/facility-presentation.ts';
 import type { Stage } from '../src/render/stage.ts';
+import { CUSTOMIZATION_MODELS } from '../src/config/character-customization-assets.ts';
+import { disposeCustomizationAssets, loadCustomizationAssets } from '../src/render/grassy/grassy-appearance.ts';
 
 function deferred<T>() {
   let resolve!: (value: T) => void;
@@ -209,4 +211,56 @@ test('同时加载同一角色的多个贴图档位，缓存与实例不会串�
     './characters/enemies/line-hound/model.ktx2-compact.glb',
     './characters/enemies/line-hound/model.ktx2.glb',
   ]);
+});
+
+test('首页切换渲染器时新模型使用新转码器，旧请求完成后才释放旧会话', async (t) => {
+  t.after(disposeCharacterTextures);
+  const gltf = await new GLTFLoader().parseAsync(JSON.stringify({ asset: { version: '2.0' }, scene: 0, scenes: [{}] }), '');
+  const pending = [deferred<GLTF>(), deferred<GLTF>()];
+  const renderers = [{} as WebGLRenderer, {} as WebGLRenderer];
+  const routes = new Map<KTX2Loader, WebGLRenderer>();
+  const released: KTX2Loader[] = [];
+  const requested: KTX2Loader[] = [];
+  t.mock.method(KTX2Loader.prototype, 'detectSupport', function (this: KTX2Loader, renderer: WebGLRenderer) {
+    routes.set(this, renderer); return this;
+  });
+  t.mock.method(KTX2Loader.prototype, 'init', async () => {});
+  t.mock.method(KTX2Loader.prototype, 'dispose', function (this: KTX2Loader) { released.push(this); return this; });
+  t.mock.method(GLTFLoader.prototype, 'loadAsync', function (this: GLTFLoader) {
+    requested.push(this.ktx2Loader!); return pending[requested.length - 1]!.promise;
+  });
+  configureCharacterTextures(renderers[0]!);
+  const old = loadCharacterModel(WEB_MODEL_SOURCES[0]!, 'ktx2');
+  configureCharacterTextures(renderers[1]!);
+  const current = loadCharacterModel(WEB_MODEL_SOURCES[0]!, 'ktx2');
+  assert.equal(routes.get(requested[0]!), renderers[0]);
+  assert.equal(routes.get(requested[1]!), renderers[1]);
+  assert.notEqual(requested[0], requested[1], '两个 WebGL 上下文必须分别检测压缩纹理能力');
+  assert.deepEqual(released, [], '切换不打断旧请求');
+  pending[0]!.resolve(gltf); await old;
+  assert.deepEqual(released, [requested[0]]);
+  pending[1]!.resolve(gltf); await current;
+  assert.deepEqual(released, [requested[0]], '新会话保留供后续模型复用');
+  disposeCharacterTextures();
+  assert.deepEqual(released, requested);
+});
+
+test('已退出的定制资源请求延迟失败时不删除新场景的加载缓存', async (t) => {
+  t.after(disposeCustomizationAssets);
+  const failures: Array<(error: Error) => void> = [];
+  t.mock.method(GLTFLoader.prototype, 'loadAsync', () => new Promise<GLTF>((_resolve, reject) => { failures.push(reject); }));
+  const count = CUSTOMIZATION_MODELS.length;
+  const old = loadCustomizationAssets('original');
+  const oldFailure = assert.rejects(old, /old download/);
+  disposeCustomizationAssets();
+  const current = loadCustomizationAssets('original');
+  const currentFailure = assert.rejects(current, /new download/);
+  assert.equal(failures.length, count * 2);
+  for (const fail of failures.slice(0, count)) fail(new Error('old download'));
+  await oldFailure;
+  const repeated = loadCustomizationAssets('original');
+  assert.equal(repeated, current, '旧 catch 不能清除另一代正在加载的 promise');
+  assert.equal(failures.length, count * 2, '重复读取不能再次下载整组定制模型');
+  for (const fail of failures.slice(count)) fail(new Error('new download'));
+  await currentFailure;
 });

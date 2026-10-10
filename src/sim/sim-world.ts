@@ -1,3 +1,4 @@
+import { createTileRideProbe } from '../physics/ride-probe.ts';
 import { createFreeWorldWeather } from '../world/free-world-weather.ts';
 import { HUMAN_BODY_HEIGHT } from '../config/player-form.ts';
 import type { PlayerForm } from '../config/player-form.ts';
@@ -13,9 +14,12 @@ import type { BossArenaState } from './boss-arena.ts';
  * hitstop 期间只推进计时（tick、hitstopTicks）并缓冲玩家输入，跳过控制器、物理、液体与小鱼，并令 prev=cur（渲染不插值抖动）。
  */
 import { ENEMY_RULES } from '../config/enemy-rules.ts';
+import { HOMESTEAD, isDaytime } from '../config/homestead.ts';
 import { cancelBossSkill, setBossDifficulty, updateBoss } from '../entities/boss.ts';
 import { mainlineTransformUnlocked, restoreMainlinePlayer, stepMainline, stepMainlineReveal } from './mainline.ts';
 import type { MainlineState } from './mainline.ts';
+import { stepHomesteadWorld } from './homestead.ts';
+import type { HomesteadState } from './homestead.ts';
 import { jumpVelocity, validateTuning, TUNING } from '../config/tuning.ts';
 import { stepPhotonUltimate, steerPhotonProjectiles } from './photon-system.ts';
 import { cancelPlayerTransform, stepPlayerTransform } from './player-transform.ts';
@@ -75,6 +79,8 @@ export interface SimWorld {
   mobileBosses: boolean;
   bossArena?: BossArenaState;
   mainline?: MainlineState;
+  /** 家园概念版本：经济、无人机与标记；只在 homestead 模式启用。 */
+  homestead?: HomesteadState;
   tick: number;
   hitstopTicks: number;
   /** 玩家死亡后的重生等待；等待期间不接收角色输入。 */
@@ -294,6 +300,11 @@ function resolveDroneStomp(world: SimWorld): void {
   world.hitstopTicks = Math.max(world.hitstopTicks, hit.hitstop);
 }
 
+/** 家园模式的夜晚：野外敌人更凶。主线和普通自由世界没有 homestead，不受影响。 */
+function homesteadNight(world: SimWorld): boolean {
+  return world.homestead !== undefined && !isDaytime(world.homestead.economy.second);
+}
+
 function resolveCombat(world: SimWorld): void {
   const { entities, events, tuning } = world;
   const player = getPlayer(world);
@@ -327,6 +338,10 @@ function resolveCombat(world: SimWorld): void {
       const shot = projectileHitSource(e);
       if (shot) sources.push(shot);
     }
+  }
+  if (homesteadNight(world)) {
+    // 近战、炸弹、铝热剂都经过这里；hitIds 保持原引用，命中去重不受影响。
+    for (const [i, src] of sources.entries()) if (src.team === 'enemy') sources[i] = { ...src, def: { ...src.def, damage: src.def.damage * HOMESTEAD.night.damage } };
   }
   const wet = wetMarks(entities);
   const hitstop = resolveHits(sources, targets, world.tick, events, tuning.combat);
@@ -436,6 +451,7 @@ function dropHealthPack(world: SimWorld, position: Vec2, healAmount: number, max
 
 export function stepSim(world: SimWorld, input: InputFrame): void {
   const { tuning, map, entities, fluid } = world;
+  const rideProbe = createTileRideProbe(map);
   const dt = tuning.sim.step;
   if (world.bossArena && stepBossArena(world)) {
     for (const entity of entities) savePrev(entity.body);
@@ -513,7 +529,7 @@ export function stepSim(world: SimWorld, input: InputFrame): void {
       const wasInWater = e.pelican.inWater;
       const wind = world.env.wind;
       const airWind = entityExposed(map, e) ? wind.sway(e.body.x) * tuning.player.airWindSpeed * Math.max(0, wind.state.scale - 1) : 0;
-      updatePelican(e, e.id === world.playerId ? playerInput : NEUTRAL_INPUT, map, tuning, dt, fluid, airWind);
+      updatePelican(e, e.id === world.playerId ? playerInput : NEUTRAL_INPUT, map, tuning, dt, fluid, airWind, rideProbe);
       pushSplash(world, e, wasInWater);
     } else if (e.boss) {
       const player = getPlayer(world);
@@ -524,7 +540,7 @@ export function stepSim(world: SimWorld, input: InputFrame): void {
       const player = getPlayer(world);
       const oldAttack = e.attack;
       const oldElapsed = e.attack?.elapsed;
-      updateEnemy(e, player.health!.hp > 0 ? { x: player.body.x, y: player.body.y + player.body.height / 2, vx: player.body.vx, vy: player.body.vy } : null, world.level, tuning);
+      updateEnemy(e, player.health!.hp > 0 ? { x: player.body.x, y: player.body.y + player.body.height / 2, vx: player.body.vx, vy: player.body.vy } : null, world.level, tuning, homesteadNight(world) ? HOMESTEAD.night.speed : 1);
       if (e.attack) {
         const skill = ENEMY_RULES[e.enemy.kind].skills[e.enemy.skill!];
         if (e.attack !== oldAttack) world.events.push({ type: 'combatAction', id: e.id, action: skill.id, phase: 'started', x: e.body.x, y: e.body.y });
@@ -610,7 +626,7 @@ export function stepSim(world: SimWorld, input: InputFrame): void {
 
   for (const e of entities) {
     if (!e.pelican || e.removed || teleportLocksMovement(e)) continue;
-    resolvePelicanRide(e, map, tuning);
+    resolvePelicanRide(e, rideProbe, tuning);
     for (const req of consumeRideEvents(e)) world.events.push({ ...req, id: e.id });
     resolvePelicanState(e);
   }
@@ -669,6 +685,8 @@ export function stepSim(world: SimWorld, input: InputFrame): void {
     entities.splice(i, 1);
   }
   if (world.mainline) stepMainline(world);
+  // 1 个模拟 tick = 1 游戏秒。
+  if (world.homestead) stepHomesteadWorld(world, 1);
 
   world.tick++;
 }

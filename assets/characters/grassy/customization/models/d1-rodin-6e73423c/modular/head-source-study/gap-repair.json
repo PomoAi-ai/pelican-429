@@ -1,0 +1,35 @@
+{
+  "cause": "Depth smoothing moved shared brow/hair boundary vertices and opened a gap.",
+  "fix": "Smooth interior brow vertices only; retain boundary coordinates.",
+  "addedPatchMeshes": 0,
+  "probePixels": [
+    [
+      543,
+      280
+    ],
+    [
+      541,
+      280
+    ],
+    [
+      546,
+      280
+    ],
+    [
+      543,
+      275
+    ],
+    [
+      543,
+      285
+    ]
+  ],
+  "beforeMisses": 4,
+  "afterMisses": 0,
+  "hitObject": "D1_Head_SourceFace",
+  "centerHit": [
+    -0.20824766,
+    -0.35935715,
+    2.62907147
+  ]
+}

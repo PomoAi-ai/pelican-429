@@ -1,3 +1,4 @@
+import type { RideProbe } from '../physics/ride-probe.ts';
 /**
  * 鹈鹕控制器：把输入意图转成速度/攻击/远程武器（pelican-weapons；物理之前调用），物理之后解析表现状态。
  * 移动层（idle/run/jump/fall/fly/glide/swim）+ 动作层（attack；未来受击/挖掘同层扩展）。
@@ -210,6 +211,7 @@ export function updatePelican(
   dt: number,
   fluid: FluidQuery | null,
   airWind: number,
+  rideProbe: RideProbe,
 ): void {
   const p = requirePelican(e);
   const b = e.body;
@@ -248,7 +250,7 @@ export function updatePelican(
     p.attackBufferTicks = melee.bufferWindow;
     p.attackBufferFacing = aimFacing(b, input);
   }
-  updateRideIntent(e, input, map, tuning);
+  updateRideIntent(e, input, rideProbe, tuning);
   const ride = p.ride.mode;
 
   // 攻击：推进进行中的攻击；空闲且有缓冲时起手（空中也可攻击）。上车中屏蔽（缓冲保留），骑行时可正常攻击。
@@ -288,7 +290,7 @@ export function updatePelican(
     if (!e.attack && !shotLocked && input.moveX !== 0) e.facing = input.moveX;
   }
   // 骑行保险杠：记录 preMoveVx，车头前方净空不足即下车，否则把 vx 夹到车头不进墙。
-  rideBumper(e, map, tuning, dt);
+  rideBumper(e, rideProbe, tuning, dt);
 
   // 下方向优先穿过单向平台，避免同时按跳跃时反向起飞；实心支撑仍保留正常跳跃。
   if (input.downHeld && b.onGround && p.ride.mode !== 'mounting' && standingOnOneWayOnly(b, map)) {

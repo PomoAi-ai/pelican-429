@@ -1,0 +1,146 @@
+{
+  "targetHeads": 3.3,
+  "worldHeightTiles": 3.1,
+  "items": [
+    {
+      "id": "C01",
+      "name": "刘备",
+      "source_file": "exec-private-source-025.png",
+      "source_size": [
+        1536,
+        1024
+      ],
+      "front": {
+        "crown_y": 68,
+        "chin_y": 295,
+        "sole_y": 833,
+        "ratio": 3.37
+      },
+      "ruler_mode": "visible-outline-measurement",
+      "estimated_pixel_uncertainty": 8,
+      "crown_position_estimated_under_headwear": false,
+      "note": "基础发冠不含束髻和金冠，下巴不含独立山羊胡。",
+      "views": "四面目视核对；衣褶、配件和武器细节仍待定稿。"
+    },
+    {
+      "id": "C02",
+      "name": "关羽",
+      "source_file": "exec-private-source-069.png",
+      "source_size": [
+        1536,
+        1024
+      ],
+      "front": {
+        "crown_y": 88,
+        "chin_y": null,
+        "sole_y": 801,
+        "ratio": null
+      },
+      "ruler_mode": "target-guide-only",
+      "estimated_pixel_uncertainty": null,
+      "crown_position_estimated_under_headwear": true,
+      "note": "头部被发巾覆盖，下巴被长须遮挡；紫尺仅为目标比例参考，不报告实测头身比。",
+      "views": "四面目视核对；衣褶、配件和武器细节仍待定稿。"
+    },
+    {
+      "id": "C03",
+      "name": "张飞",
+      "source_file": "exec-private-source-054.png",
+      "source_size": [
+        1536,
+        1024
+      ],
+      "front": {
+        "crown_y": 118,
+        "chin_y": null,
+        "sole_y": 815,
+        "ratio": null
+      },
+      "ruler_mode": "target-guide-only",
+      "estimated_pixel_uncertainty": null,
+      "crown_position_estimated_under_headwear": false,
+      "note": "排除高束髻；下颌被浓密短须遮挡，紫尺仅作目标比例参考。",
+      "views": "四面目视核对；衣褶、配件和武器细节仍待定稿。"
+    },
+    {
+      "id": "C04",
+      "name": "孙悟空",
+      "source_file": "exec-private-source-052.png",
+      "source_size": [
+        1536,
+        1024
+      ],
+      "front": {
+        "crown_y": 105,
+        "chin_y": 337,
+        "sole_y": 850,
+        "ratio": 3.211
+      },
+      "ruler_mode": "visible-outline-measurement",
+      "estimated_pixel_uncertainty": 8,
+      "crown_position_estimated_under_headwear": false,
+      "note": "基础头毛轮廓估读，不包含高翘毛束；猴耳与尾巴不计入H。",
+      "views": "四面目视核对；衣褶、配件和武器细节仍待定稿。"
+    },
+    {
+      "id": "C05",
+      "name": "猪八戒",
+      "source_file": "exec-private-source-026.png",
+      "source_size": [
+        1536,
+        1024
+      ],
+      "front": {
+        "crown_y": 100,
+        "chin_y": null,
+        "sole_y": 724,
+        "ratio": null
+      },
+      "ruler_mode": "target-guide-only",
+      "estimated_pixel_uncertainty": null,
+      "crown_position_estimated_under_headwear": true,
+      "note": "僧帽覆盖头顶部，不能直接读取裸头冠；紫尺为目标参考，猪耳不计入H。",
+      "views": "四面目视核对；衣褶、配件和武器细节仍待定稿。"
+    },
+    {
+      "id": "C06",
+      "name": "沙和尚",
+      "source_file": "exec-private-source-030.png",
+      "source_size": [
+        1536,
+        1024
+      ],
+      "front": {
+        "crown_y": 52,
+        "chin_y": null,
+        "sole_y": 811,
+        "ratio": null
+      },
+      "ruler_mode": "target-guide-only",
+      "estimated_pixel_uncertainty": null,
+      "crown_position_estimated_under_headwear": false,
+      "note": "排除束髻；下颌被络腮胡遮挡，紫尺仅作目标参考。",
+      "views": "四面目视核对；衣褶、配件和武器细节仍待定稿。"
+    },
+    {
+      "id": "C07",
+      "name": "唐三藏",
+      "source_file": "exec-private-source-060.png",
+      "source_size": [
+        1536,
+        1024
+      ],
+      "front": {
+        "crown_y": 130,
+        "chin_y": null,
+        "sole_y": 849,
+        "ratio": null
+      },
+      "ruler_mode": "target-guide-only",
+      "estimated_pixel_uncertainty": null,
+      "crown_position_estimated_under_headwear": true,
+      "note": "法冠下头顶位置不可见，基准线为帽内估读；紫尺只示意3.3头身目标。",
+      "views": "四面目视核对；衣褶、配件和武器细节仍待定稿。"
+    }
+  ]
+}

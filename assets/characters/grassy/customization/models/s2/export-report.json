@@ -1,0 +1,116 @@
+{
+  "sourceBounds": [
+    [
+      -0.40352699160575867,
+      -0.2701849341392517,
+      -0.9408149719238281
+    ],
+    [
+      0.39940398931503296,
+      0.26637202501296997,
+      0.9475250244140625
+    ]
+  ],
+  "scale": 1.6416535189700556,
+  "registrationZ": {
+    "source": [
+      0,
+      0.32,
+      0.8,
+      1.16,
+      1.67,
+      2.04,
+      2.2,
+      2.29,
+      3.1
+    ],
+    "target": [
+      0,
+      0.27,
+      0.67,
+      1.02,
+      1.35,
+      1.85,
+      1.97,
+      2.1,
+      3.1
+    ]
+  },
+  "style": "urban",
+  "bones": 22,
+  "morphs": {},
+  "parts": [
+    {
+      "name": "Female_urban_hair_2",
+      "part": "hair",
+      "vertices": 5379,
+      "materials": [
+        "custom.hair.urban.2"
+      ]
+    },
+    {
+      "name": "Female_urban_outfit",
+      "part": "outfit",
+      "vertices": 13505,
+      "materials": [
+        "custom.skin.urban",
+        "custom.top.urban",
+        "custom.bottom.urban",
+        "custom.shoes.urban"
+      ]
+    },
+    {
+      "name": "Female_urban_body",
+      "part": "body",
+      "vertices": 80,
+      "materials": [
+        "custom.skin.royal.neck"
+      ]
+    },
+    {
+      "name": "Female_urban_body.001",
+      "part": "body",
+      "vertices": 363,
+      "materials": [
+        "custom.skin.royal.eyelid",
+        "Grassy soft eyelid crease"
+      ]
+    },
+    {
+      "name": "Female_urban_body.002",
+      "part": "body",
+      "vertices": 363,
+      "materials": [
+        "custom.skin.royal.eyelid",
+        "Grassy soft eyelid crease"
+      ]
+    },
+    {
+      "name": "Female_urban_body.003",
+      "part": "body",
+      "vertices": 297,
+      "materials": [
+        "custom.skin.royal.eyelid",
+        "Grassy soft eyelid crease"
+      ]
+    },
+    {
+      "name": "Female_urban_body.004",
+      "part": "body",
+      "vertices": 297,
+      "materials": [
+        "custom.skin.royal.eyelid",
+        "Grassy soft eyelid crease"
+      ]
+    },
+    {
+      "name": "Female_urban_body.005",
+      "part": "body",
+      "vertices": 1075,
+      "materials": [
+        "custom.skin.royal.3"
+      ]
+    }
+  ],
+  "bytes": 7106128
+}

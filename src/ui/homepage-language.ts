@@ -9,6 +9,9 @@ export const HOME_ENGLISH: Record<string, string> = {
   '鹈鹕 429': 'Pelican 429', '鹈鹕 429 首页': 'Pelican 429 home',
 
   // Header and hero
+  '基础概念定义': 'Basic concepts',
+  '透视': 'Perspective',
+  '原画资料库': 'Concept art library',
   '一场越过边界的冒险': 'An adventure beyond the boundary',
   '网站导航': 'Site navigation', '游戏介绍': 'About', '章节': 'Chapters', '角色': 'Characters',
   '开源': 'Open source', '赞助': 'Sponsor', '资源展示': 'Asset gallery', '进入游戏': 'Play now', '继续游戏': 'Continue game',

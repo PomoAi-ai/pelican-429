@@ -354,6 +354,8 @@ export interface WorldLight {
   setWaterPalette(palette: WaterPalette): void;
   /** 鹈鹕微光（021，render/pelican-aura）：中心 (x,y)、半径、强度 [0,1]、线性 RGB 光色；强度 0 = 关闭。 */
   setAura(x: number, y: number, radius: number, strength: number, color: readonly [number, number, number]): void;
+  /** 砍倒的树：擦掉树冠遮光，下一次 update 生效。 */
+  removeTree(id: number): void;
   dispose(): void;
 }
 
@@ -546,6 +548,11 @@ export function createWorldLight(input: WorldLightInput): WorldLight {
       }
       uniforms.uAura.value.set(x, y, radius, strength);
       uniforms.uAuraColor.value.setRGB(color[0], color[1], color[2]);
+    },
+    removeTree(id) {
+      const tree = input.trees.find((t) => t.id === id);
+      if (!tree) throw new Error(`light-texture: removeTree unknown tree ${id}`);
+      lightMap.removeCanopy(treeCanopies([tree])[0]!);
     },
     dispose() {
       if (disposed) return;

@@ -1,0 +1,594 @@
+{
+  "target_head_ratio": 3.3,
+  "items": [
+    {
+      "id": "r01",
+      "title": "经典水手裙 · 均衡体型",
+      "hair": "黑色齐肩直发",
+      "source_file": "exec-private-source-042.png",
+      "source_size": [
+        1536,
+        1024
+      ],
+      "uniform_display_scale": 0.8722157092614302,
+      "views": [
+        {
+          "view": "FRONT",
+          "crown_y": 118,
+          "chin_y": 382,
+          "sole_y": 971,
+          "head_ratio": 3.231
+        },
+        {
+          "view": "RIGHT",
+          "crown_y": 118,
+          "chin_y": 379,
+          "sole_y": 971,
+          "head_ratio": 3.268
+        },
+        {
+          "view": "BACK",
+          "crown_y": 118,
+          "chin_y": null,
+          "sole_y": 971,
+          "head_ratio": null
+        },
+        {
+          "view": "FRONT 45",
+          "crown_y": 118,
+          "chin_y": 381,
+          "sole_y": 983,
+          "head_ratio": 3.289
+        }
+      ],
+      "screening": "人工可见发冠口径处于本轮筛查范围；非最终3D比例认证"
+    },
+    {
+      "id": "r02",
+      "title": "夏日水手短裤 · 纤细体型",
+      "hair": "银灰耳上短发",
+      "source_file": "exec-private-source-024.png",
+      "source_size": [
+        1678,
+        937
+      ],
+      "uniform_display_scale": 0.9538461538461539,
+      "views": [
+        {
+          "view": "FRONT",
+          "crown_y": 49,
+          "chin_y": 294,
+          "sole_y": 829,
+          "head_ratio": 3.184
+        },
+        {
+          "view": "RIGHT",
+          "crown_y": 49,
+          "chin_y": 292,
+          "sole_y": 828,
+          "head_ratio": 3.206
+        },
+        {
+          "view": "BACK",
+          "crown_y": 53,
+          "chin_y": null,
+          "sole_y": 827,
+          "head_ratio": null
+        },
+        {
+          "view": "FRONT 45",
+          "crown_y": 51,
+          "chin_y": 297,
+          "sole_y": 831,
+          "head_ratio": 3.171
+        }
+      ],
+      "screening": "人工可见发冠口径处于本轮筛查范围；非最终3D比例认证",
+      "note": "最终保留原始较接近目标的版本，约3.18H，头相对目标仍略大。后续两次缩头结果约3.5—3.8H，均淘汰，未纳入交付。"
+    },
+    {
+      "id": "r03",
+      "title": "休闲牛仔背带裤 · 微胖体型",
+      "hair": "栗棕半扎卷发",
+      "source_file": "exec-private-source-062.png",
+      "source_size": [
+        1678,
+        937
+      ],
+      "uniform_display_scale": 0.970013037809648,
+      "views": [
+        {
+          "view": "FRONT",
+          "crown_y": 56,
+          "chin_y": 287,
+          "sole_y": 823,
+          "head_ratio": 3.32
+        },
+        {
+          "view": "RIGHT",
+          "crown_y": 47,
+          "chin_y": 281,
+          "sole_y": 822,
+          "head_ratio": 3.312
+        },
+        {
+          "view": "BACK",
+          "crown_y": 58,
+          "chin_y": null,
+          "sole_y": 822,
+          "head_ratio": null
+        },
+        {
+          "view": "FRONT 45",
+          "crown_y": 48,
+          "chin_y": 283,
+          "sole_y": 827,
+          "head_ratio": 3.315
+        }
+      ],
+      "screening": "人工可见发冠口径处于本轮筛查范围；非最终3D比例认证"
+    },
+    {
+      "id": "r10",
+      "title": "田径运动装 · 健壮体型",
+      "hair": "栗棕高马尾",
+      "source_file": "exec-private-source-041.png",
+      "source_size": [
+        1536,
+        1024
+      ],
+      "uniform_display_scale": 0.8910179640718563,
+      "views": [
+        {
+          "view": "FRONT",
+          "crown_y": 65,
+          "chin_y": 319,
+          "sole_y": 900,
+          "head_ratio": 3.287
+        },
+        {
+          "view": "RIGHT",
+          "crown_y": 70,
+          "chin_y": 318,
+          "sole_y": 900,
+          "head_ratio": 3.347
+        },
+        {
+          "view": "BACK",
+          "crown_y": 69,
+          "chin_y": null,
+          "sole_y": 900,
+          "head_ratio": null
+        },
+        {
+          "view": "FRONT 45",
+          "crown_y": 71,
+          "chin_y": 322,
+          "sole_y": 903,
+          "head_ratio": 3.315
+        }
+      ],
+      "screening": "人工可见发冠口径处于本轮筛查范围；非最终3D比例认证"
+    },
+    {
+      "id": "r04",
+      "title": "秋日针织",
+      "source_file": "exec-private-source-067.png",
+      "source_size": [
+        1678,
+        937
+      ],
+      "estimated_landmark_uncertainty_px": 5,
+      "uniform_display_scale": 0.9265255292652553,
+      "views": [
+        {
+          "view": "FRONT",
+          "crown_y": 46,
+          "chin_y": 289,
+          "sole_y": 849,
+          "head_ratio": 3.305
+        }
+      ],
+      "review": "四视图已目视检查；本记录仅量化正面。侧面、背面、45度未作独立像素测量，不能当精密工程图。"
+    },
+    {
+      "id": "r05",
+      "title": "冬日旅行",
+      "source_file": "exec-private-source-076.png",
+      "source_size": [
+        1536,
+        1024
+      ],
+      "estimated_landmark_uncertainty_px": 5,
+      "uniform_display_scale": 0.8722157092614302,
+      "views": [
+        {
+          "view": "FRONT",
+          "crown_y": 98,
+          "chin_y": 353,
+          "sole_y": 951,
+          "head_ratio": 3.345
+        }
+      ],
+      "review": "四视图已目视检查；本记录仅量化正面。侧面、背面、45度未作独立像素测量，不能当精密工程图。"
+    },
+    {
+      "id": "r06",
+      "title": "东方轻装",
+      "source_file": "exec-private-source-018.png",
+      "source_size": [
+        1678,
+        937
+      ],
+      "estimated_landmark_uncertainty_px": 5,
+      "uniform_display_scale": 0.9230769230769231,
+      "views": [
+        {
+          "view": "FRONT",
+          "crown_y": 45,
+          "chin_y": 300,
+          "sole_y": 851,
+          "head_ratio": 3.161
+        }
+      ],
+      "review": "四视图已目视检查；本记录仅量化正面。侧面、背面、45度未作独立像素测量，不能当精密工程图。"
+    },
+    {
+      "id": "r07",
+      "title": "医生",
+      "source_file": "exec-private-source-040.png",
+      "source_size": [
+        1536,
+        1024
+      ],
+      "estimated_landmark_uncertainty_px": 5,
+      "uniform_display_scale": 0.8248337028824834,
+      "views": [
+        {
+          "view": "FRONT",
+          "crown_y": 68,
+          "chin_y": 345,
+          "sole_y": 970,
+          "head_ratio": 3.256
+        }
+      ],
+      "review": "四视图已目视检查；本记录仅量化正面。侧面、背面、45度未作独立像素测量，不能当精密工程图。"
+    },
+    {
+      "id": "r08",
+      "title": "急救员",
+      "source_file": "exec-private-source-035.png",
+      "source_size": [
+        1678,
+        937
+      ],
+      "estimated_landmark_uncertainty_px": 5,
+      "uniform_display_scale": 0.9040097205346294,
+      "views": [
+        {
+          "view": "FRONT",
+          "crown_y": 45,
+          "chin_y": 294,
+          "sole_y": 868,
+          "head_ratio": 3.305
+        }
+      ],
+      "review": "四视图已目视检查；本记录仅量化正面。侧面、背面、45度未作独立像素测量，不能当精密工程图。"
+    },
+    {
+      "id": "r09",
+      "title": "野外训练军人",
+      "source_file": "exec-private-source-050.png",
+      "source_size": [
+        1536,
+        1024
+      ],
+      "estimated_landmark_uncertainty_px": 5,
+      "uniform_display_scale": 0.8601156069364162,
+      "views": [
+        {
+          "view": "FRONT",
+          "crown_y": 75,
+          "chin_y": 338,
+          "sole_y": 940,
+          "head_ratio": 3.289
+        }
+      ],
+      "review": "四视图已目视检查；本记录仅量化正面。侧面、背面、45度未作独立像素测量，不能当精密工程图。"
+    },
+    {
+      "id": "r11",
+      "title": "网球运动员",
+      "source_file": "exec-private-source-038.png",
+      "source_size": [
+        1678,
+        937
+      ],
+      "estimated_landmark_uncertainty_px": 5,
+      "uniform_display_scale": 0.9073170731707317,
+      "views": [
+        {
+          "view": "FRONT",
+          "crown_y": 50,
+          "chin_y": 296,
+          "sole_y": 870,
+          "head_ratio": 3.333
+        }
+      ],
+      "review": "四视图已目视检查；本记录仅量化正面。侧面、背面、45度未作独立像素测量，不能当精密工程图。"
+    },
+    {
+      "id": "r12",
+      "title": "篮球运动员",
+      "source_file": "exec-private-source-028.png",
+      "source_size": [
+        1536,
+        1024
+      ],
+      "estimated_landmark_uncertainty_px": 5,
+      "uniform_display_scale": 0.8425821064552661,
+      "views": [
+        {
+          "view": "FRONT",
+          "crown_y": 72,
+          "chin_y": 332,
+          "sole_y": 955,
+          "head_ratio": 3.396
+        }
+      ],
+      "review": "四视图已目视检查；本记录仅量化正面。侧面、背面、45度未作独立像素测量，不能当精密工程图。"
+    },
+    {
+      "id": "r13",
+      "title": "学院休闲",
+      "source_file": "exec-private-source-044.png",
+      "source_size": [
+        1678,
+        937
+      ],
+      "estimated_landmark_uncertainty_px": 5,
+      "uniform_display_scale": 0.9185185185185185,
+      "views": [
+        {
+          "view": "FRONT",
+          "crown_y": 50,
+          "chin_y": 301,
+          "sole_y": 860,
+          "head_ratio": 3.227
+        }
+      ],
+      "review": "四视图已目视检查；本记录仅量化正面。侧面、背面、45度未作独立像素测量，不能当精密工程图。"
+    },
+    {
+      "id": "r14",
+      "title": "春日花瓣裙",
+      "source_file": "exec-private-source-059.png",
+      "source_size": [
+        1536,
+        1024
+      ],
+      "estimated_landmark_uncertainty_px": 5,
+      "uniform_display_scale": 0.8742655699177438,
+      "views": [
+        {
+          "view": "FRONT",
+          "crown_y": 116,
+          "chin_y": 382,
+          "sole_y": 967,
+          "head_ratio": 3.199
+        }
+      ],
+      "review": "四视图已目视检查；本记录仅量化正面。侧面、背面、45度未作独立像素测量，不能当精密工程图。"
+    },
+    {
+      "id": "r15",
+      "title": "咖啡师",
+      "source_file": "exec-private-source-072.png",
+      "source_size": [
+        1678,
+        937
+      ],
+      "estimated_landmark_uncertainty_px": 5,
+      "uniform_display_scale": 0.9196538936959209,
+      "views": [
+        {
+          "view": "FRONT",
+          "crown_y": 40,
+          "chin_y": 289,
+          "sole_y": 849,
+          "head_ratio": 3.249
+        }
+      ],
+      "review": "四视图已目视检查；本记录仅量化正面。侧面、背面、45度未作独立像素测量，不能当精密工程图。"
+    },
+    {
+      "id": "r16",
+      "title": "消防员",
+      "source_file": "exec-private-source-055.png",
+      "source_size": [
+        1536,
+        1024
+      ],
+      "estimated_landmark_uncertainty_px": 5,
+      "uniform_display_scale": 0.8435374149659864,
+      "views": [
+        {
+          "view": "FRONT",
+          "crown_y": 70,
+          "chin_y": 345,
+          "sole_y": 952,
+          "head_ratio": 3.207
+        }
+      ],
+      "review": "四视图已目视检查；本记录仅量化正面。侧面、背面、45度未作独立像素测量，不能当精密工程图。"
+    },
+    {
+      "id": "r17",
+      "title": "雨天出行",
+      "source_file": "exec-private-source-029.png",
+      "source_size": [
+        1678,
+        937
+      ],
+      "estimated_landmark_uncertainty_px": 5,
+      "uniform_display_scale": 0.9106487148102815,
+      "views": [
+        {
+          "view": "FRONT",
+          "crown_y": 50,
+          "chin_y": 299,
+          "sole_y": 867,
+          "head_ratio": 3.281
+        }
+      ],
+      "review": "四视图已目视检查；本记录仅量化正面。侧面、背面、45度未作独立像素测量，不能当精密工程图。"
+    },
+    {
+      "id": "r18",
+      "title": "都市侦探",
+      "source_file": "exec-private-source-065.png",
+      "source_size": [
+        1536,
+        1024
+      ],
+      "estimated_landmark_uncertainty_px": 5,
+      "uniform_display_scale": 0.8711943793911007,
+      "views": [
+        {
+          "view": "FRONT",
+          "crown_y": 102,
+          "chin_y": 361,
+          "sole_y": 956,
+          "head_ratio": 3.297
+        }
+      ],
+      "review": "四视图已目视检查；本记录仅量化正面。侧面、背面、45度未作独立像素测量，不能当精密工程图。"
+    },
+    {
+      "id": "r19",
+      "title": "园艺师",
+      "source_file": "exec-private-source-020.png",
+      "source_size": [
+        1678,
+        937
+      ],
+      "estimated_landmark_uncertainty_px": 5,
+      "uniform_display_scale": 0.9207920792079208,
+      "views": [
+        {
+          "view": "FRONT",
+          "crown_y": 46,
+          "chin_y": 284,
+          "sole_y": 854,
+          "head_ratio": 3.395
+        }
+      ],
+      "review": "四视图已目视检查；本记录仅量化正面。侧面、背面、45度未作独立像素测量，不能当精密工程图。"
+    },
+    {
+      "id": "r20",
+      "title": "机械维修师",
+      "source_file": "exec-private-source-051.png",
+      "source_size": [
+        1536,
+        1024
+      ],
+      "estimated_landmark_uncertainty_px": 5,
+      "uniform_display_scale": 0.8275862068965517,
+      "views": [
+        {
+          "view": "FRONT",
+          "crown_y": 36,
+          "chin_y": 305,
+          "sole_y": 935,
+          "head_ratio": 3.342
+        }
+      ],
+      "review": "四视图已目视检查；本记录仅量化正面。侧面、背面、45度未作独立像素测量，不能当精密工程图。"
+    },
+    {
+      "id": "r21",
+      "title": "星纹法师",
+      "source_file": "exec-private-source-036.png",
+      "source_size": [
+        1678,
+        937
+      ],
+      "estimated_landmark_uncertainty_px": 5,
+      "uniform_display_scale": 0.916256157635468,
+      "views": [
+        {
+          "view": "FRONT",
+          "crown_y": 46,
+          "chin_y": 294,
+          "sole_y": 858,
+          "head_ratio": 3.274
+        }
+      ],
+      "review": "四视图已目视检查；本记录仅量化正面。侧面、背面、45度未作独立像素测量，不能当精密工程图。"
+    },
+    {
+      "id": "r22",
+      "title": "礼服军官",
+      "source_file": "exec-private-source-063.png",
+      "source_size": [
+        1536,
+        1024
+      ],
+      "estimated_landmark_uncertainty_px": 5,
+      "uniform_display_scale": 0.8773584905660378,
+      "views": [
+        {
+          "view": "FRONT",
+          "crown_y": 108,
+          "chin_y": 377,
+          "sole_y": 956,
+          "head_ratio": 3.152
+        }
+      ],
+      "review": "四视图已目视检查；本记录仅量化正面。侧面、背面、45度未作独立像素测量，不能当精密工程图。"
+    },
+    {
+      "id": "r23",
+      "title": "冬日居家",
+      "source_file": "exec-private-source-066.png",
+      "source_size": [
+        1678,
+        937
+      ],
+      "estimated_landmark_uncertainty_px": 5,
+      "uniform_display_scale": 0.9207920792079208,
+      "views": [
+        {
+          "view": "FRONT",
+          "crown_y": 42,
+          "chin_y": 288,
+          "sole_y": 850,
+          "head_ratio": 3.285
+        }
+      ],
+      "review": "四视图已目视检查；本记录仅量化正面。侧面、背面、45度未作独立像素测量，不能当精密工程图。"
+    },
+    {
+      "id": "r24",
+      "title": "足球运动员",
+      "source_file": "exec-private-source-073.png",
+      "source_size": [
+        1536,
+        1024
+      ],
+      "estimated_landmark_uncertainty_px": 5,
+      "uniform_display_scale": 0.8239202657807309,
+      "views": [
+        {
+          "view": "FRONT",
+          "crown_y": 44,
+          "chin_y": 317,
+          "sole_y": 947,
+          "head_ratio": 3.308
+        }
+      ],
+      "review": "四视图已目视检查；本记录仅量化正面。侧面、背面、45度未作独立像素测量，不能当精密工程图。"
+    }
+  ]
+}

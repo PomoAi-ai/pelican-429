@@ -1,0 +1,19 @@
+Generated with built-in imagegen, 2026-10-09.
+Reference: energy-door-sealed-edge.png
+Concept art only; geometry and collision not validated.
+
+Use case: precise-object-edit.
+Edit target: supplied energy-door comparison concept for Pelican 429.
+User correction: 门和地砖没包住. Previous attempt only recessed the energy sheet; it failed to cover the actual door and floor structural edges. Make a substantial visible structural correction.
+
+Keep warm ivory and cobalt sci-fi, cute orange-gold braided bob heroine in blue-white-gold dress, side-scrolling 2.5D camera and garden-city background. Preserve closed/open energy door states, same permanent structure in both.
+
+CRITICAL PHYSICAL CONSTRUCTION:
+1. Wrap entire outer door jamb thickness in a continuous opaque cobalt metal U-channel casing, with ivory face armor over it. Cap EVERY exposed side edge, including top corner and bottom foot. Segmented ivory armor can retain decorative seams but solid blue continuous casing behind fills ALL seams. No gaps exposing sky. Outer jamb has a clear wide metal return face instead of a thin floating strip.
+2. Door header physically joins ceiling's boxed fascia with an opaque corner cap. Jamb foot physically sockets into a broad flush floor sill metal casting. No freestanding post sitting loosely on tile. No sky or open slit between post foot and floor.
+3. Ground slab is a thick SOLID row of square building cells, enclosed along its entire visible front face and underside by ivory metal cover plates and cobalt continuous L-shaped edge trims. Top edge trim folds over tile front edge; bottom trim folds under slab bottom. Exposed left/right slab ends receive matching full-height END CAPS. No bare rock-colored slab edges, no exposed internal construction, no uncapped side faces. Retain clearly visible regular cell divisions, repeated plates per cell. The same matching trim continues seamlessly around door sill connection. This is surface-cladding a solid platform, NOT adding a rail/fence above walkway.
+4. Cyan energy membrane's perimeter remains inset into frame grooves behind opaque lips. Closed blue subtle hex sheet, open empty passage. ALL posts/header/sill remain in both states.
+
+COMPOSITION: landscape concept board. Top two-thirds two equal adjacent scenes with labels “关闭” and “打开”, show whole door plus whole thickness and lower edge of platform with ample margin below, no crop hiding bottom trim. Keep heroine feet visible and enough room overhead. Bottom third two BIG enlarged construction-detail insets with short labels “门框包边” and “地砖封边”. First inset explicitly shows thick metal wrap from front face around outer jamb side down to sill; second clearly shows tile top, wrapped front face, blue top-and-bottom folded trim, and opaque end cap at a platform corner. Insets are rendered solid assembled details, NO exploded/floating pieces. Make blue enclosure distinctly visible, about 10% tile size in thickness, no subtle hairline-only change.
+No additional facilities, no leaf-style hinged door, no disappearing frame, no railing, no new house redesign, no big neon outline, no schematic arrows or long paragraphs. Polished softly shaded anime 3D game concept.
+

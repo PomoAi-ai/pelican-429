@@ -1,5 +1,6 @@
 import { SCENE_DEMOS } from '../config/scene-demos.ts';
 import { MAX_SHOWCASE_CARDS } from '../config/showcase.ts';
+import { BUILDING_KIT_VARIANTS } from '../config/building-kit.ts';
 import type { ShowcaseCatalog, ShowcaseEntry } from '../config/showcase.ts';
 import { DEFAULT_TILES } from '../world/tile-types.ts';
 import { WATER_PALETTE_NAMES } from '../config/water-palettes.ts';
@@ -23,6 +24,10 @@ import type { BedKind, FloatKind, MoteKind } from './water-flora.ts';
 import { TREE_LABELS, SHRUB_LABELS, FLORA_LABELS, COVER_LABELS, ROCK_LABELS, DESERT_LABELS, CAVE_LABELS, AQUATIC_LABELS } from './resource-labels.ts';
 
 interface ResourceActions {
+  block: (typeof BUILDING_KIT_VARIANTS.block)[number];
+  wall: (typeof BUILDING_KIT_VARIANTS.wall)[number];
+  door: (typeof BUILDING_KIT_VARIANTS.door)[number];
+  solar: (typeof BUILDING_KIT_VARIANTS.solar)[number];
   terrain: string;
   tree: TreeKind;
   shrub: ShrubKind;
@@ -65,10 +70,18 @@ const resources = [
   resource('water', '水池', '真实水体、波纹与全部配色', variants(WATER_PALETTE_NAMES, { clear: '清澈', emerald: '翡翠', deep: '深蓝' })),
   resource('aquatic', '水生植物', '湖底、水面与悬浮植物的全部变体', variants([...BED_KINDS, ...FLOAT_KINDS, ...MOTE_KINDS], AQUATIC_LABELS)),
   resource('cave', '洞穴装饰', '全部地面与顶壁装饰，保留游戏的悬挂方向', variants(CAVE_DECOR_KINDS, CAVE_LABELS)),
+  resource('block', '实心建筑格', '1 × 1 格；标准深 0.9，齐地形变体深 1.5；暖白封板与钴蓝包边', variants(BUILDING_KIT_VARIANTS.block, { single: '单格砖块', row: '连续三格', corner: '墙地转角', 'full-depth': '齐地形全深度' }), 'free-world/building-kit/block'),
+  resource('wall', '背景墙格', '1 × 1 格薄墙板，置于角色后方；与实心建筑格分层', variants(BUILDING_KIT_VARIANTS.wall, { single: '单格墙板', patch: '墙板拼接' }), 'free-world/building-kit/wall'),
+  resource('door', '能量门', '沿通行方向厚 0.14 格；基础门高 3、Z 跨度 1.4；一体门楣高 4、Z 跨度 1.5，齐地形前后沿；开启只关闭屏障', variants(BUILDING_KIT_VARIANTS.door, { closed: '关闭状态', open: '开启状态', 'lintel-closed': '一体门楣 · 关闭', 'lintel-open': '一体门楣 · 开启' }), 'free-world/building-kit/door'),
+  resource('solar', '太阳能板', '宽 1、高 0.5、深 1 格；整板左右倾转，踩踏受力，离开后渐进恢复追光；支撑砖独立', variants(BUILDING_KIT_VARIANTS.solar, { left: '向左受光', level: '水平面板', right: '向右受光' }), 'free-world/building-kit/solar'),
 ];
 export const RESOURCE_ENTRIES: readonly ResourceEntry[] = resources.flatMap((r) => r.entries);
 export const RESOURCE_CATALOG: ShowcaseCatalog = {
   mode: 'resources', title: '场景资源展示场', entries: RESOURCE_ENTRIES, subjects: resources.map((r) => r.subject), maxCards: MAX_SHOWCASE_CARDS,
+  demos: [{
+    id: 'building-kit', title: '建筑构件 · 四类', description: '砖块、背景墙、能量门与半格太阳能板；可旋转检查包边与底座。',
+    cards: [{ entryId: 'block.single' }, { entryId: 'wall.single' }, { entryId: 'door.closed' }, { entryId: 'solar.level' }],
+  }],
 };
 export const LAB_CATALOG: ShowcaseCatalog = { ...RESOURCE_CATALOG, mode: 'lab', title: '场景功能展示', demos: SCENE_DEMOS };
 export function resourceEntry(id: string): ResourceEntry {

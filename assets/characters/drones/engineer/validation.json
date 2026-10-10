@@ -1,0 +1,69 @@
+{
+  "source": "Round-trip import of delivered model.glb",
+  "axes": "glTF +X forward, +Y up; Blender import +Z up",
+  "boundsGlTF": {
+    "min": [
+      -0.42899999022483826,
+      0.005063199903815985,
+      -0.5099102258682251
+    ],
+    "max": [
+      0.445499986410141,
+      0.7987782955169678,
+      0.508171558380127
+    ]
+  },
+  "height": 0.7937150956131518,
+  "widthX": 0.8744999766349792,
+  "depthZ": 1.018081784248352,
+  "lowestY": 0.005063199903815985,
+  "nodes": {
+    "status_light": true,
+    "laser_socket": true,
+    "cargo_socket": true,
+    "drill": true,
+    "rack": true
+  },
+  "animations": {
+    "idle": {
+      "channels": 4,
+      "loop": true
+    },
+    "move": {
+      "channels": 4,
+      "loop": true
+    },
+    "work": {
+      "channels": 7,
+      "loop": true
+    },
+    "carry": {
+      "channels": 4,
+      "loop": true
+    },
+    "unload": {
+      "channels": 6,
+      "loop": false
+    },
+    "build": {
+      "channels": 8,
+      "loop": true
+    },
+    "dock": {
+      "channels": 8,
+      "loop": true
+    },
+    "stalled": {
+      "channels": 4,
+      "loop": true
+    }
+  },
+  "embeddedImages": 1,
+  "statusUntexturedWhite": true,
+  "defaultHiddenScaleZero": [
+    "drill",
+    "rack"
+  ],
+  "meshCount": 79,
+  "bytes": 964856
+}

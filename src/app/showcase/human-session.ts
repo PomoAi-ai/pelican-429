@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { GRASSY_HEIGHT, GRASSY_MODELS, grassyAction } from '../../config/grassy.ts';
+import { DEFAULT_CHARACTER_APPEARANCE } from '../../config/character-appearance.ts';
 import type { ShowcaseCard, ShowcaseEntry } from '../../config/showcase.ts';
 import { showcaseEntry } from '../../config/showcase.ts';
 import { TUNING } from '../../config/tuning.ts';
@@ -67,7 +68,7 @@ export function createHumanShowcaseSession(renderer: THREE.WebGLRenderer, card: 
       // 请求序号也覆盖 A → B → A；较旧的回调不能覆盖最后一次选择。
       if (disposed || currentRequest !== request) return;
       if (animation) {
-        rig = createGrassyRig(animation.variant);
+        rig = createGrassyRig(animation.variant, undefined, DEFAULT_CHARACTER_APPEARANCE);
         model = rig;
         animate(0);
       } else model = createGrassyStaticModel(staticVariant!.id);

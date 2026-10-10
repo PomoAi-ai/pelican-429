@@ -22,6 +22,9 @@ import { createWaterFloraView } from './water-flora-view.ts';
 import { aquaticPreviewPlan } from './resource-aquatic.ts';
 import { BED_KINDS, FLOAT_KINDS } from './water-flora.ts';
 import type { WorldViews } from './world-views.ts';
+import { isBuildingKitKind } from '../config/building-kit.ts';
+import type { BuildingKitVariant } from '../config/building-kit.ts';
+import { createBuildingKit } from './building-kit.ts';
 
 /** 单件预览使用游戏工厂，只替换实例规划，不复制几何和着色器。 */
 export function createResourcePreview(scene: THREE.Scene, level: LevelData, groundY: number, card: ShowcaseCard, world: WorldViews, frame: InspectionFrame) {
@@ -39,9 +42,16 @@ export function createResourcePreview(scene: THREE.Scene, level: LevelData, grou
   let hutTiles: ReturnType<typeof createTileView> | null = null;
   let aquatic: ReturnType<typeof createWaterFloraView> | null = null;
   let lastTime = 0;
+  let building: ReturnType<typeof createBuildingKit> | null = null;
   const hut = entry.actor === 'hut' || (entry.actor === 'terrain' && entry.action === 'roof');
   const ceiling = entry.actor === 'cave' && (entry.action.includes('Ceil') || entry.action.startsWith('stalactite') || entry.action.startsWith('cobweb'));
   try {
+    if (isBuildingKitKind(entry.actor)) {
+      building = createBuildingKit(entry.actor, entry.action as BuildingKitVariant);
+      building.root.position.set(24, groundY, 0);
+      root.add(building.root);
+      disposers.push(() => building!.dispose());
+    }
     if (entry.actor === 'shrub') {
       const rule = SHRUB_RULES[entry.action];
       const mesh = createShrubMesh([{ kind: entry.action, x: 24, y: groundY, z: sample(SHRUB_Z), yaw, height: sample(rule.height), tint: rule.palette[Math.floor(rng() * rule.palette.length)]! }],
@@ -110,8 +120,9 @@ export function createResourcePreview(scene: THREE.Scene, level: LevelData, grou
     const groundResource = (entry.actor === 'terrain' && !['branch', 'roof'].includes(entry.action)) || (entry.actor === 'grass' && entry.action === 'natural');
     const framing = entry.actor === 'aquatic' && options.reference ? { x: 21.5, y: groundY - 0.75, width: 14, height: 11 } : entry.actor === 'aquatic' ? { x: 24, y: groundY + ((BED_KINDS as readonly string[]).includes(entry.action) ? -4.6 : (FLOAT_KINDS as readonly string[]).includes(entry.action) ? -0.2 : -2), width: 6, height: 3 } : !options.assembly && !groundResource && ['shrub', 'grass', 'cover', 'rock', 'desert', 'cave'].includes(entry.actor)
       ? { x: center.x, y: center.y, width: Math.max(3, extent.x * 1.4), height: Math.max(2, extent.y * 1.5) } : null;
-    const inspection = createResourceInspection(level, groundY, options, frame, groundResource,
-      entry.actor === 'tree' || (entry.actor === 'terrain' && entry.action === 'branch'));
+    const buildingFrame = building ? { x: center.x, y: center.y, width: Math.max(1.5, Math.hypot(extent.x, extent.z) * 1.4), height: Math.max(1.2, extent.y * 1.4 + extent.z * 0.3) } : null;
+    const inspection = createResourceInspection(level, groundY, options, buildingFrame ?? frame, groundResource,
+      entry.actor === 'tree' || (entry.actor === 'terrain' && entry.action === 'branch'), building !== null);
     root.add(inspection.root); disposers.push(() => inspection.dispose());
     world.tiles.setVegetation(groundResource || options.assembly ? options.vegetation : 'ground');
     world.tiles.root.visible = options.context || groundResource;
@@ -127,9 +138,10 @@ export function createResourcePreview(scene: THREE.Scene, level: LevelData, grou
       world.waterFlora.root.visible = world.weeds.root.visible;
     }
     return {
-      framing,
+      framing: buildingFrame ?? framing,
       update(t: number) {
         time.value = t; hutTiles?.setTime(t);
+        building?.update(t);
         aquatic?.update({ x: 16, y: groundY - 6, w: 18, h: 10 }, t, t - lastTime, { fluid: level.fluid, windAt: (x) => world.weather.wind.sway(x), pelican: null });
         lastTime = t;
       },

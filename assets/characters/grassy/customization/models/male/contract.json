@@ -1,0 +1,60 @@
+{
+  "source": "grassy-equipped-game.blend",
+  "faceTargets": [
+    "FaceWidth",
+    "FaceLength",
+    "JawWidth",
+    "ChinLength",
+    "EyeSize",
+    "EyeSpacing",
+    "NoseSize",
+    "MouthWidth"
+  ],
+  "hairTargets": [
+    "HairFrontSway",
+    "HairFrontLift",
+    "HairCrownSway",
+    "HairCrownLift",
+    "HairRearSway",
+    "HairRearLift",
+    "HairTurn"
+  ],
+  "range": [
+    -1,
+    1
+  ],
+  "neutral": 0,
+  "materialPolygons": {
+    "fixed": 1655,
+    "skin": 5648,
+    "hair": 16346,
+    "top": 8799,
+    "bottom": 7682,
+    "shoes": 4870
+  },
+  "bones": [
+    "root",
+    "hips",
+    "spine",
+    "chest",
+    "neck",
+    "head",
+    "clavicle.L",
+    "upper_arm.L",
+    "forearm.L",
+    "hand.L",
+    "clavicle.R",
+    "upper_arm.R",
+    "forearm.R",
+    "hand.R",
+    "thigh.L",
+    "shin.L",
+    "foot.L",
+    "toe.L",
+    "thigh.R",
+    "shin.R",
+    "foot.R",
+    "toe.R"
+  ],
+  "blinkCorrectives": "FaceTarget + Blink or BlinkHalf; weight is faceWeight * blinkWeight"
+}

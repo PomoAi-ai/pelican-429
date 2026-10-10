@@ -9,7 +9,7 @@ export interface InspectionFrame { x: number; y: number; width: number; height: 
 
 /** 检视线直接读取碰撞形状；不根据模型外轮廓猜测可站立位置。 */
 export function createResourceInspection(level: LevelData, groundY: number, options: ResourceOptions, frame: InspectionFrame,
-  groundResource: boolean, treeResource: boolean) {
+  groundResource: boolean, treeResource: boolean, buildingResource = false) {
   const root = new THREE.Group();
   const disposers: Array<() => void> = [];
   const z = BLOCK_FRONT_Z + 0.08;
@@ -23,11 +23,12 @@ export function createResourceInspection(level: LevelData, groundY: number, opti
     disposers.push(() => { geometry.dispose(); material.dispose(); });
   };
   const columns = options.layout === 'single' || options.layout === 'raised' ? resourceTileColumns(options, level.map.width) : [24];
-  const left = options.composition ? Math.floor(frame.x - frame.width / 2) : columns[0]! - 8;
-  const right = options.composition ? Math.ceil(frame.x + frame.width / 2) : columns[columns.length - 1]! + 9;
-  const bottom = options.composition ? Math.floor(frame.y - frame.height / 2) : groundY - 4;
-  const top = options.composition ? Math.ceil(frame.y + frame.height / 2) : groundY + 3;
-  if (options.grid && groundResource) {
+  const framed = options.composition !== null || buildingResource;
+  const left = framed ? Math.floor(frame.x - frame.width / 2) : columns[0]! - 8;
+  const right = framed ? Math.ceil(frame.x + frame.width / 2) : columns[columns.length - 1]! + 9;
+  const bottom = framed ? Math.floor(frame.y - frame.height / 2) : groundY - 4;
+  const top = framed ? Math.ceil(frame.y + frame.height / 2) : groundY + 3;
+  if (options.grid && (groundResource || buildingResource)) {
     const grid: number[] = [];
     for (let x = left; x <= right; x++) grid.push(x, bottom, z, x, top, z);
     for (let y = bottom; y <= top; y++) grid.push(left, y, z, right, y, z);

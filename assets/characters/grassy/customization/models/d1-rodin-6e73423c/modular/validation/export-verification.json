@@ -1,0 +1,41 @@
+{
+  "parts": {
+    "D1_Hair": {
+      "exportVertices": 36504,
+      "headWeightOne": true,
+      "characterPart": "hair"
+    },
+    "D1_Head": {
+      "exportVertices": 8961,
+      "headWeightOne": true,
+      "characterPart": "head"
+    }
+  },
+  "animations": [
+    {
+      "name": "idle",
+      "seconds": 3.200000047683716,
+      "movingChannels": 4
+    },
+    {
+      "name": "walk",
+      "seconds": 1.2000000476837158,
+      "movingChannels": 15
+    },
+    {
+      "name": "run",
+      "seconds": 0.800000011920929,
+      "movingChannels": 14
+    },
+    {
+      "name": "jump",
+      "seconds": 1.600000023841858,
+      "movingChannels": 10
+    }
+  ],
+  "sourceBrowFaces": {
+    "removedFromHair": 22,
+    "retainedInHead": 22,
+    "missing": 0
+  }
+}

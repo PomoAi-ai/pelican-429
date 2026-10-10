@@ -1,0 +1,88 @@
+{
+  "source": "assets/characters/grassy/customization/models/d1-rodin-6e73423c/refined/d1-refined.blend",
+  "restHeight": 3.0999999046325684,
+  "retainedSurfaceUVMapping": "Original UV coordinates retained; new curved leg vertices use interpolated source UVs.",
+  "contactRepair": {
+    "sourceVertices": 19529,
+    "sourceFaces": 19568,
+    "vertices": 19629,
+    "faces": 19580,
+    "contactCapFaces": 12,
+    "roundedInnerHandVertices": 146,
+    "purpose": "Separate fused bare hand/fabric contact; preserve source face UVs."
+  },
+  "legRepair": {
+    "sourceVertices": 19629,
+    "vertices": 23943,
+    "addedVertices": 4314,
+    "surfaceMethod": "Normal-guided curved subdivision of bare legs only",
+    "surfaceSmooth": 0.65,
+    "maximumCurveDisplacement": 0.007602406750445354,
+    "movedSurfaceVertices": 4308,
+    "protectedOriginalVertexMaximumDisplacement": 0.0,
+    "kneeCenterZ": 0.84,
+    "kneeWeightTransition": [
+      0.73,
+      0.95
+    ],
+    "bootTopZ": 0.47,
+    "ankleWeightTransition": [
+      0.47,
+      0.55
+    ],
+    "purpose": "Round real leg geometry while keeping the narrow source proportions, boot rigidity and calibrated knee."
+  },
+  "weights": {
+    "vertices": 23943,
+    "bones": 26,
+    "maximumInfluences": 4,
+    "normalizationMaxError": 2.220446049250313e-16,
+    "unweightedVertices": 0
+  },
+  "clips": {
+    "idle": {
+      "duration": 3.2,
+      "loop": true,
+      "minimumSoleZ": -2.199959681092878e-07,
+      "maximumAirborneSoleZ": 0,
+      "supportFootGroundError": 0,
+      "endpointMaximumVertexDifference": 0.0,
+      "calfShaftRigidError": 3.725290298461914e-08,
+      "bootRigidError": 1.8143349223009864e-07
+    },
+    "walk": {
+      "duration": 1.2,
+      "loop": true,
+      "minimumSoleZ": 3.677967470139265e-06,
+      "maximumAirborneSoleZ": 6.059184670448303e-06,
+      "supportFootGroundError": 6.576068699359894e-06,
+      "endpointMaximumVertexDifference": 0.0,
+      "calfShaftRigidError": 2.0212918627748877e-07,
+      "bootRigidError": 2.585254890163924e-07
+    },
+    "run": {
+      "duration": 0.8,
+      "loop": true,
+      "minimumSoleZ": 2.8501381166279316e-06,
+      "maximumAirborneSoleZ": 0.0023220498114824295,
+      "supportFootGroundError": 6.1979517340660095e-06,
+      "endpointMaximumVertexDifference": 0.0,
+      "calfShaftRigidError": 2.4027400513659813e-07,
+      "bootRigidError": 2.6151431598009367e-07
+    },
+    "jump": {
+      "duration": 1.6,
+      "loop": false,
+      "minimumSoleZ": 3.7324738855204487e-07,
+      "maximumAirborneSoleZ": 0.42999500036239624,
+      "supportFootGroundError": 0,
+      "endpointMaximumVertexDifference": 0.0,
+      "calfShaftRigidError": 2.5506679435238766e-07,
+      "bootRigidError": 2.3326981590798823e-07
+    }
+  },
+  "limitations": [
+    "No facial expression or finger animation.",
+    "No cloth simulation; four weighted skirt bones."
+  ]
+}

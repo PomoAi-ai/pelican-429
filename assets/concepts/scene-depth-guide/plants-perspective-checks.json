@@ -1,0 +1,14 @@
+{
+  "size": [
+    2400,
+    2200
+  ],
+  "shared_z_scale_px_per_tile": 620,
+  "front_back_projection_ratio": 1.0508474576271187,
+  "camera_distance": 30,
+  "vertical_fov_degrees": 30,
+  "front_px": 323.86610397885846,
+  "back_px": 308.1951634637524,
+  "text_count": 62,
+  "scope": "Plant bands share zx; Y schematic. Backdrop cards encode order, not distance."
+}

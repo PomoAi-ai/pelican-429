@@ -1,0 +1,182 @@
+{
+  "coordinates": "Z-up, front -Y, existing D1 character world coordinates",
+  "headBonePivot": [
+    0,
+    0,
+    2.17
+  ],
+  "skinBounds": [
+    [
+      -0.41491395235061646,
+      0.41491395235061646
+    ],
+    [
+      -0.35433316230773926,
+      0.37162625789642334
+    ],
+    [
+      2.2151200771331787,
+      2.9998741149902344
+    ]
+  ],
+  "subdivision": "Catmull-Clark 1 level, applied to the continuous head and ears",
+  "noseTip": [
+    0,
+    -0.3552899371916636,
+    2.425
+  ],
+  "mouthCenter": [
+    0,
+    -0.3230912546971097,
+    2.35
+  ],
+  "mouthConstruction": "closed seam recessed in continuous skin; upper and lower lip support loops; no separate mouth mesh",
+  "eyelashes": "curved tapered mesh strands embedded in upper eyelid roots",
+  "referenceProportionStudy": {
+    "source": "exec-private-source-032.png FACE FRONT and FACE RIGHT",
+    "measurement": "manual image landmarks, approximate pixel bounds with 2-4 px uncertainty",
+    "referenceEyeAspect": 1.47,
+    "referenceIrisAspect": 0.87,
+    "referenceIrisEyeWidthRatio": [
+      0.53,
+      0.57
+    ],
+    "candidateEyeAspect": 1.506024096385542,
+    "candidateIrisAspect": 0.8452176051143349,
+    "eyeHalfWidth": 0.125,
+    "eyeTopHeight": 0.088,
+    "eyeBottomHeight": 0.078,
+    "eyeCenterX": 0.2,
+    "irisWidthFactor": 0.55,
+    "irisHeightFactor": 0.98,
+    "browBaseZ": 2.675,
+    "jawHalfWidthAt2_278": 0.205,
+    "cheekHalfWidthAt2_34": 0.305,
+    "noseTipOffset": 0.016,
+    "upperLipOffset": 0.0018,
+    "lowerLipOffset": 0.0028,
+    "lipSeamDepth": 0.0009
+  },
+  "objects": [
+    {
+      "name": "D1_Head_head_skin",
+      "vertices": 32342,
+      "polygons": 32340
+    },
+    {
+      "name": "D1_Head_neck",
+      "vertices": 1362,
+      "polygons": 1360
+    },
+    {
+      "name": "D1_Head_eye_white_L",
+      "vertices": 641,
+      "polygons": 640
+    },
+    {
+      "name": "D1_Head_iris_L",
+      "vertices": 1025,
+      "polygons": 1024
+    },
+    {
+      "name": "D1_Head_eye_glint_large_L",
+      "vertices": 114,
+      "polygons": 128
+    },
+    {
+      "name": "D1_Head_eye_glint_small_L",
+      "vertices": 114,
+      "polygons": 128
+    },
+    {
+      "name": "D1_Head_eyelid_L_True",
+      "vertices": 328,
+      "polygons": 322
+    },
+    {
+      "name": "D1_Head_eyelid_L_False",
+      "vertices": 328,
+      "polygons": 322
+    },
+    {
+      "name": "D1_Head_lash_L_0",
+      "vertices": 72,
+      "polygons": 66
+    },
+    {
+      "name": "D1_Head_lash_L_1",
+      "vertices": 72,
+      "polygons": 66
+    },
+    {
+      "name": "D1_Head_lash_L_2",
+      "vertices": 72,
+      "polygons": 66
+    },
+    {
+      "name": "D1_Head_brow_L",
+      "vertices": 264,
+      "polygons": 258
+    },
+    {
+      "name": "D1_Head_eye_white_R",
+      "vertices": 641,
+      "polygons": 640
+    },
+    {
+      "name": "D1_Head_iris_R",
+      "vertices": 1025,
+      "polygons": 1024
+    },
+    {
+      "name": "D1_Head_eye_glint_large_R",
+      "vertices": 114,
+      "polygons": 128
+    },
+    {
+      "name": "D1_Head_eye_glint_small_R",
+      "vertices": 114,
+      "polygons": 128
+    },
+    {
+      "name": "D1_Head_eyelid_R_True",
+      "vertices": 328,
+      "polygons": 322
+    },
+    {
+      "name": "D1_Head_eyelid_R_False",
+      "vertices": 328,
+      "polygons": 322
+    },
+    {
+      "name": "D1_Head_lash_R_0",
+      "vertices": 72,
+      "polygons": 66
+    },
+    {
+      "name": "D1_Head_lash_R_1",
+      "vertices": 72,
+      "polygons": 66
+    },
+    {
+      "name": "D1_Head_lash_R_2",
+      "vertices": 72,
+      "polygons": 66
+    },
+    {
+      "name": "D1_Head_brow_R",
+      "vertices": 264,
+      "polygons": 258
+    },
+    {
+      "name": "D1_Head_ear_L",
+      "vertices": 1250,
+      "polygons": 1248
+    },
+    {
+      "name": "D1_Head_ear_R",
+      "vertices": 1250,
+      "polygons": 1248
+    }
+  ]
+}

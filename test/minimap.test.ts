@@ -262,6 +262,19 @@ describe('minimap 增量重绘', () => {
     assert.throws(() => r.markTile(64, 0), /out of bounds/);
   });
 
+  test('砍掉一棵树后 flush，像素与从未有过这棵树时一致', () => {
+    const tree = (id: number, x: number): TreeInstance => ({
+      id, kind: 'oak', x, baseY: 1, trunkHeight: 4, trunkRadius: 0.35, canopyHalfWidth: 2, canopyHeight: 4, visualSeed: 1, crownDx: 0, platforms: [],
+    });
+    // 被砍的树横跨两个区块，留下的树与它同在区块 0。
+    const w = world(40, 12, 1, { trees: [tree(1, 15), tree(2, 4)] });
+    const r = createMinimapRaster(w.source, { chunkTiles: 16, noise: 0 });
+    r.removeTree(1);
+    r.flush();
+    const expected = createMinimapRaster({ ...w.source, trees: [tree(2, 4)] }, { chunkTiles: 16, noise: 0 });
+    assert.deepEqual(r.pixels, expected.pixels);
+  });
+
   test('地表高度变化时标脏该列从底到旧/新地表的全部区块（洞穴色随深度变化）', () => {
     const H = 48;
     const w = world(32, H, 4);

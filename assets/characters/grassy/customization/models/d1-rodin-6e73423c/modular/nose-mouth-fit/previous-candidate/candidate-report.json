@@ -1,0 +1,18 @@
+{
+  "verticesBefore": 3808,
+  "verticesAfter": 14778,
+  "changedVertices": 606,
+  "maximumDisplacement": 0.02608156252607387,
+  "profileDepthAnchor": -0.33835041522979736,
+  "noseTipCenter": 2.394,
+  "mouthSeamCenter": 2.316,
+  "unchangedProtectedVertices": 14013,
+  "uvCoordinatesUnchangedAfterSubdivision": true,
+  "preserved": [
+    "original eye geometry",
+    "source UV coordinates",
+    "skin material",
+    "head boundary"
+  ],
+  "separateLipStrip": false
+}

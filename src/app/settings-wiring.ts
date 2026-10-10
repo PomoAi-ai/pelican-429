@@ -77,6 +77,7 @@ export interface SettingsWiringInput {
   readonly setQuality: (quality: LightingQuality) => void;
   readonly seed: number | null;
   readonly disposers: Array<() => void>;
+  readonly onCharacter: () => void;
 }
 
 export interface SettingsWiring {
@@ -166,6 +167,7 @@ export function createSettingsWiring(input: SettingsWiringInput): SettingsWiring
     parent: document.body,
     controller: settings,
     seed: input.seed,
+    onCharacter: input.onCharacter,
     onNewWorld: (seed) => gameHost().location.assign(`${location.pathname}${newWorldSearch(location.search, seed, settings.current())}`),
     onShowcase: import.meta.env.PROD && import.meta.env.MODE !== 'full' ? undefined : () => {
       const params = new URLSearchParams(location.search);

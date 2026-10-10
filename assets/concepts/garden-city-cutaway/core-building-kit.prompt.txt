@@ -1,0 +1,23 @@
+Generated with built-in imagegen, 2026-10-09.
+References: door-floor-wrapped-edges.png; tilting-solar-study.png
+Approval candidate only. Panel scales differ; character scale and standing pose are illustrative, not a verified dimensional reference. Door shown as an isolated asset, installation follows side-scroller side-wall passage. Solar 1 x 0.5 footprint is a requirement, not validated geometry.
+
+Use case: stylized-concept.
+Create a coherent FOUR-PART building kit approval sheet for the 2.5D SIDE-SCROLLING game Pelican 429. Reference 1 establishes the approved warm ivory and cobalt sci-fi door and fully wrapped floor edges, heroine identity. Reference 2 establishes the modular pivoting solar panel. Continue these exact designs. This sheet must clearly settle four categories: solid building block, background wall tile, energy door, solar module. No other facilities.
+
+Landscape 3:2 high quality illustrated design sheet, four equal quadrants, ivory page with dark blue concise Chinese labels and generous spacing. Soft anime 3D finish consistent with cute orange-gold braided-bob heroine in cobalt dress, white sleeves and gold trims. Engineering joints clean and simple; no fantasy ornament or construction-site orange. Side-scroller front elevation with slight bevel depth; full objects uncropped.
+
+TOP LEFT “实心建筑格”
+Draw ONE truly SQUARE 1×1 tile in side elevation, warm ivory metal/ceramic front with cobalt protective edge casing that wraps front-to-side thickness. Solid closed sides, capped corners, not hollow frame. Next to it a short L-shaped ASSEMBLY of 3 square cells along bottom and 2 additional cells up one end to show the same tile makes floors and solid walls. Identical square grid proportions; neat fine internal seams, prominent continuous cobalt trim only along EXPOSED OUTER silhouette, not thick frames around every internal tile. Show capped exterior corner and covered underside, no bare gray stone. Label “1 × 1” and “地面 / 实体墙 / 顶部”. Whole platform thickness visible, not cropped.
+
+TOP RIGHT “背景墙格”
+Show ONE thin 1×1 square background panel and a 3-wide × 3-high joined wall patch behind a small heroine walking in front on a tiny solid floor. Ivory flat softly matte surface, restrained fine panel seams, recessed narrow cobalt accents at exposed outer boundary. Clearly thinner and lower contrast than solid block. Heroine unobstructed IN FRONT of panels to communicate nonblocking rear layer. Label “1 × 1” and “角色后方 · 不阻挡”. No freestanding solid column mistaken for background, no window or furniture distractions.
+
+BOTTOM LEFT “能量门”
+Two matching side-wall ENERGY DOOR assemblies closed and open next to each other, three building-cell tall passage for 2.8-cell heroine; do not print door width specification, not yet fixed. Narrow doorway plane oriented as the reference for character travelling horizontally through side wall; not a frontal portal in the background. Both states EXACT SAME full thick cobalt wrapped jambs, segmented ivory face armor, fixed header, flush low sill and solid foot connection into wrapped floor. Continuous opaque outer casing and capped exterior surfaces, shield perimeter buried inside frame groove. Closed: gentle cyan translucent hex-pattern membrane. Open: empty aperture, ONLY the membrane gone; posts/header/sill fully remain. Labels “关闭” / “打开”, “门框常驻”. Scale heroine silhouette/actual tiny heroine by doorway if needed, do not block frame visibility.
+
+BOTTOM RIGHT “太阳能板”
+Three identical individual modules in LEFT-TILT / LEVEL / RIGHT-TILT, each footprint 1 cell wide × half cell tall including fixed base and moving panel. Horizontal dimension of solar assembly same as one square building tile below. Blue photovoltaic segments in ivory/cobalt rounded rectangular frame; single center hinge; base bolted to top of one square building tile. Entire movement fits same indicated half-cell envelope. Clearly opposing tilt directions, small sun icons left and right. Add small lower strip of three independent modules installed one per roof cell, and a tiny heroine standing on horizontal module for standability (heroine larger than module, height about 2.8 full cells). Labels “1 × ½”, “左右倾斜 · 可站立”. No huge connected multi-cell plate.
+
+Only these short Chinese labels, no English, no marketing text. Strong visual distinction solid thick building cells vs thin background-wall cells. Preserve exposed edge enclosure especially door feet and every visible floor underside/outer end. This is an art approval sheet, not a construction blueprint or whole buildable house. Don't show the user assembling a complete new house. No city vista needed; prioritize large clear components.
+

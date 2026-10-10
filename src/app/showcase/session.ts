@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { TUNING } from '../../config/tuning.ts';
+import { DEFAULT_CHARACTER_APPEARANCE } from '../../config/character-appearance.ts';
 import type { ShowcaseCard } from '../../config/showcase.ts';
 import { createResourceScenario } from './resource-scenario.ts';
 import { createResourcePreview } from '../../render/resource-preview.ts';
@@ -42,7 +43,7 @@ function createSceneContent(stage: ReturnType<typeof createStageView>, rig: Retu
     disposers.push(() => worldViews.dispose());
     const clip = scenario.entry.grassyAnimation?.clip;
     const gait = !card.manual && (clip === 'run' || clip === 'sprint') ? clip : undefined;
-    const entityViews = createEntityViews(stage, level, disposers, () => world.entities, worldViews.treeRide, worldViews.weather.wind, rig, scenario.entry.grassyAnimation?.variant, gait);
+    const entityViews = createEntityViews(stage, level, disposers, () => world.entities, worldViews.treeRide, worldViews.weather.wind, rig, scenario.entry.grassyAnimation?.variant, gait, () => DEFAULT_CHARACTER_APPEARANCE);
     const luma = !card.resource && (scenario.entry.actor === 'pelican' || scenario.entry.actor === 'human' || scenario.entry.actor === 'luma')
       ? createLumaCompanion(stage.scene, getPlayer(world)) : null;
     if (luma) disposers.push(() => luma.dispose());

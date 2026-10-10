@@ -1,0 +1,25 @@
+Tool: built-in ImageGen
+
+Use case: infographic-diagram / stylized-concept. Create a Chinese architectural scenery design sheet, landscape 3:2 1536x1024 or higher, warm off-white margins, precise navy Chinese text, orange callout lines, detailed hand-painted tile world, matching a polished side-scrolling game concept study.
+Title exact “天空分层 · 云、太阳、月亮与星星”
+Subtitle exact “天空元素独立定义｜两层背景格子 + 三层远景保持不变”
+TOP 55%: two equally sized matched-composition side-scrolling perspective scenes.
+Left heading “A  白天”. Blue sky backdrop, clearly visible SUN DISK at upper left (not a lens flare), two distinct cloud bands: thin high distant clouds and lower nearer cumulus, clouds can partially pass in front of sun but sun remains visible. Below sky: three distinct progressively pale distant mountain / forest silhouettes, two separate tile-built rock terraces at different depths behind the single clear playable tile platform. Small neutral character silhouette only for location, not scale. Label clearly “太阳”, “远云”, “近云”, “背景格子①”, “背景格子②”. Terrain square XY front faces, horizontal/vertical grid lines and small perspective thickness.
+Right heading “B  夜晚”. EXACT SAME framing and terrain silhouette at night, a clearly visible crescent MOON upper right and scattered individual STARS across open dark blue sky, tiny point stars with restrained brightness, NOT huge cartoon star polygons. High thin remote clouds and low nearer clouds clearly distinct, some stars covered by clouds; moon partly overlaps a thin cloud edge. Same THREE distant land silhouettes and TWO background tile terraces, readable gameplay strip with silhouette and minimal ambient illumination. Label “月亮”, “星星”, “远云”, “近云”. Day/night are separate example states, not an astronomical claim that moon never appears by day.
+BOTTOM LEFT 58%: heading “C  从远到近 · 示意层序”. A clean oblique exploded stack of landscape transparent silhouette sheets: deepest sky gradient; stars sheet; celestial disk sheet containing a sun/crescent pair divided with slash to indicate two state examples and labeled “日 / 月”; remote high clouds sheet; nearby low clouds sheet; consolidated three scenic land sheets; two separate gridded tile wall sheets; playable tile platform nearest camera. Labels in easy readable separate aligned vertical list from far to near:
+“天空底色”
+“星星”
+“太阳 / 月亮”
+“远云”
+“近云”
+“远景③ → ② → ①”
+“背景格子② → ①”
+“角色与可玩格子”
+Need legibility, prevent label overlap. Thin connector lines, clear spacing. This is schematic render order, not literal celestial distance or physical star/solar alignment. The heavenly disks must be BEHIND cloud planes so clouds can occlude them. Distant mountain silhouettes occlude low sky elements naturally.
+BOTTOM RIGHT 42%: heading “D  组合规则” and four exact lines, no paragraph:
+“白天：天空 + 太阳 + 远云 / 近云”
+“夜晚：天空 + 星星 + 月亮 + 远云 / 近云”
+“云遮日月与星空，山体遮住低处天空”
+“日夜是示例，周期与轨迹尚未定稿”
+Footer exact “层序仅为表现草案，不是天体距离比例 · 人物仅示意 · 未接入运行时”
+No numerical Z distances, no new unit measurements, no UI widgets, no depiction of walking in Z. Keep labels accurate and Chinese typography clear. The four requested ingredients SUN MOON STARS CLOUDS must be unmistakably visible.

@@ -23,6 +23,7 @@ function enemyImages(kind: EnemyKind): readonly CharacterAsset[] {
 }
 
 export const CHARACTER_ASSETS: Readonly<Record<ShowcaseActor, readonly CharacterAsset[]>> = {
+  d1: [],
   sam: [
     ...[['front', '正面'], ['back', '背面'], ['left', '左侧'], ['right', '右侧']].flatMap(([view, label]) => [
       { group: '四方向参考', label: `Sam · 怪物形态 · ${label}`, path: `./characters/sam/reference-${view}.png`, thumbnail: `./characters/sam/reference-${view}.png` },

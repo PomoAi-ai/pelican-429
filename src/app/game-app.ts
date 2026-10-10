@@ -18,6 +18,8 @@ import { createTileGrid } from '../render/tile-grid.ts';
 import { createPelicanRig } from '../render/pelican/pelican-rig.ts';
 import { createLumaCompanion } from '../render/luma/luma-companion.ts';
 import { loadGrassyAsset, disposeGrassyAssets } from '../render/grassy/grassy-rig.ts';
+import { createCharacterAppearanceStore } from './character-appearance.ts';
+import { openSavedCharacterEditor } from './open-character-editor.ts';
 import { loadEnemyAsset, disposeEnemyAssets } from '../render/enemy-rig.ts';
 import { createFreeWorldBackground } from '../render/free-world-background.ts';
 import { loadInteriorBackgroundTexture, loadInteriorBackgroundTextures } from '../render/free-world-interior-textures.ts';
@@ -59,6 +61,9 @@ import { createNpcDialogue } from '../ui/npc-dialogue.ts';
 import { initializeBossArena, summonArenaBoss } from '../sim/boss-arena.ts';
 import { createBossArenaHud } from '../ui/boss-arena-hud.ts';
 import { FREE_WORLD_SIZES, parseFreeWorldSize } from '../config/free-world.ts';
+import { initializeHomestead } from '../sim/homestead.ts';
+import { clearHomesteadSave, loadHomesteadSave } from './homestead-save.ts';
+import { createHomesteadApp } from './homestead-app.ts';
 
 function requireElement<T extends HTMLElement>(id: string): T {
   const node = document.getElementById(id);
@@ -116,6 +121,8 @@ async function start(story: StorySave | undefined, newStory: boolean, onReady?: 
   performance.mark('game:level-ready');
   const bossArena = params.get('level') === 'boss-arena';
   const freeWorld = story?.destination === 'free' || (!story && (params.get('level') === null || (params.get('level') === 'facility' && params.get('free') === '1')));
+  // 家园概念版本建在自由世界地形上，但不使用自由世界的工具条和网址改写。
+  const homesteadMode = !story && params.get('mode') === 'homestead';
   const seed = params.has('seed') ? parseSeed(params.get('seed')!) : TUNING.worldgen.seed;
   const gmValue = params.get('gm');
   if (freeWorld && gmValue !== null && gmValue !== '0' && gmValue !== '1') throw new Error(`未知 GM 开关：${gmValue}`);
@@ -129,6 +136,7 @@ async function start(story: StorySave | undefined, newStory: boolean, onReady?: 
   const syncTitle = (): void => {
     const en = getLanguage() === 'en';
     document.title = story?.destination === 'fortress' ? en ? 'Chapter 1 · Mountain Fortress' : '主线 1 · 山体算力堡垒'
+      : homesteadMode ? en ? 'Homestead concept · Pelican 429' : '家园概念版本 · 鹈鹕 429'
       : freeWorld ? en ? `Free world · ${FREE_WORLD_SIZES[size].labelEn} · Pelican 429` : `自由世界 · ${FREE_WORLD_SIZES[size].label} · 鹈鹕 429`
       : chapter !== null ? en ? `${FACILITY_EN[chapter].name} · Free exploration` : `${FACILITY_SCENES[chapter].name} · 自由预览`
       : bossArena ? en ? 'Boss arena · Pelican 429' : 'Boss 场 · 鹈鹕 429'
@@ -141,6 +149,7 @@ async function start(story: StorySave | undefined, newStory: boolean, onReady?: 
   const startLevel = inspected === undefined ? level : { ...level, spawn: { x: inspected.x0 + 1.5, y: inspected.baseY }, spawnFacing: undefined };
   // 设置：网址参数（非法即抛）> localStorage 保存值（非法项清除并提示）> 调参默认（见 app/settings-wiring）。
   const startup = loadStartupSettings(params, freeWorld ? 'auto' : undefined);
+  const appearance = createCharacterAppearanceStore(window.localStorage);
   // 机房预览采用场景环境，不继承沙盒的天气和训练假人设置。
   const sceneSettings = bossArena ? {
     ...startup.loaded.settings, wind: 'calm' as const, precip: 'manual' as const, rain: 'none' as const, snow: 'none' as const,
@@ -161,6 +170,10 @@ async function start(story: StorySave | undefined, newStory: boolean, onReady?: 
       if (position === null) throw new Error(`区域无法容纳玩家：${region}，种子 ${seed}`);
     }
     initializeFreeWorldNpcs(world, seed);
+    if (homesteadMode) {
+      if (params.get('reset') === '1') clearHomesteadSave(window.localStorage, seed);
+      initializeHomestead(world, loadHomesteadSave(window.localStorage, seed, level));
+    }
   }
   if (story?.destination === 'fortress') {
     initializeMainline(world, story.checkpoint);
@@ -244,7 +257,7 @@ async function start(story: StorySave | undefined, newStory: boolean, onReady?: 
   // 地形视图（瓦片/花草、树、水面、水草、渔屋、小鱼、花瓣；树在鹈鹕后方，根贴视觉地面轮廓）；相机就位后按可视范围首帧加载。
   // 风吹天气与水体色板取自设置（见上）。
   const waterPaletteName = initial.water;
-  const worldViews = createWorldViews({ islandBackdrop: !freeWorld, caveBackground, scene: stage.scene, level, fish: world.fish, ground, weather: world.env.wind.rules, wind: world.env.wind, tornadoes: () => world.env.tornadoes, cameraDistance: tuning.camera.distance, pelican: () => getPlayer(world).body, actors: () => world.entities, waterPalette: waterPaletteName,
+  const worldViews = createWorldViews({ islandBackdrop: !freeWorld, caveBackground, scene: stage.scene, level, fish: world.fish, ground, weather: world.env.wind.rules, wind: world.env.wind, tornadoes: () => world.env.tornadoes, cameraDistance: tuning.camera.distance, pelican: () => getPlayer(world).body, actors: () => world.entities, waterPalette: waterPaletteName, felledTrees: world.homestead?.felled,
     terrainTextureSize: new URLSearchParams(location.search).get('textures') === 'original' ? 512 : 256 });
   // 区域图片已包含远处云层，避免旧卡通云片覆盖真实背景；风与降水仍照常更新。
   if (freeWorld) worldViews.weather.fx.meshes.clouds.visible = false;
@@ -264,7 +277,7 @@ async function start(story: StorySave | undefined, newStory: boolean, onReady?: 
   if (modelsResult.status === 'rejected') throw modelsResult.reason;
   if (facilityResult.status === 'rejected') throw facilityResult.reason;
   const facility = facilityResult.value;
-  const entityViews = createEntityViews(stage, level, disposers, () => world.entities, worldViews.treeRide, world.env.wind, rig);
+  const entityViews = createEntityViews(stage, level, disposers, () => world.entities, worldViews.treeRide, world.env.wind, rig, undefined, undefined, appearance.current);
   const { views, orbs, orbFx, projectileFx } = entityViews;
   // 主线还没登场的 Boss 先建好（含技能字幕画布），随下方预热一起编译上传。
   const phase = world.mainline?.phase;
@@ -426,10 +439,17 @@ async function start(story: StorySave | undefined, newStory: boolean, onReady?: 
   disposers.push(() => tileGrid.dispose());
 
   // 设置面板（Esc / O 或右上角齿轮）：打开时暂停模拟（渲染继续），各项切换即时生效。
-  const { runtime, settings, settingsPanel } = createSettingsWiring({ startup, stage, world, worldViews, worldLight, perfPanel, tileGrid, minimap, hud, tracker, setQuality, seed: freeWorld ? seed : level.seed, disposers, chapter: chapter !== null, gm: freeWorld ? gm : chapter === null && !bossArena });
+  let characterEditor: ReturnType<typeof openSavedCharacterEditor> | null = null;
+  const { runtime, settings, settingsPanel } = createSettingsWiring({ startup, stage, world, worldViews, worldLight, perfPanel, tileGrid, minimap, hud, tracker, setQuality, seed: freeWorld ? seed : level.seed, disposers, chapter: chapter !== null, gm: freeWorld ? gm : chapter === null && !bossArena,
+    onCharacter: () => {
+      tracker.releaseAll();
+      characterEditor = openSavedCharacterEditor(appearance, () => { characterEditor = null; tracker.releaseAll(); });
+    },
+  });
+  disposers.push(() => characterEditor?.dispose());
   let pendingTravel: { id: string; teleport: TeleportState } | null = null;
   let travelToolbar: ReturnType<typeof createFreeWorldToolbar> | null = null;
-  if (freeWorld) {
+  if (freeWorld && !homesteadMode) {
     const rebuild = (nextSeed: number, nextGm: boolean, nextRegion: string, nextSize = size): void => {
       tracker.releaseAll();
       gameHost().location.assign(`${location.pathname}${freeWorldSearch(location.search, nextSeed, nextGm, nextRegion, nextSize)}`);
@@ -474,10 +494,18 @@ async function start(story: StorySave | undefined, newStory: boolean, onReady?: 
     onClose: () => { tracker.releaseAll(); canvas.focus(); },
   }) : null;
   if (npcDialogue !== null) disposers.push(() => npcDialogue.dispose());
+  const removeTree = (id: number): void => {
+    worldViews.trees.removeTree(id);
+    worldLight.removeTree(id);
+    minimap.raster.removeTree(id);
+    shafts.removeTree(id);
+  };
+  const homestead = world.homestead ? createHomesteadApp({ world, stage, removeTree, cameraRig, tracker, canvas, seed, disposers }) : null;
 
   let savedCheckpoint = world.mainline ? mainlineCheckpoint(world) : null;
   let savedTick = world.tick;
   const persist = (): void => {
+    homestead?.persist();
     if (!world.mainline) return;
     const checkpoint = mainlineCheckpoint(world);
     saveStory(window.localStorage, checkpoint, storyDestination, storyDestination === 'fortress' ? captureMainlineProgress(world) : undefined);
@@ -492,17 +520,22 @@ async function start(story: StorySave | undefined, newStory: boolean, onReady?: 
   document.addEventListener('visibilitychange', visibility);
   disposers.push(() => { persistBeforeExit = null; document.removeEventListener('visibilitychange', visibility); });
 
+  let lastFrame = performance.now();
   const frame = (now: number): void => {
     if (stopped) return;
     try {
-      if (document.hidden || storyHud?.open || npcDialogue?.open) {
+      const frameDt = Math.min(Math.max(0, (now - lastFrame) / 1000), TUNING.sim.maxFrameTime);
+      lastFrame = now;
+      if (document.hidden || storyHud?.open || npcDialogue?.open || homestead?.open) {
         tracker.releaseAll();
         audio?.update(world, true);
         loop.resetClock(now);
+        homestead?.update(0);
         rafId = requestAnimationFrame(frame);
         return;
       }
       loop.frame(now);
+      homestead?.update(frameDt);
       if (pendingTravel !== null && (pendingTravel.teleport.moved || getPlayer(world).teleport !== pendingTravel.teleport)) {
         if (pendingTravel.teleport.moved) {
           region = pendingTravel.id;

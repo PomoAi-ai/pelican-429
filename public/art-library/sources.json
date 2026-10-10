@@ -1,0 +1,1293 @@
+{
+  "date": "2026-10-10",
+  "entries": [
+    {
+      "entry": "d1-base",
+      "label": "视角与脚底修订 V2",
+      "source": "assets/characters/grassy/customization/female/concepts/d1-base-layer/d1-approved-swim-angle-soles-v2.png",
+      "path": "./art-library/d1-base/d1-approved-swim-angle-soles-v2.png",
+      "sha256": "fa71efe611fedc04efcf00f0b1ebdba87d9cb022dcdc20f1d439baf19231bb21"
+    },
+    {
+      "entry": "d1-base",
+      "label": "用户确认的原图",
+      "source": "assets/characters/grassy/customization/female/concepts/d1-base-layer/d1-approved-swim-source.jpg",
+      "path": "./art-library/d1-base/d1-approved-swim-source.jpg",
+      "sha256": "f0daa220c05506bdeec2b02fbfc0ea07d2d8cafc5da53b6496feede7e15b3e0d"
+    },
+    {
+      "entry": "d1-base",
+      "label": "高清重绘 V1",
+      "source": "assets/characters/grassy/customization/female/concepts/d1-base-layer/d1-approved-swim-restored-v1.png",
+      "path": "./art-library/d1-base/d1-approved-swim-restored-v1.png",
+      "sha256": "b5ca07cc32e9f5a20194b920579dc93e75b1644341e35f7853a06e41ea760bf0"
+    },
+    {
+      "entry": "d1-bald",
+      "label": "无头发四视图与脚底",
+      "source": "assets/characters/grassy/customization/female/concepts/d1-base-layer/d1-swim-bald-v1.png",
+      "path": "./art-library/d1-bald/d1-swim-bald-v1.png",
+      "sha256": "d35c122f2c50b5b9cc9f65e7bda3f78bb3d826ff983f33b8ce9d399629bc59cb"
+    },
+    {
+      "entry": "d1-hair",
+      "label": "黑长直",
+      "source": "assets/characters/grassy/customization/female/concepts/d1-base-layer/d1-swim-long-black-v1.png",
+      "path": "./art-library/d1-hair/d1-swim-long-black-v1.png",
+      "sha256": "3174e46181ca5811aa27286506f88fe5372a02ba65b937500c7f322f5c9b867f"
+    },
+    {
+      "entry": "d1-hair",
+      "label": "金铜短发 V2",
+      "source": "assets/characters/grassy/customization/female/concepts/d1-base-layer/d1-swim-pixie-v2.png",
+      "path": "./art-library/d1-hair/d1-swim-pixie-v2.png",
+      "sha256": "63d19633ede848c54fc3c4bc8d8fd3be03bf35002541789615fff9e731c132e3"
+    },
+    {
+      "entry": "d1-hair",
+      "label": "黑色短发",
+      "source": "assets/characters/grassy/customization/female/concepts/d1-base-layer/d1-swim-black-pixie-v1.png",
+      "path": "./art-library/d1-hair/d1-swim-black-pixie-v1.png",
+      "sha256": "d5a28fc7d57c393ada80ae9a4aa413c64eef562b0efbf08255ab99580a7c5f0e"
+    },
+    {
+      "entry": "d1-hair",
+      "label": "黑色双马尾",
+      "source": "assets/characters/grassy/customization/female/concepts/d1-base-layer/d1-swim-black-twintails-v1.png",
+      "path": "./art-library/d1-hair/d1-swim-black-twintails-v1.png",
+      "sha256": "a73a6fd4770b91d473205c0d72d1a0c10f1b9cd0bef568c5b13f805f5f3fd3d5"
+    },
+    {
+      "entry": "d1-seven",
+      "label": "七视图原画",
+      "source": "assets/characters/grassy/customization/female/concepts/d1-no-gear/rodin-reference-pack-v1/character-seven-views.png",
+      "path": "./art-library/d1-seven/character-seven-views.png",
+      "sha256": "56a7302886f312e3a8eed79cd3c44d0d87dddb6f915e99d67051d5db955573cf"
+    },
+    {
+      "entry": "d1-equipped",
+      "label": "正面与右侧",
+      "source": "assets/characters/grassy/customization/female/concepts/d1-standard/slim-legs-front-right-v1.png",
+      "path": "./art-library/d1-equipped/slim-legs-front-right-v1.png",
+      "sha256": "96de8d00670b38a6e0c3e6ba8b3fa70558e116fdbce3eaac0fedd52e53765628"
+    },
+    {
+      "entry": "grassy-human",
+      "label": "右侧母版",
+      "source": "public/characters/human/turnaround-master-v2/right.png",
+      "path": "./characters/human/turnaround-master-v2/right.png",
+      "sha256": "3115660be76850e1415a7b2255a4d67da78f8cde6a6023f4c786527b3727069e"
+    },
+    {
+      "entry": "grassy-human",
+      "label": "正面",
+      "source": "public/characters/human/turnaround-master-v2/front.png",
+      "path": "./characters/human/turnaround-master-v2/front.png",
+      "sha256": "1233c2306942b46174cdecb495336292b9664253434e9a9ca17e5b096315b124"
+    },
+    {
+      "entry": "grassy-human",
+      "label": "背面",
+      "source": "public/characters/human/turnaround-master-v2/back.png",
+      "path": "./characters/human/turnaround-master-v2/back.png",
+      "sha256": "2cba0dfcd395508224b1d55879d1cebe5bb04d684379249c2295d4cf5728394f"
+    },
+    {
+      "entry": "grassy-human",
+      "label": "左侧",
+      "source": "public/characters/human/turnaround-master-v2/left.png",
+      "path": "./characters/human/turnaround-master-v2/left.png",
+      "sha256": "49e8e6ee37c3ead0d6c45fa3cd5404ecd943bbd7f89029c75a731d41893505fc"
+    },
+    {
+      "entry": "grassy-human",
+      "label": "角色卡",
+      "source": "public/characters/human/grassy-human-card.png",
+      "path": "./characters/human/grassy-human-card.png",
+      "sha256": "f2adce9605145cb2ef74659b0f158564414857dd33849ec3103c07038674e51d"
+    },
+    {
+      "entry": "grassy-pelican",
+      "label": "鹈鹕角色卡",
+      "source": "public/characters/pelican/grassy-pelican-card.png",
+      "path": "./characters/pelican/grassy-pelican-card.png",
+      "sha256": "4011ce8f5c093308eda3089ddc45ddbcc65adab435012f5b995ae44323817e55"
+    },
+    {
+      "entry": "tibo-human",
+      "label": "正面",
+      "source": "public/characters/tibo/human/reference-front.png",
+      "path": "./characters/tibo/human/reference-front.png",
+      "sha256": "baca70af1418e5abb589ad4b51cf01195945e190b5cedb4d089541b0d79d3781"
+    },
+    {
+      "entry": "tibo-human",
+      "label": "右侧",
+      "source": "public/characters/tibo/human/reference-right.png",
+      "path": "./characters/tibo/human/reference-right.png",
+      "sha256": "36cb5d9236b25d1ae0060110feaeb7459bd6ba170338294822089530aa37fd4c"
+    },
+    {
+      "entry": "tibo-human",
+      "label": "背面",
+      "source": "public/characters/tibo/human/reference-back.png",
+      "path": "./characters/tibo/human/reference-back.png",
+      "sha256": "97a8b11ba4a5e1fe4755a0e75289eadb9b12bfa8dd322bfc28a8f11856c82b27"
+    },
+    {
+      "entry": "tibo-human",
+      "label": "左侧",
+      "source": "public/characters/tibo/human/reference-left.png",
+      "path": "./characters/tibo/human/reference-left.png",
+      "sha256": "3ad22ed208896e4a80e2539aacf44e56ff33969d458752e03b4f4f04d02898c3"
+    },
+    {
+      "entry": "npc-references",
+      "label": "Sam 人形 · 正面",
+      "source": "public/characters/sam/human/reference-front.png",
+      "path": "./characters/sam/human/reference-front.png",
+      "sha256": "c6fdea5dafc195b533237de12f85f8efeefd23f1c0bc1786abd30191e5c4bca7"
+    },
+    {
+      "entry": "npc-references",
+      "label": "Sam 人形 · 右侧",
+      "source": "public/characters/sam/human/reference-right.png",
+      "path": "./characters/sam/human/reference-right.png",
+      "sha256": "ca3439c61ce445c8487527b286a658365ccf65f233c0e7e49be9d1cd597ff1bc"
+    },
+    {
+      "entry": "npc-references",
+      "label": "Sam 人形 · 背面",
+      "source": "public/characters/sam/human/reference-back.png",
+      "path": "./characters/sam/human/reference-back.png",
+      "sha256": "fe9119e2f915efac201f366d4a42eb782f8dcd95c3850b20638e1eaa7c629275"
+    },
+    {
+      "entry": "npc-references",
+      "label": "Sam 人形 · 左侧",
+      "source": "public/characters/sam/human/reference-left.png",
+      "path": "./characters/sam/human/reference-left.png",
+      "sha256": "5db005866d8338ab6dd494062abee2606005b40d7cddf5dca2e11d57096190a5"
+    },
+    {
+      "entry": "npc-references",
+      "label": "Sam 白鼬 · 正面",
+      "source": "public/characters/sam/reference-front.png",
+      "path": "./characters/sam/reference-front.png",
+      "sha256": "c2a559ed502232897819eb496e86e633c4de3d090938fc588c84c0339fdf77b0"
+    },
+    {
+      "entry": "npc-references",
+      "label": "Sam 白鼬 · 右侧",
+      "source": "public/characters/sam/reference-right.png",
+      "path": "./characters/sam/reference-right.png",
+      "sha256": "8f5b9cafc4bda3f26857d990700e251367dd4b56279abf2b0804e45809c80056"
+    },
+    {
+      "entry": "npc-references",
+      "label": "Sam 白鼬 · 背面",
+      "source": "public/characters/sam/reference-back.png",
+      "path": "./characters/sam/reference-back.png",
+      "sha256": "0e554012d750443ad3e4360e7fb0d9d80509ba4201f98b2f0daeb21d9db861b6"
+    },
+    {
+      "entry": "npc-references",
+      "label": "Sam 白鼬 · 左侧",
+      "source": "public/characters/sam/reference-left.png",
+      "path": "./characters/sam/reference-left.png",
+      "sha256": "3d20f2032d733262d1a40ccf1a9c64a8c575c50637e6085d772ab8f7bae3b2df"
+    },
+    {
+      "entry": "npc-references",
+      "label": "Tibo 鼹鼠 · 正面",
+      "source": "public/characters/tibo/reference-front.png",
+      "path": "./characters/tibo/reference-front.png",
+      "sha256": "5fd44c4a417ecde1cc0ab25811dd54da6e9b6349e138ffaa3e00f17dc0671264"
+    },
+    {
+      "entry": "npc-references",
+      "label": "Tibo 鼹鼠 · 右侧",
+      "source": "public/characters/tibo/reference-right.png",
+      "path": "./characters/tibo/reference-right.png",
+      "sha256": "7e5c444396f8ac5ff285505f9d0acf0731dfac97da94ec3b6db3e6a334b21d48"
+    },
+    {
+      "entry": "npc-references",
+      "label": "Tibo 鼹鼠 · 背面",
+      "source": "public/characters/tibo/reference-back.png",
+      "path": "./characters/tibo/reference-back.png",
+      "sha256": "eb64e3cddcbb5d0e837c67a94b3b6c21a0484e2a48a40bf0e2c774939a7a8156"
+    },
+    {
+      "entry": "npc-references",
+      "label": "Tibo 鼹鼠 · 左侧",
+      "source": "public/characters/tibo/reference-left.png",
+      "path": "./characters/tibo/reference-left.png",
+      "sha256": "525f80f746c10f8ccfe470b2555f8e4f30de59b90571a4abc9b57f53517f4701"
+    },
+    {
+      "entry": "omi",
+      "label": "确认造型",
+      "source": "assets/concepts/omi-01-actions/approved-character.png",
+      "path": "./art-library/omi/approved-character.png",
+      "sha256": "e79943d137abd8a57a78df1a5d2d1c504886bd869d227900dc0471bb4f5a023b"
+    },
+    {
+      "entry": "omi-actions",
+      "label": "基础动作",
+      "source": "assets/concepts/omi-01-actions/basic-actions.png",
+      "path": "./art-library/omi-actions/basic-actions.png",
+      "sha256": "fbbb8a40b53cb0dabe69e9be24edc0406a129037360dcd86b9e0c898006732fa"
+    },
+    {
+      "entry": "omi-actions",
+      "label": "夹爪横扫",
+      "source": "assets/concepts/omi-01-actions/skill-01-clamp-sweep.png",
+      "path": "./art-library/omi-actions/skill-01-clamp-sweep.png",
+      "sha256": "37ab41e7ddc622ed1c2de023b87144f23e953514c73f2630a86a10420a272ad9"
+    },
+    {
+      "entry": "omi-actions",
+      "label": "突进夹击",
+      "source": "assets/concepts/omi-01-actions/skill-02-dash-clamp.png",
+      "path": "./art-library/omi-actions/skill-02-dash-clamp.png",
+      "sha256": "1002cf1de92ede282c6c7f0d0e2e4e636e270c72f1378bf7b0826bff3afeac7d"
+    },
+    {
+      "entry": "watch-wasp",
+      "label": "批准参考",
+      "source": "assets/concepts/watch-wasp-final/approved-reference.png",
+      "path": "./art-library/watch-wasp/approved-reference.png",
+      "sha256": "1f3f76e243cff3562581df0362c38f677df3f778abe55da354b96b8e6199199e"
+    },
+    {
+      "entry": "watch-wasp",
+      "label": "定稿多视图",
+      "source": "assets/concepts/watch-wasp-final/compact-drone-views.png",
+      "path": "./art-library/watch-wasp/compact-drone-views.png",
+      "sha256": "f4b06034dd224ea33c031d6913e226847267842a8384141ce572e30bc7a09377"
+    },
+    {
+      "entry": "wasp-actions",
+      "label": "倾斜飞行",
+      "source": "public/characters/enemies/watch-wasp/flight-concept.png",
+      "path": "./characters/enemies/watch-wasp/flight-concept.png",
+      "sha256": "84c6caa7d078de2ec79125638bd6ce6a4bddfbc0f014708b78cf0bd469c2981e"
+    },
+    {
+      "entry": "wasp-actions",
+      "label": "铝热剂攻击",
+      "source": "public/characters/enemies/watch-wasp/thermite-concept.png",
+      "path": "./characters/enemies/watch-wasp/thermite-concept.png",
+      "sha256": "471562f08789bf15e2471a7a80cf93ea57af03534ed370d98eab081647cdaaad"
+    },
+    {
+      "entry": "line-hound",
+      "label": "正侧面原画",
+      "source": "public/characters/enemies/line-hound/reference.png",
+      "path": "./characters/enemies/line-hound/reference.png",
+      "sha256": "f85da4b62d20a57851c840586b94952a8108dfda2224b7315edece7c5ce1299e"
+    },
+    {
+      "entry": "loadmaster",
+      "label": "正侧面原画",
+      "source": "assets/concepts/enemy-front-side/loadmaster.png",
+      "path": "./art-library/loadmaster/loadmaster.png",
+      "sha256": "cd4614504d05e743f94bb839b8ad25e54fd0a403ade0d36c5100383d3aa4eed9"
+    },
+    {
+      "entry": "grassy-equipment",
+      "label": "推进飞行",
+      "source": "public/characters/human/equipment-concepts/flight.png",
+      "path": "./characters/human/equipment-concepts/flight.png",
+      "sha256": "f4aebe0ff9fe8158f6341744c7ccc478a46d7dfcf50517c4578b73c98609cd9a"
+    },
+    {
+      "entry": "grassy-equipment",
+      "label": "Codex 攻击",
+      "source": "public/characters/human/equipment-concepts/codex-attack.png",
+      "path": "./characters/human/equipment-concepts/codex-attack.png",
+      "sha256": "9f76afae245c10f3cf65aacbff8fcbba70168090e25363568c78d4e3f45e7853"
+    },
+    {
+      "entry": "grassy-equipment",
+      "label": "键盘背负",
+      "source": "public/characters/human/equipment-concepts/keyboard-stowed.png",
+      "path": "./characters/human/equipment-concepts/keyboard-stowed.png",
+      "sha256": "6e30e7d6217472066574f5aebe573dc79d61100de16d8356f93c2dbf12dbb790"
+    },
+    {
+      "entry": "keyboard-combo",
+      "label": "单手连击",
+      "source": "public/characters/human/equipment-concepts/combat-v2/keyboard-one-hand-combo.png",
+      "path": "./characters/human/equipment-concepts/combat-v2/keyboard-one-hand-combo.png",
+      "sha256": "bffc351e91f429443b23d6f26f1b569112a23bc9bf154e004cfb3bcb94fca4ba"
+    },
+    {
+      "entry": "combat-studies",
+      "label": "Codex 光弹",
+      "source": "public/characters/human/equipment-concepts/combat-v2/codex-barrage.png",
+      "path": "./characters/human/equipment-concepts/combat-v2/codex-barrage.png",
+      "sha256": "1b6a954ab282134583317ad750a3fba8220ef5f3a093f5db22daa88ffbca9200"
+    },
+    {
+      "entry": "combat-studies",
+      "label": "Bug 虫群",
+      "source": "public/characters/human/equipment-concepts/combat-v2/bug-swarm.png",
+      "path": "./characters/human/equipment-concepts/combat-v2/bug-swarm.png",
+      "sha256": "866882feac1eed85cd2e6228182bf8355b4492ce702828f337d206cc6e4a7752"
+    },
+    {
+      "entry": "combat-studies",
+      "label": "服务器超载 V2",
+      "source": "public/characters/human/equipment-concepts/combat-v2/server-overload.png",
+      "path": "./characters/human/equipment-concepts/combat-v2/server-overload.png",
+      "sha256": "0dd5ecf98ecc37d909121505da397a316c04f60a494b2fc96bfe14d0fe6b349d"
+    },
+    {
+      "entry": "combat-studies",
+      "label": "服务器超载 V4",
+      "source": "public/characters/human/equipment-concepts/combat-v4/server-overload.png",
+      "path": "./characters/human/equipment-concepts/combat-v4/server-overload.png",
+      "sha256": "c3b0149b03f3638dc49c661f4014e0cb4bd2cc4ceaab05d5ca1bf0997c7b7727"
+    },
+    {
+      "entry": "combat-studies",
+      "label": "服务器超载 V5",
+      "source": "public/characters/human/equipment-concepts/combat-v5/server-overload.png",
+      "path": "./characters/human/equipment-concepts/combat-v5/server-overload.png",
+      "sha256": "b3fd9f6a266cde931e8fd4f5c9248e7db8fc3f1991adcda3e34548b6a77536aa"
+    },
+    {
+      "entry": "combat-studies",
+      "label": "空中键盘",
+      "source": "public/characters/human/equipment-concepts/combat-v3/airborne-keyboard.png",
+      "path": "./characters/human/equipment-concepts/combat-v3/airborne-keyboard.png",
+      "sha256": "a689ac3eb8f29f161af76018f5ba86b0ef84f67fd7e6557a9544dc1b193a19fa"
+    },
+    {
+      "entry": "combat-studies",
+      "label": "空中 Codex",
+      "source": "public/characters/human/equipment-concepts/combat-v3/airborne-codex.png",
+      "path": "./characters/human/equipment-concepts/combat-v3/airborne-codex.png",
+      "sha256": "1c12c07f1d4beae9af62c4fada6bab9250ecf54b7ba528101bcaa5f7ee79cc3a"
+    },
+    {
+      "entry": "combat-studies",
+      "label": "空中 Bug",
+      "source": "public/characters/human/equipment-concepts/combat-v3/airborne-bug.png",
+      "path": "./characters/human/equipment-concepts/combat-v3/airborne-bug.png",
+      "sha256": "432228268fa9cb0fec5b5abc2aff43d3dd87c6319aabeb0534d8e7c8e0256a5e"
+    },
+    {
+      "entry": "combat-studies",
+      "label": "空中超载",
+      "source": "public/characters/human/equipment-concepts/combat-v3/airborne-overload.png",
+      "path": "./characters/human/equipment-concepts/combat-v3/airborne-overload.png",
+      "sha256": "a04bb8ae9b15b2a1210a4e6d5f87bfa4b5a218e43d404c9f974bf4b0912ca691"
+    },
+    {
+      "entry": "d1-outfits",
+      "label": "六套服装",
+      "source": "assets/characters/grassy/customization/female/concepts/d1-outfits/d1-six-outfits-v1.png",
+      "path": "./art-library/d1-outfits/d1-six-outfits-v1.png",
+      "sha256": "7e145cc3a0af880383504ed83420d8a55054bfc6d5543eaeba9f5ab7768eea47"
+    },
+    {
+      "entry": "d1-outfits",
+      "label": "三套服装修订",
+      "source": "assets/characters/grassy/customization/female/concepts/d1-outfits/d1-three-outfits-v2.png",
+      "path": "./art-library/d1-outfits/d1-three-outfits-v2.png",
+      "sha256": "4098db3b7634af6e3aaae399e09b5fdba80f14379ba243232d39416d3c72d8a0"
+    },
+    {
+      "entry": "d1-outfits",
+      "label": "星纹长袍 V2",
+      "source": "assets/characters/grassy/customization/female/concepts/d1-outfits/d1-star-robe-four-views-v2.png",
+      "path": "./art-library/d1-outfits/d1-star-robe-four-views-v2.png",
+      "sha256": "c21519db0f60bf8f7ecb16e53e2c622547e87f2e02e6dfb83a917783cf1a1eb2"
+    },
+    {
+      "entry": "npc-skills",
+      "label": "鹈鹕攻击与技能",
+      "source": "public/characters/pelican/skill-concepts/normal-and-three-skills-v1.png",
+      "path": "./characters/pelican/skill-concepts/normal-and-three-skills-v1.png",
+      "sha256": "0eb1e4a721ac5933270b41f08d296d45bac1c21274b4d56295ee982c5b291dec"
+    },
+    {
+      "entry": "npc-skills",
+      "label": "光子群大招",
+      "source": "public/characters/pelican/skill-concepts/photon-swarm-ultimate-v1.png",
+      "path": "./characters/pelican/skill-concepts/photon-swarm-ultimate-v1.png",
+      "sha256": "7892b480ce0610abe99a7d1325c49456366fb81e4724c2af0df757872e65b353"
+    },
+    {
+      "entry": "npc-skills",
+      "label": "Sam 技能",
+      "source": "assets/characters/sam/skill-concepts/skills-v1.png",
+      "path": "./art-library/npc-skills/sam-skills-v1.png",
+      "sha256": "0aaec3ef74f7c0b59a4571aa8754d5572ebb2e6ec9a433aafe3172bf1faf5046"
+    },
+    {
+      "entry": "npc-skills",
+      "label": "Tibo 技能",
+      "source": "assets/characters/tibo/skill-concepts/skills-v1.png",
+      "path": "./art-library/npc-skills/tibo-skills-v1.png",
+      "sha256": "4f644583b3a69cee25b978365fdb2af880d5d12e26e2505a4f08e2d5101ba011"
+    },
+    {
+      "entry": "fortress",
+      "label": "场景原画",
+      "source": "output/concepts/facility-grand/01-mountain-fortress.png",
+      "path": "./art-library/fortress/01-mountain-fortress.png",
+      "sha256": "115d4723d689daae929cbad0a975bb8b13c12797034529bd668aef6694cd9c9e"
+    },
+    {
+      "entry": "cathedral",
+      "label": "场景原画",
+      "source": "output/concepts/facility-grand/02-compute-cathedral.png",
+      "path": "./art-library/cathedral/02-compute-cathedral.png",
+      "sha256": "5c8b012ce6ebed5216c53766f568737e2553fec02b6ca5ac830093c068165516"
+    },
+    {
+      "entry": "abyss",
+      "label": "场景原画",
+      "source": "output/concepts/facility-grand/03-infiniband-abyss.png",
+      "path": "./art-library/abyss/03-infiniband-abyss.png",
+      "sha256": "6e1ee41b7e96db7cc303deeb2557445a99c1131d96d4580fb63bf2ae789ef92d"
+    },
+    {
+      "entry": "cloud-city",
+      "label": "云城原画",
+      "source": "output/concepts/city-depth-v2/cloud-city-grand-skyline.png",
+      "path": "./art-library/cloud-city/cloud-city-grand-skyline.png",
+      "sha256": "f4d303db8b8b055c57c6218de2e1a8b52d1565b39128332f2a95602bfbb8f687"
+    },
+    {
+      "entry": "homestead-studies",
+      "label": "家园剖面",
+      "source": "assets/concepts/garden-city-cutaway/cutaway-scene.png",
+      "path": "./art-library/homestead-studies/cutaway-scene.png",
+      "sha256": "cc04dfac6d871865aaa44319a10def505c98e3b1f4ddbf3fa2403d892c6a8bbc"
+    },
+    {
+      "entry": "homestead-studies",
+      "label": "核心构件",
+      "source": "assets/concepts/garden-city-cutaway/core-building-kit.png",
+      "path": "./art-library/homestead-studies/core-building-kit.png",
+      "sha256": "b089d68c896035a885e63589109641c3107415b732aa8323a0d0f4cdb5db2ad8"
+    },
+    {
+      "entry": "homestead-studies",
+      "label": "生产设施",
+      "source": "assets/concepts/homestead-first-batch/facilities.png",
+      "path": "./art-library/homestead-studies/facilities.png",
+      "sha256": "14d5f1dbd71ac03b8ad393667a148c53b8ccbd7e2d99ff6063b5cdf0d9b68e0d"
+    },
+    {
+      "entry": "transformation",
+      "label": "确认分镜",
+      "source": "task/114-feather-growth-transform/evidence/approved-concept.png",
+      "path": "./art-library/transformation/approved-concept.png",
+      "sha256": "f34c2dd5e51cf4a38be8415060a12caf364be56a0ff9fd299f99cd28c3e13819"
+    },
+    {
+      "entry": "teleport",
+      "label": "确认分镜",
+      "source": "task/234-shared-teleport/evidence/teleport-concept.png",
+      "path": "./art-library/teleport/teleport-concept.png",
+      "sha256": "d3f6a57d2a1be68585968b8a8856a493fc9406c01e00bea33e73dc9564bcd697"
+    },
+    {
+      "entry": "scale",
+      "label": "统一尺度总图",
+      "source": "public/concepts/character-tile-scale.png",
+      "path": "./concepts/character-tile-scale.png",
+      "sha256": "3cc4c1c1eaefe766b29097c627b7fbe050977fcc71019406303cfeaaf5b885e6"
+    },
+    {
+      "entry": "terrain",
+      "label": "地形基础",
+      "source": "public/concepts/terrain-tile-basics.png",
+      "path": "./concepts/terrain-tile-basics.png",
+      "sha256": "afd2214bc16277b4bdc0d8b532ad9bdd34f8d97b0fe82226579496870fd68286"
+    },
+    {
+      "entry": "terrain",
+      "label": "八类组合",
+      "source": "public/concepts/terrain-combinations.png",
+      "path": "./concepts/terrain-combinations.png",
+      "sha256": "4a7d183d42607386cd741a9a24d2745155f33629721443f939b8b8bef984c704"
+    },
+    {
+      "entry": "garden-city-approved",
+      "label": "已选花园城区原图",
+      "source": "private-source/exec-private-source-058.png",
+      "path": "./art-library/garden-city-approved/garden-city-approved.png",
+      "sha256": "1c5d9839f22bc37b18b60e03a53ed63f0bb42500c7ed3068e6a6e78d9d86bf0f"
+    },
+    {
+      "entry": "clean-future-approved",
+      "label": "人物比例修订 V2",
+      "source": "assets/concepts/worlds/technology-directions-v1/01-clean-future-proportions-v2.png",
+      "path": "./art-library/clean-future-approved/01-clean-future-proportions-v2.png",
+      "sha256": "9ba34d817972dbaa91f2aba6f0e3575a7101e140f85404ef97a237d451bfe1c8"
+    },
+    {
+      "entry": "homestead-components",
+      "label": "能量门包边修订",
+      "source": "assets/concepts/garden-city-cutaway/energy-door-sealed-edge.png",
+      "path": "./art-library/homestead-components/energy-door-sealed-edge.png",
+      "sha256": "6c1c25d02376e9d7b03e52e5bd501b402415daae4ed1e62abac5703814f1ccec"
+    },
+    {
+      "entry": "homestead-components",
+      "label": "可倾斜太阳能",
+      "source": "assets/concepts/garden-city-cutaway/tilting-solar-study.png",
+      "path": "./art-library/homestead-components/tilting-solar-study.png",
+      "sha256": "a0a5b91b596c6554c09643b1b4d7ecd40c449ff71fdd11af1e478e54c28bc18b"
+    },
+    {
+      "entry": "homestead-components",
+      "label": "工作站、电池与机器人坞",
+      "source": "assets/concepts/garden-city-cutaway/power-compute-dock.png",
+      "path": "./art-library/homestead-components/power-compute-dock.png",
+      "sha256": "3df522132cdd7da15ccb62edd4283b1fc9cb556c4eceb3bb344ff13c6e018128"
+    },
+    {
+      "entry": "homestead-components",
+      "label": "仓库与商店终端",
+      "source": "assets/concepts/garden-city-cutaway/storage-trade-terminals.png",
+      "path": "./art-library/homestead-components/storage-trade-terminals.png",
+      "sha256": "ab0fd087b23cbc781011222aa8ceb9fe3784942aefe3a65813a43886d0518a03"
+    },
+    {
+      "entry": "homestead-components",
+      "label": "剖面分层说明",
+      "source": "assets/concepts/garden-city-cutaway/layer-study.png",
+      "path": "./art-library/homestead-components/layer-study.png",
+      "sha256": "f5178dd1bb4d2dcd34b0a31f5b78e954abfade3adb4d3a569ad6a68de371208c"
+    },
+    {
+      "entry": "technology-camera-studies",
+      "label": "游戏镜头重绘 · 待确认",
+      "source": "assets/concepts/worlds/technology-game-camera-v1/01-lakeside-home.png",
+      "path": "./art-library/technology-camera-studies/01-lakeside-home.png",
+      "sha256": "48d749fe2f25579dcd0a42a4506839ad82f6b5213117bccdeb65bed88e84ed0e"
+    },
+    {
+      "entry": "technology-camera-studies",
+      "label": "野外 · 视角被否定",
+      "source": "assets/concepts/worlds/technology-locations-v1/01-wilderness.png",
+      "path": "./art-library/technology-camera-studies/01-wilderness.png",
+      "sha256": "9d0efbd637dfe1b68529c6af2bee6b9d269c42631e66fd84215f4b90c40790f3"
+    },
+    {
+      "entry": "technology-camera-studies",
+      "label": "室内 · 视角被否定",
+      "source": "assets/concepts/worlds/technology-locations-v1/02-home-interior.png",
+      "path": "./art-library/technology-camera-studies/02-home-interior.png",
+      "sha256": "04a4ac24571142cd1622ff1cf140406f367a51f4f6f600f4b5e7dae6abebcfe4"
+    },
+    {
+      "entry": "technology-camera-studies",
+      "label": "湖边 · 视角被否定",
+      "source": "assets/concepts/worlds/technology-locations-v1/03-lakeside.png",
+      "path": "./art-library/technology-camera-studies/03-lakeside.png",
+      "sha256": "07964b9559e4d534833b8bf38186f2660e16911c8469c71da7a108ecdcb7abf9"
+    },
+    {
+      "entry": "tibo-lauren-story",
+      "label": "英文三格漫画",
+      "source": "output/imagegen/tibo-lauren-musk-comic/tibo-lauren-musk-comic-v1.png",
+      "path": "./art-library/tibo-lauren-story/tibo-lauren-musk-comic-v1.png",
+      "sha256": "ef465dd4e267b3afa73e682b46b6a6c6b5c6685db5035f5ac12783f843847170"
+    },
+    {
+      "entry": "tibo-lauren-story",
+      "label": "一家三口早期稿",
+      "source": "output/imagegen/tibo-lauren-family/tibo-lauren-family-v1.png",
+      "path": "./art-library/tibo-lauren-story/tibo-lauren-family-v1.png",
+      "sha256": "c3bd5d066f84c05efef98a6b1339161d0e69ba033daed4a2a0cd6252179b8c54"
+    },
+    {
+      "entry": "astra-rescue",
+      "label": "中文简字版",
+      "source": "output/imagegen/拯救GPT6-Astra-简字版-中文.png",
+      "path": "./art-library/astra-rescue/astra-rescue-zh.png",
+      "sha256": "20d61c2a6f2d4e7691d67b0a66aca30a7b1e8ca143eb25109b24f9aacc26630c"
+    },
+    {
+      "entry": "astra-rescue",
+      "label": "英文简字版",
+      "source": "output/imagegen/拯救GPT6-Astra-简字版-英文.png",
+      "path": "./art-library/astra-rescue/astra-rescue-en.png",
+      "sha256": "7c96a173047095b79e20c53476a2f45699039423fb061180573115b75c581537"
+    },
+    {
+      "entry": "spatial-guides",
+      "label": "格子、墙体与门",
+      "source": "public/concepts/tile-wall-door-depth.png",
+      "path": "./concepts/tile-wall-door-depth.png",
+      "sha256": "fc8dbb06448c89b3cdbd05d38a08fa81d059674aa0e472e31f2c52ae0fec2b01"
+    },
+    {
+      "entry": "spatial-guides",
+      "label": "植物与远景透视",
+      "source": "public/concepts/plants-distant-perspective.png",
+      "path": "./concepts/plants-distant-perspective.png",
+      "sha256": "373f868aaf7cc4c25e8862447134259943719a45c876688c8f59aa5c1ea2e496"
+    },
+    {
+      "entry": "anime-style-studies",
+      "label": "传统赛璐璐",
+      "source": "assets/concepts/worlds/anime-style-comparison-v1/01-traditional-cel.png",
+      "path": "./art-library/anime-style-studies/01-traditional-cel.png",
+      "sha256": "3ef61a1f258fcdb09ad6c43909fdd8168e087907b74431fc35b58f4f45d46d90"
+    },
+    {
+      "entry": "anime-style-studies",
+      "label": "精细动漫 RPG",
+      "source": "assets/concepts/worlds/anime-style-comparison-v1/02-polished-anime-rpg.png",
+      "path": "./art-library/anime-style-studies/02-polished-anime-rpg.png",
+      "sha256": "fda628e4ddaf9c08b2d38f55abff26b68a6d0632bb6dc1d27fdbfb0e536f6158"
+    },
+    {
+      "entry": "anime-style-studies",
+      "label": "绘画感幻想",
+      "source": "assets/concepts/worlds/anime-style-comparison-v1/03-painterly-fantasy.png",
+      "path": "./art-library/anime-style-studies/03-painterly-fantasy.png",
+      "sha256": "16dd1a39243028bdd88dc7c67b85e972c9e76ec7b1976d76e70caeb2cb12d4e1"
+    },
+    {
+      "entry": "anime-style-studies",
+      "label": "厚涂动漫",
+      "source": "assets/concepts/worlds/anime-style-comparison-v1/04-painted-anime.png",
+      "path": "./art-library/anime-style-studies/04-painted-anime.png",
+      "sha256": "56f5ac87a5b32126b255400a21bd631de0e80e9dd14797a7b47943623fdd6e9e"
+    },
+    {
+      "entry": "anime-style-studies",
+      "label": "强漫画",
+      "source": "assets/concepts/worlds/anime-style-comparison-v1/05-bold-manga.png",
+      "path": "./art-library/anime-style-studies/05-bold-manga.png",
+      "sha256": "144942e60f80fe0a3e051b2dd3b0c121497e27810e83d5de6067ed7f953234eb"
+    },
+    {
+      "entry": "anime-style-studies",
+      "label": "Q 版 SD",
+      "source": "assets/concepts/worlds/anime-style-comparison-v1/06-chibi-sd.png",
+      "path": "./art-library/anime-style-studies/06-chibi-sd.png",
+      "sha256": "0d466dcdf76d545be84f79c0d359b4280895c0594dc042bcbf11f41ce2b12484"
+    },
+    {
+      "entry": "additional-style-studies",
+      "label": "手绘童话",
+      "source": "assets/concepts/worlds/additional-styles-v1/01-storybook.png",
+      "path": "./art-library/additional-style-studies/01-storybook.png",
+      "sha256": "95bb01060e399e8aa86bc8e4938a166d7d1815e34ed28195408620a411c6ff89"
+    },
+    {
+      "entry": "additional-style-studies",
+      "label": "水彩动画",
+      "source": "assets/concepts/worlds/additional-styles-v1/02-watercolor.png",
+      "path": "./art-library/additional-style-studies/02-watercolor.png",
+      "sha256": "ecb79299ca4b2b4d7ed25ced081279faf5cd4fc33e3654ac30e559b4436ef46a"
+    },
+    {
+      "entry": "additional-style-studies",
+      "label": "纸片剪纸",
+      "source": "assets/concepts/worlds/additional-styles-v1/03-papercut.png",
+      "path": "./art-library/additional-style-studies/03-papercut.png",
+      "sha256": "0183453190d13c80ccb1c221a4b86d1ef2a8d1458a942d832c5981645643099b"
+    },
+    {
+      "entry": "additional-style-studies",
+      "label": "高清像素",
+      "source": "assets/concepts/worlds/additional-styles-v1/04-pixel-art.png",
+      "path": "./art-library/additional-style-studies/04-pixel-art.png",
+      "sha256": "d0f8e1c1a7165b25487b4e56c37d3886cfb733078bee15f71fec097035fceb43"
+    },
+    {
+      "entry": "additional-style-studies",
+      "label": "像素角色与立体场景",
+      "source": "assets/concepts/worlds/additional-styles-v1/05-pixel-in-3d.png",
+      "path": "./art-library/additional-style-studies/05-pixel-in-3d.png",
+      "sha256": "17d31535df0d2c140be6466192301374b87907e138f23b3df9a325339308e172"
+    },
+    {
+      "entry": "additional-style-studies",
+      "label": "微缩模型",
+      "source": "assets/concepts/worlds/additional-styles-v1/06-miniature.png",
+      "path": "./art-library/additional-style-studies/06-miniature.png",
+      "sha256": "0da53356dc7d72599d9d6d066979102ea8629a3335615d0b3107695ef1fc126b"
+    },
+    {
+      "entry": "additional-style-studies",
+      "label": "暗色童话",
+      "source": "assets/concepts/worlds/additional-styles-v1/07-dark-fairytale.png",
+      "path": "./art-library/additional-style-studies/07-dark-fairytale.png",
+      "sha256": "819a85372a1ab799cf63c29653a4c6a0eed30d92308730a20b6c7b21badf1222"
+    },
+    {
+      "entry": "additional-style-studies",
+      "label": "几何卡通",
+      "source": "assets/concepts/worlds/additional-styles-v1/08-geometric-cartoon.png",
+      "path": "./art-library/additional-style-studies/08-geometric-cartoon.png",
+      "sha256": "e55f7476b6e0500c9c1b2d5773f1514eb9b4537d26982a2e974c311e56e5d5ce"
+    },
+    {
+      "entry": "expanded-style-studies",
+      "label": "中国水墨",
+      "source": "assets/concepts/worlds/expanded-styles-v1/01-chinese-ink.png",
+      "path": "./art-library/expanded-style-studies/01-chinese-ink.png",
+      "sha256": "1cdaf83ff9d96d496cf39ba9486189570f44cd0134e5d7ab31e993e76412c98b"
+    },
+    {
+      "entry": "expanded-style-studies",
+      "label": "清线漫画",
+      "source": "assets/concepts/worlds/expanded-styles-v1/02-ligne-claire.png",
+      "path": "./art-library/expanded-style-studies/02-ligne-claire.png",
+      "sha256": "293f7e1a112fc0b8b7e89f3b1a79bfedc83fe941966c7de9d94f2ed4cdf67043"
+    },
+    {
+      "entry": "expanded-style-studies",
+      "label": "复古动画",
+      "source": "assets/concepts/worlds/expanded-styles-v1/03-rubber-hose.png",
+      "path": "./art-library/expanded-style-studies/03-rubber-hose.png",
+      "sha256": "7c52021f517a769f55ec3163bb802a5d94b7cc6c0e828643634fcd03d342651c"
+    },
+    {
+      "entry": "expanded-style-studies",
+      "label": "彩色玻璃",
+      "source": "assets/concepts/worlds/expanded-styles-v1/04-stained-glass.png",
+      "path": "./art-library/expanded-style-studies/04-stained-glass.png",
+      "sha256": "3a9a4b7a7aef2c6fe4c5a5b2d6c16fec255f106af31f400d1daedea7cfb231cb"
+    },
+    {
+      "entry": "expanded-style-studies",
+      "label": "霓虹科幻",
+      "source": "assets/concepts/worlds/expanded-styles-v1/05-neon-scifi.png",
+      "path": "./art-library/expanded-style-studies/05-neon-scifi.png",
+      "sha256": "666ab9c656fae44c7f19797bd65dcb89e622eee4124c0280817f12d079c25eba"
+    },
+    {
+      "entry": "expanded-style-studies",
+      "label": "体素积木",
+      "source": "assets/concepts/worlds/expanded-styles-v1/06-voxel.png",
+      "path": "./art-library/expanded-style-studies/06-voxel.png",
+      "sha256": "464f8d615b75ddbd7426feaa67754dd69b2171c6e7afa523501065b2f4851ec5"
+    },
+    {
+      "entry": "d1-outfits",
+      "label": "星纹长袍 · 身体底稿修订 V3",
+      "source": "assets/characters/grassy/customization/female/concepts/d1-outfits/d1-star-robe-source-fit-v3.png",
+      "path": "./art-library/d1-outfits/d1-star-robe-source-fit-v3.png",
+      "sha256": "d9aaf80d3f36da28a9053a7da55fdf282d05cf529759a3f8381c81507f5dbd18"
+    },
+    {
+      "entry": "d1-outfits",
+      "label": "服装与发型组合 D",
+      "source": "assets/characters/grassy/customization/female/concepts/d1-outfits/d1-wardrobe-d-v1.png",
+      "path": "./art-library/d1-outfits/d1-wardrobe-d-v1.png",
+      "sha256": "f5df78fce7c2c760c21dad235cf688cf1f0a8fdfb5bfb2afe9e4e67c21ef819d"
+    },
+    {
+      "entry": "d1-outfits",
+      "label": "服装与发型组合 E",
+      "source": "assets/characters/grassy/customization/female/concepts/d1-outfits/d1-wardrobe-e-v1.png",
+      "path": "./art-library/d1-outfits/d1-wardrobe-e-v1.png",
+      "sha256": "f733ca0b89497ca94d8f1d286319254a3b235d3df503882f82bbe08d62f0351a"
+    },
+    {
+      "entry": "npc-animal-masters",
+      "label": "Sam 白鼬 V4",
+      "source": "output/imagegen/animal-npc-concepts-v4/sam-the-model-router-front.png",
+      "path": "./art-library/npc-animal-masters/sam-the-model-router-front.png",
+      "sha256": "c53e989d21c09c565b789e0ac6e6d7d05b40e6522648828741f335b6269a8ee6"
+    },
+    {
+      "entry": "npc-animal-masters",
+      "label": "Tibo 鼹鼠 V3",
+      "source": "output/imagegen/animal-npc-concepts-v3/tibo-the-reset-master-front.png",
+      "path": "./art-library/npc-animal-masters/tibo-the-reset-master-front.png",
+      "sha256": "bdd622e5b7c4691956ae9b046dcfcd189d8debe8549c1258d938192b2b6f4874"
+    },
+    {
+      "entry": "sam-human-master",
+      "label": "Sam 人形四向总图",
+      "source": "assets/characters/sam/human/reference/turnaround.png",
+      "path": "./art-library/sam-human-master/sam-human-turnaround.png",
+      "sha256": "fbccb306b86abdc79868863725e68198dff297335384a5d2a1f0174ea8ff53e9"
+    },
+    {
+      "entry": "npc-identity-masters",
+      "label": "Sam 早期身份稿",
+      "source": "output/imagegen/front-portraits-v1/sam-front.png",
+      "path": "./art-library/npc-identity-masters/sam-front.png",
+      "sha256": "6f5ea7283f02fd3c5561d4c48587ebc1da61420252900c4c4da8cd40ad47d057"
+    },
+    {
+      "entry": "npc-identity-masters",
+      "label": "Tibo 早期身份稿",
+      "source": "output/imagegen/front-portraits-v1/tibo-front.png",
+      "path": "./art-library/npc-identity-masters/tibo-front.png",
+      "sha256": "170e99dc238d06864e820c4d362b29a5688e48b7da8eb54078f98c227216a86b"
+    },
+    {
+      "entry": "npc-weapon-selection",
+      "label": "四案对照 · 已选 Sam B / Tibo A",
+      "source": "task/193-npc-weapon-design/weapon-concepts.png",
+      "path": "./art-library/npc-weapon-selection/weapon-concepts.png",
+      "sha256": "d7136b49754bea2efebde78e82b4806a70dc3088f48f58b03a4b94444a29d7a9"
+    },
+    {
+      "entry": "tibo-human",
+      "label": "已批准人形四向总图",
+      "source": "assets/characters/tibo/human/reference/turnaround.png",
+      "path": "./art-library/tibo-human/tibo-human-turnaround.png",
+      "sha256": "9fc2f527ae791fb09e5f23573b5d109c79abed2e9231f2755ccb3e5c5f1051f0"
+    },
+    {
+      "entry": "roster-24-definitions",
+      "label": "第1批定义",
+      "source": "assets/characters/grassy/customization/female/concepts/roster-24/definitions/batch-01.svg",
+      "path": "./art-library/roster-24/definitions/batch-01.svg",
+      "sha256": "241c4d1ff839c235d542db618ce6ddba0ce9f7ce90ad5d272285559725b74e12"
+    },
+    {
+      "entry": "roster-24-definitions",
+      "label": "第2批定义",
+      "source": "assets/characters/grassy/customization/female/concepts/roster-24/definitions/batch-02.svg",
+      "path": "./art-library/roster-24/definitions/batch-02.svg",
+      "sha256": "bb409a0aa009237aedd953ae15d83cdbf765f24aecde82254bff5ad8e816e271"
+    },
+    {
+      "entry": "roster-24-definitions",
+      "label": "第3批定义",
+      "source": "assets/characters/grassy/customization/female/concepts/roster-24/definitions/batch-03.svg",
+      "path": "./art-library/roster-24/definitions/batch-03.svg",
+      "sha256": "2febb66bdb65ca6304c955ea6366fe422fa121f7b3392a3fabe18696092d3597"
+    },
+    {
+      "entry": "roster-24-definitions",
+      "label": "第4批定义",
+      "source": "assets/characters/grassy/customization/female/concepts/roster-24/definitions/batch-04.svg",
+      "path": "./art-library/roster-24/definitions/batch-04.svg",
+      "sha256": "4c6403b599c63d65e48b64f0a185ef803bdacc6dfc71b46f1596878ba4fb0daa"
+    },
+    {
+      "entry": "roster-24-definitions",
+      "label": "第5批定义",
+      "source": "assets/characters/grassy/customization/female/concepts/roster-24/definitions/batch-05.svg",
+      "path": "./art-library/roster-24/definitions/batch-05.svg",
+      "sha256": "987929b0a9288c8c590a35f71a2e2555625ed3e44010ed5d7cf741dc8b8b185d"
+    },
+    {
+      "entry": "roster-24-definitions",
+      "label": "第6批定义",
+      "source": "assets/characters/grassy/customization/female/concepts/roster-24/definitions/batch-06.svg",
+      "path": "./art-library/roster-24/definitions/batch-06.svg",
+      "sha256": "19e62b4345f2cd9607f1c445b0caadfe1b59b6d8e12fd15ecb9a55d8b1b234e9"
+    },
+    {
+      "entry": "roster-r01",
+      "label": "四视图与标尺检查",
+      "source": "assets/characters/grassy/customization/female/concepts/roster-24/batch-01/r01-ruler.png",
+      "path": "./art-library/roster-24/batch-01/r01-ruler.png",
+      "sha256": "05bed36023b83c761a57a1bc061a2881987f6cc30612cd2ad915c94995406c84"
+    },
+    {
+      "entry": "roster-r01",
+      "label": "无尺原画",
+      "source": "assets/characters/grassy/customization/female/concepts/roster-24/batch-01/r01-art.png",
+      "path": "./art-library/roster-24/batch-01/r01-art.png",
+      "sha256": "b9ea58ae6b8e5447a283e057022fd86219c806175d3e837e64b307cf64c08f54"
+    },
+    {
+      "entry": "roster-r02",
+      "label": "四视图与标尺检查",
+      "source": "assets/characters/grassy/customization/female/concepts/roster-24/batch-01/r02-ruler.png",
+      "path": "./art-library/roster-24/batch-01/r02-ruler.png",
+      "sha256": "f6a94b5fd1b615e2bf17cbcf7b211d94dd82df8bcaab5d8fd676077bc57947b9"
+    },
+    {
+      "entry": "roster-r02",
+      "label": "无尺原画",
+      "source": "assets/characters/grassy/customization/female/concepts/roster-24/batch-01/r02-art.png",
+      "path": "./art-library/roster-24/batch-01/r02-art.png",
+      "sha256": "4e6f00edf4d828b102e7864813421a35cbc0e18d7449b4760897809bc030629a"
+    },
+    {
+      "entry": "roster-r03",
+      "label": "四视图与标尺检查",
+      "source": "assets/characters/grassy/customization/female/concepts/roster-24/batch-01/r03-ruler.png",
+      "path": "./art-library/roster-24/batch-01/r03-ruler.png",
+      "sha256": "4c1cd5d6c34b9a8addb2db5b22b1bd20b40bd721e4b84aa0fe013c03e18f3409"
+    },
+    {
+      "entry": "roster-r03",
+      "label": "无尺原画",
+      "source": "assets/characters/grassy/customization/female/concepts/roster-24/batch-01/r03-art.png",
+      "path": "./art-library/roster-24/batch-01/r03-art.png",
+      "sha256": "bcf7587057eba4639a93407b8507d6df02b7d5de9de3321eb2f4774922a52bca"
+    },
+    {
+      "entry": "roster-r04",
+      "label": "四视图与标尺检查",
+      "source": "assets/characters/grassy/customization/female/concepts/roster-24/batch-02/r04-ruler.png",
+      "path": "./art-library/roster-24/batch-02/r04-ruler.png",
+      "sha256": "8555dd099e9130a06118ecdbca1c224dc907dae65d32d118c7211d95fbc1921d"
+    },
+    {
+      "entry": "roster-r04",
+      "label": "无尺原画",
+      "source": "assets/characters/grassy/customization/female/concepts/roster-24/batch-02/r04-art.png",
+      "path": "./art-library/roster-24/batch-02/r04-art.png",
+      "sha256": "6b52a482aab9805675cc2261da7e0282542b4666b380196090e522a1ea615e45"
+    },
+    {
+      "entry": "roster-r05",
+      "label": "四视图与标尺检查",
+      "source": "assets/characters/grassy/customization/female/concepts/roster-24/batch-02/r05-ruler.png",
+      "path": "./art-library/roster-24/batch-02/r05-ruler.png",
+      "sha256": "5042a8fcc31053eea687a9a515c93594ada83ac2eefb83e3a6e96f849d48e3cf"
+    },
+    {
+      "entry": "roster-r05",
+      "label": "无尺原画",
+      "source": "assets/characters/grassy/customization/female/concepts/roster-24/batch-02/r05-art.png",
+      "path": "./art-library/roster-24/batch-02/r05-art.png",
+      "sha256": "deab3141ffa8556933bb4c29242a6f963405640b4eea90044ac6aa7c1c34f69d"
+    },
+    {
+      "entry": "roster-r06",
+      "label": "四视图与标尺检查",
+      "source": "assets/characters/grassy/customization/female/concepts/roster-24/batch-02/r06-ruler.png",
+      "path": "./art-library/roster-24/batch-02/r06-ruler.png",
+      "sha256": "3e9d5935f673ffe2c4dbccd3c9a26e2a175085d61d11866b0d5d6a0495e0f916"
+    },
+    {
+      "entry": "roster-r06",
+      "label": "无尺原画",
+      "source": "assets/characters/grassy/customization/female/concepts/roster-24/batch-02/r06-art.png",
+      "path": "./art-library/roster-24/batch-02/r06-art.png",
+      "sha256": "d1dbd1dd5aa1264c09e1a7aab5936848b29a97d2e286bf33d5083ec8d7789982"
+    },
+    {
+      "entry": "roster-r07",
+      "label": "四视图与标尺检查",
+      "source": "assets/characters/grassy/customization/female/concepts/roster-24/batch-03/r07-ruler.png",
+      "path": "./art-library/roster-24/batch-03/r07-ruler.png",
+      "sha256": "2cb89c897302ecf66fb38535d2d5ef1ac4892368f27756aa5fb813fd663b3ef0"
+    },
+    {
+      "entry": "roster-r07",
+      "label": "无尺原画",
+      "source": "assets/characters/grassy/customization/female/concepts/roster-24/batch-03/r07-art.png",
+      "path": "./art-library/roster-24/batch-03/r07-art.png",
+      "sha256": "3e24cd135c66f2a09f1bb16d9135a310e10b75816c82bd76ef28788c4c27e41e"
+    },
+    {
+      "entry": "roster-r08",
+      "label": "四视图与标尺检查",
+      "source": "assets/characters/grassy/customization/female/concepts/roster-24/batch-03/r08-ruler.png",
+      "path": "./art-library/roster-24/batch-03/r08-ruler.png",
+      "sha256": "176c92635efe4b43ac88ff71b61d954c59a52e4323cdade758bb17cb3ceaeeab"
+    },
+    {
+      "entry": "roster-r08",
+      "label": "无尺原画",
+      "source": "assets/characters/grassy/customization/female/concepts/roster-24/batch-03/r08-art.png",
+      "path": "./art-library/roster-24/batch-03/r08-art.png",
+      "sha256": "c48e07b33a39eb1b7ac024263e391ad028b6c49c69af8a814394282fa999b78b"
+    },
+    {
+      "entry": "roster-r09",
+      "label": "四视图与标尺检查",
+      "source": "assets/characters/grassy/customization/female/concepts/roster-24/batch-02/r09-ruler.png",
+      "path": "./art-library/roster-24/batch-02/r09-ruler.png",
+      "sha256": "9dcfd791be85af92111885e4892e36e869e7a3dda3be3ba24fb867dfdcaa492d"
+    },
+    {
+      "entry": "roster-r09",
+      "label": "无尺原画",
+      "source": "assets/characters/grassy/customization/female/concepts/roster-24/batch-02/r09-art.png",
+      "path": "./art-library/roster-24/batch-02/r09-art.png",
+      "sha256": "26f2a65c8a76ca8123fac1b859215c65b5afb105bd50b69295f76a200a6078dd"
+    },
+    {
+      "entry": "roster-r10",
+      "label": "四视图与标尺检查",
+      "source": "assets/characters/grassy/customization/female/concepts/roster-24/batch-01/r10-ruler.png",
+      "path": "./art-library/roster-24/batch-01/r10-ruler.png",
+      "sha256": "2d0a2c5aa2f850ff4c33e0fbaa55c0171d46fa1ff81b97395a796b6a77d4896c"
+    },
+    {
+      "entry": "roster-r10",
+      "label": "无尺原画",
+      "source": "assets/characters/grassy/customization/female/concepts/roster-24/batch-01/r10-art.png",
+      "path": "./art-library/roster-24/batch-01/r10-art.png",
+      "sha256": "8700827cb85e798ad333da6bb7bf0dd114919008ade8a3bebabc4dba4b2575a5"
+    },
+    {
+      "entry": "roster-r11",
+      "label": "四视图与标尺检查",
+      "source": "assets/characters/grassy/customization/female/concepts/roster-24/batch-03/r11-ruler.png",
+      "path": "./art-library/roster-24/batch-03/r11-ruler.png",
+      "sha256": "192c7bfca49f259637e5fc39432b0e2819c6b55e43b19a32d3d09f296161e621"
+    },
+    {
+      "entry": "roster-r11",
+      "label": "无尺原画",
+      "source": "assets/characters/grassy/customization/female/concepts/roster-24/batch-03/r11-art.png",
+      "path": "./art-library/roster-24/batch-03/r11-art.png",
+      "sha256": "9b1a2183756550cae22d1e5096b55d672c53c1ed55dff14241f77548fe868ba9"
+    },
+    {
+      "entry": "roster-r12",
+      "label": "四视图与标尺检查",
+      "source": "assets/characters/grassy/customization/female/concepts/roster-24/batch-03/r12-ruler.png",
+      "path": "./art-library/roster-24/batch-03/r12-ruler.png",
+      "sha256": "aabfe7ea5d60c6686a303724c2c90bd9f8cad6e141090e94bf464d18c491beb8"
+    },
+    {
+      "entry": "roster-r12",
+      "label": "无尺原画",
+      "source": "assets/characters/grassy/customization/female/concepts/roster-24/batch-03/r12-art.png",
+      "path": "./art-library/roster-24/batch-03/r12-art.png",
+      "sha256": "822ea8dd0c03073bbc3663899b0c4c645631d586fd151f8f0387bfa5ae4d2a08"
+    },
+    {
+      "entry": "roster-r13",
+      "label": "四视图与标尺检查",
+      "source": "assets/characters/grassy/customization/female/concepts/roster-24/batch-04/r13-ruler.png",
+      "path": "./art-library/roster-24/batch-04/r13-ruler.png",
+      "sha256": "e56b0026f6488a8b4e304ec3bf6dcf4a451910ea1f557de202ca1c7fe73c4527"
+    },
+    {
+      "entry": "roster-r13",
+      "label": "无尺原画",
+      "source": "assets/characters/grassy/customization/female/concepts/roster-24/batch-04/r13-art.png",
+      "path": "./art-library/roster-24/batch-04/r13-art.png",
+      "sha256": "a76328a5d0e27be4850a32d002e799b6357ed6f1cf6f1e215242407988307640"
+    },
+    {
+      "entry": "roster-r14",
+      "label": "四视图与标尺检查",
+      "source": "assets/characters/grassy/customization/female/concepts/roster-24/batch-04/r14-ruler.png",
+      "path": "./art-library/roster-24/batch-04/r14-ruler.png",
+      "sha256": "be7fd0fc53003a7440dd1087c362ffcabfedbb8fd6eff363ecc3603d8ed10717"
+    },
+    {
+      "entry": "roster-r14",
+      "label": "无尺原画",
+      "source": "assets/characters/grassy/customization/female/concepts/roster-24/batch-04/r14-art.png",
+      "path": "./art-library/roster-24/batch-04/r14-art.png",
+      "sha256": "5fae47f02d8bd64b08b69b721896c4582975af6dca78d45dee3d069227ef3a05"
+    },
+    {
+      "entry": "roster-r15",
+      "label": "四视图与标尺检查",
+      "source": "assets/characters/grassy/customization/female/concepts/roster-24/batch-04/r15-ruler.png",
+      "path": "./art-library/roster-24/batch-04/r15-ruler.png",
+      "sha256": "e58ff27eddb56a483acfcc7b8ae7c240d887766ed4d9ce107519b190190f609c"
+    },
+    {
+      "entry": "roster-r15",
+      "label": "无尺原画",
+      "source": "assets/characters/grassy/customization/female/concepts/roster-24/batch-04/r15-art.png",
+      "path": "./art-library/roster-24/batch-04/r15-art.png",
+      "sha256": "17785253849b720ebad110836c43d9a014f616b33577b8c110eae3d02831fff8"
+    },
+    {
+      "entry": "roster-r16",
+      "label": "四视图与标尺检查",
+      "source": "assets/characters/grassy/customization/female/concepts/roster-24/batch-04/r16-ruler.png",
+      "path": "./art-library/roster-24/batch-04/r16-ruler.png",
+      "sha256": "aaa9a85695622a03e6d702ea107ee67ae5215896c1674b133b4a984cf6790e48"
+    },
+    {
+      "entry": "roster-r16",
+      "label": "无尺原画",
+      "source": "assets/characters/grassy/customization/female/concepts/roster-24/batch-04/r16-art.png",
+      "path": "./art-library/roster-24/batch-04/r16-art.png",
+      "sha256": "0966a0882e819607fd5ac41a3c2a394fd6bce53da1390db14349c84ea368da0d"
+    },
+    {
+      "entry": "roster-r17",
+      "label": "四视图与标尺检查",
+      "source": "assets/characters/grassy/customization/female/concepts/roster-24/batch-05/r17-ruler.png",
+      "path": "./art-library/roster-24/batch-05/r17-ruler.png",
+      "sha256": "dad9e2c26f86d5dfe8e1ce8accf4d652979065e0277a69704302a46b846071b4"
+    },
+    {
+      "entry": "roster-r17",
+      "label": "无尺原画",
+      "source": "assets/characters/grassy/customization/female/concepts/roster-24/batch-05/r17-art.png",
+      "path": "./art-library/roster-24/batch-05/r17-art.png",
+      "sha256": "2de5bd16c69d070c03a67eeb3bbbc531f034399279ddf1042370219a8365b9c6"
+    },
+    {
+      "entry": "roster-r18",
+      "label": "四视图与标尺检查",
+      "source": "assets/characters/grassy/customization/female/concepts/roster-24/batch-05/r18-ruler.png",
+      "path": "./art-library/roster-24/batch-05/r18-ruler.png",
+      "sha256": "12289b87b396b5f012de0bb523a2364172c05457abec7aca0ceccb184fd79e5a"
+    },
+    {
+      "entry": "roster-r18",
+      "label": "无尺原画",
+      "source": "assets/characters/grassy/customization/female/concepts/roster-24/batch-05/r18-art.png",
+      "path": "./art-library/roster-24/batch-05/r18-art.png",
+      "sha256": "6c572c5f2bc1adc04b393d0b8bb624928e1ae6a36bfc49fe44d7016aeeb01574"
+    },
+    {
+      "entry": "roster-r19",
+      "label": "四视图与标尺检查",
+      "source": "assets/characters/grassy/customization/female/concepts/roster-24/batch-05/r19-ruler.png",
+      "path": "./art-library/roster-24/batch-05/r19-ruler.png",
+      "sha256": "a842eaa77e07d6374723243e9e0682d2413d08ee1016c2fc3aa9233dd1c33a66"
+    },
+    {
+      "entry": "roster-r19",
+      "label": "无尺原画",
+      "source": "assets/characters/grassy/customization/female/concepts/roster-24/batch-05/r19-art.png",
+      "path": "./art-library/roster-24/batch-05/r19-art.png",
+      "sha256": "c9f6233f91fb9f4ee7a061355d71f3ffe3711ddd50afd14af118147ba66fa20c"
+    },
+    {
+      "entry": "roster-r20",
+      "label": "四视图与标尺检查",
+      "source": "assets/characters/grassy/customization/female/concepts/roster-24/batch-05/r20-ruler.png",
+      "path": "./art-library/roster-24/batch-05/r20-ruler.png",
+      "sha256": "87be5fe06cdd341c4de4d70e1f70c0889d35ae824ecdead75995e5c0d71e4a9e"
+    },
+    {
+      "entry": "roster-r20",
+      "label": "无尺原画",
+      "source": "assets/characters/grassy/customization/female/concepts/roster-24/batch-05/r20-art.png",
+      "path": "./art-library/roster-24/batch-05/r20-art.png",
+      "sha256": "5b273b1e2654f15b5122fef3c582ddd47d30e920437e2d7b682d248e7c8acdb2"
+    },
+    {
+      "entry": "roster-r21",
+      "label": "四视图与标尺检查",
+      "source": "assets/characters/grassy/customization/female/concepts/roster-24/batch-06/r21-ruler.png",
+      "path": "./art-library/roster-24/batch-06/r21-ruler.png",
+      "sha256": "618654071bbccfd8ad09a7ba86f7ea91b408eae2d7a40b7a13a1b1fcb8885d29"
+    },
+    {
+      "entry": "roster-r21",
+      "label": "无尺原画",
+      "source": "assets/characters/grassy/customization/female/concepts/roster-24/batch-06/r21-art.png",
+      "path": "./art-library/roster-24/batch-06/r21-art.png",
+      "sha256": "990ff713b7300b86508f090818eeb6095481100a4141990c99af68c40a2f6a44"
+    },
+    {
+      "entry": "roster-r22",
+      "label": "四视图与标尺检查",
+      "source": "assets/characters/grassy/customization/female/concepts/roster-24/batch-06/r22-ruler.png",
+      "path": "./art-library/roster-24/batch-06/r22-ruler.png",
+      "sha256": "e1f7a7df46a13a31c249a2bd1e103425785376f788fe08113ba6dd09b32a9162"
+    },
+    {
+      "entry": "roster-r22",
+      "label": "无尺原画",
+      "source": "assets/characters/grassy/customization/female/concepts/roster-24/batch-06/r22-art.png",
+      "path": "./art-library/roster-24/batch-06/r22-art.png",
+      "sha256": "b1d98aa6512c4427150404609f6b1a29d54a2f6cf66f613628c26bef3cfb7968"
+    },
+    {
+      "entry": "roster-r23",
+      "label": "四视图与标尺检查",
+      "source": "assets/characters/grassy/customization/female/concepts/roster-24/batch-06/r23-ruler.png",
+      "path": "./art-library/roster-24/batch-06/r23-ruler.png",
+      "sha256": "996cfbf2f9907105941e557c112e58d1664d05ee878bd3298efbfc859f4fc0ad"
+    },
+    {
+      "entry": "roster-r23",
+      "label": "无尺原画",
+      "source": "assets/characters/grassy/customization/female/concepts/roster-24/batch-06/r23-art.png",
+      "path": "./art-library/roster-24/batch-06/r23-art.png",
+      "sha256": "5106e3bb42ead67e970a706aa2ae1c468745ee3c506b0685bdca1118218c9ba4"
+    },
+    {
+      "entry": "roster-r24",
+      "label": "四视图与标尺检查",
+      "source": "assets/characters/grassy/customization/female/concepts/roster-24/batch-06/r24-ruler.png",
+      "path": "./art-library/roster-24/batch-06/r24-ruler.png",
+      "sha256": "14b7260290abcd27a528bdabf6fe9cd5b1828750adf56f9775892b29ecad2a7c"
+    },
+    {
+      "entry": "roster-r24",
+      "label": "无尺原画",
+      "source": "assets/characters/grassy/customization/female/concepts/roster-24/batch-06/r24-art.png",
+      "path": "./art-library/roster-24/batch-06/r24-art.png",
+      "sha256": "1f8481f460cd36936203646ee472e03df96b4a72df3ac822f3a92c63b92e25d7"
+    },
+    {
+      "entry": "classics-7-overview",
+      "label": "第一批四款重绘",
+      "source": "assets/characters/grassy/customization/concepts/classics-7/overview-game-v2.png",
+      "path": "./art-library/classics-7/overview-game-v2.png",
+      "sha256": "bdf9f4e9b7e5e088211141e702c56b15707679f7a1cf20ec7589f9435251a545"
+    },
+    {
+      "entry": "classics-c01",
+      "label": "唯一造型四视图",
+      "source": "assets/characters/grassy/customization/concepts/classics-7/c01-game-v2.png",
+      "path": "./art-library/classics-7/c01-game-v2.png",
+      "sha256": "a71eb6d302aca3aac2359d929d3f55bdb3ea750bcd7c2c37ff3095c1bd66704f"
+    },
+    {
+      "entry": "classics-c01",
+      "label": "比例检查标尺",
+      "source": "assets/characters/grassy/customization/concepts/classics-7/c01-game-v2-ruler.png",
+      "path": "./art-library/classics-7/c01-game-v2-ruler.png",
+      "sha256": "6fbbd4eb83a8223ca935ed53e7b64df8c3f15b0ae07da73b79645b38033776d0"
+    },
+    {
+      "entry": "classics-c02",
+      "label": "唯一造型四视图",
+      "source": "assets/characters/grassy/customization/concepts/classics-7/c02-game-v2.png",
+      "path": "./art-library/classics-7/c02-game-v2.png",
+      "sha256": "e5d5db162be5a59b8d8ad78084a39e1cce335168c08912fc7c07b040cefcc47b"
+    },
+    {
+      "entry": "classics-c02",
+      "label": "比例检查标尺",
+      "source": "assets/characters/grassy/customization/concepts/classics-7/c02-game-v2-ruler.png",
+      "path": "./art-library/classics-7/c02-game-v2-ruler.png",
+      "sha256": "6cba60fbcf20f93aa18ee64fbbc935f46e32fa46515866632e1213e01ca50f22"
+    },
+    {
+      "entry": "classics-c03",
+      "label": "唯一造型四视图",
+      "source": "assets/characters/grassy/customization/concepts/classics-7/c03-game-v2.png",
+      "path": "./art-library/classics-7/c03-game-v2.png",
+      "sha256": "ed6701d7c77887a411a698659fb21f99a7f5f430b0d0386789ce47d429ae296e"
+    },
+    {
+      "entry": "classics-c03",
+      "label": "比例检查标尺",
+      "source": "assets/characters/grassy/customization/concepts/classics-7/c03-game-v2-ruler.png",
+      "path": "./art-library/classics-7/c03-game-v2-ruler.png",
+      "sha256": "ce8613b4c601ef8fd99e8d5160916c1d4694d09e91655c7fd12c74becd149f51"
+    },
+    {
+      "entry": "classics-c04",
+      "label": "唯一造型四视图",
+      "source": "assets/characters/grassy/customization/concepts/classics-7/c04-game-v2.png",
+      "path": "./art-library/classics-7/c04-game-v2.png",
+      "sha256": "9c9220206f96b2a9336032bfa60d22496c12835fc1678ff34e4899f153f006bf"
+    },
+    {
+      "entry": "classics-c04",
+      "label": "比例检查标尺",
+      "source": "assets/characters/grassy/customization/concepts/classics-7/c04-game-v2-ruler.png",
+      "path": "./art-library/classics-7/c04-game-v2-ruler.png",
+      "sha256": "a2086bab77920c3368a4bd2bb5e8dfce3e72081d34fa3be5cc601520ba3fd77a"
+    }
+  ]
+}

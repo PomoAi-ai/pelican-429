@@ -83,6 +83,8 @@ export interface TreeView {
   blossomEmitters(): readonly Readonly<Rect>[];
   /** 平台瓦片 (tx, ty) 所属的已上屏树与枝组（风动参数与着色器同值）；不是已上屏树的平台格返回 null。 */
   rideAt(tx: number, ty: number): TreeRideTile | null;
+  /** 移除一棵树（家园模式砍树）；已上屏的桶当场重建，未上屏的桶留给后续 update。 */
+  removeTree(id: number): void;
   stats(): TreeViewStats;
   dispose(): void;
 }
@@ -313,6 +315,21 @@ export function createTreeView(trees: readonly TreeInstance[], options: TreeView
     },
     rideAt(tx, ty) {
       return rides.get(tileKey(tx, ty)) ?? null;
+    },
+    removeTree(id) {
+      for (const [cx, list] of buckets) {
+        const index = list.findIndex(t => t.id === id);
+        if (index < 0) continue;
+        list.splice(index, 1);
+        if (list.length === 0) buckets.delete(cx);
+        const loaded = groups.has(cx);
+        unload(cx);
+        blossoms.delete(cx);
+        // 否则同桶的邻树要按帧预算分几帧才长回来，砍一棵会让周围的树闪没。
+        if (loaded && buckets.has(cx)) while (!step(cx).done);
+        return;
+      }
+      throw new Error(`tree-view: tree ${id} is not in any bucket`);
     },
     stats() {
       return { loadedBuckets: groups.size, pendingTrees, lastBuilt, lastCost };

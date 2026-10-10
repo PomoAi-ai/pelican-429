@@ -33,9 +33,11 @@ import type { LevelData } from '../world/level.ts';
 import { pickHomeHut } from '../world/spawn-home.ts';
 import type { WindController } from '../world/wind.ts';
 import { skyExposed } from '../world/sky-exposure.ts';
+import type { CharacterAppearance } from '../config/character-appearance.ts';
+import { createCharacterAppearanceStore } from './character-appearance.ts';
 
 /** 实体视图：鹈鹕 rig、光球、视图注册表、光球特效；鹈鹕/假人按地形做斜坡脚底偏移。 */
-export function createEntityViews(stage: { scene: THREE.Object3D }, level: LevelData, disposers: Array<() => void>, actors: () => readonly Entity[], treeRide: TreeRideQuery, wind: WindController, rig: PelicanRig, grassyVariant?: GrassyAnimatedVariant | null, grassyGait?: 'run' | 'sprint') {
+export function createEntityViews(stage: { scene: THREE.Object3D }, level: LevelData, disposers: Array<() => void>, actors: () => readonly Entity[], treeRide: TreeRideQuery, wind: WindController, rig: PelicanRig, grassyVariant?: GrassyAnimatedVariant | null, grassyGait?: 'run' | 'sprint', appearance: () => CharacterAppearance = createCharacterAppearanceStore(window.localStorage).current, modelView?: () => { yaw: number; pitch: number }) {
   rig.root.traverse((node) => {
     if (!(node as THREE.Mesh).isMesh) return;
     // 021：鹈鹕自身材质保留最低可见度（全黑洞内也能看到轮廓；光照图挂接时读取）。
@@ -71,7 +73,7 @@ export function createEntityViews(stage: { scene: THREE.Object3D }, level: Level
     pelican: grassyVariant === null
       ? createPelicanViewFactory({ rig, tuning: TUNING, terrain: level.map, actors, fishRelay: projectiles.fishRelay, treeRide, windAt })
       : createPlayerViewFactory({ rig, tuning: TUNING, terrain: level.map, actors, fishRelay: projectiles.fishRelay, treeRide, grassyVariant, grassyGait,
-        windAt }),
+        windAt, appearance, modelView }),
     trainingDummy: createDummyViewFactory({ tuning: TUNING, terrain: level.map, treeRide }),
     gatekeeper: createEnemyViewFactory(level.map), lineHound: createEnemyViewFactory(level.map),
     watchWasp: createEnemyViewFactory(level.map), loadmaster: createEnemyViewFactory(level.map),

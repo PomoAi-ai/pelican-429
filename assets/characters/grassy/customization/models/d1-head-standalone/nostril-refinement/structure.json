@@ -1,0 +1,85 @@
+{
+  "source": "assets/characters/grassy/customization/models/d1-head-standalone/nose-lip-refinement/refined-head.glb",
+  "sourceBounds": [
+    [
+      -0.7990930080413818,
+      -0.8020576238632202,
+      0.0
+    ],
+    [
+      0.8019310235977173,
+      0.8231769800186157,
+      1.8907849788665771
+    ]
+  ],
+  "bounds": [
+    [
+      -0.7990930080413818,
+      -0.8020576238632202,
+      0.0
+    ],
+    [
+      0.8019310235977173,
+      0.8231769800186157,
+      1.8907849788665771
+    ]
+  ],
+  "originalNoseVertexCount": 138,
+  "cavities": [
+    {
+      "centerXY": [
+        -0.034,
+        -0.773
+      ],
+      "openingRadii": [
+        0.01,
+        0.0075
+      ],
+      "openingZ": 0.583,
+      "depth": 0.027,
+      "outwardSlope": 0.6,
+      "boundaryVertices": 48,
+      "replacedFaces": 208
+    },
+    {
+      "centerXY": [
+        0.034,
+        -0.773
+      ],
+      "openingRadii": [
+        0.01,
+        0.0075
+      ],
+      "openingZ": 0.583,
+      "depth": 0.027,
+      "outwardSlope": 0.6,
+      "boundaryVertices": 50,
+      "replacedFaces": 200
+    }
+  ],
+  "cavityFaces": 392,
+  "vertices": 19524,
+  "faces": 38348,
+  "nonManifoldEdges": 0,
+  "protectedPositionUVCornerCount": 18049,
+  "protectedPositionUVNormalsPreserved": true,
+  "visibility": {
+    "front": {
+      "visibleInnerFaceSamples": 0,
+      "totalInnerFaces": 392
+    },
+    "right": {
+      "visibleInnerFaceSamples": 46,
+      "totalInnerFaces": 392
+    },
+    "three-quarter": {
+      "visibleInnerFaceSamples": 17,
+      "totalInnerFaces": 392
+    },
+    "low-angle": {
+      "visibleInnerFaceSamples": 45,
+      "totalInnerFaces": 392
+    }
+  },
+  "method": "Replace two nasal underside patches with continuous rolled rims, inward walls and blind caps; no floating or added dark geometry"
+}

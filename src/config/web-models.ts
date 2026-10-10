@@ -1,3 +1,5 @@
+import { CUSTOMIZATION_MODELS } from './character-customization-assets.ts';
+
 /** 原始模型及无损版本保留供近景对照；默认游戏资源同时压缩贴图与模型数据。 */
 export const WEB_MODEL_SOURCES: readonly string[] = [
   './characters/human/models-equipped/grassy-equipped-game.glb',
@@ -9,6 +11,7 @@ export const WEB_MODEL_SOURCES: readonly string[] = [
   './characters/enemies/watch-wasp/model.glb',
   './characters/enemies/loadmaster/model.glb',
   './characters/enemies/gatekeeper/model.glb',
+  ...CUSTOMIZATION_MODELS.map(model => model.path),
 ];
 
 export function webModelPath(source: string): string {

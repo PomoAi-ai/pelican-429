@@ -7,6 +7,7 @@ import { mountMobileGameViewport } from './ui/mobile-game-viewport.ts';
 import { homeScreenInstallState } from './ui/home-screen-install.ts';
 import { fullscreenOnFirstTap } from './ui/fullscreen.ts';
 import { mountSitePage } from './ui/site-pages.ts';
+import { mountArtLibrary } from './ui/art-library.ts';
 
 function bootError(error: unknown): void {
   console.error(error);
@@ -54,7 +55,9 @@ async function boot(): Promise<void> {
       if (url.origin === location.origin && url.searchParams.has('mode') && !RELEASE_MODES.includes(url.searchParams.get('mode')!)) link.remove();
     }
   }
-  if (mode === 'game' || mode === 'story' || mode === 'controls') {
+  const playing = mode === 'game' || mode === 'homestead' || mode === 'story' || mode === 'controls';
+  const perspective = mode === 'resources' && (params.get('scene') === 'room' || params.get('scene') === 'settlement' || params.get('scene') === 'depth');
+  if (playing) {
     document.documentElement.classList.add('game-interface');
     document.querySelector<HTMLMetaElement>('meta[name="viewport"]')!.content = 'width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover';
     document.addEventListener('contextmenu', event => {
@@ -64,8 +67,10 @@ async function boot(): Promise<void> {
     if (matchMedia('(pointer: coarse)').matches) fullscreenOnFirstTap();
   }
   const navigation = document.getElementById('dev-navigation')!;
-  navigation.dataset.context = mode === 'index' ? 'home' : mode === 'story' || mode === 'game' || mode === 'controls' ? 'game' : 'resources';
+  navigation.dataset.context = mode === 'index' ? 'home' : playing ? 'game' : 'resources';
   const currentPage = mode === 'showcase' && params.get('library') === 'history' ? 'history'
+    : perspective ? 'perspective'
+    : mode === 'homestead' ? 'game'
     : mode === 'game' && params.get('level') === 'boss-arena' ? 'boss-arena'
     : mode === 'game' && params.get('free') === '1' ? 'game'
     : mode === 'game' && params.get('level') === 'facility' ? `chapter-${parseFacilityChapter(params)}` : mode;
@@ -89,8 +94,15 @@ async function boot(): Promise<void> {
     navigation.querySelector('.home-play-toggle')!.remove();
     document.getElementById('home-play-menu')!.remove();
   }
-  if (mode !== 'index') attachGameNavigation(navigation, mode === 'game' || mode === 'story' || mode === 'controls');
-  if (mode === 'catalog' || mode === 'about') {
+  if (mode !== 'index' && !perspective) {
+    attachGameNavigation(navigation, playing);
+  }
+  if (mode === 'art-library') {
+    attachDomLanguage();
+    mountArtLibrary();
+    return;
+  }
+  if (mode === 'catalog' || mode === 'about' || mode === 'concepts') {
     attachDomLanguage();
     mountSitePage(mode, navigation);
     return;
@@ -130,6 +142,19 @@ async function boot(): Promise<void> {
     // 首页原先 hidden，显式恢复锚点位置，避免平滑滚动途中误启动首屏场景。
     document.getElementById(location.hash.slice(1))?.scrollIntoView({ behavior: 'instant' });
     const hero = document.querySelector<HTMLElement>('#entry-index .home-hero')!;
+    const customize = document.createElement('button');
+    customize.type = 'button';
+    customize.className = 'home-button home-button-secondary';
+    const labelCustomize = (): void => { customize.textContent = getLanguage() === 'zh' ? '捏人 · 角色外观' : 'Customize character'; };
+    labelCustomize();
+    onLanguageChange(labelCustomize);
+    hero.querySelector('.home-actions')!.append(customize);
+    customize.addEventListener('click', () => {
+      customize.disabled = true;
+      void Promise.all([import('./app/open-character-editor.ts'), import('./app/character-appearance.ts')]).then(([{ openSavedCharacterEditor }, { createCharacterAppearanceStore }]) => {
+        openSavedCharacterEditor(createCharacterAppearanceStore(window.localStorage), () => { customize.disabled = false; }, true);
+      }).catch(error => { customize.disabled = false; bootError(error); });
+    });
     let imagesObserved = false;
     const observeImages = (): void => {
       if (imagesObserved) return;

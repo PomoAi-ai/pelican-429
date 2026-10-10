@@ -6,6 +6,7 @@
 import type { Rect, Vec2 } from '../core/math.ts';
 import { validateEnemyRules } from './enemy-rules.ts';
 import { validateBossRules } from './boss-rules.ts';
+import { HOMESTEAD, validateHomesteadRules } from './homestead.ts';
 import { validateWorldgenTuning } from './worldgen-rules.ts';
 import { flightMaxRise, validateCaveIslandTuning } from './cave-island-rules.ts';
 import type { WorldgenTuning } from './worldgen-rules.ts';
@@ -408,6 +409,7 @@ function validateCollision(path: string, c: CollisionTuning): void {
 export function validateTuning(t: Tuning): void {
   validateEnemyRules();
   validateBossRules();
+  validateHomesteadRules(HOMESTEAD);
   positive('sim.step', t.sim.step);
   positive('sim.maxFrameTime', t.sim.maxFrameTime);
   if (t.sim.maxFrameTime < t.sim.step) fail('sim.maxFrameTime', 'must be >= sim.step', t.sim.maxFrameTime);

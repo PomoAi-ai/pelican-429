@@ -1,0 +1,206 @@
+{
+  "source": "private-source-043",
+  "sourceFaces": 19576,
+  "duplicateSourceFacesRemovedByImporter": 8,
+  "normalization": {
+    "height": 3.1,
+    "uniformScale": 1.6325137930011275,
+    "sourceBounds": [
+      [
+        -0.42050600051879883,
+        -0.3725610077381134,
+        -2.761252559935201e-08
+      ],
+      [
+        0.42150598764419556,
+        0.3657391369342804,
+        1.898911952972412
+      ]
+    ]
+  },
+  "objects": [
+    {
+      "name": "model",
+      "vertices": 19529,
+      "faces": 19568,
+      "faceSizes": {
+        "4": 19484,
+        "3": 84
+      },
+      "boundaryEdges": 26,
+      "nonManifoldEdges": 26,
+      "wireEdges": 0,
+      "inconsistentWindingEdges": 0,
+      "degenerateFaces": 0,
+      "connectedComponents": [
+        {
+          "vertices": 19503,
+          "boundaryEdges": 0,
+          "bounds": [
+            [
+              -0.687298059463501,
+              -0.6026424765586853,
+              6.22966638275102e-08
+            ],
+            [
+              0.687298059463501,
+              0.6026425361633301,
+              3.0999999046325684
+            ]
+          ]
+        },
+        {
+          "vertices": 4,
+          "boundaryEdges": 4,
+          "bounds": [
+            [
+              -0.1698320358991623,
+              -0.20499147474765778,
+              1.5783861875534058
+            ],
+            [
+              -0.16211840510368347,
+              -0.19312472641468048,
+              1.5935097932815552
+            ]
+          ]
+        },
+        {
+          "vertices": 4,
+          "boundaryEdges": 4,
+          "bounds": [
+            [
+              0.16211842000484467,
+              -0.20499147474765778,
+              1.5783861875534058
+            ],
+            [
+              0.1698336899280548,
+              -0.19312472641468048,
+              1.5935097932815552
+            ]
+          ]
+        },
+        {
+          "vertices": 3,
+          "boundaryEdges": 3,
+          "bounds": [
+            [
+              -0.16378356516361237,
+              -0.19789493083953857,
+              1.5922983884811401
+            ],
+            [
+              -0.1603291630744934,
+              -0.19297289848327637,
+              1.6038354635238647
+            ]
+          ]
+        },
+        {
+          "vertices": 3,
+          "boundaryEdges": 3,
+          "bounds": [
+            [
+              -0.3619332015514374,
+              0.07736474275588989,
+              0.2429589182138443
+            ],
+            [
+              -0.3579384386539459,
+              0.08433230966329575,
+              0.2531163990497589
+            ]
+          ]
+        },
+        {
+          "vertices": 3,
+          "boundaryEdges": 3,
+          "bounds": [
+            [
+              0.1603291928768158,
+              -0.19789493083953857,
+              1.5922983884811401
+            ],
+            [
+              0.16378359496593475,
+              -0.19297289848327637,
+              1.6038354635238647
+            ]
+          ]
+        },
+        {
+          "vertices": 3,
+          "boundaryEdges": 3,
+          "bounds": [
+            [
+              0.3579384684562683,
+              0.07736474275588989,
+              0.2429589182138443
+            ],
+            [
+              0.3619332015514374,
+              0.08433230966329575,
+              0.2531163990497589
+            ]
+          ]
+        },
+        {
+          "vertices": 3,
+          "boundaryEdges": 3,
+          "bounds": [
+            [
+              0.3578421175479889,
+              0.04660654813051224,
+              0.2295967936515808
+            ],
+            [
+              0.37101325392723083,
+              0.0493132546544075,
+              0.24537666141986847
+            ]
+          ]
+        },
+        {
+          "vertices": 3,
+          "boundaryEdges": 3,
+          "bounds": [
+            [
+              -0.3710115849971771,
+              0.04660654813051224,
+              0.2295967936515808
+            ],
+            [
+              -0.3578421175479889,
+              0.0493132546544075,
+              0.24537666141986847
+            ]
+          ]
+        }
+      ],
+      "collapsedUvFaces": 0,
+      "uvOutsideUnitSquare": 0
+    }
+  ],
+  "rigged": false,
+  "animations": [],
+  "limits": [
+    "UV overlap and self-intersection are not automatically checked.",
+    "Quad count alone does not establish deformation-ready edge flow."
+  ],
+  "visualFindings": [
+    "Base-color-only render retains hair highlights and garment shading; the downloaded diffuse is not lighting-neutral.",
+    "Clay head shows shallow eye and mouth geometry; facial expression relies heavily on painted texture.",
+    "Face profile and thick hair masses differ from the approved illustrated reference.",
+    "No skeleton, animation or morph targets are present; deformation suitability is not verified."
+  ],
+  "validation": {
+    "typecheck": "passed",
+    "tests": {
+      "passed": 1816,
+      "failed": 0
+    },
+    "build": "passed; Vite chunk-size warning",
+    "browser": "PBR and clay rendered in shared stage; front-view control and zoom checked; no console errors/warnings observed"
+  }
+}

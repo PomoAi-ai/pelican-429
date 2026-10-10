@@ -1,0 +1,91 @@
+.room-preview { --room-bg: #10191e; --room-panel: #152127; --room-line: #2b393f; --room-muted: #91a5ae; --room-text: #e6eeed; --room-accent: #b8df9d; height: 100%; display: grid; grid-template-rows: auto minmax(0, 1fr); font: 12px/1.5 'PingFang SC', system-ui, sans-serif; background: var(--room-bg); color: var(--room-text); }
+.room-preview * { box-sizing: border-box; }
+.room-preview [hidden] { display: none; }
+.room-preview :focus-visible { outline: 2px solid var(--room-accent); outline-offset: 3px; }
+.room-preview :is(.room-preview-toolbar, .room-preview-directory, .room-preview-tools) button, .room-preview-toolbar a { min-height: 28px; padding: 3px 7px; border: 1px solid var(--room-line); border-radius: 6px; background: #1d2b32; color: var(--room-text); font: inherit; text-decoration: none; cursor: pointer; white-space: nowrap; }
+.room-preview :is(.room-preview-toolbar, .room-preview-directory, .room-preview-tools) button:hover, .room-preview-toolbar a:hover { background: #2a3b42; border-color: #637b80; }
+.room-preview :is(.room-preview-toolbar, .room-preview-directory, .room-preview-tools) button[aria-pressed="true"] { color: var(--room-accent); background: #26392e; border-color: #59724c; }
+.room-preview :is(.room-preview-toolbar, .room-preview-directory, .room-preview-tools) button:disabled { color: #829293; border-color: #34454a; cursor: default; }
+.room-preview-toolbar { display: flex; align-items: center; gap: 6px; min-height: 36px; padding: 4px 10px; background: var(--room-bg); border-bottom: 1px solid var(--room-line); }
+.room-preview-toolbar strong { display: flex; align-items: center; gap: 10px; margin-right: auto; font-size: 13px; white-space: nowrap; }
+.room-preview-toolbar strong span { font-size: 11px; color: var(--room-muted); font-weight: 400; }
+.room-preview-workspace { position: relative; display: grid; grid-template-columns: 176px minmax(0, 1fr) 204px; min-height: 0; }
+.room-preview-workspace:has(.room-preview-tools[hidden]) { grid-template-columns: 176px minmax(0, 1fr); }
+.room-preview-directory, .room-preview-tools { overflow-y: auto; scrollbar-width: thin; scrollbar-color: #42555d transparent; background: var(--room-panel); }
+.room-preview-directory { padding: 8px; border-right: 1px solid var(--room-line); }
+.room-preview-tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; padding: 3px; border: 1px solid var(--room-line); border-radius: 7px; background: var(--room-bg); }
+.room-preview-tabs a { padding: 6px 2px; color: var(--room-muted); border-radius: 4px; text-align: center; text-decoration: none; white-space: nowrap; font-size: 10px; }
+.room-preview-tabs a:hover { color: var(--room-text); }
+.room-preview-tabs a[aria-current="page"] { color: var(--room-accent); background: #293c2e; }
+.room-preview-heading { display: flex; justify-content: space-between; margin: 12px 6px 6px; color: var(--room-muted); font-size: 11px; font-weight: 500; }
+.room-preview-heading span { font-variant-numeric: tabular-nums; }
+.room-preview-sections { display: grid; gap: 4px; }
+.room-preview-sections button { width: 100%; text-align: left; padding: 6px 8px; border-color: transparent; background: transparent; white-space: normal; }
+.room-preview-caption { display: flex; flex-direction: column; gap: 5px; margin: 8px 0 0; }
+.room-preview-caption strong { font-size: 12px; font-weight: 500; }
+.room-preview-caption span { color: var(--room-muted); font-size: 11px; line-height: 1.8; }
+.room-preview-coverage { margin: 16px 8px 0; color: var(--room-muted); font-size: 11px; line-height: 1.8; }
+.room-preview-coverage summary { cursor: pointer; }
+.room-preview-coverage h3 { margin: 12px 0 4px; font-size: 12px; color: var(--room-text); }
+.room-preview-coverage ul { padding-left: 17px; margin: 0; }
+.room-preview-main { min-width: 0; min-height: 0; display: grid; grid-template-rows: minmax(0, 1fr); }
+.room-preview-viewport { min-width: 0; min-height: 0; position: relative; overflow: hidden; }
+.room-preview-canvas { position: absolute; inset: 0; }
+body.room-scene-page #app canvas { cursor: grab; touch-action: none; }
+body.room-scene-page #app canvas:active { cursor: grabbing; }
+.room-preview-tools { padding: 0 10px; border-left: 1px solid var(--room-line); }
+.room-preview-control-section { padding: 9px 0; border-bottom: 1px solid var(--room-line); }
+.room-preview-control-section:last-child { border-bottom: 0; }
+.room-preview-control-section > summary { cursor: pointer; font-weight: 500; color: var(--room-text); }
+.room-preview-control-section[open] > summary { margin-bottom: 7px; }
+.room-preview-depth-stops, .room-preview-depth-layers { display: grid; gap: 8px; }
+.room-preview-depth-stops button { text-align: left; white-space: normal; }
+.room-preview-depth-stops small { display: block; margin-top: 4px; color: var(--room-muted); font-weight: 400; }
+.room-preview-depth-layers label { display: flex; gap: 8px; align-items: center; font-size: 11px; }
+.room-preview-depth-layers input { accent-color: var(--room-accent); }
+.room-preview-depth-layers small { display: block; color: var(--room-muted); font-size: 10px; }
+.room-preview-depth-layers label:has(input:disabled) { opacity: .4; }
+.room-preview-camera-controls, .room-preview-solar { display: grid; gap: 6px; }
+.room-preview-views, .room-preview-control-row { display: flex; gap: 4px; }
+.room-preview-views button, .room-preview-control-row button { flex: 1; padding: 3px 5px; font-size: 11px; }
+.room-preview-camera-controls small, .room-preview-hint, .room-preview-notes { color: var(--room-muted); font-size: 11px; line-height: 1.8; margin: 0; }
+.room-preview-notes { margin-top: 12px; }
+.room-preview-solar label { display: flex; justify-content: space-between; gap: 8px; font-size: 11px; color: var(--room-muted); }
+.room-preview-solar output { color: var(--room-text); font-variant-numeric: tabular-nums; }
+.room-preview-solar input { width: 100%; margin: 0; accent-color: var(--room-accent); cursor: pointer; }
+.room-preview-solar .room-preview-control-row { margin-bottom: 3px; }
+[data-solar-trial] .room-preview-control-row { flex-wrap: wrap; }
+[data-solar-trial] .room-preview-control-row button { flex-basis: 70px; }
+.room-preview-comparison { padding: 9px 0; border-bottom: 1px solid var(--room-line); font-size: 12px; }
+.room-preview-comparison label { display: block; margin-top: 9px; font-size: 11px; }
+.room-preview-comparison output { display: block; margin-top: 4px; font-variant-numeric: tabular-nums; }
+.room-preview-comparison input { width: 100%; accent-color: var(--room-accent); }
+.room-preview-comparison p { line-height: 1.6; margin: 7px 0; }
+.room-preview-comparison small { color: var(--room-muted); line-height: 1.5; }
+.room-preview-depth-key { display: block; margin-top: 5px; }
+@media (max-width: 1000px) {
+  .room-preview-workspace, .room-preview-workspace:has(.room-preview-tools[hidden]) { grid-template-columns: 176px minmax(0, 1fr); }
+  .room-preview-tools { position: absolute; z-index: 4; right: 0; top: 0; bottom: 0; width: 244px; box-shadow: -12px 0 30px #0005; }
+  .room-preview-toolbar strong { gap: 8px; }
+}
+@media (max-width: 600px) {
+  .room-preview-toolbar { padding: 8px; flex-wrap: wrap; gap: 6px; }
+  .room-preview-toolbar strong { font-size: 14px; }
+  .room-preview-toolbar strong span { font-size: 10px; }
+  .room-preview-toolbar > a { display: none; }
+  .room-preview-workspace, .room-preview-workspace:has(.room-preview-tools[hidden]) { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); }
+  .room-preview-directory { padding: 8px; border-right: 0; border-bottom: 1px solid var(--room-line); }
+  .room-preview-tabs { max-width: 290px; }
+  .room-preview-heading, .room-preview-description, .room-preview-coverage { display: none; }
+  .room-preview-sections { display: flex; overflow-x: auto; margin-top: 6px; }
+  .room-preview-sections button { flex: 0 0 auto; width: auto; white-space: nowrap; padding: 6px 9px; }
+  .room-preview-tools { width: min(280px, 90%); }
+}
+
+.room-preview-description { margin: 14px 6px 0; padding-top: 10px; border-top: 1px solid var(--room-line); color: var(--room-muted); font-size: 11px; }
+.room-preview-description summary { cursor: pointer; }
+.room-preview-hud { --dev-nav-height: 0px; --control-gold: #e5c789; position: absolute; inset: 0; pointer-events: none; }
+.room-preview-hud .hud-skill-aim, .room-preview-hud .hud-skill-aim-status, .room-preview-hud .hud-weapon-toast { position: absolute; }
+.room-preview-hud .hud-character-switch, .room-preview-hud .hud-weapon-slot[data-slot='4'] { display: none; }
+.room-preview-hud .control-pad { cursor: pointer; font: inherit; touch-action: none; }
+.room-preview-hud[inert] { opacity: .6; }

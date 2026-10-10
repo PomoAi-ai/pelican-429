@@ -11,6 +11,9 @@ import { createGrassyCycle } from './grassy-cycle.ts';
 import type { GrassyCycle } from './grassy-cycle.ts';
 import { createGrassyMotionPose, GRASSY_MOTION_NODES } from './grassy-motion-pose.ts';
 import type { GrassyMotionPose } from './grassy-motion-pose.ts';
+import { DEFAULT_CHARACTER_APPEARANCE, type CharacterAppearance } from '../../config/character-appearance.ts';
+import { createGrassyAppearance, disposeCustomizationAssets, loadCustomizationAssets } from './grassy-appearance.ts';
+import { disposeModelResources as disposeSceneResources } from '../model-resources.ts';
 
 interface GrassyAsset {
   scene: THREE.Group;
@@ -26,6 +29,7 @@ export interface GrassyRig {
   cycle: GrassyCycle;
   motionPose: GrassyMotionPose;
   currentAction: GrassyAction | null;
+  applyAppearance(appearance: CharacterAppearance): void;
   blink(dt: number): void;
   swayHair(energy: number, airflow: number, lift: number, dt: number): void;
   dispose(): void;
@@ -123,27 +127,6 @@ const assets = new Map<GrassyAssetKey, GrassyAsset>();
 const loading = new Map<GrassyAssetKey, Promise<void>>();
 let generation = 0;
 
-function disposeSceneResources(scene: THREE.Group): void {
-  const geometries = new Set<THREE.BufferGeometry>();
-  const materials = new Set<THREE.Material>();
-  const textures = new Set<THREE.Texture>();
-  const skeletons = new Set<THREE.Skeleton>();
-  scene.traverse((node) => {
-    if (node instanceof THREE.Mesh) {
-      geometries.add(node.geometry);
-      for (const material of Array.isArray(node.material) ? node.material : [node.material]) materials.add(material);
-    }
-    if (node instanceof THREE.SkinnedMesh) skeletons.add(node.skeleton);
-  });
-  for (const material of materials) {
-    for (const value of Object.values(material)) if (value instanceof THREE.Texture) textures.add(value);
-    material.dispose();
-  }
-  for (const geometry of geometries) geometry.dispose();
-  for (const texture of textures) texture.dispose();
-  for (const skeleton of skeletons) skeleton.dispose();
-}
-
 function readAsset(gltf: GLTF, path: string, variant: GrassyAnimatedVariant): GrassyAsset {
   const { scene, animations } = gltf;
   try {
@@ -217,14 +200,15 @@ export function loadGrassyAsset(variant: GrassyAnimatedVariant, tier: TextureTie
     pending = loadCharacterModel(path, tier).then((gltf) => {
       if (requestGeneration !== generation) { disposeSceneResources(gltf.scene); return; }
       assets.set(key, readAsset(gltf, path, variant));
-    });
+    }).catch(error => { if (loading.get(key) === pending) loading.delete(key); throw error; });
     loading.set(key, pending);
   }
-  return pending;
+  return Promise.all([pending, loadCustomizationAssets(tier)]).then(() => {});
 }
 
 /** Shared meshes and materials outlive individual previews and are released with the app. */
 export function disposeGrassyAssets(): void {
+  disposeCustomizationAssets();
   generation++;
   for (const asset of assets.values()) disposeSceneResources(asset.scene);
   assets.clear();
@@ -243,7 +227,7 @@ export function createGrassyFlightHarness(tier: TextureTier): THREE.Object3D {
 }
 
 /** Gameplay and showcase instances use the same Blender model and authored clips. */
-export function createGrassyRig(variant: GrassyAnimatedVariant, tier: TextureTier = characterTextureTier()): GrassyRig {
+export function createGrassyRig(variant: GrassyAnimatedVariant, tier: TextureTier = characterTextureTier(), appearance: CharacterAppearance = DEFAULT_CHARACTER_APPEARANCE): GrassyRig {
   const asset = assets.get(`${variant}:${tier}`);
   if (!asset) throw new Error(`Grassy 动画模型 ${variant} 尚未加载；请先等待 loadGrassyAsset()`);
   const model = clone(asset.scene) as THREE.Group;
@@ -284,10 +268,16 @@ export function createGrassyRig(variant: GrassyAnimatedVariant, tier: TextureTie
   const hair = model.getObjectByName(`grassy-rodin-refined-${variant}`) as THREE.SkinnedMesh;
   const swayHair = createHairSway(hair, model.getObjectByName('head')!, root, 'grassy');
 
+  const customization = createGrassyAppearance(model, tier);
+  customization.apply(appearance);
+  hair.visible = false;
+  for (const name of EYELIDS) model.getObjectByName(name)!.visible = false;
+
   let disposed = false;
   return {
     root, mixer, actions, effects, cycle, motionPose,
     currentAction: null,
+    applyAppearance: customization.apply,
     blink(dt) {
       blinkAge += dt;
       if (blinkAge > closeSeconds + holdSeconds + openSeconds) {
@@ -300,13 +290,14 @@ export function createGrassyRig(variant: GrassyAnimatedVariant, tier: TextureTie
       }
       const closed = THREE.MathUtils.smoothstep(blinkAge, 0, closeSeconds)
         * (1 - THREE.MathUtils.smoothstep(blinkAge, closeSeconds + holdSeconds, closeSeconds + holdSeconds + openSeconds));
+      customization.blink(Math.max(0, 2 * closed - 1), 1 - Math.abs(2 * closed - 1));
       // 经过贴合眼球的半闭形态，避免直接线性闭合时切穿凸出的眼面。
       for (const lid of eyelids) {
         lid.weights[lid.halfIndex] = 1 - Math.abs(2 * closed - 1);
         lid.weights[lid.closedIndex] = Math.max(0, 2 * closed - 1);
       }
     },
-    swayHair,
+    swayHair(energy, airflow, lift, dt) { swayHair(energy, airflow, lift, dt); customization.swayHair(energy, airflow, lift, dt); },
     dispose() {
       if (disposed) return;
       disposed = true;
@@ -314,6 +305,7 @@ export function createGrassyRig(variant: GrassyAnimatedVariant, tier: TextureTie
       mixer.uncacheRoot(model);
       effects.dispose();
       cycle.dispose();
+      customization.dispose();
       for (const material of materials.values()) material.dispose();
       for (const skeleton of skeletons) skeleton.dispose();
       root.removeFromParent();

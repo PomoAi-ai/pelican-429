@@ -10,7 +10,7 @@ import { prepareFish } from './fish.ts';
 import { prepareHuman } from './human.ts';
 import type { ScenarioContext, ScenarioDriver, ShowcaseScenario } from './scenario.ts';
 
-type SimulatedActor = Exclude<ShowcaseActor, 'human' | 'luma' | 'sam' | 'tibo'>;
+type SimulatedActor = Exclude<ShowcaseActor, 'human' | 'd1' | 'luma' | 'sam' | 'tibo'>;
 
 const adapters: Readonly<Record<SimulatedActor, (ctx: ScenarioContext) => ScenarioDriver>> = {
   pelican: preparePelican, dummy: prepareDummy, gatekeeper: prepareEnemy, lineHound: prepareEnemy, watchWasp: prepareEnemy, loadmaster: prepareEnemy, fish: prepareFish,

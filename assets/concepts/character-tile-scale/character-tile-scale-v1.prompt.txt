@@ -1,0 +1,51 @@
+人物与场景格子比例概念图
+状态：旧稿，人物头身比例错误，不作为角色比例依据。用户已明确人物为 3.3 头身；参见 v2。
+生成日期：2026-10-09
+工具：内置 image_gen，初稿后进行两次修订。
+风格参考：assets/concepts/garden-city-cutaway/layer-study.png
+
+尺寸依据：
+- src/config/grassy.ts：GRASSY_HEIGHT = 3.1，脚底到最高发梢的外观高度。
+- src/config/player-form.ts：HUMAN_BODY_HEIGHT = 2.8，碰撞高度。
+- src/config/player-tuning.ts：halfWidth = 0.4，完整碰撞宽度 0.8。
+- src/sim/player-transform.ts：变身改变高度，保持身体宽度。
+- 1 格为 1 世界单位，不表示米或固定屏幕像素。
+
+用途与限制：用于讨论人物、背景墙和地形模块的尺寸关系。图内标注数值来自代码；生成图的线段长度、局部缩放及刻度间距仍有误差，不能作为逐像素量取或碰撞制作模板。背景墙 1×1 为概念模块示意，并非已实现的通用墙块规格。
+
+初始提示词：
+Use case: stylized-concept.
+Create a polished landscape 3:2 Chinese game environment SCALE CONCEPT BOARD with accurate square grid and dimension rulers. Use attached image as STYLE and CHARACTER reference only: warm ivory / cobalt blue cozy science fiction building, refined soft anime 3D orange-gold braided-bob heroine in blue-white-gold dress and white boots. Redesign layout for dimensional explanation, NOT a copy of four panels. No pixel art, no isometric perspective.
+
+Title: “人物与场景格子比例”
+Subtitle: “1 格 = 1 世界单位”
+Critical true game scale: standing visible character from boot soles to highest hair tip is 3.1 tiles, collision rectangle is 0.8 tiles wide and 2.8 tiles tall, same foot baseline. Do not label the visible height 2.8. Do not equate tiles to meters or pixels.
+
+Layout:
+LEFT upper 65% area, roughly 40% width: large full-body standing heroine in a relaxed neutral side/three-quarter view, elegant original proportions, feet exactly on y=0 baseline. Uniform square grid with 1-unit lines and fine 0.1 subdivisions on ruler, vertical ruler numbered 0, 1, 2, 3, 4. Character hair tip just above the 3 line at 3.1. Cyan thin dashed axis-aligned collision rectangle from soles to y=2.8 and width 0.8 centered on character, clearly separate from clothing/hair silhouette. Visible height orange double-ended bracket foot-to-hair, label “外观高 3.1 格”; cyan collision height bracket from feet to 2.8, label “碰撞高 2.8 格”; cyan horizontal bracket below soles “碰撞宽 0.8 格”. Use extension lines and readable spaced text, no overlapping labels. A 1×1 ivory square tile beside her at floor baseline and bracket showing its 1-unit width and height.
+
+RIGHT upper 65% area: smaller but clean side-on room cross-section on a square grid, a hollow interior, warm ivory background wall with blue round window behind the room, one-cell-thick solid floor and side walls, blue trim, no front facade. Same heroine standing inside, scaled to 3.1 grid cells. One thin one-way platform toward left, no bulky furniture hiding dimensions. A right-side OPEN passage exactly 3 grid cells high, marked with a vertical bracket “通行净高 3 格”. Visually distinguish background flat wall versus thick perimeter solid cells via leader labels “背景墙 · 不碰撞”, “实体砖 · 有碰撞”, and thin platform label “单向平台”. Put unobtrusive small note under room “3 格净高按碰撞体通行；发梢可能穿入门楣”. This is current configuration explanation, not claim that visual clearance fits. Don't put character directly under lintel.
+
+BOTTOM 30%: compact material/shape comparison strip, all modules SAME SCALE on faint square grid. Five samples each with dimensional bracket:
+1 flat ivory thin BACKGROUND WALL panel 1×1 face; label “背景墙 1×1”, depict as almost zero thickness;
+2 solid full square grass-top soil tile with subtle depth; label “整格 1×1”;
+3 grass-top soil HALF tile half as tall and same width; label “半高 1×0.5”;
+4 triangular solid grass slope high LEFT low RIGHT, within 1×1 dashed bounding square; label “左高右低 1×1”;
+5 triangular solid grass slope low LEFT high RIGHT, same; label “左低右高 1×1”.
+Grid cells MUST be square, ruler tick spacing consistent, different panels may be different zoom but internally consistent. Delicate gray grid, blue headings, orange visual measurement and cyan collision measurements, clear Chinese typography, sophisticated concept-art presentation, restrained atmospheric shading. Enough blank spacing. No additional characters beyond the same heroine shown in the two explanatory panels, no pets, no arbitrary weapons. Small footer “比例概念图 · 尺寸以标注为准”.
+
+第一次修订提示词：
+Edit the supplied concept board to correct its inaccurate scale. Preserve heroine identity, ivory/cobalt anime art style, Chinese title and numeric specifications, but SIMPLIFY to TWO large panels only: LEFT character with ruler; RIGHT stacked module comparison. REMOVE the room entirely (it shows wrong scale), remove slogan. Precision of grid and drawing takes priority over extra details.
+Landscape 1536x1024 conceptual layout. One universal scale across BOTH panels: 1 tile = 180 image pixels. Baseline foot y=800. Grid horizontal lines at y=800 (0),620 (1),440 (2),260 (3),80 (4). Grid vertical spacing also 180 pixels. All grid cells square. Title in dedicated narrow top margin. Ruler at x100: labels 0 at y800, 1 at620, 2 at440, 3 at260, 4 at80, and half-unit ticks. Keep 4 near top margin if needed, never shift the grid.
+Heroine in LEFT panel centered x420, soles exactly y800, highest hair tip exactly y242 (558 pixels =3.1*180). Natural slender anime proportions not a chibi; relaxed standing neutral posture. Orange height arrow from y800 to y242 labeled '外观高 3.1 格'. Cyan dashed rectangle width144pixels (0.8*180), from x348 to492, y296 to800 (504pixels=2.8*180). Side cyan arrow labeled '碰撞高 2.8 格'; bottom horizontal arrow '碰撞宽 0.8 格'. Clothing may extend out of collision box. 0 baseline exactly at soles. The character MUST be just over THREE square cells tall, NOT 4 or 5. Collision top below hair by 0.3tile.
+
+RIGHT panel module examples each at exactly180px width:
+upper row around y250-430: flat front-view warm ivory wall square exactly180x180 (small sliver of depth, NOT edge-on), label '背景墙 1×1' and '不碰撞'; next to it grass-top full soil square180x180 label '整格 1×1', '有碰撞'.
+middle row around y550-730: half-height brick180x90 with full180x180 dashed reference square, label '半高 1×0.5'; two opposite RIGHT TRIANGLE grass-top slopes each180x180 bounding square, left triangle high left and ZERO height right label '左高右低'; right triangle ZERO height left and full height right label '左低右高'. Triangles go fully down to zero, NOT trapezoids. Add width bracket1格 and full height1格, half height0.5格.
+Enough spacing so module labels do not overlap. Use small full block beside the character if there is space, exactly same180px width/height, otherwise omit.
+Footer: '1 格 = 1 世界单位' and '尺寸依据：外观 3.1 格 / 碰撞 0.8 × 2.8 格'. Also small note '背景墙是视觉层；地形砖负责碰撞'. No room, no doorway, no extra scene illustration. This corrected image must make actual visible character-to-tile proportion visually evident. Maintain polished game concept quality and clean readable Chinese engineering dimensions. Use coordinate instructions to determine proportions but DO NOT print pixel coordinates or px labels.
+
+最终修订提示词：
+Correct this game concept board. Keep its orange-haired anime heroine, ivory/cobalt palette and two-column design. IMPORTANT: remove ALL background grid lines and ALL existing numbered vertical rulers. They are wrong. Replace the left ruler with a SIMPLE scale BAR next to the existing heroine: foot level =0; one third of nearly full height=1; two thirds=2; just below top hair=3; highest hair=3.1. The full height from soles to highest hair tip is3.1 units, so split it into three EQUAL large sections plus one TINY section of 0.1 unit at top. Make this bar alternate muted cream and blue sections, numbers 0,1,2,3,3.1 in order bottom to top. Do not add a4. Reference existing heroine pixel heights: top about250, bottom about772, so 0 at772,1 at604,2 at435,3 at267,3.1 at250. Cyan collision rectangle stays feet to2.8, its top should be about y301 and width about135pixels centered on heroine (visible silhouette may extend beyond it). Width bracket0.8 follows that box. Keep clear orange “外观高 3.1 格” and cyan “碰撞高 2.8 格” labels but position without overlaps. 
+Remove the stray comparison block in the left panel.
+On the right, preserve five material examples but all use the same one unit width, about168px: background wall flat square168x168, full brick168x168, half brick168x84, two slopes each fit168x168 dashed bounding squares and taper TO ZERO at low end (right triangle, no vertical thickness at low corner). Move panels if needed for spacing. Remove all rulers from right panel, use object-local dimension arrows only. Label each specimen in Chinese exactly as original. Only title “人物与场景格子比例”, unit “1 格 = 1 世界单位”, panel titles “角色尺寸” and “场景模块”, numeric dimension labels and footer “概念示意 · 以标注尺寸为准”. No claims “同一比例” unless exactly true. No decorative graph paper. Cream background, polished clean professional game design art. This is a reference concept image, preserve character rather than replace by diagram silhouette.

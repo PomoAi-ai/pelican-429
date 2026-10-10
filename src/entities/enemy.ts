@@ -95,10 +95,10 @@ function dropPayload(e: Entity, mode: 'bomb' | 'thermite', target: Readonly<Enem
   });
 }
 
-function flyDrone(e: Entity, target: Readonly<EnemyTarget>, map: TileQuery, freeWorld: boolean): void {
+function flyDrone(e: Entity, target: Readonly<EnemyTarget>, map: TileQuery, freeWorld: boolean, speedScale: number): void {
   const enemy = e.enemy!;
   const b = e.body;
-  const speed = freeWorld ? FREE_DRONE_SPEED : ENEMY_RULES.watchWasp.speed;
+  const speed = (freeWorld ? FREE_DRONE_SPEED : ENEMY_RULES.watchWasp.speed) * speedScale;
   const engaged = enemy.engaged || !!e.attack;
   const destination = engaged ? target : { ...enemy.home, vx: 0, vy: 0 };
   // 速度前馈消除跑动/爬升产生的固定跟随误差；地图上方是空气，不能在顶部截断投弹高度。
@@ -183,9 +183,12 @@ function updateFreeWorldPursuit(e: Entity, target: EnemyTarget, terrain: EnemyTe
   if (enemy.chaseTicks >= FREE_CHASE_TICKS || enemy.lostSightTicks >= FREE_LOST_SIGHT_TICKS) returnEnemyToPatrol(e);
 }
 
-/** 意图与时间轴共用游戏和展示场；朝向只在起手时锁定。 */
-export function updateEnemy(e: Entity, target: Readonly<EnemyTarget> | null, terrain: EnemyTerrain, tuning: Tuning): void {
-  updateEnemyIntent(e, target, terrain, tuning);
+/**
+ * 意图与时间轴共用游戏和展示场；朝向只在起手时锁定。
+ * speedScale 只放大巡逻/追击移速；技能位移不放大，防落水预测按技能定义的速度计算。
+ */
+export function updateEnemy(e: Entity, target: Readonly<EnemyTarget> | null, terrain: EnemyTerrain, tuning: Tuning, speedScale: number): void {
+  updateEnemyIntent(e, target, terrain, tuning, speedScale);
   if (terrain.safeZones === undefined || e.removed) return;
   const probe = { ...e.body };
   moveAndCollide(probe, terrain.map, tuning.sim.step);
@@ -198,7 +201,7 @@ export function updateEnemy(e: Entity, target: Readonly<EnemyTarget> | null, ter
   }
 }
 
-function updateEnemyIntent(e: Entity, target: Readonly<EnemyTarget> | null, terrain: EnemyTerrain, tuning: Tuning): void {
+function updateEnemyIntent(e: Entity, target: Readonly<EnemyTarget> | null, terrain: EnemyTerrain, tuning: Tuning, speedScale: number): void {
   const { map } = terrain;
   const enemy = e.enemy!;
   const cfg = ENEMY_RULES[enemy.kind];
@@ -228,7 +231,7 @@ function updateEnemyIntent(e: Entity, target: Readonly<EnemyTarget> | null, terr
   if (terrain.safeZones !== undefined) updateFreeWorldPursuit(e, target, terrain, wasEngaged);
   const inRange = enemy.engaged;
   enemy.lookTarget = enemy.kind === 'gatekeeper' && (e.attack || (enemy.enabled && inRange)) ? { x: target.x, y: target.y } : null;
-  if (enemy.kind === 'watchWasp' && enemy.enabled) flyDrone(e, target, map, terrain.safeZones !== undefined);
+  if (enemy.kind === 'watchWasp' && enemy.enabled) flyDrone(e, target, map, terrain.safeZones !== undefined, speedScale);
   if (e.attack) {
     const def = cfg.skills[enemy.skill!];
     if (!(def.mode === 'slam' && enemy.airborne) && !advanceAttack(e.attack)) {
@@ -267,7 +270,7 @@ function updateEnemyIntent(e: Entity, target: Readonly<EnemyTarget> | null, terr
         startEnemySkill(e, enemy.nextSkill, target);
       }
     } else {
-      const moveVx = Math.abs(moveX) > (inRange ? 1.4 : 0.2) ? cfg.speed * e.facing : 0;
+      const moveVx = Math.abs(moveX) > (inRange ? 1.4 : 0.2) ? cfg.speed * speedScale * e.facing : 0;
       jumpToPlatform(e, destination, moveVx, terrain, tuning);
       if (b.onGround && destination.y < b.y - 1 && Math.abs(moveX) < 4 && map.collisionAt(Math.floor(b.x), Math.floor(b.y - 0.1)) === 'oneWay'
         && enemyLandingIsSafe(b, terrain, tuning, 0, b.vy, 0, 12)) {

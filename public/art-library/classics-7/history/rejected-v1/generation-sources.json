@@ -1,0 +1,30 @@
+{
+  "C01": {
+    "file": "private-source/exec-private-source-025.png",
+    "output": "exec-private-source-025.png"
+  },
+  "C02": {
+    "file": "private-source/exec-private-source-069.png",
+    "output": "exec-private-source-069.png"
+  },
+  "C03": {
+    "file": "private-source/exec-private-source-054.png",
+    "output": "exec-private-source-054.png"
+  },
+  "C04": {
+    "file": "private-source/exec-private-source-052.png",
+    "output": "exec-private-source-052.png"
+  },
+  "C05": {
+    "file": "private-source/exec-private-source-026.png",
+    "output": "exec-private-source-026.png"
+  },
+  "C06": {
+    "file": "private-source/exec-private-source-030.png",
+    "output": "exec-private-source-030.png"
+  },
+  "C07": {
+    "file": "private-source/exec-private-source-060.png",
+    "output": "exec-private-source-060.png"
+  }
+}

@@ -1,3 +1,4 @@
+import { createDefinitionRideProbe } from '../src/physics/definition-ride-probe.ts';
 // 任务 014 W1：骑行保险杠 / 净空探测（physics/ride-probe，形状感知）。
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -164,4 +165,30 @@ test('probe: 非法参数 fail-fast', () => {
   assert.throws(() => probeObstacle(WALLS, 8, 1, 1, 3, STEP, 0), /height/);
   assert.throws(() => ceilingClear(WALLS, 8, 0, 1, RIDE), /halfWidth/);
   assert.throws(() => ceilingClear(WALLS, 8, HW, Number.POSITIVE_INFINITY, RIDE), /ceilingClear/);
+});
+
+test('定义场双向探测不会漏掉薄墙，平台不挡头或车头', () => {
+  const probe = createDefinitionRideProbe({ solids: [
+    { points: [[0, 0], [20, 0], [20, 1], [0, 1]] },
+    { points: [[10.01, 1], [10.02, 1], [10.02, 6], [10.01, 6]] },
+  ], platforms: [{ left: 2, right: 8, top: 3 }] });
+  assert.equal(probe.ceilingClear(4, HW, 1, RIDE), true);
+  assert.equal(probe.probeObstacle(4, 1, 1, 5, STEP, RIDE), null);
+  assert.ok(Math.abs(probe.probeObstacle(8, 1, 1, 3, STEP, BUMP)! - 2.01) < 1e-10);
+  assert.ok(Math.abs(probe.probeObstacle(12, 1, -1, 3, STEP, BUMP)! - 1.98) < 1e-10);
+});
+
+test('定义场探测实时读取变形轮廓，脚下斜坡不会误报净空', () => {
+  const points: [number, number][] = [[10, 4], [12, 4], [12, 4.2], [10, 4.2]];
+  const probe = createDefinitionRideProbe({ solids: [
+    { points: [[0, 0], [20, 0], [20, 1], [0, 1]] },
+    { points: [[4, 1], [5, 1], [5, 2]] },
+    { points },
+  ], platforms: [] });
+  assert.equal(probe.ceilingClear(4.5, HW, 1.5 + HW, RIDE), true);
+  assert.equal(probe.ceilingClear(11, HW, 1, RIDE), false);
+  assert.equal(probe.probeObstacle(8, 1, 1, 4, STEP, RIDE), 2);
+  for (const point of points) point[1] += 2;
+  assert.equal(probe.ceilingClear(11, HW, 1, RIDE), true);
+  assert.equal(probe.probeObstacle(8, 1, 1, 4, STEP, RIDE), null);
 });

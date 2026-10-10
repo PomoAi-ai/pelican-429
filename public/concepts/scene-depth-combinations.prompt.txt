@@ -1,0 +1,73 @@
+Tool: built-in ImageGen
+
+=== 组合一 · 山谷阶地 ===
+Use case: stylized-concept / infographic-diagram.
+Create a polished Chinese architectural perspective concept sheet for a 2D side-scrolling tile game with 3D depth. Landscape 3:2 high resolution. Warm white margins, precise navy typography and orange leader lines, restrained illustrated architectural game art. This is a scenery depth design study, NOT a UI screenshot.
+Layout: title and subtitle at top. Left 65% a large composed game-view perspective scene; right 35% a clearly labeled exploded perspective view of THE SAME scene. Bottom a compact legend and one design rule.
+Game camera looks straight at XY: X lines horizontal and Y lines vertical; actual tile thickness Z edges share a vanishing point. No isometric playable view. Exploded view may be oblique architectural perspective to show depth. All tile fronts square with readable seams, tangible depth, no depth-of-field blur. Character is a small plain neutral silhouette, NOT a new designed character, used only to locate playable lane; do not state exact scale.
+CRITICAL: distinguish TWO separate background TILE strata behind the character, NOT just a single wall. Both are built from distinct grid blocks, at different Z depths, both visibly present in the composite. Foreground optional blocks do NOT count toward these two background layers. The first background tile stratum is discontinuous, with broad openings, so the second can be seen behind it. The second also has openings so THREE distant scenic strata are visible. Avoid solid full-screen walls that conceal all rear scenery.
+Exploded view must have seven clearly separated depth strata in this exact far-to-near order (labels can be distributed for clarity):
+“天空 / 最深背景” (or scene-appropriate deepest backdrop)
+“远景③”
+“远景②”
+“远景①”
+“背景格子②”
+“背景格子①”
+“角色与可玩格子”
+Optional foreground block fragments can appear at extreme scene edges but aren't required and must not conceal the above. Show camera in front of playable lane and a subtle near-to-far arrow labeled “近 → 远”. All layers aligned as belonging to one scene. Each strata must correspond with a recognizable silhouette in the main scene. Tile layers heavier warmer sharper; distant scenery progressively less contrast, simpler shapes, lighter/cooler hue. Scene must visibly read as a deep environment with occlusion and gaps, not painted texture slapped on one flat wall.
+Subtitle verbatim “两层背景格子 + 三层远景｜分层透视草案”
+Panel labels “A  合成透视” and “B  分层展开”
+Footer verbatim “层间距离与视差待定 · 人物仅示意 · 不代表运行时已实现”
+Avoid numeric Z distances, new tile depth measurements, character scale specifications, collision claims, interface widgets, tiny illegible paragraphs. Respect 2D gameplay on one lane. Three-dimensional feel comes from strata placement, occlusion, atmosphere and shared perspective, not extra playable Z lanes.
+
+Title verbatim: “组合一 · 山谷阶地”
+SCENE: outdoor green rocky mountain valley. Playable strip at bottom center is tan square tile terrain with one small slope and character. Background tile① close behind: discontinuous low mossy rock terrace rising on LEFT, clear square grid face and exposed thickness, leaving center/right open. Background tile② farther behind: taller stepped gridded stone terrace rising on RIGHT and a short distant rocky ledge on left, separate depth and overlapping partially with layer①. Both entirely behind playable lane, never confused with nearer foreground. Distant① is an irregular tree-covered foothill, distant② broad blue-green mountain slopes separated by a valley, distant③ pale blue high mountain skyline. Deepest sky with sparse clouds. The two tile terraces form an offset open corridor through which three distant bands are visible. Label ALL five main scenery layers in composite with concise leaders: “背景格子①”, “背景格子②”, “远景①”, “远景②”, “远景③”. Bottom rule exactly “阶地错开，透过前层缺口看到后层；后面仍有三层山谷。”
+
+=== 组合二 · 错落建筑 ===
+Use case: stylized-concept / infographic-diagram.
+Create a polished Chinese architectural perspective concept sheet for a 2D side-scrolling tile game with 3D depth. Landscape 3:2 high resolution. Warm white margins, precise navy typography and orange leader lines, restrained illustrated architectural game art. This is a scenery depth design study, NOT a UI screenshot.
+Layout: title and subtitle at top. Left 65% a large composed game-view perspective scene; right 35% a clearly labeled exploded perspective view of THE SAME scene. Bottom a compact legend and one design rule.
+Game camera looks straight at XY: X lines horizontal and Y lines vertical; actual tile thickness Z edges share a vanishing point. No isometric playable view. Exploded view may be oblique architectural perspective to show depth. All tile fronts square with readable seams, tangible depth, no depth-of-field blur. Character is a small plain neutral silhouette, NOT a new designed character, used only to locate playable lane; do not state exact scale.
+CRITICAL: distinguish TWO separate background TILE strata behind the character, NOT just a single wall. Both are built from distinct grid blocks, at different Z depths, both visibly present in the composite. Foreground optional blocks do NOT count toward these two background layers. The first background tile stratum is discontinuous, with broad openings, so the second can be seen behind it. The second also has openings so THREE distant scenic strata are visible. Avoid solid full-screen walls that conceal all rear scenery.
+Exploded view must have seven clearly separated depth strata in this exact far-to-near order (labels can be distributed for clarity):
+“天空 / 最深背景” (or scene-appropriate deepest backdrop)
+“远景③”
+“远景②”
+“远景①”
+“背景格子②”
+“背景格子①”
+“角色与可玩格子”
+Optional foreground block fragments can appear at extreme scene edges but aren't required and must not conceal the above. Show camera in front of playable lane and a subtle near-to-far arrow labeled “近 → 远”. All layers aligned as belonging to one scene. Each strata must correspond with a recognizable silhouette in the main scene. Tile layers heavier warmer sharper; distant scenery progressively less contrast, simpler shapes, lighter/cooler hue. Scene must visibly read as a deep environment with occlusion and gaps, not painted texture slapped on one flat wall.
+Subtitle verbatim “两层背景格子 + 三层远景｜分层透视草案”
+Panel labels “A  合成透视” and “B  分层展开”
+Footer verbatim “层间距离与视差待定 · 人物仅示意 · 不代表运行时已实现”
+Avoid numeric Z distances, new tile depth measurements, character scale specifications, collision claims, interface widgets, tiny illegible paragraphs. Respect 2D gameplay on one lane. Three-dimensional feel comes from strata placement, occlusion, atmosphere and shared perspective, not extra playable Z lanes.
+
+Title verbatim: “组合二 · 错落建筑”
+SCENE: abandoned stone settlement embedded in hillside, warm cream and sage green. Playable strip bottom with character in open center. Background tile① close behind: LEFT building fragment made from gridded stone blocks with a broad door arch and broken upper edge, only occupying left third and a small right wall fragment. Background tile② farther behind: RIGHT offset gridded stone facade and large open window/arch at a clearly separate depth, visible BOTH through the first arch and in the open center. First and second background facades must have visibly different horizontal placement and silhouettes; complete separate geometric tile walls, not two textures on same wall. Distant① subdued roofs and nearby treetops; distant② a farther town silhouette across valley; distant③ pale mountain ridge. Deepest soft sky. Tile arches frame views of rear facade and scenery; leave character walking surface clear. Label ALL five main scenery layers in composite with concise leaders: “背景格子①”, “背景格子②”, “远景①”, “远景②”, “远景③”. Bottom rule exactly “两排建筑前后错位，门窗与断墙共同形成纵深。”
+
+=== 组合三 · 洞穴层叠 ===
+Use case: stylized-concept / infographic-diagram.
+Create a polished Chinese architectural perspective concept sheet for a 2D side-scrolling tile game with 3D depth. Landscape 3:2 high resolution. Warm white margins, precise navy typography and orange leader lines, restrained illustrated architectural game art. This is a scenery depth design study, NOT a UI screenshot.
+Layout: title and subtitle at top. Left 65% a large composed game-view perspective scene; right 35% a clearly labeled exploded perspective view of THE SAME scene. Bottom a compact legend and one design rule.
+Game camera looks straight at XY: X lines horizontal and Y lines vertical; actual tile thickness Z edges share a vanishing point. No isometric playable view. Exploded view may be oblique architectural perspective to show depth. All tile fronts square with readable seams, tangible depth, no depth-of-field blur. Character is a small plain neutral silhouette, NOT a new designed character, used only to locate playable lane; do not state exact scale.
+CRITICAL: distinguish TWO separate background TILE strata behind the character, NOT just a single wall. Both are built from distinct grid blocks, at different Z depths, both visibly present in the composite. Foreground optional blocks do NOT count toward these two background layers. The first background tile stratum is discontinuous, with broad openings, so the second can be seen behind it. The second also has openings so THREE distant scenic strata are visible. Avoid solid full-screen walls that conceal all rear scenery.
+Exploded view must have seven clearly separated depth strata in this exact far-to-near order (labels can be distributed for clarity):
+“天空 / 最深背景” (or scene-appropriate deepest backdrop)
+“远景③”
+“远景②”
+“远景①”
+“背景格子②”
+“背景格子①”
+“角色与可玩格子”
+Optional foreground block fragments can appear at extreme scene edges but aren't required and must not conceal the above. Show camera in front of playable lane and a subtle near-to-far arrow labeled “近 → 远”. All layers aligned as belonging to one scene. Each strata must correspond with a recognizable silhouette in the main scene. Tile layers heavier warmer sharper; distant scenery progressively less contrast, simpler shapes, lighter/cooler hue. Scene must visibly read as a deep environment with occlusion and gaps, not painted texture slapped on one flat wall.
+Subtitle verbatim “两层背景格子 + 三层远景｜分层透视草案”
+Panel labels “A  合成透视” and “B  分层展开”
+Footer verbatim “层间距离与视差待定 · 人物仅示意 · 不代表运行时已实现”
+Avoid numeric Z distances, new tile depth measurements, character scale specifications, collision claims, interface widgets, tiny illegible paragraphs. Respect 2D gameplay on one lane. Three-dimensional feel comes from strata placement, occlusion, atmosphere and shared perspective, not extra playable Z lanes.
+
+Title verbatim: “组合三 · 洞穴层叠”
+SCENE: subterranean rocky cavern in restrained slate teal and earthy stone. Playable gridded tile floor at bottom, small neutral character in center and an unobstructed walking line. Background tile① immediately behind: large but broken block-built cave wall masses on LEFT and upper-left, visible individual square tile seams, broad irregular opening in center. Background tile② farther back: SECOND separate gridded rock wall with a shifted larger opening toward RIGHT, independently visible beyond and around opening①. Two clearly distinguishable voxel/tile strata, not a single cave ring. Both frames must be partial, not complete opaque panels. Distant① farther tall irregular rock columns; distant② blue dim cave arches at greater distance; distant③ pale teal distant chamber silhouette with diffuse reflected light. Deepest backdrop is cave darkness / atmospheric gradient, NOT outdoor sky, NOT an exit into mountains. Three far cavern silhouettes diminishing in contrast; no numerical depth. It should feel like looking through alternating gaps into a very deep cavern. Exploded deepest layer label exactly “洞穴最深背景” instead of sky. Label ALL five main scenery layers in composite with concise leaders: “背景格子①”, “背景格子②”, “远景①”, “远景②”, “远景③”. Bottom rule exactly “洞壁开口前后错开，深处用三层岩体继续延伸空间。”
+
+Valley label correction:
+Edit ONLY ONE label in the right panel B of this image. There are erroneously TWO labels saying 背景格子②. The LOWER label, located around x=1230 y=642 on the 1536×1024 image, pointing to the NEARER gridded terrace immediately behind the character/playable strip, must read exactly “背景格子①”. Keep the UPPER 背景格子② label around x=1450 y=560 as 背景格子②. Preserve all other elements, Chinese wording, layout, rendering and composition unchanged. Do not change the main scene or legend.

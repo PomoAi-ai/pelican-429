@@ -169,6 +169,8 @@ export interface MinimapRaster {
   /** 比较每区块水量哈希，变化的区块标脏；返回本次新标脏的区块数。 */
   scanFluid(): number;
   readonly dirtyCount: number;
+  /** 砍倒的树：从所在区块移除并标脏，下次 flush 生效。 */
+  removeTree(id: number): void;
   /** 重绘全部脏区块并清空标记；返回重绘过的像素矩形（按区块序）。 */
   flush(): PixelRect[];
   /** 区块 (cx,cy) 对应的像素矩形（贴边区块裁到地图内）。 */
@@ -421,6 +423,14 @@ export function createMinimapRaster(source: MinimapSource, options: MinimapRaste
     },
     get dirtyCount() {
       return dirty.size;
+    },
+    removeTree(id) {
+      treeBuckets.forEach((bucket, i) => {
+        const k = bucket.findIndex((h) => h.tree.id === id);
+        if (k < 0) return;
+        bucket.splice(k, 1);
+        dirty.add(i);
+      });
     },
     flush() {
       const out: PixelRect[] = [];

@@ -115,6 +115,18 @@ describe('light-map', () => {
     assert.deepEqual(again.light, full.light, '确定性');
   });
 
+  test('砍掉一棵树后，与从未有过这棵树时逐格一致（重叠的邻树树冠保留）', () => {
+    const map = ground(80, 40, 20);
+    const felled = treeCanopies([makeTree('oak', 1, 30, 20)]);
+    const kept = treeCanopies([makeTree('oak', 2, 33, 20)]);
+    const lm = build(map, undefined, [...felled, ...kept]);
+    lm.removeCanopy(felled[0]!);
+    lm.flush();
+    const full = build(map, undefined, kept);
+    assert.deepEqual(lm.medium, full.medium);
+    assert.deepEqual(lm.light, full.light);
+  });
+
   test('reach 覆盖亮度非 0 的最远距离；非法输入即抛', () => {
     const r = lightReach(CFG);
     let v = LIGHT_FULL;

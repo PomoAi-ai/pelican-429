@@ -1,0 +1,33 @@
+基础概念定义页面图片，2026-10-09。
+
+character-tile-scale.png
+  来源：assets/concepts/character-tile-scale/local-drawing/character-tile-scale-front-side.png
+  Python 精确绘制模块与标尺，贴入主角正侧原图。比例与校验记录见同目录 ORIGINAL-SOURCE.txt 和 front-side-drawing-checks.json。
+
+protagonist-front.png
+  来源：assets/characters/grassy/customization/female/concepts/d1-no-gear/individual/front-v1.png
+
+protagonist-right.png
+  来源：assets/characters/grassy/customization/female/concepts/d1-no-gear/individual/right-v1.png
+
+均为原文件直接复制，没有重新生成或修改形体。用于本地与完整版 ?mode=concepts；不在默认发布资源清单内。
+
+economy.md: docs/economy.md 完整原文快照，2026-10-09 整理；与 src/ui/concept-economy.ts 同步更新。
+
+terrain-tile-basics.png / terrain-combinations.png: 2026-10-09 本地 Python + Pillow 绘制。
+来源与绘图记录：assets/concepts/terrain-tile-guide/SOURCE.txt。
+基础图依据 tile-shapes / tile-types；组合图直接读取 createTerrainCompositionLevel 的 8 类真实关卡格子。
+组合图各面板统一 24×20 格、32px/格，种子429；不代表游戏材质效果。规则变化后需重新导出并重绘。
+
+2026-10-10 植物、生长物与矿脉补充：
+natural-resources-perspective.png（2400×2700）、natural-resources-depth.png（2400×1430）。
+来源：assets/concepts/scene-depth-guide/draw_natural_resources.py，本地Pillow几何制图，无AI生成与外部素材。
+定义：docs/natural-resource-definitions.md；public/concepts 为原文副本，src/ui/concept-natural-resources.ts 为页面内容快照。
+统一格单位；图谱每卡按1格标尺独立放大，每卡实体与线框投影一致；YZ剖面等比例。草案尺寸与状态不代表运行时实现。
+制图检查：构件包络、相机正交基、文字画布边界；已人工检查输出图。
+重绘：UV_CACHE_DIR=/private/tmp/pelican-uv-cache uv run --no-project --python /private/tmp/pelican-scale-env/bin/python3 assets/concepts/scene-depth-guide/draw_natural_resources.py
+
+2026-10-10 逐状态补充：natural-{grass,flower,shrub,bonsai,tree,ore}-states.png，六张图共32状态；矿脉2400×1905，其余2400×2695。
+状态数据 natural-resource-states.json；绘图 draw_natural_states.py；独立原文 docs/natural-{kind}-definitions.md；build_natural_resource_documents.py 同步网页与公开文档。
+每类同镜头、同比例、同锚点；盆体各状态不缩放；当前外观包络与成熟预留分开。矿脉保留原位置，部分剩3格，其中一格50%仅储量示意。
+几何包络与矿格剩余范围自检通过，六图均已目视检查。全部为新增资料草案，没有修改游戏逻辑。

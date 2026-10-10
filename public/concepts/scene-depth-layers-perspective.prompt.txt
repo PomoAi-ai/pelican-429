@@ -1,0 +1,45 @@
+Tool: built-in ImageGen
+
+Initial generation:
+Use case: infographic-diagram / stylized-concept
+Create a polished Chinese game environment perspective design sheet for a 2D side-scrolling tile world rendered in 3D. This is an architectural concept drawing, NOT a screenshot or implemented feature. Landscape 3:2, high resolution, off-white background, precise thin navy linework, restrained sage green / muted blue distant landscape, warm earth tile solids, orange callout lines. Clear readable Chinese typography, generous spacing.
+
+Title EXACT: “背景 · 远景 · 近景”
+Subtitle EXACT: “横版世界分层透视草案｜近景可以直接由格子构成”
+Three panels:
+A top-left/main about 65% width and 65% height, labeled “A  游戏视角 · 正面透视”. Large coherent landscape scene viewed straight toward XY (NOT isometric): screen horizontal X and vertical Y remain horizontal/vertical; all Z thickness edges recede toward a single vanishing point near image center. Sky pale soft background and sparse clouds, pale blue mountain silhouettes far behind, then subdued distant hills and trees. Nearest fully legible playable strip is composed of actual 1×1 square-front extruded earth/stone tiles, a few half-height tiles and a slope, showing clear tile seams and perspective thickness. A short grass-covered slope on right, a small cutaway room at left with thin background wall and a window through which distant scenery is visible; wall not stretched across whole scene. Small neutral outlined human silhouette in the open playable area for scale. Keep walking surface and silhouette fully readable. Bottom left and bottom right only: OPTIONAL closer dark-sage tile masses, obviously blocks with grid seams and thickness, irregular cutout tops, separated from playable strip by depth. These nearer tiles frame edges and partially overlap lower terrain but NEVER conceal the character or central walking route. Show believable sky > mountains > subdued hills > playable tiles > optional foreground tiles depth. Grid is visible on actual tile faces, NOT a full-screen grid overlay. Label with unobtrusive leaders: “背景：天空与整体色调”, “远景：山体与远处轮廓”, “近景：实体格子与可玩空间”, “可选前景格子：局部遮挡”.
+B top-right about 35% width, labeled “B  分层展开 · 仅示意顺序”. An exploded architectural perspective of FIVE spaced parallel XY scene cards, depth stepping from upper-right far away to lower-left near viewer. All layers are under one coherent perspective and visually connected by faint dashed Z guides. Label each sheet clearly in far-to-near reading order: “① 背景”, “② 远景”, “③ 局部背景墙”, “④ 角色与实体格”, “⑤ 可选前景格子”. Sky card opaque pale blue; mountains silhouette card with transparent cutout shape; local room wall grid card with window cutout; ground tile/standing character card; last foreground block card only at side/bottom edges with large open middle. Show camera symbol at front lower-left. Caption: “前后间距为示意，不代表实际格数”.
+C bottom full-width, labeled “C  近景格子 · 深度不变”. Left half shows a precise wireframe/extruded single tile and two light transparent reserve zones in one coherent perspective. Actual solid central tile dimensions width1 height1 depth1. Reserve zone in front extends an extra0.5; reserve zone behind extends extra0.5. Thin back wall 1×1×0.2 sits entirely inside the rear0.5 reserve. Label front zone “内沿预留 0.5”, solid “实体深 1”, rear “外延预留 0.5”, wall “背景墙厚 0.2”. Dimension total “总带宽 2”. No numeric Z coordinates necessary. Label “背景墙属于局部构件，不等于天空背景”.
+Right half has three large concise notes:
+“近景可由格子、半砖、斜坡直接构成”
+“层级依靠前后位置、遮挡与远近明暗”
+“角色、敌人与落脚线保持清晰”
+Footer EXACT: “设计草案 · 镜头参数、层间距离与视差系数待定 · 不代表运行时已实现”
+Avoid giant foreground foliage replacing requested tiles, avoid isometric game view, avoid diagonal XY square grids, avoid blurring near tiles, avoid pretending render layers provide extra walkable Z lanes, avoid old camera numbers or old negative-Z scenery distances, no logos, no decorative UI. All text is Chinese except panel letters and numerals. Focus on the requested depth hierarchy and spatial readability; no unnecessary props.
+
+Refinement:
+Edit this game depth design sheet. Preserve title and the coherent A game scene and B exploded diagram, same layout and Chinese typography. Three targeted corrections:
+1. In A the neutral outlined humanoid is too short compared with tiles. Keep its feet at the existing walk surface but make it about 3.1 tile heights tall, counting the visible square grid on the playable ground. It must be clearly visible and unobstructed; neutral plain silhouette only.
+2. Foreground block faces in A must be crisp readable seams, no depth-of-field blur.
+3. REPLACE THE ENTIRE CONTENTS OF PANEL C, including its erroneous dimension drawing and all numerical dimension annotations. The replacement is a simple clean text-and-color legend, no cubes, no dimension arrows, no coordinates. New heading exactly “C  分层规则 · 先明确空间关系”. Below heading make three spacious columns with a short colored horizontal swatch at top and exact text:
+Column1 pale blue swatch:
+“背景与远景”
+“天空提供整体底色”
+“远山与远处建筑建立距离”
+“越远越淡，细节越少”
+Column2 earth brown swatch:
+“近景与可玩格子”
+“格子、半砖、斜坡可直接形成近景”
+“角色高度约 3.1 格”
+“背景墙是局部构件，不是天空”
+Column3 dark sage swatch:
+“可选前景格子”
+“位于镜头与可玩空间之间”
+“只在边缘局部遮挡”
+“保留角色、敌人与落脚线”
+Small caption across C bottom “实体深度与预留区沿用已确认定义；本图只讨论景别层次。”
+Preserve footer “设计草案 · 镜头参数、层间距离与视差系数待定 · 不代表运行时已实现”.
+No other changes. Especially do not add actual Z distances or camera values.
+
+Final correction:
+Make ONLY one text correction in this design sheet. In panel C middle column, replace the line “角色高度约 3.1 格” with “人物仅示意，尺寸另按规范”. Preserve every other text, picture, panel, layout, palette and composition exactly. This is a scenery layering concept, not a dimensional character scale diagram.

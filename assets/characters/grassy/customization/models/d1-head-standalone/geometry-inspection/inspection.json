@@ -1,0 +1,94 @@
+{
+  "source": "assets/characters/grassy/customization/models/d1-head-standalone/source/head-geometry.glb",
+  "sourceBounds": [
+    [
+      -0.7990930080413818,
+      -0.8259779810905457,
+      0.0
+    ],
+    [
+      0.8019310235977173,
+      0.8231769800186157,
+      1.8907849788665771
+    ]
+  ],
+  "bounds": [
+    [
+      -0.7990930080413818,
+      -0.8259779810905457,
+      0.0
+    ],
+    [
+      0.8019310235977173,
+      0.8231769800186157,
+      1.8907849788665771
+    ]
+  ],
+  "rotationDegreesXYZ": [
+    0,
+    0,
+    0
+  ],
+  "uniformScale": 1,
+  "requestedHeadHeight": null,
+  "coordinates": "Blender Z-up; front -Y; no translation or shape edits",
+  "objects": [
+    {
+      "name": "model",
+      "bounds": [
+        [
+          -0.7990930080413818,
+          -0.8259779810905457,
+          0.0
+        ],
+        [
+          0.8019310235977173,
+          0.8231769800186157,
+          1.8907849788665771
+        ]
+      ],
+      "vertices": 18187,
+      "edges": 52919,
+      "faces": 34740,
+      "faceSides": {
+        "3": 34740
+      },
+      "connectedComponents": [
+        4667,
+        4278,
+        3859,
+        1912,
+        1822,
+        639,
+        558,
+        452
+      ],
+      "nonManifoldEdges": 1618,
+      "boundaryEdges": 1618,
+      "wireEdges": 0,
+      "edgesWithMoreThanTwoFaces": 0,
+      "uvLayers": [
+        {
+          "name": "UVMap",
+          "loops": 104220
+        }
+      ],
+      "materials": [
+        "model"
+      ]
+    }
+  ],
+  "materials": [
+    {
+      "name": "model",
+      "shaders": [
+        "BSDF_PRINCIPLED"
+      ],
+      "textures": []
+    }
+  ],
+  "notes": [
+    "Components and non-manifold counts describe indexed mesh connectivity; UV-split vertices may inflate them.",
+    "Gray renders override all materials, including transparent eye or eyelash surfaces."
+  ]
+}

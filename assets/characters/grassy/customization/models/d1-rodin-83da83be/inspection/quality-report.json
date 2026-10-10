@@ -1,0 +1,189 @@
+{
+  "source": "private-source-049",
+  "sourceFaces": 19217,
+  "duplicateSourceFacesRemovedByImporter": 6,
+  "normalization": {
+    "height": 3.1,
+    "uniformScale": 1.6341229626802334,
+    "sourceBounds": [
+      [
+        -0.3990730047225952,
+        -0.388604998588562,
+        -2.9196321804647596e-08
+      ],
+      [
+        0.39849600195884705,
+        0.38671714067459106,
+        1.8970420360565186
+      ]
+    ]
+  },
+  "objects": [
+    {
+      "name": "model",
+      "removedIsolatedFaces": 6,
+      "removedIsolatedVertices": 18,
+      "beforeCleanup": {
+        "vertices": 19197,
+        "faces": 19211,
+        "faceSizes": {
+          "4": 19177,
+          "3": 34
+        },
+        "boundaryEdges": 18,
+        "nonManifoldEdges": 18,
+        "connectedComponents": [
+          {
+            "vertices": 19179,
+            "boundaryEdges": 0,
+            "bounds": [
+              [
+                -0.6516629457473755,
+                -0.633485734462738,
+                6.4890173234744e-08
+              ],
+              [
+                0.6516629457473755,
+                0.6334857940673828,
+                3.0999999046325684
+              ]
+            ]
+          },
+          {
+            "vertices": 3,
+            "boundaryEdges": 3,
+            "bounds": [
+              [
+                -0.30268940329551697,
+                -0.1658862978219986,
+                2.376140594482422
+              ],
+              [
+                -0.2849036157131195,
+                -0.15764378011226654,
+                2.4041903018951416
+              ]
+            ]
+          },
+          {
+            "vertices": 3,
+            "boundaryEdges": 3,
+            "bounds": [
+              [
+                -0.35720375180244446,
+                -0.006863415706902742,
+                0.20645840466022491
+              ],
+              [
+                -0.3496116101741791,
+                0.0021814554929733276,
+                0.23211251199245453
+              ]
+            ]
+          },
+          {
+            "vertices": 3,
+            "boundaryEdges": 3,
+            "bounds": [
+              [
+                0.07257711887359619,
+                0.3563319146633148,
+                1.1005605459213257
+              ],
+              [
+                0.08418919891119003,
+                0.362664133310318,
+                1.1280678510665894
+              ]
+            ]
+          },
+          {
+            "vertices": 3,
+            "boundaryEdges": 3,
+            "bounds": [
+              [
+                -0.2849036157131195,
+                -0.17133118212223053,
+                2.386340856552124
+              ],
+              [
+                -0.2746184468269348,
+                -0.1658862978219986,
+                2.4038031101226807
+              ]
+            ]
+          },
+          {
+            "vertices": 3,
+            "boundaryEdges": 3,
+            "bounds": [
+              [
+                -0.35849469900131226,
+                -0.006863415706902742,
+                0.20645840466022491
+              ],
+              [
+                -0.35274097323417664,
+                0.0011470539029687643,
+                0.22597965598106384
+              ]
+            ]
+          },
+          {
+            "vertices": 3,
+            "boundaryEdges": 3,
+            "bounds": [
+              [
+                -0.3417890667915344,
+                0.05145353078842163,
+                0.22992932796478271
+              ],
+              [
+                -0.3348979651927948,
+                0.0713767558336258,
+                0.2341567873954773
+              ]
+            ]
+          }
+        ]
+      },
+      "vertices": 19179,
+      "faces": 19205,
+      "faceSizes": {
+        "4": 19177,
+        "3": 28
+      },
+      "boundaryEdges": 0,
+      "nonManifoldEdges": 0,
+      "wireEdges": 0,
+      "inconsistentWindingEdges": 0,
+      "degenerateFaces": 0,
+      "connectedComponents": [
+        {
+          "vertices": 19179,
+          "boundaryEdges": 0,
+          "bounds": [
+            [
+              -0.6516629457473755,
+              -0.633485734462738,
+              6.4890173234744e-08
+            ],
+            [
+              0.6516629457473755,
+              0.6334857940673828,
+              3.0999999046325684
+            ]
+          ]
+        }
+      ],
+      "collapsedUvFaces": 0,
+      "uvOutsideUnitSquare": 0
+    }
+  ],
+  "rigged": false,
+  "animations": [],
+  "limits": [
+    "UV overlap and self-intersection are not automatically checked.",
+    "Quad count alone does not establish deformation-ready edge flow."
+  ]
+}

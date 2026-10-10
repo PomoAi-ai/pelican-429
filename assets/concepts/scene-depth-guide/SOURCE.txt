@@ -1,0 +1,100 @@
+二维玩法与三维场景概念资料，2026-10-09。
+
+液体补充（2026-10-10）：public/concepts/liquid-perspective.png，2400×2200。
+draw_liquid_perspective.py 本地Pillow精确制图；完整定义 docs/liquid-definitions.md。
+图示遵循新版中间Z=[−0.5,+0.5]深1，内外各额外预留0.5、墙厚0.2；这不是现行渲染尺寸。
+主图为统一针孔透视，斜上方从内沿看水池；另附XY占格与等比例YZ剖面。池宽4、水深1.5为布局示例。
+现行依据：fluid-map.ts、fluid-sim.ts、fluid-contact.ts、player-breath.ts、water-view.ts、water-shading.ts、tile-geometry.ts。
+现有水前面+0.42、背板−1、湖中顶面后沿−1.3未修改；半砖/斜坡整格挡水、平台透水、放砖清水等限制分别说明。
+重绘：UV_CACHE_DIR=/private/tmp/pelican-uv-cache uv run --no-project --python /private/tmp/pelican-scale-env/bin/python3 assets/concepts/scene-depth-guide/draw_liquid_perspective.py
+
+输出：public/concepts/tile-wall-door-depth.png、plants-distant-perspective.png。
+本地 Python/Pillow 绘制；门图使用主角 right-v1.png 原图等比缩放，未使用模型或 AI 绘图。
+补充明确深度标注：地形YZ侧视按200px/格等比例绘出1.5格深、1格高，标出后沿-1、前沿+.5和Z=0；各构件加双端尺寸箭头。
+重绘版：取消斜向展开。瓦片按距离30的正面透视投影绘制（局部等比放大），构件比较使用正交厚度尺。
+植物侧剖面共用同一Z标尺；远景用独立层序，不与近景共用距离比例。场景摆放和植物剪影仅为说明，不是游戏截图或新设定。
+
+来源：
+src/render/tile-geometry.ts — 地形前后沿 +0.5/-1；花草 z 范围 -0.85/+0.2。
+src/config/building-kit.ts、src/render/building-kit.ts — 建筑格、墙板与门包络；门屏障在 YZ、沿 X 穿过。
+src/render/cave-wall-view.ts — 洞穴背景平面 z=-1.01，与有厚度的建筑墙板不同。
+src/config/view-tuning.ts、src/render/camera-rig.ts — 默认透视相机 FOV30°、距离30，+Z 正对 Z=0。
+src/render/flora.ts、flora-cover.ts、tree-skeleton.ts — 花草分带、低地被、树中心与前沿。
+src/render/facility-sky.ts — 四层天空/城市平片的深度、视差系数与画幅适配。
+src/render/free-world-background.ts — 常规背景画幅 z=-121，随视口覆盖、轻微偏移。
+assets/characters/grassy/customization/female/concepts/d1-no-gear/individual/right-v1.png — 主角原图。
+
+已发现的现状限制：门整体高3不等于净高3。主框内净高约2.64，内槽略占空间，小于人形碰撞高2.8。
+能量门目前为资源预览，通行逻辑尚未接入；门构件X已改为0.14，碰撞与通行逻辑未接入。
+自然砖厚1.5，建筑格厚0.9，建筑墙板厚0.14；这是当前实现，前后沿尚未统一。
+自然砖范围为世界Z；建筑格、墙板、门比较图为各自局部Z，不能据此断定安装位置。建筑墙板最终世界Z位置待统一。
+正面镜头下，砖前+.5与后-1距相机29.5/31，等尺寸前后投影比31/29.5≈1.050847；禁止用任意缩小比夸大近景透视。
+远景视差系数为构图参数，不是直接世界速度倍率；背景画幅会缩放，不能按同尺寸实体的投影比例解读。
+
+重绘：
+UV_CACHE_DIR=/private/tmp/pelican-uv-cache uv run --no-project --python /private/tmp/pelican-scale-env/bin/python3 assets/concepts/scene-depth-guide/draw_tiles_walls_doors.py
+UV_CACHE_DIR=/private/tmp/pelican-uv-cache uv run --no-project --python /private/tmp/pelican-scale-env/bin/python3 assets/concepts/scene-depth-guide/draw_plants_perspective.py
+
+房间线框图：public/concepts/room-space-wireframe.png，2400×1700。
+脚本：draw_room_wireframe.py。本地Pillow画透视边线与XZ俯视。
+房间内宽6、高4仅为示例；深1.5沿用当前实现但待设计确认。背景墙厚.14、示例内表面Z=-1，安装位置不作为规范。
+门沿X通行，整体0.14×3×1.4，平移至房间右侧；保持当前净高不足提示。地板下部只画剖切带，不代表实体高度。
+
+房间独立图：public/concepts/room-space-perspective.png（2400×1700）。
+制图脚本：draw_room_perspective.py；本地 Pillow，针孔透视相机从斜上方观察，不代表游戏相机。
+示例内宽6、高4；布局仅作空间说明。地板范围[-1,.5]，实际深1.5；背景墙厚.14，示例内面Z=-1。
+门采用当前0.14×3×1.4包络与主框尺寸，平移到房间右侧X=[6,6.14]，深度中心Z=-.25；打开时不画能量膜。
+房间宽高、侧墙与地板竖向厚度、背景墙安装位置均为制图示例，不能视为新增游戏规范。
+
+薄门框修订（用户反馈门太厚）：room-space-wireframe.png 改为X厚0.14格示意方案；Z跨度1.4和Y高3保留。缩短侧墙与地板末端，俯视图同步。用户要求继续后，共享构件X已同步改为0.14；实体房间图同步薄框。
+
+单间房图：room-reference-perspective.png（2400×1800），draw_reference_house.py 本地 Pillow 绘制。
+本次按用户要求只画单间，取消二层和平台。主图左门、右侧完整墙体，另画右门镜像构件，不是两间房。
+本次按房间外轮廓总高7格处理：底板1、室内净高5、顶板1；室内净宽6是布局示例。底板y=-1至0，屋顶底y=5，顶格y=5至6。人物使用right-v1原图，外观3.1格，3.3头身为设计比例参照。
+“留半个”本图按X方向理解：外侧0.5安装区、内侧0.5留空区；左门靠左外沿、右半格空，右门镜像。薄框实际X厚仍为0.14，半格不是实心门厚。
+门高独立于房间：门洞y=0至3净高3，1×1一体门楣y=3至4；模块包络宽1、高4。y=4至5普通墙格，y=5至6屋顶，地板y=-1至0，房间总高仍7。左右镜像、外沿半格形态保留，无门槛。人物碰撞2.8可容纳，外观3.1的发梢余量仍需协调。本次未修改运行时。
+地板、侧墙、顶格和前门柱的前沿统一Z=+.5；门Z范围[-.9,.5]跨度1.4，房体Z[-1,.5]深1.5。背景墙Z[-1.14,-1]厚.14是安装假设。前方敞开展示内部，家具仍为后侧装饰示意。
+此图按用户的外沿、半格、一体门楣要求做方案，不是现有门模型复现；未修改运行时门、碰撞或建造规则。不套用泰拉瑞亚NPC住房判定。
+检查：同一组格子用于正面和XY图，半格尺寸与左右镜像明确；投影同Z格宽高相等，总高7断言，净高5大于外观3.1，绘图边界断言。
+
+2026-10-10 植物、生长物与矿脉补充：
+natural-resources-perspective.png（2400×2700）、natural-resources-depth.png（2400×1430）。
+来源：assets/concepts/scene-depth-guide/draw_natural_resources.py，本地Pillow几何制图，无AI生成与外部素材。
+定义：docs/natural-resource-definitions.md；public/concepts 为原文副本，src/ui/concept-natural-resources.ts 为页面内容快照。
+统一格单位；图谱每卡按1格标尺独立放大，每卡实体与线框投影一致；YZ剖面等比例。草案尺寸与状态不代表运行时实现。
+制图检查：构件包络、相机正交基、文字画布边界；已人工检查输出图。
+重绘：UV_CACHE_DIR=/private/tmp/pelican-uv-cache uv run --no-project --python /private/tmp/pelican-scale-env/bin/python3 assets/concepts/scene-depth-guide/draw_natural_resources.py
+
+2026-10-10 逐状态补充：natural-{grass,flower,shrub,bonsai,tree,ore}-states.png，六张图共32状态；矿脉2400×1905，其余2400×2695。
+状态数据 natural-resource-states.json；绘图 draw_natural_states.py；独立原文 docs/natural-{kind}-definitions.md；build_natural_resource_documents.py 同步网页与公开文档。
+每类同镜头、同比例、同锚点；盆体各状态不缩放；当前外观包络与成熟预留分开。矿脉保留原位置，部分剩3格，其中一格50%仅储量示意。
+几何包络与矿格剩余范围自检通过，六图均已目视检查。全部为新增资料草案，没有修改游戏逻辑。
+
+2026-10-10 自然资源空间定位修订：
+natural-attachments-space.png（2400×2200）、natural-flora-space.png（2400×2100）、natural-tree-space.png / natural-ore-space.png（2400×2250）。
+来源 draw_natural_space.py；本地Pillow几何透视制图，无外部图片；定义 docs/natural-spatial-definitions.md。
+青苔四形附着宿主；草花根在前上棱Z=-0.5，当前深D的枝叶范围[-0.5-D,-0.5]；同步状态数据、草花状态图、独立定义及网页。
+树高从根面量5格，根占中间一格，冠宽3深1.4；矿带5格嵌入5×4×1岩层，20→18→15实体格，矿格5→3→0，另附单格XZ剖切。
+四图已经目视核对；绘图文字边界、矿格计数断言通过。早期成熟总览保留形体历史参考，并标明旧草花位置已被替代。未修改游戏运行时。
+
+2026-10-10 整格覆盖修订：按用户要求，小草改为顶面1×1全部覆盖，前中后排草簇+前叶伸0.4，总深1.4。同步草的6阶段、成熟组合、树下草；新增natural-tree-ground-space.png（2400×2400），含树根放大、相邻树与YZ剖面。图片由draw_natural_states.py和draw_natural_space.py生成；资料同步由build_natural_resource_documents.py完成。本轮仅透视资料。
+
+2026-10-10 正背面植物补充：natural-surface-vines.png（2400×2400），同一草苔格/藤蔓格从正背两个方向观察；natural-vine-states.png（2400×2250），四阶段同镜头对照。draw_natural_space.py绘制并检查藤叶包络；定义natural-vine-definitions.md。概念目录新增独立植物大类，矿脉放在矿产资源类。
+
+垂挂补图：natural-vine-hanging.png（2400×1300），前后上棱支点、最长下垂1.5、越过砖底0.5的双向透视。
+
+2026-10-10 形态扩充：natural-vine-forms-1.png、natural-vine-forms-2.png（均2400×2790）。共12种轮廓/附着方式，涵盖苔岛、草裙、单藤、扇形、密叶、长垂、叶帘、转角、洞口、斜面、缠干、跨格。draw_natural_space.py按明确表面路径几何投影，坡面叶沿实际斜率，缠干使用深度遮挡。图谱与每形宿主尺寸同步到natural-vine-definitions.md，图片已目视核对。
+
+2026-10-10 植物全类图文复核与下垂补充：
+修正整格草覆盖旧口径、顶草与背苔/背藤组合深度、藤蔓攀升高度与路径长度混淆、旧游戏与本轮制图坐标提示。
+重新校准花卉、盆景、灌木残桩的实际宽高深及树桩0.3高度；灌木果实移到冠层表面，树状态格线与居中宿主对齐；青苔包边剖面接缝闭合，坡面藤转向低端以显示贴坡叶层。
+新增natural-shrub-bonsai-space.png（2400×2180），区分灌木冠幅和单格根部、盆底0.7、盆沿0.76与成熟预留1。
+新增natural-drooping-forms.png（2400×3200），草裙、苔须、垂藤、垂花、悬崖盆景、垂枝树六形；natural-drooping-vine-states.png（2400×2250），固定上沿支点的下垂0.2/0.6/1.5/0.3四阶段。
+下垂定义位于docs/natural-drooping-definitions.md，新增植物目录独立入口；定义发布器同步八份独立资料及两份共同资料。
+检查：draw_natural_states.py实际包络与高度断言、draw_natural_space.py下垂最低点与盆景避让承托台断言通过；当前输出已目视检查，10份公开文档与原文一致，引用图片和文档链接有效；浏览器已确认植物目录与下垂图片加载。
+本次只制作透视定义、图与页面资料；未运行游戏测试、typecheck或build，未提交或推送。
+
+2026-10-10 下垂图逐面复核与状态补齐：
+修正大砖面按整面排序造成的错误遮挡，natural_depth_raster.py 对枝叶和宿主逐像素比较深度；叶片补接叶柄，垂藤根部接到真实上棱。修剪保留成熟植株的上段枝叶位置，仅截断下段；悬崖盆景取消叶顶强行削平，垂枝树补齐冠内至垂枝挂点的木质连接。
+新增 natural-drooping-flower-states.png、natural-drooping-bonsai-states.png、natural-drooping-tree-states.png（均2400×2850），分别6、5、6阶段；与垂藤4阶段共21个下垂状态。绘图使用 draw_natural_space.py 与 draw_drooping_states.py，同类共用透视镜头、比例与支承物，尺寸取实际几何包络。
+检查：遮挡前后顺序、宿主大面遮挡、修剪保留叶片、实际包络与承托台避让自检通过；新图已逐张目视复核，独立定义与页面快照同步。仅透视制图与资料，未运行游戏测试、typecheck或build，未提交或推送。

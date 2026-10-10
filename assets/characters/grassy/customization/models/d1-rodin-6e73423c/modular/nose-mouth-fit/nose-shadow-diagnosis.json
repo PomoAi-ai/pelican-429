@@ -1,0 +1,122 @@
+{
+  "noseFaceMaterials": {
+    "D1 refined skin": 196
+  },
+  "materialNormals": [
+    {
+      "material": "D1 refined skin",
+      "strength": 0.44999998807907104,
+      "inputSource": [
+        "Image Texture.007"
+      ]
+    }
+  ],
+  "renders": [
+    "normal-on.png",
+    "normal-off.png",
+    "skin-unlit.png"
+  ],
+  "lightsChanged": false,
+  "geometryChanged": false,
+  "pixelComparison": {
+    "noseUnderside": {
+      "rectTopLeftPixels": [
+        473,
+        631,
+        528,
+        654
+      ],
+      "normalOnMeanLinearLuminance": 0.7477694798153003,
+      "normalOffMeanLinearLuminance": 0.7467418789207511,
+      "unlitMeanLinearLuminance": 0.8727315031364877,
+      "normalToggleMeanAbsRgbDifference": 0.0012854894157499075
+    },
+    "mouthRegion": {
+      "rectTopLeftPixels": [
+        435,
+        690,
+        564,
+        713
+      ],
+      "normalOnMeanLinearLuminance": 0.6781559505442116,
+      "normalOffMeanLinearLuminance": 0.6789407331578853,
+      "unlitMeanLinearLuminance": 0.8252028203175571,
+      "normalToggleMeanAbsRgbDifference": 0.00930100493133068
+    }
+  },
+  "actualGeometryNormalSamples": [
+    {
+      "z": 2.345,
+      "surfaceY": -0.35028600692749023,
+      "triangleNormal": [
+        -0.10408173501491547,
+        -0.9853790998458862,
+        -0.1348886936903
+      ]
+    },
+    {
+      "z": 2.355,
+      "surfaceY": -0.35215461254119873,
+      "triangleNormal": [
+        -0.09286663681268692,
+        -0.9707961082458496,
+        -0.22120301425457
+      ]
+    },
+    {
+      "z": 2.365,
+      "surfaceY": -0.35676753520965576,
+      "triangleNormal": [
+        -0.09728851169347763,
+        -0.8840587139129639,
+        -0.4571380615234375
+      ]
+    },
+    {
+      "z": 2.375,
+      "surfaceY": -0.3657604455947876,
+      "triangleNormal": [
+        -0.16074389219284058,
+        -0.7342663407325745,
+        -0.6595561504364014
+      ]
+    },
+    {
+      "z": 2.385,
+      "surfaceY": -0.3746691942214966,
+      "triangleNormal": [
+        -0.22793422639369965,
+        -0.8003994822502136,
+        -0.5544426441192627
+      ]
+    },
+    {
+      "z": 2.395,
+      "surfaceY": -0.3782997131347656,
+      "triangleNormal": [
+        -0.3098990321159363,
+        -0.9476354718208313,
+        0.07713361084461212
+      ]
+    },
+    {
+      "z": 2.405,
+      "surfaceY": -0.3736073970794678,
+      "triangleNormal": [
+        -0.22358767688274384,
+        -0.689656138420105,
+        0.688754677772522
+      ]
+    },
+    {
+      "z": 2.415,
+      "surfaceY": -0.3630952835083008,
+      "triangleNormal": [
+        -0.1985623836517334,
+        -0.6708394289016724,
+        0.7145261168479919
+      ]
+    }
+  ],
+  "conclusion": "The broad nose underside dark patch remains with skin tangent normal disconnected and disappears in unlit base color. It is primarily geometric lighting/shadow response; the old normal map is not the main cause. Mouth color line remains in unlit base color."
+}

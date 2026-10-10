@@ -1,0 +1,582 @@
+{
+  "version": "1.0",
+  "date": "2026-10-10",
+  "scope": "24款四视图画稿已齐全，共96个全身视图；每款保留无尺原图、标尺检查页、定义与两套提示词。",
+  "identity": "日式漫画与清爽游戏插画风格；成年女性角色设定，约20岁；自然人类圆耳。保持D1的圆眼、小鼻小嘴与紧凑游戏比例。",
+  "proportion": {
+    "targetHeads": 3.3,
+    "worldHeightTiles": 3.1,
+    "referencePixelsPerTile": 240,
+    "referenceHeightPixels": 744,
+    "collisionReference": {
+      "widthTiles": 0.8,
+      "heightTiles": 2.8
+    },
+    "measurement": "可见基础发冠至下巴为H，基础发冠至鞋底为总高；排除发髻、马尾和独立翘发。此为可见轮廓口径，不冒充裸头骨解剖测量。",
+    "target": "设计目标3.30H，所有角色共享头部尺度、骨长与关节高度；胖瘦仅改变宽度与厚度。当前画稿的实测值单独保留，不能改尺伪造达标。",
+    "review": "人工选点误差约±5原图像素；0H、1H、2H、3H、3.3H等距尺由测量计算，末段严格为0.3H。背面下巴遮挡时不估造数值。3.1格为世界尺寸，不是3.1头身。"
+  },
+  "views": [
+    "FRONT：身体、头与双脚正对镜头，站立中性姿势",
+    "RIGHT：人物朝画面右方的严格侧面，头身共同转向",
+    "BACK：身体与头部正背面，服装结构与正面一致",
+    "FRONT45：头、胸廓、骨盆和双脚整体约45°转向，不能只转头"
+  ],
+  "sheet": "一名角色一张白底横向四视图，视图顺序正面、右侧、背面、前侧45°。使用相同缩放与地平线，四肢自然张开便于观察，完整显示手脚，左侧添加精确标尺。另保留无尺原图。鞋底、头顶或附件只在进入具体建模且需要时独立补图，不挤入本轮四视图。",
+  "faces": "脸型、眉型、眼睛颜色和表情有区别；保持大而圆的眼形，禁止过度上挑狭长眼。鼻口下巴在正侧与45°连续一致。",
+  "material": "材质参考只交一张合成图，四个全身视角，不放头部特写。皮肤、衣服与头发采用干净固有色；去除投影、强方向光、环境染色、边缘光与烘焙AO。保留真实缝线和设计色块。生成贴图后与原画分别核对肤色、发色、服装色，不靠过曝灯光补偿。",
+  "modeling": "原画用于造型，不等同UV贴图。批准后再做模型；保留可替换头发、服装、鞋子与附件的部件边界。拓扑重点检查肩肘、髋膝、颈部和面部，四边面母模用于编辑与变形，游戏导出明确三角化并检查变形、穿插、法线和材质；面数预算按实际场景测量决定，不能仅凭game-ready标签通过。",
+  "approval": "24款均为已绘制、待核对画稿；不是用户逐款批准的定稿。人工正面估测约3.15—3.40H，目标3.30H，保留偏差。",
+  "batchPolicy": "共6批，每批4款；用户要求继续绘制完成，本轮已补齐全部24款。",
+  "negative": "禁止黄色背景、精灵耳、写实皮肤毛孔、尖斜小眼、拉长腿或缩小头、不同视角变脸变发型、左右配件镜像、缺指多指、截脚、夸张性感姿态、泳装替代指定服饰、把原画阴影烘焙成皮肤色、未经用户确认标记定稿。"
+}
+
+id：R01
+name：经典水手裙
+batch：1
+season：春夏
+body：均衡
+bodyDefinition：以D1基准宽度为中位：肩、腰、臀自然过渡；腿保留细而有体积的轮廓；不夸大胸腰差。
+hair：黑色齐肩直发；侧分刘海，发尾内收，露出部分耳廓
+face：柔和圆脸；圆蓝眼；平缓眉，短小圆鼻，微笑
+outfit：象牙白水手领短袖上衣、藏蓝百褶短裙、暗红领结
+shoes：白色短袜、藏蓝圆头玛丽珍鞋
+palette：象牙白 #F5F1E8 / 藏蓝 #273552 / 暗红 #A43E47
+material：棉质上衣、哑光裙布；胸前领结与背后方领独立成层
+viewChecks：侧面保留短躯干；背面方领双白线，裙褶围绕腰线连续；鞋扣左右一致
+status：已绘制·待核对
+approval：未定稿
+art：batch-01/r01-art.png
+ruler：batch-01/r01-ruler.png
+geometryPrompt：Create ONE character design sheet for R01: black shoulder-length bob, soft round face, blue eyes, ivory sailor blouse, navy pleated skirt, muted red necktie, ankle socks and navy Mary Jane shoes. Balanced body on the SAME compact D1 game skeleton, approximately3.3 heads tall. Big rounded eyes, natural human ears. FOUR full-body views FRONT, RIGHT strict profile facing image right, BACK, FRONT45 with the entire body rotated. Same head size, bone lengths, clothes and baseline across views. White background, opaque clothing, neutral technical standing pose, hands and shoes visible. No equipment unless separately specified. Do not add a ruler using generated text; preserve a clean image for measured ruler layout. Design constraints: 黑色齐肩直发；侧分刘海，发尾内收，露出部分耳廓；柔和圆脸；圆蓝眼；平缓眉，短小圆鼻，微笑；象牙白水手领短袖上衣、藏蓝百褶短裙、暗红领结；白色短袜、藏蓝圆头玛丽珍鞋。 View consistency: 侧面保留短躯干；背面方领双白线，裙褶围绕腰线连续；鞋扣左右一致。
+materialPrompt：Produce ONE single four-view material reference sheet for R01, matching the approved geometry and black shoulder-length bob, soft round face, blue eyes, ivory sailor blouse, navy pleated skirt, muted red necktie, ankle socks and navy Mary Jane shoes. Same FRONT / RIGHT / BACK / FRONT45 full-body views, no head close-ups. Neutral white background, flat diffuse base colours, even illumination; no cast shadows, baked ambient occlusion, directional highlights or environment colour tint. Opaque fabrics and natural skin; preserve seams and design colour blocks. Palette: 象牙白 #F5F1E8 / 藏蓝 #273552 / 暗红 #A43E47. Material structure: 棉质上衣、哑光裙布；胸前领结与背后方领独立成层. This is a reference image, not a UV atlas. Do not change facial features, hair silhouette, body proportions or outfit.
+measuredFrontHeads：3.231
+
+------------------
+
+id：R02
+name：夏日水手短裤
+batch：1
+season：夏
+body：纤细
+bodyDefinition：同骨架与头高，适度缩窄肩臂、腰臀和大小腿；保留关节与肌肉体积，不拉长腿，不缩成纸片。
+hair：银灰耳上短发；蓬松侧扫，细碎后颈，单侧交叉发夹
+face：短心形脸；圆灰蓝眼；细平眉，小鼻，轻微微笑
+outfit：天蓝短袖水手上衣、象牙白领巾、藏蓝高腰短裤
+shoes：白色帆布低帮鞋、白色短袜
+palette：天蓝 #8DB8E7 / 藏蓝 #2E3C58 / 象牙白 #F7F2E7
+material：轻棉布、短裤斜纹布、帆布鞋；不画丝袜或深色腿部阴影
+viewChecks：短裤后袋仅在背面出现；发夹固定角色左侧，不镜像；腿纤细但保留膝踝体积
+status：已绘制·待核对
+approval：未定稿
+art：batch-01/r02-art.png
+ruler：batch-01/r02-ruler.png
+geometryPrompt：Create ONE character design sheet for R02: silver-grey cropped pixie, heart-shaped face, grey-blue eyes, sky-blue sailor blouse, ivory neckerchief, navy shorts, white canvas shoes. Slender body on the SAME compact D1 game skeleton, approximately3.3 heads tall. Big rounded eyes, natural human ears. FOUR full-body views FRONT, RIGHT strict profile facing image right, BACK, FRONT45 with the entire body rotated. Same head size, bone lengths, clothes and baseline across views. White background, opaque clothing, neutral technical standing pose, hands and shoes visible. No equipment unless separately specified. Do not add a ruler using generated text; preserve a clean image for measured ruler layout. Design constraints: 银灰耳上短发；蓬松侧扫，细碎后颈，单侧交叉发夹；短心形脸；圆灰蓝眼；细平眉，小鼻，轻微微笑；天蓝短袖水手上衣、象牙白领巾、藏蓝高腰短裤；白色帆布低帮鞋、白色短袜。 View consistency: 短裤后袋仅在背面出现；发夹固定角色左侧，不镜像；腿纤细但保留膝踝体积。
+materialPrompt：Produce ONE single four-view material reference sheet for R02, matching the approved geometry and silver-grey cropped pixie, heart-shaped face, grey-blue eyes, sky-blue sailor blouse, ivory neckerchief, navy shorts, white canvas shoes. Same FRONT / RIGHT / BACK / FRONT45 full-body views, no head close-ups. Neutral white background, flat diffuse base colours, even illumination; no cast shadows, baked ambient occlusion, directional highlights or environment colour tint. Opaque fabrics and natural skin; preserve seams and design colour blocks. Palette: 天蓝 #8DB8E7 / 藏蓝 #2E3C58 / 象牙白 #F7F2E7. Material structure: 轻棉布、短裤斜纹布、帆布鞋；不画丝袜或深色腿部阴影. This is a reference image, not a UV atlas. Do not change facial features, hair silhouette, body proportions or outfit.
+measuredFrontHeads：3.184
+
+------------------
+
+id：R03
+name：牛仔背带短裤
+batch：1
+season：春夏
+body：微胖
+bodyDefinition：同身高与骨长，增加脸颊、上臂、腰腹、臀、大腿和小腿厚度；轮廓连续，不仅加粗腿。
+hair：栗棕齐肩波浪半扎；小发束，后脑体积饱满
+face：饱满椭圆脸；圆棕眼；柔眉，浅酒窝
+outfit：杏色圆领短袖、浅蓝牛仔背带短裤、雏菊胸袋
+shoes：米白帆布鞋、短袜
+palette：杏色 #F3B493 / 牛仔蓝 #739BC2 / 米白 #EEE8D8
+material：轻棉T恤、洗水牛仔；胸袋、扣件、双肩带是独立结构
+viewChecks：厚度分布在上臂、腰腹、臀腿；侧面自然圆腹，背面双后袋；不能只加粗腿
+status：已绘制·待核对
+approval：未定稿
+art：batch-01/r03-art.png
+ruler：batch-01/r03-ruler.png
+geometryPrompt：Create ONE character design sheet for R03: chestnut half-up shoulder-length waves, full oval face, brown eyes, apricot T-shirt, light denim short overalls with daisy pocket, ivory canvas shoes. Soft plump body on the SAME compact D1 game skeleton, approximately3.3 heads tall. Big rounded eyes, natural human ears. FOUR full-body views FRONT, RIGHT strict profile facing image right, BACK, FRONT45 with the entire body rotated. Same head size, bone lengths, clothes and baseline across views. White background, opaque clothing, neutral technical standing pose, hands and shoes visible. No equipment unless separately specified. Do not add a ruler using generated text; preserve a clean image for measured ruler layout. Design constraints: 栗棕齐肩波浪半扎；小发束，后脑体积饱满；饱满椭圆脸；圆棕眼；柔眉，浅酒窝；杏色圆领短袖、浅蓝牛仔背带短裤、雏菊胸袋；米白帆布鞋、短袜。 View consistency: 厚度分布在上臂、腰腹、臀腿；侧面自然圆腹，背面双后袋；不能只加粗腿。
+materialPrompt：Produce ONE single four-view material reference sheet for R03, matching the approved geometry and chestnut half-up shoulder-length waves, full oval face, brown eyes, apricot T-shirt, light denim short overalls with daisy pocket, ivory canvas shoes. Same FRONT / RIGHT / BACK / FRONT45 full-body views, no head close-ups. Neutral white background, flat diffuse base colours, even illumination; no cast shadows, baked ambient occlusion, directional highlights or environment colour tint. Opaque fabrics and natural skin; preserve seams and design colour blocks. Palette: 杏色 #F3B493 / 牛仔蓝 #739BC2 / 米白 #EEE8D8. Material structure: 轻棉T恤、洗水牛仔；胸袋、扣件、双肩带是独立结构. This is a reference image, not a UV atlas. Do not change facial features, hair silhouette, body proportions or outfit.
+measuredFrontHeads：3.32
+
+------------------
+
+id：R04
+name：秋日针织
+batch：2
+season：秋
+body：微胖
+bodyDefinition：同身高与骨长，增加脸颊、上臂、腰腹、臀、大腿和小腿厚度；轮廓连续，不仅加粗腿。
+hair：深棕齐下巴圆弧波波头；短齐刘海，不遮眼
+face：圆脸；榛色圆眼；柔和短眉，鼻尖圆润
+outfit：苔绿宽松短开衫、奶油内搭、焦糖A字短裙
+shoes：棕色踝靴、奶油罗纹短袜
+palette：苔绿 #758568 / 奶油 #F2E5CB / 焦糖 #B77C51
+material：低频针织纹、哑光棉裙、软皮鞋；开衫留可见下摆层次
+viewChecks：侧面开衫盖住腰带但不改变腰高；后背无多余蝴蝶结；裙摆与臀部留间隙
+status：已绘制·待核对
+approval：未定稿
+art：batch-02/r04-art.png
+ruler：batch-02/r04-ruler.png
+geometryPrompt：Create ONE character design sheet for R04: dark brown chin-length bob with short fringe, round face, hazel eyes, moss cardigan, cream inner top, caramel A-line skirt, brown ankle boots. Soft plump body on the SAME compact D1 game skeleton, approximately3.3 heads tall. Big rounded eyes, natural human ears. FOUR full-body views FRONT, RIGHT strict profile facing image right, BACK, FRONT45 with the entire body rotated. Same head size, bone lengths, clothes and baseline across views. White background, opaque clothing, neutral technical standing pose, hands and shoes visible. No equipment unless separately specified. Do not add a ruler using generated text; preserve a clean image for measured ruler layout. Design constraints: 深棕齐下巴圆弧波波头；短齐刘海，不遮眼；圆脸；榛色圆眼；柔和短眉，鼻尖圆润；苔绿宽松短开衫、奶油内搭、焦糖A字短裙；棕色踝靴、奶油罗纹短袜。 View consistency: 侧面开衫盖住腰带但不改变腰高；后背无多余蝴蝶结；裙摆与臀部留间隙。
+materialPrompt：Produce ONE single four-view material reference sheet for R04, matching the approved geometry and dark brown chin-length bob with short fringe, round face, hazel eyes, moss cardigan, cream inner top, caramel A-line skirt, brown ankle boots. Same FRONT / RIGHT / BACK / FRONT45 full-body views, no head close-ups. Neutral white background, flat diffuse base colours, even illumination; no cast shadows, baked ambient occlusion, directional highlights or environment colour tint. Opaque fabrics and natural skin; preserve seams and design colour blocks. Palette: 苔绿 #758568 / 奶油 #F2E5CB / 焦糖 #B77C51. Material structure: 低频针织纹、哑光棉裙、软皮鞋；开衫留可见下摆层次. This is a reference image, not a UV atlas. Do not change facial features, hair silhouette, body proportions or outfit.
+measuredFrontHeads：3.305
+
+------------------
+
+id：R05
+name：冬日旅行
+batch：2
+season：冬
+body：均衡
+bodyDefinition：以D1基准宽度为中位：肩、腰、臀自然过渡；腿保留细而有体积的轮廓；不夸大胸腰差。
+hair：橙金色单侧长辫；辫尾至腰，刘海与D1家族一致
+face：椭圆脸；蓝眼；清晰但不尖锐的眉眼，淡雀斑
+outfit：象牙白短呢大衣、青绿围巾、藏蓝直筒长裤
+shoes：棕色平底保暖靴、薄手套
+palette：象牙白 #F1EBDD / 青绿 #397E7A / 藏蓝 #2B3C56
+material：毛呢、针织围巾、磨砂皮靴；表面不添加强高光
+viewChecks：围巾垂尾固定一侧；侧面衣厚不等于肥胖；背面大衣分缝与辫子清晰
+status：已绘制·待核对
+approval：未定稿
+art：batch-02/r05-art.png
+ruler：batch-02/r05-ruler.png
+geometryPrompt：Create ONE character design sheet for R05: orange-gold side braid, oval face with light freckles, blue eyes, ivory short wool coat, teal scarf, navy trousers, brown winter boots. Balanced body on the SAME compact D1 game skeleton, approximately3.3 heads tall. Big rounded eyes, natural human ears. FOUR full-body views FRONT, RIGHT strict profile facing image right, BACK, FRONT45 with the entire body rotated. Same head size, bone lengths, clothes and baseline across views. White background, opaque clothing, neutral technical standing pose, hands and shoes visible. No equipment unless separately specified. Do not add a ruler using generated text; preserve a clean image for measured ruler layout. Design constraints: 橙金色单侧长辫；辫尾至腰，刘海与D1家族一致；椭圆脸；蓝眼；清晰但不尖锐的眉眼，淡雀斑；象牙白短呢大衣、青绿围巾、藏蓝直筒长裤；棕色平底保暖靴、薄手套。 View consistency: 围巾垂尾固定一侧；侧面衣厚不等于肥胖；背面大衣分缝与辫子清晰。
+materialPrompt：Produce ONE single four-view material reference sheet for R05, matching the approved geometry and orange-gold side braid, oval face with light freckles, blue eyes, ivory short wool coat, teal scarf, navy trousers, brown winter boots. Same FRONT / RIGHT / BACK / FRONT45 full-body views, no head close-ups. Neutral white background, flat diffuse base colours, even illumination; no cast shadows, baked ambient occlusion, directional highlights or environment colour tint. Opaque fabrics and natural skin; preserve seams and design colour blocks. Palette: 象牙白 #F1EBDD / 青绿 #397E7A / 藏蓝 #2B3C56. Material structure: 毛呢、针织围巾、磨砂皮靴；表面不添加强高光. This is a reference image, not a UV atlas. Do not change facial features, hair silhouette, body proportions or outfit.
+measuredFrontHeads：3.345
+
+------------------
+
+id：R06
+name：东方轻装
+batch：2
+season：春
+body：纤细
+bodyDefinition：同骨架与头高，适度缩窄肩臂、腰臀和大小腿；保留关节与肌肉体积，不拉长腿，不缩成纸片。
+hair：黑色低发髻；中分两条短鬓发，髻不超过头高基线
+face：柔和鹅蛋脸；深绿圆眼；平眉，小嘴
+outfit：玉色交领短外套、米白九分直筒裤、深青布腰带
+shoes：深青布面平底鞋
+palette：玉色 #89B9A9 / 米白 #F0EADC / 深青 #275C5C
+material：棉麻、低光泽滚边；交领左右压叠方向固定
+viewChecks：背面腰带结小而清楚；侧面裤腿不贴成裙；手腕与脚踝留关节空间
+status：已绘制·待核对
+approval：未定稿
+art：batch-02/r06-art.png
+ruler：batch-02/r06-ruler.png
+geometryPrompt：Create ONE character design sheet for R06: black low bun with short framing strands, oval face, dark green eyes, jade crossover jacket, ivory cropped trousers, dark teal cloth belt and flats. Slender body on the SAME compact D1 game skeleton, approximately3.3 heads tall. Big rounded eyes, natural human ears. FOUR full-body views FRONT, RIGHT strict profile facing image right, BACK, FRONT45 with the entire body rotated. Same head size, bone lengths, clothes and baseline across views. White background, opaque clothing, neutral technical standing pose, hands and shoes visible. No equipment unless separately specified. Do not add a ruler using generated text; preserve a clean image for measured ruler layout. Design constraints: 黑色低发髻；中分两条短鬓发，髻不超过头高基线；柔和鹅蛋脸；深绿圆眼；平眉，小嘴；玉色交领短外套、米白九分直筒裤、深青布腰带；深青布面平底鞋。 View consistency: 背面腰带结小而清楚；侧面裤腿不贴成裙；手腕与脚踝留关节空间。
+materialPrompt：Produce ONE single four-view material reference sheet for R06, matching the approved geometry and black low bun with short framing strands, oval face, dark green eyes, jade crossover jacket, ivory cropped trousers, dark teal cloth belt and flats. Same FRONT / RIGHT / BACK / FRONT45 full-body views, no head close-ups. Neutral white background, flat diffuse base colours, even illumination; no cast shadows, baked ambient occlusion, directional highlights or environment colour tint. Opaque fabrics and natural skin; preserve seams and design colour blocks. Palette: 玉色 #89B9A9 / 米白 #F0EADC / 深青 #275C5C. Material structure: 棉麻、低光泽滚边；交领左右压叠方向固定. This is a reference image, not a UV atlas. Do not change facial features, hair silhouette, body proportions or outfit.
+measuredFrontHeads：3.161
+
+------------------
+
+id：R07
+name：医生
+batch：3
+season：四季·室内
+body：均衡
+bodyDefinition：以D1基准宽度为中位：肩、腰、臀自然过渡；腿保留细而有体积的轮廓；不夸大胸腰差。
+hair：暖棕低马尾；干净侧分刘海，不遮眼耳
+face：柔和方圆脸；灰蓝圆眼；温和眉，平静表情
+outfit：白色短医师外套、淡蓝刷手衣、深蓝直筒长裤
+shoes：白色工作运动鞋；胸牌，简洁听诊器可拆
+palette：白 #F6F5F0 / 淡蓝 #91BBD5 / 深蓝 #38556F
+material：棉涤外套与刷手服；金属件仅听诊器局部
+viewChecks：后背中缝与下摆开衩；听诊器不与头发融合；胸牌用图形不生成小字
+status：已绘制·待核对
+approval：未定稿
+art：batch-03/r07-art.png
+ruler：batch-03/r07-ruler.png
+geometryPrompt：Create ONE character design sheet for R07: warm brown low ponytail, rounded square face, grey-blue eyes, short white medical coat over pale blue scrubs, navy trousers, white work sneakers. Balanced body on the SAME compact D1 game skeleton, approximately3.3 heads tall. Big rounded eyes, natural human ears. FOUR full-body views FRONT, RIGHT strict profile facing image right, BACK, FRONT45 with the entire body rotated. Same head size, bone lengths, clothes and baseline across views. White background, opaque clothing, neutral technical standing pose, hands and shoes visible. No equipment unless separately specified. Do not add a ruler using generated text; preserve a clean image for measured ruler layout. Design constraints: 暖棕低马尾；干净侧分刘海，不遮眼耳；柔和方圆脸；灰蓝圆眼；温和眉，平静表情；白色短医师外套、淡蓝刷手衣、深蓝直筒长裤；白色工作运动鞋；胸牌，简洁听诊器可拆。 View consistency: 后背中缝与下摆开衩；听诊器不与头发融合；胸牌用图形不生成小字。
+materialPrompt：Produce ONE single four-view material reference sheet for R07, matching the approved geometry and warm brown low ponytail, rounded square face, grey-blue eyes, short white medical coat over pale blue scrubs, navy trousers, white work sneakers. Same FRONT / RIGHT / BACK / FRONT45 full-body views, no head close-ups. Neutral white background, flat diffuse base colours, even illumination; no cast shadows, baked ambient occlusion, directional highlights or environment colour tint. Opaque fabrics and natural skin; preserve seams and design colour blocks. Palette: 白 #F6F5F0 / 淡蓝 #91BBD5 / 深蓝 #38556F. Material structure: 棉涤外套与刷手服；金属件仅听诊器局部. This is a reference image, not a UV atlas. Do not change facial features, hair silhouette, body proportions or outfit.
+measuredFrontHeads：3.256
+
+------------------
+
+id：R08
+name：急救员
+batch：3
+season：四季·户外
+body：微胖
+bodyDefinition：同身高与骨长，增加脸颊、上臂、腰腹、臀、大腿和小腿厚度；轮廓连续，不仅加粗腿。
+hair：黑色利落短发；偏分，后颈贴合
+face：宽圆脸；深棕眼；厚而柔和眉，可靠表情
+outfit：藏蓝急救夹克、橙色肩部拼片、藏蓝工装长裤
+shoes：黑色防滑工作鞋、腰部可拆工具小袋
+palette：藏蓝 #243E58 / 橙 #E58B43 / 灰白 #DADFE2
+material：耐磨织物，反光条独立浅灰色；不烘焙自发光
+viewChecks：反光条前后水平接续；口袋体积适度；侧面腰腹与肩部都保留微胖特征
+status：已绘制·待核对
+approval：未定稿
+art：batch-03/r08-art.png
+ruler：batch-03/r08-ruler.png
+geometryPrompt：Create ONE character design sheet for R08: black neat cropped hair, broad round face, dark brown eyes, navy paramedic jacket with orange panels, navy cargo trousers, black work shoes. Soft plump body on the SAME compact D1 game skeleton, approximately3.3 heads tall. Big rounded eyes, natural human ears. FOUR full-body views FRONT, RIGHT strict profile facing image right, BACK, FRONT45 with the entire body rotated. Same head size, bone lengths, clothes and baseline across views. White background, opaque clothing, neutral technical standing pose, hands and shoes visible. No equipment unless separately specified. Do not add a ruler using generated text; preserve a clean image for measured ruler layout. Design constraints: 黑色利落短发；偏分，后颈贴合；宽圆脸；深棕眼；厚而柔和眉，可靠表情；藏蓝急救夹克、橙色肩部拼片、藏蓝工装长裤；黑色防滑工作鞋、腰部可拆工具小袋。 View consistency: 反光条前后水平接续；口袋体积适度；侧面腰腹与肩部都保留微胖特征。
+materialPrompt：Produce ONE single four-view material reference sheet for R08, matching the approved geometry and black neat cropped hair, broad round face, dark brown eyes, navy paramedic jacket with orange panels, navy cargo trousers, black work shoes. Same FRONT / RIGHT / BACK / FRONT45 full-body views, no head close-ups. Neutral white background, flat diffuse base colours, even illumination; no cast shadows, baked ambient occlusion, directional highlights or environment colour tint. Opaque fabrics and natural skin; preserve seams and design colour blocks. Palette: 藏蓝 #243E58 / 橙 #E58B43 / 灰白 #DADFE2. Material structure: 耐磨织物，反光条独立浅灰色；不烘焙自发光. This is a reference image, not a UV atlas. Do not change facial features, hair silhouette, body proportions or outfit.
+measuredFrontHeads：3.305
+
+------------------
+
+id：R09
+name：野外训练军人
+batch：2
+season：春秋
+body：健壮
+bodyDefinition：同身高与骨长，肩臂和大小腿体积略增，躯干稳定；简化肌肉面，不做高挑健美写实身材。
+hair：黑色极短碎发；露耳，短鬓角，不剃光
+face：短方圆脸；琥珀圆眼；直眉，坚定表情
+outfit：橄榄绿训练夹克、低对比迷彩工装长裤、深绿腰带
+shoes：棕色低筒作战靴
+palette：橄榄 #6A7555 / 深绿 #40513D / 棕 #665244
+material：耐磨斜纹布与哑光皮革；不出现现实军徽、枪械
+viewChecks：肩袖、肘膝活动区明确；背面衣褶简洁；健壮来自肩臂与小腿而非拉高身材
+status：已绘制·待核对
+approval：未定稿
+art：batch-02/r09-art.png
+ruler：batch-02/r09-ruler.png
+geometryPrompt：Create ONE character design sheet for R09: black very short textured crop, rounded square face, amber eyes, olive training jacket, low-contrast camouflage cargo trousers, brown field boots, no weapons. Athletic sturdy body on the SAME compact D1 game skeleton, approximately3.3 heads tall. Big rounded eyes, natural human ears. FOUR full-body views FRONT, RIGHT strict profile facing image right, BACK, FRONT45 with the entire body rotated. Same head size, bone lengths, clothes and baseline across views. White background, opaque clothing, neutral technical standing pose, hands and shoes visible. No equipment unless separately specified. Do not add a ruler using generated text; preserve a clean image for measured ruler layout. Design constraints: 黑色极短碎发；露耳，短鬓角，不剃光；短方圆脸；琥珀圆眼；直眉，坚定表情；橄榄绿训练夹克、低对比迷彩工装长裤、深绿腰带；棕色低筒作战靴。 View consistency: 肩袖、肘膝活动区明确；背面衣褶简洁；健壮来自肩臂与小腿而非拉高身材。
+materialPrompt：Produce ONE single four-view material reference sheet for R09, matching the approved geometry and black very short textured crop, rounded square face, amber eyes, olive training jacket, low-contrast camouflage cargo trousers, brown field boots, no weapons. Same FRONT / RIGHT / BACK / FRONT45 full-body views, no head close-ups. Neutral white background, flat diffuse base colours, even illumination; no cast shadows, baked ambient occlusion, directional highlights or environment colour tint. Opaque fabrics and natural skin; preserve seams and design colour blocks. Palette: 橄榄 #6A7555 / 深绿 #40513D / 棕 #665244. Material structure: 耐磨斜纹布与哑光皮革；不出现现实军徽、枪械. This is a reference image, not a UV atlas. Do not change facial features, hair silhouette, body proportions or outfit.
+measuredFrontHeads：3.289
+
+------------------
+
+id：R10
+name：田径运动员
+batch：1
+season：夏
+body：健壮
+bodyDefinition：同身高与骨长，肩臂和大小腿体积略增，躯干稳定；简化肌肉面，不做高挑健美写实身材。
+hair：栗棕高马尾；侧分刘海，基础头顶与马尾分开识别
+face：椭圆脸；榛色圆眼；浅雀斑，积极表情
+outfit：蓝白全长运动背心、藏蓝侧条纹跑步短裤
+shoes：蓝白跑鞋、白色短袜
+palette：亮蓝 #2665C5 / 藏蓝 #273D62 / 白 #F5F6F5
+material：哑光运动针织，鞋面网布以大色块表现；禁止湿亮皮肤
+viewChecks：上臂、肩膀、小腿共同体现运动型；衣服覆盖躯干；马尾不计入身高尺
+status：已绘制·待核对
+approval：未定稿
+art：batch-01/r10-art.png
+ruler：batch-01/r10-ruler.png
+geometryPrompt：Create ONE character design sheet for R10: chestnut high ponytail, oval freckled face, hazel eyes, full-length blue-white athletics tank, navy running shorts, blue-white running shoes. Athletic sturdy body on the SAME compact D1 game skeleton, approximately3.3 heads tall. Big rounded eyes, natural human ears. FOUR full-body views FRONT, RIGHT strict profile facing image right, BACK, FRONT45 with the entire body rotated. Same head size, bone lengths, clothes and baseline across views. White background, opaque clothing, neutral technical standing pose, hands and shoes visible. No equipment unless separately specified. Do not add a ruler using generated text; preserve a clean image for measured ruler layout. Design constraints: 栗棕高马尾；侧分刘海，基础头顶与马尾分开识别；椭圆脸；榛色圆眼；浅雀斑，积极表情；蓝白全长运动背心、藏蓝侧条纹跑步短裤；蓝白跑鞋、白色短袜。 View consistency: 上臂、肩膀、小腿共同体现运动型；衣服覆盖躯干；马尾不计入身高尺。
+materialPrompt：Produce ONE single four-view material reference sheet for R10, matching the approved geometry and chestnut high ponytail, oval freckled face, hazel eyes, full-length blue-white athletics tank, navy running shorts, blue-white running shoes. Same FRONT / RIGHT / BACK / FRONT45 full-body views, no head close-ups. Neutral white background, flat diffuse base colours, even illumination; no cast shadows, baked ambient occlusion, directional highlights or environment colour tint. Opaque fabrics and natural skin; preserve seams and design colour blocks. Palette: 亮蓝 #2665C5 / 藏蓝 #273D62 / 白 #F5F6F5. Material structure: 哑光运动针织，鞋面网布以大色块表现；禁止湿亮皮肤. This is a reference image, not a UV atlas. Do not change facial features, hair silhouette, body proportions or outfit.
+measuredFrontHeads：3.287
+
+------------------
+
+id：R11
+name：网球运动员
+batch：3
+season：夏
+body：纤细
+bodyDefinition：同骨架与头高，适度缩窄肩臂、腰臀和大小腿；保留关节与肌肉体积，不拉长腿，不缩成纸片。
+hair：蜂蜜金单侧辫；额前自然分束，辫尾至肩下
+face：窄椭圆脸；绿色圆眼；轻扬眉，明快表情
+outfit：白绿翻领运动上衣、白色百褶运动裙，内置同色安全短裤
+shoes：白绿网球鞋、简洁腕带；球拍不进入基础四视图
+palette：白 #F5F5EC / 草绿 #4C9B70 / 蜂蜜金 #D9AD68
+material：哑光弹力运动面料；褶数与色条前后对应
+viewChecks：前后裙长一致，侧面可见运动结构；辫子固定角色右侧；不靠拉长腿表现纤细
+status：已绘制·待核对
+approval：未定稿
+art：batch-03/r11-art.png
+ruler：batch-03/r11-ruler.png
+geometryPrompt：Create ONE character design sheet for R11: honey-blonde side braid, narrow oval face, green eyes, white-green collared tennis top, white pleated athletic skirt with built-in shorts, tennis shoes. Slender body on the SAME compact D1 game skeleton, approximately3.3 heads tall. Big rounded eyes, natural human ears. FOUR full-body views FRONT, RIGHT strict profile facing image right, BACK, FRONT45 with the entire body rotated. Same head size, bone lengths, clothes and baseline across views. White background, opaque clothing, neutral technical standing pose, hands and shoes visible. No equipment unless separately specified. Do not add a ruler using generated text; preserve a clean image for measured ruler layout. Design constraints: 蜂蜜金单侧辫；额前自然分束，辫尾至肩下；窄椭圆脸；绿色圆眼；轻扬眉，明快表情；白绿翻领运动上衣、白色百褶运动裙，内置同色安全短裤；白绿网球鞋、简洁腕带；球拍不进入基础四视图。 View consistency: 前后裙长一致，侧面可见运动结构；辫子固定角色右侧；不靠拉长腿表现纤细。
+materialPrompt：Produce ONE single four-view material reference sheet for R11, matching the approved geometry and honey-blonde side braid, narrow oval face, green eyes, white-green collared tennis top, white pleated athletic skirt with built-in shorts, tennis shoes. Same FRONT / RIGHT / BACK / FRONT45 full-body views, no head close-ups. Neutral white background, flat diffuse base colours, even illumination; no cast shadows, baked ambient occlusion, directional highlights or environment colour tint. Opaque fabrics and natural skin; preserve seams and design colour blocks. Palette: 白 #F5F5EC / 草绿 #4C9B70 / 蜂蜜金 #D9AD68. Material structure: 哑光弹力运动面料；褶数与色条前后对应. This is a reference image, not a UV atlas. Do not change facial features, hair silhouette, body proportions or outfit.
+measuredFrontHeads：3.333
+
+------------------
+
+id：R12
+name：篮球运动员
+batch：3
+season：夏
+body：健壮
+bodyDefinition：同身高与骨长，肩臂和大小腿体积略增，躯干稳定；简化肌肉面，不做高挑健美写实身材。
+hair：深棕双编辫；两侧对称，辫尾到肩胛
+face：宽椭圆脸；深棕圆眼；直眉，开朗笑容
+outfit：酒红宽松篮球背心、同色及膝篮球短裤、奶油侧条
+shoes：奶油酒红篮球鞋、中筒袜
+palette：酒红 #863E4C / 奶油 #EDE0C7 / 深棕 #543E35
+material：运动网眼以简化纹理表现；衣裤不贴身塑形
+viewChecks：背面纯色图形徽记不写数字；宽短裤下仍能识别膝位；肩臂健壮
+status：已绘制·待核对
+approval：未定稿
+art：batch-03/r12-art.png
+ruler：batch-03/r12-ruler.png
+geometryPrompt：Create ONE character design sheet for R12: dark brown twin braids, broad oval face, dark eyes, burgundy loose basketball jersey and knee-length shorts, cream trim, basketball shoes. Athletic sturdy body on the SAME compact D1 game skeleton, approximately3.3 heads tall. Big rounded eyes, natural human ears. FOUR full-body views FRONT, RIGHT strict profile facing image right, BACK, FRONT45 with the entire body rotated. Same head size, bone lengths, clothes and baseline across views. White background, opaque clothing, neutral technical standing pose, hands and shoes visible. No equipment unless separately specified. Do not add a ruler using generated text; preserve a clean image for measured ruler layout. Design constraints: 深棕双编辫；两侧对称，辫尾到肩胛；宽椭圆脸；深棕圆眼；直眉，开朗笑容；酒红宽松篮球背心、同色及膝篮球短裤、奶油侧条；奶油酒红篮球鞋、中筒袜。 View consistency: 背面纯色图形徽记不写数字；宽短裤下仍能识别膝位；肩臂健壮。
+materialPrompt：Produce ONE single four-view material reference sheet for R12, matching the approved geometry and dark brown twin braids, broad oval face, dark eyes, burgundy loose basketball jersey and knee-length shorts, cream trim, basketball shoes. Same FRONT / RIGHT / BACK / FRONT45 full-body views, no head close-ups. Neutral white background, flat diffuse base colours, even illumination; no cast shadows, baked ambient occlusion, directional highlights or environment colour tint. Opaque fabrics and natural skin; preserve seams and design colour blocks. Palette: 酒红 #863E4C / 奶油 #EDE0C7 / 深棕 #543E35. Material structure: 运动网眼以简化纹理表现；衣裤不贴身塑形. This is a reference image, not a UV atlas. Do not change facial features, hair silhouette, body proportions or outfit.
+measuredFrontHeads：3.396
+
+------------------
+
+id：R13
+name：学院休闲
+batch：4
+season：春秋
+body：纤细
+bodyDefinition：同骨架与头高，适度缩窄肩臂、腰臀和大小腿；保留关节与肌肉体积，不拉长腿，不缩成纸片。
+hair：银紫不对称短波波；一侧耳上，另一侧到下巴
+face：短心形脸；紫灰圆眼；平缓眉，轻微微笑
+outfit：藏蓝短西装、浅灰针织内搭、灰蓝格纹A字裙
+shoes：黑色乐福鞋、灰色短袜
+palette：藏蓝 #303E5D / 银紫 #AAA3C5 / 灰蓝 #8595AA
+material：哑光毛料、小比例格纹；格纹不变成噪点
+viewChecks：后背西装两条省线；侧面领口和袖口层次可见；不加入学生年龄或校徽设定
+status：已绘制·待核对
+approval：未定稿
+art：batch-04/r13-art.png
+ruler：batch-04/r13-ruler.png
+geometryPrompt：Create ONE character design sheet for R13: silver-lilac asymmetric bob, short heart-shaped face, violet-grey eyes, navy casual blazer, light grey knit top, grey-blue plaid A-line skirt, loafers. Slender body on the SAME compact D1 game skeleton, approximately3.3 heads tall. Big rounded eyes, natural human ears. FOUR full-body views FRONT, RIGHT strict profile facing image right, BACK, FRONT45 with the entire body rotated. Same head size, bone lengths, clothes and baseline across views. White background, opaque clothing, neutral technical standing pose, hands and shoes visible. No equipment unless separately specified. Do not add a ruler using generated text; preserve a clean image for measured ruler layout. Design constraints: 银紫不对称短波波；一侧耳上，另一侧到下巴；短心形脸；紫灰圆眼；平缓眉，轻微微笑；藏蓝短西装、浅灰针织内搭、灰蓝格纹A字裙；黑色乐福鞋、灰色短袜。 View consistency: 后背西装两条省线；侧面领口和袖口层次可见；不加入学生年龄或校徽设定。
+materialPrompt：Produce ONE single four-view material reference sheet for R13, matching the approved geometry and silver-lilac asymmetric bob, short heart-shaped face, violet-grey eyes, navy casual blazer, light grey knit top, grey-blue plaid A-line skirt, loafers. Same FRONT / RIGHT / BACK / FRONT45 full-body views, no head close-ups. Neutral white background, flat diffuse base colours, even illumination; no cast shadows, baked ambient occlusion, directional highlights or environment colour tint. Opaque fabrics and natural skin; preserve seams and design colour blocks. Palette: 藏蓝 #303E5D / 银紫 #AAA3C5 / 灰蓝 #8595AA. Material structure: 哑光毛料、小比例格纹；格纹不变成噪点. This is a reference image, not a UV atlas. Do not change facial features, hair silhouette, body proportions or outfit.
+measuredFrontHeads：3.227
+
+------------------
+
+id：R14
+name：春日花瓣裙
+batch：4
+season：春夏
+body：均衡
+bodyDefinition：以D1基准宽度为中位：肩、腰、臀自然过渡；腿保留细而有体积的轮廓；不夸大胸腰差。
+hair：蜂蜜金半扎长卷发；发尾至肩胛，不遮腰
+face：柔和椭圆脸；浅棕圆眼；细眉，温柔表情
+outfit：灰玫瑰色短袖连衣裙、花瓣叠片裙摆、奶油细腰带
+shoes：奶油平底鞋；小花发饰
+palette：灰玫瑰 #C58D9C / 奶油 #F2E7D8 / 蜂蜜金 #CFA56A
+material：哑光轻织物；花瓣为少量大叠片，内层不透明
+viewChecks：背面小腰带结，花瓣层数与正面一致；侧面裙身不紧贴身体
+status：已绘制·待核对
+approval：未定稿
+art：batch-04/r14-art.png
+ruler：batch-04/r14-ruler.png
+geometryPrompt：Create ONE character design sheet for R14: honey-blonde half-up waves, soft oval face, light brown eyes, dusty rose short-sleeve petal-layer dress, cream belt and flats. Balanced body on the SAME compact D1 game skeleton, approximately3.3 heads tall. Big rounded eyes, natural human ears. FOUR full-body views FRONT, RIGHT strict profile facing image right, BACK, FRONT45 with the entire body rotated. Same head size, bone lengths, clothes and baseline across views. White background, opaque clothing, neutral technical standing pose, hands and shoes visible. No equipment unless separately specified. Do not add a ruler using generated text; preserve a clean image for measured ruler layout. Design constraints: 蜂蜜金半扎长卷发；发尾至肩胛，不遮腰；柔和椭圆脸；浅棕圆眼；细眉，温柔表情；灰玫瑰色短袖连衣裙、花瓣叠片裙摆、奶油细腰带；奶油平底鞋；小花发饰。 View consistency: 背面小腰带结，花瓣层数与正面一致；侧面裙身不紧贴身体。
+materialPrompt：Produce ONE single four-view material reference sheet for R14, matching the approved geometry and honey-blonde half-up waves, soft oval face, light brown eyes, dusty rose short-sleeve petal-layer dress, cream belt and flats. Same FRONT / RIGHT / BACK / FRONT45 full-body views, no head close-ups. Neutral white background, flat diffuse base colours, even illumination; no cast shadows, baked ambient occlusion, directional highlights or environment colour tint. Opaque fabrics and natural skin; preserve seams and design colour blocks. Palette: 灰玫瑰 #C58D9C / 奶油 #F2E7D8 / 蜂蜜金 #CFA56A. Material structure: 哑光轻织物；花瓣为少量大叠片，内层不透明. This is a reference image, not a UV atlas. Do not change facial features, hair silhouette, body proportions or outfit.
+measuredFrontHeads：3.199
+
+------------------
+
+id：R15
+name：咖啡师
+batch：4
+season：四季·室内
+body：微胖
+bodyDefinition：同身高与骨长，增加脸颊、上臂、腰腹、臀、大腿和小腿厚度；轮廓连续，不仅加粗腿。
+hair：焦糖棕低双丸子；短卷刘海，体积不超过脸宽
+face：饱满圆脸；榛色圆眼；厚柔眉，浅酒窝
+outfit：奶油衬衣、咖啡棕短围裙、深绿宽松长裤
+shoes：棕色软底工作鞋
+palette：奶油 #EEE2CD / 咖啡 #865B43 / 深绿 #405F50
+material：棉麻衬衣、帆布围裙；口袋边缘清楚
+viewChecks：围裙背带和背后系结完整；肚腹臀部有圆润体积；不拿杯子遮挡手指
+status：已绘制·待核对
+approval：未定稿
+art：batch-04/r15-art.png
+ruler：batch-04/r15-ruler.png
+geometryPrompt：Create ONE character design sheet for R15: caramel low double buns with soft curls, full round face, hazel eyes, cream shirt, coffee-brown apron, dark green relaxed trousers, brown work shoes. Soft plump body on the SAME compact D1 game skeleton, approximately3.3 heads tall. Big rounded eyes, natural human ears. FOUR full-body views FRONT, RIGHT strict profile facing image right, BACK, FRONT45 with the entire body rotated. Same head size, bone lengths, clothes and baseline across views. White background, opaque clothing, neutral technical standing pose, hands and shoes visible. No equipment unless separately specified. Do not add a ruler using generated text; preserve a clean image for measured ruler layout. Design constraints: 焦糖棕低双丸子；短卷刘海，体积不超过脸宽；饱满圆脸；榛色圆眼；厚柔眉，浅酒窝；奶油衬衣、咖啡棕短围裙、深绿宽松长裤；棕色软底工作鞋。 View consistency: 围裙背带和背后系结完整；肚腹臀部有圆润体积；不拿杯子遮挡手指。
+materialPrompt：Produce ONE single four-view material reference sheet for R15, matching the approved geometry and caramel low double buns with soft curls, full round face, hazel eyes, cream shirt, coffee-brown apron, dark green relaxed trousers, brown work shoes. Same FRONT / RIGHT / BACK / FRONT45 full-body views, no head close-ups. Neutral white background, flat diffuse base colours, even illumination; no cast shadows, baked ambient occlusion, directional highlights or environment colour tint. Opaque fabrics and natural skin; preserve seams and design colour blocks. Palette: 奶油 #EEE2CD / 咖啡 #865B43 / 深绿 #405F50. Material structure: 棉麻衬衣、帆布围裙；口袋边缘清楚. This is a reference image, not a UV atlas. Do not change facial features, hair silhouette, body proportions or outfit.
+measuredFrontHeads：3.249
+
+------------------
+
+id：R16
+name：消防员
+batch：4
+season：四季·防护
+body：健壮
+bodyDefinition：同身高与骨长，肩臂和大小腿体积略增，躯干稳定；简化肌肉面，不做高挑健美写实身材。
+hair：棕色短碎发；露耳，干净后颈
+face：宽方圆脸；棕色圆眼；粗直眉，沉稳表情
+outfit：深炭色防护夹克与长裤、黄灰反光带
+shoes：深色防护靴；头盔单独附件，基础图不戴
+palette：炭灰 #394249 / 黄 #DDC15C / 反光灰 #C6CCCB
+material：厚织物、橡胶鞋底；反光带不画成发光灯带
+viewChecks：前后反光带高度一致；侧面关节可屈；不让厚外衣导致头身比变小
+status：已绘制·待核对
+approval：未定稿
+art：batch-04/r16-art.png
+ruler：batch-04/r16-ruler.png
+geometryPrompt：Create ONE character design sheet for R16: brown short textured hair, broad rounded-square face, brown eyes, charcoal firefighter jacket and trousers, yellow-grey reflective bands, protective boots. Athletic sturdy body on the SAME compact D1 game skeleton, approximately3.3 heads tall. Big rounded eyes, natural human ears. FOUR full-body views FRONT, RIGHT strict profile facing image right, BACK, FRONT45 with the entire body rotated. Same head size, bone lengths, clothes and baseline across views. White background, opaque clothing, neutral technical standing pose, hands and shoes visible. No equipment unless separately specified. Do not add a ruler using generated text; preserve a clean image for measured ruler layout. Design constraints: 棕色短碎发；露耳，干净后颈；宽方圆脸；棕色圆眼；粗直眉，沉稳表情；深炭色防护夹克与长裤、黄灰反光带；深色防护靴；头盔单独附件，基础图不戴。 View consistency: 前后反光带高度一致；侧面关节可屈；不让厚外衣导致头身比变小。
+materialPrompt：Produce ONE single four-view material reference sheet for R16, matching the approved geometry and brown short textured hair, broad rounded-square face, brown eyes, charcoal firefighter jacket and trousers, yellow-grey reflective bands, protective boots. Same FRONT / RIGHT / BACK / FRONT45 full-body views, no head close-ups. Neutral white background, flat diffuse base colours, even illumination; no cast shadows, baked ambient occlusion, directional highlights or environment colour tint. Opaque fabrics and natural skin; preserve seams and design colour blocks. Palette: 炭灰 #394249 / 黄 #DDC15C / 反光灰 #C6CCCB. Material structure: 厚织物、橡胶鞋底；反光带不画成发光灯带. This is a reference image, not a UV atlas. Do not change facial features, hair silhouette, body proportions or outfit.
+measuredFrontHeads：3.207
+
+------------------
+
+id：R17
+name：雨天出行
+batch：5
+season：春夏雨季
+body：纤细
+bodyDefinition：同骨架与头高，适度缩窄肩臂、腰臀和大小腿；保留关节与肌肉体积，不拉长腿，不缩成纸片。
+hair：蓝黑锁骨直发；轻薄齐刘海，露出双眼
+face：窄鹅蛋脸；蓝灰圆眼；柔眉，安静表情
+outfit：湖蓝短雨衣、米白短裤、袖口收束
+shoes：藏蓝雨靴；兜帽垂在背后，透明伞另附
+palette：湖蓝 #6AA9C5 / 米白 #EEEAD9 / 藏蓝 #2E4563
+material：低光泽防水面料；避免整件塑料高光
+viewChecks：背后兜帽开口和肩部接缝；雨靴筒口与腿分离；前后短裤长度相同
+status：已绘制·待核对
+approval：未定稿
+art：batch-05/r17-art.png
+ruler：batch-05/r17-ruler.png
+geometryPrompt：Create ONE character design sheet for R17: blue-black collarbone-length straight hair, oval face, blue-grey eyes, lake-blue short rain jacket with lowered hood, ivory shorts, navy rain boots. Slender body on the SAME compact D1 game skeleton, approximately3.3 heads tall. Big rounded eyes, natural human ears. FOUR full-body views FRONT, RIGHT strict profile facing image right, BACK, FRONT45 with the entire body rotated. Same head size, bone lengths, clothes and baseline across views. White background, opaque clothing, neutral technical standing pose, hands and shoes visible. No equipment unless separately specified. Do not add a ruler using generated text; preserve a clean image for measured ruler layout. Design constraints: 蓝黑锁骨直发；轻薄齐刘海，露出双眼；窄鹅蛋脸；蓝灰圆眼；柔眉，安静表情；湖蓝短雨衣、米白短裤、袖口收束；藏蓝雨靴；兜帽垂在背后，透明伞另附。 View consistency: 背后兜帽开口和肩部接缝；雨靴筒口与腿分离；前后短裤长度相同。
+materialPrompt：Produce ONE single four-view material reference sheet for R17, matching the approved geometry and blue-black collarbone-length straight hair, oval face, blue-grey eyes, lake-blue short rain jacket with lowered hood, ivory shorts, navy rain boots. Same FRONT / RIGHT / BACK / FRONT45 full-body views, no head close-ups. Neutral white background, flat diffuse base colours, even illumination; no cast shadows, baked ambient occlusion, directional highlights or environment colour tint. Opaque fabrics and natural skin; preserve seams and design colour blocks. Palette: 湖蓝 #6AA9C5 / 米白 #EEEAD9 / 藏蓝 #2E4563. Material structure: 低光泽防水面料；避免整件塑料高光. This is a reference image, not a UV atlas. Do not change facial features, hair silhouette, body proportions or outfit.
+measuredFrontHeads：3.281
+
+------------------
+
+id：R18
+name：都市侦探
+batch：5
+season：秋
+body：均衡
+bodyDefinition：以D1基准宽度为中位：肩、腰、臀自然过渡；腿保留细而有体积的轮廓；不夸大胸腰差。
+hair：酒红耳下短发；侧分柔卷，后颈利落
+face：短方圆脸；琥珀圆眼；平眉，若有所思
+outfit：驼色短风衣、炭灰马甲、米白衬衣、细格长裤
+shoes：棕色系带皮鞋
+palette：驼色 #BB9570 / 炭灰 #495058 / 酒红 #773D4B
+material：棉风衣、毛料马甲、哑光皮鞋；格纹稀疏
+viewChecks：背后短覆肩和中缝明确；风衣长度不遮膝；手不持放大镜
+status：已绘制·待核对
+approval：未定稿
+art：batch-05/r18-art.png
+ruler：batch-05/r18-ruler.png
+geometryPrompt：Create ONE character design sheet for R18: burgundy ear-length softly waved hair, rounded square face, amber eyes, camel short trench coat, charcoal waistcoat, ivory shirt, checked trousers, brown lace-up shoes. Balanced body on the SAME compact D1 game skeleton, approximately3.3 heads tall. Big rounded eyes, natural human ears. FOUR full-body views FRONT, RIGHT strict profile facing image right, BACK, FRONT45 with the entire body rotated. Same head size, bone lengths, clothes and baseline across views. White background, opaque clothing, neutral technical standing pose, hands and shoes visible. No equipment unless separately specified. Do not add a ruler using generated text; preserve a clean image for measured ruler layout. Design constraints: 酒红耳下短发；侧分柔卷，后颈利落；短方圆脸；琥珀圆眼；平眉，若有所思；驼色短风衣、炭灰马甲、米白衬衣、细格长裤；棕色系带皮鞋。 View consistency: 背后短覆肩和中缝明确；风衣长度不遮膝；手不持放大镜。
+materialPrompt：Produce ONE single four-view material reference sheet for R18, matching the approved geometry and burgundy ear-length softly waved hair, rounded square face, amber eyes, camel short trench coat, charcoal waistcoat, ivory shirt, checked trousers, brown lace-up shoes. Same FRONT / RIGHT / BACK / FRONT45 full-body views, no head close-ups. Neutral white background, flat diffuse base colours, even illumination; no cast shadows, baked ambient occlusion, directional highlights or environment colour tint. Opaque fabrics and natural skin; preserve seams and design colour blocks. Palette: 驼色 #BB9570 / 炭灰 #495058 / 酒红 #773D4B. Material structure: 棉风衣、毛料马甲、哑光皮鞋；格纹稀疏. This is a reference image, not a UV atlas. Do not change facial features, hair silhouette, body proportions or outfit.
+measuredFrontHeads：3.297
+
+------------------
+
+id：R19
+name：园艺师
+batch：5
+season：春夏
+body：微胖
+bodyDefinition：同身高与骨长，增加脸颊、上臂、腰腹、臀、大腿和小腿厚度；轮廓连续，不仅加粗腿。
+hair：铜棕蓬松短卷发；自然圆轮廓，不戴帽
+face：圆润梨形脸；绿色圆眼；柔眉，淡雀斑
+outfit：浅绿短袖、卡其背带长裤、布质腰袋
+shoes：深棕橡胶底园艺鞋；手套可拆
+palette：浅绿 #A4BD89 / 卡其 #B6A17C / 铜棕 #A56A43
+material：棉T恤、厚帆布工装；尘土不烘焙成肤色污渍
+viewChecks：背后背带交叉方式唯一；裤腿松量保留；侧面腰腹微胖且脚踝清晰
+status：已绘制·待核对
+approval：未定稿
+art：batch-05/r19-art.png
+ruler：batch-05/r19-ruler.png
+geometryPrompt：Create ONE character design sheet for R19: copper-brown short curls, rounded pear-shaped face, green eyes and freckles, light green tee, khaki long overalls, dark brown gardening shoes. Soft plump body on the SAME compact D1 game skeleton, approximately3.3 heads tall. Big rounded eyes, natural human ears. FOUR full-body views FRONT, RIGHT strict profile facing image right, BACK, FRONT45 with the entire body rotated. Same head size, bone lengths, clothes and baseline across views. White background, opaque clothing, neutral technical standing pose, hands and shoes visible. No equipment unless separately specified. Do not add a ruler using generated text; preserve a clean image for measured ruler layout. Design constraints: 铜棕蓬松短卷发；自然圆轮廓，不戴帽；圆润梨形脸；绿色圆眼；柔眉，淡雀斑；浅绿短袖、卡其背带长裤、布质腰袋；深棕橡胶底园艺鞋；手套可拆。 View consistency: 背后背带交叉方式唯一；裤腿松量保留；侧面腰腹微胖且脚踝清晰。
+materialPrompt：Produce ONE single four-view material reference sheet for R19, matching the approved geometry and copper-brown short curls, rounded pear-shaped face, green eyes and freckles, light green tee, khaki long overalls, dark brown gardening shoes. Same FRONT / RIGHT / BACK / FRONT45 full-body views, no head close-ups. Neutral white background, flat diffuse base colours, even illumination; no cast shadows, baked ambient occlusion, directional highlights or environment colour tint. Opaque fabrics and natural skin; preserve seams and design colour blocks. Palette: 浅绿 #A4BD89 / 卡其 #B6A17C / 铜棕 #A56A43. Material structure: 棉T恤、厚帆布工装；尘土不烘焙成肤色污渍. This is a reference image, not a UV atlas. Do not change facial features, hair silhouette, body proportions or outfit.
+measuredFrontHeads：3.395
+
+------------------
+
+id：R20
+name：机械维修师
+batch：5
+season：四季·工坊
+body：健壮
+bodyDefinition：同身高与骨长，肩臂和大小腿体积略增，躯干稳定；简化肌肉面，不做高挑健美写实身材。
+hair：银灰短后梳；两侧短，顶部低体积
+face：短方脸；钢蓝圆眼；浓眉，专注表情
+outfit：灰蓝连体工装，腰部自然收束、袖子卷至肘下、少量橙色标识
+shoes：棕色安全鞋；腰部工具包可拆
+palette：灰蓝 #688299 / 橙 #CF8954 / 棕 #675247
+material：耐磨斜纹布、哑光金属扣；油污仅作为可选后期贴花
+viewChecks：背面肩育克、腰线、口袋对应；连体服是工作服；手臂筋肉简化不过度写实
+status：已绘制·待核对
+approval：未定稿
+art：batch-05/r20-art.png
+ruler：batch-05/r20-ruler.png
+geometryPrompt：Create ONE character design sheet for R20: silver-grey slicked short hair, short square face, steel-blue eyes, slate-blue mechanic coveralls with rolled sleeves and subtle orange accents, brown safety shoes. Athletic sturdy body on the SAME compact D1 game skeleton, approximately3.3 heads tall. Big rounded eyes, natural human ears. FOUR full-body views FRONT, RIGHT strict profile facing image right, BACK, FRONT45 with the entire body rotated. Same head size, bone lengths, clothes and baseline across views. White background, opaque clothing, neutral technical standing pose, hands and shoes visible. No equipment unless separately specified. Do not add a ruler using generated text; preserve a clean image for measured ruler layout. Design constraints: 银灰短后梳；两侧短，顶部低体积；短方脸；钢蓝圆眼；浓眉，专注表情；灰蓝连体工装，腰部自然收束、袖子卷至肘下、少量橙色标识；棕色安全鞋；腰部工具包可拆。 View consistency: 背面肩育克、腰线、口袋对应；连体服是工作服；手臂筋肉简化不过度写实。
+materialPrompt：Produce ONE single four-view material reference sheet for R20, matching the approved geometry and silver-grey slicked short hair, short square face, steel-blue eyes, slate-blue mechanic coveralls with rolled sleeves and subtle orange accents, brown safety shoes. Same FRONT / RIGHT / BACK / FRONT45 full-body views, no head close-ups. Neutral white background, flat diffuse base colours, even illumination; no cast shadows, baked ambient occlusion, directional highlights or environment colour tint. Opaque fabrics and natural skin; preserve seams and design colour blocks. Palette: 灰蓝 #688299 / 橙 #CF8954 / 棕 #675247. Material structure: 耐磨斜纹布、哑光金属扣；油污仅作为可选后期贴花. This is a reference image, not a UV atlas. Do not change facial features, hair silhouette, body proportions or outfit.
+measuredFrontHeads：3.342
+
+------------------
+
+id：R21
+name：星纹法师
+batch：6
+season：秋冬·幻想
+body：纤细
+bodyDefinition：同骨架与头高，适度缩窄肩臂、腰臀和大小腿；保留关节与肌肉体积，不拉长腿，不缩成纸片。
+hair：橙金编辫短波波；单侧小白花，承接原参考女孩
+face：柔和圆脸；大圆蓝眼；平缓眉，平静表情
+outfit：深蓝金边短斗篷、星纹长袖上衣、藏蓝直筒裤
+shoes：棕黑短靴；星形扣件，小披肩可拆
+palette：深蓝 #233D72 / 金 #D6B15B / 棕黑 #493D36
+material：哑光织物、少量金属扣；星纹为平面图案，非灯光
+viewChecks：背面斗篷星纹完整；侧面手臂不与斗篷融合；不添加精灵耳或长袍遮住全部腿
+status：已绘制·待核对
+approval：未定稿
+art：batch-06/r21-art.png
+ruler：batch-06/r21-ruler.png
+geometryPrompt：Create ONE character design sheet for R21: orange-gold braided bob with small white flower, soft round face, big blue eyes, navy gold-trim short cape, star-pattern long-sleeve top, navy trousers, dark ankle boots. Slender body on the SAME compact D1 game skeleton, approximately3.3 heads tall. Big rounded eyes, natural human ears. FOUR full-body views FRONT, RIGHT strict profile facing image right, BACK, FRONT45 with the entire body rotated. Same head size, bone lengths, clothes and baseline across views. White background, opaque clothing, neutral technical standing pose, hands and shoes visible. No equipment unless separately specified. Do not add a ruler using generated text; preserve a clean image for measured ruler layout. Design constraints: 橙金编辫短波波；单侧小白花，承接原参考女孩；柔和圆脸；大圆蓝眼；平缓眉，平静表情；深蓝金边短斗篷、星纹长袖上衣、藏蓝直筒裤；棕黑短靴；星形扣件，小披肩可拆。 View consistency: 背面斗篷星纹完整；侧面手臂不与斗篷融合；不添加精灵耳或长袍遮住全部腿。
+materialPrompt：Produce ONE single four-view material reference sheet for R21, matching the approved geometry and orange-gold braided bob with small white flower, soft round face, big blue eyes, navy gold-trim short cape, star-pattern long-sleeve top, navy trousers, dark ankle boots. Same FRONT / RIGHT / BACK / FRONT45 full-body views, no head close-ups. Neutral white background, flat diffuse base colours, even illumination; no cast shadows, baked ambient occlusion, directional highlights or environment colour tint. Opaque fabrics and natural skin; preserve seams and design colour blocks. Palette: 深蓝 #233D72 / 金 #D6B15B / 棕黑 #493D36. Material structure: 哑光织物、少量金属扣；星纹为平面图案，非灯光. This is a reference image, not a UV atlas. Do not change facial features, hair silhouette, body proportions or outfit.
+measuredFrontHeads：3.274
+
+------------------
+
+id：R22
+name：礼服军官
+batch：6
+season：四季·礼仪
+body：均衡
+bodyDefinition：以D1基准宽度为中位：肩、腰、臀自然过渡；腿保留细而有体积的轮廓；不夸大胸腰差。
+hair：黑色低盘发；偏分刘海，头后小髻
+face：鹅蛋脸；灰蓝圆眼；清晰平眉，端正表情
+outfit：藏蓝立领礼服短上衣、银色滚边、同色直筒长裤
+shoes：黑色低跟短靴、白手套；礼帽另附
+palette：藏蓝 #27364D / 银 #C5CBD4 / 白 #F4F1E9
+material：哑光精纺呢、低反射银扣；不出现现实军衔或组织标识
+viewChecks：后背省线与腰线固定；肩饰小而扁；正侧面靴跟同高
+status：已绘制·待核对
+approval：未定稿
+art：batch-06/r22-art.png
+ruler：batch-06/r22-ruler.png
+geometryPrompt：Create ONE character design sheet for R22: black low chignon, oval face, grey-blue eyes, navy formal high-collar military-inspired jacket with silver piping, matching trousers, white gloves, low black boots. Balanced body on the SAME compact D1 game skeleton, approximately3.3 heads tall. Big rounded eyes, natural human ears. FOUR full-body views FRONT, RIGHT strict profile facing image right, BACK, FRONT45 with the entire body rotated. Same head size, bone lengths, clothes and baseline across views. White background, opaque clothing, neutral technical standing pose, hands and shoes visible. No equipment unless separately specified. Do not add a ruler using generated text; preserve a clean image for measured ruler layout. Design constraints: 黑色低盘发；偏分刘海，头后小髻；鹅蛋脸；灰蓝圆眼；清晰平眉，端正表情；藏蓝立领礼服短上衣、银色滚边、同色直筒长裤；黑色低跟短靴、白手套；礼帽另附。 View consistency: 后背省线与腰线固定；肩饰小而扁；正侧面靴跟同高。
+materialPrompt：Produce ONE single four-view material reference sheet for R22, matching the approved geometry and black low chignon, oval face, grey-blue eyes, navy formal high-collar military-inspired jacket with silver piping, matching trousers, white gloves, low black boots. Same FRONT / RIGHT / BACK / FRONT45 full-body views, no head close-ups. Neutral white background, flat diffuse base colours, even illumination; no cast shadows, baked ambient occlusion, directional highlights or environment colour tint. Opaque fabrics and natural skin; preserve seams and design colour blocks. Palette: 藏蓝 #27364D / 银 #C5CBD4 / 白 #F4F1E9. Material structure: 哑光精纺呢、低反射银扣；不出现现实军衔或组织标识. This is a reference image, not a UV atlas. Do not change facial features, hair silhouette, body proportions or outfit.
+measuredFrontHeads：3.152
+
+------------------
+
+id：R23
+name：冬日居家
+batch：6
+season：冬·室内
+body：微胖
+bodyDefinition：同身高与骨长，增加脸颊、上臂、腰腹、臀、大腿和小腿厚度；轮廓连续，不仅加粗腿。
+hair：栗棕侧低松马尾；碎发自然，不遮面
+face：圆脸；暖棕圆眼；短柔眉，放松表情
+outfit：燕麦色宽松针织上衣、淡灰绿家居长裤
+shoes：暖棕包跟居家鞋
+palette：燕麦 #D9CDB8 / 灰绿 #A2B2A3 / 暖棕 #9F8065
+material：软针织、棉裤、绒面鞋；以轮廓体现柔软，少画绒毛
+viewChecks：背面针织下摆同长；侧面腹腰自然圆润；裤脚不能吞掉整只脚
+status：已绘制·待核对
+approval：未定稿
+art：batch-06/r23-art.png
+ruler：batch-06/r23-ruler.png
+geometryPrompt：Create ONE character design sheet for R23: chestnut loose low side ponytail, round face, warm brown eyes, oatmeal relaxed sweater, pale sage lounge trousers, closed-heel brown house shoes. Soft plump body on the SAME compact D1 game skeleton, approximately3.3 heads tall. Big rounded eyes, natural human ears. FOUR full-body views FRONT, RIGHT strict profile facing image right, BACK, FRONT45 with the entire body rotated. Same head size, bone lengths, clothes and baseline across views. White background, opaque clothing, neutral technical standing pose, hands and shoes visible. No equipment unless separately specified. Do not add a ruler using generated text; preserve a clean image for measured ruler layout. Design constraints: 栗棕侧低松马尾；碎发自然，不遮面；圆脸；暖棕圆眼；短柔眉，放松表情；燕麦色宽松针织上衣、淡灰绿家居长裤；暖棕包跟居家鞋。 View consistency: 背面针织下摆同长；侧面腹腰自然圆润；裤脚不能吞掉整只脚。
+materialPrompt：Produce ONE single four-view material reference sheet for R23, matching the approved geometry and chestnut loose low side ponytail, round face, warm brown eyes, oatmeal relaxed sweater, pale sage lounge trousers, closed-heel brown house shoes. Same FRONT / RIGHT / BACK / FRONT45 full-body views, no head close-ups. Neutral white background, flat diffuse base colours, even illumination; no cast shadows, baked ambient occlusion, directional highlights or environment colour tint. Opaque fabrics and natural skin; preserve seams and design colour blocks. Palette: 燕麦 #D9CDB8 / 灰绿 #A2B2A3 / 暖棕 #9F8065. Material structure: 软针织、棉裤、绒面鞋；以轮廓体现柔软，少画绒毛. This is a reference image, not a UV atlas. Do not change facial features, hair silhouette, body proportions or outfit.
+measuredFrontHeads：3.285
+
+------------------
+
+id：R24
+name：足球运动员
+batch：6
+season：夏
+body：健壮
+bodyDefinition：同身高与骨长，肩臂和大小腿体积略增，躯干稳定；简化肌肉面，不做高挑健美写实身材。
+hair：黑色耳上短卷发；小束卷曲，轮廓紧凑
+face：宽椭圆脸；深棕圆眼；直眉，坚定笑容
+outfit：青白足球短袖球衣、深青运动短裤、白色长运动袜
+shoes：青黑足球鞋；护腿板在袜内
+palette：青绿 #2F9293 / 白 #EFF3EE / 深青 #254C56
+material：运动涤纶、哑光鞋面；鞋钉作为鞋底结构，不在脚边画尖刺
+viewChecks：背面仅抽象小队标，无现实品牌；膝盖位置与基础骨架一致；头发四面卷束一致
+status：已绘制·待核对
+approval：未定稿
+art：batch-06/r24-art.png
+ruler：batch-06/r24-ruler.png
+geometryPrompt：Create ONE character design sheet for R24: black short tight curls, broad oval face, dark brown eyes, teal-white football jersey, dark teal shorts, white athletic socks, teal-black football shoes. Athletic sturdy body on the SAME compact D1 game skeleton, approximately3.3 heads tall. Big rounded eyes, natural human ears. FOUR full-body views FRONT, RIGHT strict profile facing image right, BACK, FRONT45 with the entire body rotated. Same head size, bone lengths, clothes and baseline across views. White background, opaque clothing, neutral technical standing pose, hands and shoes visible. No equipment unless separately specified. Do not add a ruler using generated text; preserve a clean image for measured ruler layout. Design constraints: 黑色耳上短卷发；小束卷曲，轮廓紧凑；宽椭圆脸；深棕圆眼；直眉，坚定笑容；青白足球短袖球衣、深青运动短裤、白色长运动袜；青黑足球鞋；护腿板在袜内。 View consistency: 背面仅抽象小队标，无现实品牌；膝盖位置与基础骨架一致；头发四面卷束一致。
+materialPrompt：Produce ONE single four-view material reference sheet for R24, matching the approved geometry and black short tight curls, broad oval face, dark brown eyes, teal-white football jersey, dark teal shorts, white athletic socks, teal-black football shoes. Same FRONT / RIGHT / BACK / FRONT45 full-body views, no head close-ups. Neutral white background, flat diffuse base colours, even illumination; no cast shadows, baked ambient occlusion, directional highlights or environment colour tint. Opaque fabrics and natural skin; preserve seams and design colour blocks. Palette: 青绿 #2F9293 / 白 #EFF3EE / 深青 #254C56. Material structure: 运动涤纶、哑光鞋面；鞋钉作为鞋底结构，不在脚边画尖刺. This is a reference image, not a UV atlas. Do not change facial features, hair silhouette, body proportions or outfit.
+measuredFrontHeads：3.308

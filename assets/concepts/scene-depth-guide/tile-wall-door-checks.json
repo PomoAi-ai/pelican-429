@@ -1,0 +1,36 @@
+{
+  "image": "public/concepts/tile-wall-door-depth.png",
+  "size": [
+    2400,
+    1900
+  ],
+  "projection": "front perspective, camera distance 30, uniform viewport crop",
+  "camera_fov_degrees": 30,
+  "projection_pixels_per_tile_at_z0": 110,
+  "near_far_equal_size_ratio": 1.0508474576271187,
+  "side_view_pixels_per_tile": 200,
+  "side_view_depth": 1.5,
+  "natural_world_z": [
+    -1,
+    0.5
+  ],
+  "building_local_z": [
+    -0.45,
+    0.45
+  ],
+  "wall_local_z": [
+    -0.07,
+    0.07
+  ],
+  "wall_world_z": "not finalized",
+  "door_envelope": [
+    0.14,
+    3,
+    1.4
+  ],
+  "door_main_frame_clearance": 2.64,
+  "character_visual_height": 3.1,
+  "character_head_ratio": 3.3,
+  "collision_height": 2.8,
+  "art_preserved": "right-v1.png whitespace crop, uniform resize"
+}

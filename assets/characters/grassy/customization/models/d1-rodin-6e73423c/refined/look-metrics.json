@@ -1,0 +1,42 @@
+{
+  "method": "Median sRGB at identical UV face centres, grouped using original base-color hue. These are palette diagnostics, not pixel-aligned reference error.",
+  "skin": {
+    "faces": 2070,
+    "beforeMedianRGB": [
+      255,
+      192,
+      180
+    ],
+    "afterMedianRGB": [
+      255,
+      214,
+      204
+    ]
+  },
+  "hair": {
+    "faces": 7534,
+    "beforeMedianRGB": [
+      246,
+      167,
+      94
+    ],
+    "afterMedianRGB": [
+      252,
+      192,
+      123
+    ]
+  },
+  "blue": {
+    "faces": 1604,
+    "beforeMedianRGB": [
+      0,
+      102,
+      178
+    ],
+    "afterMedianRGB": [
+      0,
+      69,
+      167
+    ]
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "sourceHeadVertices": 985,
+  "catmullClarkVertices": 3719,
+  "chosenPinnedCatmullClarkVertices": 3719,
+  "rejectedNormalGuidedCandidate": "It exaggerates mouth dimples; do not use it.",
+  "headFaces": 3496,
+  "boundaryEdges": 448,
+  "UVLayers": [
+    "UVMap"
+  ],
+  "hairSeparateObject": "D1_Hair_Source",
+  "materialNames": [
+    "D1 refined detail",
+    "D1 refined skin",
+    "D1 refined hair",
+    "D1 refined blue"
+  ],
+  "chosenCandidate": "cc1-pinned",
+  "productionReady": false,
+  "limitations": [
+    "Source head is an open face/ear shell, missing top and rear scalp.",
+    "Extraction has small collar-detail islands to remove before integration.",
+    "Painted iris/lashes remain; no independent eyeballs or face-expression topology."
+  ]
+}

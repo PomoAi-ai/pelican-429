@@ -1,0 +1,129 @@
+{
+  "source": "assets/characters/grassy/customization/models/d1-head-standalone/nostril-refinement/refined-head.glb",
+  "sourceBounds": [
+    [
+      -0.7990930080413818,
+      -0.8020576238632202,
+      0.0
+    ],
+    [
+      0.8019310235977173,
+      0.8231769800186157,
+      1.8907849788665771
+    ]
+  ],
+  "bounds": [
+    [
+      -0.7990930080413818,
+      -0.8020576238632202,
+      0.0
+    ],
+    [
+      0.8019310235977173,
+      0.8231769800186157,
+      1.8907849788665771
+    ]
+  ],
+  "rotationDegreesXYZ": [
+    0,
+    0,
+    0
+  ],
+  "uniformScale": 1,
+  "requestedHeadHeight": null,
+  "coordinates": "Blender Z-up; front -Y; no translation or shape edits",
+  "objects": [
+    {
+      "name": "model",
+      "bounds": [
+        [
+          -0.7990930080413818,
+          -0.8020576238632202,
+          0.0
+        ],
+        [
+          0.8019310235977173,
+          0.8231769800186157,
+          1.8907849788665771
+        ]
+      ],
+      "vertices": 20458,
+      "edges": 59494,
+      "faces": 39044,
+      "faceSides": {
+        "3": 39044
+      },
+      "connectedComponents": [
+        5562,
+        4667,
+        4452,
+        1912,
+        1822,
+        639,
+        558,
+        452,
+        201,
+        193
+      ],
+      "nonManifoldEdges": 1856,
+      "boundaryEdges": 1856,
+      "wireEdges": 0,
+      "edgesWithMoreThanTwoFaces": 0,
+      "uvLayers": [
+        {
+          "name": "UVMap",
+          "loops": 117132
+        }
+      ],
+      "materials": [
+        "model",
+        "D1 nostril inner skin"
+      ]
+    }
+  ],
+  "materials": [
+    {
+      "name": "D1 nostril inner skin",
+      "shaders": [
+        "BSDF_PRINCIPLED"
+      ],
+      "textures": []
+    },
+    {
+      "name": "model",
+      "shaders": [
+        "BSDF_PRINCIPLED"
+      ],
+      "textures": [
+        {
+          "name": "texture_diffuse",
+          "size": [
+            2048,
+            2048
+          ],
+          "colorSpace": "sRGB"
+        },
+        {
+          "name": "texture_metallic-texture_roughness",
+          "size": [
+            2048,
+            2048
+          ],
+          "colorSpace": "Non-Color"
+        },
+        {
+          "name": "texture_normal",
+          "size": [
+            2048,
+            2048
+          ],
+          "colorSpace": "Non-Color"
+        }
+      ]
+    }
+  ],
+  "notes": [
+    "Components and non-manifold counts describe indexed mesh connectivity; UV-split vertices may inflate them.",
+    "Gray renders override all materials, including transparent eye or eyelash surfaces."
+  ]
+}

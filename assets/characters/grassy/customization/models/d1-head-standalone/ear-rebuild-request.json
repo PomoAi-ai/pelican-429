@@ -1,0 +1,105 @@
+{
+  "provider": "Hyper3D Rodin",
+  "model": "Gen-2.5",
+  "effort": "High",
+  "count": 1,
+  "geometryReferences": [
+    "references/head-v6-front.png",
+    "references/head-v6-right.png",
+    "references/head-v6-back.png",
+    "references/head-v6-low.png"
+  ],
+  "geometryPrompt": "references/head-ear-brow-rebuild-v6-rodin-prompt.txt",
+  "referenceImagePrompt": "references/head-ear-brow-rebuild-v6-prompt.txt",
+  "status": "user rejected head geometry; confirmed candidate is not approved; further iterations must remain unconfirmed previews",
+  "submitted": true,
+  "rejectedCompositeAttempt": {
+    "assetId": "private-source-017",
+    "reason": "Rodin interpreted the six-view sheet as six heads; geometry not confirmed",
+    "creditsShownAfter": 34
+  },
+  "materialReference": "references/head-v6-front.png",
+  "materialPrompt": "references/head-v6-material-prompt.txt",
+  "creditsBefore": 34.5,
+  "userRequirement": "不要为了正面好看把耳朵竖起来；重新来。再次明确修正耳朵、眉毛。",
+  "constraints": [
+    "Natural ears against lateral skull with slight rearward inclination; preserve rounded side width and small front projection; inspect side, front, oblique and rear together.",
+    "Thin pale golden-brown eyebrows with soft inner ends and tapered tails; avoid orange bars and raised comb-like geometry.",
+    "Small downward-facing geometric nostrils; shallow integrated lips and smooth mouth corners.",
+    "Independent bald head preserving existing D1 identity and head-to-body scale.",
+    "Candidate remains separate until visual geometry and assembled action checks pass."
+  ],
+  "assetId": "private-source-048",
+  "assetUrl": "private-workspace",
+  "creditsAfterGeneration": 33.5,
+  "geometryConfirmed": true,
+  "materialSettings": {
+    "mode": "Native",
+    "effort": "High",
+    "deLight": true,
+    "faceRestore": false,
+    "pbrTemperature": 3,
+    "referenceCount": 1
+  },
+  "userReviewRequiredBeforeConfirm": true,
+  "materialConfirmed": true,
+  "userRejection": "Head geometry incorrect. Use available Redo iterations; do not confirm immediately or proceed through material acceptance.",
+  "rework": {
+    "assetId": "private-source-047",
+    "assetUrl": "private-workspace",
+    "status": "first targeted geometry Redo completed; side profile remains unsatisfactory; unconfirmed",
+    "geometryConfirmed": false,
+    "materialLocked": true,
+    "creditsShownAfterFork": 33.5,
+    "geometryPrompt": "references/head-v6-redo-geometry-prompt.txt",
+    "referenceDirections": ["Front", "Right", "Back", "Front"],
+    "referenceDirectionNote": "Fourth reference is frontal low-angle, not pure Down. Prompt limits it to nostril/lip underside detail and prioritizes the first three silhouettes.",
+    "redoIterationsSubmitted": 1,
+    "note": "Replaced inherited material caption with geometry-specific instructions; set all four directions in website UI before Redo."
+  },
+  "threeViewTrial": {
+    "assetId": "private-source-031",
+    "assetUrl": "private-workspace",
+    "status": "generated and visually inspected; unconfirmed preview for user review",
+    "geometryConfirmed": false,
+    "materialLocked": true,
+    "geometryReferences": [
+      "references/head-v6-front.png",
+      "references/head-v6-right.png",
+      "references/head-v6-back.png"
+    ],
+    "referenceDirections": ["Front", "Right", "Back"],
+    "geometryPrompt": "references/head-v6-three-view-geometry-prompt.txt",
+    "presets": ["Faithful", "Detailed"],
+    "effort": "High",
+    "creditsBefore": 33.5,
+    "creditsAfter": 33,
+    "redoRemaining": 20,
+    "note": "User requested removing the low-angle nose reference. No reference-removal control was available on the old rework branch, so a separate three-image candidate was generated. All three directions were set before generation. Prompt shortened with eyebrow constraints first; this is not a strict single-variable comparison.",
+    "visualFindings": "Preview still shows substantial rear cranium depth and a pointed/upturned nose with some lip projection; no claim of acceptance or verified improvement. Eyebrow hair geometry and topology remain unverified."
+  },
+  "smallNostrilDetailTrial": {
+    "assetId": "private-source-045",
+    "assetUrl": "private-workspace",
+    "status": "one Redo completed with corrected geometry prompt; inspected front, profile and low-angle preview; not accepted",
+    "geometryConfirmed": false,
+    "materialLocked": true,
+    "geometryReferences": [
+      "references/head-v6-front.png",
+      "references/head-v6-right.png",
+      "references/head-v6-back.png",
+      "references/head-v7-small-nostrils-detail.png"
+    ],
+    "referenceDirections": ["Front", "Right", "Back", "Front"],
+    "geometryPrompt": "references/head-v7-nose-detail-rodin-prompt.txt",
+    "presets": ["Faithful", "Detailed"],
+    "effort": "High",
+    "creditsBefore": 33,
+    "creditsAfterInitialGeneration": 32.5,
+    "redoIterationsSubmitted": 1,
+    "redoRemaining": 19,
+    "creditsAfterRedo": 32.5,
+    "note": "All directions were visibly selected before submission. The fourth input is a frontal low-angle detail, not a whole head or pure Down view. Initial generation unexpectedly retained the old three-view preset caption after the preset dialog was closed. Corrected the actual candidate contenteditable prompt and submitted one free Redo. No geometry or material confirmation.",
+    "visualFindings": "Nostril openings remain conspicuous in the low-angle preview and the nasal underside still appears upturned; profile retains a projecting nose tip and upper lip. The small-nostril reference has not solved the shape. No measured improvement claim; no topology or material acceptance."
+  }
+}

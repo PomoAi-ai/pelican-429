@@ -1,0 +1,74 @@
+{
+  "asset_id": "private-source-049",
+  "source": "private-workspace",
+  "retrieved_via": "Hyper3D CLI result",
+  "material": {
+    "mode": "Native",
+    "quality": "High",
+    "delight": true,
+    "exportResolution": "2K"
+  },
+  "files": [
+    {
+      "name": "base.obj",
+      "bytes": 2854926,
+      "sha256": "662196aec57781e4a9f3351672ac3cc5bd10dd23b1c467e113a48ce272dd41f9",
+      "vertices": 19197,
+      "faces": 19217
+    },
+    {
+      "name": "texture_diffuse.png",
+      "bytes": 3517837,
+      "sha256": "ca437412aff3ea2a3307781e94f7fc9a03e385ff8f1c3ec135dec10b2fdda2e8",
+      "dimensions": [
+        2048,
+        2048
+      ]
+    },
+    {
+      "name": "texture_metallic.png",
+      "bytes": 701295,
+      "sha256": "a206b4d923d50994393e115ec468e767edaf72e017afc8854e9d2fab8e5ecc39",
+      "dimensions": [
+        2048,
+        2048
+      ]
+    },
+    {
+      "name": "texture_normal.png",
+      "bytes": 3958123,
+      "sha256": "f2e6e9e5427570a54c3a2f33ff1a2701019fb3037d58443bf893ec7461b5bb21",
+      "dimensions": [
+        2048,
+        2048
+      ]
+    },
+    {
+      "name": "texture_pbr.png",
+      "bytes": 2115157,
+      "sha256": "58521bc4ef04e50df481adcf9719c7a4343038c85c3d27fbc89870de6f28951f",
+      "dimensions": [
+        2048,
+        2048
+      ]
+    },
+    {
+      "name": "texture_roughness.png",
+      "bytes": 1008204,
+      "sha256": "eab3e0dd65da8e629c9f2cff2102bf0535e18bafd1b3cb6945819b3c6c483035",
+      "dimensions": [
+        2048,
+        2048
+      ]
+    },
+    {
+      "name": "shaded.png",
+      "bytes": 4115295,
+      "sha256": "9853990f0fcdd1238ffecc08deceb27ddd0d4ab5faf860c9a9f0f1c7c7739864",
+      "dimensions": [
+        2048,
+        2048
+      ]
+    }
+  ]
+}

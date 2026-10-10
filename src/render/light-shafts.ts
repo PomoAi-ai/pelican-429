@@ -144,10 +144,11 @@ export interface LightShaftsInput {
 
 export interface LightShafts {
   readonly root: THREE.Object3D;
-  readonly anchors: readonly ShaftAnchor[];
   /** 当前显示的光束数。 */
   readonly active: number;
   setEnabled(enabled: boolean): void;
+  /** 砍倒的树：去掉它的光束（该处可能改由天空光束补上）。 */
+  removeTree(id: number): void;
   update(view: Readonly<Rect>, time: number): void;
   dispose(): void;
 }
@@ -156,7 +157,8 @@ export function createLightShafts(input: LightShaftsInput): LightShafts {
   const { lighting } = input;
   const cfg = lighting.shafts;
   const axis = shaftAxis(lighting.sun.direction);
-  const anchors = buildShaftAnchors(input.trees, input.ground, cfg, lighting.sun.direction);
+  let trees = input.trees;
+  let anchors = buildShaftAnchors(trees, input.ground, cfg, lighting.sun.direction);
 
   const geometry = createShaftGeometry();
   const seeds = new THREE.InstancedBufferAttribute(new Float32Array(cfg.maxCount), 1);
@@ -196,13 +198,16 @@ export function createLightShafts(input: LightShaftsInput): LightShafts {
 
   return {
     root: mesh,
-    anchors,
     get active() {
       return enabled ? mesh.count : 0;
     },
     setEnabled(on) {
       enabled = on;
       mesh.visible = on;
+    },
+    removeTree(id) {
+      trees = trees.filter((t) => t.id !== id);
+      anchors = buildShaftAnchors(trees, input.ground, cfg, lighting.sun.direction);
     },
     update(view, time) {
       if (disposed) throw new Error('light-shafts: update after dispose');

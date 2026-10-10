@@ -1,0 +1,42 @@
+{
+  "asset_id": "private-source-043",
+  "source": "private-workspace",
+  "retrieved_via": "Hyper3D CLI result",
+  "files": [
+    {
+      "name": "base.obj",
+      "bytes": 2910768,
+      "sha256": "822c1d0eec330fa9a5dd3c0d86b02178d056f01e91384abedf883434f2f7bbe2"
+    },
+    {
+      "name": "texture_diffuse.png",
+      "bytes": 3515826,
+      "sha256": "cb5c84df9de4b5e029d24f5246efaadbf42d82d8141e767d5ed52f9808b65c57"
+    },
+    {
+      "name": "texture_metallic.png",
+      "bytes": 641504,
+      "sha256": "491be8762f8ad47699cfca7dcdf87d36deef39007241fd81424793538193398c"
+    },
+    {
+      "name": "texture_normal.png",
+      "bytes": 4062428,
+      "sha256": "e4533fb50cfbaf2da9f779246ba743df94b3cf5d038163b591586d250dc3f2c3"
+    },
+    {
+      "name": "texture_pbr.png",
+      "bytes": 2208123,
+      "sha256": "de4c4c3b00a537de94c9af974c46a90866780746b17c52dec20fc357d4f66226"
+    },
+    {
+      "name": "texture_roughness.png",
+      "bytes": 1065024,
+      "sha256": "75708cb7f4050d5543e9ab27e0d00c5b1564017f1f2f22d4e05f310eda56d243"
+    },
+    {
+      "name": "shaded.png",
+      "bytes": 4376585,
+      "sha256": "eced0b681367057000fa6254289a5eae16d221773988d0bb21c8fe7729851834"
+    }
+  ]
+}

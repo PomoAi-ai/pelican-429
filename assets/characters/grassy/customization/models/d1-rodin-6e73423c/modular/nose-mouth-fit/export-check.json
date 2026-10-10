@@ -1,0 +1,17 @@
+{
+  "file": "public/characters/human/customization/d1-modular-animated.glb",
+  "sha256": "47e1b371c4caaeb1c4938478138290c8c727e3581d83d8c6209ddfddab47f3ad",
+  "bytes": 20254880,
+  "animations": [
+    "idle",
+    "walk",
+    "run",
+    "jump"
+  ],
+  "skins": 1,
+  "meshParts": [
+    "D1 separated hand contacts",
+    "D1 separated hand contacts.001",
+    "model.001"
+  ]
+}

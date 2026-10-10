@@ -8,9 +8,10 @@ from mathutils.bvhtree import BVHTree
 from mathutils.geometry import barycentric_transform
 
 
-def build_eyelids(ob, rig, tier):
+def build_eyelids(ob, rig, tier, eyes=(.168, 2.356, .113, .092, .090, .012), skin_sample_scale=1, skin_sample_z=None, meeting_fraction=.8):
     """Return head-skinned lids with half-closed and closed shape targets."""
     mesh = ob.data
+    eye_x, eye_z, radius_x, radius_top, radius_bottom, tilt = eyes
     mesh.calc_loop_triangles()
     triangles = list(mesh.loop_triangles)
     tree = BVHTree.FromPolygons([v.co for v in mesh.vertices],
@@ -56,13 +57,14 @@ def build_eyelids(ob, rig, tier):
         for upper in (True, False):
             name = f'Eyelid{"Upper" if upper else "Lower"}_{side}'
             opened, halfway, closed, uvs, opacity, faces, materials = [], [], [], [], [], [], []
+            sampled_colors = []
             for col in range(columns + 1):
                 u = -1 + 2 * col / columns
                 arch = math.sqrt(max(0, 1 - u * u))
-                x = sign * 0.168 + u * 0.113
-                center = 2.356 + sign * u * 0.012
-                top, bottom = center + 0.092 * arch, center - 0.090 * arch
-                meeting = top * 0.2 + bottom * 0.8
+                x = sign * eye_x + u * radius_x
+                center = eye_z + sign * u * tilt
+                top, bottom = center + radius_top * arch, center - radius_bottom * arch
+                meeting = top * (1 - meeting_fraction) + bottom * meeting_fraction
                 outer = top if upper else bottom
                 top_y = surface(x, top)[0].y
                 bottom_y = surface(x, bottom)[0].y
@@ -92,10 +94,25 @@ def build_eyelids(ob, rig, tier):
                     closed.append(tuple(point))
                     # Match the original skin at the fixed edge; moving rows sample
                     # adjacent unpainted skin rather than stretching iris pixels.
-                    source_z = 2.45 if upper else 2.26
+                    source_z = eye_z + radius_top + .002 if upper else eye_z - radius_bottom - .006
                     sample_z = outer + (source_z - outer) * math.sin(t * math.pi / 2)
-                    uvs.append(surface(x, sample_z)[1])
-                    opacity.append(min(1, abs(z - outer) / 0.01) * min(1, 0.113 * (1 - abs(u)) / 0.008))
+                    if skin_sample_z is None:
+                        uvs.append(surface(x * skin_sample_scale, sample_z)[1])
+                        sampled_colors.append(None)
+                    else:
+                        adjacent = surface(x, outer + (.022 if upper else -.022))[1]
+                        interior = surface(x * skin_sample_scale, skin_sample_z)[1]
+                        def color_at(uv):
+                            ix = min(atlas.size[0] - 1, int(uv[0] * atlas.size[0]))
+                            iy = min(atlas.size[1] - 1, int(uv[1] * atlas.size[1]))
+                            offset = (iy * atlas.size[0] + ix) * 4
+                            return pixels[offset:offset + 3]
+                        blend = math.sin(t * math.pi / 2)
+                        edge_color, inner_color = color_at(adjacent), color_at(interior)
+                        sampled_colors.append(tuple(a * (1 - blend) + b * blend for a, b in zip(edge_color, inner_color)))
+                        uvs.append(interior)
+                    feather = .025 if skin_sample_z is not None else .01
+                    opacity.append(min(1, abs(z - outer) / feather) * min(1, radius_x * (1 - abs(u)) / .008))
             # A smooth outward envelope removes bumps inherited from the painted
             # eye mesh while preserving the clearance already established above.
             for shape in (halfway, closed):
@@ -131,6 +148,7 @@ def build_eyelids(ob, rig, tier):
                         halfway.append(tuple(h))
                         closed.append(tuple(c))
                         uvs.append(uvs[index])
+                        sampled_colors.append(sampled_colors[index])
                         opacity.append(1)
                 for col in range(columns):
                     a = start + col * 2
@@ -142,11 +160,11 @@ def build_eyelids(ob, rig, tier):
             data.materials.append(lash)
             uv_layer = data.uv_layers.new(name='UVMap')
             colors = data.color_attributes.new(name='LidSkin', type='FLOAT_COLOR', domain='POINT')
-            for color, uv, alpha in zip(colors.data, uvs, opacity):
+            for color, uv, alpha, sampled in zip(colors.data, uvs, opacity, sampled_colors):
                 ix = min(atlas.size[0] - 1, int(uv[0] * atlas.size[0]))
                 iy = min(atlas.size[1] - 1, int(uv[1] * atlas.size[1]))
                 offset = (iy * atlas.size[0] + ix) * 4
-                color.color_srgb = (*pixels[offset:offset + 3], alpha)
+                color.color_srgb = (*(pixels[offset:offset + 3] if sampled is None else sampled), alpha)
             for polygon, material_index in zip(data.polygons, materials):
                 polygon.material_index = material_index
                 polygon.use_smooth = True

@@ -22,11 +22,14 @@
     <meta property="og:url" content="https://pelican429.pomoai.vip/" />
     <title>鹈鹕 429 / Pelican 429</title>
     <link rel="stylesheet" href="/src/ui/showcase.css" />
+    <link rel="stylesheet" href="/src/ui/room-scene-preview.css" />
     <link rel="stylesheet" href="/src/ui/character-stage.css" />
+    <link rel="stylesheet" href="/src/ui/character-editor.css" />
     <link rel="stylesheet" href="/src/ui/texture-compare.css" />
     <link rel="stylesheet" href="/src/ui/navigation.css" />
     <link rel="stylesheet" href="/src/ui/free-world.css" />
     <link rel="stylesheet" href="/src/ui/npc-dialogue.css" />
+    <link rel="stylesheet" href="/src/ui/homestead.css" />
     <link rel="stylesheet" href="/src/ui/intro.css" />
     <link rel="stylesheet" href="/src/ui/facility.css" />
     <link rel="stylesheet" href="/src/ui/facility-chapter.css" />
@@ -256,11 +259,12 @@
     <link rel="stylesheet" href="/src/ui/sound-gallery.css" />
     <link rel="stylesheet" href="/src/ui/homepage.css" />
     <link rel="stylesheet" href="/src/ui/site-pages.css" />
+    <link rel="stylesheet" href="/src/ui/art-library.css" />
   </head>
   <body>
     <main id="entry-index" hidden>
       <section class="home-hero" aria-labelledby="home-title">
-        <div class="home-hero-art" role="img" aria-label="鹈鹕站在黑洞前哨的石台上，远处是蓝天下的未来都市与海面"><img class="home-hero-poster" data-home-src="./resources/home/fortress-overview.webp" alt="" fetchpriority="high" /></div>
+        <div class="home-hero-art" role="img" aria-label="鹈鹕站在黑洞前哨的石台上，远处是蓝天下的未来都市与海面"><img class="home-hero-poster" data-home-src="./resourcesprivate-source/fortress-overview.webp" alt="" fetchpriority="high" /></div>
         <div class="home-hero-shade"></div>
         <div class="home-hero-copy">
           <p class="home-pill"><span class="home-status-dot"></span>独立横版动作冒险 · 主线制作中</p>
@@ -270,7 +274,7 @@
           <div class="home-actions"><a class="home-button home-button-primary" href="./?mode=story">进入游戏 <span aria-hidden="true">→</span></a><a class="home-button home-button-secondary" href="./?mode=intro&amp;opening=finale"><span aria-hidden="true">▶</span> 观看序章</a><a class="home-button home-button-ghost" href="https://github.com/PomoAi-ai/pelican-429" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#icon-github"/></svg> 源码</a></div>
           <p class="home-hero-note">浏览器即开即玩 · 无需下载 · 推荐电脑键盘与鼠标</p>
         </div>
-        <aside class="home-hero-contact" aria-label="联系作者"><a class="home-hero-author" href="https://x.com/grassy429" target="_blank" rel="noopener"><img data-home-src="./contact/x-avatar.jpg" alt="作者头像" width="48" height="48" /><span><strong>小草</strong><small>作者 · @grassy429</small></span></a><div class="home-hero-contact-links"><a href="https://x.com/grassy429" target="_blank" rel="noopener"><svg aria-hidden="true" viewBox="0 0 24 24"><path fill="currentColor" d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg> 关注 X</a><a href="https://github.com/PomoAi-ai/pelican-429" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#icon-github"/></svg> GitHub</a></div><figure class="home-hero-qr"><img data-home-src="./resources/home/wechat-group.webp" alt="鹈鹕 429 微信交流群二维码" width="132" height="132" /><figcaption>微信扫码<br>加入交流群</figcaption></figure></aside>
+        <aside class="home-hero-contact" aria-label="联系作者"><a class="home-hero-author" href="https://x.com/grassy429" target="_blank" rel="noopener"><img data-home-src="./contact/x-avatar.jpg" alt="作者头像" width="48" height="48" /><span><strong>小草</strong><small>作者 · @grassy429</small></span></a><div class="home-hero-contact-links"><a href="https://x.com/grassy429" target="_blank" rel="noopener"><svg aria-hidden="true" viewBox="0 0 24 24"><path fill="currentColor" d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg> 关注 X</a><a href="https://github.com/PomoAi-ai/pelican-429" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#icon-github"/></svg> GitHub</a></div><figure class="home-hero-qr"><img data-home-src="./resourcesprivate-source/wechat-group.webp" alt="鹈鹕 429 微信交流群二维码" width="132" height="132" /><figcaption>微信扫码<br>加入交流群</figcaption></figure></aside>
         <canvas class="home-hero-score" aria-hidden="true"></canvas>
         <a class="home-scroll-cue" href="#home-world" aria-label="向下探索"><span></span></a>
       </section>
@@ -281,8 +285,8 @@
       <section class="home-journey home-section" id="home-journey" aria-labelledby="home-journey-title">
         <div class="home-journey-heading"><div><p class="home-eyebrow">02 / START YOUR JOURNEY</p><h2 id="home-journey-title">先听故事，再走进世界。</h2></div><p>从序章出发，或直接体验正在生长的主线。</p></div>
         <div class="home-chapters">
-          <a class="home-chapter home-prelude" href="./?mode=intro&amp;opening=finale"><div class="home-chapter-image"><img data-src="./resources/home/prelude-card.webp" alt="Grassy 在雨雪夜的房间中编程" decoding="async" fetchpriority="low" /><span class="home-chapter-badge">序章 · 可观看</span><span class="home-play-icon" aria-hidden="true">▶</span></div><div class="home-chapter-copy"><p class="home-eyebrow">PROLOGUE / 00</p><h3>AGI 降智风暴</h3><p>四个音符把 AGI 推向 99%，一道 429 劈下。黑暗里，新的旋律重新响起。</p><span class="home-text-link">观看序章动画 <span aria-hidden="true">→</span></span></div></a>
-          <a class="home-chapter home-mainline" href="./?mode=story"><div class="home-chapter-image"><img data-src="./resources/home/fortress-overview.webp" alt="山体算力堡垒全景：三层机房、屋顶冷却阵列与黑洞前哨" decoding="async" fetchpriority="low" /><span class="home-chapter-badge home-chapter-badge-live"><span class="home-status-dot"></span>主线 · 开发中试玩</span></div><div class="home-chapter-copy"><p class="home-eyebrow">CHAPTER ONE / 01</p><h3>深入山体堡垒</h3><p>从黑洞前哨出发，穿过堡垒门禁，深入多层机房：清理外围守卫、击退 Tibo、击败 Sam，让前沿模型重新开放。主线仍在制作中，剧情与关卡将持续完善。</p><span class="home-text-link">进入主线试玩 <span aria-hidden="true">→</span></span></div></a>
+          <a class="home-chapter home-prelude" href="./?mode=intro&amp;opening=finale"><div class="home-chapter-image"><img data-src="./resourcesprivate-source/prelude-card.webp" alt="Grassy 在雨雪夜的房间中编程" decoding="async" fetchpriority="low" /><span class="home-chapter-badge">序章 · 可观看</span><span class="home-play-icon" aria-hidden="true">▶</span></div><div class="home-chapter-copy"><p class="home-eyebrow">PROLOGUE / 00</p><h3>AGI 降智风暴</h3><p>四个音符把 AGI 推向 99%，一道 429 劈下。黑暗里，新的旋律重新响起。</p><span class="home-text-link">观看序章动画 <span aria-hidden="true">→</span></span></div></a>
+          <a class="home-chapter home-mainline" href="./?mode=story"><div class="home-chapter-image"><img data-src="./resourcesprivate-source/fortress-overview.webp" alt="山体算力堡垒全景：三层机房、屋顶冷却阵列与黑洞前哨" decoding="async" fetchpriority="low" /><span class="home-chapter-badge home-chapter-badge-live"><span class="home-status-dot"></span>主线 · 开发中试玩</span></div><div class="home-chapter-copy"><p class="home-eyebrow">CHAPTER ONE / 01</p><h3>深入山体堡垒</h3><p>从黑洞前哨出发，穿过堡垒门禁，深入多层机房：清理外围守卫、击退 Tibo、击败 Sam，让前沿模型重新开放。主线仍在制作中，剧情与关卡将持续完善。</p><span class="home-text-link">进入主线试玩 <span aria-hidden="true">→</span></span></div></a>
         </div>
         <aside class="home-controls" aria-label="游玩提示"><div><strong>出发前的小提示</strong><p>推荐使用电脑游玩；具体操作以游戏内提示为准。</p></div><div class="home-control-keys"><span><kbd>A</kbd><kbd>D</kbd> 移动</span><span><kbd>Space</kbd> 跳跃</span><span><kbd>F</kbd> 切换形态</span><span><kbd>鼠标</kbd> 瞄准与攻击</span></div></aside>
       </section>
@@ -291,25 +295,25 @@
         <div class="home-cast-group">
           <h3 class="home-cast-label">主角<small>HEROES</small></h3>
           <div class="home-cast-grid home-cast-heroes">
-            <article class="home-cast-card"><div class="home-cast-art"><img data-src="./resources/home/pelican.webp" alt="戴绿帽、系红围巾的白色鹈鹕" decoding="async" fetchpriority="low" /></div><div class="home-cast-copy"><h4>鹈鹕</h4><p>吐水普攻、鱼群轰炸、振翅突进、吞弹反击</p></div></article>
-            <article class="home-cast-card"><div class="home-cast-art"><img data-src="./resources/home/grassy.webp" alt="穿红色上衣、背着键盘装备的少年 Grassy" decoding="async" fetchpriority="low" /></div><div class="home-cast-copy"><h4>Grassy · 人类</h4><p>正式装备角色 · 骑行、键盘战斗与推进飞行</p></div></article>
+            <article class="home-cast-card"><div class="home-cast-art"><img data-src="./resourcesprivate-source/pelican.webp" alt="戴绿帽、系红围巾的白色鹈鹕" decoding="async" fetchpriority="low" /></div><div class="home-cast-copy"><h4>鹈鹕</h4><p>吐水普攻、鱼群轰炸、振翅突进、吞弹反击</p></div></article>
+            <article class="home-cast-card"><div class="home-cast-art"><img data-src="./resourcesprivate-source/grassy.webp" alt="穿红色上衣、背着键盘装备的少年 Grassy" decoding="async" fetchpriority="low" /></div><div class="home-cast-copy"><h4>Grassy · 人类</h4><p>正式装备角色 · 骑行、键盘战斗与推进飞行</p></div></article>
             <article class="home-cast-card"><div class="home-cast-art home-cast-art-fill"><img data-src="./characters/luma/portrait.jpg" alt="在黑暗中发出青色微光的光子" decoding="async" fetchpriority="low" /></div><div class="home-cast-copy"><h4>光子</h4><p>像萤火虫一样的一团活的光，一路引导</p></div></article>
           </div>
         </div>
         <div class="home-cast-group">
           <h3 class="home-cast-label">首领<small>BOSSES</small></h3>
           <div class="home-cast-grid home-cast-bosses">
-            <article class="home-cast-card home-cast-boss"><div class="home-cast-art home-cast-art-fill"><img data-src="./resources/home/tibo.webp" alt="穿黑色帽衫、戴重置胸章的 Tibo" decoding="async" fetchpriority="low" /></div><div class="home-cast-copy"><p class="home-eyebrow">BOSS / 01</p><h4>Tibo</h4><p class="home-cast-title">重置大师 · The Reset Master</p><p>机房核心的第一位首领，击退他才能解锁变身。</p><ul class="home-stack" aria-label="Tibo 的技能"><li>薯条攻击</li><li>额度返场</li><li>重置降临</li></ul></div></article>
-            <article class="home-cast-card home-cast-boss"><div class="home-cast-art home-cast-art-fill"><img data-src="./resources/home/sam.webp" alt="穿灰色毛衣、戴路由胸章的 Sam" decoding="async" fetchpriority="low" /></div><div class="home-cast-copy"><p class="home-eyebrow">BOSS / 02</p><h4>Sam</h4><p class="home-cast-title">模型路由者 · The Model Router</p><p>Tibo 之后抵达的对手，击败他，前沿模型才能重新开放。</p><ul class="home-stack" aria-label="Sam 的技能"><li>模型路由攻击</li><li>算力激涌</li><li>AGI 降临</li></ul></div></article>
+            <article class="home-cast-card home-cast-boss"><div class="home-cast-art home-cast-art-fill"><img data-src="./resourcesprivate-source/tibo.webp" alt="穿黑色帽衫、戴重置胸章的 Tibo" decoding="async" fetchpriority="low" /></div><div class="home-cast-copy"><p class="home-eyebrow">BOSS / 01</p><h4>Tibo</h4><p class="home-cast-title">重置大师 · The Reset Master</p><p>机房核心的第一位首领，击退他才能解锁变身。</p><ul class="home-stack" aria-label="Tibo 的技能"><li>薯条攻击</li><li>额度返场</li><li>重置降临</li></ul></div></article>
+            <article class="home-cast-card home-cast-boss"><div class="home-cast-art home-cast-art-fill"><img data-src="./resourcesprivate-source/sam.webp" alt="穿灰色毛衣、戴路由胸章的 Sam" decoding="async" fetchpriority="low" /></div><div class="home-cast-copy"><p class="home-eyebrow">BOSS / 02</p><h4>Sam</h4><p class="home-cast-title">模型路由者 · The Model Router</p><p>Tibo 之后抵达的对手，击败他，前沿模型才能重新开放。</p><ul class="home-stack" aria-label="Sam 的技能"><li>模型路由攻击</li><li>算力激涌</li><li>AGI 降临</li></ul></div></article>
           </div>
         </div>
         <div class="home-cast-group">
           <h3 class="home-cast-label">堡垒守卫<small>FORTRESS GUARDS</small></h3>
           <div class="home-cast-grid home-cast-guards">
-            <article class="home-cast-card"><div class="home-cast-art"><img data-src="./resources/home/gatekeeper.webp" alt="大头双钳的白色机器人欧米 OMI-01" decoding="async" fetchpriority="low" /></div><div class="home-cast-copy"><h4>欧米 OMI-01</h4><p>夹臂横扫 · 突进夹击</p></div></article>
-            <article class="home-cast-card"><div class="home-cast-art"><img data-src="./resources/home/line-hound.webp" alt="四足机械犬巡线犬" decoding="async" fetchpriority="low" /></div><div class="home-cast-copy"><h4>巡线犬</h4><p>直线扑冲 · 落地震击</p></div></article>
-            <article class="home-cast-card"><div class="home-cast-art"><img data-src="./resources/home/watch-wasp.webp" alt="四旋翼无人机哨蜂" decoding="async" fetchpriority="low" /></div><div class="home-cast-copy"><h4>哨蜂</h4><p>悬停投弹 · 铝热剂投放</p></div></article>
-            <article class="home-cast-card"><div class="home-cast-art"><img data-src="./resources/home/loadmaster.webp" alt="带黄色机械臂的轮式搬运机器人搬山" decoding="async" fetchpriority="low" /></div><div class="home-cast-copy"><h4>搬山</h4><p>前方下砸 · 低位横扫</p></div></article>
+            <article class="home-cast-card"><div class="home-cast-art"><img data-src="./resourcesprivate-source/gatekeeper.webp" alt="大头双钳的白色机器人欧米 OMI-01" decoding="async" fetchpriority="low" /></div><div class="home-cast-copy"><h4>欧米 OMI-01</h4><p>夹臂横扫 · 突进夹击</p></div></article>
+            <article class="home-cast-card"><div class="home-cast-art"><img data-src="./resourcesprivate-source/line-hound.webp" alt="四足机械犬巡线犬" decoding="async" fetchpriority="low" /></div><div class="home-cast-copy"><h4>巡线犬</h4><p>直线扑冲 · 落地震击</p></div></article>
+            <article class="home-cast-card"><div class="home-cast-art"><img data-src="./resourcesprivate-source/watch-wasp.webp" alt="四旋翼无人机哨蜂" decoding="async" fetchpriority="low" /></div><div class="home-cast-copy"><h4>哨蜂</h4><p>悬停投弹 · 铝热剂投放</p></div></article>
+            <article class="home-cast-card"><div class="home-cast-art"><img data-src="./resourcesprivate-source/loadmaster.webp" alt="带黄色机械臂的轮式搬运机器人搬山" decoding="async" fetchpriority="low" /></div><div class="home-cast-copy"><h4>搬山</h4><p>前方下砸 · 低位横扫</p></div></article>
           </div>
         </div>
         <a class="home-text-link home-cast-more" href="./?mode=showcase">在角色展示场查看实时 3D 模型 <span aria-hidden="true">→</span></a>
@@ -353,7 +357,7 @@
               <p>反馈问题、提出建议或交流想法，欢迎在 GitHub Issues 留言、在 X 上关注 @grassy429，或扫码加入微信交流群。</p>
               <div class="home-actions"><a class="home-button home-button-secondary" href="https://github.com/PomoAi-ai/pelican-429/issues" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#icon-github"/></svg> GitHub Issues <span aria-hidden="true">↗</span></a><a class="home-button home-button-secondary" href="https://x.com/grassy429" target="_blank" rel="noopener"><svg aria-hidden="true" viewBox="0 0 24 24"><path fill="currentColor" d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg> @grassy429 <span aria-hidden="true">↗</span></a></div>
             </div>
-            <figure class="home-qr"><img data-src="./resources/home/wechat-group.webp" alt="鹈鹕 429 微信交流群二维码" decoding="async" fetchpriority="low" /><figcaption>微信扫码加入交流群 · 二维码定期更新，失效请通过 Issues 联系</figcaption></figure>
+            <figure class="home-qr"><img data-src="./resourcesprivate-source/wechat-group.webp" alt="鹈鹕 429 微信交流群二维码" decoding="async" fetchpriority="low" /><figcaption>微信扫码加入交流群 · 二维码定期更新，失效请通过 Issues 联系</figcaption></figure>
           </article>
         </div>
       </section>
@@ -406,6 +410,8 @@
         <button type="button" class="home-resources-toggle" popovertarget="home-resources-menu"><span>资源</span><span aria-hidden="true"></span></button>
         <div id="home-resources-menu" class="home-resources-menu" popover>
           <a href="./?mode=catalog" data-page="catalog">资源总览</a>
+          <a href="./?mode=concepts" data-page="concepts">基础概念定义</a>
+          <a href="./?mode=art-library" data-page="art-library">原画资料库</a>
           <a href="./?mode=showcase" data-page="showcase" id="dev-showcase-link">角色展示场</a>
           <a href="./?mode=showcase&amp;library=history" data-page="history">历史资料</a>
           <a href="./?mode=compare" data-page="compare">画质对比</a>
@@ -424,6 +430,7 @@
           <a href="./?mode=facility" data-page="facility">机房预览</a>
           <a href="./?mode=dev" data-page="dev">全部开发场景</a>
         </div>
+        <a class="home-primary-link" href="./?mode=resources&amp;scene=settlement" data-page="perspective">透视</a>
         <a class="home-primary-link" href="./?mode=game" data-page="game">自由世界</a>
         <span class="home-play-control">
           <a class="home-nav-play" href="./?mode=story" data-page="story">开始游戏</a>
@@ -434,7 +441,7 @@
         </div>
         <a class="home-primary-link" href="./?mode=about" data-page="about">帮助与关于</a>
         <span class="home-social" role="group" aria-label="联系作者"><a href="https://github.com/PomoAi-ai/pelican-429" target="_blank" rel="noopener" aria-label="GitHub 仓库" title="GitHub 仓库"><svg aria-hidden="true"><use href="#icon-github"/></svg></a><a href="https://x.com/grassy429" target="_blank" rel="noopener" aria-label="在 X 上关注 @grassy429" title="在 X 上关注 @grassy429"><svg aria-hidden="true" viewBox="0 0 24 24"><path fill="currentColor" d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a><button type="button" popovertarget="home-wechat-pop" aria-label="微信交流群" title="微信交流群"><svg aria-hidden="true" viewBox="0 0 24 24"><path fill="currentColor" fill-rule="evenodd" d="M9 3C4.6 3 1 6 1 9.7c0 2.1 1.2 4 3 5.2l-.7 2.6 2.9-1.5c.9.3 1.8.4 2.8.4h.4a5.6 5.6 0 0 1-.2-1.5c0-3.6 3.4-6.5 7.6-6.5h.4C16.4 5.3 13 3 9 3ZM6 6.4a1.1 1.1 0 1 0 0 2.2 1.1 1.1 0 0 0 0-2.2Zm6 0a1.1 1.1 0 1 0 0 2.2 1.1 1.1 0 0 0 0-2.2Z"/><path fill="currentColor" fill-rule="evenodd" d="M16.8 10C13.1 10 10 12.5 10 15.6s3.1 5.6 6.8 5.6c.8 0 1.5-.1 2.2-.3l2.4 1.3-.6-2.1c1.6-1 2.6-2.6 2.6-4.5 0-3.1-3-5.6-6.6-5.6Zm-2.3 2.9a.9.9 0 1 0 0 1.8.9.9 0 0 0 0-1.8Zm4.6 0a.9.9 0 1 0 0 1.8.9.9 0 0 0 0-1.8Z"/></svg></button></span></nav>
-      <div id="home-wechat-pop" class="home-wechat-pop" popover><img src="./resources/home/wechat-group.webp" alt="鹈鹕 429 微信交流群二维码" width="180" height="180" /><p>微信扫码加入交流群</p></div>
+      <div id="home-wechat-pop" class="home-wechat-pop" popover><img src="./resourcesprivate-source/wechat-group.webp" alt="鹈鹕 429 微信交流群二维码" width="180" height="180" /><p>微信扫码加入交流群</p></div>
       </header>
     <div id="app"></div>
     <div id="hud" aria-live="off"></div>

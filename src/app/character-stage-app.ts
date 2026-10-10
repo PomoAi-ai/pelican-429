@@ -4,6 +4,8 @@ import { TUNING } from '../config/tuning.ts';
 import type { ShowcaseCard } from '../config/showcase.ts';
 import { createStage } from '../render/stage.ts';
 import { disposeGrassyAssets } from '../render/grassy/grassy-rig.ts';
+import { disposeGrassyStaticAssets } from '../render/grassy/grassy-static.ts';
+import { disposeD1Assets } from '../render/grassy/d1-rig.ts';
 import { disposeEnemyAssets } from '../render/enemy-rig.ts';
 import { disposeNpcAssets } from '../render/npc/npc-rig.ts';
 import { DUMMY_HEALTH_LAYER } from '../render/entity-views.ts';
@@ -12,11 +14,12 @@ import type { ShowcaseModel } from '../ui/showcase-model.ts';
 import { createStageActor } from './showcase/stage-actor.ts';
 import type { StageActor } from './showcase/stage-actor.ts';
 import { createStageGround } from './showcase/stage-ground.ts';
+import { createStageDragControls } from './showcase/stage-drag-controls.ts';
 import type { CharacterStageView } from '../ui/character-stage-location.ts';
 
 /** 角色共享一个舞台和后期通道；独立实例仅持有自己的动作与视图。 */
 export function startCharacterStage(parent: HTMLElement, model: ShowcaseModel, returnUrl: string, view: CharacterStageView): void {
-  const actors = new Map<number, { key: string; actor: StageActor; framing: StageActor['framing'] }>();
+  const actors = new Map<number, { key: string; actor: StageActor; framing: StageActor['framing']; placed: boolean }>();
   const preparing = new Map<number, string>();
   const panel = createCharacterStagePanel(parent, model, returnUrl, async (card, enabled) => {
     const actor = actors.get(card.id)?.actor;
@@ -29,7 +32,7 @@ export function startCharacterStage(parent: HTMLElement, model: ShowcaseModel, r
   stage.camera.layers.enable(DUMMY_HEALTH_LAYER);
   stage.camera.near = .05;
   stage.camera.updateProjectionMatrix();
-  stage.canvas.setAttribute('aria-label', '角色草地场景：拖动或单指平移摄像头，滚轮或双指缩放，点击空白或按左右方向键切换轻微角度');
+  stage.canvas.setAttribute('aria-label', '角色草地场景：点击角色或按 Enter 选择角色并打开工具条，拖动角色调整位置，拖动空白平移摄像头，滚轮或双指缩放，点击空白或按左右方向键切换轻微角度');
   stage.canvas.tabIndex = 0;
   const cameraControls = new OrbitControls(stage.camera, stage.canvas);
   cameraControls.enableRotate = false;
@@ -48,6 +51,8 @@ export function startCharacterStage(parent: HTMLElement, model: ShowcaseModel, r
   const content = new THREE.Group();
   pivot.add(content);
   stage.scene.add(pivot);
+  const dragControls = createStageDragControls(stage.canvas, stage.camera, content, actors, cameraControls,
+    () => { cameraGestureMoved = true; }, id => panel.selectActor(id));
   const ground = createStageGround(content);
   const angles = [0, 8, -8];
   let angleIndex = angles.indexOf(view.angle);
@@ -78,16 +83,14 @@ export function startCharacterStage(parent: HTMLElement, model: ShowcaseModel, r
   };
   const onSceneClick = (event: MouseEvent): void => {
     if (cameraGestureMoved) return;
-    const rect = stage.canvas.getBoundingClientRect();
-    raycaster.setFromCamera(new THREE.Vector2((event.clientX - rect.left) / rect.width * 2 - 1, 1 - (event.clientY - rect.top) / rect.height * 2), stage.camera);
-    const hits = raycaster.intersectObjects([...actors.values()].map(({ actor }) => actor.root), true);
-    const onCharacter = hits.some(({ object }) => {
-      for (let node: THREE.Object3D | null = object; node; node = node.parent) if (!node.visible) return false;
-      return true;
-    });
-    if (!onCharacter) changeAngle(1);
+    if (dragControls.hitActor(event) === undefined) changeAngle(1);
   };
   const onSceneKey = (event: KeyboardEvent): void => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      panel.selectNextActor();
+      return;
+    }
     if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
     event.preventDefault();
     changeAngle(event.key === 'ArrowRight' ? 1 : -1);
@@ -95,7 +98,6 @@ export function startCharacterStage(parent: HTMLElement, model: ShowcaseModel, r
   stage.canvas.addEventListener('click', onSceneClick);
   stage.canvas.addEventListener('keydown', onSceneKey);
   stage.canvas.addEventListener('pointermove', onSceneAim);
-  const projected = new THREE.Vector3();
   let stopped = false;
   let raf = 0;
   let last = performance.now();
@@ -113,6 +115,7 @@ export function startCharacterStage(parent: HTMLElement, model: ShowcaseModel, r
     if (stopped) return;
     stopped = true;
     cancelAnimationFrame(raf);
+    dragControls.dispose();
     for (const { actor } of actors.values()) actor.dispose();
     actors.clear();
     ground.dispose();
@@ -122,7 +125,7 @@ export function startCharacterStage(parent: HTMLElement, model: ShowcaseModel, r
     cameraControls.dispose();
     panel.resetCamera.removeEventListener('click', resetCamera);
     stage.dispose(); panel.dispose();
-    disposeGrassyAssets(); disposeEnemyAssets(); disposeNpcAssets();
+    disposeGrassyAssets(); disposeGrassyStaticAssets(); disposeD1Assets(); disposeEnemyAssets(); disposeNpcAssets();
     window.removeEventListener('error', onError);
     window.removeEventListener('unhandledrejection', onRejection);
     window.removeEventListener('pagehide', dispose);
@@ -139,7 +142,10 @@ export function startCharacterStage(parent: HTMLElement, model: ShowcaseModel, r
   const onRejection = (event: PromiseRejectionEvent): void => fail(event.reason);
   const onVisibility = (): void => {
     last = performance.now();
-    if (document.hidden) for (const { actor } of actors.values()) void actor.setSoundEnabled?.(false);
+    if (document.hidden) {
+      dragControls.cancel();
+      for (const { actor } of actors.values()) void actor.setSoundEnabled?.(false);
+    }
   };
   window.addEventListener('error', onError);
   window.addEventListener('unhandledrejection', onRejection);
@@ -153,7 +159,7 @@ export function startCharacterStage(parent: HTMLElement, model: ShowcaseModel, r
     try {
       for (const [id, item] of actors) {
         const card = model.cards.find((item) => item.id === id);
-        if (!card) { item.actor.dispose(); actors.delete(id); }
+        if (!card) { dragControls.cancel(); item.actor.dispose(); actors.delete(id); }
       }
       const pending = model.cards.find((card) => actors.get(card.id)?.key !== key(card) && preparing.get(card.id) !== key(card));
       if (pending) {
@@ -167,7 +173,7 @@ export function startCharacterStage(parent: HTMLElement, model: ShowcaseModel, r
           const previous = actors.get(pending.id);
           // 动作只替换实例内容，沿用入场时的占位和镜头范围。
           if (previous) { actor.root.position.copy(previous.actor.root.position); previous.actor.dispose(); }
-          actors.set(pending.id, { key: requestedKey, actor, framing: previous ? previous.framing : { ...actor.framing } });
+          actors.set(pending.id, { key: requestedKey, actor, framing: previous ? previous.framing : { ...actor.framing }, placed: previous?.placed ?? false });
           content.add(actor.root);
           if (!previous) layoutKey = '';
         }).catch(fail);
@@ -177,17 +183,29 @@ export function startCharacterStage(parent: HTMLElement, model: ShowcaseModel, r
         const nextLayout = `${model.cards.map((card) => card.id).join(',')}:${rect.width}:${rect.height}`;
         if (nextLayout !== layoutKey) {
           layoutKey = nextLayout;
-          let width = 0;
+          let left = Infinity;
+          let right = -Infinity;
           let height = 5;
+          for (const item of actors.values()) {
+            if (!item.placed) continue;
+            const center = item.actor.root.position.x + item.framing.x;
+            left = Math.min(left, center - item.framing.width / 2);
+            right = Math.max(right, center + item.framing.width / 2);
+          }
           for (const card of model.cards) {
             const item = actors.get(card.id);
             if (!item) continue;
-            item.actor.root.position.x = width + item.framing.width / 2 - item.framing.x;
-            width += item.framing.width + 2;
+            if (!item.placed) {
+              const start = right === -Infinity ? 0 : right + 2;
+              item.actor.root.position.x = start + item.framing.width / 2 - item.framing.x;
+              item.placed = true;
+              left = Math.min(left, start);
+              right = start + item.framing.width;
+            }
             height = Math.max(height, item.framing.y + item.framing.height / 2);
           }
-          width = Math.max(5, width - 2);
-          const centerX = width / 2;
+          const width = actors.size ? Math.max(5, right - left) : 5;
+          const centerX = actors.size ? (left + right) / 2 : width / 2;
           pivot.position.x = centerX;
           content.position.x = -centerX;
           const centerY = height * 0.45;
@@ -237,15 +255,6 @@ export function startCharacterStage(parent: HTMLElement, model: ShowcaseModel, r
           groundBounds.expandByPoint(groundCorner);
         }
         ground.update({ x: groundBounds.min.x - 4, y: groundBounds.min.y - 4, w: groundBounds.max.x - groundBounds.min.x + 8, h: groundBounds.max.y - groundBounds.min.y + 8 }, now / 1000);
-        const points: Array<{ id: number; x: number; y: number }> = [];
-        for (const card of model.cards) {
-          const actor = actors.get(card.id)?.actor;
-          if (!actor) continue;
-          projected.copy(actor.anchor);
-          actor.root.localToWorld(projected).project(stage.camera);
-          points.push({ id: card.id, x: (projected.x + 1) * rect.width / 2, y: (1 - projected.y) * rect.height / 2 - 16 });
-        }
-        panel.position(points);
         stage.render();
         panel.setNote(`场景中 ${model.cards.length} 个角色 · 角度 ${angles[angleIndex]}° · 点击空白切换`);
         loading.hidden = true;

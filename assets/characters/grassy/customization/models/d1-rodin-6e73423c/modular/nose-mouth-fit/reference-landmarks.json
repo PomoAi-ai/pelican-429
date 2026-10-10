@@ -1,0 +1,191 @@
+{
+  "schema": "landmarks.v1",
+  "image_size": [
+    1536,
+    1024
+  ],
+  "reference": "private-source/exec-private-source-032.png",
+  "method": "Manually identified on a 3x enlarged inspection crop at source rectangle x=440,y=640,w=300,h=320. Pixel positions remain in the full original image. No geometry or texture modified.",
+  "uncertainty_px": 2,
+  "normalization": {
+    "origin_name": "iris_center",
+    "scale_vertical_iris_to_chin": 73.66669999999999,
+    "u": "(x-iris.x)/scale, positive forward in profile",
+    "v": "(y-iris.y)/scale, positive downward",
+    "blender_z_formula": "zEye - v * (zEye - zChin)",
+    "blender_y_formula": "For profile boundary points use yNoseRoot - (u-uNoseRoot) * (zEye-zChin). Do not use the iris world depth as a contour anchor: it is lateral, not midsagittal.",
+    "example_z_not_a_measured_anchor": true
+  },
+  "landmarks": [
+    {
+      "view": "right",
+      "name": "iris_center",
+      "class": "feature",
+      "x": 663.3333,
+      "y": 823.3333,
+      "normalized_eye_chin": [
+        0.0,
+        0.0
+      ],
+      "example_z_eye_2_49_chin_2_23": 2.49
+    },
+    {
+      "view": "right",
+      "name": "nose_root",
+      "class": "feature",
+      "x": 687.3333,
+      "y": 831.3333,
+      "normalized_eye_chin": [
+        0.32579,
+        0.1086
+      ],
+      "example_z_eye_2_49_chin_2_23": 2.461765
+    },
+    {
+      "view": "right",
+      "name": "nose_tip",
+      "class": "structural_tip",
+      "x": 701.0,
+      "y": 851.0,
+      "normalized_eye_chin": [
+        0.51131,
+        0.37557
+      ],
+      "example_z_eye_2_49_chin_2_23": 2.392353
+    },
+    {
+      "view": "right",
+      "name": "subnasale",
+      "class": "feature",
+      "x": 693.6667,
+      "y": 860.3333,
+      "normalized_eye_chin": [
+        0.41177,
+        0.50226
+      ],
+      "example_z_eye_2_49_chin_2_23": 2.359412
+    },
+    {
+      "view": "right",
+      "name": "philtrum",
+      "class": "feature",
+      "x": 691.0,
+      "y": 865.6667,
+      "normalized_eye_chin": [
+        0.37557,
+        0.57466
+      ],
+      "example_z_eye_2_49_chin_2_23": 2.340588
+    },
+    {
+      "view": "right",
+      "name": "upper_lip_front",
+      "class": "feature",
+      "x": 689.0,
+      "y": 870.3333,
+      "normalized_eye_chin": [
+        0.34842,
+        0.63801
+      ],
+      "example_z_eye_2_49_chin_2_23": 2.324118
+    },
+    {
+      "view": "right",
+      "name": "mouth_seam_front",
+      "class": "feature",
+      "x": 688.3333,
+      "y": 872.3333,
+      "normalized_eye_chin": [
+        0.33937,
+        0.66516
+      ],
+      "example_z_eye_2_49_chin_2_23": 2.317059
+    },
+    {
+      "view": "right",
+      "name": "mouth_corner",
+      "class": "feature",
+      "x": 674.6667,
+      "y": 870.0,
+      "normalized_eye_chin": [
+        0.15385,
+        0.63348
+      ],
+      "example_z_eye_2_49_chin_2_23": 2.325294
+    },
+    {
+      "view": "right",
+      "name": "lower_lip_front",
+      "class": "feature",
+      "x": 685.3333,
+      "y": 875.0,
+      "normalized_eye_chin": [
+        0.29864,
+        0.70136
+      ],
+      "example_z_eye_2_49_chin_2_23": 2.307647
+    },
+    {
+      "view": "right",
+      "name": "mentolabial_recess",
+      "class": "feature",
+      "x": 679.6667,
+      "y": 881.3333,
+      "normalized_eye_chin": [
+        0.22172,
+        0.78733
+      ],
+      "example_z_eye_2_49_chin_2_23": 2.285294
+    },
+    {
+      "view": "right",
+      "name": "chin_front_round",
+      "class": "feature",
+      "x": 675.0,
+      "y": 890.6667,
+      "normalized_eye_chin": [
+        0.15837,
+        0.91403
+      ],
+      "example_z_eye_2_49_chin_2_23": 2.252353
+    },
+    {
+      "view": "right",
+      "name": "chin_bottom",
+      "class": "structural_tip",
+      "x": 668.0,
+      "y": 897.0,
+      "normalized_eye_chin": [
+        0.06335,
+        1.0
+      ],
+      "example_z_eye_2_49_chin_2_23": 2.23
+    }
+  ],
+  "current_diagnosis": [
+    "The current nose/subnasal/upper-lip area is one broad convex swelling rather than a localized small nose tip with a short backward return.",
+    "Current mouth reads as a broad dark indentation. Target has an extremely small closed lip boundary, with upper and lower lip contour still visible.",
+    "Current lower face begins retreating backward too early and gives a cut-off/pointed chin; reference has a more forward gently rounded chin.",
+    "User current screenshot is not guaranteed to be exact orthographic right view. Its crop and zoom differ from the target; no direct pixel displacement is safe."
+  ],
+  "repair_priority": [
+    "Keep the eye and upper face unchanged. Register using the eye-to-chin vertical span, then align the nose-root contour depth separately.",
+    "Sculpt a localized rounded nose tip; do not reduce the entire muzzle region uniformly.",
+    "Introduce a short subnasal backward return and a shallow closed lip break, without a deep hole, large lip strip, or lipstick-like volume.",
+    "Round the lip-to-chin continuation and check 45-degree/front views before final export."
+  ],
+  "acceptance": {
+    "suggested_landmark_tolerance_normalized": 0.04,
+    "meaning": "Approximately 3 original reference pixels. Apply only after camera and anchor registration.",
+    "mandatory_views": [
+      "front",
+      "right",
+      "three-quarter"
+    ],
+    "not_claimed": [
+      "Absolute physical dimensions from screenshots",
+      "Expression-ready topology",
+      "Precise match from different perspective camera snapshots"
+    ]
+  }
+}

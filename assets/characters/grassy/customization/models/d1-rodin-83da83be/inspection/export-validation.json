@@ -1,0 +1,25 @@
+{
+  "vertices": 19179,
+  "faces": 19205,
+  "faceSizes": {
+    "4": 19177,
+    "3": 28
+  },
+  "removedIsolatedFaces": 6,
+  "removedIsolatedVertices": 18,
+  "boundaryEdges": 0,
+  "nonManifoldEdges": 0,
+  "collapsedUvFaces": 0,
+  "pbr": {
+    "bytes": 10797644,
+    "triangles": 38382,
+    "height": 3.099999839742395,
+    "sha256": "65efc5878df9eac7b5dde53d347533f0bd8262c6b6e925fc6cdfbf254c36ebec"
+  },
+  "clay": {
+    "bytes": 978124,
+    "triangles": 38382,
+    "height": 3.099999839742395,
+    "sha256": "8901b6ed9833ebd3bf431ffd7b4df157c77a1b65f1e102ca320c685d0d48097c"
+  }
+}

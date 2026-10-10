@@ -346,7 +346,7 @@ describe('flora 规划：繁茂、成片、丰富', () => {
   test('createFloraEnv：按湖（水面高度相近）算水平距离、按树冠算遮荫；非法输入即抛', () => {
     const env = createFloraEnv({
       lakes: [{ x0: 20, x1: 30, level: 11, perched: false }],
-      trees: [{ x: 50, baseY: 11, canopyHalfWidth: 3 }],
+      trees: [{ id: 1, x: 50, baseY: 11, canopyHalfWidth: 3 }],
     });
     assert.equal(env.waterDistance(25, 10), 0);
     assert.equal(env.waterDistance(17, 10), 3);
@@ -357,7 +357,7 @@ describe('flora 规划：繁茂、成片、丰富', () => {
     assert.equal(env.shade(60, 10), 0);
     assert.equal(env.shade(50, 40), 0, 'a tree far below casts no shade up here');
     assert.throws(() => createFloraEnv({ lakes: [{ x0: 5, x1: 2, level: 1, perched: false }], trees: [] }), /flora/);
-    assert.throws(() => createFloraEnv({ lakes: [], trees: [{ x: 1, baseY: 1, canopyHalfWidth: -1 }] }), /flora/);
+    assert.throws(() => createFloraEnv({ lakes: [], trees: [{ id: 1, x: 1, baseY: 1, canopyHalfWidth: -1 }] }), /flora/);
   });
 });
 

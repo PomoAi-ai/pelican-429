@@ -74,10 +74,13 @@ export function createNpcTransformation(kind: NpcKind, initialForm: NpcForm) {
     resetPose() {
       for (const rig of rigs) rig.pose.reset();
     },
-    sample(action: NpcAction, seconds: number, facing: 1 | -1, frameDt: number, idleFacing: number = 0) {
+    sample(action: NpcAction, seconds: number, facing: 1 | -1, frameDt: number, idleFacing: number = 0, modelView?: { yaw: number; pitch: number }) {
       progress = targetForm === 'human' ? Math.min(1, progress + frameDt / .55) : Math.max(0, progress - frameDt / .55);
       sync();
-      for (const rig of rigs) animateNpc(rig, action, seconds, frameDt, facing, null, idleFacing);
+      for (const rig of rigs) {
+        animateNpc(rig, action, seconds, frameDt, facing, null, idleFacing);
+        if (modelView) rig.root.rotation.set(modelView.pitch, modelView.yaw, 0);
+      }
       const time = npcAction(kind, action).loop ? seconds % rigs[0]!.actions[action].getClip().duration : seconds;
       weapon.sample(action, time, rigs.find(rig => rig.form === 'monster')!.model, rigs.find(rig => rig.form === 'human')!.model, humanMix.value);
       // FX 自带横版世界坐标，不随身体旋转。

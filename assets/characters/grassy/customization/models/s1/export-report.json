@@ -1,0 +1,167 @@
+{
+  "sourceBounds": [
+    [
+      -0.40101000666618347,
+      -0.29395192861557007,
+      -0.9472950100898743
+    ],
+    [
+      0.40092599391937256,
+      0.2984600365161896,
+      0.9496790170669556
+    ]
+  ],
+  "scale": 1.6341815731901488,
+  "registrationZ": {
+    "source": [
+      0,
+      0.32,
+      0.8,
+      1.16,
+      1.67,
+      2.04,
+      2.2,
+      2.29,
+      3.1
+    ],
+    "target": [
+      0,
+      0.27,
+      0.67,
+      1.02,
+      1.35,
+      1.85,
+      1.97,
+      2.1,
+      3.1
+    ]
+  },
+  "style": "royal",
+  "bones": 22,
+  "morphs": {
+    "Female_royal_body_3": {
+      "FaceWidth": 0.02227058172225952,
+      "FaceLength": 0.04090210608163175,
+      "JawWidth": 0.024971764454564147,
+      "ChinLength": 0.04480499939729684,
+      "EyeSize": 0.0083586794904279,
+      "EyeSpacing": 0.019998693953209686,
+      "NoseSize": 0.024194145946219565,
+      "MouthWidth": 0.016591616115309186
+    },
+    "Female_royal_body_EyelidUpper_L": {
+      "FaceWidth": 0.020959999561309815,
+      "FaceLength": 0.010920010662078884,
+      "JawWidth": 0.004107039759249179,
+      "ChinLength": 1.1718268044043867e-05,
+      "EyeSize": 0.008311886653598199,
+      "EyeSpacing": 0.014878578738067217,
+      "NoseSize": 0.009099429271060196,
+      "MouthWidth": 3.2333509581130725e-07
+    },
+    "Female_royal_body_EyelidLower_L": {
+      "FaceWidth": 0.020959999561309815,
+      "FaceLength": 0.020039900398254422,
+      "JawWidth": 0.011084612530658917,
+      "ChinLength": 0.00021862264360051934,
+      "EyeSize": 0.008343883795637145,
+      "EyeSpacing": 0.01546303123266387,
+      "NoseSize": 0.012381036231520526,
+      "MouthWidth": 0.00034527082576221735
+    },
+    "Female_royal_body_EyelidUpper_R": {
+      "FaceWidth": 0.020959999561309815,
+      "FaceLength": 0.010920010662078884,
+      "JawWidth": 0.004107039759249179,
+      "ChinLength": 1.1718268044043867e-05,
+      "EyeSize": 0.008311886653598199,
+      "EyeSpacing": 0.014878578738067217,
+      "NoseSize": 0.009099429271060196,
+      "MouthWidth": 3.2333509581130725e-07
+    },
+    "Female_royal_body_EyelidLower_R": {
+      "FaceWidth": 0.020959999561309815,
+      "FaceLength": 0.020039900398254422,
+      "JawWidth": 0.011084612530658917,
+      "ChinLength": 0.00021862264360051934,
+      "EyeSize": 0.008343883795637145,
+      "EyeSpacing": 0.01546303123266387,
+      "NoseSize": 0.012381036231520526,
+      "MouthWidth": 0.00034527082576221735
+    }
+  },
+  "parts": [
+    {
+      "name": "Female_royal_hair_2",
+      "part": "hair",
+      "vertices": 6727,
+      "materials": [
+        "custom.hair.royal.2"
+      ]
+    },
+    {
+      "name": "Female_royal_body_3",
+      "part": "body",
+      "vertices": 1075,
+      "materials": [
+        "custom.skin.royal.3"
+      ]
+    },
+    {
+      "name": "Female_royal_body_neck",
+      "part": "body",
+      "vertices": 80,
+      "materials": [
+        "custom.skin.royal.neck"
+      ]
+    },
+    {
+      "name": "Female_royal_body_EyelidUpper_L",
+      "part": "body",
+      "vertices": 363,
+      "materials": [
+        "custom.skin.royal.eyelid",
+        "Grassy soft eyelid crease"
+      ]
+    },
+    {
+      "name": "Female_royal_body_EyelidLower_L",
+      "part": "body",
+      "vertices": 297,
+      "materials": [
+        "custom.skin.royal.eyelid",
+        "Grassy soft eyelid crease"
+      ]
+    },
+    {
+      "name": "Female_royal_body_EyelidUpper_R",
+      "part": "body",
+      "vertices": 363,
+      "materials": [
+        "custom.skin.royal.eyelid",
+        "Grassy soft eyelid crease"
+      ]
+    },
+    {
+      "name": "Female_royal_body_EyelidLower_R",
+      "part": "body",
+      "vertices": 297,
+      "materials": [
+        "custom.skin.royal.eyelid",
+        "Grassy soft eyelid crease"
+      ]
+    },
+    {
+      "name": "Female_royal_outfit",
+      "part": "outfit",
+      "vertices": 12115,
+      "materials": [
+        "custom.skin.royal",
+        "custom.top.royal",
+        "custom.bottom.royal",
+        "custom.shoes.royal"
+      ]
+    }
+  ],
+  "bytes": 9410736
+}

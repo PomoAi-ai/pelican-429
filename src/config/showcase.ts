@@ -2,8 +2,8 @@ import { ENEMY_RULES } from './enemy-rules.ts';
 import type { EnemyKind } from './enemy-rules.ts';
 import { ENEMY_KINDS, ENEMY_MODEL_DIRS } from './enemy-models.ts';
 import type { ResourceOptions } from './resource-showcase.ts';
-import { GRASSY_ACTIONS, GRASSY_ANIMATED_MODELS, GRASSY_MODELS, GRASSY_FLIGHTS, isGrassyAttack } from './grassy.ts';
-import type { GrassyAction, GrassyAnimatedVariant, GrassyFlight } from './grassy.ts';
+import { D1_ACTIONS, D1_MODELS, GRASSY_ACTIONS, GRASSY_ANIMATED_MODELS, GRASSY_MODELS, GRASSY_FLIGHTS, isGrassyAttack } from './grassy.ts';
+import type { D1Action, GrassyAction, GrassyAnimatedVariant, GrassyFlight, GrassyModelVariant } from './grassy.ts';
 import { LUMA_ACTIONS } from './luma.ts';
 import { FISH_SPECIES } from './fish-appearance.ts';
 import type { FishSpeciesId } from './fish-appearance.ts';
@@ -11,7 +11,7 @@ import { NPCS, NPC_ACTIONS } from './npc.ts';
 import type { NpcKind, NpcForm } from './npc.ts';
 
 export type ShowcaseEnvironment = 'surface' | 'underground';
-export type ShowcaseActor = 'pelican' | 'human' | 'luma' | 'dummy' | 'fish' | NpcKind | EnemyKind;
+export type ShowcaseActor = 'pelican' | 'human' | 'd1' | 'luma' | 'dummy' | 'fish' | NpcKind | EnemyKind;
 
 export const MODEL_SHOWCASE_VIEWS = {
   threeQuarter: { label: '三分之四', yaw: Math.PI / 4 },
@@ -33,21 +33,25 @@ export interface ShowcaseEntry<Actor extends string = ShowcaseActor> {
   readonly supportsShapes?: boolean;
   readonly fishSpecies?: FishSpeciesId;
   readonly npcForm?: NpcForm;
+  readonly staticModel?: GrassyModelVariant;
+  readonly d1Animation?: D1Action;
+  readonly d1HairVisible?: boolean;
   readonly grassyAnimation?: { readonly variant: GrassyAnimatedVariant; readonly clip: GrassyAction; readonly flight?: GrassyFlight };
 }
 
 export const MAX_SHOWCASE_CARDS = 8;
 
 export const SHOWCASE_ACTORS: ReadonlyArray<{ id: ShowcaseActor; name: string; image: string; description: string; defaultEntry: string }> = [
-  { id: 'pelican', name: '鹈鹕', image: './resources/home/pelican.webp', description: '原画、参考图与实时模型', defaultEntry: 'pelican.idle' },
-  { id: 'human', name: 'Grassy · 人类', image: './resources/home/grassy.webp', description: '正式装备角色 · 骑行、键盘战斗与推进飞行', defaultEntry: 'human.rodin-animated-game.idle' },
+  { id: 'pelican', name: '鹈鹕', image: './resourcesprivate-source/pelican.webp', description: '原画、参考图与实时模型', defaultEntry: 'pelican.idle' },
+  { id: 'human', name: 'Grassy · 人类', image: './resourcesprivate-source/grassy.webp', description: '正式装备角色 · 骑行、键盘战斗与推进飞行', defaultEntry: 'human.rodin-animated-game.idle' },
+  { id: 'd1', name: 'D1 · 女性角色', image: './characters/human/customization/d1-rodin-front.png', description: '口鼻与暖肤色修正版 · 待机、行走、跑步、跳跃', defaultEntry: 'd1.idle' },
   { id: 'luma', name: '光子', image: './characters/luma/portrait.jpg', description: '飞行微光 · 自由游弋与环境照明', defaultEntry: 'luma.idle' },
   ...(Object.keys(NPCS) as NpcKind[]).map((id) => ({
     id, name: `${NPCS[id].name} · ${NPCS[id].title}`, image: `./characters/${id}/render-front.png`,
     description: NPCS[id].description, defaultEntry: `${id}.monster.idle`,
   })),
   { id: 'dummy', name: '训练假人', image: './showcase/dummy.jpg', description: '受击、射击与漂浮', defaultEntry: 'dummy.idle' },
-  ...ENEMY_KINDS.map((id) => ({ id, name: ENEMY_RULES[id].name, image: `./resources/home/${ENEMY_MODEL_DIRS[id].split('/').at(-1)}.webp`, description: ENEMY_RULES[id].skills.map((skill) => skill.name).join(' · '), defaultEntry: `${id}.idle` })),
+  ...ENEMY_KINDS.map((id) => ({ id, name: ENEMY_RULES[id].name, image: `./resourcesprivate-source/${ENEMY_MODEL_DIRS[id].split('/').at(-1)}.webp`, description: ENEMY_RULES[id].skills.map((skill) => skill.name).join(' · '), defaultEntry: `${id}.idle` })),
   { id: 'fish', name: '鱼类', image: './showcase/fish.jpg', description: '七种鱼的外形、游动与扑腾', defaultEntry: 'fish.species.minnow' },
 ];
 
@@ -55,6 +59,9 @@ const entries = (actor: ShowcaseActor, group: string, rows: ReadonlyArray<readon
   rows.map(([action, label, description, seconds]) => ({ id: `${actor}.${action}`, actor, action, label, group, description, seconds }));
 
 export const SHOWCASE_ENTRIES: readonly ShowcaseEntry[] = [
+  ...D1_ACTIONS.map(action => ({ ...action, id: `d1.${action.id}`, actor: 'd1' as const, action: action.id, group: '基础动作', d1Animation: action.id })),
+  { id: 'd1.bare-head', actor: 'd1', action: 'idle', label: '头部检查 · 隐藏头发', description: '隐藏独立发型，查看新脸型、眼睑与鼻唇曲面。', seconds: 3.2, loop: true, group: '模型检查', d1Animation: 'idle', d1HairVisible: false },
+  ...D1_MODELS.map((model) => ({ id: `d1.${model.id.replace('d1-rodin-', '')}`, actor: 'd1' as const, action: model.id, label: model.label, description: model.description, seconds: 0, group: '模型检查', staticModel: model.id })),
   ...GRASSY_ANIMATED_MODELS.flatMap((model) => GRASSY_ACTIONS.map((action) => ({
     id: `human.rodin-animated-${model.id}.${action.id}`, actor: 'human' as const, action: action.id,
     label: action.label, group: action.id === 'ride' ? '自行车' : ['keyboard_smash', 'codex_attack', 'bug_attack', 'server_overload'].includes(action.id) ? '键盘战斗' : ['takeoff', 'hover', 'fly_forward', 'fly_fast', 'land'].includes(action.id) ? '推进飞行' : '基础动作',
@@ -193,6 +200,18 @@ export const CHARACTER_CATALOG: ShowcaseCatalog = {
   mode: 'showcase', title: '角色展示场', subjects: SHOWCASE_ACTORS, entries: currentEntries,
   maxCards: MAX_SHOWCASE_CARDS,
   demos: [{
+    id: 'd1-modular', title: 'D1 · 新头部与独立发型', description: '同一角色显示或隐藏独立发型，检查曲面与动作跟随。',
+    cards: [{ entryId: 'd1.idle' }, { entryId: 'd1.bare-head' }],
+  }, {
+    id: 'd1-actions', title: 'D1 · 基础动作', description: '待机、走路、跑步与跳跃；支持暂停、慢放、重播和多角度检查。',
+    cards: D1_ACTIONS.map(action => ({ entryId: `d1.${action.id}` })),
+  }, {
+    id: 'd1-rodin', title: 'D1 · 原版与参考校准版', description: '在相同场景灯光中对比肤色、金铜发色和刘海；可切换原始白模检查，尚未绑定或制作动画。',
+    cards: [{ entryId: 'd1.pbr' }, { entryId: 'd1.refined' }],
+  }, {
+    id: 'd1-rodin-latest', title: 'D1 · 新版与参考校准版', description: '在相同场景灯光中对比新版 Rodin 材质与旧版参考校准效果；可切换新版白模检查，均尚未绑定或制作动画。',
+    cards: [{ entryId: 'd1.83da83be-pbr' }, { entryId: 'd1.refined' }],
+  }, {
     id: 'fortress-enemies', title: '堡垒运维队 · 四怪', description: '欧米、巡线犬、FPV 哨蜂和搬山；共享第一章模型与双技能，支持正面和侧面检查。',
     cards: ENEMY_KINDS.map((kind) => ({ entryId: `${kind}.idle` })),
   }, {

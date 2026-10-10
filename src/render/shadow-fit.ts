@@ -43,6 +43,37 @@ export interface ShadowFit {
   readonly texelUp: number;
 }
 
+/** 视锥八角点按 x/y/z 符号位排列；仅拟合与接收阴影深度带相交的部分。 */
+export function shadowReceiverBounds(corners: readonly Vec3Like[], zMin: number, zMax: number):
+  Pick<ShadowFitInput, 'centerX' | 'centerY' | 'halfWidth' | 'halfHeight'> | null {
+  let minX = Infinity;
+  let minY = Infinity;
+  let maxX = -Infinity;
+  let maxY = -Infinity;
+  const include = (x: number, y: number): void => {
+    minX = Math.min(minX, x);
+    maxX = Math.max(maxX, x);
+    minY = Math.min(minY, y);
+    maxY = Math.max(maxY, y);
+  };
+  for (let index = 0; index < 8; index++) {
+    const a = corners[index]!;
+    if (a.z >= zMin && a.z <= zMax) include(a.x, a.y);
+    for (const bit of [1, 2, 4]) {
+      const next = index ^ bit;
+      if (next < index) continue;
+      const b = corners[next]!;
+      if (a.z === b.z) continue;
+      for (const z of [zMin, zMax]) {
+        const t = (z - a.z) / (b.z - a.z);
+        if (t >= 0 && t <= 1) include(a.x + (b.x - a.x) * t, a.y + (b.y - a.y) * t);
+      }
+    }
+  }
+  if (minX >= maxX || minY >= maxY) return null;
+  return { centerX: (minX + maxX) / 2, centerY: (minY + maxY) / 2, halfWidth: (maxX - minX) / 2, halfHeight: (maxY - minY) / 2 };
+}
+
 interface Basis {
   readonly d: Vec3Like;
   readonly r: Vec3Like;

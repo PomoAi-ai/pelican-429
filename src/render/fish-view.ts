@@ -82,6 +82,7 @@ export function fishTailPhase0(seed: number): number {
 export interface FishViewOptions {
   /** 实例上限（默认容纳初始完整鱼群，至少预留 64）；鱼数超过即抛。 */
   readonly capacity?: number;
+  readonly modelView?: () => { yaw: number; pitch: number };
 }
 
 export interface FishView {
@@ -176,6 +177,8 @@ export function createFishView(school: FishSchool, options: FishViewOptions = {}
   const pos = new THREE.Vector3();
   const quat = new THREE.Quaternion();
   const euler = new THREE.Euler(0, 0, 0, 'YXZ');
+  const viewEuler = new THREE.Euler();
+  const viewRotation = new THREE.Quaternion();
   const one = new THREE.Vector3(1, 1, 1);
   let lastTime: number | null = null;
   let frame = 0;
@@ -188,6 +191,8 @@ export function createFishView(school: FishSchool, options: FishViewOptions = {}
     lastTime = time;
     frame++;
     for (const { mesh } of batches) mesh.count = 0;
+    const modelView = options.modelView?.();
+    if (modelView) viewRotation.setFromEuler(viewEuler.set(modelView.pitch, modelView.yaw - Math.PI / 2, 0));
 
     for (let i = 0; i < fish.length; i++) {
       const f = fish[i] as Fish;
@@ -211,8 +216,9 @@ export function createFishView(school: FishSchool, options: FishViewOptions = {}
 
       const hop = grounded && f.state !== 'dead' ? FLOP_HOP * Math.abs(Math.sin(v.phase * 0.25)) : 0;
       pos.set(lerp(b.prevX, b.x, a), lerp(b.prevY, b.y, a) + b.height / 2 + hop, fishLaneZ(f.seed));
-      euler.set(v.roll, v.yaw, v.pitch);
+      euler.set(v.roll, modelView ? 0 : v.yaw, v.pitch);
       quat.setFromEuler(euler);
+      if (modelView) quat.premultiply(viewRotation);
       matrix.compose(pos, quat, one);
       const species = fishSpeciesIndex(f.seed);
       const { mesh, swim } = batches[species]!;

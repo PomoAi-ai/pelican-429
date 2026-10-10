@@ -1,0 +1,80 @@
+{
+  "sourceBounds": [
+    [
+      -0.40352699160575867,
+      -0.2701849341392517,
+      -0.9408149719238281
+    ],
+    [
+      0.39940398931503296,
+      0.26637202501296997,
+      0.9475250244140625
+    ]
+  ],
+  "scale": 1.6416535189700556,
+  "objects": [
+    {
+      "name": "root.0",
+      "vertices": 569,
+      "materials": [
+        "root.0"
+      ]
+    },
+    {
+      "name": "root.1",
+      "vertices": 271,
+      "materials": [
+        "root.1"
+      ]
+    },
+    {
+      "name": "root.2",
+      "vertices": 5407,
+      "materials": [
+        "root.2"
+      ]
+    },
+    {
+      "name": "root.3",
+      "vertices": 843,
+      "materials": [
+        "root.3"
+      ]
+    },
+    {
+      "name": "root.4",
+      "vertices": 1348,
+      "materials": [
+        "root.4"
+      ]
+    },
+    {
+      "name": "root.5",
+      "vertices": 1219,
+      "materials": [
+        "root.5"
+      ]
+    },
+    {
+      "name": "root.6",
+      "vertices": 842,
+      "materials": [
+        "root.6"
+      ]
+    },
+    {
+      "name": "root.7",
+      "vertices": 3016,
+      "materials": [
+        "root.7"
+      ]
+    },
+    {
+      "name": "root.8",
+      "vertices": 561,
+      "materials": [
+        "root.8"
+      ]
+    }
+  ]
+}

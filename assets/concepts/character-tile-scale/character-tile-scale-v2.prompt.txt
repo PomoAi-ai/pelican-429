@@ -1,0 +1,38 @@
+人物与场景比例概念修订，2026-10-09。
+状态：未通过完整比例校验；由 local-drawing/character-tile-scale-local.png 的本地精确制图版取代，不用于尺寸量取。
+工具：内置 image_gen。
+用户明确：角色为 3.3 头身，不是 3.3 格。
+人物参考：assets/characters/grassy/customization/female/concepts/d1-no-gear/individual/front-v1.png。
+游戏外观高度依 src/config/grassy.ts 为 3.1 格；碰撞依 src/config/player-form.ts 与 player-tuning.ts 为宽 0.8 格、高 2.8 格。
+本版调整为大头、紧凑躯干与短腿的角色。图中标尺刻度间距与模块示意仍存在生成误差，不能作为精确量取模板；3.3 头身以用户要求为准，未改游戏模型或尺寸配置。
+
+初始提示词：
+Use case: stylized-concept.
+Create a NEW corrected game CHARACTER SCALE CONCEPT BOARD. The attached character reference is the identity/costume reference: orange-gold short bob with side braid, huge turquoise eyes, blue dress with white puff sleeves and gold filigree, white/gold boots. User's authoritative body design: EXACTLY 3.3 HEADS TALL. This overrides any taller appearance in the reference. Draw a LARGE HEAD and SHORT COMPACT BODY, not a slender long-legged fashion anime adult. Head height from crown to chin is about 30.3 percent of entire standing stature; below chin to soles is only2.3 head heights. Preserve face and costume. The earlier image was rejected for being too tall and slender, so strongly compress torso and legs and enlarge head. No adult seven-head/five-head silhouette. Neutral FRONT orthographic standing, feet level, arms relaxed outwards slightly.
+
+Concept board landscape3:2 warm ivory background with clean cobalt titles and fine drafting strokes. Main title Chinese “人物比例 · 3.3 头身”. Subtitle “头身比例与格子尺寸分开标注”.
+LEFT TWO THIRDS: a large compact full-body character next to TWO independent dimension systems.
+Purple ruler on left: “头身标尺”. Start0 at crown,1H at chin,2H lower on body,3H near ankles,3.3H at sole. First segment crown-to-chin must visually match each of next two complete head units. Add faint purple horizontal construction guide lines through these exact levels. Numbers in descending spatial order0,1H,2H,3H,3.3H. Character's chin falls precisely at first 1H division! Use header “3.3 头身”. Avoid arbitrary anatomical claims.
+Orange dimension on right: soles-to-hair-top “外观高 3.1 格”. A quiet GRAY SQUARE GRID behind only the character: standing visual height is3.1 full square units. Grid baseline soles0; full tile marks1,2,3 from bottom upward. Orange label makes clear this is game world units. Full head is nearly one tile high; body below chin about2.16 tiles. Keep proportions compact. The grid should show3 full square cells plus0.1cell over full stature, not six tiny cells.
+Small cyan dashed collision rectangle centered on character foot baseline, width0.8tiles and height2.8tiles. Character hair and dress are allowed outside it. Label beside lower panel, with no occlusion: “碰撞框 0.8 × 2.8 格”. Collision box width about25.8% of total visible stature; height90.3%. No separate collision ruler to avoid clutter.
+
+RIGHT THIRD: clear small module references spaced vertically in two rows; exact short labels: thin flat square ivory “背景墙 1×1” with “不碰撞”; grass-top solid soil square “实体砖 1×1”; squat half block “半高砖 1×0.5”. Width/height dimension ticks beside these samples. Use no extra scene or tiny long-legged character. This is to preserve relationship to background wall and terrain discussion.
+Footer “1 格 = 1 世界单位” and “3.3 头身 ≠ 3.3 格”.
+Render sophisticated soft anime3D game concept art, not toy/plastic doll, no isometric view, no weapons, no mascots, no doors. Clear readable Chinese. PRIORITY: correct compact3.3-head silhouette, then scale annotations, then decorative polish. Show entire head/feet/rulers uncropped. No invented slogan.
+
+人物比例修订：
+Correct the attached image. The current character is too squat, roughly2.4 heads tall, and the ruler does NOT align. Target exactly3.3 heads tall. Keep same face, hair, dress, colors, front pose. Make HEAD SMALLER by about25% while keeping overall full-body height nearly unchanged; give compact body a little more length. This is NOT a normal long-legged adult, but a3.3-head game figure between current2.4-head chibi and4-head character.
+
+Concrete anatomy guide for main figure on1536x1024 canvas: hair/crown top y180, chin y392, soles y880. Head unitH212px; total700px =3.3H. Approximate waist y510, skirt hem y640, boots starting y775. Head silhouette width about250px, shoulder widthabout230px. Existing head width380px is TOO BIG. Do not keep that oversized head.
+Purple ruler MUST start at same hair/crown top y180 and finish at sole y880: 0 at180;1H at392 (CHIN);2H at604;3H at816;3.3H at880. Horizontal fine guides exactly at those landmarks. Label only “3.3 头身”, numbers0,1H,2H,3H,3.3H. Remove distracting definitions and do not write anatomical names incorrectly.
+Orange dimension arrow starts atsole880 and endsattop180 labeled “外观高3.1格”, ONLY TWO endpoints. Remove orange1,2,3tick marks and remove background square grid completely to avoid errors.
+REMOVE cyan dashed collision box from body entirely; show a SEPARATE small clean outlined rectangle right below modules caption “碰撞框0.8×2.8格”, no claim silhouette width equals box. The main request is correctly proportioned character and clean height dimension, not collision illustration.
+Right side retains3 simple modules “背景墙1×1”, “实体砖1×1”, “半高砖1×0.5” with local rulers, but reduce their panel as needed for collision diagram. Footer “头身比例与格子尺寸是两种尺度”. Title “人物比例·3.3头身”.
+Very clean white-ivory board, cobalt headings, attractive soft3D anime game art. Do not add new details. Highest priority is actual3.3-head proportion and purple ruler first segment exactly headtop to chin.
+
+标注修订：
+Precise annotation repair only. PRESERVE THE CENTRAL CHARACTER EXACTLY as now: identity, head size, body length, pose and every detail. Her headtop abouty175, chin abouty388, sole abouty875, ratio about3.3heads is CORRECT. Do not alter her.
+1 Purple head ruler MUST use uniform head units matching the character: start0 at y175 (same level as hair top),1H at y387 (chin),2H at y599,3H at y811,3.3H at y875 (sole). Move ticks AND dotted horizontal guides accordingly. Last0.3H segment64px, NOT104px. Top0 label and tick must align with top horizontal guide instead of being below it.
+2 Bottom-right cyan COLLISION BOX is currently horizontal and wrong. DELETE the cyan rectangle entirely. Keep ONLY text “碰撞尺寸：宽0.8格 × 高2.8格”. It is a dimension note, do not draw any box.
+3 Right upper background-wall square and middle full terrain tile must have SQUARE visible faces: width equals height. Middle current soil brick is squashed: increase face height to same as width, keeping within the row and adjusting labels to maintain spacing. Half brick width equals twice its height.
+Everything else identical. Do not add new wording or new elements. Accurate annotations are priority.

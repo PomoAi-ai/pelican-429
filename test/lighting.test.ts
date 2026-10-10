@@ -8,7 +8,7 @@ import type { Tuning } from '../src/config/tuning.ts';
 import { DEFAULT_LIGHTING, resolveAntialias, resolveQuality, validateLightingTuning } from '../src/config/lighting-rules.ts';
 import type { LightingTuning } from '../src/config/lighting-rules.ts';
 import { createPostFx, planPasses } from '../src/render/post-fx.ts';
-import { fitShadowCamera, lightBasis } from '../src/render/shadow-fit.ts';
+import { fitShadowCamera, lightBasis, shadowReceiverBounds } from '../src/render/shadow-fit.ts';
 import type { ShadowFitInput, Vec3Like } from '../src/render/shadow-fit.ts';
 import { createBackdrop, hazeFactor } from '../src/render/stage.ts';
 import { buildShaftAnchors, createLightShafts, selectVisibleShafts, shaftAxis } from '../src/render/light-shafts.ts';
@@ -291,6 +291,34 @@ function fitInput(over: Partial<ShadowFitInput> = {}): ShadowFitInput {
 }
 
 describe('shadow-fit', () => {
+  test('侧面与背面镜头的阴影范围覆盖视野内实体，旋转不会生成负范围', () => {
+    for (const position of [[40, 10, 0], [0, 10, -40], [0, 40, 0]]) {
+      const camera = new THREE.PerspectiveCamera(40, 1.5, 0.5, 100);
+      camera.position.fromArray(position);
+      camera.lookAt(0, 10, 0);
+      camera.updateMatrixWorld();
+      const corners = Array.from({ length: 8 }, (_, index) => new THREE.Vector3(
+        index & 1 ? 1 : -1, index & 2 ? 1 : -1, index & 4 ? 1 : -1,
+      ).unproject(camera));
+      const bounds = shadowReceiverBounds(corners, -1, 1);
+      assert.ok(bounds);
+      const input = fitInput({ ...bounds, zMin: -1, zMax: 1, direction: { x: 1, y: 1, z: 0.35 } });
+      const fit = fitShadowCamera(input);
+      const { r, u } = lightBasis(input.direction);
+      let visible = 0;
+      for (let x = -40; x <= 40; x += 5) for (let y = -20; y <= 40; y += 5) for (const z of [-1, 0, 1]) {
+        const point = new THREE.Vector3(x, y, z);
+        const screen = point.clone().project(camera);
+        if (Math.abs(screen.x) > 1 || Math.abs(screen.y) > 1 || Math.abs(screen.z) > 1) continue;
+        visible++;
+        const rel = sub(point, fit.target);
+        assert.ok(Math.abs(dot(rel, r)) <= fit.halfRight + 1e-8, 'visible receiver inside shadow width');
+        assert.ok(Math.abs(dot(rel, u)) <= fit.halfUp + 1e-8, 'visible receiver inside shadow height');
+      }
+      assert.ok(visible > 0);
+    }
+  });
+
   test('光照基正交归一，且与 lookAt 约定一致（right 无 y 分量）', () => {
     const { d, r, u } = lightBasis({ x: -0.55, y: 0.78, z: 0.3 });
     for (const v of [d, r, u]) assert.ok(Math.abs(Math.hypot(v.x, v.y, v.z) - 1) < 1e-9);

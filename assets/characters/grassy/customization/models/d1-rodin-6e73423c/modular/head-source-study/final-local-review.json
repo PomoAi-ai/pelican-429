@@ -1,0 +1,38 @@
+{
+  "status": "rejected_visual_review",
+  "promoted": false,
+  "viewsInspected": [
+    "final-local-front.png",
+    "final-local-right.png",
+    "final-local-three-quarter.png"
+  ],
+  "geometryChecks": {
+    "mainShellBoundaryEdges": 0,
+    "protectedFacialVertexDisplacementLimit": 1e-08,
+    "smoothingIterations": 35
+  },
+  "remainingDefects": [
+    "Raised horizontal forehead join looks like a helmet lip",
+    "Temple transition has long folded bands",
+    "Ear root connection is still visibly sheet-like",
+    "Neck bottom contour has an unnatural notch"
+  ],
+  "scope": "Candidate only. Production head script, head.blend, d1-head.glb and scene were not replaced by this experiment.",
+  "productionStatus": "Current hairstyle can cover defects; a continuous interchangeable bare head is not complete.",
+  "reason": "The source hair/skin split has irregular folded boundaries and ear cutouts. Window regularization and constrained smoothing close topology but do not establish a natural tangent-continuous scalp/temple/ear junction.",
+  "nextRequiredWork": "A controlled local scalp and temple retopology with intentional ear-root bridges and texture reprojection, preserving original eye/nose/mouth patch. No further candidates produced in this attempt.",
+  "stableFiles": {
+    "assets/characters/grassy/customization/models/d1-rodin-6e73423c/modular/head.blend": {
+      "sha256": "d519bc3b9c961d67473089326f708269d9d22d02cc4681735d957d0a53a9f319",
+      "bytes": 431900
+    },
+    "public/characters/human/customization/d1-head.glb": {
+      "sha256": "071342566298c0fcbcbe25d5d11cb72f121228873e06388135bd97b22150fb8d",
+      "bytes": 13363148
+    },
+    "scripts/character_customization/d1_head_from_source.py": {
+      "sha256": "4fd215679aa811aebc95a8814c889e392ab0f21f171cbb24c7da35f667d86348",
+      "bytes": 9770
+    }
+  }
+}

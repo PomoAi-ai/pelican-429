@@ -176,7 +176,9 @@ const SHADE_LEVEL_SLACK = 3;
 /** 由关卡的湖与树构建环境查询（纯函数；非法湖/树即抛）。 */
 export function createFloraEnv(src: {
   readonly lakes: readonly LakeInfo[];
-  readonly trees: readonly Pick<TreeInstance, 'x' | 'baseY' | 'canopyHalfWidth'>[];
+  readonly trees: readonly Pick<TreeInstance, 'id' | 'x' | 'baseY' | 'canopyHalfWidth'>[];
+  /** 已砍倒的树 id（家园模式；实时数组，砍树后重建的区块不再按它遮荫）。 */
+  readonly felled?: readonly number[];
   readonly deserts?: readonly DesertInfo[];
   /** 每列岩石退让量 0..1（surface-decor 的 rockGrassClearance；缺省无）。 */
   readonly rockClear?: ArrayLike<number>;
@@ -191,6 +193,7 @@ export function createFloraEnv(src: {
   const trees = [...src.trees];
   const deserts = [...(src.deserts ?? [])];
   const rocks = src.rockClear;
+  const felled = src.felled ?? [];
   return Object.freeze({
     rockClear(tx: number): number {
       return rocks && tx >= 0 && tx < rocks.length ? (rocks[tx] as number) : 0;
@@ -211,7 +214,7 @@ export function createFloraEnv(src: {
     shade(tx: number, ty: number): number {
       let best = 0;
       for (const t of trees) {
-        if (Math.abs(t.baseY - (ty + 1)) > SHADE_LEVEL_SLACK) continue;
+        if (Math.abs(t.baseY - (ty + 1)) > SHADE_LEVEL_SLACK || felled.includes(t.id)) continue;
         best = Math.max(best, 1 - Math.abs(tx - t.x) / (t.canopyHalfWidth + 1.5));
       }
       return Math.min(1, Math.max(0, best));

@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { isEnemyKind } from '../../config/enemy-models.ts';
+import { DEFAULT_CHARACTER_APPEARANCE } from '../../config/character-appearance.ts';
 import { isGrassyAttack } from '../../config/grassy.ts';
 import { LUMA, LUMA_ACTIONS } from '../../config/luma.ts';
 import { PHOTON_ULTIMATE } from '../../config/photon-ultimate.ts';
@@ -12,6 +13,9 @@ import type { Vec2 } from '../../core/math.ts';
 import { loadEnemyAsset } from '../../render/enemy-rig.ts';
 import { createFishView } from '../../render/fish-view.ts';
 import { loadGrassyAsset } from '../../render/grassy/grassy-rig.ts';
+import { createGrassyStaticModel, loadGrassyStaticAsset } from '../../render/grassy/grassy-static.ts';
+import { createD1Rig, loadD1Asset } from '../../render/grassy/d1-rig.ts';
+import { GRASSY_HEIGHT } from '../../config/grassy.ts';
 import { animateLuma } from '../../render/luma/luma-animator.ts';
 import { createLumaCompanion } from '../../render/luma/luma-companion.ts';
 import { createLumaRig } from '../../render/luma/luma-rig.ts';
@@ -45,6 +49,27 @@ export interface StageActor {
 /** 每个角色保留游戏自身的模拟和动画，所有可见对象挂到同一个舞台。 */
 export async function createStageActor(card: ShowcaseCard, isCurrent: () => boolean): Promise<StageActor | null> {
   const entry = showcaseEntry(card.entryId);
+  if (entry.d1Animation) {
+    await loadD1Asset();
+    if (!isCurrent()) return null;
+    return createD1Actor(card, entry);
+  }
+  if (entry.staticModel) {
+    await loadGrassyStaticAsset(entry.staticModel);
+    if (!isCurrent()) return null;
+    const model = createGrassyStaticModel(entry.staticModel);
+    const root = new THREE.Group();
+    root.add(model.root);
+    const sample = (): void => { model.root.rotation.set(card.modelPitch, card.modelYaw, 0); };
+    sample();
+    return {
+      root, anchor: new THREE.Vector3(0, GRASSY_HEIGHT + .4, 0),
+      framing: { x: 0, y: GRASSY_HEIGHT / 2, width: 3.2, height: GRASSY_HEIGHT },
+      ready: true, complete: false, progress: 0, status: `${entry.label} · 静态模型，尚未绑定`,
+      update: sample, reset: sample,
+      dispose() { model.dispose(); root.removeFromParent(); },
+    };
+  }
   if (entry.actor === 'sam' || entry.actor === 'tibo') {
     const transformationRevision = card.npcTransformationRevision;
     await loadNpcForms(entry.actor);
@@ -57,6 +82,37 @@ export async function createStageActor(card: ShowcaseCard, isCurrent: () => bool
   if (isEnemyKind(entry.actor)) await loadEnemyAsset(entry.actor);
   if (!isCurrent()) return null;
   return createSimulatedActor(card, entry);
+}
+
+function createD1Actor(card: ShowcaseCard, entry: ShowcaseEntry): StageActor {
+  const rig = createD1Rig();
+  rig.setHairVisible(entry.d1HairVisible !== false);
+  const root = new THREE.Group();
+  root.add(rig.root);
+  const action = rig.actions[entry.d1Animation!];
+  const duration = action.getClip().duration;
+  // 展示场用统一的循环/重播控制，避免动作自身循环后进度与画面不一致。
+  action.setLoop(THREE.LoopOnce, 1).play();
+  let time = 0;
+  const rotate = (): void => { rig.root.rotation.set(card.modelPitch, card.modelYaw, 0); };
+  const reset = (): void => { time = 0; action.reset().play(); rig.mixer.update(0); rotate(); };
+  reset();
+  return {
+    root, anchor: new THREE.Vector3(0, GRASSY_HEIGHT + .4, 0),
+    framing: { x: 0, y: 2, width: 3.2, height: 4 }, ready: true,
+    get complete() { return time >= duration; },
+    get progress() { return time / duration; },
+    get status() { return `D1 · ${entry.label} · ${time >= duration ? '演示完成' : '骨骼动画'}`; },
+    update(elapsed) {
+      rotate();
+      if (!card.playing || time >= duration) return;
+      const dt = Math.min(Math.min(elapsed, TUNING.sim.maxFrameTime) * card.speed, duration - time);
+      time += dt;
+      rig.mixer.update(dt);
+    },
+    reset,
+    dispose() { rig.dispose(); root.removeFromParent(); },
+  };
 }
 
 function createSimulatedActor(card: ShowcaseCard, entry: ShowcaseEntry): StageActor {
@@ -90,10 +146,15 @@ function createSimulatedActor(card: ShowcaseCard, entry: ShowcaseEntry): StageAc
     disposers.push(() => rig.dispose());
     const clip = entry.grassyAnimation?.clip;
     const gait = clip === 'run' || clip === 'sprint' ? clip : undefined;
-    const views = createEntityViews({ scene: content }, world.level, disposers, () => world.entities, { sample: () => null }, world.env.wind, rig, entry.grassyAnimation?.variant, gait);
+    // 目录展示原版主角，游戏里保存的捏人搭配不改变资源身份。
+    const turning = entry.actor === 'pelican' && entry.action === 'turn' ? rig.root.getObjectByName('pelican-yaw')! : null;
+    const initialTurnYaw = card.facing === 1 ? 0 : -Math.PI;
+    // 转身演示保留动画的转角；检视滑条仍控制它的起始朝向。
+    const modelView = () => ({ yaw: card.modelYaw + (turning ? turning.rotation.y - initialTurnYaw : 0), pitch: card.modelPitch });
+    const views = createEntityViews({ scene: content }, world.level, disposers, () => world.entities, { sample: () => null }, world.env.wind, rig, entry.grassyAnimation?.variant, gait, () => DEFAULT_CHARACTER_APPEARANCE, modelView);
     const luma = photon ? createLumaCompanion(content, player) : null;
     if (luma) disposers.push(() => luma.dispose());
-    const fish = entry.actor === 'fish' ? createFishView(world.fish) : null;
+    const fish = entry.actor === 'fish' ? createFishView(world.fish, { modelView }) : null;
     if (fish) { content.add(fish.root); disposers.push(() => fish.dispose()); }
     const runner = createShowcaseRunner(scenario);
     const basicHuman = entry.actor === 'human' && !humanCombat;
@@ -117,7 +178,11 @@ function createSimulatedActor(card: ShowcaseCard, entry: ShowcaseEntry): StageAc
       const animDt = world.hitstopTicks > 0 ? 0 : dt;
       views.views.sync(visibleEntities(), runner.alpha, animDt);
       for (const entity of world.entities) {
-        if (entity.enemy && !entity.removed) views.views.get(entity.id)!.object.rotation.set(card.modelPitch, card.modelYaw - Math.PI / 2, 0);
+        if (entity.enemy && !entity.removed) views.views.get(entity.id)!.object.rotation.set(card.modelPitch, card.modelYaw - Math.PI / 2 - (entity.facing === 1 ? 0 : Math.PI), 0);
+      }
+      if (entry.actor === 'dummy') {
+        const object = views.views.get(subject.id)!.object;
+        object.rotation.set(card.modelPitch, card.modelYaw, object.rotation.z);
       }
       luma?.update(player, runner.alpha, animDt, world.photon.chargeTicks > 0 || world.photon.activeTicks > 0);
       fish?.update(runner.alpha, runner.time);
@@ -171,6 +236,7 @@ export function createLumaActor(card: ShowcaseCard): StageActor {
   const sample = (): void => {
     const animating = !ultimate || time < chargeSeconds + activeSeconds;
     animateLuma(rig, animating ? action.id : 'idle', animating ? time : time - chargeSeconds - activeSeconds);
+    rig.root.rotation.x = card.modelPitch;
     rig.root.rotation.y = card.modelYaw;
     rig.motion.getWorldPosition(emitter);
     root.worldToLocal(emitter);
@@ -227,7 +293,7 @@ function createNpcActor(card: ShowcaseCard, kind: NpcKind, entry: ShowcaseEntry,
   let audioSpeed = card.speed;
   const stopAudio = (): void => { score?.stop(); audioPlaying = false; };
   const sample = (frameDt: number): void => {
-    rig.sample(action.id, time, card.facing, frameDt);
+    rig.sample(action.id, time, card.facing, frameDt, 0, { yaw: card.modelYaw, pitch: card.modelPitch });
     targets.sample(action.id, time, card.facing, card.targetDodge);
   };
   const reset = (): void => {

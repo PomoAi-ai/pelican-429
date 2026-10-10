@@ -1,0 +1,38 @@
+地形瓦片逻辑与组合说明图
+制作日期：2026-10-09
+
+输出：
+public/concepts/terrain-tile-basics.png — 2200 × 1920
+public/concepts/terrain-combinations.png — 2200 × 3530
+
+制作方式：本地 Python 3 + Pillow；无 imagegen、无模型渲染、无游戏截图。
+绘制脚本：assets/concepts/terrain-tile-guide/draw_terrain_guide.py
+字体：/System/Library/Fonts/STHeiti Medium.ttc
+重绘命令：
+UV_CACHE_DIR=/private/tmp/pelican-uv-cache uv run --no-project --python /private/tmp/pelican-scale-env/bin/python3 assets/concepts/terrain-tile-guide/draw_terrain_guide.py
+
+规则来源：
+src/world/tile-shapes.ts
+src/world/tile-types.ts
+src/config/terrain-compositions.ts
+src/world/terrain-compositions.ts
+src/world/tile-map.ts
+src/world/fluid-map.ts
+src/world/trees.ts
+
+基础图：
+实心形状为 FULL、SHAPE_SLOPE_R（左低右高）、SHAPE_SLOPE_L（左高右低）、SHAPE_HALF（下半砖）。
+平台是 oneWay 碰撞类别，背景墙是独立的无碰撞背景表现；二者不是新的 solid 形状。
+拼接图是规则示意，非游戏材质，也不表示新增倒置坡砖或上半砖。
+
+组合图：
+直接调用 createTerrainCompositionLevel(kind, 429, 'grass', 'surface')，对配置目录中的8类分别导出。
+原始快照：terrain-composition-cells.json。
+每格读取 map.get、map.shapeAt、fluid.amountAt；树的浅色轮廓按真实参数示意，不新增树干碰撞。
+世界坐标 y 向上；图中 x 为相对组合起点，y 为相对 groundY=24。
+统一窗口 x∈[-2,22)、y∈[-6,14)，24 × 20 格；统一每格32像素。
+8类为 meadow、mound、gully、terraces、cleft、cave、roots、pond。
+2026-10-09 复核：3840格的 id、shape、fluid 与重新调用关卡工厂的结果逐项相同。
+验算记录：drawing-checks.json。
+
+这两张图为代码规则的资料快照；形状、组合或关卡工厂变化时需要重新导出并重绘。

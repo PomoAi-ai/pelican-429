@@ -1,0 +1,36 @@
+人物与场景统一尺度图 — 本地精确制图版
+后续修订：用户要求使用主角原图，当前交付改为 character-tile-scale-original.png。draw_scale.py 现直接读取主角正面原图；以下模型渲染说明仅记录旧版 character-tile-scale-local.png。当前来源见 ORIGINAL-SOURCE.txt。
+日期：2026-10-09
+
+最终图片：character-tile-scale-local.png，2560×1600。
+此版取代上级目录的生成式概念图，作为尺寸关系说明。
+
+工具：Blender 5.2.2 LTS + Python 3.12 + Pillow 12.3.0。
+Pillow 已通过 uv 安装到本机独立环境 /private/tmp/pelican-scale-env。
+draw_scale.py 内含 uv 依赖声明，临时环境清理后也可重新运行。
+
+人物来源：public/characters/human/customization/d1-modular-animated.glb。
+使用模型原材质和 REST 姿态，未修改几何、头身比例、模型文件或游戏代码。
+背景透明、正交投影、1600×1600，4 个世界单位占画面全宽，得到每格 400 像素的模型素材。
+合成时整张模型素材等比缩放为 60%，对应每格 240 像素；未分别拉伸头、身体或腿。
+Blender 导入生成的骨骼辅助 Icosphere 不属于人物，未计入模型尺寸。
+
+统一尺寸：
+- 1 格 = 240 px；该数值是本图绘制尺度，不是游戏固定屏幕像素。
+- 背景墙正面 240×240，实体砖正面 240×240，半高砖 240×120。
+- 两种斜坡占 240×240 边界，低端为零高度。
+- 配置外观高度 3.1 格 = 744 px；当前模型网格实测 3.0960945 格，实际不透明轮廓约 743 px。
+- 碰撞 0.8×2.8 格 = 192×672 px。
+- 3.3 头身参照尺按总高除以 3.3 等距绘制，最后一段是完整头高的 0.3。
+- 模型最高点至头网格最低点约 0.9411 格，粗略推算约 3.29 头身；这是网格包围范围估算，不等于解剖头顶/下颌地标校准。
+- 背景墙的 1×1 为设计示意；模块使用轮廓色块，不宣称是游戏材质截图。
+
+校验：脚本已运行，检查同宽同高、半高比例、碰撞尺寸、头高等分、末段 0.3、实际模型透明轮廓高度。
+已打开最终图目视检查中文、标尺、脚底对齐、模型和模块比例与版式。
+证据：model-render.json 保存模型来源、SHA-256、边界与投影；drawing-checks.json 保存绘图坐标和通过结果。
+
+重绘（项目根目录）：
+blender --background --factory-startup --python assets/concepts/character-tile-scale/local-drawing/render_model.py
+uv run assets/concepts/character-tile-scale/local-drawing/draw_scale.py
+
+没有运行游戏测试、类型检查和构建，因为本次只制作资料，没有修改游戏。

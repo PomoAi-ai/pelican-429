@@ -1,0 +1,92 @@
+{
+  "target_head_ratio": 3.3,
+  "world_height_tiles": 3.1,
+  "method": "人工读取可见基础发冠、下巴与最低鞋底的像素位置，H=下巴-基础发冠；排除高马尾、发髻、独立翘发。不是裸头骨解剖测量。背面下巴被遮挡，不计算头身比。",
+  "estimated_landmark_uncertainty_px": 5,
+  "items": [
+    {
+      "id": "r17",
+      "title": "雨天出行",
+      "source_file": "exec-private-source-029.png",
+      "source_size": [
+        1678,
+        937
+      ],
+      "estimated_landmark_uncertainty_px": 5,
+      "uniform_display_scale": 0.9106487148102815,
+      "views": [
+        {
+          "view": "FRONT",
+          "crown_y": 50,
+          "chin_y": 299,
+          "sole_y": 867,
+          "head_ratio": 3.281
+        }
+      ],
+      "review": "四视图已目视检查；本记录仅量化正面。侧面、背面、45度未作独立像素测量，不能当精密工程图。"
+    },
+    {
+      "id": "r18",
+      "title": "都市侦探",
+      "source_file": "exec-private-source-065.png",
+      "source_size": [
+        1536,
+        1024
+      ],
+      "estimated_landmark_uncertainty_px": 5,
+      "uniform_display_scale": 0.8711943793911007,
+      "views": [
+        {
+          "view": "FRONT",
+          "crown_y": 102,
+          "chin_y": 361,
+          "sole_y": 956,
+          "head_ratio": 3.297
+        }
+      ],
+      "review": "四视图已目视检查；本记录仅量化正面。侧面、背面、45度未作独立像素测量，不能当精密工程图。"
+    },
+    {
+      "id": "r19",
+      "title": "园艺师",
+      "source_file": "exec-private-source-020.png",
+      "source_size": [
+        1678,
+        937
+      ],
+      "estimated_landmark_uncertainty_px": 5,
+      "uniform_display_scale": 0.9207920792079208,
+      "views": [
+        {
+          "view": "FRONT",
+          "crown_y": 46,
+          "chin_y": 284,
+          "sole_y": 854,
+          "head_ratio": 3.395
+        }
+      ],
+      "review": "四视图已目视检查；本记录仅量化正面。侧面、背面、45度未作独立像素测量，不能当精密工程图。"
+    },
+    {
+      "id": "r20",
+      "title": "机械维修师",
+      "source_file": "exec-private-source-051.png",
+      "source_size": [
+        1536,
+        1024
+      ],
+      "estimated_landmark_uncertainty_px": 5,
+      "uniform_display_scale": 0.8275862068965517,
+      "views": [
+        {
+          "view": "FRONT",
+          "crown_y": 36,
+          "chin_y": 305,
+          "sole_y": 935,
+          "head_ratio": 3.342
+        }
+      ],
+      "review": "四视图已目视检查；本记录仅量化正面。侧面、背面、45度未作独立像素测量，不能当精密工程图。"
+    }
+  ]
+}

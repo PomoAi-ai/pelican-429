@@ -1,0 +1,294 @@
+[
+  {
+    "path": "SOURCE.txt",
+    "sha256": "cdfde22592b757bf3cf3b39a67c936f3c7206124785b126cce64138d37414363"
+  },
+  {
+    "path": "c01-art.png",
+    "sha256": "d0e8ea7853c3aa4fee38781d150fc5456fde734eaf0a7f105a93068e312ae84c"
+  },
+  {
+    "path": "c01-game-v2-definition.txt",
+    "sha256": "2fd8a09a2388015b7af6d0ed00bfe2a378aa5d86edb80c11e61a871708f88e82"
+  },
+  {
+    "path": "c01-game-v2-ruler.png",
+    "sha256": "6fbbd4eb83a8223ca935ed53e7b64df8c3f15b0ae07da73b79645b38033776d0"
+  },
+  {
+    "path": "c01-game-v2-ruler.svg",
+    "sha256": "9cb78539d043c84a8e8bd2b10f31e664e29ac523c6b5f650985577b9b7f2410e"
+  },
+  {
+    "path": "c01-game-v2.png",
+    "sha256": "a71eb6d302aca3aac2359d929d3f55bdb3ea750bcd7c2c37ff3095c1bd66704f"
+  },
+  {
+    "path": "c01-prompts.txt",
+    "sha256": "386351073338aece103366f47411200403f28fe78300736e3db718cb2b15b8d5"
+  },
+  {
+    "path": "c01-ruler.png",
+    "sha256": "a45b6e623485238e3fc381a7fa9445df8465ce920b3d666adba0678dbceb9b4a"
+  },
+  {
+    "path": "c01-ruler.svg",
+    "sha256": "b3fbd54e4a3b1f01c6de31c51583325b337c943b4f9f523e739635747f986ed3"
+  },
+  {
+    "path": "c02-art-v1.png",
+    "sha256": "52a758412b4fcc5be678426b03b88c274773f0293d34cdc8bab698e21aa65c66"
+  },
+  {
+    "path": "c02-art.png",
+    "sha256": "35a462d585b64b6762f98326f43846a72192fdfa65491c536bb9104d575c2c6e"
+  },
+  {
+    "path": "c02-game-v2-definition.txt",
+    "sha256": "4327d5469fa81df4f274dd26bb17569b5f41402bf5f11c066f9d1a489c73de97"
+  },
+  {
+    "path": "c02-game-v2-ruler.png",
+    "sha256": "6cba60fbcf20f93aa18ee64fbbc935f46e32fa46515866632e1213e01ca50f22"
+  },
+  {
+    "path": "c02-game-v2-ruler.svg",
+    "sha256": "f5fdca331df68b9c43785e0ce6a4de408b3837aff9ce6454c6328d805b048c81"
+  },
+  {
+    "path": "c02-game-v2.png",
+    "sha256": "e5d5db162be5a59b8d8ad78084a39e1cce335168c08912fc7c07b040cefcc47b"
+  },
+  {
+    "path": "c02-prompts.txt",
+    "sha256": "6a36460bd367a3aa84bbb90a93de66ebdd211dabb710be8032a47b3fcc8b9566"
+  },
+  {
+    "path": "c02-revision-prompt.txt",
+    "sha256": "eb6eedf79d557b1f8dca468696496d38d373320aaad87ecbbbe29e6cf8cba660"
+  },
+  {
+    "path": "c02-ruler.png",
+    "sha256": "8e156406a7b17a6f867659dffc44f392a54c7d89b02598364c986a0df668b282"
+  },
+  {
+    "path": "c02-ruler.svg",
+    "sha256": "89c6155295f1148c20b5d4417bfd968717fabe88b2bec5ac6f0538c3c6cad2b1"
+  },
+  {
+    "path": "c03-art-before-final.png",
+    "sha256": "414a43acf20eb15a3e98dcdc8aad1b426b12e6cb2f2ae654b9962f995f2e1f25"
+  },
+  {
+    "path": "c03-art-v1.png",
+    "sha256": "381a9e4e99e67819f7cf869c87d4b0bf3a8d75982f2b3066f533883353e94d7b"
+  },
+  {
+    "path": "c03-art.png",
+    "sha256": "b55993bd264c67756e906c49d50f9beb9baab7bedf5fc4e863e47058bd413806"
+  },
+  {
+    "path": "c03-final-revision-prompt.txt",
+    "sha256": "127af0eee4ddf9ccc722556d33862b8777037742e1039638a5764a6ec601a129"
+  },
+  {
+    "path": "c03-game-v2-definition.txt",
+    "sha256": "94a64168a09bfa52d79abf41afc53f317d3ca03a8ee043f16f9db4d03ac3cae4"
+  },
+  {
+    "path": "c03-game-v2-ruler.png",
+    "sha256": "ce8613b4c601ef8fd99e8d5160916c1d4694d09e91655c7fd12c74becd149f51"
+  },
+  {
+    "path": "c03-game-v2-ruler.svg",
+    "sha256": "b2f683551cd52e780114839b6c4f01649e48a131398cdea8e4f0b51367aae747"
+  },
+  {
+    "path": "c03-game-v2.png",
+    "sha256": "ed6701d7c77887a411a698659fb21f99a7f5f430b0d0386789ce47d429ae296e"
+  },
+  {
+    "path": "c03-prompts.txt",
+    "sha256": "f705b2a4cf2551ef926aac13237f20ca4d7e9ec77d908a6a599e2b9b1c98072f"
+  },
+  {
+    "path": "c03-revision-prompt.txt",
+    "sha256": "525b7ce9a3e6d605563f03b2b6bf2cd569e3a2678f5d503293207ffc7dd9dc4f"
+  },
+  {
+    "path": "c03-ruler.png",
+    "sha256": "53de32ba939eb19ffa830d1843b2915d10cc7613b779c84c9db6067388bc8f07"
+  },
+  {
+    "path": "c03-ruler.svg",
+    "sha256": "e3dd44fdcd1a9bbf9d317fa3282af413080846e1e17847e32d3783a8d9ddd9e8"
+  },
+  {
+    "path": "c04-art-v1.png",
+    "sha256": "58e4bdddddfd90f2f8ada38c74cdb9b8acb860eb288983a16dadb685977c26ae"
+  },
+  {
+    "path": "c04-art.png",
+    "sha256": "b8d46c85016511692561dbe55a88b5eca7b19ac86806cd008bbb8f2c72d8de67"
+  },
+  {
+    "path": "c04-game-v2-definition.txt",
+    "sha256": "87d4945bbb97d0e0e3cbd65207aa558657e53829fba5e79241689a854a981984"
+  },
+  {
+    "path": "c04-game-v2-ruler.png",
+    "sha256": "a2086bab77920c3368a4bd2bb5e8dfce3e72081d34fa3be5cc601520ba3fd77a"
+  },
+  {
+    "path": "c04-game-v2-ruler.svg",
+    "sha256": "96d1fd495e3e18b5aa4829d5f6153b5da8e6aa4494ef8ca631649fd4d6f985d1"
+  },
+  {
+    "path": "c04-game-v2.png",
+    "sha256": "9c9220206f96b2a9336032bfa60d22496c12835fc1678ff34e4899f153f006bf"
+  },
+  {
+    "path": "c04-prompts.txt",
+    "sha256": "13a6b3fad41cfb381c0db2a19e4d93f1c25e35062752491b6b7b59ac1ad65264"
+  },
+  {
+    "path": "c04-revision-prompt.txt",
+    "sha256": "ce7b0c7c2c492b58113177895ddd6161b208d8d230c422e27348a0d60f988d5e"
+  },
+  {
+    "path": "c04-ruler.png",
+    "sha256": "b4e3a6af5759859fcfb3db74799328df08cdd0431f21175e989fac428f23413c"
+  },
+  {
+    "path": "c04-ruler.svg",
+    "sha256": "84b584b2b75c6ba886e7de24b72be58bccdc640813ed1708d3e20faa97e74cd2"
+  },
+  {
+    "path": "c05-art-before-final.png",
+    "sha256": "13d45b08a15603c50d49f36472775192a45b8aa7e9566bc880c2b697c4e50008"
+  },
+  {
+    "path": "c05-art.png",
+    "sha256": "16c15de56aae3dc198fc0254379597a5699c1f9f0fda1210017d6b17951991c4"
+  },
+  {
+    "path": "c05-final-revision-prompt.txt",
+    "sha256": "c910053fda5adb3f07aa75f425f6ac82f5ed23058eb54d06057c380f8e6a9705"
+  },
+  {
+    "path": "c05-prompts.txt",
+    "sha256": "64fe7ae6a54580fca4fc75433fd3ed54291fc840ff46e96cff713ea266839c93"
+  },
+  {
+    "path": "c05-ruler.png",
+    "sha256": "258b68783dd6f5bed30f65b65ec1b817ea0cd6e5ca5b6e47e29ffa21dce08219"
+  },
+  {
+    "path": "c05-ruler.svg",
+    "sha256": "d821b4adac3940734ec588e9eaccc9e885c267902213687fab96b0e8f00eb2f2"
+  },
+  {
+    "path": "c06-art-before-final.png",
+    "sha256": "f64881d83ead512cb1784d8f7f8539a53212bfebd20a9fef7cb71a0d854fea79"
+  },
+  {
+    "path": "c06-art.png",
+    "sha256": "427965ada9d3789992820077e8fbb90b8d5c65fd91ecb282fdfac21992edb41a"
+  },
+  {
+    "path": "c06-final-revision-prompt.txt",
+    "sha256": "e291591ddcf1b78067018da2d0f07f2960d38e32f286eb5d5de0f2645331565b"
+  },
+  {
+    "path": "c06-prompts.txt",
+    "sha256": "42c8b9e2e5ac4f16f9abcce64c3d5be8d96cb64739afd2c798354070ea64c925"
+  },
+  {
+    "path": "c06-ruler.png",
+    "sha256": "d2c06fe0e861e446923035db0b347c8da0b08942ea0b4669a83d6d50efc43f39"
+  },
+  {
+    "path": "c06-ruler.svg",
+    "sha256": "a002556501648ecf9e8f7488b19a15440c52fb9fb2c2222f7eeb3af7a43b88a7"
+  },
+  {
+    "path": "c07-art-before-final.png",
+    "sha256": "d965036ec463925e336a2b17d8b392d3e045cf941cbe4e66392d8c8862262388"
+  },
+  {
+    "path": "c07-art.png",
+    "sha256": "d5a6ed0585263e7b0aaed3ce0d7a0dd0c719f3978fffce5ed60711f0812305d2"
+  },
+  {
+    "path": "c07-final-revision-prompt.txt",
+    "sha256": "ff22588190e4b1bc19f1ba768899b486faee0d2ed4dc55122cecd80ad9bebcc6"
+  },
+  {
+    "path": "c07-prompts.txt",
+    "sha256": "aa61f5e6691c2ec4238da1dc943ec6a85565d59d856b5bdee0f370d273124f2c"
+  },
+  {
+    "path": "c07-ruler.png",
+    "sha256": "cff75c432074f6641d2cca17c8c91fd85844310ca2383d24d5ef2eb465a41707"
+  },
+  {
+    "path": "c07-ruler.svg",
+    "sha256": "8c48156f454834af5a4bb40335cb735f9329e15df3d00ccf118317adab58623b"
+  },
+  {
+    "path": "definitions.json",
+    "sha256": "836b04e599ea7dea026620d04a09b3c0b17f353210db310bc6936b889ef02df3"
+  },
+  {
+    "path": "generation-sources.json",
+    "sha256": "8f1090d37503ec9cc590487d73f45684372fc754f646f953d51a1377e3d46083"
+  },
+  {
+    "path": "history/rejected-v1/SOURCE.txt",
+    "sha256": "d10ef21f48799afd60a9b96886e52d47dde44b7b9bf98861778f7bc0ed30536f"
+  },
+  {
+    "path": "history/rejected-v1/definitions.json",
+    "sha256": "33162f4aebb1836e5ed560dd3dccd4e2b12428173fd97b8577dc8b107224d008"
+  },
+  {
+    "path": "history/rejected-v1/generation-sources.json",
+    "sha256": "e2bd6fbad8d49a38198d6bf0a082878e7e641083c4c02a6d67dbb91a7ec445f7"
+  },
+  {
+    "path": "history/rejected-v1/index.html",
+    "sha256": "b382582539d8993abd865a4f6052c13673d9e1fc5f3731770e19d6d7668007f2"
+  },
+  {
+    "path": "history/rejected-v1/measurements.json",
+    "sha256": "6defe0337a912c2848ab72e3c8df3a2b094068d72a37709af966ba94590a81ea"
+  },
+  {
+    "path": "history/rejected-v1/overview.png",
+    "sha256": "052d858aa97cf15eacd302d35a48aed523ebdee67c5ae2471f3dd50750e2eea3"
+  },
+  {
+    "path": "index.html",
+    "sha256": "5ce9abe754fb54b3b9502966201b0a870a5bdf58907294e4cb4420265cdd139a"
+  },
+  {
+    "path": "measurements.json",
+    "sha256": "b8d3d52a1dd6a72d124593583e8f1a2e75d66cc88a3a6db87fbb4e7d2968858e"
+  },
+  {
+    "path": "overview-game-v2.png",
+    "sha256": "bdf9f4e9b7e5e088211141e702c56b15707679f7a1cf20ec7589f9435251a545"
+  },
+  {
+    "path": "overview-game-v2.svg",
+    "sha256": "c68c868d690ece650f7b70cfc8185c781400adddb2cabbe37e4befc682324ee7"
+  },
+  {
+    "path": "overview.png",
+    "sha256": "052d858aa97cf15eacd302d35a48aed523ebdee67c5ae2471f3dd50750e2eea3"
+  },
+  {
+    "path": "overview.svg",
+    "sha256": "d26fed8d0fe4a0aba54e8718f2d8cb518b850553e86dba3b7faa57b3bf2bff5e"
+  }
+]

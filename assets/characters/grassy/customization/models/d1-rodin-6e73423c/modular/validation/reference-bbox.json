@@ -1,0 +1,78 @@
+{
+  "schema": "d1-reference-bbox.v1",
+  "sourceImageSize": [
+    1536,
+    1024
+  ],
+  "mask": "within manually selected head ROI, chroma > .07 excludes white/gray background and labels; neck manually excluded",
+  "views": {
+    "front": {
+      "bbox": [
+        50,
+        646,
+        368,
+        918
+      ],
+      "width": 318,
+      "height": 272,
+      "widthHeightRatio": 1.1691176470588236,
+      "centroid": [
+        213.39330113724878,
+        787.9005296775199
+      ],
+      "foregroundPixels": 64190,
+      "touchesCropBorder": false
+    },
+    "side": {
+      "bbox": [
+        415,
+        647,
+        732,
+        914
+      ],
+      "width": 317,
+      "height": 267,
+      "widthHeightRatio": 1.1872659176029963,
+      "centroid": [
+        579.1572335449382,
+        782.5317073170731
+      ],
+      "foregroundPixels": 59860,
+      "touchesCropBorder": false
+    },
+    "back": {
+      "bbox": [
+        1001,
+        18,
+        1210,
+        201
+      ],
+      "width": 209,
+      "height": 183,
+      "widthHeightRatio": 1.1420765027322404,
+      "centroid": [
+        1103.5982124005911,
+        115.76645084101625
+      ],
+      "foregroundPixels": 28418,
+      "touchesCropBorder": false
+    },
+    "top": {
+      "bbox": [
+        793,
+        661,
+        1098,
+        948
+      ],
+      "width": 305,
+      "height": 287,
+      "widthHeightRatio": 1.0627177700348431,
+      "centroid": [
+        944.6343112324009,
+        801.0095360664889
+      ],
+      "foregroundPixels": 64492,
+      "touchesCropBorder": false
+    }
+  }
+}

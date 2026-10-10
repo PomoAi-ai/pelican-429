@@ -1,0 +1,9 @@
+{
+  "provider": "Hyper3D CLI",
+  "tier": "Gen-2.5-High",
+  "images": ["../references/front.png", "../references/right.png"],
+  "mesh_mode": "Quad",
+  "quality_override": 18000,
+  "geometry_file_format": "glb",
+  "prompt": "Two views of the same single stylized game character: image 1 is front, image 2 is right profile. Faithfully preserve the reference proportions, large round eyes, human round ears, short blonde braided bob, short slim legs, blue and white dress, backpack and both silver cyan wrist devices. Preserve the original pose and silhouette. No pedestal or ground geometry."
+}

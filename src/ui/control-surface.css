@@ -18,8 +18,8 @@ body[data-controls]:not(.intro-active) .game-navigation-handle { display: none; 
 .control-surface { position: fixed; inset: 0; z-index: 6; pointer-events: none; user-select: none; color: var(--control-ink); }
 body[data-controls=mobile] .control-surface, body[data-controls=mobile] #hud { inset: var(--game-safe-top) var(--game-safe-right) var(--game-safe-bottom) var(--game-safe-left); }
 body[data-controls=mobile] .settings-gear { top: calc(var(--dev-nav-height) + var(--game-safe-top) + 12px); right: calc(var(--game-safe-right) + 12px); }
-.control-surface button, body[data-controls] .hud-weapon button { cursor: pointer; font: inherit; touch-action: none; -webkit-tap-highlight-color: transparent; }
-.control-surface button:focus-visible, body[data-controls] .hud-weapon button:focus-visible { outline: 2px solid var(--control-gold); outline-offset: 4px; }
+.control-surface button, :is(body[data-controls], .room-preview-hud) .hud-weapon button { cursor: pointer; font: inherit; touch-action: none; -webkit-tap-highlight-color: transparent; }
+.control-surface button:focus-visible, :is(body[data-controls], .room-preview-hud) .hud-weapon button:focus-visible { outline: 2px solid var(--control-gold); outline-offset: 4px; }
 .control-top-actions { position: absolute; top: calc(var(--dev-nav-height) + 12px); right: 64px; display: flex; align-items: center; gap: 16px; pointer-events: auto; }
 .control-menu { position: relative; z-index: 20; }
 .control-menu-toggle { position: relative; list-style: none; margin-left: auto; }
@@ -56,33 +56,33 @@ body[data-controls=mobile] #app canvas { touch-action: none; }
 .control-keyboard { position: absolute; left: 24px; bottom: 108px; display: flex; gap: 13px; color: #e4dfd4; font-size: 10px; text-shadow: 0 1px 4px #000; }
 .control-keyboard > span { display: flex; align-items: center; gap: 5px; }
 .control-keyboard kbd { border: 1px solid #e7dfc75c; border-radius: 3px; padding: 3px 5px; background: #14192280; font: 9px ui-monospace, monospace; color: #fff0d0; }
-body[data-controls] .hud-weapon { position: absolute; inset: 0; width: 100%; height: 100%; min-width: 0; padding: 0; background: none; pointer-events: none; }
-body[data-controls] .hud-weapon-main { position: absolute; left: 24px; top: calc(var(--dev-nav-height) + 20px); width: 250px; gap: 12px; align-items: start; }
-body[data-controls] .hud-weapon-icon { position: relative; flex: none; width: 58px; height: 58px; border: 2px solid #e8d4aa; border-radius: 50%; background-color: #20262c; box-shadow: 0 2px 8px #0007, inset 0 0 0 3px #302f2f; color: transparent; }
-body[data-controls] .hud-weapon-info { gap: 5px; padding-top: 2px; }
-body[data-controls] .hud-weapon-name { font-size: 10px; letter-spacing: 1.5px; color: #fff0d4; text-shadow: 0 1px 4px #000; }
-body[data-controls] .hud-player-health { position: relative; }
-body[data-controls] .hud-player-health-label { position: absolute; z-index: 1; right: 5px; top: 0; color: #ffefd7; font: 8px/12px ui-monospace, monospace; text-shadow: 0 1px 2px #000; }
-body[data-controls] .hud-player-health-track { height: 12px; background: #191a22c9; border: 1px solid #edd3ac99; border-radius: 4px; overflow: hidden; box-shadow: 0 1px 4px #0005; }
-body[data-controls] .hud-player-health-fill { height: 100%; background: linear-gradient(#ec685c, #b4363f); }
-body[data-controls] .hud-weapon-track { height: 4px; margin-top: 15px; border: 1px solid #d1e5eb65; background: #18232ed9; }
-body[data-controls] .hud-weapon-fill { background: #65bedb; }
-body[data-controls] .hud-weapon-detail { font-size: 9px; color: #e1ece9; text-shadow: 0 1px 4px #000; }
-body[data-controls] .hud-weapon-main .hud-weapon-detail:last-child { display: none; }
+:is(body[data-controls], .room-preview-hud) .hud-weapon { position: absolute; inset: 0; width: 100%; height: 100%; min-width: 0; padding: 0; background: none; pointer-events: none; }
+:is(body[data-controls], .room-preview-hud) .hud-weapon-main { position: absolute; left: 24px; top: calc(var(--dev-nav-height) + 20px); width: 250px; gap: 12px; align-items: start; }
+:is(body[data-controls], .room-preview-hud) .hud-weapon-icon { position: relative; flex: none; width: 58px; height: 58px; border: 2px solid #e8d4aa; border-radius: 50%; background-color: #20262c; box-shadow: 0 2px 8px #0007, inset 0 0 0 3px #302f2f; color: transparent; }
+:is(body[data-controls], .room-preview-hud) .hud-weapon-info { gap: 5px; padding-top: 2px; }
+:is(body[data-controls], .room-preview-hud) .hud-weapon-name { font-size: 10px; letter-spacing: 1.5px; color: #fff0d4; text-shadow: 0 1px 4px #000; }
+:is(body[data-controls], .room-preview-hud) .hud-player-health { position: relative; }
+:is(body[data-controls], .room-preview-hud) .hud-player-health-label { position: absolute; z-index: 1; right: 5px; top: 0; color: #ffefd7; font: 8px/12px ui-monospace, monospace; text-shadow: 0 1px 2px #000; }
+:is(body[data-controls], .room-preview-hud) .hud-player-health-track { height: 12px; background: #191a22c9; border: 1px solid #edd3ac99; border-radius: 4px; overflow: hidden; box-shadow: 0 1px 4px #0005; }
+:is(body[data-controls], .room-preview-hud) .hud-player-health-fill { height: 100%; background: linear-gradient(#ec685c, #b4363f); }
+:is(body[data-controls], .room-preview-hud) .hud-weapon-track { height: 4px; margin-top: 15px; border: 1px solid #d1e5eb65; background: #18232ed9; }
+:is(body[data-controls], .room-preview-hud) .hud-weapon-fill { background: #65bedb; }
+:is(body[data-controls], .room-preview-hud) .hud-weapon-detail { font-size: 9px; color: #e1ece9; text-shadow: 0 1px 4px #000; }
+:is(body[data-controls], .room-preview-hud) .hud-weapon-main .hud-weapon-detail:last-child { display: none; }
 body[data-controls] .hud-status { top: calc(var(--dev-nav-height) + 55px); left: 94px; width: 180px; min-width: 0; padding: 0; background: none; }
 body[data-controls] .hud-flight-label, body[data-controls] .hud-orb { display: none; }
 body[data-controls] .hud-flight-track { height: 7px; border: 1px solid #c5e3e397; border-radius: 3px; background: #161b27cc; }
 body[data-controls] .hud-flight-fill { background: linear-gradient(#8dd8ef, #449fc4); }
 body[data-controls] .hud-oxygen { position: absolute; top: 50px; left: 0; right: 0; }
 body[data-controls] .hud-character-switch[aria-disabled="true"] { opacity: .6; }
-body[data-controls] .hud-weapon-slots { position: absolute; left: 162px; bottom: 34px; display: flex; gap: 12px; transform: none; }
-body[data-controls] .hud-weapon-slot { position: relative; width: 52px; height: 52px; min-width: 0; min-height: 0; display: block; padding: 0; border: 2px solid #e4d0a7; border-radius: 50%; background: #1b202ae8; box-shadow: 0 2px 8px #0007, inset 0 0 0 3px #443e37; color: #fff3d8; pointer-events: auto; overflow: visible; }
-body[data-controls] .hud-weapon-key, .control-primary-key { position: absolute; top: calc(100% + 7px); left: -8px; right: -8px; text-align: center; color: #eee1c5; font: 10px ui-monospace, monospace; text-shadow: 0 1px 4px #000; white-space: nowrap; }
-body[data-controls] .hud-skill-name, body[data-controls] .hud-skill-track { display: none; }
-body[data-controls] .hud-skill-state { position: absolute; inset: 0; display: grid; place-items: center; font: bold 11px ui-monospace, monospace; color: #fff; text-shadow: 0 1px 4px #000; border-radius: inherit; background: #0d111a65; z-index: 2; }
-body[data-controls] .hud-skill-state[hidden], body[data-controls] .hud-weapon-ready .hud-skill-state { display: none; }
-body[data-controls] .hud-weapon-slot:hover:not(:disabled), body[data-controls] .hud-weapon-slot.hud-weapon-active { border-color: #ffe8ad; box-shadow: 0 0 13px #ffc86c60; }
-body[data-controls] .hud-weapon-slot:disabled { opacity: .45; }
+:is(body[data-controls], .room-preview-hud) .hud-weapon-slots { position: absolute; left: 162px; bottom: 34px; display: flex; gap: 12px; transform: none; }
+:is(body[data-controls], .room-preview-hud) .hud-weapon-slot { position: relative; width: 52px; height: 52px; min-width: 0; min-height: 0; display: block; padding: 0; border: 2px solid #e4d0a7; border-radius: 50%; background: #1b202ae8; box-shadow: 0 2px 8px #0007, inset 0 0 0 3px #443e37; color: #fff3d8; pointer-events: auto; overflow: visible; }
+:is(body[data-controls], .room-preview-hud) .hud-weapon-key, .control-primary-key { position: absolute; top: calc(100% + 7px); left: -8px; right: -8px; text-align: center; color: #eee1c5; font: 10px ui-monospace, monospace; text-shadow: 0 1px 4px #000; white-space: nowrap; }
+:is(body[data-controls], .room-preview-hud) .hud-skill-name, :is(body[data-controls], .room-preview-hud) .hud-skill-track { display: none; }
+:is(body[data-controls], .room-preview-hud) .hud-skill-state { position: absolute; inset: 0; display: grid; place-items: center; font: bold 11px ui-monospace, monospace; color: #fff; text-shadow: 0 1px 4px #000; border-radius: inherit; background: #0d111a65; z-index: 2; }
+:is(body[data-controls], .room-preview-hud) .hud-skill-state[hidden], :is(body[data-controls], .room-preview-hud) .hud-weapon-ready .hud-skill-state { display: none; }
+:is(body[data-controls], .room-preview-hud) .hud-weapon-slot:hover:not(:disabled), :is(body[data-controls], .room-preview-hud) .hud-weapon-slot.hud-weapon-active { border-color: #ffe8ad; box-shadow: 0 0 13px #ffc86c60; }
+:is(body[data-controls], .room-preview-hud) .hud-weapon-slot:disabled { opacity: .45; }
 .hud-skill-icon { background-image: url('/ui/hud-icons.webp'); background-size: 400% 300%; background-repeat: no-repeat; }
 .hud-skill-icon { position: absolute; inset: 4px; border-radius: 50%; pointer-events: none; }
 [data-icon=water] { background-position: 0 0; }
@@ -100,7 +100,7 @@ body[data-controls] .hud-weapon-slot:disabled { opacity: .45; }
 body:has(.hud-weapon[data-player-form=human]) .control-attack .hud-skill-icon { background-position: 33.3333% 50%; }
 body[data-controls] .hud-hints { top: calc(var(--dev-nav-height) + 130px); left: 24px; right: auto; bottom: auto; max-height: calc(100dvh - var(--dev-nav-height) - 260px); overflow: auto; pointer-events: auto; background: #151a24f0; border: 1px solid #e5d7b84d; font-size: 11px; }
 body[data-controls] .hud-hints-hidden { pointer-events: none; }
-body[data-controls] .hud-weapon-toast { left: 50%; top: calc(var(--dev-nav-height) + 105px); font-size: 15px; }
+:is(body[data-controls], .room-preview-hud) .hud-weapon-toast { left: 50%; top: calc(var(--dev-nav-height) + 105px); font-size: 15px; }
 .control-touch { display: contents; }
 .control-touch-hint, .control-move, .control-ride, .hud-touch-help { display: none; }
 .control-surface-demo .control-touch-hint { display: block; position: absolute; left: 50%; top: calc(var(--dev-nav-height) + 18px); transform: translateX(-50%); padding: 8px 16px; border-radius: 999px; background: var(--control-glass); color: #fff0ce; font-size: 13px; white-space: nowrap; }

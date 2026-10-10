@@ -1,4 +1,5 @@
 import { isEnemyKind } from '../config/enemy-models.ts';
+import { isBuildingKitKind } from '../config/building-kit.ts';
 import { WIND_LABELS } from '../config/weather-rules.ts';
 import { GRASSY_ANIMATED_MODELS, GRASSY_FLIGHTS, isGrassyAttack } from '../config/grassy.ts';
 import { NPCS, npcModel } from '../config/npc.ts';
@@ -98,6 +99,7 @@ export function createCard(parent: HTMLElement, card: ShowcaseCard, model: Showc
     model.changeAction(card, next.id);
   }) : null;
   const actionList = el('div', 'sc-action-list', actions);
+  if (sharedScene) { actionList.setAttribute('role', 'group'); actionList.setAttribute('aria-label', '动作与技能'); }
   const viewport = el('div', 'sc-viewport', root);
   viewport.hidden = sharedScene;
   viewport.tabIndex = 0;
@@ -110,13 +112,22 @@ export function createCard(parent: HTMLElement, card: ShowcaseCard, model: Showc
   instruction.hidden = true;
   const footer = el('div', 'sc-card-controls', root);
   const mainRow = el('div', 'sc-card-row', footer);
+  if (sharedScene) mainRow.classList.add('sc-stage-view-row');
+  const modelVersions = sharedScene ? model.catalog.entries.filter((item) => item.actor === actor && (item.staticModel !== undefined || item.d1HairVisible === false)) : [];
+  const modelVersion = modelVersions.length ? select(mainRow, '模型版本', modelVersions.map((item) => [item.id, item.label]), (value) => model.changeAction(card, value)) : null;
+  const animatedEntry = modelVersion ? model.catalog.entries.find((item) => item.actor === actor && !modelVersions.includes(item)) : undefined;
+  const animatedModel = animatedEntry ? document.createElement('option') : null;
+  if (animatedModel) {
+    animatedModel.textContent = '动画模型';
+    animatedModel.value = animatedEntry!.id;
+    modelVersion!.prepend(animatedModel);
+  }
   const environment = select(mainRow, '环境', [['surface', '地上'], ['underground', '地下']], (value) => model.update(card, { environment: value as ShowcaseCard['environment'] }, true));
   environment.parentElement!.hidden = sharedScene;
   let modelCamera: ReturnType<typeof createModelCameraControls> | null = null;
   const resourceControls = card.resource ? createResourceControls(footer, card, model) : null;
   const controls = el('div', 'sc-card-row', footer);
   const play = button(controls, '暂停', () => model.update(card, { playing: !card.playing }));
-  if (sharedScene) header.insertBefore(play, close);
   button(controls, '重播', () => { model.update(card, { playing: true }, true); });
   let soundPlay: HTMLButtonElement | null = null;
   let soundStop: HTMLButtonElement | null = null;
@@ -156,7 +167,7 @@ export function createCard(parent: HTMLElement, card: ShowcaseCard, model: Showc
     const label = caveAssembly ? '完整洞穴' : entry.label;
     const flightLabel = entry.grassyAnimation?.flight ? ` · ${GRASSY_FLIGHTS.find((item) => item.id === entry.grassyAnimation!.flight)!.label}` : '';
     const overview = model.catalog.mode === 'lab' && model.activeDemo !== null;
-    title.textContent = sharedScene ? `${actorInfo.name}${npc ? ` · ${npc.label}` : ''}` : overview || card.resource?.composition ? labCardText(card, model).title : `${actorInfo.name}${npc ? ` · ${npc.label}` : ''} · ${label}${flightLabel}`;
+    title.textContent = sharedScene ? entry.staticModel ? label : `${actorInfo.name}${npc ? ` · ${npc.label}` : ''}` : overview || card.resource?.composition ? labCardText(card, model).title : `${actorInfo.name}${npc ? ` · ${npc.label}` : ''} · ${label}${flightLabel}`;
     if (gameLink) {
       const options = card.resource!;
       gameLink.hidden = options.composition === null;
@@ -186,6 +197,7 @@ export function createCard(parent: HTMLElement, card: ShowcaseCard, model: Showc
       actionButtons.clear();
       const groups = new Map<string, HTMLElement>();
       for (const item of model.catalog.entries.filter((e) => e.actor === entry.actor && e.npcForm === entry.npcForm && (!equipmentCharacter || (e.grassyAnimation!.variant === entry.grassyAnimation!.variant && (!(isGrassyAttack(e.grassyAnimation!.clip) || e.action === 'photon_burst') || e.grassyAnimation!.flight === entry.grassyAnimation!.flight))))) {
+        if (sharedScene && (item.staticModel !== undefined || item.d1HairVisible === false)) continue;
         let choices = groups.get(item.group);
         if (!choices) {
           const row = el('div', 'sc-action-row', actionList);
@@ -198,6 +210,8 @@ export function createCard(parent: HTMLElement, card: ShowcaseCard, model: Showc
         actionButtons.set(item.id, choice);
       }
     }
+    if (animatedModel && !modelVersions.some((item) => item.id === card.entryId)) animatedModel.value = card.entryId;
+    if (modelVersion) modelVersion.value = card.entryId;
     for (const [id, choice] of actionButtons) {
       choice.classList.toggle('sc-active', id === card.entryId);
       choice.setAttribute('aria-pressed', String(id === card.entryId));
@@ -220,17 +234,20 @@ export function createCard(parent: HTMLElement, card: ShowcaseCard, model: Showc
     play.textContent = card.playing ? 'Ⅱ 暂停' : '▶ 播放';
     play.setAttribute('aria-label', card.playing ? '暂停此预览' : '播放此预览');
     loop.classList.toggle('sc-active', card.loop); loop.setAttribute('aria-pressed', String(card.loop));
-    const staticHuman = entry.actor === 'human' && !entry.grassyAnimation;
-    controls.hidden = staticHuman;
-    progress.hidden = staticHuman;
+    const staticModel = entry.staticModel !== undefined || entry.actor === 'human' && !entry.grassyAnimation;
+    controls.hidden = staticModel;
+    progress.hidden = staticModel;
+    play.hidden = staticModel;
     actions.setAttribute('aria-label', entry.actor === 'human' ? equipmentCharacter ? '角色动作与精细度' : '历史模型版本选择' : isResource ? '资源变体选择' : '动作选择');
-    const supportsModelView = isEnemyKind(entry.actor) || (entry.actor === 'human' && !humanWorld) || entry.actor === 'luma';
-    if (supportsModelView && !modelCamera) modelCamera = createModelCameraControls(mainRow, viewport, card, model);
+    const supportsModelView = sharedScene || entry.staticModel !== undefined || entry.d1Animation !== undefined || isEnemyKind(entry.actor) || (entry.actor === 'human' && !humanWorld) || entry.actor === 'luma';
+    if (supportsModelView && !modelCamera) modelCamera = createModelCameraControls(mainRow, sharedScene ? null : viewport, card, model);
     else if (!supportsModelView && modelCamera) {
       modelCamera.dispose(); modelCamera = null;
       viewport.setAttribute('role', 'img'); viewport.removeAttribute('title');
     }
-    facing.hidden = isResource || (supportsModelView && !isEnemyKind(entry.actor));
+    facing.hidden = isResource || (sharedScene
+      ? entry.staticModel !== undefined || entry.d1Animation !== undefined || entry.actor === 'luma'
+      : supportsModelView && !isEnemyKind(entry.actor));
     targetDodge.hidden = !((entry.actor === 'sam' && entry.action === 'skill1') || ((entry.actor === 'sam' || entry.actor === 'tibo') && entry.action === 'attack'));
     targetDodge.classList.toggle('sc-active', card.targetDodge);
     targetDodge.setAttribute('aria-pressed', String(card.targetDodge));
@@ -240,6 +257,7 @@ export function createCard(parent: HTMLElement, card: ShowcaseCard, model: Showc
       const ground = entry.actor === 'terrain' || (entry.actor === 'grass' && entry.action === 'natural');
       const layers = ground ? `${({ single: '悬空单格', raised: '地面单格', flat: '连续平地', shapes: '四形状并列', steps: '阶梯', mixed: '材质邻接' })[settings.layout]} · ${({ ground: '仅瓦片', cover: '加入地被', flora: '加入花草', all: '完整植被' })[settings.vegetation]} · ` : '';
       caption.textContent = `${settings.assembly ? '场景组合 · ' : ''}${layers}${({ open: '空旷', wood: '树下', shore: '岸边', desert: '沙漠' })[settings.habitat]} · 种子 ${settings.seed} · ${WIND_LABELS[settings.wind]}`;
+      if (isBuildingKitKind(entry.actor)) caption.textContent = entry.description;
       if (settings.platforms && (entry.actor === 'tree' || (entry.actor === 'terrain' && entry.action === 'branch'))) caption.textContent += ' · 青线：可站立';
       if (overview || settings.composition) caption.textContent = labCardText(card, model).detail;
     }
@@ -289,6 +307,14 @@ export function createShowcasePanel(parent: HTMLElement, model: ShowcaseModel, r
       if (isHistory === historical) link.setAttribute('aria-current', 'page');
     }
     const compare = el('a', '', libraries, '画质对比'); compare.href = './?mode=compare';
+  }
+  const references = el('nav', 'sc-library-tabs', sidebar);
+  references.setAttribute('aria-label', '设计资料');
+  const concepts = el('a', '', references, '基础概念定义'); concepts.href = './?mode=concepts';
+  const artwork = el('a', '', references, '原画资料库'); artwork.href = './?mode=art-library';
+  if (model.catalog.mode === 'resources') {
+    const room = el('a', '', references, '透视 · 单独场景'); room.href = './?mode=resources&scene=room';
+    const settlement = el('a', '', references, '透视 · 大场景'); settlement.href = './?mode=resources&scene=settlement';
   }
   const demoViews = model.catalog.demos ? createDemoDirectory(sidebar, model) : [];
   const searchWrap = el('div', 'sc-search', sidebar);

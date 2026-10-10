@@ -34,6 +34,7 @@ const EN: Record<string, string> = {
   '新世界': 'New world', '重新加载页面生成新世界（设置会保留）': 'Reloads the page with a new world (settings are kept)',
   '角色展示场 ↗': 'Character showcase ↗', '选择角色，在预览卡内切换动作，并排查看地上 / 地下效果；返回时重新进入原种子世界。': 'Choose a character, preview actions and compare above / below ground. Returning reloads the original seed.',
   '关闭 ×': 'Close ×', '关闭并继续': 'Close and resume',
+  '捏人 · 角色外观': 'Customize character',
   '无法保存设置（浏览器存储不可用），本次修改仍然生效': 'Settings could not be saved (browser storage is unavailable); your changes still apply for this session',
 };
 const tr = (text: string): string => getLanguage() === 'en' ? EN[text] ?? text : text;
@@ -59,6 +60,7 @@ export interface SettingsPanelOptions {
   /** “新世界”：种子已校验（uint32）。 */
   readonly onNewWorld: (seed: number) => void;
   readonly onShowcase?: () => void;
+  readonly onCharacter?: () => void;
   /** 留空种子时的随机源（[0,1)，缺省 Math.random）。 */
   readonly random?: () => number;
 }
@@ -130,6 +132,11 @@ export function createSettingsPanel(options: SettingsPanelOptions): SettingsPane
   }
   languageSelect.value = getLanguage();
   languageSelect.addEventListener('change', () => setLanguage(languageSelect.value as Language));
+  if (options.onCharacter) {
+    const character = label(el('button', 'settings-footer', card), '捏人 · 角色外观');
+    character.type = 'button';
+    character.addEventListener('click', options.onCharacter);
+  }
   for (const group of SETTING_GROUPS) {
     if ((options.chapter && group.id === 'weather') || (!options.gm && group.id === 'debug')) continue;
     const defs = SETTING_DEFS.filter((d) => d.group === group.id);

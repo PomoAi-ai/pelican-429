@@ -112,7 +112,7 @@ test('地面追击在有支撑的积水和冷却液之前停住', () => {
       a.enemy.enemy!.enabled = true;
       a.enemy.enemy!.cooldownTicks = 10000;
       for (let i = 0; i < 180; i++) {
-        updateEnemy(a.enemy, a.target(), a.world.level, a.world.tuning);
+        updateEnemy(a.enemy, a.target(), a.world.level, a.world.tuning, 1);
         moveAndCollide(a.enemy.body, a.world.map, a.world.tuning.sim.step);
       }
       assert.ok(a.enemy.body.x + a.enemy.body.halfWidth <= 30, danger);
@@ -131,14 +131,14 @@ test('巡线犬不会向没有安全落点的深坑起跳，前摇中新出现�
       a.enemy.enemy!.cooldownTicks = 0;
       const target = { x: 34, y: a.groundY + .75, vx: 0, vy: 0 };
       if (delayed) {
-        updateEnemy(a.enemy, target, a.world.level, a.world.tuning);
+        updateEnemy(a.enemy, target, a.world.level, a.world.tuning, 1);
         assert.ok(a.enemy.attack);
       }
       if (danger === 'pit') for (let x = 30; x <= 36; x++) for (let y = 1; y < a.groundY + 8; y++) a.world.map.set(x, y, TILE_AIR);
       if (danger === 'water') for (let x = 30; x <= 36; x++) for (let y = a.groundY; y < a.groundY + 3; y++) a.world.fluid.set(x, y, 255);
       if (danger === 'coolant') Object.assign(a.world.level, { lethalCoolant: { x: 30, y: a.groundY, w: 7, h: 3 } });
       for (let i = 0; i < 100; i++) {
-        updateEnemy(a.enemy, target, a.world.level, a.world.tuning);
+        updateEnemy(a.enemy, target, a.world.level, a.world.tuning, 1);
         moveAndCollide(a.enemy.body, a.world.map, a.world.tuning.sim.step);
         assert.ok(a.enemy.body.y >= a.groundY, `delayed=${delayed}, y=${a.enemy.body.y}`);
       }
@@ -157,7 +157,7 @@ test('地面机器人脱战后安全下穿平台回到驻地，危险落点则�
       Object.assign(a.enemy.body, { x: 28, y: a.groundY + 5, onGround: true });
       a.enemy.enemy!.enabled = true;
       for (let i = 0; i < 240; i++) {
-        updateEnemy(a.enemy, { x: 100, y: a.groundY + 1, vx: 0, vy: 0 }, a.world.level, a.world.tuning);
+        updateEnemy(a.enemy, { x: 100, y: a.groundY + 1, vx: 0, vy: 0 }, a.world.level, a.world.tuning, 1);
         moveAndCollide(a.enemy.body, a.world.map, a.world.tuning.sim.step);
       }
       assert.equal(a.enemy.body.y, a.groundY + (wet ? 5 : 0));
@@ -175,7 +175,7 @@ test('返家跳台按实际水平速度预测，不会斜跳进入驻地旁的�
     Object.assign(a.enemy.body, { x: 27, y: a.groundY, onGround: true });
     a.enemy.enemy!.enabled = true;
     for (let i = 0; i < 160; i++) {
-      updateEnemy(a.enemy, { x: 100, y: a.groundY + 1, vx: 0, vy: 0 }, a.world.level, a.world.tuning);
+      updateEnemy(a.enemy, { x: 100, y: a.groundY + 1, vx: 0, vy: 0 }, a.world.level, a.world.tuning, 1);
       moveAndCollide(a.enemy.body, a.world.map, a.world.tuning.sim.step);
       assert.equal(submersion(a.enemy.body, a.world.fluid), 0, `tick ${i}`);
     }
@@ -194,7 +194,7 @@ test('机器人沿连续下坡追击，不把较低的安全地面当成断崖',
     a.enemy.enemy!.enabled = true;
     a.enemy.enemy!.cooldownTicks = 10000;
     for (let i = 0; i < 180; i++) {
-      updateEnemy(a.enemy, { x: 36, y: a.groundY - 2, vx: 0, vy: 0 }, a.world.level, a.world.tuning);
+      updateEnemy(a.enemy, { x: 36, y: a.groundY - 2, vx: 0, vy: 0 }, a.world.level, a.world.tuning, 1);
       moveAndCollide(a.enemy.body, a.world.map, a.world.tuning.sim.step);
     }
     assert.ok(a.enemy.body.x > 33);
@@ -208,11 +208,11 @@ test('欧米攻击中持续注视移动目标，身体保持起手方向', () =>
   try {
     startEnemySkill(a.enemy, 0, a.target());
     for (const target of [{ x: 32, y: a.groundY + 4 }, { x: 25, y: a.groundY + 1 }]) {
-      updateEnemy(a.enemy, { ...target, vx: 0, vy: 0 }, a.world.level, a.world.tuning);
+      updateEnemy(a.enemy, { ...target, vx: 0, vy: 0 }, a.world.level, a.world.tuning, 1);
       assert.deepEqual(a.enemy.enemy!.lookTarget, target);
       assert.equal(a.enemy.facing, -1);
     }
-    updateEnemy(a.enemy, null, a.world.level, a.world.tuning);
+    updateEnemy(a.enemy, null, a.world.level, a.world.tuning, 1);
     assert.equal(a.enemy.enemy!.lookTarget, null);
     assert.equal(a.enemy.attack, undefined);
   } finally { a.dispose(); }
@@ -223,13 +223,13 @@ test('欧米脱离感知范围或受击后停止战斗注视', () => {
   const a = arena('gatekeeper', 4);
   try {
     a.enemy.enemy!.enabled = true;
-    updateEnemy(a.enemy, a.target(), a.world.level, a.world.tuning);
+    updateEnemy(a.enemy, a.target(), a.world.level, a.world.tuning, 1);
     assert.deepEqual(a.enemy.enemy!.lookTarget, { x: a.target().x, y: a.target().y });
-    updateEnemy(a.enemy, { x: 100, y: a.groundY, vx: 0, vy: 0 }, a.world.level, a.world.tuning);
+    updateEnemy(a.enemy, { x: 100, y: a.groundY, vx: 0, vy: 0 }, a.world.level, a.world.tuning, 1);
     assert.equal(a.enemy.enemy!.lookTarget, null);
     startEnemySkill(a.enemy, 0, a.target());
     a.enemy.health!.hitstunTicks = 8;
-    updateEnemy(a.enemy, a.target(), a.world.level, a.world.tuning);
+    updateEnemy(a.enemy, a.target(), a.world.level, a.world.tuning, 1);
     assert.equal(a.enemy.enemy!.lookTarget, null);
   } finally { a.dispose(); }
 });
@@ -240,10 +240,10 @@ test('空闲受击期间冷却继续减少，攻击只在首次打断时重置�
   try {
     startEnemySkill(a.enemy, 0, a.target());
     a.enemy.health!.hitstunTicks = 12;
-    updateEnemy(a.enemy, a.target(), a.world.level, a.world.tuning);
+    updateEnemy(a.enemy, a.target(), a.world.level, a.world.tuning, 1);
     assert.equal(a.enemy.attack, undefined);
     const cooldown = a.enemy.enemy!.cooldownTicks;
-    for (let i = 0; i < 8; i++) updateEnemy(a.enemy, a.target(), a.world.level, a.world.tuning);
+    for (let i = 0; i < 8; i++) updateEnemy(a.enemy, a.target(), a.world.level, a.world.tuning, 1);
     assert.equal(a.enemy.enemy!.cooldownTicks, cooldown - 8);
   } finally { a.dispose(); }
 });
@@ -254,8 +254,8 @@ test('欧米夹扫结束后迅速衔接突进', () => {
   try {
     a.enemy.enemy!.enabled = true;
     startEnemySkill(a.enemy, 0, a.target());
-    while (a.enemy.attack) updateEnemy(a.enemy, a.target(), a.world.level, a.world.tuning);
-    for (let i = 0; i < 12 && !a.enemy.attack; i++) updateEnemy(a.enemy, a.target(), a.world.level, a.world.tuning);
+    while (a.enemy.attack) updateEnemy(a.enemy, a.target(), a.world.level, a.world.tuning, 1);
+    for (let i = 0; i < 12 && !a.enemy.attack; i++) updateEnemy(a.enemy, a.target(), a.world.level, a.world.tuning, 1);
     assert.ok(a.enemy.attack, '夹扫后应已经起手下一招');
     assert.equal(a.enemy.enemy!.skill, 1);
   } finally { a.dispose(); }
@@ -272,11 +272,11 @@ test('搬山起手受伤不退缩，收招恢复可打断', () => {
     applyHit(a.enemy, 1, hit, 2, a.world.tuning.combat);
     assert.equal(a.enemy.health!.hp, hp - hit.damage);
     assert.equal(a.enemy.health!.hitstunTicks, 0);
-    updateEnemy(a.enemy, a.target(), a.world.level, a.world.tuning);
+    updateEnemy(a.enemy, a.target(), a.world.level, a.world.tuning, 1);
     assert.ok(a.enemy.attack, '刚起手受击仍能继续出招');
-    while (a.enemy.attack.elapsed < def.startup + def.active) updateEnemy(a.enemy, a.target(), a.world.level, a.world.tuning);
+    while (a.enemy.attack.elapsed < def.startup + def.active) updateEnemy(a.enemy, a.target(), a.world.level, a.world.tuning, 1);
     applyHit(a.enemy, 1, hit, 3, a.world.tuning.combat);
-    updateEnemy(a.enemy, a.target(), a.world.level, a.world.tuning);
+    updateEnemy(a.enemy, a.target(), a.world.level, a.world.tuning, 1);
     assert.equal(a.enemy.attack, undefined);
     assert.equal(a.enemy.armored, false);
   } finally { a.dispose(); }
@@ -322,16 +322,16 @@ test('连续受击触发短暂韧性后恢复可打断，并且不能立即再�
   try {
     const hit = a.world.tuning.weapons.water.projectile;
     applyHit(a.enemy, 1, hit, 1, a.world.tuning.combat);
-    updateEnemy(a.enemy, a.target(), a.world.level, a.world.tuning);
+    updateEnemy(a.enemy, a.target(), a.world.level, a.world.tuning, 1);
     applyHit(a.enemy, 1, hit, 10, a.world.tuning.combat);
-    updateEnemy(a.enemy, a.target(), a.world.level, a.world.tuning);
+    updateEnemy(a.enemy, a.target(), a.world.level, a.world.tuning, 1);
     assert.equal(a.enemy.armored, true);
     assert.equal(a.enemy.health!.hitstunTicks, 0);
-    for (let i = 0; i < 60; i++) updateEnemy(a.enemy, a.target(), a.world.level, a.world.tuning);
+    for (let i = 0; i < 60; i++) updateEnemy(a.enemy, a.target(), a.world.level, a.world.tuning, 1);
     assert.equal(a.enemy.armored, false);
     for (const tick of [80, 90]) {
       applyHit(a.enemy, 1, hit, tick, a.world.tuning.combat);
-      updateEnemy(a.enemy, a.target(), a.world.level, a.world.tuning);
+      updateEnemy(a.enemy, a.target(), a.world.level, a.world.tuning, 1);
       assert.equal(a.enemy.armored, false);
       assert.ok(a.enemy.health!.hitstunTicks > 0);
     }
@@ -647,21 +647,21 @@ test('哨蜂冷却期间追随远离出生点的玩家升降，起手后仍保�
     let target = { x: 30, y: a.groundY + 8 };
     for (let i = 0; i < 300; i++) {
       target = { x: 30 + i / 12, y: a.groundY + 8 };
-      updateEnemy(a.enemy, { ...target, vx: 0, vy: 0 }, a.world.level, a.world.tuning);
+      updateEnemy(a.enemy, { ...target, vx: 0, vy: 0 }, a.world.level, a.world.tuning, 1);
       moveAndCollide(a.enemy.body, a.world.map, a.world.tuning.sim.step);
     }
     assert.ok(a.enemy.body.x > a.enemy.enemy!.home.x + 15);
     assert.ok(a.enemy.body.y > a.groundY + 9);
     target.y = a.groundY + 1;
     for (let i = 0; i < 120; i++) {
-      updateEnemy(a.enemy, { ...target, vx: 0, vy: 0 }, a.world.level, a.world.tuning);
+      updateEnemy(a.enemy, { ...target, vx: 0, vy: 0 }, a.world.level, a.world.tuning, 1);
       moveAndCollide(a.enemy.body, a.world.map, a.world.tuning.sim.step);
     }
     assert.ok(a.enemy.body.y < a.groundY + 5);
     startEnemySkill(a.enemy, 0, target);
     const { x, y } = a.enemy.body;
     for (let i = 0; i < 20; i++) {
-      updateEnemy(a.enemy, { x: 20, y: a.groundY + 10, vx: 0, vy: 0 }, a.world.level, a.world.tuning);
+      updateEnemy(a.enemy, { x: 20, y: a.groundY + 10, vx: 0, vy: 0 }, a.world.level, a.world.tuning, 1);
       moveAndCollide(a.enemy.body, a.world.map, a.world.tuning.sim.step);
     }
     assert.ok(a.enemy.body.x < x - 1);
@@ -679,7 +679,7 @@ test('机器人和哨蜂能下穿单向平台追击下层玩家', () => {
       a.enemy.enemy!.enabled = true;
       a.enemy.enemy!.cooldownTicks = 10000;
       for (let i = 0; i < 120; i++) {
-        updateEnemy(a.enemy, { x: 28, y: a.groundY + 1, vx: 0, vy: 0 }, a.world.level, a.world.tuning);
+        updateEnemy(a.enemy, { x: 28, y: a.groundY + 1, vx: 0, vy: 0 }, a.world.level, a.world.tuning, 1);
         moveAndCollide(a.enemy.body, a.world.map, a.world.tuning.sim.step);
       }
       assert.ok(a.enemy.body.y < a.groundY + 5);
@@ -696,7 +696,7 @@ test('哨蜂追击遇实体矮墙会上升越过再回到玩家上空', () => {
     a.enemy.enemy!.enabled = true;
     a.enemy.enemy!.cooldownTicks = 10000;
     for (let i = 0; i < 240; i++) {
-      updateEnemy(a.enemy, { x: 37, y: a.groundY + 1, vx: 0, vy: 0 }, a.world.level, a.world.tuning);
+      updateEnemy(a.enemy, { x: 37, y: a.groundY + 1, vx: 0, vy: 0 }, a.world.level, a.world.tuning, 1);
       moveAndCollide(a.enemy.body, a.world.map, a.world.tuning.sim.step);
     }
     assert.ok(a.enemy.body.x > 33);
@@ -711,11 +711,11 @@ test('欧米远处先突进，巡线犬近处可震击，脱战后返回驻地',
     try {
       a.enemy.enemy!.enabled = true;
       a.enemy.enemy!.cooldownTicks = 0;
-      updateEnemy(a.enemy, a.target(), a.world.level, a.world.tuning);
+      updateEnemy(a.enemy, a.target(), a.world.level, a.world.tuning, 1);
       assert.equal(a.enemy.enemy!.skill, 1);
       a.enemy.attack = undefined;
       a.enemy.body.x = a.enemy.enemy!.home.x + 5;
-      updateEnemy(a.enemy, { x: 100, y: a.groundY, vx: 0, vy: 0 }, a.world.level, a.world.tuning);
+      updateEnemy(a.enemy, { x: 100, y: a.groundY, vx: 0, vy: 0 }, a.world.level, a.world.tuning, 1);
       assert.ok(a.enemy.body.vx < 0);
     } finally { a.dispose(); }
   }
@@ -729,14 +729,14 @@ test('轻型机器人追击能跳上一格台阶，高墙前停止而不连续�
     a.enemy.enemy!.cooldownTicks = 10000;
     for (let x = 30; x < 36; x++) a.world.map.set(x, a.groundY, TILE_STONE);
     for (let i = 0; i < 150; i++) {
-      updateEnemy(a.enemy, { x: 35, y: a.groundY + 2, vx: 0, vy: 0 }, a.world.level, a.world.tuning);
+      updateEnemy(a.enemy, { x: 35, y: a.groundY + 2, vx: 0, vy: 0 }, a.world.level, a.world.tuning, 1);
       moveAndCollide(a.enemy.body, a.world.map, a.world.tuning.sim.step);
     }
     assert.ok(a.enemy.body.x > 32);
     assert.ok(a.enemy.body.y >= a.groundY + 1);
     for (let y = a.groundY + 1; y < a.groundY + 8; y++) a.world.map.set(36, y, TILE_STONE);
     for (let i = 0; i < 120; i++) {
-      updateEnemy(a.enemy, { x: 40, y: a.groundY + 2, vx: 0, vy: 0 }, a.world.level, a.world.tuning);
+      updateEnemy(a.enemy, { x: 40, y: a.groundY + 2, vx: 0, vy: 0 }, a.world.level, a.world.tuning, 1);
       moveAndCollide(a.enemy.body, a.world.map, a.world.tuning.sim.step);
     }
     assert.equal(a.enemy.body.vx, 0);

@@ -1,0 +1,41 @@
+{
+  "provider": "Hyper3D Rodin",
+  "model": "Gen-2.5",
+  "effort": "High",
+  "assetId": "private-source-061",
+  "url": "private-workspace",
+  "source": "authenticated web workspace",
+  "private": true,
+  "count": 1,
+  "references": [
+    "references/front-canonical-v2.png",
+    "references/right-canonical-v2.png"
+  ],
+  "canonicalReference": "references/user-canonical-body.png",
+  "initialAutoPrompt": "Chibi-style bald anime character head.",
+  "refinementPrompt": "One bald stylized anime female game character head with a short neck, matching the same head in both references. Complete smooth round skull and human ears, large round eyes, petite low nasal bridge, tiny softly rounded nose tip, small thin closed smiling lips, short rounded chin and compact jaw. Sculpt real subtle eyelids and lips integrated into the face. No hair, body, bust, shoulders, clothing, base or pedestal. No protruding muzzle, thick lips, floating eyelashes, extra eyes, red outlines or baked shadows.",
+  "creditsBefore": 35,
+  "creditsAfterInitialGeneration": 34.5,
+  "status": "geometry and material downloaded; local nose/lip refinement and assembly review in progress",
+  "limitations": [
+    "Reference side drawing is not a strict orthographic projection and includes a far-side eyelash.",
+    "Generated result requires actual three-view geometry inspection before replacing shared game assets.",
+    "4K export UI requires a Business subscription; no subscription upgrade was made. Actual downloaded maps are 2K."
+  ],
+  "materialReference": "references/front-canonical-v2.png",
+  "materialOptions": {
+    "native": true,
+    "effort": "High",
+    "deLight": true,
+    "faceRestore": false,
+    "pbrTemperature": 3
+  },
+  "materialPrompt": "Match the FRONT reference exactly: fair warm peach skin with a subtle healthy pink blush, soft peach eyebrows, large bright blue-to-cyan anime irises, fine black eyelashes along the eyelids, a tiny natural pale pink closed smile. Uniform skin color around scalp, ears and neck. Clean anime game albedo, matte skin, no makeup, no black or red outline on the skin, no cast shadows, no baked ambient occlusion, no painted highlights, no metallic skin, no hair. Preserve the face identity and facial proportions.",
+  "actualTextureResolution": [
+    2048,
+    2048
+  ],
+  "objQuadCount": 17370,
+  "glbTriangleCount": 34740,
+  "creditsShownAfterDownload": 34.5
+}

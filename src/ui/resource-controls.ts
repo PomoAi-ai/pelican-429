@@ -1,5 +1,6 @@
 import type { ShowcaseCard } from '../config/showcase.ts';
 import type { ResourceOptions } from '../config/resource-showcase.ts';
+import { isBuildingKitKind } from '../config/building-kit.ts';
 import { TERRAIN_COMPOSITIONS, parseTerrainComposition } from '../config/terrain-compositions.ts';
 import { TILE_SHAPES } from '../world/tile-shapes.ts';
 import { WIND_LABELS, WIND_MODES, resolveWindMode } from '../config/weather-rules.ts';
@@ -69,6 +70,8 @@ export function createResourceControls(parent: HTMLElement, card: ShowcaseCard, 
       light.classList.toggle('sc-active', options.inspectionLight);
       seed.value = String(options.seed); wind.value = options.wind;
       const entry = model.entry(card.entryId);
+      const building = isBuildingKitKind(entry.actor);
+      seedLabel.hidden = building; next.hidden = building; windLabel.hidden = building;
       const terrain = entry.actor === 'terrain' && !['branch', 'roof'].includes(entry.action);
       const groundResource = terrain || (entry.actor === 'grass' && entry.action === 'natural');
       platforms.hidden = !groundResource && entry.actor !== 'tree' && !(entry.actor === 'terrain' && entry.action === 'branch');
@@ -85,7 +88,7 @@ export function createResourceControls(parent: HTMLElement, card: ShowcaseCard, 
       layout.value = options.layout; shape.value = String(options.shapeIndex); vegetation.value = options.vegetation;
       explanation.hidden = model.catalog.mode !== 'lab';
       explanation.textContent = options.composition ? TERRAIN_COMPOSITIONS.find(({ id }) => id === options.composition)!.description : terrain ? '形状改变真实瓦片；邻格决定接缝。植被由暴露顶面、材质、坐标与环境生成。' : entry.actor === 'terrain' ? (entry.action === 'branch' ? '树枝平台是碰撞瓦片，外观由同一棵游戏树模型绘制。' : '屋顶瓦片负责碰撞，外观由游戏渔屋模型绘制。') : '类型决定几何，种子控制实例参数；风力驱动游戏原有动画。自然花草按坐标与环境分布，不随此种子任意重排。';
-      context.hidden = groundResource; grid.hidden = !groundResource;
+      context.hidden = groundResource; grid.hidden = !groundResource && !building;
       grid.setAttribute('aria-pressed', String(options.grid));
       grid.classList.toggle('sc-active', options.grid);
       context.textContent = options.context ? '场景模式' : '纯资源模式';

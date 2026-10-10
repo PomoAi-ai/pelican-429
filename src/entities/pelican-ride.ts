@@ -20,8 +20,7 @@
  */
 import type { Tuning } from '../config/tuning.ts';
 import { approach } from '../core/math.ts';
-import { ceilingClear, probeObstacle } from '../physics/ride-probe.ts';
-import type { TileQuery } from '../world/tile-map.ts';
+import type { RideProbe } from '../physics/ride-probe.ts';
 import type { DismountCause, Entity, PelicanData, RideData, RideEventRequest } from './entity.ts';
 import type { PelicanInput } from './pelican-controller.ts';
 
@@ -51,11 +50,11 @@ function beginDismount(e: Entity, r: RideData, cause: DismountCause): void {
   r.events.push({ type: 'dismount', x: e.body.x, y: e.body.y, cause });
 }
 
-function canMount(e: Entity, p: PelicanData, map: TileQuery, tuning: Tuning): boolean {
+function canMount(e: Entity, p: PelicanData, probe: RideProbe, tuning: Tuning): boolean {
   const b = e.body;
   if (!b.onGround || p.inWater || e.attack || p.humanCombat.action !== null || p.ride.lockTicks > 0) return false;
   if (e.health && e.health.hitstunTicks > 0) return false;
-  return ceilingClear(map, b.x, b.halfWidth, b.y, tuning.player.bike.rideHeight);
+  return probe.ceilingClear(b.x, b.halfWidth, b.y, tuning.player.bike.rideHeight);
 }
 
 function canTakeoff(e: Entity, p: PelicanData, input: PelicanInput): boolean {
@@ -70,7 +69,7 @@ function canTakeoff(e: Entity, p: PelicanData, input: PelicanInput): boolean {
  * 控制器每 tick 调用（入水判定与输入缓冲之后、攻击/移动之前）：推进计时并处理
  * 上车、上车完成、下车完成、入水/手动/起飞下车。
  */
-export function updateRideIntent(e: Entity, input: PelicanInput, map: TileQuery, tuning: Tuning): void {
+export function updateRideIntent(e: Entity, input: PelicanInput, probe: RideProbe, tuning: Tuning): void {
   const p = requirePelican(e);
   const r = p.ride;
   const k = tuning.player.bike;
@@ -87,7 +86,7 @@ export function updateRideIntent(e: Entity, input: PelicanInput, map: TileQuery,
   if ((r.mode === 'mounting' || r.mode === 'riding') && p.inWater) beginDismount(e, r, 'water');
 
   if (r.mode === 'off') {
-    if (r.mountBufferTicks > 0 && canMount(e, p, map, tuning)) {
+    if (r.mountBufferTicks > 0 && canMount(e, p, probe, tuning)) {
       r.mode = 'mounting';
       r.ticks = 0;
       r.cause = null;
@@ -142,13 +141,13 @@ function probeStep(e: Entity, tuning: Tuning): number {
 }
 
 /** 车头前方 reach 内骑行高度的遮挡是否先于保险杠障碍出现（门楣/悬垂）。 */
-function headBlocked(e: Entity, map: TileQuery, tuning: Tuning, dir: 1 | -1, reach: number): boolean {
+function headBlocked(e: Entity, probe: RideProbe, tuning: Tuning, dir: 1 | -1, reach: number): boolean {
   const b = e.body;
   const k = tuning.player.bike;
   const step = probeStep(e, tuning);
-  const head = probeObstacle(map, b.x, b.y, dir, reach, step, k.rideHeight);
+  const head = probe.probeObstacle(b.x, b.y, dir, reach, step, k.rideHeight);
   if (head === null) return false;
-  const bump = probeObstacle(map, b.x, b.y, dir, reach + TOUCH_EPS, step, k.bumperHeight);
+  const bump = probe.probeObstacle(b.x, b.y, dir, reach + TOUCH_EPS, step, k.bumperHeight);
   return bump === null || head < bump - TOUCH_EPS;
 }
 
@@ -156,7 +155,7 @@ function headBlocked(e: Entity, map: TileQuery, tuning: Tuning, dir: 1 | -1, rea
  * 物理之前、水平速度确定之后调用：记录 preMoveVx；骑行时
  * 地面上前方（含本 tick 位移）骑行高度遮挡 → clearance 下车（保留速度）；否则保险杠把 vx 夹到车头刚好不进墙。
  */
-export function rideBumper(e: Entity, map: TileQuery, tuning: Tuning, dt: number): void {
+export function rideBumper(e: Entity, probe: RideProbe, tuning: Tuning, dt: number): void {
   const p = requirePelican(e);
   const r = p.ride;
   const b = e.body;
@@ -165,18 +164,18 @@ export function rideBumper(e: Entity, map: TileQuery, tuning: Tuning, dt: number
   const k = tuning.player.bike;
   const dir: 1 | -1 = b.vx > 0 ? 1 : -1;
   const travel = Math.abs(b.vx) * dt;
-  if (b.onGround && headBlocked(e, map, tuning, dir, k.bumperReach + travel)) {
+  if (b.onGround && headBlocked(e, probe, tuning, dir, k.bumperReach + travel)) {
     beginDismount(e, r, 'clearance');
     return;
   }
-  const d = probeObstacle(map, b.x, b.y, dir, k.bumperReach + travel, probeStep(e, tuning), k.bumperHeight);
+  const d = probe.probeObstacle(b.x, b.y, dir, k.bumperReach + travel, probeStep(e, tuning), k.bumperHeight);
   if (d === null) return;
   const allowed = Math.max(0, d - k.bumperReach);
   if (allowed < travel) b.vx = (dir * allowed) / dt;
 }
 
 /** 物理之后调用（sim 在 moveAndCollide 之后、resolvePelicanState 之前）：撞墙与净空下车。 */
-export function resolvePelicanRide(e: Entity, map: TileQuery, tuning: Tuning): void {
+export function resolvePelicanRide(e: Entity, probe: RideProbe, tuning: Tuning): void {
   const p = requirePelican(e);
   const r = p.ride;
   if (r.mode !== 'riding') return;
@@ -188,7 +187,7 @@ export function resolvePelicanRide(e: Entity, map: TileQuery, tuning: Tuning): v
     const touching =
       b.wallContact === dir ||
       e.solid?.contact === dir ||
-      probeObstacle(map, b.x, b.y, dir, k.bumperReach + TOUCH_EPS, probeStep(e, tuning), k.bumperHeight) !== null;
+      probe.probeObstacle(b.x, b.y, dir, k.bumperReach + TOUCH_EPS, probeStep(e, tuning), k.bumperHeight) !== null;
     if (touching) {
       if (p.weapon.dashTicks > 0) {
         p.weapon.dashTicks = 0;
@@ -205,7 +204,7 @@ export function resolvePelicanRide(e: Entity, map: TileQuery, tuning: Tuning): v
   }
   if (!b.onGround) return;
   const dir: 1 | -1 = b.vx > 0 ? 1 : b.vx < 0 ? -1 : e.facing;
-  if (!ceilingClear(map, b.x, b.halfWidth, b.y, k.rideHeight) || headBlocked(e, map, tuning, dir, k.bumperReach)) {
+  if (!probe.ceilingClear(b.x, b.halfWidth, b.y, k.rideHeight) || headBlocked(e, probe, tuning, dir, k.bumperReach)) {
     beginDismount(e, r, 'clearance');
   }
 }

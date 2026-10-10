@@ -92,6 +92,8 @@ export interface LightMap {
   syncWater(cells: Uint8Array): boolean;
   /** 处理脏列：重算并返回写回的列范围（无脏列为 null）。 */
   flush(): ColumnRange | null;
+  /** 移除一个树冠（按值匹配，找不到抛错）：擦掉它的遮光并标脏受影响的列，下次 flush 生效。 */
+  removeCanopy(canopy: CanopyRegion): void;
   /** 全量重算（构造时已调用一次）。 */
   recomputeAll(): void;
 }
@@ -123,13 +125,17 @@ export function createLightMap(input: LightMapInput): LightMap {
   decay[MEDIUM.FOLIAGE] = config.foliageDecay;
   decay[MEDIUM.PLATFORM] = config.platformDecay;
 
-  // 树冠掩码（静态）：格中心落在任一树冠椭圆内。
+  // 树冠掩码：格中心落在任一树冠椭圆内。树被砍掉时由 removeCanopy 擦除。
   const foliage = new Uint8Array(width * height);
-  for (const c of input.canopies) {
-    const y0 = Math.max(0, Math.floor(c.cy - c.ry));
-    const y1 = Math.min(height - 1, Math.ceil(c.cy + c.ry));
-    const x0 = Math.max(0, Math.floor(c.cx - c.rx));
-    const x1 = Math.min(width - 1, Math.ceil(c.cx + c.rx));
+  const canopies = [...input.canopies];
+  const boundsOf = (c: CanopyRegion): { x0: number; x1: number; y0: number; y1: number } => ({
+    x0: Math.max(0, Math.floor(c.cx - c.rx)),
+    x1: Math.min(width - 1, Math.ceil(c.cx + c.rx)),
+    y0: Math.max(0, Math.floor(c.cy - c.ry)),
+    y1: Math.min(height - 1, Math.ceil(c.cy + c.ry)),
+  });
+  const stamp = (c: CanopyRegion): void => {
+    const { x0, x1, y0, y1 } = boundsOf(c);
     for (let ty = y0; ty <= y1; ty++) {
       for (let tx = x0; tx <= x1; tx++) {
         const dx = (tx + 0.5 - c.cx) / c.rx;
@@ -137,7 +143,8 @@ export function createLightMap(input: LightMapInput): LightMap {
         if (dx * dx + dy * dy <= 1) foliage[ty * width + tx] = 1;
       }
     }
-  }
+  };
+  for (const c of canopies) stamp(c);
 
   const medium = new Uint8Array(width * height);
   const mediumOf = (tx: number, ty: number, amount: number): Medium => {
@@ -273,6 +280,24 @@ export function createLightMap(input: LightMapInput): LightMap {
       dirtyLo = Infinity;
       dirtyHi = -Infinity;
       return { x0: ox0, x1: ox1 };
+    },
+    removeCanopy(canopy) {
+      const k = canopies.findIndex((c) => c.cx === canopy.cx && c.cy === canopy.cy && c.rx === canopy.rx && c.ry === canopy.ry);
+      if (k < 0) throw new Error(`light-map: removeCanopy unknown canopy (${canopy.cx},${canopy.cy})`);
+      canopies.splice(k, 1);
+      const { x0, x1, y0, y1 } = boundsOf(canopy);
+      for (let ty = y0; ty <= y1; ty++) foliage.fill(0, ty * width + x0, ty * width + x1 + 1);
+      // ponytail: 全量重盖剩余树冠，树多到卡顿时改为只重盖与包围盒重叠的树冠
+      for (const c of canopies) stamp(c);
+      for (let ty = y0; ty <= y1; ty++) {
+        for (let tx = x0; tx <= x1; tx++) {
+          const i = ty * width + tx;
+          const m = mediumOf(tx, ty, water[i] as number);
+          if (m === medium[i]) continue;
+          medium[i] = m;
+          markDirty(tx);
+        }
+      }
     },
     recomputeAll,
   };

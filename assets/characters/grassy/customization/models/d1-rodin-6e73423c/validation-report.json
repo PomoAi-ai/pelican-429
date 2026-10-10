@@ -1,0 +1,49 @@
+{
+  "geometry": {
+    "vertices": 19529,
+    "faces": 19576,
+    "quads": 19486,
+    "triangles": 90,
+    "triangle_equivalent": 39062,
+    "uv_coordinates": 23916,
+    "material_library_references": []
+  },
+  "textures": [
+    {
+      "name": "shaded.png",
+      "width": 2048,
+      "height": 2048,
+      "crc_and_decompression": "passed"
+    },
+    {
+      "name": "texture_diffuse.png",
+      "width": 2048,
+      "height": 2048,
+      "crc_and_decompression": "passed"
+    },
+    {
+      "name": "texture_metallic.png",
+      "width": 2048,
+      "height": 2048,
+      "crc_and_decompression": "passed"
+    },
+    {
+      "name": "texture_normal.png",
+      "width": 2048,
+      "height": 2048,
+      "crc_and_decompression": "passed"
+    },
+    {
+      "name": "texture_pbr.png",
+      "width": 2048,
+      "height": 2048,
+      "crc_and_decompression": "passed"
+    },
+    {
+      "name": "texture_roughness.png",
+      "width": 2048,
+      "height": 2048,
+      "crc_and_decompression": "passed"
+    }
+  ]
+}

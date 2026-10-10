@@ -1,12 +1,16 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
-import { readFileSync, writeFileSync, renameSync } from 'node:fs';
+import { readFileSync, writeFileSync, renameSync, existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { MeshoptEncoder } from 'meshoptimizer';
 import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
+const args = process.argv.slice(2);
+assert.ok(args.length === 0 || args.length === 1 && args[0]!.startsWith('--only='), 'Expected optional --only=source-path-prefix');
+const only = args[0]?.slice('--only='.length).replace(/^\.\//, '');
+assert.notEqual(only, '', '--only requires a nonempty source path prefix');
 const bits = 18;
 const components: Record<string, number> = { SCALAR: 1, VEC2: 2, VEC3: 3, VEC4: 4, MAT4: 16 };
 type Compression = { buffer: number; byteOffset: number; byteLength: number; byteStride: number; count: number; mode: 'ATTRIBUTES' | 'INDICES'; filter?: 'EXPONENTIAL' };
@@ -17,7 +21,7 @@ type Document = {
   buffers: { byteLength: number; extensions?: { EXT_meshopt_compression: { fallback: true } } }[];
   bufferViews: View[]; accessors: Accessor[];
   meshes: { primitives: { attributes: Record<string, number>; indices?: number; targets?: Record<string, number>[] }[] }[];
-  animations: { samplers: { input: number; output: number }[]; channels: { sampler: number; target: { path: string } }[] }[];
+  animations?: { samplers: { input: number; output: number }[]; channels: { sampler: number; target: { path: string } }[] }[];
   images?: { bufferView: number }[]; skins: { inverseBindMatrices: number }[];
 };
 type ModelReport = { source: string; output: string; sourceSha256: string; sourceBytes: number; outputBytes: number;
@@ -75,10 +79,10 @@ function selectedViews(json: Document) {
     for (const [semantic, index] of Object.entries(primitive.attributes)) tag(index, semantic);
     for (const target of primitive.targets ?? []) for (const [semantic, index] of Object.entries(target)) tag(index, `morph:${semantic}`);
   }
-  for (const animation of json.animations) for (const channel of animation.channels) {
+  for (const animation of json.animations ?? []) for (const channel of animation.channels) {
     tag(animation.samplers[channel.sampler]!.output, `animation:${channel.target.path}`);
   }
-  for (const animation of json.animations) for (const sampler of animation.samplers) {
+  for (const animation of json.animations ?? []) for (const sampler of animation.samplers) {
     assert.ok(!labels.has(sampler.input), 'Animation time accessor shares quantized data');
   }
   for (const skin of json.skins) assert.ok(!labels.has(skin.inverseBindMatrices), 'Inverse bind accessor shares quantized data');
@@ -221,11 +225,16 @@ function build(model: ModelReport) {
     outputBytes: result.length, storedBufferBytes, quantizedViews: quantized.size, bufferErrors: errors };
 }
 
-assert.equal(process.argv.length, 2, 'This script builds both 512 and 256 compact tiers; no arguments expected');
 await Promise.all([MeshoptEncoder.ready, MeshoptDecoder.ready]);
 for (const tier of ['ktx2', 'ktx2-256']) {
   const report = JSON.parse(readFileSync(resolve(root, `assets/characters/${tier}-models-report.json`), 'utf8'));
-  const models = (report.models as ModelReport[]).map(build);
-  writeFileSync(resolve(root, `assets/characters/${tier}-compact-models-report.json`), `${JSON.stringify({ ...report,
+  const selected = (report.models as ModelReport[]).filter(model => only === undefined || model.source.replace(/^\.\//, '').startsWith(only));
+  assert.ok(selected.length > 0, `No ${tier} texture report matches --only=${only}`);
+  const built = selected.map(build);
+  const reportPath = resolve(root, `assets/characters/${tier}-compact-models-report.json`);
+  const previous = only !== undefined && existsSync(reportPath) ? JSON.parse(readFileSync(reportPath, 'utf8')).models as ReturnType<typeof build>[] : [];
+  const replacements = new Map(built.map(model => [model.source, model]));
+  const models = [...previous.filter(model => !replacements.has(model.source)), ...built];
+  writeFileSync(reportPath, `${JSON.stringify({ ...report,
     modelCompression: { filter: 'EXPONENTIAL', bits, mode: 'SharedComponent', topology: 'unchanged', animationTimes: 'unchanged', textures: 'byte-identical' }, models }, null, 2)}\n`);
 }

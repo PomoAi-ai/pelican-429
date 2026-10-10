@@ -194,6 +194,7 @@
 .sc-viewport[role=button] { cursor: grab; }
 .sc-viewport[role=button]:active { cursor: grabbing; }
 .sc-camera-hint { position: absolute; bottom: 7px; right: 8px; padding: 3px 7px; border-radius: 5px; background: #142126bd; color: #e2eddf; font-size: 9px; pointer-events: none; }
+.sc-model-turn { flex: 1 1 120px; min-width: 70px; max-width: 220px; margin: 0; accent-color: var(--sc-accent); cursor: pointer; }
 .sc-lab-overview .sc-badges { top: 6px; left: 6px; right: 6px; }
 .sc-lab-overview .sc-badges > span { padding: 2px 4px; font-size: 8px; }
 .sc-lab-expanded .sc-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }

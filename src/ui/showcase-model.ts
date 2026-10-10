@@ -1,4 +1,5 @@
 import { isEnemyKind } from '../config/enemy-models.ts';
+import { isBuildingKitKind } from '../config/building-kit.ts';
 import { CHARACTER_CATALOG } from '../config/showcase.ts';
 import type { ShowcaseCatalog, ShowcaseCard, ShowcaseDemo } from '../config/showcase.ts';
 import type { NpcForm } from '../config/npc.ts';
@@ -18,10 +19,11 @@ export function createShowcaseModel(catalog: ShowcaseCatalog = CHARACTER_CATALOG
   const notify = (): void => { for (const listener of listeners) listener(); };
   const add = (entryId: string, from?: ShowcaseCard): void => {
     if (cards.length >= catalog.maxCards) return;
+    const building = isBuildingKitKind(entry(entryId).actor);
     const card: ShowcaseCard = {
       id: nextId++, entryId, environment: 'surface', facing: 1, modelYaw: isEnemyKind(entry(entryId).actor) ? Math.PI / 2 : Math.PI / 4, modelPitch: 0, speed: 1, zoom: 1,
       playing: true, loop: entry(entryId).loop ?? true, manual: false, targetDodge: false, humanView: 'world', attackMotion: 'still', revision: 0, npcTransformationRevision: 0,
-      resource: catalog.mode !== 'showcase' ? { layout: 'flat', shapeIndex: 0, sampleIndex: 0, sampleCount: 1, yaw: 0, pitch: 0, habitat: 'open', assembly: false, composition: null, vegetation: 'all', seed: 429, wind: 'breeze', reference: false, context: entry(entryId).actor !== 'aquatic', grid: false, platforms: true, inspectionLight: true } : null,
+      resource: catalog.mode !== 'showcase' ? { layout: 'flat', shapeIndex: 0, sampleIndex: 0, sampleCount: 1, yaw: entry(entryId).actor === 'door' ? 65 : building ? 35 : 0, pitch: building ? 18 : 0, habitat: 'open', assembly: false, composition: null, vegetation: 'all', seed: 429, wind: 'breeze', reference: false, context: !building && entry(entryId).actor !== 'aquatic', grid: false, platforms: true, inspectionLight: true } : null,
       ...(from ? { environment: from.environment, facing: from.facing, humanView: from.humanView, attackMotion: from.attackMotion, targetDodge: from.targetDodge, modelYaw: from.modelYaw, modelPitch: from.modelPitch, speed: from.speed, zoom: from.zoom, playing: from.playing, loop: from.loop, resource: from.resource ? { ...from.resource } : null } : {}),
     };
     cards.push(card);

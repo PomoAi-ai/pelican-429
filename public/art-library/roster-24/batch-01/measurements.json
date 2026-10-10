@@ -1,0 +1,190 @@
+{
+  "target_head_ratio": 3.3,
+  "world_height_tiles": 3.1,
+  "batch": [
+    1,
+    6
+  ],
+  "method": "人工读取可见基础发冠、下巴与最低鞋底的像素位置，H=下巴-基础发冠；排除高马尾、发髻、独立翘发。不是裸头骨解剖测量。背面下巴被遮挡，不计算头身比。",
+  "estimated_landmark_uncertainty_px": 5,
+  "provisional_review_band": [
+    3.15,
+    3.45
+  ],
+  "band_note": "本轮概念图筛查范围，不是用户已批准的最终建模容差；二维图无法证明精确45度。",
+  "items": [
+    {
+      "id": "r01",
+      "title": "经典水手裙 · 均衡体型",
+      "hair": "黑色齐肩直发",
+      "source_file": "exec-private-source-042.png",
+      "source_size": [
+        1536,
+        1024
+      ],
+      "uniform_display_scale": 0.8722157092614302,
+      "views": [
+        {
+          "view": "FRONT",
+          "crown_y": 118,
+          "chin_y": 382,
+          "sole_y": 971,
+          "head_ratio": 3.231
+        },
+        {
+          "view": "RIGHT",
+          "crown_y": 118,
+          "chin_y": 379,
+          "sole_y": 971,
+          "head_ratio": 3.268
+        },
+        {
+          "view": "BACK",
+          "crown_y": 118,
+          "chin_y": null,
+          "sole_y": 971,
+          "head_ratio": null
+        },
+        {
+          "view": "FRONT 45",
+          "crown_y": 118,
+          "chin_y": 381,
+          "sole_y": 983,
+          "head_ratio": 3.289
+        }
+      ],
+      "screening": "人工可见发冠口径处于本轮筛查范围；非最终3D比例认证"
+    },
+    {
+      "id": "r02",
+      "title": "夏日水手短裤 · 纤细体型",
+      "hair": "银灰耳上短发",
+      "source_file": "exec-private-source-024.png",
+      "source_size": [
+        1678,
+        937
+      ],
+      "uniform_display_scale": 0.9538461538461539,
+      "views": [
+        {
+          "view": "FRONT",
+          "crown_y": 49,
+          "chin_y": 294,
+          "sole_y": 829,
+          "head_ratio": 3.184
+        },
+        {
+          "view": "RIGHT",
+          "crown_y": 49,
+          "chin_y": 292,
+          "sole_y": 828,
+          "head_ratio": 3.206
+        },
+        {
+          "view": "BACK",
+          "crown_y": 53,
+          "chin_y": null,
+          "sole_y": 827,
+          "head_ratio": null
+        },
+        {
+          "view": "FRONT 45",
+          "crown_y": 51,
+          "chin_y": 297,
+          "sole_y": 831,
+          "head_ratio": 3.171
+        }
+      ],
+      "screening": "人工可见发冠口径处于本轮筛查范围；非最终3D比例认证",
+      "note": "最终保留原始较接近目标的版本，约3.18H，头相对目标仍略大。后续两次缩头结果约3.5—3.8H，均淘汰，未纳入交付。"
+    },
+    {
+      "id": "r03",
+      "title": "休闲牛仔背带裤 · 微胖体型",
+      "hair": "栗棕半扎卷发",
+      "source_file": "exec-private-source-062.png",
+      "source_size": [
+        1678,
+        937
+      ],
+      "uniform_display_scale": 0.970013037809648,
+      "views": [
+        {
+          "view": "FRONT",
+          "crown_y": 56,
+          "chin_y": 287,
+          "sole_y": 823,
+          "head_ratio": 3.32
+        },
+        {
+          "view": "RIGHT",
+          "crown_y": 47,
+          "chin_y": 281,
+          "sole_y": 822,
+          "head_ratio": 3.312
+        },
+        {
+          "view": "BACK",
+          "crown_y": 58,
+          "chin_y": null,
+          "sole_y": 822,
+          "head_ratio": null
+        },
+        {
+          "view": "FRONT 45",
+          "crown_y": 48,
+          "chin_y": 283,
+          "sole_y": 827,
+          "head_ratio": 3.315
+        }
+      ],
+      "screening": "人工可见发冠口径处于本轮筛查范围；非最终3D比例认证"
+    },
+    {
+      "id": "r10",
+      "title": "田径运动装 · 健壮体型",
+      "hair": "栗棕高马尾",
+      "source_file": "exec-private-source-041.png",
+      "source_size": [
+        1536,
+        1024
+      ],
+      "uniform_display_scale": 0.8910179640718563,
+      "views": [
+        {
+          "view": "FRONT",
+          "crown_y": 65,
+          "chin_y": 319,
+          "sole_y": 900,
+          "head_ratio": 3.287
+        },
+        {
+          "view": "RIGHT",
+          "crown_y": 70,
+          "chin_y": 318,
+          "sole_y": 900,
+          "head_ratio": 3.347
+        },
+        {
+          "view": "BACK",
+          "crown_y": 69,
+          "chin_y": null,
+          "sole_y": 900,
+          "head_ratio": null
+        },
+        {
+          "view": "FRONT 45",
+          "crown_y": 71,
+          "chin_y": 322,
+          "sole_y": 903,
+          "head_ratio": 3.315
+        }
+      ],
+      "screening": "人工可见发冠口径处于本轮筛查范围；非最终3D比例认证"
+    }
+  ],
+  "rejected_sources": [
+    "exec-private-source-021.png",
+    "exec-private-source-023.png"
+  ]
+}

@@ -1,11 +1,11 @@
 import * as THREE from 'three';
-import { HUMAN_MELEE_ATTACK, PLAYER_TRANSFORM } from '../config/player-form.ts';
-import type { GrassyAction, GrassyAnimatedVariant, GrassyMotionState } from '../config/grassy.ts';
-import type { Entity } from '../entities/entity.ts';
-import { createPelicanViewFactory, rideProgress } from './entity-views.ts';
+import { PLAYER_TRANSFORM } from '../config/player-form.ts';
+import type { GrassyAnimatedVariant } from '../config/grassy.ts';
+import { DEFAULT_CHARACTER_APPEARANCE, type CharacterAppearance } from '../config/character-appearance.ts';
+import { createPelicanViewFactory } from './entity-views.ts';
 import type { PelicanViewOptions } from './entity-views.ts';
 import { createGrassyRig } from './grassy/grassy-rig.ts';
-import { animateGrassy } from './grassy/grassy-animator.ts';
+import { createGrassyPlayerAnimator } from './grassy/grassy-player-animator.ts';
 import { createGrassyDeath } from './grassy/grassy-death.ts';
 import { createPlayerTransformation } from './player-transform.ts';
 import type { EntityViewFactory } from './view-registry.ts';
@@ -13,10 +13,11 @@ import { createTeleportEffect } from './teleport-effect.ts';
 import { caption } from './npc/npc-effects.ts';
 
 /** Both forms use their production rigs and share the pelican view's terrain and platform placement. */
-export function createPlayerViewFactory(options: PelicanViewOptions & { grassyVariant?: GrassyAnimatedVariant; grassyGait?: 'run' | 'sprint' }): EntityViewFactory {
+export function createPlayerViewFactory(options: PelicanViewOptions & { grassyVariant?: GrassyAnimatedVariant; grassyGait?: 'run' | 'sprint'; appearance?: () => CharacterAppearance; modelView?: () => { yaw: number; pitch: number } }): EntityViewFactory {
   const createBird = createPelicanViewFactory(options);
   return (entity) => {
-    const human = createGrassyRig(options.grassyVariant ?? 'game');
+    let appearance = options.appearance ? options.appearance() : DEFAULT_CHARACTER_APPEARANCE;
+    const human = createGrassyRig(options.grassyVariant ?? 'game', undefined, appearance);
     const animateDeath = createGrassyDeath(human);
     human.effects.setProjectilePreview(false);
     const bird = createBird(entity);
@@ -31,86 +32,16 @@ export function createPlayerViewFactory(options: PelicanViewOptions & { grassyVa
     root.add(invincible);
     const teleport = createTeleportEffect([bird.object, human.root]);
     root.add(teleport.root);
-    const bicycleScale = human.cycle.root.scale.clone();
-    const animatedRoot = human.root.getObjectByName('root')!;
-    const restRootY = animatedRoot.position.y;
+    const humanAnimator = createGrassyPlayerAnimator(human, entity, options);
     const step = options.tuning.sim.step;
-    let motionTime = 0;
-    let flightTime = 0;
-    let airborneTime = 0;
-    let landingTime = 1;
-    let wasFlying = false;
-    let wasGrounded = entity.body.onGround;
     let deathTime = 0;
     let wasDead = false;
-
-    function animateHuman(e: Entity, alpha: number, frameDt: number): void {
-      const p = e.pelican!;
-      const time = (p.stateTicks + alpha) * step;
-      const flying = p.flightMode !== 'none';
-      motionTime += frameDt;
-      flightTime = flying ? wasFlying ? flightTime + frameDt : 0 : 0;
-      airborneTime = e.body.onGround ? 0 : wasGrounded ? 0 : airborneTime + frameDt;
-      landingTime = e.body.onGround && !wasGrounded ? 0 : landingTime + frameDt;
-      wasFlying = flying;
-      wasGrounded = e.body.onGround;
-      let action: GrassyAction = 'idle';
-      let sample = motionTime;
-      if (p.ride.mode !== 'off') {
-        action = 'ride';
-        sample = (p.ride.ticks + alpha) * step;
-      } else if (flying) {
-        const fastSpeed = (options.tuning.player.flight.humanSpeed + options.tuning.player.flight.humanFastSpeed) / 2;
-        action = flightTime < 1.2 ? 'takeoff' : Math.abs(e.body.vx) > fastSpeed ? 'fly_fast' : Math.abs(e.body.vx) > 0.5 ? 'fly_forward' : 'hover';
-        sample = flightTime;
-      } else if (!e.body.onGround) {
-        action = 'jump';
-        const progress = e.body.vy > 0 ? 0.28 + Math.min(1, airborneTime / 0.35) * 0.18
-          : 0.54 + Math.min(1, airborneTime / 0.5) * 0.2;
-        sample = progress * human.actions.jump.getClip().duration;
-      } else if (Math.abs(e.body.vx) > 0.08) {
-        const sprintSpeed = (options.tuning.player.walkSpeed + options.tuning.player.runSpeed) / 2;
-        action = p.moveGear === 'run' ? options.grassyGait ?? (Math.abs(e.body.vx) > sprintSpeed ? 'sprint' : 'run') : 'walk';
-      }
-      else if (landingTime < 0.36) {
-        action = 'land';
-        sample = 0.84 + landingTime;
-      }
-      const motion: GrassyMotionState | null = action === 'idle' || action === 'ride' ? null : { action, time: sample };
-      const combat = p.humanCombat;
-      const air = {
-        forward: (e.body.vx / options.tuning.player.runSpeed - options.windAt(e.body.x, e.body.y + e.body.height)) * e.facing,
-        lift: -e.body.vy / Math.sqrt(2 * options.tuning.physics.gravity * options.tuning.player.jumpHeight),
-      };
-      if (combat.action === 'keyboard_smash' && e.attack?.def.id === HUMAN_MELEE_ATTACK.id) {
-        const { startup, active, recovery } = e.attack.def;
-        const ticks = e.attack.elapsed + alpha;
-        const activeEnd = startup + active;
-        const first = combat.smashSide === 0;
-        // Reverse the authored second recovery to draw directly into the opposite strike, without replaying strike one.
-        const progress = ticks < startup ? first ? ticks / startup * 0.3 : 1 - ticks / startup * 0.24
-          : ticks < activeEnd ? first ? 0.3 + (ticks - startup) / active * 0.13 : 0.76 - (ticks - startup) / active * 0.16
-          : first ? 0.5 : 0.6;
-        const duration = human.actions.keyboard_smash.getClip().duration;
-        const clipTime = progress * duration;
-        const weight = THREE.MathUtils.smoothstep((ticks - activeEnd) / recovery, 0, 1);
-        animateGrassy(human, 'keyboard_smash', clipTime, frameDt, air, motion, { side: combat.smashSide, recovery: weight });
-      } else if (combat.action !== null) animateGrassy(human, combat.action, (combat.ticks + alpha) * step, frameDt, air, motion);
-      else animateGrassy(human, action, action === 'idle' ? time : sample, frameDt, air);
-
-      if (combat.action !== null && action === 'ride') human.cycle.update(true, sample);
-      if (p.ride.mode === 'mounting' || p.ride.mode === 'dismounting') {
-        const progress = rideProgress(p.ride, options.tuning, alpha);
-        const size = p.ride.mode === 'mounting' ? progress : 1 - progress;
-        human.cycle.root.scale.copy(bicycleScale).multiplyScalar(size);
-      } else human.cycle.root.scale.copy(bicycleScale);
-      // The simulation already supplies jump/flight altitude; retain authored limb poses without adding it twice.
-      if (!e.body.onGround) human.root.position.y -= animatedRoot.position.y - restRootY;
-    }
 
     return {
       object: root,
       sync(e, alpha, frameDt): void {
+        const nextAppearance = options.appearance ? options.appearance() : appearance;
+        if (nextAppearance !== appearance) { human.applyAppearance(nextAppearance); appearance = nextAppearance; }
         transformation.restore();
         const dead = e.health!.hp <= 0;
         bird.sync(e, alpha, dead ? 0 : frameDt);
@@ -129,16 +60,18 @@ export function createPlayerViewFactory(options: PelicanViewOptions & { grassyVa
             bird.object.position.y += .42 * fall;
           }
         } else {
-          if (wasDead) {
-            human.motionPose.reset();
-            motionTime = flightTime = airborneTime = 0;
-            landingTime = 1;
-            wasFlying = false;
-            wasGrounded = e.body.onGround;
-          }
-          if (human.root.visible || p.transformTicks >= 0) animateHuman(e, alpha, frameDt);
+          if (wasDead) humanAnimator.reset(e);
+          if (human.root.visible || p.transformTicks >= 0) humanAnimator.update(e, alpha, frameDt);
         }
         wasDead = dead;
+        if (options.modelView) {
+          const view = options.modelView();
+          // 检视只转身体；先于变身羽毛采样，保持两种形态的附着点一致。
+          human.root.rotation.x = view.pitch;
+          human.root.rotation.y = view.yaw;
+          bird.object.rotation.x = view.pitch;
+          bird.object.rotation.y = view.yaw - Math.PI / 2 - facingYaw.rotation.y;
+        }
         invincible.visible = !dead && e.health!.overloadInvulnTicks > 0;
         invincible.position.copy(bird.object.position);
         invincible.position.y += e.body.height + .35;

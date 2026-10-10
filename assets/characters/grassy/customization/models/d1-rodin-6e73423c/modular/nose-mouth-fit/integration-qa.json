@@ -1,0 +1,235 @@
+{
+  "comparison": "Official head.blend vs pre-repair head after equivalent SIMPLE level 1; local deformation only",
+  "vertices": 14778,
+  "loops": 57280,
+  "maximumActualDisplacement": 0.01897406578063965,
+  "changedVerticesOver1e6": 526,
+  "outsideRegionMaxDisplacement": 0.0,
+  "uvMaxDelta": 0.0,
+  "baseColorPixelsUnchanged": true,
+  "paintedEyeVertexCount": 402,
+  "paintedEyeMaxDisplacement": 0.0,
+  "paintedEyeMovedVerticesOver1e6": 0,
+  "otherMeshMaxDisplacements": {
+    "D1_Head_ClosedScalp": 0.0,
+    "D1_Head_Lash_-1_0": 0.00020082872651983052,
+    "D1_Head_Lash_-1_1": 1.7618145648157224e-05,
+    "D1_Head_Lash_-1_2": 8.358103514183313e-06,
+    "D1_Head_Lash_1_0": 7.568664295831695e-05,
+    "D1_Head_Lash_1_1": 0.0004332390089984983,
+    "D1_Head_Lash_1_2": 0.00012942319153808057,
+    "D1_Head_NeckClosure": 0.0
+  },
+  "minimumFaceArea": 2.4880778255464975e-06,
+  "finite": true,
+  "profileAudit": {
+    "method": "Mid-sagittal BVH rays (x=0, toward +Y), reference depth aligned at nasal root. Reference z anchors are conditional examples, not confirmed model registration.",
+    "assumedEyeZ": 2.49,
+    "assumedChinZ": 2.23,
+    "assumedEyeChinSpan": 0.26000000000000023,
+    "actualNasalRootY": -0.3391786813735962,
+    "canClaimExactReferenceFit": false,
+    "landmarks": [
+      {
+        "name": "nose_root",
+        "conditionalZ": 2.461764,
+        "actualCentralSurfaceY": -0.3391786813735962,
+        "rootAlignedReferenceTargetY": -0.3391786813735962,
+        "depthError": 0.0,
+        "normalizedEyeChinDepthError": 0.0
+      },
+      {
+        "name": "nose_tip",
+        "conditionalZ": 2.3923518,
+        "actualCentralSurfaceY": -0.37339627742767334,
+        "rootAlignedReferenceTargetY": -0.3874138813735962,
+        "depthError": 0.014017603945922885,
+        "normalizedEyeChinDepthError": 0.05391386133047259
+      },
+      {
+        "name": "subnasale",
+        "conditionalZ": 2.3594124,
+        "actualCentralSurfaceY": -0.35728132724761963,
+        "rootAlignedReferenceTargetY": -0.3615334813735962,
+        "depthError": 0.0042521541259765705,
+        "normalizedEyeChinDepthError": 0.01635443894606372
+      },
+      {
+        "name": "philtrum",
+        "conditionalZ": 2.3405884,
+        "actualCentralSurfaceY": -0.35058093070983887,
+        "rootAlignedReferenceTargetY": -0.3521214813735962,
+        "depthError": 0.0015405506637573563,
+        "normalizedEyeChinDepthError": 0.005925194860605211
+      },
+      {
+        "name": "upper_lip_front",
+        "conditionalZ": 2.3241174,
+        "actualCentralSurfaceY": -0.3457568883895874,
+        "rootAlignedReferenceTargetY": -0.3450624813735962,
+        "depthError": -0.0006944070159912163,
+        "normalizedEyeChinDepthError": -0.0026707962153508296
+      },
+      {
+        "name": "mouth_seam_front",
+        "conditionalZ": 2.3170584,
+        "actualCentralSurfaceY": -0.3404182195663452,
+        "rootAlignedReferenceTargetY": -0.3427094813735962,
+        "depthError": 0.002291261807250977,
+        "normalizedEyeChinDepthError": 0.00881254541250375
+      },
+      {
+        "name": "lower_lip_front",
+        "conditionalZ": 2.3076464,
+        "actualCentralSurfaceY": -0.3327147960662842,
+        "rootAlignedReferenceTargetY": -0.3321196813735962,
+        "depthError": -0.0005951146926879702,
+        "normalizedEyeChinDepthError": -0.002288902664184499
+      },
+      {
+        "name": "mentolabial_recess",
+        "conditionalZ": 2.2852942,
+        "actualCentralSurfaceY": -0.31219208240509033,
+        "rootAlignedReferenceTargetY": -0.31212048137359616,
+        "depthError": -7.160103149417285e-05,
+        "normalizedEyeChinDepthError": -0.00027538858266989535
+      },
+      {
+        "name": "chin_front_round",
+        "conditionalZ": 2.2523522,
+        "actualCentralSurfaceY": -0.2947045564651489,
+        "rootAlignedReferenceTargetY": -0.29564948137359615,
+        "depthError": 0.00094492490844722,
+        "normalizedEyeChinDepthError": 0.003634326570950843
+      }
+    ]
+  },
+  "reviewedAsset": "assets/characters/grassy/customization/models/d1-rodin-6e73423c/modular/head.blend",
+  "visualReview": {
+    "views": [
+      "integrated-front.png",
+      "integrated-right.png",
+      "integrated-three-quarter.png"
+    ],
+    "decision": "Accept final narrowed nose as local nose/lip/chin improvement; browser visual acceptance remains with root; not a completed reference likeness",
+    "observedImprovements": [
+      "Nose tip and subnasal return are readable in profile instead of a single convex mound.",
+      "Central W peak on mouth is reduced to a gentler closed smile.",
+      "No horizontal wrinkles, zipper seams, or detached lip strip introduced by this change.",
+      "The narrowed nose reduces the broad frontal gray underside patch while preserving a small nose tip in profile; geometry/material/lighting were compared at the same camera."
+    ],
+    "remainingDifferences": [
+      "Dark brown mouth texture is still heavier than the reference and the three-quarter far corner remains pointed.",
+      "A soft nasal-base shadow remains.",
+      "The original broad flat lower-jaw edge is retained; the whole jaw was not resculpted."
+    ],
+    "outOfScope": [
+      "Bare-head seams and skin shell supports",
+      "Hair design and texture changes",
+      "Facial-expression topology",
+      "Browser-render verification"
+    ]
+  },
+  "checksRun": [
+    "Blender read-only baseline/official vertex and UV comparisons",
+    "Image pixel hash comparison",
+    "Actual painted iris/eyeliner vertex protection check",
+    "Mid-sagittal BVH profile samples",
+    "Manual front/right/three-quarter render inspection"
+  ],
+  "checksNotRun": [
+    "Full repository tests (root handles release checks)",
+    "Browser view (root handles it)",
+    "Expression deformation / LOD"
+  ],
+  "geometryNormalsAfterNarrowing": [
+    {
+      "z": 2.345,
+      "surfaceY": -0.35175323486328125,
+      "triangleNormal": [
+        -0.11887387931346893,
+        -0.9587309956550598,
+        -0.25827082991600037
+      ]
+    },
+    {
+      "z": 2.355,
+      "surfaceY": -0.3552408218383789,
+      "triangleNormal": [
+        -0.12240377068519592,
+        -0.9249688386917114,
+        -0.3597915768623352
+      ]
+    },
+    {
+      "z": 2.365,
+      "surfaceY": -0.36024701595306396,
+      "triangleNormal": [
+        -0.1477258950471878,
+        -0.8842301964759827,
+        -0.44307342171669006
+      ]
+    },
+    {
+      "z": 2.375,
+      "surfaceY": -0.36656033992767334,
+      "triangleNormal": [
+        -0.2575869560241699,
+        -0.873595654964447,
+        -0.4128919243812561
+      ]
+    },
+    {
+      "z": 2.385,
+      "surfaceY": -0.3714977502822876,
+      "triangleNormal": [
+        -0.3235098421573639,
+        -0.8877794742584229,
+        -0.3273974061012268
+      ]
+    },
+    {
+      "z": 2.395,
+      "surfaceY": -0.37300312519073486,
+      "triangleNormal": [
+        -0.3763852119445801,
+        -0.9125776290893555,
+        0.15980064868927002
+      ]
+    },
+    {
+      "z": 2.405,
+      "surfaceY": -0.3684929609298706,
+      "triangleNormal": [
+        -0.28860822319984436,
+        -0.7051634192466736,
+        0.6476494669914246
+      ]
+    },
+    {
+      "z": 2.415,
+      "surfaceY": -0.35871410369873047,
+      "triangleNormal": [
+        -0.25560250878334045,
+        -0.6912476420402527,
+        0.6759024262428284
+      ]
+    }
+  ],
+  "noseShadowComparison": {
+    "method": "Same camera, same official hair, materials and Blender studio lights before vs after nasal-width reduction; root performs browser verification.",
+    "rectTopLeftPixels": [
+      473,
+      631,
+      528,
+      654
+    ],
+    "previousMeanLinearLuminance": 0.7477694798153003,
+    "narrowedMeanLinearLuminance": 0.8114750521904206,
+    "normalMapChanged": false,
+    "lightingChanged": false,
+    "remainingLimit": "Soft nasal-base shading remains; this is not an exact reference style match."
+  },
+  "sourceBuilderDisplacement": 0.02058076866806411,
+  "displacementInterpretation": "Builder measures the new deformation from raw extracted/subdivided source. Independent QA compares against the previous official head containing the old tiny nose/lip offsets; the two maximum distances use different baselines."
+}

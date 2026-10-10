@@ -1,0 +1,76 @@
+{
+  "canvas_basics": [
+    2200,
+    1920
+  ],
+  "canvas_combinations": [
+    2200,
+    3530
+  ],
+  "composition_cell_size_px": 32,
+  "bounds": {
+    "xMin": -2,
+    "xMax": 22,
+    "yMin": -6,
+    "yMax": 14
+  },
+  "source": "createTerrainCompositionLevel, seed 429, grass, surface",
+  "compositions": [
+    {
+      "id": "meadow",
+      "cells": 480,
+      "solid_cells": 144,
+      "platform_cells": 0,
+      "fluid_cells": 0
+    },
+    {
+      "id": "mound",
+      "cells": 480,
+      "solid_cells": 171,
+      "platform_cells": 0,
+      "fluid_cells": 0
+    },
+    {
+      "id": "gully",
+      "cells": 480,
+      "solid_cells": 123,
+      "platform_cells": 0,
+      "fluid_cells": 0
+    },
+    {
+      "id": "terraces",
+      "cells": 480,
+      "solid_cells": 166,
+      "platform_cells": 0,
+      "fluid_cells": 0
+    },
+    {
+      "id": "cleft",
+      "cells": 480,
+      "solid_cells": 155,
+      "platform_cells": 0,
+      "fluid_cells": 0
+    },
+    {
+      "id": "cave",
+      "cells": 480,
+      "solid_cells": 156,
+      "platform_cells": 0,
+      "fluid_cells": 0
+    },
+    {
+      "id": "roots",
+      "cells": 480,
+      "solid_cells": 164,
+      "platform_cells": 9,
+      "fluid_cells": 0
+    },
+    {
+      "id": "pond",
+      "cells": 480,
+      "solid_cells": 132,
+      "platform_cells": 0,
+      "fluid_cells": 12
+    }
+  ]
+}

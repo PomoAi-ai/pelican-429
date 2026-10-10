@@ -1,0 +1,170 @@
+{
+  "schema": "d1-head-fit.v1",
+  "status": "diagnostic only",
+  "registration": "independent uniform head-height normalization and bbox-centering; no absolute center/size pass inferred",
+  "limitations": [
+    "Reference views are AI illustrations with inconsistent width/depth relationships.",
+    "Candidate includes upper neck support inside head; reference mask excludes neck manually.",
+    "Head-top camera in reference is not proven orthographic.",
+    "Flat emission silhouette ignores color and lighting; beauty colors are not adjusted."
+  ],
+  "views": {
+    "front": {
+      "reference": {
+        "bbox": [
+          10,
+          8,
+          328,
+          280
+        ],
+        "width": 318,
+        "height": 272,
+        "centroid": [
+          173.39330113724878,
+          149.90052967751987
+        ]
+      },
+      "candidate": {
+        "bbox": [
+          94,
+          114,
+          606,
+          553
+        ],
+        "width": 512,
+        "height": 439,
+        "centroid": [
+          349.48681518795746,
+          347.573202312959
+        ]
+      },
+      "referenceAspect": 1.1691176470588236,
+      "candidateAspect": 1.1662870159453302,
+      "aspectRelativeError": -0.00242116875116416,
+      "registeredSilhouetteIoU": 0.9037096335679545,
+      "registeredCentroidDriftPx": [
+        -7.349279930588693,
+        3.6637506620114664
+      ]
+    },
+    "side": {
+      "reference": {
+        "bbox": [
+          9,
+          7,
+          326,
+          274
+        ],
+        "width": 317,
+        "height": 267,
+        "centroid": [
+          173.15723354493818,
+          142.53170731707317
+        ]
+      },
+      "candidate": {
+        "bbox": [
+          70,
+          114,
+          577,
+          553
+        ],
+        "width": 507,
+        "height": 439,
+        "centroid": [
+          329.11223170747314,
+          334.5231656278397
+        ]
+      },
+      "referenceAspect": 1.1872659176029963,
+      "candidateAspect": 1.1548974943052392,
+      "aspectRelativeError": -0.0272629937555241,
+      "registeredSilhouetteIoU": 0.9191500326105336,
+      "registeredCentroidDriftPx": [
+        -3.579409700428357,
+        -2.3301172757116433
+      ]
+    },
+    "back": {
+      "reference": {
+        "bbox": [
+          31,
+          10,
+          240,
+          193
+        ],
+        "width": 209,
+        "height": 183,
+        "centroid": [
+          133.59821240059117,
+          107.76645084101625
+        ]
+      },
+      "candidate": {
+        "bbox": [
+          94,
+          114,
+          606,
+          553
+        ],
+        "width": 512,
+        "height": 439,
+        "centroid": [
+          349.51318481204254,
+          347.573202312959
+        ]
+      },
+      "referenceAspect": 1.1420765027322404,
+      "candidateAspect": 1.1662870159453302,
+      "aspectRelativeError": 0.021198679033471057,
+      "registeredSilhouetteIoU": 0.9178218126432715,
+      "registeredCentroidDriftPx": [
+        2.6182274971178003,
+        -1.3921210327081326
+      ]
+    },
+    "top": {
+      "reference": {
+        "bbox": [
+          3,
+          16,
+          308,
+          303
+        ],
+        "width": 305,
+        "height": 287,
+        "centroid": [
+          154.6343112324009,
+          156.00953606648886
+        ]
+      },
+      "candidate": {
+        "bbox": [
+          94,
+          70,
+          606,
+          577
+        ],
+        "width": 512,
+        "height": 507,
+        "centroid": [
+          349.3808542277902,
+          312.2681016713652
+        ]
+      },
+      "referenceAspect": 1.0627177700348431,
+      "candidateAspect": 1.009861932938856,
+      "aspectRelativeError": -0.049736476218191106,
+      "registeredSilhouetteIoU": 0.8168749784801845,
+      "registeredCentroidDriftPx": [
+        0.43281417008171275,
+        -4.110194976687467
+      ]
+    }
+  },
+  "referenceConsistency": {
+    "widthDepthFromFrontSide": 0.9847142326962331,
+    "widthDepthFromTop": 1.0627177700348431,
+    "relativeConflict": 0.07921439007236608
+  }
+}

@@ -1,0 +1,10 @@
+r01_final_prompt
+
+Edit this R01 sheet. Remove ALL ruler lines, grid lines, text and ground line, leaving a pure WHITE background and FOUR clean character views at same positions. Critical proportion repair: the current black-haired sailor girl is3.6 heads tall. INCREASE each entire head including face/skull/hair UNIFORMLY by approximately13 percent in both width and height relative to the unchanged body. Anchor head enlargement at the neck connection, enlarging upward and outward; do not elongate body or legs. Make a compact3.3-head game character, not a tall figure. Preserve exact facial features, hairstyle, sailor outfit, small hands, standard balanced body. Match this exact enlargement in FRONT, RIGHT, BACK, FRONT45. All shoes stay on same baseline. Four views of same person, clear true profile and three-quarter rotated body. Front large round blue eyes, black shoulder-length bob, ivory sailor blouse, navy skirt, red neckerchief, white socks, navy Mary Jane shoes. White background with ample outer margins, no ruler or other marks, no text at all. Refined clean anime art, neutral nonsexual standing pose and fully opaque outfit.
+
+---
+
+r01_angle_prompt
+
+Preserve the first THREE views exactly as reference, same proportions, designs and scale. Correct ONLY fourth rightmost view: genuinely rotate WHOLE character 45 degrees towards image right, including face, ribcage, pelvis, knees and shoes. Near shoulder prominent, far shoulder foreshortened, nose clearly off center, near and far eyes different projected widths, show front and right side of torso equally. Current fourth is nearly frontal; make this unmistakable three-quarter full body. Same navy sailor skirt/white blouse/red tie/black bob girl. Keep head size and limbs unchanged. Four fullbody views FRONT, RIGHT, BACK, FRONT45, white background, no text or rulers, same baseline.
+

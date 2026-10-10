@@ -17,7 +17,7 @@ function arena(kind: EnemyKind) {
   const enemy = createEnemyEntity(90, kind, { x: 28, y: groundY + (kind === 'watchWasp' ? 5 : 0) }, TUNING);
   enemy.body.onGround = kind !== 'watchWasp';
   const step = (target: { x: number; y: number; vx: number; vy: number }) => {
-    updateEnemy(enemy, target, terrain, TUNING);
+    updateEnemy(enemy, target, terrain, TUNING, 1);
     moveAndCollide(enemy.body, terrain.map, TUNING.sim.step);
   };
   return { terrain, groundY, enemy, step };

@@ -1,0 +1,18 @@
+主角原图版，2026-10-09。
+最新交付：character-tile-scale-front-side.png，新增同套 right-v1.png 右侧原图；正面单图版本保留。
+侧面源区域 (224,34,758,1408)，原内容高 1374 px，等比缩放至 289×744 px。与正面同高 744 px，脚底统一 y=1180；没有局部变形或重绘。
+正面与侧面共同使用 1 格 240 px；绘制后验证等高、脚底对齐、各自等比缩放、无重叠、相同碰撞框和所有模块尺寸，并打开成图检查。
+当前脚本输出正侧对照版本；最新校验信息见 front-side-drawing-checks.json，以下为原正面版记录。
+输出：character-tile-scale-original.png，2560×1600。
+来源：assets/characters/grassy/customization/female/concepts/d1-no-gear/individual/front-v1.png。
+没有调用绘图生成工具，没有使用模型渲染。
+Python/Pillow 仅裁去原图外围留白并等比缩放，保留原图白底、服装、面貌及头身关系。
+目视结合像素检查得到发顶 y=24、鞋底末行 y=1425；裁切区域 (192,24,788,1426)。
+原图内容高 1402 px，按统一比例缩至 744 px = 3.1 格；目标宽取整为 316 px。
+砖块和标尺沿用每格 240 px：整格和墙面 240×240，半格 240×120，斜坡 240×240。
+3.3 头身紫尺是用户指定设计目标的等分参照，不宣称与原图所有解剖地标吻合，也未为了对齐标尺修改原图。
+碰撞框为当前配置 0.8×2.8 格，192×672 px。
+已运行 draw_scale.py 并通过尺寸、脚底对齐、等比缩放取整和头身参照刻度校验；已打开成图目视检查。
+校验坐标、原图 SHA-256 和缩放信息：original-drawing-checks.json。
+复现：uv run assets/concepts/character-tile-scale/local-drawing/draw_scale.py
+本次没有修改原图、模型或游戏逻辑，没有运行游戏测试或构建。

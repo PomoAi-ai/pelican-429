@@ -403,10 +403,13 @@ export function createPostFx(input: PostFxInput): PostFx {
   const smaaMode = antialias === 'smaa';
 
   // 场景目标 = composer.readBuffer；另一个缓冲（writeBuffer）只在 smaa 模式下承接 Grade 的 8 位显示空间输出（无深度、无多重采样）。
+  const sceneDepth = new THREE.DepthTexture(1, 1, THREE.UnsignedInt248Type);
+  sceneDepth.format = THREE.DepthStencilFormat;
   const sceneTarget = new THREE.WebGLRenderTarget(1, 1, {
     type: THREE.HalfFloatType,
     samples: smaaMode ? 0 : lighting.msaa,
-    depthTexture: new THREE.DepthTexture(1, 1),
+    stencilBuffer: true,
+    depthTexture: sceneDepth,
   });
   sceneTarget.texture.name = 'post-fx.scene';
   const displayTarget = new THREE.WebGLRenderTarget(1, 1, { type: THREE.UnsignedByteType, depthBuffer: false });

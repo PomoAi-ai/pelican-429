@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import type { GLTF } from 'three/addons/loaders/GLTFLoader.js';
-import { GRASSY_HEIGHT, GRASSY_MODELS } from '../../config/grassy.ts';
+import { D1_MODELS, GRASSY_HEIGHT, GRASSY_MODELS } from '../../config/grassy.ts';
 import type { GrassyModelVariant } from '../../config/grassy.ts';
 
 export interface GrassyStaticModel {
@@ -60,7 +60,7 @@ function readStaticAsset(gltf: GLTF, path: string): THREE.Group {
 export function loadGrassyStaticAsset(variant: GrassyModelVariant): Promise<void> {
   let pending = loading.get(variant);
   if (!pending) {
-    const { path } = GRASSY_MODELS.find((model) => model.id === variant)!;
+    const { path } = [...GRASSY_MODELS, ...D1_MODELS].find((model) => model.id === variant)!;
     pending = new GLTFLoader().loadAsync(path).then((gltf) => { assets.set(variant, readStaticAsset(gltf, path)); });
     loading.set(variant, pending);
   }

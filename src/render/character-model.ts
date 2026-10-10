@@ -10,17 +10,22 @@ let textureSession: TextureSession | null = null;
 const preloaded = new Map<string, Promise<ArrayBuffer>>();
 export type TextureTier = 'original' | 'web-1k' | 'web' | 'ktx2' | 'ktx2-256' | 'ktx2-compact' | 'ktx2-256-compact';
 
-export function configureCharacterTextures(value: WebGLRenderer): void {
-  renderer = value;
-}
-
-export function disposeCharacterTextures(): void {
+export function configureCharacterTextures(value: WebGLRenderer | null): void {
+  if (renderer === value) return;
   if (textureSession) {
     textureSession.retired = true;
     if (textureSession.pending === 0) textureSession.release();
     textureSession = null;
   }
-  renderer = null;
+  renderer = value;
+}
+
+export function currentCharacterTextureRenderer(): WebGLRenderer | null {
+  return renderer;
+}
+
+export function disposeCharacterTextures(): void {
+  configureCharacterTextures(null);
   preloaded.clear();
 }
 

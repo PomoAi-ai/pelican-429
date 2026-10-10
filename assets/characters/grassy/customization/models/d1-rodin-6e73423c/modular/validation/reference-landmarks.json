@@ -1,0 +1,175 @@
+{
+  "schema": "d1-reference-landmarks.v1",
+  "reference": "private-source/exec-private-source-032.png",
+  "imageSize": [
+    1536,
+    1024
+  ],
+  "coordinateConvention": "pixel coordinates from top left, crops [left, top, right, bottom]",
+  "status": "reference prepared; candidate comparison pending",
+  "notes": [
+    "AI-generated views are not calibrated orthographic photographs. Front and side detail panels use independent composition scales.",
+    "The head-top image may include a pitched view rather than a strict orthographic top projection. Cross-view depth consistency must be reported, not assumed.",
+    "Front/side use enlarged face panels; back uses full-body panel. Labels, body, collar and neck are excluded before comparing silhouettes.",
+    "Pixel landmarks are manual approximations with 2-4 px uncertainty in large panels and 2-3 px in the smaller back panel.",
+    "Normalize each silhouette by head height and center only for shape comparison; do not report this registration as an absolute scale or placement pass.",
+    "Beauty image luminance is diagnostic only and cannot prove albedo matching; no light changes are authorized by this QA task."
+  ],
+  "views": {
+    "front": {
+      "crop": [
+        40,
+        638,
+        380,
+        949
+      ],
+      "neckExcludePolygon": [
+        [
+          172,
+          894
+        ],
+        [
+          249,
+          894
+        ],
+        [
+          280,
+          949
+        ],
+        [
+          144,
+          949
+        ]
+      ],
+      "landmarks": {
+        "leftEyeBounds": [
+          141,
+          800,
+          194,
+          836
+        ],
+        "rightEyeBounds": [
+          239,
+          800,
+          290,
+          836
+        ],
+        "leftIrisBounds": [
+          157,
+          805,
+          184,
+          836
+        ],
+        "noseTip": [
+          214,
+          847
+        ],
+        "mouthCenter": [
+          214,
+          865
+        ],
+        "chin": [
+          214,
+          891
+        ]
+      }
+    },
+    "side": {
+      "crop": [
+        406,
+        640,
+        745,
+        931
+      ],
+      "neckExcludePolygon": [
+        [
+          524,
+          902
+        ],
+        [
+          632,
+          899
+        ],
+        [
+          665,
+          931
+        ],
+        [
+          520,
+          931
+        ]
+      ],
+      "landmarks": {
+        "noseTip": [
+          702,
+          849
+        ],
+        "mouthFront": [
+          691,
+          869
+        ],
+        "chin": [
+          673,
+          895
+        ]
+      }
+    },
+    "back": {
+      "crop": [
+        970,
+        8,
+        1240,
+        229
+      ],
+      "neckExcludePolygon": [
+        [
+          1066,
+          192
+        ],
+        [
+          1140,
+          192
+        ],
+        [
+          1180,
+          229
+        ],
+        [
+          1030,
+          229
+        ]
+      ],
+      "landmarks": {}
+    },
+    "top": {
+      "crop": [
+        790,
+        645,
+        1200,
+        958
+      ],
+      "landmarks": {}
+    }
+  },
+  "referenceFaceRatios": {
+    "eyeWidthHeight": 1.47,
+    "irisWidthHeight": 0.87,
+    "irisWidthEyeWidth": [
+      0.53,
+      0.57
+    ],
+    "browEyeGapEyeHeight": [
+      0.3,
+      0.35
+    ],
+    "eyeCenterGapCheekWidth": [
+      0.52,
+      0.55
+    ],
+    "eyeCenterMouthDistanceEyeHeight": 1.25,
+    "eyeCenterChinDistanceEyeHeight": [
+      1.95,
+      2.0
+    ]
+  }
+}

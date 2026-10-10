@@ -1,0 +1,69 @@
+{
+  "status": "display RGB patch diagnostic only; render lighting differs from painted reference; no albedo equivalence or color calibration claimed",
+  "patches": {
+    "reference-cheek": {
+      "pixelRect": [
+        188,
+        840,
+        202,
+        856
+      ],
+      "medianRGB255": [
+        254.00001525878906,
+        240.0000160932541,
+        236.00001633167267
+      ],
+      "meanValue": 0.9960259640855449,
+      "valueP95": 1.0,
+      "meanSaturation": 0.07048218641791135
+    },
+    "reference-hair": {
+      "pixelRect": [
+        105,
+        712,
+        136,
+        745
+      ],
+      "medianRGB255": [
+        250.00001549720764,
+        170.0000050663948,
+        104.00000900030136
+      ],
+      "meanValue": 0.8765377241131265,
+      "valueP95": 0.9960784912109375,
+      "meanSaturation": 0.6223689588487474
+    },
+    "candidate-cheek": {
+      "pixelRect": [
+        293,
+        399,
+        316,
+        425
+      ],
+      "medianRGB255": [
+        255.0,
+        228.00001680850983,
+        221.00001722574234
+      ],
+      "meanValue": 0.9987474660012235,
+      "valueP95": 1.0,
+      "meanSaturation": 0.1374657096818277
+    },
+    "candidate-hair": {
+      "pixelRect": [
+        190,
+        173,
+        231,
+        209
+      ],
+      "medianRGB255": [
+        255.0,
+        211.0000178217888,
+        154.00000602006912
+      ],
+      "meanValue": 0.9993437520937545,
+      "valueP95": 1.0,
+      "meanSaturation": 0.4036032748937524
+    }
+  }
+}

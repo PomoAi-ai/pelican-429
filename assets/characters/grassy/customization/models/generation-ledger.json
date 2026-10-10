@@ -1,0 +1,49 @@
+{
+  "service": "Hyper3D CLI",
+  "generationTier": "Gen-2.5-Medium",
+  "meshMode": "Quad",
+  "targetPolygonCount": 18000,
+  "before": {
+    "balance": 25,
+    "subscription_balance": 24,
+    "frozen": 0
+  },
+  "after": {
+    "balance": 25,
+    "subscription_balance": 18,
+    "frozen": 0
+  },
+  "observedSubscriptionCreditDecrease": 6,
+  "tasks": [
+    {
+      "style": "s1",
+      "generate": "private-source-034",
+      "bang": "private-source-056"
+    },
+    {
+      "style": "s2",
+      "generate": "private-source-033",
+      "bang": "private-source-037"
+    },
+    {
+      "style": "s3",
+      "generate": "private-source-068",
+      "bang": "private-source-019"
+    },
+    {
+      "style": "s4",
+      "generate": "private-source-074",
+      "bang": "private-source-070"
+    },
+    {
+      "style": "s5",
+      "generate": "private-source-046",
+      "bang": "private-source-064"
+    },
+    {
+      "style": "s6",
+      "generate": "private-source-027",
+      "bang": "private-source-075"
+    }
+  ]
+}

@@ -1,4 +1,47 @@
 .help-page { max-width: 1320px; margin: 0 auto; padding: 64px 40px 32px; }
+.help-page.concepts-page { max-width: none; padding: 16px 24px 24px; }
+.concepts-heading { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 20px; padding-bottom: 12px; border-bottom: 1px solid var(--home-line); }
+#dev-index .concepts-heading h1 { margin: 0; font-size: 20px; line-height: 1.5; }
+.concepts-heading > .concepts-copy { margin: 0; }
+.concepts-reading-guide { flex: 1; min-width: 150px; font-size: 12px; color: var(--home-muted); }
+.concepts-reading-guide summary { width: fit-content; cursor: pointer; padding: 6px 0; }
+.concepts-reading-guide[open] { flex-basis: 100%; }
+.concepts-page .help-layout { padding-top: 18px; gap: 24px; }
+.concepts-page .help-content { min-width: 0; }
+.concepts-figure { margin: 20px 0 0; overflow: hidden; border: 1px solid var(--home-line); border-radius: 10px; background: var(--home-surface); }
+.concepts-figure img { display: block; width: 100%; height: auto; }
+.concepts-figure figcaption { padding: 0 16px; }
+.concepts-figure + h3 { margin-top: 28px; }
+.concepts-definitions { margin: 0; }
+.concepts-definitions > div { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 20px; padding: 18px 0; border-bottom: 1px solid var(--home-line); }
+.concepts-definitions dt { font-size: 14px; line-height: 1.7; }
+.concepts-definitions dd { margin: 0; }
+.concepts-definitions strong { color: var(--home-accent); font-size: 16px; }
+.concepts-definitions dd p { margin: 6px 0 0; }
+.concepts-note { padding: 16px 20px; border-left: 3px solid var(--home-accent); background: var(--home-surface); }
+.concepts-originals { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.concepts-page .help-index { max-height: calc(100dvh - 64px); overflow-y: auto; overscroll-behavior: contain; }
+.concepts-nav-group > summary { padding: 6px 4px; cursor: pointer; color: var(--home-accent); font-size: 13px; }
+#dev-index .concepts-page .help-index a { min-height: 32px; gap: 8px; padding: 2px 8px; }
+.concepts-page code { overflow-wrap: anywhere; font-size: 12px; }
+.concepts-system-document { min-width: 0; scroll-margin-top: 32px; }
+.concepts-copy { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; margin: 0 0 12px; }
+.concepts-copy button { min-height: 32px; padding: 4px 10px; border: 1px solid var(--home-line); border-radius: 6px; background: var(--home-surface); color: var(--home-accent); font: 13px/1.5 system-ui, sans-serif; cursor: pointer; }
+.concepts-copy button:hover { background: var(--home-surface-2); }
+.concepts-copy button:disabled { opacity: 0.6; cursor: wait; }
+.concepts-copy span { color: var(--home-muted); font: 12px/1.6 system-ui, sans-serif; }
+.concepts-system-document > h2 { padding-top: 32px; margin-top: 36px; border-top: 1px solid var(--home-line); scroll-margin-top: 32px; }
+.concepts-system-document > h3 { margin-top: 28px; }
+.concepts-system-document :is(li, blockquote) { color: var(--home-muted); font-size: 14px; line-height: 1.85; }
+.concepts-system-document li + li { margin-top: 6px; }
+.concepts-system-document ul, .concepts-system-document ol { padding-left: 24px; }
+.concepts-note > p:first-child { margin-top: 0; }
+.concepts-note > p:last-child { margin-bottom: 0; }
+.concepts-table-scroll { max-width: 100%; overflow-x: auto; margin: 20px 0; }
+.concepts-table-scroll table { width: 100%; border-collapse: collapse; font-size: 13px; line-height: 1.7; }
+.concepts-table-scroll :is(th, td) { min-width: 96px; padding: 12px; border: 1px solid var(--home-line); text-align: left; vertical-align: top; }
+.concepts-table-scroll th { color: var(--home-fg); background: var(--home-surface-2); }
+.concepts-table-scroll td { color: var(--home-muted); }
 .help-page p { color: var(--home-muted); font-size: 14px; line-height: 1.85; }
 .help-page .home-eyebrow { margin: 0 0 12px; color: var(--home-accent); font-size: 10px; letter-spacing: 2px; }
 .help-hero { display: grid; grid-template-columns: 1.1fr 1fr; align-items: center; gap: 48px; padding-bottom: 44px; border-bottom: 1px solid var(--home-line); }
@@ -63,9 +106,23 @@
   .help-layout { grid-template-columns: 1fr; gap: 28px; padding-top: 20px; }
   .help-index { position: static; display: flex; flex-wrap: wrap; gap: 4px; }
   .help-index p { display: none; }
+  .concepts-page .help-index { display: block; max-height: none; overflow: visible; }
+  .concepts-nav-group[open] { display: flex; flex-wrap: wrap; gap: 4px; }
+  .concepts-nav-group > summary { flex-basis: 100%; }
   .help-controls-grid { gap: 20px; }
 }
+@media (min-width: 641px) and (max-width: 1000px) {
+  .concepts-page .help-layout { grid-template-columns: 150px minmax(0, 1fr); gap: 24px; }
+  .concepts-page .help-index { position: sticky; display: grid; max-height: calc(100dvh - 64px); overflow-y: auto; }
+  .concepts-page .help-index p { display: block; }
+  .concepts-nav-group[open] { display: block; }
+  .concepts-definitions > div { grid-template-columns: 1fr; gap: 6px; }
+}
 @media (max-width: 640px) {
+  .help-page.concepts-page { padding: 12px; }
+  .concepts-page .help-index { max-height: 220px; overflow-y: auto; }
+  .concepts-definitions > div { grid-template-columns: 1fr; gap: 6px; }
+  .concepts-originals { gap: 10px; }
   .help-page { padding: 44px 20px 28px; }
   .help-hero { grid-template-columns: 1fr; gap: 16px; padding-bottom: 28px; }
   .help-hero img { aspect-ratio: 2.4; }

@@ -13,8 +13,8 @@ import type { Tuning } from '../config/tuning.ts';
 import type { TileQuery } from '../world/tile-map.ts';
 import { createPostFx } from './post-fx.ts';
 import type { PostFx } from './post-fx.ts';
-import { fitShadowCamera } from './shadow-fit.ts';
-import type { ShadowFit } from './shadow-fit.ts';
+import { fitShadowCamera, shadowReceiverBounds } from './shadow-fit.ts';
+import type { ShadowFit, Vec3Like } from './shadow-fit.ts';
 import { configureCharacterTextures, disposeCharacterTextures } from './character-model.ts';
 
 const SHADOW_HALF_EXTENT_MIN = 14;
@@ -34,6 +34,8 @@ export interface Stage {
   readonly canvas: HTMLCanvasElement;
   readonly quality: LightingQuality;
   setQuality(quality: LightingQuality): void;
+  /** 从场景指向太阳；阴影拟合保留此方向，不必归一化。 */
+  setSunDirection(direction: Vec3Like): void;
   /** 当前抗锯齿方式；setAntialias 运行时切换（后期链路重建 SMAA 通道/场景目标采样数，见 post-fx）。 */
   readonly antialias: AntialiasMode;
   setAntialias(mode: AntialiasMode): void;
@@ -62,6 +64,7 @@ export interface BackdropHaze extends Readonly<LightingTuning['haze']> {
 
 export interface Backdrop {
   readonly root: THREE.Group;
+  readonly layers: Readonly<Record<'near' | 'middle' | 'far', THREE.Mesh>>;
   dispose(): void;
 }
 
@@ -158,7 +161,8 @@ export function createBackdrop(options: BackdropOptions): Backdrop {
     { name: 'far', z: -76, color: '#96adbd', rise: 23, amplitude: 19, span: 55, depth: 8, seed: 0x4138 },
     { name: 'middle', z: -43, color: '#7b9f9d', rise: 13, amplitude: 13, span: 36, depth: 6, seed: 0x7251 },
     { name: 'near', z: -20, color: '#6d9485', rise: 4, amplitude: 8, span: 26, depth: 4, seed: 0x9357 },
-  ];
+  ] as const;
+  const layerMeshes = {} as Record<'near' | 'middle' | 'far', THREE.Mesh>;
   const skirtBottom = -40;
   for (const layer of layers) {
     const pad = 180;
@@ -209,10 +213,12 @@ export function createBackdrop(options: BackdropOptions): Backdrop {
     mesh.matrixAutoUpdate = false;
     mesh.updateMatrix();
     root.add(mesh);
+    layerMeshes[layer.name] = mesh;
   }
 
   return {
     root,
+    layers: layerMeshes,
     dispose() {
       root.removeFromParent();
       root.clear();
@@ -222,15 +228,15 @@ export function createBackdrop(options: BackdropOptions): Backdrop {
   };
 }
 
-function skyTexture(): THREE.CanvasTexture {
+export function createSkyTexture(top: string, bottom: string): THREE.CanvasTexture {
   const canvas = document.createElement('canvas');
   canvas.width = 4;
   canvas.height = 256;
   const ctx = canvas.getContext('2d');
   if (!ctx) throw new Error('stage: cannot create 2D context for the sky gradient');
   const g = ctx.createLinearGradient(0, 0, 0, canvas.height);
-  g.addColorStop(0, SKY_TOP);
-  g.addColorStop(1, SKY_BOTTOM);
+  g.addColorStop(0, top);
+  g.addColorStop(1, bottom);
   ctx.fillStyle = g;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   const texture = new THREE.CanvasTexture(canvas);
@@ -297,7 +303,7 @@ export function createStageView(renderer: THREE.WebGLRenderer, tuning: Tuning, o
   const canvas = renderer.domElement;
 
   const scene = new THREE.Scene();
-  const sky = skyTexture();
+  const sky = createSkyTexture(SKY_TOP, SKY_BOTTOM);
   scene.background = sky;
 
   const camera = new THREE.PerspectiveCamera(tuning.camera.fov, 1, 0.5, 200);
@@ -339,19 +345,33 @@ export function createStageView(renderer: THREE.WebGLRenderer, tuning: Tuning, o
   const postFx = createPostFx({ renderer, scene, camera, lighting: l, quality, antialias: options.antialias ?? l.antialias });
 
   let lastFit: ShadowFit | null = null;
-  /** 主光与阴影相机跟随相机可视区域（相机平视 z=0，注视点 = 相机 xy）。 */
+  let sunDirection = l.sun.direction;
+  const frustumCorners = Array.from({ length: 8 }, () => new THREE.Vector3());
+  /** 正面镜头保留稳定拟合；自由旋转时按视锥与实体深度带交集拟合。 */
   const updateKeyLight = (): void => {
     const hh = camera.position.z * Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2);
-    const fit = fitShadowCamera({
+    let bounds = {
       centerX: camera.position.x,
       centerY: camera.position.y,
       halfWidth: hh * camera.aspect,
       halfHeight: hh,
+    };
+    if (camera.quaternion.x !== 0 || camera.quaternion.y !== 0 || camera.quaternion.z !== 0 || camera.position.z <= 0) {
+      camera.updateMatrixWorld();
+      for (const [index, corner] of frustumCorners.entries()) {
+        corner.set(index & 1 ? 1 : -1, index & 2 ? 1 : -1, index & 4 ? 1 : -1).unproject(camera);
+      }
+      const visible = shadowReceiverBounds(frustumCorners, l.shadow.zMin, l.shadow.zMax);
+      if (!visible) return; // 视野内没有实体深度带，无需更新阴影。
+      bounds = visible;
+    }
+    const fit = fitShadowCamera({
+      ...bounds,
       margin: l.shadow.margin,
       zMin: l.shadow.zMin,
       zMax: l.shadow.zMax,
       casterReach: l.shadow.casterReach,
-      direction: l.sun.direction,
+      direction: sunDirection,
       mapSize: l.shadow.mapSize,
     });
     keyLight.position.set(fit.position.x, fit.position.y, fit.position.z);
@@ -387,6 +407,9 @@ export function createStageView(renderer: THREE.WebGLRenderer, tuning: Tuning, o
     setQuality(q) {
       postFx.setQuality(q);
       quality = q;
+    },
+    setSunDirection(direction) {
+      sunDirection = direction;
     },
     get antialias() {
       return postFx.antialias;

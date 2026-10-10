@@ -96,6 +96,8 @@ export interface WorldViewsInput {
   readonly actors?: () => readonly Entity[];
   /** 水体色板（main 由 ?water= 解析；缺省 DEFAULT_WATER_PALETTE）。 */
   readonly waterPalette?: WaterPaletteName;
+  /** 已砍倒的树 id（家园模式的实时数组；缺省 = 无）：花草不再在它们下面长阴生植物。 */
+  readonly felledTrees?: readonly number[];
 }
 
 /** 风吹天气句柄（main 的调试键 V 与 ?debug 暴露）。 */
@@ -222,7 +224,7 @@ export function createWorldViews(input: WorldViewsInput): WorldViews {
   const decorEnv = createDecorEnv(level, ground, groundColumns);
   // 浮空岛正面的攀附由空岛视图画（向上爬的岛体版本），瓦片视图跳过岛体列。
   const onIsland = (tx: number, ty: number): boolean => level.islands.some((s) => tx >= s.x0 && tx <= s.x1 && ty >= (s.bottoms[tx - s.x0] as number) && ty < (s.tops[tx - s.x0] as number));
-  const tiles = add(createTileView(level.map, { textureSize: input.terrainTextureSize, floraEnv: createFloraEnv({ lakes: level.lakes, trees: level.trees, deserts: level.deserts, rockClear: rockGrassClearance(decorEnv) }), lakes: level.lakes, bareAir: covered, noClimbers: onIsland }));
+  const tiles = add(createTileView(level.map, { textureSize: input.terrainTextureSize, floraEnv: createFloraEnv({ lakes: level.lakes, trees: level.trees, felled: input.felledTrees, deserts: level.deserts, rockClear: rockGrassClearance(decorEnv) }), lakes: level.lakes, bareAir: covered, noClimbers: onIsland }));
   // 021：岛上树的根盘贴岛顶（树视图用岛感知轮廓；其余视图仍用真实地表）。
   const trees = add(createTreeView(level.trees, { ground: islandGroundProfile(level.map, level.islands, groundColumns, ground, level.lakes) }));
   const water = add(createWaterView(level.fluid, input.waterPalette ? { palette: input.waterPalette } : {}));

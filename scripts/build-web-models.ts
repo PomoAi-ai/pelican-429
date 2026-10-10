@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { readFileSync, writeFileSync, renameSync, mkdtempSync, rmSync } from 'node:fs';
+import { readFileSync, writeFileSync, renameSync, mkdtempSync, rmSync, existsSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
@@ -13,11 +13,17 @@ const root = fileURLToPath(new URL('../', import.meta.url));
 const maxBuffer = 64 * 1024 * 1024;
 const pngSignature = Buffer.from('89504e470d0a1a0a', 'hex');
 const args = process.argv.slice(2);
-assert.ok(args.length === 0 || (args.length === 1 && ['--ktx2', '--web-1k', '--ktx2-256'].includes(args[0]!)),
-  'Expected --ktx2, --web-1k, --ktx2-256, or no arguments');
-const ktx256 = args[0] === '--ktx2-256';
-const ktx2 = args[0] === '--ktx2' || ktx256;
-const web1k = args[0] === '--web-1k';
+const filters = args.filter(arg => arg.startsWith('--only='));
+const modes = args.filter(arg => !arg.startsWith('--only='));
+assert.ok(filters.length <= 1 && (modes.length === 0 || modes.length === 1 && ['--ktx2', '--web-1k', '--ktx2-256'].includes(modes[0]!)),
+  'Expected optional --ktx2, --web-1k, or --ktx2-256 and optional --only=source-path-prefix');
+const only = filters[0]?.slice('--only='.length).replace(/^\.\//, '');
+assert.notEqual(only, '', '--only requires a nonempty source path prefix');
+const sources = WEB_MODEL_SOURCES.filter(source => only === undefined || source.replace(/^\.\//, '').startsWith(only));
+assert.ok(sources.length > 0, `No registered model matches --only=${only}`);
+const ktx256 = modes[0] === '--ktx2-256';
+const ktx2 = modes[0] === '--ktx2' || ktx256;
+const web1k = modes[0] === '--web-1k';
 const textureLimit = web1k ? 1024 : ktx256 ? 256 : 512;
 const toktx = process.env.TOKTX ?? 'toktx';
 const ktx = toktx === 'toktx' ? 'ktx' : resolve(dirname(toktx), 'ktx');
@@ -154,6 +160,17 @@ function compressKtx(png: Buffer, kind: 'color' | 'normal' | 'data', width: numb
   }
 }
 
+/** Large bidirectional image pipes can stall native encoders on macOS. */
+function imageTool(command: string, args: string[], input: Buffer): Buffer {
+  const directory = mkdtempSync(resolve(tmpdir(), 'pelican-image-'));
+  try {
+    const source = resolve(directory, 'input'), destination = resolve(directory, 'output');
+    writeFileSync(source, input);
+    execFileSync(command, args.map(arg => arg.replace('@input', source).replace('@output', destination)), { maxBuffer });
+    return readFileSync(destination);
+  } finally { rmSync(directory, { recursive: true }); }
+}
+
 function compressImage(png: Buffer, kind: 'color' | 'normal' | 'data') {
   assert.deepEqual(png.subarray(0, 8), pngSignature, 'Expected embedded PNG');
   const width = png.readUInt32BE(16), height = png.readUInt32BE(20);
@@ -164,9 +181,9 @@ function compressImage(png: Buffer, kind: 'color' | 'normal' | 'data') {
   if (scale < 1) {
     // Color is filtered in linear light; packed material channels are numerical data.
     const colorspace = kind === 'color' ? ['-colorspace', 'RGB'] : ['-set', 'colorspace', 'RGB'];
-    const rgba = execFileSync('magick', ['png:-', ...colorspace, '-filter', 'Lanczos', '-resize',
+    const rgba = imageTool('magick', ['png:@input', ...colorspace, '-filter', 'Lanczos', '-resize',
       `${outputWidth}x${outputHeight}!`, ...(kind === 'color' ? ['-colorspace', 'sRGB'] : []),
-      '-depth', '8', 'rgba:-'], { input: png, maxBuffer });
+      '-depth', '8', 'rgba:@output'], png);
     if (kind === 'normal') {
       // Averaging unit normals shortens them; restore unit length before encoding.
       for (let p = 0; p < rgba.length; p += 4) {
@@ -177,15 +194,15 @@ function compressImage(png: Buffer, kind: 'color' | 'normal' | 'data') {
         rgba[p + 2] = Math.round((z / length + 1) * 127.5);
       }
     }
-    resized = execFileSync('magick', ['-size', `${outputWidth}x${outputHeight}`, '-depth', '8',
-      'rgba:-', 'png:-'], { input: rgba, maxBuffer });
+    resized = imageTool('magick', ['-size', `${outputWidth}x${outputHeight}`, '-depth', '8',
+      'rgba:@input', 'png:@output'], rgba);
   }
   if (ktx2) return { ...compressKtx(resized, kind, outputWidth, outputHeight), width, height, outputWidth, outputHeight, kind };
   const options = kind === 'color' ? ['-q', '90', '-alpha_q', '100', '-sharp_yuv'] : ['-lossless', '-exact'];
-  const encoded = execFileSync('cwebp', ['-quiet', ...options, '-m', '6', '-o', '-', '--', '-'], { input: resized, maxBuffer });
+  const encoded = imageTool('cwebp', ['-quiet', ...options, '-m', '6', '-o', '@output', '--', '@input'], resized);
   // Check real output pixels, including alpha, rather than just encoder exit status.
-  const decoded = execFileSync('magick', ['webp:-', '-depth', '8', 'rgba:-'], { input: encoded, maxBuffer });
-  const reference = execFileSync('magick', ['png:-', '-depth', '8', 'rgba:-'], { input: resized, maxBuffer });
+  const decoded = imageTool('magick', ['webp:@input', '-depth', '8', 'rgba:@output'], encoded);
+  const reference = imageTool('magick', ['png:@input', '-depth', '8', 'rgba:@output'], resized);
   assert.equal(decoded.length, outputWidth * outputHeight * 4);
   if (kind !== 'color') assert.deepEqual(decoded, reference, 'Data texture encoding changed pixels');
   else for (let p = 3; p < decoded.length; p += 4) assert.equal(decoded[p], reference[p], 'Alpha changed');
@@ -285,6 +302,11 @@ const imageMagick = execFileSync('magick', ['-version'], { encoding: 'utf8' }).s
 const encoder = ktx2 ? { ktxSoftware: execFileSync(ktx, ['--version'], { encoding: 'utf8' }).trim() }
   : { webp: execFileSync('cwebp', ['-version'], { encoding: 'utf8' }).trim() };
 await Promise.all([MeshoptEncoder.ready, MeshoptDecoder.ready]);
-const models = WEB_MODEL_SOURCES.map(buildModel);
+const built = sources.map(buildModel);
 const reportName = ktx256 ? 'ktx2-256' : ktx2 ? 'ktx2' : web1k ? 'web-1k' : 'web';
-writeFileSync(resolve(root, `assets/characters/${reportName}-models-report.json`), `${JSON.stringify({ imageMagick, ...encoder, textureLimit, meshopt: '0.22.0', models }, null, 2)}\n`);
+const reportPath = resolve(root, `assets/characters/${reportName}-models-report.json`);
+// 局部生成保留其他模型的记录，后续 compact 仍可按完整清单构建。
+const previous = only !== undefined && existsSync(reportPath) ? JSON.parse(readFileSync(reportPath, 'utf8')).models as ReturnType<typeof buildModel>[] : [];
+const replacements = new Map(built.map(model => [model.source, model]));
+const models = [...previous.filter(model => !replacements.has(model.source)), ...built];
+writeFileSync(reportPath, `${JSON.stringify({ imageMagick, ...encoder, textureLimit, meshopt: '0.22.0', models }, null, 2)}\n`);

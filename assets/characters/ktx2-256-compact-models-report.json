@@ -66,39 +66,39 @@
       "quantizedViews": 516,
       "bufferErrors": {
         "POSITION": {
-          "maxAbsoluteError": 1.52587890625e-05,
+          "maxAbsoluteError": 0.0000152587890625,
           "values": 165663
         },
         "TEXCOORD_0": {
-          "maxAbsoluteError": 7.62939453125e-06,
+          "maxAbsoluteError": 0.00000762939453125,
           "values": 90402
         },
         "morph:POSITION": {
-          "maxAbsoluteError": 3.814697265625e-06,
+          "maxAbsoluteError": 0.000003814697265625,
           "values": 7920
         },
         "morph:NORMAL": {
-          "maxAbsoluteError": 7.62939453125e-06,
+          "maxAbsoluteError": 0.00000762939453125,
           "values": 7920
         },
         "NORMAL": {
-          "maxAbsoluteError": 7.62939453125e-06,
+          "maxAbsoluteError": 0.00000762939453125,
           "values": 158946
         },
         "WEIGHTS_0": {
-          "maxAbsoluteError": 7.62939453125e-06,
+          "maxAbsoluteError": 0.00000762939453125,
           "values": 109376
         },
         "animation:rotation": {
-          "maxAbsoluteError": 7.62939453125e-06,
+          "maxAbsoluteError": 0.00000762939453125,
           "values": 38888
         },
         "animation:translation": {
-          "maxAbsoluteError": 1.5020370483398438e-05,
+          "maxAbsoluteError": 0.000015020370483398438,
           "values": 14868
         },
         "animation:scale": {
-          "maxAbsoluteError": 7.62939453125e-06,
+          "maxAbsoluteError": 0.00000762939453125,
           "values": 582
         }
       }
@@ -175,43 +175,43 @@
           "quantizedViews": 79,
           "bufferErrors": {
             "POSITION": {
-              "maxAbsoluteError": 1.52587890625e-05,
+              "maxAbsoluteError": 0.0000152587890625,
               "values": 62460
             },
             "NORMAL": {
-              "maxAbsoluteError": 3.814697265625e-06,
+              "maxAbsoluteError": 0.000003814697265625,
               "values": 62460
             },
             "TEXCOORD_0": {
-              "maxAbsoluteError": 3.814697265625e-06,
+              "maxAbsoluteError": 0.000003814697265625,
               "values": 41640
             },
             "WEIGHTS_0": {
-              "maxAbsoluteError": 7.62939453125e-06,
+              "maxAbsoluteError": 0.00000762939453125,
               "values": 83280
             },
             "morph:POSITION": {
-              "maxAbsoluteError": 3.814697265625e-06,
+              "maxAbsoluteError": 0.000003814697265625,
               "values": 5214
             },
             "morph:NORMAL": {
-              "maxAbsoluteError": 7.62939453125e-06,
+              "maxAbsoluteError": 0.00000762939453125,
               "values": 29271
             },
             "animation:rotation": {
-              "maxAbsoluteError": 7.62939453125e-06,
+              "maxAbsoluteError": 0.00000762939453125,
               "values": 20400
             },
             "animation:scale": {
-              "maxAbsoluteError": 7.510185241699219e-06,
+              "maxAbsoluteError": 0.000007510185241699219,
               "values": 363
             },
             "animation:weights": {
-              "maxAbsoluteError": 6.735324859619141e-06,
+              "maxAbsoluteError": 0.000006735324859619141,
               "values": 242
             },
             "animation:translation": {
-              "maxAbsoluteError": 3.769993782043457e-06,
+              "maxAbsoluteError": 0.000003769993782043457,
               "values": 801
             }
           }
@@ -290,47 +290,47 @@
           "quantizedViews": 78,
           "bufferErrors": {
             "POSITION": {
-              "maxAbsoluteError": 1.52587890625e-05,
+              "maxAbsoluteError": 0.0000152587890625,
               "values": 66501
             },
             "NORMAL": {
-              "maxAbsoluteError": 7.62939453125e-06,
+              "maxAbsoluteError": 0.00000762939453125,
               "values": 66501
             },
             "TEXCOORD_0": {
-              "maxAbsoluteError": 3.814697265625e-06,
+              "maxAbsoluteError": 0.000003814697265625,
               "values": 41218
             },
             "WEIGHTS_0": {
-              "maxAbsoluteError": 7.62939453125e-06,
+              "maxAbsoluteError": 0.00000762939453125,
               "values": 82436
             },
             "morph:NORMAL": {
-              "maxAbsoluteError": 7.62939453125e-06,
+              "maxAbsoluteError": 0.00000762939453125,
               "values": 33756
             },
             "COLOR_0": {
-              "maxAbsoluteError": 3.635883331298828e-06,
+              "maxAbsoluteError": 0.000003635883331298828,
               "values": 4182
             },
             "morph:POSITION": {
-              "maxAbsoluteError": 3.814697265625e-06,
+              "maxAbsoluteError": 0.000003814697265625,
               "values": 6834
             },
             "animation:rotation": {
-              "maxAbsoluteError": 7.62939453125e-06,
+              "maxAbsoluteError": 0.00000762939453125,
               "values": 17088
             },
             "animation:scale": {
-              "maxAbsoluteError": 7.510185241699219e-06,
+              "maxAbsoluteError": 0.000007510185241699219,
               "values": 363
             },
             "animation:weights": {
-              "maxAbsoluteError": 6.735324859619141e-06,
+              "maxAbsoluteError": 0.000006735324859619141,
               "values": 242
             },
             "animation:translation": {
-              "maxAbsoluteError": 3.769993782043457e-06,
+              "maxAbsoluteError": 0.000003769993782043457,
               "values": 801
             }
           }
@@ -409,43 +409,43 @@
           "quantizedViews": 64,
           "bufferErrors": {
             "POSITION": {
-              "maxAbsoluteError": 1.52587890625e-05,
+              "maxAbsoluteError": 0.0000152587890625,
               "values": 65181
             },
             "NORMAL": {
-              "maxAbsoluteError": 7.62939453125e-06,
+              "maxAbsoluteError": 0.00000762939453125,
               "values": 65181
             },
             "TEXCOORD_0": {
-              "maxAbsoluteError": 3.814697265625e-06,
+              "maxAbsoluteError": 0.000003814697265625,
               "values": 43454
             },
             "WEIGHTS_0": {
-              "maxAbsoluteError": 7.62939453125e-06,
+              "maxAbsoluteError": 0.00000762939453125,
               "values": 86908
             },
             "morph:POSITION": {
-              "maxAbsoluteError": 3.814697265625e-06,
+              "maxAbsoluteError": 0.000003814697265625,
               "values": 4902
             },
             "morph:NORMAL": {
-              "maxAbsoluteError": 7.62939453125e-06,
+              "maxAbsoluteError": 0.00000762939453125,
               "values": 30186
             },
             "animation:rotation": {
-              "maxAbsoluteError": 7.62939453125e-06,
+              "maxAbsoluteError": 0.00000762939453125,
               "values": 15428
             },
             "animation:scale": {
-              "maxAbsoluteError": 7.510185241699219e-06,
+              "maxAbsoluteError": 0.000007510185241699219,
               "values": 363
             },
             "animation:weights": {
-              "maxAbsoluteError": 6.735324859619141e-06,
+              "maxAbsoluteError": 0.000006735324859619141,
               "values": 242
             },
             "animation:translation": {
-              "maxAbsoluteError": 3.814697265625e-06,
+              "maxAbsoluteError": 0.000003814697265625,
               "values": 147
             }
           }
@@ -524,47 +524,47 @@
           "quantizedViews": 71,
           "bufferErrors": {
             "POSITION": {
-              "maxAbsoluteError": 1.52587890625e-05,
+              "maxAbsoluteError": 0.0000152587890625,
               "values": 65400
             },
             "NORMAL": {
-              "maxAbsoluteError": 7.62939453125e-06,
+              "maxAbsoluteError": 0.00000762939453125,
               "values": 65400
             },
             "TEXCOORD_0": {
-              "maxAbsoluteError": 3.814697265625e-06,
+              "maxAbsoluteError": 0.000003814697265625,
               "values": 40484
             },
             "WEIGHTS_0": {
-              "maxAbsoluteError": 7.62939453125e-06,
+              "maxAbsoluteError": 0.00000762939453125,
               "values": 80968
             },
             "morph:NORMAL": {
-              "maxAbsoluteError": 7.62939453125e-06,
+              "maxAbsoluteError": 0.00000762939453125,
               "values": 32718
             },
             "COLOR_0": {
-              "maxAbsoluteError": 3.635883331298828e-06,
+              "maxAbsoluteError": 0.000003635883331298828,
               "values": 4182
             },
             "morph:POSITION": {
-              "maxAbsoluteError": 3.814697265625e-06,
+              "maxAbsoluteError": 0.000003814697265625,
               "values": 6255
             },
             "animation:rotation": {
-              "maxAbsoluteError": 7.62939453125e-06,
+              "maxAbsoluteError": 0.00000762939453125,
               "values": 14836
             },
             "animation:scale": {
-              "maxAbsoluteError": 7.510185241699219e-06,
+              "maxAbsoluteError": 0.000007510185241699219,
               "values": 363
             },
             "animation:weights": {
-              "maxAbsoluteError": 6.735324859619141e-06,
+              "maxAbsoluteError": 0.000006735324859619141,
               "values": 242
             },
             "animation:translation": {
-              "maxAbsoluteError": 3.814697265625e-06,
+              "maxAbsoluteError": 0.000003814697265625,
               "values": 147
             }
           }
@@ -633,27 +633,27 @@
       "quantizedViews": 44,
       "bufferErrors": {
         "POSITION": {
-          "maxAbsoluteError": 7.62939453125e-06,
+          "maxAbsoluteError": 0.00000762939453125,
           "values": 114909
         },
         "NORMAL": {
-          "maxAbsoluteError": 3.814697265625e-06,
+          "maxAbsoluteError": 0.000003814697265625,
           "values": 114909
         },
         "TEXCOORD_0": {
-          "maxAbsoluteError": 3.814697265625e-06,
+          "maxAbsoluteError": 0.000003814697265625,
           "values": 76606
         },
         "WEIGHTS_0": {
-          "maxAbsoluteError": 7.62939453125e-06,
+          "maxAbsoluteError": 0.00000762939453125,
           "values": 153212
         },
         "animation:rotation": {
-          "maxAbsoluteError": 7.62939453125e-06,
+          "maxAbsoluteError": 0.00000762939453125,
           "values": 14116
         },
         "animation:translation": {
-          "maxAbsoluteError": 3.762543201446533e-06,
+          "maxAbsoluteError": 0.000003762543201446533,
           "values": 765
         }
       }
@@ -720,23 +720,23 @@
       "quantizedViews": 107,
       "bufferErrors": {
         "POSITION": {
-          "maxAbsoluteError": 7.62939453125e-06,
+          "maxAbsoluteError": 0.00000762939453125,
           "values": 137673
         },
         "NORMAL": {
-          "maxAbsoluteError": 7.361173629760742e-06,
+          "maxAbsoluteError": 0.000007361173629760742,
           "values": 137553
         },
         "TEXCOORD_0": {
-          "maxAbsoluteError": 7.510185241699219e-06,
+          "maxAbsoluteError": 0.000007510185241699219,
           "values": 89382
         },
         "animation:rotation": {
-          "maxAbsoluteError": 7.62939453125e-06,
+          "maxAbsoluteError": 0.00000762939453125,
           "values": 9660
         },
         "animation:translation": {
-          "maxAbsoluteError": 3.7476420402526855e-06,
+          "maxAbsoluteError": 0.0000037476420402526855,
           "values": 1428
         }
       }
@@ -803,23 +803,23 @@
       "quantizedViews": 22,
       "bufferErrors": {
         "POSITION": {
-          "maxAbsoluteError": 1.52587890625e-05,
+          "maxAbsoluteError": 0.0000152587890625,
           "values": 96786
         },
         "NORMAL": {
-          "maxAbsoluteError": 7.62939453125e-06,
+          "maxAbsoluteError": 0.00000762939453125,
           "values": 96786
         },
         "TEXCOORD_0": {
-          "maxAbsoluteError": 3.814697265625e-06,
+          "maxAbsoluteError": 0.000003814697265625,
           "values": 64524
         },
         "WEIGHTS_0": {
-          "maxAbsoluteError": 7.62939453125e-06,
+          "maxAbsoluteError": 0.00000762939453125,
           "values": 129048
         },
         "animation:rotation": {
-          "maxAbsoluteError": 7.62939453125e-06,
+          "maxAbsoluteError": 0.00000762939453125,
           "values": 8672
         }
       }
@@ -839,24 +839,925 @@
       "quantizedViews": 294,
       "bufferErrors": {
         "POSITION": {
-          "maxAbsoluteError": 1.52587890625e-05,
+          "maxAbsoluteError": 0.0000152587890625,
           "values": 191850
         },
         "NORMAL": {
-          "maxAbsoluteError": 7.62939453125e-06,
+          "maxAbsoluteError": 0.00000762939453125,
           "values": 191850
         },
         "TEXCOORD_0": {
-          "maxAbsoluteError": 7.62939453125e-06,
+          "maxAbsoluteError": 0.00000762939453125,
           "values": 117774
         },
         "animation:rotation": {
-          "maxAbsoluteError": 7.62939453125e-06,
+          "maxAbsoluteError": 0.00000762939453125,
           "values": 15016
         },
         "animation:translation": {
-          "maxAbsoluteError": 7.510185241699219e-06,
+          "maxAbsoluteError": 0.000007510185241699219,
           "values": 1500
+        }
+      }
+    },
+    {
+      "source": "./characters/human/customization/male.glb",
+      "output": "./characters/human/customization/male.ktx2-256-compact.glb",
+      "sourceSha256": "4e6f8a506e963f11821d38c3c8a88d645ec9c4821db67b9f74ca68cfcecef185",
+      "sourceBytes": 7922264,
+      "outputBytes": 2020844,
+      "sourceBufferBytes": 4538903,
+      "storedBufferBytes": 1644299,
+      "images": [
+        {
+          "name": "rodin-refined-normal",
+          "compression": "UASTC",
+          "transferFunction": "linear",
+          "mipLevels": 9,
+          "width": 1024,
+          "height": 1024,
+          "outputWidth": 256,
+          "outputHeight": 256,
+          "kind": "normal",
+          "sourceBytes": 1365437,
+          "outputBytes": 62417,
+          "sourceRgbaMipBytes": 5592404,
+          "outputRgbaMipBytes": 349524
+        },
+        {
+          "name": "rodin-refined-base-color",
+          "compression": "ETC1S",
+          "transferFunction": "sRGB",
+          "mipLevels": 9,
+          "width": 1024,
+          "height": 1024,
+          "outputWidth": 256,
+          "outputHeight": 256,
+          "kind": "color",
+          "sourceBytes": 1280187,
+          "outputBytes": 28666,
+          "sourceRgbaMipBytes": 5592404,
+          "outputRgbaMipBytes": 349524
+        },
+        {
+          "name": "rodin-refined-roughness",
+          "compression": "UASTC",
+          "transferFunction": "linear",
+          "rdoLambda": 0.5,
+          "mipLevels": 9,
+          "width": 1024,
+          "height": 1024,
+          "outputWidth": 256,
+          "outputHeight": 256,
+          "kind": "data",
+          "sourceBytes": 587130,
+          "outputBytes": 54251,
+          "sourceRgbaMipBytes": 5592404,
+          "outputRgbaMipBytes": 349524
+        }
+      ],
+      "before": "./characters/human/customization/male.ktx2-256.glb",
+      "beforeBytes": 2781300,
+      "beforeSha256": "51191bd77b7be7c4a72a2f8f188b18f40877f3e068a88d200a5c42b308db8fbb",
+      "quantizedViews": 390,
+      "bufferErrors": {
+        "POSITION": {
+          "maxAbsoluteError": 0.0000152587890625,
+          "values": 89652
+        },
+        "TEXCOORD_0": {
+          "maxAbsoluteError": 0.000003814697265625,
+          "values": 59768
+        },
+        "morph:POSITION": {
+          "maxAbsoluteError": 0.000003814697265625,
+          "values": 173934
+        },
+        "morph:NORMAL": {
+          "maxAbsoluteError": 0.0000152587890625,
+          "values": 418032
+        },
+        "NORMAL": {
+          "maxAbsoluteError": 0.000003814697265625,
+          "values": 85692
+        },
+        "WEIGHTS_0": {
+          "maxAbsoluteError": 0.00000762939453125,
+          "values": 114256
+        }
+      }
+    },
+    {
+      "source": "./characters/human/customization/female-royal.glb",
+      "output": "./characters/human/customization/female-royal.ktx2-256-compact.glb",
+      "sourceSha256": "64ca5967c05790b29cbc44803616efec0633cae1d3270460a8cb46a4abc8f2ff",
+      "sourceBytes": 9410736,
+      "outputBytes": 1608504,
+      "sourceBufferBytes": 3228263,
+      "storedBufferBytes": 1142704,
+      "images": [
+        {
+          "name": "texture_normal",
+          "compression": "UASTC",
+          "transferFunction": "linear",
+          "mipLevels": 9,
+          "width": 1024,
+          "height": 1024,
+          "outputWidth": 256,
+          "outputHeight": 256,
+          "kind": "normal",
+          "sourceBytes": 1029601,
+          "outputBytes": 52203,
+          "sourceRgbaMipBytes": 5592404,
+          "outputRgbaMipBytes": 349524
+        },
+        {
+          "name": "texture_diffuse",
+          "compression": "ETC1S",
+          "transferFunction": "sRGB",
+          "mipLevels": 9,
+          "width": 1024,
+          "height": 1024,
+          "outputWidth": 256,
+          "outputHeight": 256,
+          "kind": "color",
+          "sourceBytes": 990076,
+          "outputBytes": 26377,
+          "sourceRgbaMipBytes": 5592404,
+          "outputRgbaMipBytes": 349524
+        },
+        {
+          "name": "texture_metallic-texture_roughness",
+          "compression": "UASTC",
+          "transferFunction": "linear",
+          "rdoLambda": 0.5,
+          "mipLevels": 9,
+          "width": 1024,
+          "height": 1024,
+          "outputWidth": 256,
+          "outputHeight": 256,
+          "kind": "data",
+          "sourceBytes": 756366,
+          "outputBytes": 49213,
+          "sourceRgbaMipBytes": 5592404,
+          "outputRgbaMipBytes": 349524
+        },
+        {
+          "name": "texture_metallic-texture_roughness",
+          "compression": "UASTC",
+          "transferFunction": "linear",
+          "rdoLambda": 0.5,
+          "mipLevels": 9,
+          "width": 1024,
+          "height": 1024,
+          "outputWidth": 256,
+          "outputHeight": 256,
+          "kind": "data",
+          "sourceBytes": 425621,
+          "outputBytes": 25243,
+          "sourceRgbaMipBytes": 5592404,
+          "outputRgbaMipBytes": 349524
+        },
+        {
+          "name": "texture_normal",
+          "compression": "UASTC",
+          "transferFunction": "linear",
+          "mipLevels": 9,
+          "width": 1024,
+          "height": 1024,
+          "outputWidth": 256,
+          "outputHeight": 256,
+          "kind": "normal",
+          "sourceBytes": 1057670,
+          "outputBytes": 52585,
+          "sourceRgbaMipBytes": 5592404,
+          "outputRgbaMipBytes": 349524
+        },
+        {
+          "name": "texture_diffuse",
+          "compression": "ETC1S",
+          "transferFunction": "sRGB",
+          "mipLevels": 9,
+          "width": 1024,
+          "height": 1024,
+          "outputWidth": 256,
+          "outputHeight": 256,
+          "kind": "color",
+          "sourceBytes": 1035793,
+          "outputBytes": 26706,
+          "sourceRgbaMipBytes": 5592404,
+          "outputRgbaMipBytes": 349524
+        },
+        {
+          "name": "texture_metallic-texture_roughness",
+          "compression": "UASTC",
+          "transferFunction": "linear",
+          "rdoLambda": 0.5,
+          "mipLevels": 9,
+          "width": 1024,
+          "height": 1024,
+          "outputWidth": 256,
+          "outputHeight": 256,
+          "kind": "data",
+          "sourceBytes": 772924,
+          "outputBytes": 56094,
+          "sourceRgbaMipBytes": 5592404,
+          "outputRgbaMipBytes": 349524
+        }
+      ],
+      "before": "./characters/human/customization/female-royal.ktx2-256.glb",
+      "beforeBytes": 2143560,
+      "beforeSha256": "49e82efbeadd64a1ce0eff812e2e28078441f631bbc496790fcadc62480f8863",
+      "quantizedViews": 299,
+      "bufferErrors": {
+        "POSITION": {
+          "maxAbsoluteError": 0.0000152587890625,
+          "values": 67938
+        },
+        "NORMAL": {
+          "maxAbsoluteError": 0.000003814697265625,
+          "values": 63978
+        },
+        "TEXCOORD_0": {
+          "maxAbsoluteError": 0.000003814697265625,
+          "values": 45132
+        },
+        "WEIGHTS_0": {
+          "maxAbsoluteError": 0.00000762939453125,
+          "values": 58076
+        },
+        "morph:POSITION": {
+          "maxAbsoluteError": 0.000003814697265625,
+          "values": 199110
+        },
+        "morph:NORMAL": {
+          "maxAbsoluteError": 0.00000762939453125,
+          "values": 211986
+        }
+      }
+    },
+    {
+      "source": "./characters/human/customization/female-urban.glb",
+      "output": "./characters/human/customization/female-urban.ktx2-256-compact.glb",
+      "sourceSha256": "b5c261ae0648ec7ca7725bf128323ecef39596c698bbf962403491de28b57888",
+      "sourceBytes": 7106128,
+      "outputBytes": 1046464,
+      "sourceBufferBytes": 2102346,
+      "storedBufferBytes": 769468,
+      "images": [
+        {
+          "name": "texture_normal",
+          "compression": "UASTC",
+          "transferFunction": "linear",
+          "mipLevels": 9,
+          "width": 1024,
+          "height": 1024,
+          "outputWidth": 256,
+          "outputHeight": 256,
+          "kind": "normal",
+          "sourceBytes": 859438,
+          "outputBytes": 41387,
+          "sourceRgbaMipBytes": 5592404,
+          "outputRgbaMipBytes": 349524
+        },
+        {
+          "name": "texture_diffuse",
+          "compression": "ETC1S",
+          "transferFunction": "sRGB",
+          "mipLevels": 9,
+          "width": 1024,
+          "height": 1024,
+          "outputWidth": 256,
+          "outputHeight": 256,
+          "kind": "color",
+          "sourceBytes": 881827,
+          "outputBytes": 22211,
+          "sourceRgbaMipBytes": 5592404,
+          "outputRgbaMipBytes": 349524
+        },
+        {
+          "name": "texture_metallic-texture_roughness",
+          "compression": "UASTC",
+          "transferFunction": "linear",
+          "rdoLambda": 0.5,
+          "mipLevels": 9,
+          "width": 1024,
+          "height": 1024,
+          "outputWidth": 256,
+          "outputHeight": 256,
+          "kind": "data",
+          "sourceBytes": 720704,
+          "outputBytes": 53245,
+          "sourceRgbaMipBytes": 5592404,
+          "outputRgbaMipBytes": 349524
+        },
+        {
+          "name": "texture_normal",
+          "compression": "UASTC",
+          "transferFunction": "linear",
+          "mipLevels": 9,
+          "width": 1024,
+          "height": 1024,
+          "outputWidth": 256,
+          "outputHeight": 256,
+          "kind": "normal",
+          "sourceBytes": 857233,
+          "outputBytes": 42608,
+          "sourceRgbaMipBytes": 5592404,
+          "outputRgbaMipBytes": 349524
+        },
+        {
+          "name": "texture_diffuse",
+          "compression": "ETC1S",
+          "transferFunction": "sRGB",
+          "mipLevels": 9,
+          "width": 1024,
+          "height": 1024,
+          "outputWidth": 256,
+          "outputHeight": 256,
+          "kind": "color",
+          "sourceBytes": 914944,
+          "outputBytes": 24656,
+          "sourceRgbaMipBytes": 5592404,
+          "outputRgbaMipBytes": 349524
+        },
+        {
+          "name": "texture_metallic-texture_roughness",
+          "compression": "UASTC",
+          "transferFunction": "linear",
+          "rdoLambda": 0.5,
+          "mipLevels": 9,
+          "width": 1024,
+          "height": 1024,
+          "outputWidth": 256,
+          "outputHeight": 256,
+          "kind": "data",
+          "sourceBytes": 747441,
+          "outputBytes": 57353,
+          "sourceRgbaMipBytes": 5592404,
+          "outputRgbaMipBytes": 349524
+        }
+      ],
+      "before": "./characters/human/customization/female-urban.ktx2-256.glb",
+      "beforeBytes": 1433260,
+      "beforeSha256": "3847cf1fe2c2fe8a3ff09c86be791afe88d65be877c17a4121840b10825f923d",
+      "quantizedViews": 49,
+      "bufferErrors": {
+        "POSITION": {
+          "maxAbsoluteError": 0.0000152587890625,
+          "values": 57432
+        },
+        "NORMAL": {
+          "maxAbsoluteError": 0.00000762939453125,
+          "values": 57432
+        },
+        "TEXCOORD_0": {
+          "maxAbsoluteError": 0.000003814697265625,
+          "values": 38288
+        },
+        "morph:POSITION": {
+          "maxAbsoluteError": 0.000003814697265625,
+          "values": 94653
+        },
+        "morph:NORMAL": {
+          "maxAbsoluteError": 0.000003814697265625,
+          "values": 112626
+        },
+        "WEIGHTS_0": {
+          "maxAbsoluteError": 0.00000762939453125,
+          "values": 55052
+        }
+      }
+    },
+    {
+      "source": "./characters/human/customization/female-explorer.glb",
+      "output": "./characters/human/customization/female-explorer.ktx2-256-compact.glb",
+      "sourceSha256": "4701b238a804fd3751dfb7d0e1ee02b6dd430177f898483c90b8aa11657367b7",
+      "sourceBytes": 7873956,
+      "outputBytes": 1116540,
+      "sourceBufferBytes": 2233996,
+      "storedBufferBytes": 812621,
+      "images": [
+        {
+          "name": "texture_normal",
+          "compression": "UASTC",
+          "transferFunction": "linear",
+          "mipLevels": 9,
+          "width": 1024,
+          "height": 1024,
+          "outputWidth": 256,
+          "outputHeight": 256,
+          "kind": "normal",
+          "sourceBytes": 1094427,
+          "outputBytes": 52825,
+          "sourceRgbaMipBytes": 5592404,
+          "outputRgbaMipBytes": 349524
+        },
+        {
+          "name": "texture_diffuse",
+          "compression": "ETC1S",
+          "transferFunction": "sRGB",
+          "mipLevels": 9,
+          "width": 1024,
+          "height": 1024,
+          "outputWidth": 256,
+          "outputHeight": 256,
+          "kind": "color",
+          "sourceBytes": 991483,
+          "outputBytes": 25678,
+          "sourceRgbaMipBytes": 5592404,
+          "outputRgbaMipBytes": 349524
+        },
+        {
+          "name": "texture_metallic-texture_roughness",
+          "compression": "UASTC",
+          "transferFunction": "linear",
+          "rdoLambda": 0.5,
+          "mipLevels": 9,
+          "width": 1024,
+          "height": 1024,
+          "outputWidth": 256,
+          "outputHeight": 256,
+          "kind": "data",
+          "sourceBytes": 690225,
+          "outputBytes": 53115,
+          "sourceRgbaMipBytes": 5592404,
+          "outputRgbaMipBytes": 349524
+        },
+        {
+          "name": "texture_normal",
+          "compression": "UASTC",
+          "transferFunction": "linear",
+          "mipLevels": 9,
+          "width": 1024,
+          "height": 1024,
+          "outputWidth": 256,
+          "outputHeight": 256,
+          "kind": "normal",
+          "sourceBytes": 1151834,
+          "outputBytes": 57635,
+          "sourceRgbaMipBytes": 5592404,
+          "outputRgbaMipBytes": 349524
+        },
+        {
+          "name": "texture_diffuse",
+          "compression": "ETC1S",
+          "transferFunction": "sRGB",
+          "mipLevels": 9,
+          "width": 1024,
+          "height": 1024,
+          "outputWidth": 256,
+          "outputHeight": 256,
+          "kind": "color",
+          "sourceBytes": 1020512,
+          "outputBytes": 26531,
+          "sourceRgbaMipBytes": 5592404,
+          "outputRgbaMipBytes": 349524
+        },
+        {
+          "name": "texture_metallic-texture_roughness",
+          "compression": "UASTC",
+          "transferFunction": "linear",
+          "rdoLambda": 0.5,
+          "mipLevels": 9,
+          "width": 1024,
+          "height": 1024,
+          "outputWidth": 256,
+          "outputHeight": 256,
+          "kind": "data",
+          "sourceBytes": 668885,
+          "outputBytes": 51348,
+          "sourceRgbaMipBytes": 5592404,
+          "outputRgbaMipBytes": 349524
+        }
+      ],
+      "before": "./characters/human/customization/female-explorer.ktx2-256.glb",
+      "beforeBytes": 1524092,
+      "beforeSha256": "c0f1828ce2cabdd3e7519535c4fc0239576156db49899a20f6f8841f31d933e6",
+      "quantizedViews": 49,
+      "bufferErrors": {
+        "POSITION": {
+          "maxAbsoluteError": 0.0000152587890625,
+          "values": 59286
+        },
+        "NORMAL": {
+          "maxAbsoluteError": 0.000003814697265625,
+          "values": 59286
+        },
+        "TEXCOORD_0": {
+          "maxAbsoluteError": 0.000003814697265625,
+          "values": 39524
+        },
+        "morph:POSITION": {
+          "maxAbsoluteError": 0.000003814697265625,
+          "values": 93000
+        },
+        "morph:NORMAL": {
+          "maxAbsoluteError": 0.000003814697265625,
+          "values": 129195
+        },
+        "WEIGHTS_0": {
+          "maxAbsoluteError": 0.00000762939453125,
+          "values": 54844
+        }
+      }
+    },
+    {
+      "source": "./characters/human/customization/female-soft.glb",
+      "output": "./characters/human/customization/female-soft.ktx2-256-compact.glb",
+      "sourceSha256": "5168e5e60bdf8accde287f493f80ed2e7dcb49fa024adaf7f72c45725630e06a",
+      "sourceBytes": 8077328,
+      "outputBytes": 1224956,
+      "sourceBufferBytes": 2535472,
+      "storedBufferBytes": 928588,
+      "images": [
+        {
+          "name": "texture_normal",
+          "compression": "UASTC",
+          "transferFunction": "linear",
+          "mipLevels": 9,
+          "width": 1024,
+          "height": 1024,
+          "outputWidth": 256,
+          "outputHeight": 256,
+          "kind": "normal",
+          "sourceBytes": 1075108,
+          "outputBytes": 51321,
+          "sourceRgbaMipBytes": 5592404,
+          "outputRgbaMipBytes": 349524
+        },
+        {
+          "name": "texture_diffuse",
+          "compression": "ETC1S",
+          "transferFunction": "sRGB",
+          "mipLevels": 9,
+          "width": 1024,
+          "height": 1024,
+          "outputWidth": 256,
+          "outputHeight": 256,
+          "kind": "color",
+          "sourceBytes": 970104,
+          "outputBytes": 25396,
+          "sourceRgbaMipBytes": 5592404,
+          "outputRgbaMipBytes": 349524
+        },
+        {
+          "name": "texture_metallic-texture_roughness",
+          "compression": "UASTC",
+          "transferFunction": "linear",
+          "rdoLambda": 0.5,
+          "mipLevels": 9,
+          "width": 1024,
+          "height": 1024,
+          "outputWidth": 256,
+          "outputHeight": 256,
+          "kind": "data",
+          "sourceBytes": 693636,
+          "outputBytes": 51848,
+          "sourceRgbaMipBytes": 5592404,
+          "outputRgbaMipBytes": 349524
+        },
+        {
+          "name": "texture_normal",
+          "compression": "UASTC",
+          "transferFunction": "linear",
+          "mipLevels": 9,
+          "width": 1024,
+          "height": 1024,
+          "outputWidth": 256,
+          "outputHeight": 256,
+          "kind": "normal",
+          "sourceBytes": 1095275,
+          "outputBytes": 52875,
+          "sourceRgbaMipBytes": 5592404,
+          "outputRgbaMipBytes": 349524
+        },
+        {
+          "name": "texture_diffuse",
+          "compression": "ETC1S",
+          "transferFunction": "sRGB",
+          "mipLevels": 9,
+          "width": 1024,
+          "height": 1024,
+          "outputWidth": 256,
+          "outputHeight": 256,
+          "kind": "color",
+          "sourceBytes": 964279,
+          "outputBytes": 25200,
+          "sourceRgbaMipBytes": 5592404,
+          "outputRgbaMipBytes": 349524
+        },
+        {
+          "name": "texture_metallic-texture_roughness",
+          "compression": "UASTC",
+          "transferFunction": "linear",
+          "rdoLambda": 0.5,
+          "mipLevels": 9,
+          "width": 1024,
+          "height": 1024,
+          "outputWidth": 256,
+          "outputHeight": 256,
+          "kind": "data",
+          "sourceBytes": 720784,
+          "outputBytes": 53492,
+          "sourceRgbaMipBytes": 5592404,
+          "outputRgbaMipBytes": 349524
+        }
+      ],
+      "before": "./characters/human/customization/female-soft.ktx2-256.glb",
+      "beforeBytes": 1664584,
+      "beforeSha256": "0368bfafe8e48650afacb9465feee15293b0c9c00dc8f0c10435dbe69f75b093",
+      "quantizedViews": 47,
+      "bufferErrors": {
+        "POSITION": {
+          "maxAbsoluteError": 0.0000152587890625,
+          "values": 59280
+        },
+        "NORMAL": {
+          "maxAbsoluteError": 0.000003814697265625,
+          "values": 59280
+        },
+        "TEXCOORD_0": {
+          "maxAbsoluteError": 0.000003814697265625,
+          "values": 39520
+        },
+        "morph:POSITION": {
+          "maxAbsoluteError": 0.000003814697265625,
+          "values": 125808
+        },
+        "morph:NORMAL": {
+          "maxAbsoluteError": 0.000003814697265625,
+          "values": 154524
+        },
+        "WEIGHTS_0": {
+          "maxAbsoluteError": 0.00000762939453125,
+          "values": 43740
+        }
+      }
+    },
+    {
+      "source": "./characters/human/customization/female-dark.glb",
+      "output": "./characters/human/customization/female-dark.ktx2-256-compact.glb",
+      "sourceSha256": "a0fe3f18419937adb079e305b092ae25ab12568be818e34e214e806f5049af1d",
+      "sourceBytes": 7571404,
+      "outputBytes": 1197068,
+      "sourceBufferBytes": 2469249,
+      "storedBufferBytes": 921530,
+      "images": [
+        {
+          "name": "texture_normal",
+          "compression": "UASTC",
+          "transferFunction": "linear",
+          "mipLevels": 9,
+          "width": 1024,
+          "height": 1024,
+          "outputWidth": 256,
+          "outputHeight": 256,
+          "kind": "normal",
+          "sourceBytes": 869464,
+          "outputBytes": 43496,
+          "sourceRgbaMipBytes": 5592404,
+          "outputRgbaMipBytes": 349524
+        },
+        {
+          "name": "texture_diffuse",
+          "compression": "ETC1S",
+          "transferFunction": "sRGB",
+          "mipLevels": 9,
+          "width": 1024,
+          "height": 1024,
+          "outputWidth": 256,
+          "outputHeight": 256,
+          "kind": "color",
+          "sourceBytes": 950125,
+          "outputBytes": 24228,
+          "sourceRgbaMipBytes": 5592404,
+          "outputRgbaMipBytes": 349524
+        },
+        {
+          "name": "texture_metallic-texture_roughness",
+          "compression": "UASTC",
+          "transferFunction": "linear",
+          "rdoLambda": 0.5,
+          "mipLevels": 9,
+          "width": 1024,
+          "height": 1024,
+          "outputWidth": 256,
+          "outputHeight": 256,
+          "kind": "data",
+          "sourceBytes": 710010,
+          "outputBytes": 51582,
+          "sourceRgbaMipBytes": 5592404,
+          "outputRgbaMipBytes": 349524
+        },
+        {
+          "name": "texture_normal",
+          "compression": "UASTC",
+          "transferFunction": "linear",
+          "mipLevels": 9,
+          "width": 1024,
+          "height": 1024,
+          "outputWidth": 256,
+          "outputHeight": 256,
+          "kind": "normal",
+          "sourceBytes": 921706,
+          "outputBytes": 47545,
+          "sourceRgbaMipBytes": 5592404,
+          "outputRgbaMipBytes": 349524
+        },
+        {
+          "name": "texture_diffuse",
+          "compression": "ETC1S",
+          "transferFunction": "sRGB",
+          "mipLevels": 9,
+          "width": 1024,
+          "height": 1024,
+          "outputWidth": 256,
+          "outputHeight": 256,
+          "kind": "color",
+          "sourceBytes": 954646,
+          "outputBytes": 25448,
+          "sourceRgbaMipBytes": 5592404,
+          "outputRgbaMipBytes": 349524
+        },
+        {
+          "name": "texture_metallic-texture_roughness",
+          "compression": "UASTC",
+          "transferFunction": "linear",
+          "rdoLambda": 0.5,
+          "mipLevels": 9,
+          "width": 1024,
+          "height": 1024,
+          "outputWidth": 256,
+          "outputHeight": 256,
+          "kind": "data",
+          "sourceBytes": 673592,
+          "outputBytes": 47037,
+          "sourceRgbaMipBytes": 5592404,
+          "outputRgbaMipBytes": 349524
+        }
+      ],
+      "before": "./characters/human/customization/female-dark.ktx2-256.glb",
+      "beforeBytes": 1626604,
+      "beforeSha256": "e7605f199b0bed5ebebdb87f98368b3210db8ff53962a374d45cd61083b882cb",
+      "quantizedViews": 47,
+      "bufferErrors": {
+        "POSITION": {
+          "maxAbsoluteError": 0.0000152587890625,
+          "values": 63903
+        },
+        "NORMAL": {
+          "maxAbsoluteError": 0.000003814697265625,
+          "values": 63903
+        },
+        "TEXCOORD_0": {
+          "maxAbsoluteError": 0.000003814697265625,
+          "values": 42602
+        },
+        "morph:POSITION": {
+          "maxAbsoluteError": 0.000003814697265625,
+          "values": 109548
+        },
+        "morph:NORMAL": {
+          "maxAbsoluteError": 0.00000762939453125,
+          "values": 134937
+        },
+        "WEIGHTS_0": {
+          "maxAbsoluteError": 0.00000762939453125,
+          "values": 56688
+        }
+      }
+    },
+    {
+      "source": "./characters/human/customization/female-sport.glb",
+      "output": "./characters/human/customization/female-sport.ktx2-256-compact.glb",
+      "sourceSha256": "cb3d56fffc623e71911cfa0135458333773f06c647586a8051c570e13683a647",
+      "sourceBytes": 7712044,
+      "outputBytes": 1015756,
+      "sourceBufferBytes": 1934710,
+      "storedBufferBytes": 732803,
+      "images": [
+        {
+          "name": "texture_normal",
+          "compression": "UASTC",
+          "transferFunction": "linear",
+          "mipLevels": 9,
+          "width": 1024,
+          "height": 1024,
+          "outputWidth": 256,
+          "outputHeight": 256,
+          "kind": "normal",
+          "sourceBytes": 1220301,
+          "outputBytes": 53936,
+          "sourceRgbaMipBytes": 5592404,
+          "outputRgbaMipBytes": 349524
+        },
+        {
+          "name": "texture_diffuse",
+          "compression": "ETC1S",
+          "transferFunction": "sRGB",
+          "mipLevels": 9,
+          "width": 1024,
+          "height": 1024,
+          "outputWidth": 256,
+          "outputHeight": 256,
+          "kind": "color",
+          "sourceBytes": 1015356,
+          "outputBytes": 23422,
+          "sourceRgbaMipBytes": 5592404,
+          "outputRgbaMipBytes": 349524
+        },
+        {
+          "name": "texture_metallic-texture_roughness",
+          "compression": "UASTC",
+          "transferFunction": "linear",
+          "rdoLambda": 0.5,
+          "mipLevels": 9,
+          "width": 1024,
+          "height": 1024,
+          "outputWidth": 256,
+          "outputHeight": 256,
+          "kind": "data",
+          "sourceBytes": 669715,
+          "outputBytes": 43319,
+          "sourceRgbaMipBytes": 5592404,
+          "outputRgbaMipBytes": 349524
+        },
+        {
+          "name": "texture_normal",
+          "compression": "UASTC",
+          "transferFunction": "linear",
+          "mipLevels": 9,
+          "width": 1024,
+          "height": 1024,
+          "outputWidth": 256,
+          "outputHeight": 256,
+          "kind": "normal",
+          "sourceBytes": 1216456,
+          "outputBytes": 57133,
+          "sourceRgbaMipBytes": 5592404,
+          "outputRgbaMipBytes": 349524
+        },
+        {
+          "name": "texture_diffuse",
+          "compression": "ETC1S",
+          "transferFunction": "sRGB",
+          "mipLevels": 9,
+          "width": 1024,
+          "height": 1024,
+          "outputWidth": 256,
+          "outputHeight": 256,
+          "kind": "color",
+          "sourceBytes": 985835,
+          "outputBytes": 24283,
+          "sourceRgbaMipBytes": 5592404,
+          "outputRgbaMipBytes": 349524
+        },
+        {
+          "name": "texture_metallic-texture_roughness",
+          "compression": "UASTC",
+          "transferFunction": "linear",
+          "rdoLambda": 0.5,
+          "mipLevels": 9,
+          "width": 1024,
+          "height": 1024,
+          "outputWidth": 256,
+          "outputHeight": 256,
+          "kind": "data",
+          "sourceBytes": 647093,
+          "outputBytes": 44143,
+          "sourceRgbaMipBytes": 5592404,
+          "outputRgbaMipBytes": 349524
+        }
+      ],
+      "before": "./characters/human/customization/female-sport.ktx2-256.glb",
+      "beforeBytes": 1358668,
+      "beforeSha256": "871adabddf6f54a1bef36f3bf583b6222e78784d178ba4b8d85a4bf490b22b7d",
+      "quantizedViews": 49,
+      "bufferErrors": {
+        "POSITION": {
+          "maxAbsoluteError": 0.0000152587890625,
+          "values": 55566
+        },
+        "NORMAL": {
+          "maxAbsoluteError": 0.000003814697265625,
+          "values": 55566
+        },
+        "TEXCOORD_0": {
+          "maxAbsoluteError": 0.000003814697265625,
+          "values": 37044
+        },
+        "morph:POSITION": {
+          "maxAbsoluteError": 0.000003814697265625,
+          "values": 74163
+        },
+        "morph:NORMAL": {
+          "maxAbsoluteError": 0.000003814697265625,
+          "values": 98577
+        },
+        "WEIGHTS_0": {
+          "maxAbsoluteError": 0.00000762939453125,
+          "values": 56140
         }
       }
     }

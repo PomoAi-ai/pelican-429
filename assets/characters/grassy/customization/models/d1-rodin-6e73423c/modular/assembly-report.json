@@ -1,0 +1,25 @@
+{
+  "parts": {
+    "body": "D1_Body",
+    "head": [
+      "D1_Head"
+    ],
+    "hair": [
+      "D1_Hair"
+    ]
+  },
+  "vertices": {
+    "body": 15593,
+    "head": 19182,
+    "hair": 32634
+  },
+  "attachmentBone": "head",
+  "restHeight": 3.096094846725464,
+  "animations": [
+    "idle",
+    "walk",
+    "run",
+    "jump"
+  ],
+  "hairAsset": "d1-hair-braided-rigged.glb"
+}

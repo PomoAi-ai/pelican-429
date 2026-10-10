@@ -3,6 +3,7 @@ import type { Entity, ProjectileRequest } from '../entities/entity.ts';
 import { projectileCenter } from '../entities/projectile.ts';
 import type { InputFrame, SimWorld } from './sim-world.ts';
 import { spawnProjectiles } from './weapon-system.ts';
+import { ultimateWaitTicks } from './homestead-economy.ts';
 
 /** 实战与独立预览共用发射方向，先从光子附近窄角冲出，再由追踪器寻敌。 */
 export function createPhotonVolley(x: number, y: number, angle: number, index: number, ownerId: number, team: Entity['team']): ProjectileRequest[] {
@@ -23,7 +24,10 @@ export function createPhotonVolley(x: number, y: number, angle: number, index: n
 
 export function stepPhotonUltimate(world: SimWorld, input: InputFrame): void {
   const state = world.photon;
-  if (state.cooldownTicks > 0) state.cooldownTicks--;
+  // 家园模式的大招靠家里电网充能，冷却显示的是充满还要多久。
+  const economy = world.homestead?.economy;
+  if (economy) state.cooldownTicks = ultimateWaitTicks(economy);
+  else if (state.cooldownTicks > 0) state.cooldownTicks--;
   const player = world.entities.find((e) => e.id === world.playerId)!;
   if (player.removed || player.health!.hp <= 0) {
     state.chargeTicks = 0;
@@ -52,7 +56,10 @@ export function stepPhotonUltimate(world: SimWorld, input: InputFrame): void {
   const aim = state.buffered ? state.aim : input.aim;
   state.buffered = false;
   if (!pressed || player.pelican!.transformTicks >= 0 || state.cooldownTicks > 0 || state.chargeTicks > 0) return;
-  state.cooldownTicks = PHOTON_ULTIMATE.cooldownTicks;
+  if (economy) {
+    economy.ultimate = 0;
+    state.cooldownTicks = ultimateWaitTicks(economy);
+  } else state.cooldownTicks = PHOTON_ULTIMATE.cooldownTicks;
   state.chargeTicks = PHOTON_ULTIMATE.chargeTicks;
   state.volleyIndex = 0;
   state.aim = aim === null ? null : { ...aim };

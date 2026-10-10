@@ -2,6 +2,7 @@ import type { ShowcaseCard } from '../../config/showcase.ts';
 import { arrangeTerrain } from './terrain-layout.ts';
 import { createCompositionScenario } from './composition-scenario.ts';
 import { resourceTileColumns } from '../../config/resource-showcase.ts';
+import { isBuildingKitKind } from '../../config/building-kit.ts';
 import { resourceEntry } from '../../render/resource-catalog.ts';
 import { TUNING } from '../../config/tuning.ts';
 import { HUT_RULES } from '../../config/worldgen-rules.ts';
@@ -144,7 +145,7 @@ export function createResourceScenario(card: ShowcaseCard): ShowcaseScenario {
     get elapsedTicks() { return ticks; },
     step() { stepSim(world, NEUTRAL_INPUT); ticks++; },
     focus: () => focus,
-    status: () => `${options.assembly && entry.actor === 'cave' ? '完整洞穴' : entry.label} · Seed ${options.seed}${options.reference ? ' · 鹈鹕原始比例' : ''}`,
+    status: () => `${options.assembly && entry.actor === 'cave' ? '完整洞穴' : entry.label}${isBuildingKitKind(entry.actor) ? '' : ` · Seed ${options.seed}`}${options.reference ? ' · 鹈鹕原始比例' : ''}`,
     dispose() { level.fluid.dispose(); },
   };
 }
