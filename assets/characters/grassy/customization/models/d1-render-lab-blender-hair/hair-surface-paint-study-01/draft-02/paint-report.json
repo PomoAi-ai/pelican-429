@@ -1,0 +1,301 @@
+{
+  "source": "assets/characters/grassy/customization/models/d1-render-lab-blender-hair/temple-root-continuity-study-01/draft-01/Temple-Root-Continuity.blend",
+  "sourceSHA256": "86ed3bf38c97c06d0b0004f88fab393541e52e10d79523607c4f25b92f17ecdc",
+  "candidate": "assets/characters/grassy/customization/models/d1-render-lab-blender-hair/hair-surface-paint-study-01/draft-02/Hair-Surface-Paint.blend",
+  "candidateSHA256": "88937ef61c0cd3e6652a981a1424879f6917a282411b0408d1bb12a4541bc280",
+  "materialOnly": true,
+  "geometryUVWeightsNormalsAndGuidesFrozen": true,
+  "sceneMeshCount": 54,
+  "modifiedMaterialObjects": [
+    "Single broad swept fringe",
+    "Inner long fringe",
+    "Inner short fringe",
+    "Right swept fringe",
+    "Left swept crown",
+    "Rear swept crown",
+    "Right crown turn",
+    "Left crown curled tip"
+  ],
+  "allOtherAtlasPixelsExactlyFrozen": true,
+  "lightingAndMaterialResponseUnchanged": true,
+  "referencePaletteSource": "paint_components.py PaintedReference.strand_palette; genuine side crop hair colour quantiles",
+  "revision": 2,
+  "correctionReason": "First draft removed wrong sampled bars but its broad highlight was too weak and uniform; strengthen one continuous ridge and broad longitudinal edge shadow",
+  "components": [
+    {
+      "name": "Single broad swept fringe",
+      "tile": [
+        0,
+        0
+      ],
+      "nativeUVLayer": "Hair flow native",
+      "before": {
+        "meanRGB": [
+          0.914404034614563,
+          0.6385322213172913,
+          0.404263973236084
+        ],
+        "luminanceMean": 0.680295616024495,
+        "luminanceStd": 0.16709289803685656,
+        "luminanceP95": 0.8471858683311939,
+        "meanSaturation": 0.5760049819946289,
+        "meanLongitudinalAbsoluteStep": 0.007107572663818452,
+        "p99LongitudinalAbsoluteStep": 0.05744391814470287
+      },
+      "after": {
+        "meanRGB": [
+          0.9347553098533165,
+          0.5999748504510508,
+          0.3500879423102723
+        ],
+        "luminanceMean": 0.6531073413522069,
+        "luminanceStd": 0.09901517250713557,
+        "luminanceP95": 0.8219550872975174,
+        "meanSaturation": 0.6307208195245114,
+        "meanLongitudinalAbsoluteStep": 0.00034590476651379977,
+        "p99LongitudinalAbsoluteStep": 0.0035390917493984316
+      }
+    },
+    {
+      "name": "Inner long fringe",
+      "tile": [
+        3,
+        0
+      ],
+      "nativeUVLayer": "Hair flow native",
+      "before": {
+        "meanRGB": [
+          0.9571004509925842,
+          0.6443280577659607,
+          0.4007718563079834
+        ],
+        "luminanceMean": 0.6932307422965194,
+        "luminanceStd": 0.12277511460774723,
+        "luminanceP95": 0.8129130076289177,
+        "meanSaturation": 0.5885677337646484,
+        "meanLongitudinalAbsoluteStep": 0.004327391135834736,
+        "p99LongitudinalAbsoluteStep": 0.028907449257373763
+      },
+      "after": {
+        "meanRGB": [
+          0.9347553098533165,
+          0.5999748504510508,
+          0.3500879423102723
+        ],
+        "luminanceMean": 0.6531073413522069,
+        "luminanceStd": 0.09901517250713557,
+        "luminanceP95": 0.8219550872975174,
+        "meanSaturation": 0.6307208195245114,
+        "meanLongitudinalAbsoluteStep": 0.00034590476651379977,
+        "p99LongitudinalAbsoluteStep": 0.0035390917493984316
+      }
+    },
+    {
+      "name": "Inner short fringe",
+      "tile": [
+        2,
+        0
+      ],
+      "nativeUVLayer": "Hair flow native",
+      "before": {
+        "meanRGB": [
+          0.9483174681663513,
+          0.6494207978248596,
+          0.40910741686820984
+        ],
+        "luminanceMean": 0.6956451644657199,
+        "luminanceStd": 0.13147574178384652,
+        "luminanceP95": 0.8530863385677337,
+        "meanSaturation": 0.5782883167266846,
+        "meanLongitudinalAbsoluteStep": 0.004290076857886,
+        "p99LongitudinalAbsoluteStep": 0.026884704279899613
+      },
+      "after": {
+        "meanRGB": [
+          0.9347553098533165,
+          0.5999748504510508,
+          0.3500879423102723
+        ],
+        "luminanceMean": 0.6531073413522069,
+        "luminanceStd": 0.09901517250713557,
+        "luminanceP95": 0.8219550872975174,
+        "meanSaturation": 0.6307208195245114,
+        "meanLongitudinalAbsoluteStep": 0.00034590476651379977,
+        "p99LongitudinalAbsoluteStep": 0.0035390917493984316
+      }
+    },
+    {
+      "name": "Right swept fringe",
+      "tile": [
+        1,
+        0
+      ],
+      "nativeUVLayer": "same source tile 8px inset / 276px extent",
+      "before": {
+        "meanRGB": [
+          0.9290496706962585,
+          0.6272591352462769,
+          0.4011381268501282
+        ],
+        "luminanceMean": 0.6750573398132059,
+        "luminanceStd": 0.1565100654800829,
+        "luminanceP95": 0.8336784965872763,
+        "meanSaturation": 0.5829980969429016,
+        "meanLongitudinalAbsoluteStep": 0.008009375678073801,
+        "p99LongitudinalAbsoluteStep": 0.05804627214735751
+      },
+      "after": {
+        "meanRGB": [
+          0.9347553098533165,
+          0.5999748504510508,
+          0.3500879423102723
+        ],
+        "luminanceMean": 0.6531073413522069,
+        "luminanceStd": 0.09901517250713557,
+        "luminanceP95": 0.8219550872975174,
+        "meanSaturation": 0.6307208195245114,
+        "meanLongitudinalAbsoluteStep": 0.00034590476651379977,
+        "p99LongitudinalAbsoluteStep": 0.0035390917493984316
+      }
+    },
+    {
+      "name": "Left swept crown",
+      "tile": [
+        4,
+        0
+      ],
+      "nativeUVLayer": "Hair flow native",
+      "before": {
+        "meanRGB": [
+          0.8573765754699707,
+          0.5165126323699951,
+          0.2888367474079132
+        ],
+        "luminanceMean": 0.5725401631992719,
+        "luminanceStd": 0.144674031093504,
+        "luminanceP95": 0.7997483025312424,
+        "meanSaturation": 0.6773741841316223,
+        "meanLongitudinalAbsoluteStep": 0.0019039165811220251,
+        "p99LongitudinalAbsoluteStep": 0.011198430705070428
+      },
+      "after": {
+        "meanRGB": [
+          0.9350207757252139,
+          0.6045770274866604,
+          0.3554233350343983
+        ],
+        "luminanceMean": 0.6568404717671235,
+        "luminanceStd": 0.10121151370305602,
+        "luminanceP95": 0.8239245983664372,
+        "meanSaturation": 0.6253687036784338,
+        "meanLongitudinalAbsoluteStep": 0.000374923135334465,
+        "p99LongitudinalAbsoluteStep": 0.003690745956212555
+      }
+    },
+    {
+      "name": "Rear swept crown",
+      "tile": [
+        5,
+        0
+      ],
+      "nativeUVLayer": "Hair flow native",
+      "before": {
+        "meanRGB": [
+          0.8572157621383667,
+          0.5148414969444275,
+          0.28696209192276
+        ],
+        "luminanceMean": 0.571176441775974,
+        "luminanceStd": 0.14349593410368444,
+        "luminanceP95": 0.7972110477805137,
+        "meanSaturation": 0.6792771816253662,
+        "meanLongitudinalAbsoluteStep": 0.001910058841676894,
+        "p99LongitudinalAbsoluteStep": 0.010647864893078784
+      },
+      "after": {
+        "meanRGB": [
+          0.9350207757252139,
+          0.6045770274866604,
+          0.3554233350343983
+        ],
+        "luminanceMean": 0.6568404717671235,
+        "luminanceStd": 0.10121151370305602,
+        "luminanceP95": 0.8239245983664372,
+        "meanSaturation": 0.6253687036784338,
+        "meanLongitudinalAbsoluteStep": 0.000374923135334465,
+        "p99LongitudinalAbsoluteStep": 0.003690745956212555
+      }
+    },
+    {
+      "name": "Right crown turn",
+      "tile": [
+        6,
+        0
+      ],
+      "nativeUVLayer": "same source tile 8px inset / 276px extent",
+      "before": {
+        "meanRGB": [
+          0.8940147757530212,
+          0.5548954606056213,
+          0.31934845447540283
+        ],
+        "luminanceMean": 0.6099794654051315,
+        "luminanceStd": 0.15526207775462744,
+        "luminanceP95": 0.7907161335349082,
+        "meanSaturation": 0.659446656703949,
+        "meanLongitudinalAbsoluteStep": 0.006984268721753674,
+        "p99LongitudinalAbsoluteStep": 0.04395529204639791
+      },
+      "after": {
+        "meanRGB": [
+          0.9350207757252139,
+          0.6045770274866604,
+          0.3554233350343983
+        ],
+        "luminanceMean": 0.6568404717671235,
+        "luminanceStd": 0.10121151370305602,
+        "luminanceP95": 0.8239245983664372,
+        "meanSaturation": 0.6253687036784338,
+        "meanLongitudinalAbsoluteStep": 0.000374923135334465,
+        "p99LongitudinalAbsoluteStep": 0.003690745956212555
+      }
+    },
+    {
+      "name": "Left crown curled tip",
+      "tile": [
+        0,
+        1
+      ],
+      "nativeUVLayer": "Hair flow native",
+      "before": {
+        "meanRGB": [
+          0.8573899865150452,
+          0.5168455839157104,
+          0.2891814410686493
+        ],
+        "luminanceMean": 0.5728170961848783,
+        "luminanceStd": 0.14156834077045077,
+        "luminanceP95": 0.7914058716559417,
+        "meanSaturation": 0.6760562658309937,
+        "meanLongitudinalAbsoluteStep": 0.0019048675965049127,
+        "p99LongitudinalAbsoluteStep": 0.013735685455799063
+      },
+      "after": {
+        "meanRGB": [
+          0.9350207757252139,
+          0.6045770274866604,
+          0.3554233350343983
+        ],
+        "luminanceMean": 0.6568404717671235,
+        "luminanceStd": 0.10121151370305602,
+        "luminanceP95": 0.8239245983664372,
+        "meanSaturation": 0.6253687036784338,
+        "meanLongitudinalAbsoluteStep": 0.000374923135334465,
+        "p99LongitudinalAbsoluteStep": 0.003690745956212555
+      }
+    }
+  ],
+  "visualApproved": false,
+  "exported": false,
+  "published": false
+}

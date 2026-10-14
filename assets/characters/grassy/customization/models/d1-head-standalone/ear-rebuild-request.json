@@ -52,7 +52,12 @@
     "materialLocked": true,
     "creditsShownAfterFork": 33.5,
     "geometryPrompt": "references/head-v6-redo-geometry-prompt.txt",
-    "referenceDirections": ["Front", "Right", "Back", "Front"],
+    "referenceDirections": [
+      "Front",
+      "Right",
+      "Back",
+      "Front"
+    ],
     "referenceDirectionNote": "Fourth reference is frontal low-angle, not pure Down. Prompt limits it to nostril/lip underside detail and prioritizes the first three silhouettes.",
     "redoIterationsSubmitted": 1,
     "note": "Replaced inherited material caption with geometry-specific instructions; set all four directions in website UI before Redo."
@@ -68,9 +73,16 @@
       "references/head-v6-right.png",
       "references/head-v6-back.png"
     ],
-    "referenceDirections": ["Front", "Right", "Back"],
+    "referenceDirections": [
+      "Front",
+      "Right",
+      "Back"
+    ],
     "geometryPrompt": "references/head-v6-three-view-geometry-prompt.txt",
-    "presets": ["Faithful", "Detailed"],
+    "presets": [
+      "Faithful",
+      "Detailed"
+    ],
     "effort": "High",
     "creditsBefore": 33.5,
     "creditsAfter": 33,
@@ -81,7 +93,7 @@
   "smallNostrilDetailTrial": {
     "assetId": "private-source-045",
     "assetUrl": "private-workspace",
-    "status": "one Redo completed with corrected geometry prompt; inspected front, profile and low-angle preview; not accepted",
+    "status": "All remaining 14 global Redos completed, History v8-v21 recorded; selected v9 for review; all geometry and material unconfirmed",
     "geometryConfirmed": false,
     "materialLocked": true,
     "geometryReferences": [
@@ -90,16 +102,206 @@
       "references/head-v6-back.png",
       "references/head-v7-small-nostrils-detail.png"
     ],
-    "referenceDirections": ["Front", "Right", "Back", "Front"],
-    "geometryPrompt": "references/head-v7-nose-detail-rodin-prompt.txt",
-    "presets": ["Faithful", "Detailed"],
+    "referenceDirections": [
+      "Front",
+      "Right",
+      "Back",
+      "Front"
+    ],
+    "geometryPrompt": "references/head-v7-nose-mouth-redo5-prompt.txt",
+    "presets": [
+      "Faithful"
+    ],
     "effort": "High",
     "creditsBefore": 33,
     "creditsAfterInitialGeneration": 32.5,
-    "redoIterationsSubmitted": 1,
-    "redoRemaining": 19,
+    "redoIterationsSubmitted": 20,
+    "redoRemaining": 0,
     "creditsAfterRedo": 32.5,
     "note": "All directions were visibly selected before submission. The fourth input is a frontal low-angle detail, not a whole head or pure Down view. Initial generation unexpectedly retained the old three-view preset caption after the preset dialog was closed. Corrected the actual candidate contenteditable prompt and submitted one free Redo. No geometry or material confirmation.",
-    "visualFindings": "Nostril openings remain conspicuous in the low-angle preview and the nasal underside still appears upturned; profile retains a projecting nose tip and upper lip. The small-nostril reference has not solved the shape. No measured improvement claim; no topology or material acceptance."
+    "visualFindings": "No fully accepted candidate. Shortlist v9 for identity/brow completeness and v15 for thinner lip profile; v21 reserve. Each retains visual defects described in the complete review record.",
+    "promptIterations": [
+      {
+        "redoNumber": 2,
+        "prompt": "references/head-v7-nose-redo2-prompt.txt",
+        "redoRemaining": 18,
+        "creditsShown": 32.5,
+        "method": "global Redo",
+        "findings": "Nostril recesses are small but remain exposed; profile has a pointed/upturned nose and projecting upper-lip ledge. Not accepted.",
+        "screenshots": [
+          "d1-nose-redo2-profile.png",
+          "d1-nose-redo2-low.png"
+        ]
+      },
+      {
+        "redoNumber": 3,
+        "prompt": "references/head-v7-nose-redo3-prompt.txt",
+        "redoRemaining": 17,
+        "creditsShown": 32.5,
+        "method": "global Redo",
+        "findings": "Front preview still exposes both nostrils; profile retains projecting tip and lip. Camera views are approximate, so no quantitative improvement claim. Not accepted.",
+        "screenshots": [
+          "d1-nose-redo3-front.png",
+          "d1-nose-redo3-profile.png",
+          "d1-nose-redo3-low.png"
+        ]
+      },
+      {
+        "redoNumber": 4,
+        "method": "regional editor switched from Local Modify preview to Partial Redo",
+        "prompt": "references/head-v7-local1-prompt.txt",
+        "redoRemaining": 16,
+        "creditsShown": 32.5,
+        "findings": "Nose appeared rounder but mouth corners developed deep pinches and lips remained protruding. Camera views are approximate; result not accepted.",
+        "screenshots": [
+          "d1-nose-partial1-front.png",
+          "d1-nose-partial1-profile.png",
+          "d1-nose-partial1-low.png"
+        ]
+      },
+      {
+        "redoNumber": 5,
+        "method": "Partial Redo with revised geometry caption",
+        "prompt": "references/head-v7-nose-mouth-redo5-prompt.txt",
+        "redoRemaining": 15,
+        "creditsShown": 32.5,
+        "findings": "Mouth-corner pits reduced versus first regional result; frontal nostril exposure and projected lips remain. Not accepted.",
+        "screenshots": [
+          "d1-nose-partial2-front.png",
+          "d1-nose-partial2-profile.png"
+        ]
+      },
+      {
+        "redoNumber": 6,
+        "method": "Partial Redo with Advanced Options negative prompt",
+        "prompt": "references/head-v7-nose-mouth-redo5-prompt.txt",
+        "negativePrompt": "references/head-v7-nose-mouth-redo6-negative-prompt.txt",
+        "redoRemaining": 14,
+        "creditsShown": 32.5,
+        "findings": "No clear overall improvement. Nostril openings remain visible frontally, tip slightly upturned, upper-lip contour more wavy/hard. Advanced Options also removed visible Detailed preset, so not a strict single-variable comparison.",
+        "screenshots": [
+          "d1-nose-partial3-front.png",
+          "d1-nose-partial3-profile.png",
+          "d1-nose-partial3-low.png",
+          "d1-nose-partial3-review.png"
+        ]
+      }
+    ],
+    "localModifyAttempt": "Generated a Local Modify image preview, which shifted toward realistic doll anatomy and was not accepted as a reference. Switched the editor to Partial Redo before applying the selected region. First regional geometry attempt completed with the UI showing Redo Modify; final Geometry Confirm was not clicked. Mouth corners became strongly indented, so the result was rejected.",
+    "negativePrompt": "references/head-v7-nose-mouth-redo6-negative-prompt.txt",
+    "advancedOptions": true,
+    "currentSelectedHistoryVersion": "v9",
+    "latestReviewRecord": "remaining-fourteen-review.json"
+  },
+  "correctedThreeViewTrial": {
+    "assetId": "private-source-001",
+    "assetUrl": "private-source-001",
+    "status": "Three High redos inspected; latest retained for review, not accepted as finished geometry",
+    "geometryConfirmed": false,
+    "materialLocked": true,
+    "geometryReferences": [
+      "references/head-v8-front.png",
+      "references/head-v8-right.png",
+      "references/head-v6-back.png"
+    ],
+    "referenceDirections": [
+      "Front",
+      "Right",
+      "Back"
+    ],
+    "geometryPrompt": "references/head-v8-three-view-geometry-prompt.txt",
+    "redoPrompt": "references/head-v8-closed-mouth-redo-prompt.txt",
+    "creditsBefore": 32.5,
+    "creditsAfterInitialGeneration": 32,
+    "redoIterationsSubmitted": 3,
+    "redoRemaining": 17,
+    "referenceChanges": "Removed frontal nostril dots, reduced upturned side nose and lip projection; omitted the separate nose crop which had conflicting thick lips/deep corners. Back view unchanged.",
+    "iterations": [
+      {
+        "redoNumber": 1,
+        "presets": [
+          "Faithful",
+          "Detailed"
+        ],
+        "findings": "Closed mouth instruction narrowed seam, but fine surface ripples appeared. Rejected as finished."
+      },
+      {
+        "redoNumber": 2,
+        "presets": [
+          "Faithful",
+          "Soft"
+        ],
+        "findings": "Surface became smoother, but eyebrows and nostril cavities were nearly erased; deep vertical mouth corners and lip ridge remained. Rejected as finished."
+      },
+      {
+        "redoNumber": 3,
+        "presets": [
+          "Faithful"
+        ],
+        "findings": "Nostril relief and brows returned; mouth corners less vertically incised, but lips/corners and skin ripples remain unsatisfactory. Front/profile/low screenshots saved; no topology inspection possible in this unconfirmed preview."
+      }
+    ],
+    "localModifyAttempt": {
+      "geometryApplied": false,
+      "findings": "Generated a mouth edit image preview. It shifted toward a realistic doll face and thick cosmetic lips, so canceled without applying it to geometry. Region could not be reliably restricted to mouth. Redo count stayed 18 until the next global redo."
+    },
+    "comparisonLimit": "Camera angles are approximate and generation seed remained -1, so these are visual candidate comparisons, not controlled quantitative fits.",
+    "runtimeAssetReplaced": false,
+    "creditsAfterRedo": 32,
+    "screenshots": [
+      "d1-head-v8-review-front.png",
+      "d1-head-v8-review-profile.png",
+      "d1-head-v8-redo3-low.png"
+    ],
+    "screenshotDirectory": "private-source/private-source-002"
+  },
+  "localBlenderCandidate": {
+    "directory": "manual-nose-mouth-final-candidate",
+    "status": "Nose and lip projection improved, but deep nasolabial/mouth corner transitions still fail full-face acceptance. Separate local branch, not the unconfirmed web candidate.",
+    "geometryScope": "Nose and mouth only; UV and unaffected vertices preserved; nostril wall/edge vertices protected.",
+    "verification": "manual-nose-mouth-final-candidate/verification.json",
+    "triangleCount": 39044,
+    "glbReimportPositionMatch1e5": true,
+    "rejectedAdditionalAttempt": "manual-nasolabial-soft-candidate",
+    "rejectionReason": "Additional smoothing softened part of the groove but introduced nose-under creasing and did not resolve mouth corners.",
+    "runtimeAssetReplaced": false
+  },
+  "localBrowRebuild": {
+    "directory": "manual-rebuilt-brows-candidate",
+    "source": "manual-nose-mouth-final-candidate/candidate.blend",
+    "status": "Visual local improvement retained; not accepted as completed head or runtime asset",
+    "method": "Recess old eyebrow ridge inside bounded patch, localized skin-color and normal repair in Blender, separate tapered matte eyebrow hair meshes.",
+    "changedHeadVertices": 418,
+    "hairsPerEyebrow": 92,
+    "hairMeshCount": 2,
+    "verification": "manual-rebuilt-brows-candidate/verification.json",
+    "outsidePatchVertexChanges": 0,
+    "uvUnchanged": true,
+    "outsideTextureMaskPixelDifference": 0,
+    "outsidePatchNormalMaximumDegrees": 0.038762203353000756,
+    "glbRoundTripMaximumCoordinateDifference": 0,
+    "visualFindings": "Solid dark eyebrow plates removed in front and three-quarter renders. Hair strands visible, but inner ends remain sparse/comb-like. Mouth corner dents, lip edge thickness, and old skin-colored eyelash spikes remain.",
+    "rejectedOverlayDirectory": "manual-hair-brows-candidate",
+    "runtimeAssetReplaced": false,
+    "primaryReviewGLB": "manual-rebuilt-brows-lod-candidate/candidate-packed.glb",
+    "primaryReviewBlend": "manual-rebuilt-brows-lod-candidate/candidate-packed.blend",
+    "finalRender": "manual-rebuilt-brows-lod-candidate/final-glb-reimport-front.png",
+    "lowerPolygonVerification": "manual-rebuilt-brows-lod-candidate/verification.json",
+    "totalBrowTriangles": 5152,
+    "texturePackagingCorrection": "Earlier candidate-head.glb/candidate.blend inherited stale packed texture bytes and are superseded. Use candidate-packed files only. Reimported final GLB textures equal repaired PNGs (maximum pixel difference 0); final render made from fresh GLB import."
+  },
+  "remainingFourteenReview": {
+    "record": "remaining-fourteen-review.json",
+    "gallery": "remaining-fourteen-gallery.md",
+    "completed": 14,
+    "remaining": 0,
+    "geometryConfirmed": false,
+    "materialConfirmed": false,
+    "shortlist": [
+      "choice02 / v9",
+      "choice08 / v15"
+    ],
+    "selectedForReview": "v9",
+    "status": "Ready for user comparison; no candidate yet meets all visual requirements"
   }
 }

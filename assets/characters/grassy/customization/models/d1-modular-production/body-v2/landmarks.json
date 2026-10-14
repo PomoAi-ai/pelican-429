@@ -1,0 +1,122 @@
+{
+  "source": "source/rodin-ce912294/base.obj placed by assembled-base/assemble.py",
+  "units": "Assembly units before gameNormalizeScale (final = raw x 1.5752013)",
+  "measurementMethod": "Horizontal mesh slices every 0.02 plus orthographic front/side renders with a coordinate grid; rest-pose pivot estimates",
+  "landmarks": {
+    "pelvis": [
+      0,
+      0.025,
+      0.8
+    ],
+    "spine": [
+      0,
+      0,
+      0.97
+    ],
+    "chest": [
+      0,
+      -0.012,
+      1.15
+    ],
+    "neck_base": [
+      0,
+      0.04,
+      1.29
+    ],
+    "head_attach": [
+      0,
+      0.035,
+      1.315
+    ],
+    "shoulder.L": [
+      0.18,
+      0.03,
+      1.215
+    ],
+    "elbow.L": [
+      0.27,
+      0.04,
+      0.98
+    ],
+    "wrist.L": [
+      0.37,
+      0,
+      0.8
+    ],
+    "hand.L": [
+      0.405,
+      -0.005,
+      0.69
+    ],
+    "hip.L": [
+      0.1,
+      0.025,
+      0.8
+    ],
+    "knee.L": [
+      0.106,
+      0.035,
+      0.47
+    ],
+    "ankle.L": [
+      0.148,
+      0.06,
+      0.135
+    ],
+    "ball.L": [
+      0.16,
+      -0.075,
+      0.035
+    ],
+    "toe.L": [
+      0.165,
+      -0.12,
+      0.024
+    ],
+    "shoulder.R": [
+      -0.18,
+      0.03,
+      1.215
+    ],
+    "elbow.R": [
+      -0.27,
+      0.04,
+      0.98
+    ],
+    "wrist.R": [
+      -0.37,
+      0,
+      0.8
+    ],
+    "hand.R": [
+      -0.405,
+      -0.005,
+      0.69
+    ],
+    "hip.R": [
+      -0.1,
+      0.025,
+      0.8
+    ],
+    "knee.R": [
+      -0.106,
+      0.035,
+      0.47
+    ],
+    "ankle.R": [
+      -0.148,
+      0.06,
+      0.135
+    ],
+    "ball.R": [
+      -0.16,
+      -0.075,
+      0.035
+    ],
+    "toe.R": [
+      -0.165,
+      -0.12,
+      0.024
+    ]
+  }
+}
