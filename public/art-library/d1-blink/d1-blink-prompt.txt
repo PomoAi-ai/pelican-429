@@ -1,0 +1,27 @@
+Model: gpt-image-2.5-sunburst, quality max, input-fidelity high, size 1536x1024 (openai images edit via the CPA endpoint).
+source-eye.png: the head texture's painted left eye resampled into eye space (iris-normalised, u -1.6..2.9 toward the outer corner, v -1.5..1.8), scaled to 1396x1024 and edge-padded 70 px each side; sampled by head-look/build.py (eye_rgb) and resized with Lanczos.
+
+===== open.png (inputs: source-eye.png, concept FACE FRONT crop of d1-seven/character-seven-views-slim-legs-v1.png x80-320 y700-900 at 4x) =====
+Use case: game texture repaint for an anime heroine's eye (one eye, extreme close-up, used as an eye decal on a 3D face).
+Image 1 is the current eye texture. Image 2 is the approved concept art face, for STYLE ONLY.
+Task: repaint image 1 as a clean cel-shaded anime eye in the style of image 2.
+HARD CONSTRAINTS: the canvas, framing and scale stay exactly the same. The iris keeps EXACTLY its current centre position and size (same circle). Reshape the eye opening around that iris so the iris sits CENTRED in the eye: a little eye white visible on BOTH sides of the iris, the eye opening roughly the iris height, upper lid slightly covering the top of the iris. The upper lash line is a bold dark brown-black line with a small lash flick at the right (outer) corner; a thin soft lower lash line. Iris: deep navy at the top fading to bright cyan-blue at the bottom, dark outer ring, black pupil, one large white catchlight upper-left and one small catchlight lower-right. Eye white is pure clean white with a soft blue-grey shadow under the upper lid.
+Everything outside the eye is plain smooth skin of the same pink skin colour as image 1, no eyebrow, no hair, no crease lines, no blush. No text.
+
+===== half.png (input: open.png) =====
+Use case: blink animation frame for a game eye decal (anime heroine, one eye, extreme close-up).
+Image 1 is the OPEN eye frame. Draw the SAME eye in the SAME style mid-blink:
+HALF-CLOSED: the upper eyelid with its bold lash line has slid DOWN to cover the upper half of the eye; only the lower half of the iris and eye white still show below it; the lower lash line stays where it is.
+HARD CONSTRAINTS: identical canvas, framing and scale; the inner corner and the outer corner (with its lash flick) stay at exactly the same pixel positions as image 1; same line thickness, colours and cel-shaded style; the iris, where still visible, stays at exactly the same position and size, just covered by the lid (never squashed or moved). Everything outside the eye is the same plain smooth pink skin as image 1, with a soft eyelid skin fold above the lash line. No eyebrow, no hair, no text.
+
+===== mostly.png (input: open.png) =====
+Use case: blink animation frame for a game eye decal (anime heroine, one eye, extreme close-up).
+Image 1 is the OPEN eye frame. Draw the SAME eye in the SAME style mid-blink:
+NEARLY CLOSED: the upper eyelid with its bold lash line has slid down to just above the lower lid; only a thin sliver of iris and eye white shows between the two lash lines.
+HARD CONSTRAINTS: identical canvas, framing and scale; the inner corner and the outer corner (with its lash flick) stay at exactly the same pixel positions as image 1; same line thickness, colours and cel-shaded style; the iris, where still visible, stays at exactly the same position and size, just covered by the lid (never squashed or moved). Everything outside the eye is the same plain smooth pink skin as image 1, with a soft eyelid skin fold above the lash line. No eyebrow, no hair, no text.
+
+===== closed.png (input: open.png) =====
+Use case: blink animation frame for a game eye decal (anime heroine, one eye, extreme close-up).
+Image 1 is the OPEN eye frame. Draw the SAME eye in the SAME style mid-blink:
+FULLY CLOSED: no iris and no eye white at all. The eye is a single bold dark brown-black lash line that curves gently DOWNWARD (a soft U-shaped arc) from the inner corner to the outer corner, keeping the small lash flick at the right (outer) corner and a few short lashes; the closed line sits about two thirds of the way down the former eye opening. Plain skin where the eye used to be.
+HARD CONSTRAINTS: identical canvas, framing and scale; the inner corner and the outer corner (with its lash flick) stay at exactly the same pixel positions as image 1; same line thickness, colours and cel-shaded style; the iris, where still visible, stays at exactly the same position and size, just covered by the lid (never squashed or moved). Everything outside the eye is the same plain smooth pink skin as image 1, with a soft eyelid skin fold above the lash line. No eyebrow, no hair, no text.

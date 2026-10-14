@@ -1,0 +1,9 @@
+Model: gpt-image-2.5-sunburst, quality max, input-fidelity high (openai images edit); returned 1673x940.
+Image 1: grassy-boy-base-v1.png
+
+Use case: game character modeling reference — hairless head variant so hairstyles can be modeled as separate swappable parts.
+Image 1 is the EDIT TARGET: a stylized game character turnaround sheet of the boy Grassy (FRONT, RIGHT, BACK, LEFT, plus LEFT SOLE / RIGHT SOLE panels).
+
+Task: remove the dark hair from the head in every view and show a smooth, plain, rounded bald head like an unpainted character-base mannequin head, skin-toned. Keep his eyebrows and eyelashes. The skull fits inside the former hair volume: crown lower than the old hair tips, full round back of head in the RIGHT, BACK and LEFT views, ears fully visible and unchanged.
+
+Everything else stays identical to image 1: face, ears, neck, body, blue tank top and shorts, arms, hands, legs, feet, pose, every figure's position and scale, the ground line, the sole panel and all labels. Do not resize or move any figure, do not change proportions. White background, same rendering style. No hats, no extra text, rulers or guide lines.

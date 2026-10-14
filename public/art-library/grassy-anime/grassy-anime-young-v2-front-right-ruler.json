@@ -1,0 +1,67 @@
+{
+  "source": "grassy-anime-young-v2.png",
+  "source_sha256": "a776ebb05db4b9f3abd26f2a3cffa4f5c31c7bcb3b22c301ca5693fbf035794f",
+  "crop_boxes": [
+    [
+      50,
+      5,
+      410,
+      925
+    ],
+    [
+      430,
+      5,
+      730,
+      925
+    ]
+  ],
+  "source_soles_y": [
+    915,
+    916
+  ],
+  "top_y": 25,
+  "chin_y": 294,
+  "head_pixels": 269,
+  "measured_head_units": 3.308550185873606,
+  "head_unit_definition": "发顶至下巴（含头发）",
+  "pixels_per_tile": 240,
+  "uniform_scale": 0.8419867947178872,
+  "landmarks": [
+    {
+      "label": "发顶",
+      "source_y": 25,
+      "tiles": 3.122
+    },
+    {
+      "label": "下巴",
+      "source_y": 294,
+      "tiles": 2.179
+    },
+    {
+      "label": "肩线",
+      "source_y": 325,
+      "tiles": 2.07
+    },
+    {
+      "label": "毛衣下摆",
+      "source_y": 520,
+      "tiles": 1.386
+    },
+    {
+      "label": "膝线",
+      "source_y": 680,
+      "tiles": 0.824
+    },
+    {
+      "label": "裤脚",
+      "source_y": 818,
+      "tiles": 0.34
+    },
+    {
+      "label": "鞋底",
+      "source_y": 915,
+      "tiles": 0.0
+    }
+  ],
+  "method": "unified ruler (public/concepts/character-ruler-standard.md); uniform resize; sole-aligned"
+}

@@ -1,0 +1,72 @@
+{
+  "source": "grassy-anime-young-base-v2.png",
+  "source_sha256": "b1a61f93f998b48ed37f7d399ccf95aded567dcf7d4b59089e8abcb9be811c7f",
+  "crop_boxes": [
+    [
+      45,
+      5,
+      385,
+      866
+    ],
+    [
+      405,
+      5,
+      690,
+      866
+    ]
+  ],
+  "source_soles_y": [
+    857,
+    856
+  ],
+  "top_y": 24,
+  "chin_y": 276,
+  "head_pixels": 252,
+  "measured_head_units": 3.3055555555555554,
+  "head_unit_definition": "发顶至下巴（含头发）",
+  "pixels_per_tile": 240,
+  "uniform_scale": 0.8931572629051621,
+  "landmarks": [
+    {
+      "label": "发顶",
+      "source_y": 24,
+      "tiles": 3.1
+    },
+    {
+      "label": "下巴",
+      "source_y": 276,
+      "tiles": 2.162
+    },
+    {
+      "label": "肩线",
+      "source_y": 300,
+      "tiles": 2.073
+    },
+    {
+      "label": "腰线",
+      "source_y": 470,
+      "tiles": 1.44
+    },
+    {
+      "label": "胯线",
+      "source_y": 548,
+      "tiles": 1.15
+    },
+    {
+      "label": "膝线",
+      "source_y": 635,
+      "tiles": 0.826
+    },
+    {
+      "label": "踝线",
+      "source_y": 805,
+      "tiles": 0.194
+    },
+    {
+      "label": "脚底",
+      "source_y": 857,
+      "tiles": 0.0
+    }
+  ],
+  "method": "unified ruler (public/concepts/character-ruler-standard.md); uniform resize; sole-aligned"
+}

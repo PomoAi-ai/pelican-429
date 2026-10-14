@@ -1,594 +1,1591 @@
 {
+  "method": "统一标尺：正面发冠（不含马尾、发髻、翘发）至鞋底 = 3.1 格；四视图同一倍率，鞋底对齐。头身 = (鞋底 − 发冠) ÷ (下巴 − 发冠)。",
   "target_head_ratio": 3.3,
-  "items": [
-    {
-      "id": "r01",
-      "title": "经典水手裙 · 均衡体型",
-      "hair": "黑色齐肩直发",
-      "source_file": "exec-private-source-042.png",
-      "source_size": [
-        1536,
-        1024
-      ],
-      "uniform_display_scale": 0.8722157092614302,
-      "views": [
+  "world_height_tiles": 3.1,
+  "sheets": {
+    "r01-f": {
+      "ruler": "r01-ruler.png",
+      "head_ratio": 3.231,
+      "uniform_scale": 0.8722,
+      "front_sole_y": 971,
+      "landmarks": [
         {
-          "view": "FRONT",
-          "crown_y": 118,
-          "chin_y": 382,
-          "sole_y": 971,
-          "head_ratio": 3.231
+          "label": "发冠",
+          "source_y": 118,
+          "tiles": 3.1
         },
         {
-          "view": "RIGHT",
-          "crown_y": 118,
-          "chin_y": 379,
-          "sole_y": 971,
-          "head_ratio": 3.268
+          "label": "下巴",
+          "source_y": 382,
+          "tiles": 2.141
         },
         {
-          "view": "BACK",
-          "crown_y": 118,
-          "chin_y": null,
-          "sole_y": 971,
-          "head_ratio": null
+          "label": "肩线",
+          "source_y": 430,
+          "tiles": 1.966
         },
         {
-          "view": "FRONT 45",
-          "crown_y": 118,
-          "chin_y": 381,
-          "sole_y": 983,
-          "head_ratio": 3.289
-        }
-      ],
-      "screening": "人工可见发冠口径处于本轮筛查范围；非最终3D比例认证"
-    },
-    {
-      "id": "r02",
-      "title": "夏日水手短裤 · 纤细体型",
-      "hair": "银灰耳上短发",
-      "source_file": "exec-private-source-024.png",
-      "source_size": [
-        1678,
-        937
-      ],
-      "uniform_display_scale": 0.9538461538461539,
-      "views": [
-        {
-          "view": "FRONT",
-          "crown_y": 49,
-          "chin_y": 294,
-          "sole_y": 829,
-          "head_ratio": 3.184
+          "label": "腰线",
+          "source_y": 550,
+          "tiles": 1.53
         },
         {
-          "view": "RIGHT",
-          "crown_y": 49,
-          "chin_y": 292,
-          "sole_y": 828,
-          "head_ratio": 3.206
+          "label": "膝线",
+          "source_y": 785,
+          "tiles": 0.676
+        }
+      ]
+    },
+    "r01-m": {
+      "ruler": "r01-male-ruler.png",
+      "head_ratio": 3.2,
+      "uniform_scale": 0.8611,
+      "front_sole_y": 972,
+      "landmarks": [
+        {
+          "label": "发冠",
+          "source_y": 108,
+          "tiles": 3.1
         },
         {
-          "view": "BACK",
-          "crown_y": 53,
-          "chin_y": null,
-          "sole_y": 827,
-          "head_ratio": null
+          "label": "下巴",
+          "source_y": 378,
+          "tiles": 2.131
         },
         {
-          "view": "FRONT 45",
-          "crown_y": 51,
-          "chin_y": 297,
-          "sole_y": 831,
-          "head_ratio": 3.171
-        }
-      ],
-      "screening": "人工可见发冠口径处于本轮筛查范围；非最终3D比例认证",
-      "note": "最终保留原始较接近目标的版本，约3.18H，头相对目标仍略大。后续两次缩头结果约3.5—3.8H，均淘汰，未纳入交付。"
-    },
-    {
-      "id": "r03",
-      "title": "休闲牛仔背带裤 · 微胖体型",
-      "hair": "栗棕半扎卷发",
-      "source_file": "exec-private-source-062.png",
-      "source_size": [
-        1678,
-        937
-      ],
-      "uniform_display_scale": 0.970013037809648,
-      "views": [
-        {
-          "view": "FRONT",
-          "crown_y": 56,
-          "chin_y": 287,
-          "sole_y": 823,
-          "head_ratio": 3.32
+          "label": "肩线",
+          "source_y": 431,
+          "tiles": 1.941
         },
         {
-          "view": "RIGHT",
-          "crown_y": 47,
-          "chin_y": 281,
-          "sole_y": 822,
-          "head_ratio": 3.312
+          "label": "腰线",
+          "source_y": 551,
+          "tiles": 1.511
         },
         {
-          "view": "BACK",
-          "crown_y": 58,
-          "chin_y": null,
-          "sole_y": 822,
-          "head_ratio": null
+          "label": "膝线",
+          "source_y": 783,
+          "tiles": 0.678
+        }
+      ]
+    },
+    "r02-f": {
+      "ruler": "r02-ruler.png",
+      "head_ratio": 3.188,
+      "uniform_scale": 0.9526,
+      "front_sole_y": 830,
+      "landmarks": [
+        {
+          "label": "发冠",
+          "source_y": 49,
+          "tiles": 3.1
         },
         {
-          "view": "FRONT 45",
-          "crown_y": 48,
-          "chin_y": 283,
-          "sole_y": 827,
-          "head_ratio": 3.315
-        }
-      ],
-      "screening": "人工可见发冠口径处于本轮筛查范围；非最终3D比例认证"
-    },
-    {
-      "id": "r10",
-      "title": "田径运动装 · 健壮体型",
-      "hair": "栗棕高马尾",
-      "source_file": "exec-private-source-041.png",
-      "source_size": [
-        1536,
-        1024
-      ],
-      "uniform_display_scale": 0.8910179640718563,
-      "views": [
-        {
-          "view": "FRONT",
-          "crown_y": 65,
-          "chin_y": 319,
-          "sole_y": 900,
-          "head_ratio": 3.287
+          "label": "下巴",
+          "source_y": 294,
+          "tiles": 2.128
         },
         {
-          "view": "RIGHT",
-          "crown_y": 70,
-          "chin_y": 318,
-          "sole_y": 900,
-          "head_ratio": 3.347
+          "label": "肩线",
+          "source_y": 328,
+          "tiles": 1.993
         },
         {
-          "view": "BACK",
-          "crown_y": 69,
-          "chin_y": null,
-          "sole_y": 900,
-          "head_ratio": null
+          "label": "腰线",
+          "source_y": 442,
+          "tiles": 1.54
         },
         {
-          "view": "FRONT 45",
-          "crown_y": 71,
-          "chin_y": 322,
-          "sole_y": 903,
-          "head_ratio": 3.315
+          "label": "膝线",
+          "source_y": 678,
+          "tiles": 0.603
         }
-      ],
-      "screening": "人工可见发冠口径处于本轮筛查范围；非最终3D比例认证"
+      ]
     },
-    {
-      "id": "r04",
-      "title": "秋日针织",
-      "source_file": "exec-private-source-067.png",
-      "source_size": [
-        1678,
-        937
-      ],
-      "estimated_landmark_uncertainty_px": 5,
-      "uniform_display_scale": 0.9265255292652553,
-      "views": [
+    "r02-m": {
+      "ruler": "r02-male-ruler.png",
+      "head_ratio": 3.241,
+      "uniform_scale": 0.8631,
+      "front_sole_y": 974,
+      "landmarks": [
         {
-          "view": "FRONT",
-          "crown_y": 46,
-          "chin_y": 289,
-          "sole_y": 849,
-          "head_ratio": 3.305
+          "label": "发冠",
+          "source_y": 112,
+          "tiles": 3.1
+        },
+        {
+          "label": "下巴",
+          "source_y": 378,
+          "tiles": 2.143
+        },
+        {
+          "label": "肩线",
+          "source_y": 433,
+          "tiles": 1.946
+        },
+        {
+          "label": "腰线",
+          "source_y": 553,
+          "tiles": 1.514
+        },
+        {
+          "label": "膝线",
+          "source_y": 785,
+          "tiles": 0.68
         }
-      ],
-      "review": "四视图已目视检查；本记录仅量化正面。侧面、背面、45度未作独立像素测量，不能当精密工程图。"
+      ]
     },
-    {
-      "id": "r05",
-      "title": "冬日旅行",
-      "source_file": "exec-private-source-076.png",
-      "source_size": [
-        1536,
-        1024
-      ],
-      "estimated_landmark_uncertainty_px": 5,
-      "uniform_display_scale": 0.8722157092614302,
-      "views": [
+    "r03-f": {
+      "ruler": "r03-ruler.png",
+      "head_ratio": 3.226,
+      "uniform_scale": 0.8702,
+      "front_sole_y": 973,
+      "landmarks": [
         {
-          "view": "FRONT",
-          "crown_y": 98,
-          "chin_y": 353,
-          "sole_y": 951,
-          "head_ratio": 3.345
+          "label": "发冠",
+          "source_y": 118,
+          "tiles": 3.1
+        },
+        {
+          "label": "下巴",
+          "source_y": 383,
+          "tiles": 2.139
+        },
+        {
+          "label": "肩线",
+          "source_y": 432,
+          "tiles": 1.962
+        },
+        {
+          "label": "腰线",
+          "source_y": 552,
+          "tiles": 1.526
+        },
+        {
+          "label": "膝线",
+          "source_y": 784,
+          "tiles": 0.685
         }
-      ],
-      "review": "四视图已目视检查；本记录仅量化正面。侧面、背面、45度未作独立像素测量，不能当精密工程图。"
+      ]
     },
-    {
-      "id": "r06",
-      "title": "东方轻装",
-      "source_file": "exec-private-source-018.png",
-      "source_size": [
-        1678,
-        937
-      ],
-      "estimated_landmark_uncertainty_px": 5,
-      "uniform_display_scale": 0.9230769230769231,
-      "views": [
+    "r03-m": {
+      "ruler": "r03-male-ruler.png",
+      "head_ratio": 3.193,
+      "uniform_scale": 0.8631,
+      "front_sole_y": 970,
+      "landmarks": [
         {
-          "view": "FRONT",
-          "crown_y": 45,
-          "chin_y": 300,
-          "sole_y": 851,
-          "head_ratio": 3.161
+          "label": "发冠",
+          "source_y": 108,
+          "tiles": 3.1
+        },
+        {
+          "label": "下巴",
+          "source_y": 378,
+          "tiles": 2.129
+        },
+        {
+          "label": "肩线",
+          "source_y": 429,
+          "tiles": 1.946
+        },
+        {
+          "label": "腰线",
+          "source_y": 549,
+          "tiles": 1.514
+        },
+        {
+          "label": "膝线",
+          "source_y": 781,
+          "tiles": 0.68
         }
-      ],
-      "review": "四视图已目视检查；本记录仅量化正面。侧面、背面、45度未作独立像素测量，不能当精密工程图。"
+      ]
     },
-    {
-      "id": "r07",
-      "title": "医生",
-      "source_file": "exec-private-source-040.png",
-      "source_size": [
-        1536,
-        1024
-      ],
-      "estimated_landmark_uncertainty_px": 5,
-      "uniform_display_scale": 0.8248337028824834,
-      "views": [
+    "r04-f": {
+      "ruler": "r04-ruler.png",
+      "head_ratio": 3.198,
+      "uniform_scale": 0.8681,
+      "front_sole_y": 974,
+      "landmarks": [
         {
-          "view": "FRONT",
-          "crown_y": 68,
-          "chin_y": 345,
-          "sole_y": 970,
-          "head_ratio": 3.256
+          "label": "发冠",
+          "source_y": 117,
+          "tiles": 3.1
+        },
+        {
+          "label": "下巴",
+          "source_y": 385,
+          "tiles": 2.131
+        },
+        {
+          "label": "肩线",
+          "source_y": 433,
+          "tiles": 1.957
+        },
+        {
+          "label": "腰线",
+          "source_y": 553,
+          "tiles": 1.523
+        },
+        {
+          "label": "膝线",
+          "source_y": 785,
+          "tiles": 0.684
         }
-      ],
-      "review": "四视图已目视检查；本记录仅量化正面。侧面、背面、45度未作独立像素测量，不能当精密工程图。"
+      ]
     },
-    {
-      "id": "r08",
-      "title": "急救员",
-      "source_file": "exec-private-source-035.png",
-      "source_size": [
-        1678,
-        937
-      ],
-      "estimated_landmark_uncertainty_px": 5,
-      "uniform_display_scale": 0.9040097205346294,
-      "views": [
+    "r04-m": {
+      "ruler": "r04-male-ruler.png",
+      "head_ratio": 3.132,
+      "uniform_scale": 0.8732,
+      "front_sole_y": 960,
+      "landmarks": [
         {
-          "view": "FRONT",
-          "crown_y": 45,
-          "chin_y": 294,
-          "sole_y": 868,
-          "head_ratio": 3.305
+          "label": "发冠",
+          "source_y": 108,
+          "tiles": 3.1
+        },
+        {
+          "label": "下巴",
+          "source_y": 380,
+          "tiles": 2.11
+        },
+        {
+          "label": "肩线",
+          "source_y": 419,
+          "tiles": 1.968
+        },
+        {
+          "label": "腰线",
+          "source_y": 539,
+          "tiles": 1.532
+        },
+        {
+          "label": "膝线",
+          "source_y": 771,
+          "tiles": 0.688
         }
-      ],
-      "review": "四视图已目视检查；本记录仅量化正面。侧面、背面、45度未作独立像素测量，不能当精密工程图。"
+      ]
     },
-    {
-      "id": "r09",
-      "title": "野外训练军人",
-      "source_file": "exec-private-source-050.png",
-      "source_size": [
-        1536,
-        1024
-      ],
-      "estimated_landmark_uncertainty_px": 5,
-      "uniform_display_scale": 0.8601156069364162,
-      "views": [
+    "r05-f": {
+      "ruler": "r05-ruler.png",
+      "head_ratio": 3.349,
+      "uniform_scale": 0.8712,
+      "front_sole_y": 952,
+      "landmarks": [
         {
-          "view": "FRONT",
-          "crown_y": 75,
-          "chin_y": 338,
-          "sole_y": 940,
-          "head_ratio": 3.289
+          "label": "发冠",
+          "source_y": 98,
+          "tiles": 3.1
+        },
+        {
+          "label": "下巴",
+          "source_y": 353,
+          "tiles": 2.174
+        },
+        {
+          "label": "肩线",
+          "source_y": 414,
+          "tiles": 1.953
+        },
+        {
+          "label": "腰线",
+          "source_y": 540,
+          "tiles": 1.496
+        },
+        {
+          "label": "膝线",
+          "source_y": 740,
+          "tiles": 0.77
         }
-      ],
-      "review": "四视图已目视检查；本记录仅量化正面。侧面、背面、45度未作独立像素测量，不能当精密工程图。"
+      ]
     },
-    {
-      "id": "r11",
-      "title": "网球运动员",
-      "source_file": "exec-private-source-038.png",
-      "source_size": [
-        1678,
-        937
-      ],
-      "estimated_landmark_uncertainty_px": 5,
-      "uniform_display_scale": 0.9073170731707317,
-      "views": [
+    "r05-m": {
+      "ruler": "r05-male-ruler.png",
+      "head_ratio": 3.225,
+      "uniform_scale": 0.8641,
+      "front_sole_y": 969,
+      "landmarks": [
         {
-          "view": "FRONT",
-          "crown_y": 50,
-          "chin_y": 296,
-          "sole_y": 870,
-          "head_ratio": 3.333
+          "label": "发冠",
+          "source_y": 108,
+          "tiles": 3.1
+        },
+        {
+          "label": "下巴",
+          "source_y": 375,
+          "tiles": 2.139
+        },
+        {
+          "label": "肩线",
+          "source_y": 428,
+          "tiles": 1.948
+        },
+        {
+          "label": "腰线",
+          "source_y": 548,
+          "tiles": 1.516
+        },
+        {
+          "label": "膝线",
+          "source_y": 780,
+          "tiles": 0.68
         }
-      ],
-      "review": "四视图已目视检查；本记录仅量化正面。侧面、背面、45度未作独立像素测量，不能当精密工程图。"
+      ]
     },
-    {
-      "id": "r12",
-      "title": "篮球运动员",
-      "source_file": "exec-private-source-028.png",
-      "source_size": [
-        1536,
-        1024
-      ],
-      "estimated_landmark_uncertainty_px": 5,
-      "uniform_display_scale": 0.8425821064552661,
-      "views": [
+    "r06-f": {
+      "ruler": "r06-ruler.png",
+      "head_ratio": 3.169,
+      "uniform_scale": 0.9208,
+      "front_sole_y": 853,
+      "landmarks": [
         {
-          "view": "FRONT",
-          "crown_y": 72,
-          "chin_y": 332,
-          "sole_y": 955,
-          "head_ratio": 3.396
+          "label": "发冠",
+          "source_y": 45,
+          "tiles": 3.1
+        },
+        {
+          "label": "下巴",
+          "source_y": 300,
+          "tiles": 2.122
+        },
+        {
+          "label": "肩线",
+          "source_y": 333,
+          "tiles": 1.995
+        },
+        {
+          "label": "腰线",
+          "source_y": 448,
+          "tiles": 1.554
+        },
+        {
+          "label": "膝线",
+          "source_y": 678,
+          "tiles": 0.671
         }
-      ],
-      "review": "四视图已目视检查；本记录仅量化正面。侧面、背面、45度未作独立像素测量，不能当精密工程图。"
+      ]
     },
-    {
-      "id": "r13",
-      "title": "学院休闲",
-      "source_file": "exec-private-source-044.png",
-      "source_size": [
-        1678,
-        937
-      ],
-      "estimated_landmark_uncertainty_px": 5,
-      "uniform_display_scale": 0.9185185185185185,
-      "views": [
+    "r06-m": {
+      "ruler": "r06-male-ruler.png",
+      "head_ratio": 3.185,
+      "uniform_scale": 0.8651,
+      "front_sole_y": 968,
+      "landmarks": [
         {
-          "view": "FRONT",
-          "crown_y": 50,
-          "chin_y": 301,
-          "sole_y": 860,
-          "head_ratio": 3.227
+          "label": "发冠",
+          "source_y": 108,
+          "tiles": 3.1
+        },
+        {
+          "label": "下巴",
+          "source_y": 378,
+          "tiles": 2.127
+        },
+        {
+          "label": "肩线",
+          "source_y": 427,
+          "tiles": 1.95
+        },
+        {
+          "label": "腰线",
+          "source_y": 547,
+          "tiles": 1.518
+        },
+        {
+          "label": "膝线",
+          "source_y": 779,
+          "tiles": 0.681
         }
-      ],
-      "review": "四视图已目视检查；本记录仅量化正面。侧面、背面、45度未作独立像素测量，不能当精密工程图。"
+      ]
     },
-    {
-      "id": "r14",
-      "title": "春日花瓣裙",
-      "source_file": "exec-private-source-059.png",
-      "source_size": [
-        1536,
-        1024
-      ],
-      "estimated_landmark_uncertainty_px": 5,
-      "uniform_display_scale": 0.8742655699177438,
-      "views": [
+    "r07-f": {
+      "ruler": "r07-ruler.png",
+      "head_ratio": 3.256,
+      "uniform_scale": 0.8248,
+      "front_sole_y": 970,
+      "landmarks": [
         {
-          "view": "FRONT",
-          "crown_y": 116,
-          "chin_y": 382,
-          "sole_y": 967,
-          "head_ratio": 3.199
+          "label": "发冠",
+          "source_y": 68,
+          "tiles": 3.1
+        },
+        {
+          "label": "下巴",
+          "source_y": 345,
+          "tiles": 2.148
+        },
+        {
+          "label": "肩线",
+          "source_y": 431,
+          "tiles": 1.852
+        },
+        {
+          "label": "腰线",
+          "source_y": 560,
+          "tiles": 1.409
+        },
+        {
+          "label": "膝线",
+          "source_y": 776,
+          "tiles": 0.667
         }
-      ],
-      "review": "四视图已目视检查；本记录仅量化正面。侧面、背面、45度未作独立像素测量，不能当精密工程图。"
+      ]
     },
-    {
-      "id": "r15",
-      "title": "咖啡师",
-      "source_file": "exec-private-source-072.png",
-      "source_size": [
-        1678,
-        937
-      ],
-      "estimated_landmark_uncertainty_px": 5,
-      "uniform_display_scale": 0.9196538936959209,
-      "views": [
+    "r07-m": {
+      "ruler": "r07-male-ruler.png",
+      "head_ratio": 3.185,
+      "uniform_scale": 0.8651,
+      "front_sole_y": 968,
+      "landmarks": [
         {
-          "view": "FRONT",
-          "crown_y": 40,
-          "chin_y": 289,
-          "sole_y": 849,
-          "head_ratio": 3.249
+          "label": "发冠",
+          "source_y": 108,
+          "tiles": 3.1
+        },
+        {
+          "label": "下巴",
+          "source_y": 378,
+          "tiles": 2.127
+        },
+        {
+          "label": "肩线",
+          "source_y": 427,
+          "tiles": 1.95
+        },
+        {
+          "label": "腰线",
+          "source_y": 547,
+          "tiles": 1.518
+        },
+        {
+          "label": "膝线",
+          "source_y": 779,
+          "tiles": 0.681
         }
-      ],
-      "review": "四视图已目视检查；本记录仅量化正面。侧面、背面、45度未作独立像素测量，不能当精密工程图。"
+      ]
     },
-    {
-      "id": "r16",
-      "title": "消防员",
-      "source_file": "exec-private-source-055.png",
-      "source_size": [
-        1536,
-        1024
-      ],
-      "estimated_landmark_uncertainty_px": 5,
-      "uniform_display_scale": 0.8435374149659864,
-      "views": [
+    "r08-f": {
+      "ruler": "r08-ruler.png",
+      "head_ratio": 3.219,
+      "uniform_scale": 0.8722,
+      "front_sole_y": 971,
+      "landmarks": [
         {
-          "view": "FRONT",
-          "crown_y": 70,
-          "chin_y": 345,
-          "sole_y": 952,
-          "head_ratio": 3.207
+          "label": "发冠",
+          "source_y": 118,
+          "tiles": 3.1
+        },
+        {
+          "label": "下巴",
+          "source_y": 383,
+          "tiles": 2.137
+        },
+        {
+          "label": "肩线",
+          "source_y": 430,
+          "tiles": 1.966
+        },
+        {
+          "label": "腰线",
+          "source_y": 550,
+          "tiles": 1.53
+        },
+        {
+          "label": "膝线",
+          "source_y": 782,
+          "tiles": 0.687
         }
-      ],
-      "review": "四视图已目视检查；本记录仅量化正面。侧面、背面、45度未作独立像素测量，不能当精密工程图。"
+      ]
     },
-    {
-      "id": "r17",
-      "title": "雨天出行",
-      "source_file": "exec-private-source-029.png",
-      "source_size": [
-        1678,
-        937
-      ],
-      "estimated_landmark_uncertainty_px": 5,
-      "uniform_display_scale": 0.9106487148102815,
-      "views": [
+    "r08-m": {
+      "ruler": "r08-male-ruler.png",
+      "head_ratio": 3.23,
+      "uniform_scale": 0.8826,
+      "front_sole_y": 961,
+      "landmarks": [
         {
-          "view": "FRONT",
-          "crown_y": 50,
-          "chin_y": 299,
-          "sole_y": 867,
-          "head_ratio": 3.281
+          "label": "发冠",
+          "source_y": 118,
+          "tiles": 3.1
+        },
+        {
+          "label": "下巴",
+          "source_y": 379,
+          "tiles": 2.14
+        },
+        {
+          "label": "肩线",
+          "source_y": 420,
+          "tiles": 1.989
+        },
+        {
+          "label": "腰线",
+          "source_y": 540,
+          "tiles": 1.548
+        },
+        {
+          "label": "膝线",
+          "source_y": 772,
+          "tiles": 0.695
         }
-      ],
-      "review": "四视图已目视检查；本记录仅量化正面。侧面、背面、45度未作独立像素测量，不能当精密工程图。"
+      ]
     },
-    {
-      "id": "r18",
-      "title": "都市侦探",
-      "source_file": "exec-private-source-065.png",
-      "source_size": [
-        1536,
-        1024
-      ],
-      "estimated_landmark_uncertainty_px": 5,
-      "uniform_display_scale": 0.8711943793911007,
-      "views": [
+    "r09-f": {
+      "ruler": "r09-ruler.png",
+      "head_ratio": 3.26,
+      "uniform_scale": 0.8712,
+      "front_sole_y": 970,
+      "landmarks": [
         {
-          "view": "FRONT",
-          "crown_y": 102,
-          "chin_y": 361,
-          "sole_y": 956,
-          "head_ratio": 3.297
+          "label": "发冠",
+          "source_y": 116,
+          "tiles": 3.1
+        },
+        {
+          "label": "下巴",
+          "source_y": 378,
+          "tiles": 2.149
+        },
+        {
+          "label": "肩线",
+          "source_y": 429,
+          "tiles": 1.964
+        },
+        {
+          "label": "腰线",
+          "source_y": 549,
+          "tiles": 1.528
+        },
+        {
+          "label": "膝线",
+          "source_y": 781,
+          "tiles": 0.686
         }
-      ],
-      "review": "四视图已目视检查；本记录仅量化正面。侧面、背面、45度未作独立像素测量，不能当精密工程图。"
+      ]
     },
-    {
-      "id": "r19",
-      "title": "园艺师",
-      "source_file": "exec-private-source-020.png",
-      "source_size": [
-        1678,
-        937
-      ],
-      "estimated_landmark_uncertainty_px": 5,
-      "uniform_display_scale": 0.9207920792079208,
-      "views": [
+    "r09-m": {
+      "ruler": "r09-male-ruler.png",
+      "head_ratio": 3.222,
+      "uniform_scale": 0.8681,
+      "front_sole_y": 969,
+      "landmarks": [
         {
-          "view": "FRONT",
-          "crown_y": 46,
-          "chin_y": 284,
-          "sole_y": 854,
-          "head_ratio": 3.395
+          "label": "发冠",
+          "source_y": 112,
+          "tiles": 3.1
+        },
+        {
+          "label": "下巴",
+          "source_y": 378,
+          "tiles": 2.138
+        },
+        {
+          "label": "肩线",
+          "source_y": 428,
+          "tiles": 1.957
+        },
+        {
+          "label": "腰线",
+          "source_y": 548,
+          "tiles": 1.523
+        },
+        {
+          "label": "膝线",
+          "source_y": 780,
+          "tiles": 0.684
         }
-      ],
-      "review": "四视图已目视检查；本记录仅量化正面。侧面、背面、45度未作独立像素测量，不能当精密工程图。"
+      ]
     },
-    {
-      "id": "r20",
-      "title": "机械维修师",
-      "source_file": "exec-private-source-051.png",
-      "source_size": [
-        1536,
-        1024
-      ],
-      "estimated_landmark_uncertainty_px": 5,
-      "uniform_display_scale": 0.8275862068965517,
-      "views": [
+    "r10-f": {
+      "ruler": "r10-ruler.png",
+      "head_ratio": 3.119,
+      "uniform_scale": 0.8581,
+      "front_sole_y": 972,
+      "landmarks": [
         {
-          "view": "FRONT",
-          "crown_y": 36,
-          "chin_y": 305,
-          "sole_y": 935,
-          "head_ratio": 3.342
+          "label": "发冠",
+          "source_y": 105,
+          "tiles": 3.1
+        },
+        {
+          "label": "下巴",
+          "source_y": 383,
+          "tiles": 2.106
+        },
+        {
+          "label": "肩线",
+          "source_y": 431,
+          "tiles": 1.934
+        },
+        {
+          "label": "腰线",
+          "source_y": 551,
+          "tiles": 1.505
+        },
+        {
+          "label": "膝线",
+          "source_y": 783,
+          "tiles": 0.676
         }
-      ],
-      "review": "四视图已目视检查；本记录仅量化正面。侧面、背面、45度未作独立像素测量，不能当精密工程图。"
+      ]
     },
-    {
-      "id": "r21",
-      "title": "星纹法师",
-      "source_file": "exec-private-source-036.png",
-      "source_size": [
-        1678,
-        937
-      ],
-      "estimated_landmark_uncertainty_px": 5,
-      "uniform_display_scale": 0.916256157635468,
-      "views": [
+    "r10-m": {
+      "ruler": "r10-male-ruler.png",
+      "head_ratio": 3.263,
+      "uniform_scale": 0.8571,
+      "front_sole_y": 974,
+      "landmarks": [
         {
-          "view": "FRONT",
-          "crown_y": 46,
-          "chin_y": 294,
-          "sole_y": 858,
-          "head_ratio": 3.274
+          "label": "发冠",
+          "source_y": 106,
+          "tiles": 3.1
+        },
+        {
+          "label": "下巴",
+          "source_y": 372,
+          "tiles": 2.15
+        },
+        {
+          "label": "肩线",
+          "source_y": 433,
+          "tiles": 1.932
+        },
+        {
+          "label": "腰线",
+          "source_y": 553,
+          "tiles": 1.504
+        },
+        {
+          "label": "膝线",
+          "source_y": 785,
+          "tiles": 0.675
         }
-      ],
-      "review": "四视图已目视检查；本记录仅量化正面。侧面、背面、45度未作独立像素测量，不能当精密工程图。"
+      ]
     },
-    {
-      "id": "r22",
-      "title": "礼服军官",
-      "source_file": "exec-private-source-063.png",
-      "source_size": [
-        1536,
-        1024
-      ],
-      "estimated_landmark_uncertainty_px": 5,
-      "uniform_display_scale": 0.8773584905660378,
-      "views": [
+    "r11-f": {
+      "ruler": "r11-ruler.png",
+      "head_ratio": 3.337,
+      "uniform_scale": 0.9062,
+      "front_sole_y": 871,
+      "landmarks": [
         {
-          "view": "FRONT",
-          "crown_y": 108,
-          "chin_y": 377,
-          "sole_y": 956,
-          "head_ratio": 3.152
+          "label": "发冠",
+          "source_y": 50,
+          "tiles": 3.1
+        },
+        {
+          "label": "下巴",
+          "source_y": 296,
+          "tiles": 2.171
+        },
+        {
+          "label": "肩线",
+          "source_y": 355,
+          "tiles": 1.948
+        },
+        {
+          "label": "腰线",
+          "source_y": 450,
+          "tiles": 1.59
+        },
+        {
+          "label": "膝线",
+          "source_y": 662,
+          "tiles": 0.789
         }
-      ],
-      "review": "四视图已目视检查；本记录仅量化正面。侧面、背面、45度未作独立像素测量，不能当精密工程图。"
+      ]
     },
-    {
-      "id": "r23",
-      "title": "冬日居家",
-      "source_file": "exec-private-source-066.png",
-      "source_size": [
-        1678,
-        937
-      ],
-      "estimated_landmark_uncertainty_px": 5,
-      "uniform_display_scale": 0.9207920792079208,
-      "views": [
+    "r11-m": {
+      "ruler": "r11-male-ruler.png",
+      "head_ratio": 3.22,
+      "uniform_scale": 0.8621,
+      "front_sole_y": 973,
+      "landmarks": [
         {
-          "view": "FRONT",
-          "crown_y": 42,
-          "chin_y": 288,
-          "sole_y": 850,
-          "head_ratio": 3.285
+          "label": "发冠",
+          "source_y": 110,
+          "tiles": 3.1
+        },
+        {
+          "label": "下巴",
+          "source_y": 378,
+          "tiles": 2.137
+        },
+        {
+          "label": "肩线",
+          "source_y": 432,
+          "tiles": 1.943
+        },
+        {
+          "label": "腰线",
+          "source_y": 552,
+          "tiles": 1.512
+        },
+        {
+          "label": "膝线",
+          "source_y": 784,
+          "tiles": 0.679
         }
-      ],
-      "review": "四视图已目视检查；本记录仅量化正面。侧面、背面、45度未作独立像素测量，不能当精密工程图。"
+      ]
     },
-    {
-      "id": "r24",
-      "title": "足球运动员",
-      "source_file": "exec-private-source-073.png",
-      "source_size": [
-        1536,
-        1024
-      ],
-      "estimated_landmark_uncertainty_px": 5,
-      "uniform_display_scale": 0.8239202657807309,
-      "views": [
+    "r12-f": {
+      "ruler": "r12-ruler.png",
+      "head_ratio": 3.213,
+      "uniform_scale": 0.8671,
+      "front_sole_y": 974,
+      "landmarks": [
         {
-          "view": "FRONT",
-          "crown_y": 44,
-          "chin_y": 317,
-          "sole_y": 947,
-          "head_ratio": 3.308
+          "label": "发冠",
+          "source_y": 116,
+          "tiles": 3.1
+        },
+        {
+          "label": "下巴",
+          "source_y": 383,
+          "tiles": 2.135
+        },
+        {
+          "label": "肩线",
+          "source_y": 433,
+          "tiles": 1.955
+        },
+        {
+          "label": "腰线",
+          "source_y": 553,
+          "tiles": 1.521
+        },
+        {
+          "label": "膝线",
+          "source_y": 785,
+          "tiles": 0.683
         }
-      ],
-      "review": "四视图已目视检查；本记录仅量化正面。侧面、背面、45度未作独立像素测量，不能当精密工程图。"
+      ]
+    },
+    "r12-m": {
+      "ruler": "r12-male-ruler.png",
+      "head_ratio": 3.246,
+      "uniform_scale": 0.8681,
+      "front_sole_y": 974,
+      "landmarks": [
+        {
+          "label": "发冠",
+          "source_y": 117,
+          "tiles": 3.1
+        },
+        {
+          "label": "下巴",
+          "source_y": 381,
+          "tiles": 2.145
+        },
+        {
+          "label": "肩线",
+          "source_y": 433,
+          "tiles": 1.957
+        },
+        {
+          "label": "腰线",
+          "source_y": 553,
+          "tiles": 1.523
+        },
+        {
+          "label": "膝线",
+          "source_y": 785,
+          "tiles": 0.684
+        }
+      ]
+    },
+    "r13-f": {
+      "ruler": "r13-ruler.png",
+      "head_ratio": 3.231,
+      "uniform_scale": 0.9174,
+      "front_sole_y": 861,
+      "landmarks": [
+        {
+          "label": "发冠",
+          "source_y": 50,
+          "tiles": 3.1
+        },
+        {
+          "label": "下巴",
+          "source_y": 301,
+          "tiles": 2.141
+        },
+        {
+          "label": "肩线",
+          "source_y": 330,
+          "tiles": 2.03
+        },
+        {
+          "label": "腰线",
+          "source_y": 452,
+          "tiles": 1.563
+        },
+        {
+          "label": "膝线",
+          "source_y": 655,
+          "tiles": 0.787
+        }
+      ]
+    },
+    "r13-m": {
+      "ruler": "r13-male-ruler.png",
+      "head_ratio": 3.187,
+      "uniform_scale": 0.8712,
+      "front_sole_y": 964,
+      "landmarks": [
+        {
+          "label": "发冠",
+          "source_y": 110,
+          "tiles": 3.1
+        },
+        {
+          "label": "下巴",
+          "source_y": 378,
+          "tiles": 2.127
+        },
+        {
+          "label": "肩线",
+          "source_y": 423,
+          "tiles": 1.964
+        },
+        {
+          "label": "腰线",
+          "source_y": 543,
+          "tiles": 1.528
+        },
+        {
+          "label": "膝线",
+          "source_y": 775,
+          "tiles": 0.686
+        }
+      ]
+    },
+    "r14-f": {
+      "ruler": "r14-ruler.png",
+      "head_ratio": 3.162,
+      "uniform_scale": 0.8681,
+      "front_sole_y": 971,
+      "landmarks": [
+        {
+          "label": "发冠",
+          "source_y": 114,
+          "tiles": 3.1
+        },
+        {
+          "label": "下巴",
+          "source_y": 385,
+          "tiles": 2.12
+        },
+        {
+          "label": "肩线",
+          "source_y": 430,
+          "tiles": 1.957
+        },
+        {
+          "label": "腰线",
+          "source_y": 550,
+          "tiles": 1.523
+        },
+        {
+          "label": "膝线",
+          "source_y": 782,
+          "tiles": 0.684
+        }
+      ]
+    },
+    "r14-m": {
+      "ruler": "r14-male-ruler.png",
+      "head_ratio": 3.209,
+      "uniform_scale": 0.8651,
+      "front_sole_y": 970,
+      "landmarks": [
+        {
+          "label": "发冠",
+          "source_y": 110,
+          "tiles": 3.1
+        },
+        {
+          "label": "下巴",
+          "source_y": 378,
+          "tiles": 2.134
+        },
+        {
+          "label": "肩线",
+          "source_y": 429,
+          "tiles": 1.95
+        },
+        {
+          "label": "腰线",
+          "source_y": 549,
+          "tiles": 1.518
+        },
+        {
+          "label": "膝线",
+          "source_y": 781,
+          "tiles": 0.681
+        }
+      ]
+    },
+    "r15-f": {
+      "ruler": "r15-ruler.png",
+      "head_ratio": 3.182,
+      "uniform_scale": 0.8692,
+      "front_sole_y": 972,
+      "landmarks": [
+        {
+          "label": "发冠",
+          "source_y": 116,
+          "tiles": 3.1
+        },
+        {
+          "label": "下巴",
+          "source_y": 385,
+          "tiles": 2.126
+        },
+        {
+          "label": "肩线",
+          "source_y": 431,
+          "tiles": 1.959
+        },
+        {
+          "label": "腰线",
+          "source_y": 551,
+          "tiles": 1.525
+        },
+        {
+          "label": "膝线",
+          "source_y": 783,
+          "tiles": 0.684
+        }
+      ]
+    },
+    "r15-m": {
+      "ruler": "r15-male-ruler.png",
+      "head_ratio": 3.211,
+      "uniform_scale": 0.8712,
+      "front_sole_y": 966,
+      "landmarks": [
+        {
+          "label": "发冠",
+          "source_y": 112,
+          "tiles": 3.1
+        },
+        {
+          "label": "下巴",
+          "source_y": 378,
+          "tiles": 2.134
+        },
+        {
+          "label": "肩线",
+          "source_y": 425,
+          "tiles": 1.964
+        },
+        {
+          "label": "腰线",
+          "source_y": 545,
+          "tiles": 1.528
+        },
+        {
+          "label": "膝线",
+          "source_y": 777,
+          "tiles": 0.686
+        }
+      ]
+    },
+    "r16-f": {
+      "ruler": "r16-ruler.png",
+      "head_ratio": 3.255,
+      "uniform_scale": 0.8692,
+      "front_sole_y": 973,
+      "landmarks": [
+        {
+          "label": "发冠",
+          "source_y": 117,
+          "tiles": 3.1
+        },
+        {
+          "label": "下巴",
+          "source_y": 380,
+          "tiles": 2.148
+        },
+        {
+          "label": "肩线",
+          "source_y": 432,
+          "tiles": 1.959
+        },
+        {
+          "label": "腰线",
+          "source_y": 552,
+          "tiles": 1.525
+        },
+        {
+          "label": "膝线",
+          "source_y": 784,
+          "tiles": 0.684
+        }
+      ]
+    },
+    "r16-m": {
+      "ruler": "r16-male-ruler.png",
+      "head_ratio": 3.233,
+      "uniform_scale": 0.8651,
+      "front_sole_y": 972,
+      "landmarks": [
+        {
+          "label": "发冠",
+          "source_y": 112,
+          "tiles": 3.1
+        },
+        {
+          "label": "下巴",
+          "source_y": 378,
+          "tiles": 2.141
+        },
+        {
+          "label": "肩线",
+          "source_y": 431,
+          "tiles": 1.95
+        },
+        {
+          "label": "腰线",
+          "source_y": 551,
+          "tiles": 1.518
+        },
+        {
+          "label": "膝线",
+          "source_y": 783,
+          "tiles": 0.681
+        }
+      ]
+    },
+    "r17-f": {
+      "ruler": "r17-ruler.png",
+      "head_ratio": 3.285,
+      "uniform_scale": 0.9095,
+      "front_sole_y": 868,
+      "landmarks": [
+        {
+          "label": "发冠",
+          "source_y": 50,
+          "tiles": 3.1
+        },
+        {
+          "label": "下巴",
+          "source_y": 299,
+          "tiles": 2.156
+        },
+        {
+          "label": "肩线",
+          "source_y": 325,
+          "tiles": 2.058
+        },
+        {
+          "label": "腰线",
+          "source_y": 505,
+          "tiles": 1.376
+        },
+        {
+          "label": "膝线",
+          "source_y": 675,
+          "tiles": 0.731
+        }
+      ]
+    },
+    "r17-m": {
+      "ruler": "r17-male-ruler.png",
+      "head_ratio": 3.194,
+      "uniform_scale": 0.8692,
+      "front_sole_y": 966,
+      "landmarks": [
+        {
+          "label": "发冠",
+          "source_y": 110,
+          "tiles": 3.1
+        },
+        {
+          "label": "下巴",
+          "source_y": 378,
+          "tiles": 2.129
+        },
+        {
+          "label": "肩线",
+          "source_y": 425,
+          "tiles": 1.959
+        },
+        {
+          "label": "腰线",
+          "source_y": 545,
+          "tiles": 1.525
+        },
+        {
+          "label": "膝线",
+          "source_y": 777,
+          "tiles": 0.684
+        }
+      ]
+    },
+    "r18-f": {
+      "ruler": "r18-ruler.png",
+      "head_ratio": 3.301,
+      "uniform_scale": 0.8702,
+      "front_sole_y": 957,
+      "landmarks": [
+        {
+          "label": "发冠",
+          "source_y": 102,
+          "tiles": 3.1
+        },
+        {
+          "label": "下巴",
+          "source_y": 361,
+          "tiles": 2.161
+        },
+        {
+          "label": "肩线",
+          "source_y": 395,
+          "tiles": 2.038
+        },
+        {
+          "label": "腰线",
+          "source_y": 560,
+          "tiles": 1.439
+        },
+        {
+          "label": "膝线",
+          "source_y": 777,
+          "tiles": 0.653
+        }
+      ]
+    },
+    "r18-m": {
+      "ruler": "r18-male-ruler.png",
+      "head_ratio": 3.192,
+      "uniform_scale": 0.8763,
+      "front_sole_y": 961,
+      "landmarks": [
+        {
+          "label": "发冠",
+          "source_y": 112,
+          "tiles": 3.1
+        },
+        {
+          "label": "下巴",
+          "source_y": 378,
+          "tiles": 2.129
+        },
+        {
+          "label": "肩线",
+          "source_y": 420,
+          "tiles": 1.975
+        },
+        {
+          "label": "腰线",
+          "source_y": 540,
+          "tiles": 1.537
+        },
+        {
+          "label": "膝线",
+          "source_y": 772,
+          "tiles": 0.69
+        }
+      ]
+    },
+    "r19-f": {
+      "ruler": "r19-ruler.png",
+      "head_ratio": 3.17,
+      "uniform_scale": 0.8661,
+      "front_sole_y": 971,
+      "landmarks": [
+        {
+          "label": "发冠",
+          "source_y": 112,
+          "tiles": 3.1
+        },
+        {
+          "label": "下巴",
+          "source_y": 383,
+          "tiles": 2.122
+        },
+        {
+          "label": "肩线",
+          "source_y": 430,
+          "tiles": 1.952
+        },
+        {
+          "label": "腰线",
+          "source_y": 550,
+          "tiles": 1.519
+        },
+        {
+          "label": "膝线",
+          "source_y": 782,
+          "tiles": 0.682
+        }
+      ]
+    },
+    "r19-m": {
+      "ruler": "r19-male-ruler.png",
+      "head_ratio": 3.197,
+      "uniform_scale": 0.8651,
+      "front_sole_y": 954,
+      "landmarks": [
+        {
+          "label": "发冠",
+          "source_y": 94,
+          "tiles": 3.1
+        },
+        {
+          "label": "下巴",
+          "source_y": 363,
+          "tiles": 2.13
+        },
+        {
+          "label": "肩线",
+          "source_y": 413,
+          "tiles": 1.95
+        },
+        {
+          "label": "腰线",
+          "source_y": 533,
+          "tiles": 1.518
+        },
+        {
+          "label": "膝线",
+          "source_y": 765,
+          "tiles": 0.681
+        }
+      ]
+    },
+    "r20-f": {
+      "ruler": "r20-ruler.png",
+      "head_ratio": 3.242,
+      "uniform_scale": 0.8692,
+      "front_sole_y": 972,
+      "landmarks": [
+        {
+          "label": "发冠",
+          "source_y": 116,
+          "tiles": 3.1
+        },
+        {
+          "label": "下巴",
+          "source_y": 380,
+          "tiles": 2.144
+        },
+        {
+          "label": "肩线",
+          "source_y": 431,
+          "tiles": 1.959
+        },
+        {
+          "label": "腰线",
+          "source_y": 551,
+          "tiles": 1.525
+        },
+        {
+          "label": "膝线",
+          "source_y": 783,
+          "tiles": 0.684
+        }
+      ]
+    },
+    "r20-m": {
+      "ruler": "r20-male-ruler.png",
+      "head_ratio": 3.22,
+      "uniform_scale": 0.8753,
+      "front_sole_y": 961,
+      "landmarks": [
+        {
+          "label": "发冠",
+          "source_y": 111,
+          "tiles": 3.1
+        },
+        {
+          "label": "下巴",
+          "source_y": 375,
+          "tiles": 2.137
+        },
+        {
+          "label": "肩线",
+          "source_y": 420,
+          "tiles": 1.973
+        },
+        {
+          "label": "腰线",
+          "source_y": 540,
+          "tiles": 1.535
+        },
+        {
+          "label": "膝线",
+          "source_y": 772,
+          "tiles": 0.689
+        }
+      ]
+    },
+    "r21-f": {
+      "ruler": "r21-ruler.png",
+      "head_ratio": 3.274,
+      "uniform_scale": 0.9163,
+      "front_sole_y": 858,
+      "landmarks": [
+        {
+          "label": "发冠",
+          "source_y": 46,
+          "tiles": 3.1
+        },
+        {
+          "label": "下巴",
+          "source_y": 294,
+          "tiles": 2.153
+        },
+        {
+          "label": "肩线",
+          "source_y": 365,
+          "tiles": 1.882
+        },
+        {
+          "label": "腰线",
+          "source_y": 440,
+          "tiles": 1.596
+        },
+        {
+          "label": "膝线",
+          "source_y": 684,
+          "tiles": 0.664
+        }
+      ]
+    },
+    "r21-m": {
+      "ruler": "r21-male-ruler.png",
+      "head_ratio": 3.315,
+      "uniform_scale": 0.8631,
+      "front_sole_y": 966,
+      "landmarks": [
+        {
+          "label": "发冠",
+          "source_y": 104,
+          "tiles": 3.1
+        },
+        {
+          "label": "下巴",
+          "source_y": 364,
+          "tiles": 2.165
+        },
+        {
+          "label": "肩线",
+          "source_y": 425,
+          "tiles": 1.946
+        },
+        {
+          "label": "腰线",
+          "source_y": 545,
+          "tiles": 1.514
+        },
+        {
+          "label": "膝线",
+          "source_y": 777,
+          "tiles": 0.68
+        }
+      ]
+    },
+    "r22-f": {
+      "ruler": "r22-ruler.png",
+      "head_ratio": 3.152,
+      "uniform_scale": 0.8774,
+      "front_sole_y": 956,
+      "landmarks": [
+        {
+          "label": "发冠",
+          "source_y": 108,
+          "tiles": 3.1
+        },
+        {
+          "label": "下巴",
+          "source_y": 377,
+          "tiles": 2.117
+        },
+        {
+          "label": "肩线",
+          "source_y": 406,
+          "tiles": 2.011
+        },
+        {
+          "label": "腰线",
+          "source_y": 555,
+          "tiles": 1.466
+        },
+        {
+          "label": "膝线",
+          "source_y": 763,
+          "tiles": 0.706
+        }
+      ]
+    },
+    "r22-m": {
+      "ruler": "r22-male-ruler.png",
+      "head_ratio": 3.292,
+      "uniform_scale": 0.8692,
+      "front_sole_y": 967,
+      "landmarks": [
+        {
+          "label": "发冠",
+          "source_y": 111,
+          "tiles": 3.1
+        },
+        {
+          "label": "下巴",
+          "source_y": 371,
+          "tiles": 2.158
+        },
+        {
+          "label": "肩线",
+          "source_y": 426,
+          "tiles": 1.959
+        },
+        {
+          "label": "腰线",
+          "source_y": 546,
+          "tiles": 1.525
+        },
+        {
+          "label": "膝线",
+          "source_y": 778,
+          "tiles": 0.684
+        }
+      ]
+    },
+    "r23-f": {
+      "ruler": "r23-ruler.png",
+      "head_ratio": 3.146,
+      "uniform_scale": 0.8631,
+      "front_sole_y": 973,
+      "landmarks": [
+        {
+          "label": "发冠",
+          "source_y": 111,
+          "tiles": 3.1
+        },
+        {
+          "label": "下巴",
+          "source_y": 385,
+          "tiles": 2.115
+        },
+        {
+          "label": "肩线",
+          "source_y": 432,
+          "tiles": 1.946
+        },
+        {
+          "label": "腰线",
+          "source_y": 552,
+          "tiles": 1.514
+        },
+        {
+          "label": "膝线",
+          "source_y": 784,
+          "tiles": 0.68
+        }
+      ]
+    },
+    "r23-m": {
+      "ruler": "r23-male-ruler.png",
+      "head_ratio": 3.392,
+      "uniform_scale": 0.8774,
+      "front_sole_y": 968,
+      "landmarks": [
+        {
+          "label": "发冠",
+          "source_y": 120,
+          "tiles": 3.1
+        },
+        {
+          "label": "下巴",
+          "source_y": 370,
+          "tiles": 2.186
+        },
+        {
+          "label": "肩线",
+          "source_y": 427,
+          "tiles": 1.978
+        },
+        {
+          "label": "腰线",
+          "source_y": 547,
+          "tiles": 1.539
+        },
+        {
+          "label": "膝线",
+          "source_y": 779,
+          "tiles": 0.691
+        }
+      ]
+    },
+    "r24-f": {
+      "ruler": "r24-ruler.png",
+      "head_ratio": 3.19,
+      "uniform_scale": 0.8702,
+      "front_sole_y": 970,
+      "landmarks": [
+        {
+          "label": "发冠",
+          "source_y": 115,
+          "tiles": 3.1
+        },
+        {
+          "label": "下巴",
+          "source_y": 383,
+          "tiles": 2.128
+        },
+        {
+          "label": "肩线",
+          "source_y": 429,
+          "tiles": 1.962
+        },
+        {
+          "label": "腰线",
+          "source_y": 549,
+          "tiles": 1.526
+        },
+        {
+          "label": "膝线",
+          "source_y": 781,
+          "tiles": 0.685
+        }
+      ]
+    },
+    "r24-m": {
+      "ruler": "r24-male-ruler.png",
+      "head_ratio": 3.314,
+      "uniform_scale": 0.8702,
+      "front_sole_y": 968,
+      "landmarks": [
+        {
+          "label": "发冠",
+          "source_y": 113,
+          "tiles": 3.1
+        },
+        {
+          "label": "下巴",
+          "source_y": 371,
+          "tiles": 2.165
+        },
+        {
+          "label": "肩线",
+          "source_y": 427,
+          "tiles": 1.962
+        },
+        {
+          "label": "腰线",
+          "source_y": 547,
+          "tiles": 1.526
+        },
+        {
+          "label": "膝线",
+          "source_y": 779,
+          "tiles": 0.685
+        }
+      ]
     }
-  ]
+  }
 }

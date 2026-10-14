@@ -1,0 +1,123 @@
+{
+  "method": "unified ruler: each haired barefoot base = 3.1 tiles at 240 px/tile; forms share their character base body scale; sole alignment",
+  "foot_y": 1010,
+  "pixels_per_tile": 240,
+  "ruler_x": [
+    110,
+    3460
+  ],
+  "images": [
+    {
+      "source": "public/art-library/grassy-d1-male/grassy-d1-male-eight-final.png",
+      "crop": [
+        14,
+        20,
+        286,
+        618
+      ],
+      "scale": 1.2783505154639174,
+      "position": [
+        236,
+        247
+      ]
+    },
+    {
+      "source": "public/art-library/grassy-d1-male/grassy-d1-male-eight-final.png",
+      "crop": [
+        352,
+        20,
+        580,
+        618
+      ],
+      "scale": 1.2783505154639174,
+      "position": [
+        665,
+        247
+      ]
+    },
+    {
+      "source": "public/art-library/grassy-d1-male/grassy-d1-male-eight-final.png",
+      "crop": [
+        624,
+        55,
+        895,
+        618
+      ],
+      "scale": 1.2783505154639174,
+      "position": [
+        1037,
+        292
+      ]
+    },
+    {
+      "source": "public/art-library/grassy-d1-male/grassy-d1-male-eight-final.png",
+      "crop": [
+        984,
+        55,
+        1153,
+        618
+      ],
+      "scale": 1.2783505154639174,
+      "position": [
+        1502,
+        292
+      ]
+    },
+    {
+      "source": "public/art-library/grassy-d1-male/grassy-d1-male-eight-final.png",
+      "crop": [
+        14,
+        645,
+        284,
+        1245
+      ],
+      "scale": 1.2783505154639174,
+      "position": [
+        1838,
+        244
+      ]
+    },
+    {
+      "source": "public/art-library/grassy-d1-male/grassy-d1-male-eight-final.png",
+      "crop": [
+        353,
+        645,
+        581,
+        1245
+      ],
+      "scale": 1.2783505154639174,
+      "position": [
+        2265,
+        244
+      ]
+    },
+    {
+      "source": "public/art-library/grassy-d1-male/grassy-d1-male-eight-final.png",
+      "crop": [
+        622,
+        645,
+        899,
+        1245
+      ],
+      "scale": 1.2783505154639174,
+      "position": [
+        2633,
+        244
+      ]
+    },
+    {
+      "source": "public/art-library/grassy-d1-male/grassy-d1-male-eight-final.png",
+      "crop": [
+        965,
+        645,
+        1193,
+        1245
+      ],
+      "scale": 1.2783505154639174,
+      "position": [
+        3065,
+        244
+      ]
+    }
+  ]
+}

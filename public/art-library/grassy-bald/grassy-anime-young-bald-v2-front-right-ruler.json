@@ -1,0 +1,72 @@
+{
+  "source": "grassy-anime-young-bald-v2.png",
+  "source_sha256": "e3fc5b7dcedcb5043735d18bc1baf545a96f1eac8848169f29b957a4120baed5",
+  "crop_boxes": [
+    [
+      45,
+      60,
+      385,
+      866
+    ],
+    [
+      405,
+      60,
+      690,
+      866
+    ]
+  ],
+  "source_soles_y": [
+    858,
+    856
+  ],
+  "top_y": 72,
+  "chin_y": 276,
+  "head_pixels": 204,
+  "measured_head_units": 3.8529411764705883,
+  "head_unit_definition": "颅顶至下巴（不含头发）",
+  "pixels_per_tile": 240,
+  "uniform_scale": 0.8931572629051621,
+  "landmarks": [
+    {
+      "label": "颅顶",
+      "source_y": 72,
+      "tiles": 2.925
+    },
+    {
+      "label": "下巴",
+      "source_y": 276,
+      "tiles": 2.166
+    },
+    {
+      "label": "肩线",
+      "source_y": 300,
+      "tiles": 2.077
+    },
+    {
+      "label": "腰线",
+      "source_y": 470,
+      "tiles": 1.444
+    },
+    {
+      "label": "胯线",
+      "source_y": 548,
+      "tiles": 1.154
+    },
+    {
+      "label": "膝线",
+      "source_y": 635,
+      "tiles": 0.83
+    },
+    {
+      "label": "踝线",
+      "source_y": 805,
+      "tiles": 0.197
+    },
+    {
+      "label": "脚底",
+      "source_y": 858,
+      "tiles": 0.0
+    }
+  ],
+  "method": "unified ruler (public/concepts/character-ruler-standard.md); uniform resize; sole-aligned"
+}

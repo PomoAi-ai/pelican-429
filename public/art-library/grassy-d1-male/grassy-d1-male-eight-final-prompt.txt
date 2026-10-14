@@ -1,0 +1,48 @@
+Final Grassy hero eight-view sheet (grassy-d1-male-eight-final.png). Model throughout: gpt-image-2.5-sunburst, quality max (openai images edit).
+
+Step 1 · face-shape sheet. Input: the D1 bald front head (d1-bald/d1-swim-bald-v1.png crop 80,40,350,330) on a 1536x1024 white canvas, style reference only; input-fidelity low; 1536x1024. Prompt:
+
+    Image 1 shows a bald chibi anime head only as an ART-STYLE reference (soft cel shading, clean thin warm outline, glossy anime eyes). Ignore its face shape.
+    Draw a FACE-SHAPE DESIGN SHEET for a boy hero: TEN bald boy heads (head and neck only, front view, facing the viewer) arranged in two rows of five on a pure white background, all heads the same overall height, all with the SAME neutral relaxed expression (mouth closed, small neutral line, eyes open, natural soft eyebrows) so that ONLY the bone structure and feature placement differ. No hair, no text, no numbers.
+    Each head must be clearly and structurally different; exaggerate the differences enough to be obvious at a glance:
+    Top row, left to right:
+    1. LONG OVAL: face height about 1.35 x width, high forehead, eyes at the exact middle of the head, long narrow lower face, small narrow rounded chin, medium almond eyes, small ears.
+    2. SQUARE: broad flat jaw almost as wide as the cheekbones, wide squared chin, short forehead, medium-small eyes set wide apart, thick neck.
+    3. INVERTED TRIANGLE: wide temples and cheekbones, jaw narrowing sharply to a pointed chin, large sharp eyes, slim neck.
+    4. DIAMOND: narrow forehead, widest at prominent cheekbones, narrow angular jaw, narrow pointed chin, narrow upturned eyes.
+    5. RECTANGLE: long face with straight parallel sides, long strong chin, defined jaw corners, small realistic eyes, straight nose bridge visible.
+    Bottom row, left to right:
+    6. HEART: wide rounded forehead, cheeks tapering to a short soft narrow chin, big round eyes set close together.
+    7. PEAR: narrow forehead, fuller lower cheeks and wider jaw, small soft chin, small round eyes, sturdy and gentle.
+    8. EGG: smooth even taper from wide upper head to a small rounded chin, slightly lower eye line, medium round eyes.
+    9. SMALL-FACE BIG-CRANIUM: very large dome cranium, eyes low on the head, tiny short lower face and tiny chin, very big eyes.
+    10. STRONG CHIN: angular cheekbones, prominent squared forward chin, slightly hollow cheeks, narrow eyes, older-looking (about 13).
+    All must read as boys. Same soft anime cel-shaded style as the reference.
+
+Step 2 · contour-line cleanup of that sheet; input-fidelity high. Prompt:
+
+    This is a face-shape design sheet: ten bald boy heads in two rows of five. Refine ONLY the facial contour line (the outline of cheeks, jaw, chin and where the jaw meets the neck) on every head, like a careful line-art cleanup:
+    - one smooth, continuous, even-weight thin warm-brown outline (same thin soft line as anime cel art), no wobbles, no double lines, no gaps;
+    - every chin tip and jaw corner becomes a small clean rounded turn instead of a hard sharp point or a notch, while the overall chin shape (pointed, square, round, long) stays recognisably the same;
+    - smooth natural transition from jaw into the neck, with the neck lines starting cleanly behind the jaw;
+    - cheek curves symmetric and smooth.
+    Keep each head's face type, width, length, cranium, eyes, eyebrows, nose, mouth, ears, colours, sizes, positions and the white background unchanged. No text.
+
+Step 3 · face B8 (egg, bottom row, third head) cropped (614,520,921,1000), enlarged x2 and centred on a 1024x1024 white canvas: grassy-d1-male-face-b8-ref.png.
+
+Step 4 · final sheet. Image 1 = grassy-d1-male-face-b8-ref.png; image 2 = the eight D1 views from ../d1-comparison/three-forms-shared-ruler.png cropped at ruler scale and laid out 4 x 2 on a 1600x1680 white canvas, feet on y=810 and y=1630, slot centres x=200/600/1000/1400. input-fidelity high; requested 1600x1680, returned 1224x1285. Prompt:
+
+    Image 1 is the chosen FACE design for the boy hero (bald head shown only to define his face shape, jaw, chin, eye shape and placement, nose, mouth and ears). Image 2 is the layout, art-style and body-proportion guide: eight views in two rows (top: base FRONT, base RIGHT, bald FRONT, bald RIGHT; bottom: outfit FRONT, outfit RIGHT, equipped FRONT, equipped RIGHT).
+    Draw the boy hero in all eight slots of image 2: same slots, poses, hair-top heights, ground lines, white background, same soft anime cel-shaded rendering and the same chibi body proportions and head size as image 2. His FACE must be the face of image 1 (same face outline and chin, same eye shape and spacing, same feature placement), only adapted to the chibi head size; do NOT use the girl's face from image 2. A cute but clearly male boy of about 10, calm friendly small smile. Slim boyish body, flat chest, straight waist, no hip curve.
+    - Hair (all non-bald slots): soft fluffy dark chocolate-brown short boy's hair, a few spiky tufts on top, light fringe that does not hide the eyebrows, ears visible.
+    - Slots 1-2: plain white sleeveless tank top and white shorts (light grey shading, thin outline), barefoot.
+    - Slots 3-4: same as 1-2, completely bald smooth head (this shows the face shape of image 1 most clearly); eyebrows and ears kept.
+    - Slots 5-6: bright red crew-neck knit sweater, straight blue jeans with rolled cuffs, off-white sneakers.
+    - Slots 7-8: same as 5-6 plus the tech backpack and the two white-silver-cyan wrist gauntlets from image 2.
+    No text.
+
+Step 5 · head-to-body correction (user: the head looks too big against the 3.3-head ruler). Deterministic Python edit of the generated sheet, no AI redraw: near-white pixels (min channel >= 242) flattened to white; per slot the head with hair (hair top to 4 px below the chin) scaled by about 0.91 about its centre and moved up 18 px; torso and arms moved up 18 px; the legs between fingertips and ankles/cuffs (rows 450-590 and 1068-1165) stretched to absorb the 18 px; feet and ground lines unchanged. Overall height stays 3.1 tiles; chin 2.04 -> 2.13 tiles, knee 0.64 -> 0.70 tiles (D1: 2.14 / 0.72).
+
+Step 6 · sturdier legs (user: the boy should not have the heroine's slim legs). Deterministic Python edit: in each view the legs between crotch and ankles/cuffs (rows 395-592 and 1012-1196) are widened about their own smoothed centre lines by up to 1.12, fading in from the crotch and out above the feet, and over 14 px beside each leg; front views treat the two legs separately, right profiles as one leg mass. Feet, heights and everything above the crotch unchanged. Knee width 0.22 -> 0.25 tiles (D1 slim legs: 0.19).
+
+Step 7 · outfit-row alignment (user: the forms are not aligned). The red-sweater and equipped views had their chins 7-9 px higher above the ground than the base views; the sneaker soles explain about 2 px. In all four outfit-row views everything above row 1068 (fingertips) moved down 7 px and the jeans between rows 1068 and 1165 were compressed by 7 px; shoes, ground lines and overall height unchanged. Chin difference now 1-2 px.

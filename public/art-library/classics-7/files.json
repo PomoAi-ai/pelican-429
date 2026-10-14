@@ -256,20 +256,12 @@
     "sha256": "e2bd6fbad8d49a38198d6bf0a082878e7e641083c4c02a6d67dbb91a7ec445f7"
   },
   {
-    "path": "history/rejected-v1/index.html",
-    "sha256": "b382582539d8993abd865a4f6052c13673d9e1fc5f3731770e19d6d7668007f2"
-  },
-  {
     "path": "history/rejected-v1/measurements.json",
     "sha256": "6defe0337a912c2848ab72e3c8df3a2b094068d72a37709af966ba94590a81ea"
   },
   {
     "path": "history/rejected-v1/overview.png",
     "sha256": "052d858aa97cf15eacd302d35a48aed523ebdee67c5ae2471f3dd50750e2eea3"
-  },
-  {
-    "path": "index.html",
-    "sha256": "5ce9abe754fb54b3b9502966201b0a870a5bdf58907294e4cb4420265cdd139a"
   },
   {
     "path": "measurements.json",

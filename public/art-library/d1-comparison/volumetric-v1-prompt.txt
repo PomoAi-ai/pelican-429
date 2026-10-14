@@ -1,0 +1,22 @@
+Volumetric redraw V1 (d1-volumetric-eight-v1.png -> three-forms-volumetric-shared-ruler.png). Does not replace three-forms-shared-ruler.png.
+Reason: modeling from the D1 four-form comparison was hard because the flat cel art does not read as 3D volume.
+Model: gpt-image-2.5-sunburst, quality max, input-fidelity high, background opaque (openai-cpa images edit); requested 3072x1024, returned 2172x724.
+Input: the eight figure rectangles of three-forms-shared-ruler.png (positions from its json, ground-line rows excluded) on a 3240x1080 white canvas, near-white (min channel >= 238) flattened to white.
+Placement: one uniform scale fitted on the base front (hair top to soles = 3.1 tiles), soles on foot_y 1010, slot centres from the original board; figure tops land within 1-6 px of the original.
+
+Use case: 3D-modeling reference sheet for an approved game heroine (D1). The input is her approved eight-view sheet: base FRONT, base RIGHT, bald FRONT, bald RIGHT, blue-white dress FRONT, dress RIGHT, equipped FRONT, equipped RIGHT, all at one shared scale with feet on one ground line.
+Problem: the current drawing is flat 2D cel art (thin red outlines, almost no form shading), so a 3D modeler cannot read the volumes. Redraw ALL EIGHT views as a clean stylized 3D character render, like a high-quality toon-shaded 3D game model turnaround (soft clay / stylized PBR look), orthographic camera, so every volume reads clearly:
+- one consistent soft key light from the upper front-left, gentle fill, soft ambient occlusion in creases (neck under chin, armpits, between arms and torso, crotch, behind knees, under the skirt, inside folds);
+- the cranium reads as a sphere, cheeks and chin have rounded volume, the nose has a tiny form, ears have depth;
+- torso, chest, belly, hips, thighs, knees, calves and feet show rounded cylinder-like form shading and a subtle rim light, so front and side silhouettes clearly describe the same 3D body;
+- hair is sculpted into thick, layered, clearly separated clumps with real depth, the side braid is a 3D twisted rope, each clump has its own highlight and shadow;
+- dress, puffed sleeves, skirt pleats, petticoat ruffle, boots, tights, backpack and gauntlets show real thickness, folds and hard/soft edges as 3D objects;
+- no heavy outlines (at most a very faint thin contour), no flat fills.
+Keep EXACTLY: the character design, face, eye shape and colour, expression, hair colour and style, outfit design, colours and patterns, every figure's pose, proportions, head size, slim legs, height, position, scale and the shared ground line. Front views stay perfectly frontal, right views stay perfectly in profile. Pure white background. No text, labels, rulers, guide lines, floor shadow patches or extra characters.
+
+===== Soft shading (d1-volumetric-soft-eight-v1.png) =====
+An AI lighting edit of V1 (prompt below) was blocked by output moderation (category: sexual, the underwear base views). The soft version is instead a deterministic Python edit of V1 in LAB: base = MaxFilter(15) then GaussianBlur(10) of L; d = max(base - L, 0); L += d * 0.5 * clip((90 - d) / 40, 0, 1), so soft shading and AO lift by half while pupils, lashes and contours stay. Same geometry as V1, so the ruler board reuses the V1 placement json.
+
+Use case: lighting adjustment on an approved 3D-style game character reference sheet (the heroine D1, eight views: base front/right, bald front/right, dress front/right, equipped front/right).
+Task: make the shading LIGHTER and SOFTER in every view, like a brighter, more evenly lit studio render: reduce the darkness of all form shadows and ambient occlusion by about half, lift the shadow tones toward the base colours, softer and wider shadow transitions, slightly brighter overall; keep just enough gentle shading that the volumes (round head, cheeks, torso, limbs, hair clumps, braid, dress folds, boots, gear) still read as 3D.
+Do NOT change anything else: design, face, eyes, expression, hair shape, outfit, colours (only their shading becomes lighter), poses, proportions, sizes, every figure's position and the shared ground line stay identical. Pure white background. No text, rulers, guide lines, floor shadow patches or extra characters.

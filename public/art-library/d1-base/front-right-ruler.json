@@ -1,0 +1,72 @@
+{
+  "source": "d1-base-slim-legs-v1.png",
+  "source_sha256": "8b381ee3fd5160ff5e7d2898a7c5648cf5dd64689bc759dc078c1962dd9f2980",
+  "crop_boxes": [
+    [
+      35,
+      25,
+      390,
+      744
+    ],
+    [
+      455,
+      25,
+      760,
+      744
+    ]
+  ],
+  "source_soles_y": [
+    734,
+    737
+  ],
+  "top_y": 50,
+  "chin_y": 262,
+  "head_pixels": 212,
+  "measured_head_units": 3.2264150943396226,
+  "head_unit_definition": "发顶至下巴（含头发）",
+  "pixels_per_tile": 240,
+  "uniform_scale": 1.087719298245614,
+  "landmarks": [
+    {
+      "label": "发顶",
+      "source_y": 50,
+      "tiles": 3.1
+    },
+    {
+      "label": "下巴",
+      "source_y": 262,
+      "tiles": 2.139
+    },
+    {
+      "label": "肩线",
+      "source_y": 285,
+      "tiles": 2.035
+    },
+    {
+      "label": "腰线",
+      "source_y": 398,
+      "tiles": 1.523
+    },
+    {
+      "label": "胯线",
+      "source_y": 480,
+      "tiles": 1.151
+    },
+    {
+      "label": "膝线",
+      "source_y": 576,
+      "tiles": 0.716
+    },
+    {
+      "label": "踝线",
+      "source_y": 687,
+      "tiles": 0.213
+    },
+    {
+      "label": "脚底",
+      "source_y": 734,
+      "tiles": 0.0
+    }
+  ],
+  "method": "unified ruler (public/concepts/character-ruler-standard.md); uniform resize; sole-aligned"
+}

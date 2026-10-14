@@ -1,0 +1,40 @@
+六场景效果图试画，2026-10-13。
+工具：openai CLI（~/.config/openai/cpa.zsh 的 openai-cpa），模型 gpt-image-2.5，images edit，2560×1440，quality high。
+参考图：public/concepts/protagonist-right.png（主角右侧原图，保持人物外观）。
+提示词：common-rules.txt（正面透视 FOV30°、D=30、景深 G 层距 −7/−16/−35/−70/−140、前景 +3 下沉 1 格并模糊压暗、指数雾）+ 各场景 {scene}.txt（取自 src/app/definition-depth-layout.ts 的 SCENES 描述与色板）。
+valley-v1-scale-wrong.png：首版，人物约 1.3 格，已按比例要求补写提示词。
+*-v2.png：补写比例后六场景同批生成。人物仍约 1.6–2 格、画面约 13 格宽，未达 3.1 格 / 28 格规范；效果图仅作美术氛围参考，不作尺寸依据。
+
+2026-10-13 现代科幻 · 两层房间＋远景：scifi-two-storey-{a-garden-day,b-clean-coast,c-garden-dusk}.png。
+draw_layout_guide.py 先按真实镜头（FOV30°、距 30 格）用 Pillow 画构图底图 layout-guide-two-storey.png：房屋按 docs/room-layout-definitions.md「两层房屋透视」11×13、门洞 3＋上沿 1、2×2 窗、通口平台 2/4/6；人物占位 3.1 格；背景格子 Z=-7/-16，前景 Z=+3 下沉 1 格。
+gpt-image-2.5 images edit，输入：底图、男女主统一标尺图、已选风格「白蓝科技世界」「花园城区」；提示词 scifi-two-storey-common.txt＋各变体。
+人物约 3.1 格、房屋与底图比例一致；背景墙板尺寸、个别平台和窗尺寸与底图有出入，仅作风格效果图。
+
+2026-10-13 现代科技 · 后 AI 时代六风格：post-ai-{1-solarpunk,2-compute-reuse,3-minimal-white,4-east-asian-tech,5-vertical-farm,6-rain-night}.png。
+同一张 layout-guide-two-storey.png 构图底图＋男女主统一标尺图，不再输入已选风格图；提示词 post-ai-common.txt＋各风格文件。gpt-image-2.5 images edit，2560×1440 high。
+
+2026-10-13 半砖两层房间 · 后 AI 时代八风格：post-ai-half-{1-ocean-city … 8-academy-spring}.png。
+底图 layout-guide-half-brick.png（draw_layout_guide.py half）：按 docs/room-layout-definitions.md「半砖层间组合」②上半砖 C，侧墙 K/L 0.5 宽，底板/楼板/顶板半砖，总高 12，一层净高 5.5、二层 5；其余同整砖底图。
+提示词 post-ai-half-common.txt＋half-*.txt；gpt-image-2.5 images edit，2560×1440 high。
+
+2026-10-13 半砖两层房间 · 城市八风格：post-ai-half-{09-dubai,10-new-york,11-singapore,12-tokyo,13-shanghai,14-shenzhen,15-seoul,16-paris}.png。
+用户指定迪拜、纽约、新加坡、东京、上海，另补深圳、首尔、巴黎。底图与共用提示词同半砖八风格；首尔版在顶板上加了韩屋屋顶，超出底图。
+
+2026-10-13 城市八风格 V2：post-ai-city2-*.png。用户指出迪拜不该是黄沙感，要求参考各城市宣传图与天际线。
+调研（Exa 检索各城摄影/旅游指南）：宣传图普遍取蓝调时刻（日落后 20–40 分钟）与水面倒影——迪拜：哈利法塔＋音乐喷泉湖、未来博物馆、码头塔群、帆船酒店；纽约：布鲁克林大桥公园看曼哈顿/布鲁克林两桥、世贸一号、帝国大厦；新加坡：滨海湾金沙＋擎天树＋双穹顶＋艺术科学馆；东京：六本木方向东京塔、晴空塔、彩虹桥、富士山剪影；上海：外滩看陆家嘴东方明珠、上海中心、环球金融中心、金茂；深圳：深圳湾人才公园灯光秀、春笋、平安金融中心；首尔：汉江盘浦彩虹喷泉、南山塔、乐天世界塔、北汉山；巴黎：特罗卡德罗看埃菲尔铁塔、亚历山大三世桥、奥斯曼屋顶、圣心堂、拉德芳斯。
+室内同步改为各城高端住宅风格（迪拜白色大理石＋香槟金等）。提示词 city2-*.txt。
+
+2026-10-13 融合八方案：post-ai-fusion-*.png。以另一会话「双层房间 · 原创八方案 V1」的共用提示词（明暗层级、占位替换、通口留空）为底，追加 FUSION RULES 修正其不足：
+加入 2–4 处克制的现代科技元素；两侧格子改为高低错落的景观台地，禁止城垛节奏；每层 3–5 组边缘陈设；远景城市可辨但低两档明度，只用白天或黄昏。
+城市取景沿用城市 V2 调研。提示词 fusion-common.txt＋fusion-*.txt；gpt-image-2.5 images edit。
+
+2026-10-13 AI 城市 V1：post-ai-aicity-*.png，一座原创后 AI 城市的八个城区。
+输入：半砖底图、男女主标尺、已确认风格「白蓝科技世界」「花园城区」。提示词＝融合规则 fusion-common.txt＋城市设定 ai-city-bible.txt（统一建筑语言、算力尖塔地标、AI 基础设施去反乌托邦化）＋各城区 aicity-*.txt。
+
+2026-10-13 AI 城市 · 能量门：aicity-door-*.png。用户指定门型 public/art-library/homestead-components/energy-door-sealed-edge.png。
+以 post-ai-aicity-*.png 为底、能量门图为参考，door-mask.png 只开放左墙两处门洞做局部重绘；提示词 energy-door-edit.txt。资源库 ai-city-v1 已替换为能量门版，原版保留在本目录。
+注意：CPA 通道实际返回 1672×941，未按请求的 2560×1440 输出；本目录所有 gpt-image-2.5 结果均为此尺寸。
+
+2026-10-13 AI 城市 · 能量门 V2：aicity-v2-*.png，取代局部重绘版 aicity-door-*（用户反馈“门处理的真丑”：门贴在墙内、压到床、旧木门楣悬在墙外）。
+原因：正面镜头下侧墙门面朝 +X，几乎侧对镜头，参考图是另一种视角，宽门面不可能出现在本构图里。
+改法：draw_layout_guide.py half door 生成 layout-guide-half-brick-door.png，把能量门模块画进左墙厚度（X=0.5~1，Z=[-0.9,0.5]，高 4＝净洞 3＋门框顶 1，前柱三格青色指示灯、屏障窄面与地面蓝光），去掉木色门楣；整张重画，提示词追加 energy-door-rules.txt。

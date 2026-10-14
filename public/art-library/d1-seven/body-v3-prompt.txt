@@ -1,0 +1,16 @@
+Model: gpt-image-2.5-sunburst, quality max, 1536x1024, input-fidelity high (openai images edit).
+Image 1: body guide composed with Pillow from character-seven-views.png — top row replaced by the FRONT/RIGHT/BACK bodies of ../d1-base/d1-approved-swim-angle-soles-v2.png (crops 35,25,390,744 / 455,25,760,744 / 870,25,1200,744) scaled 0.845x, soles on y=600, centred at x=360/750/1105; bottom row untouched.
+Image 2: character-seven-views.png (costume reference).
+
+Use case: costume transfer onto a fixed body, character reference sheet.
+Image 1 is the edit target and the BODY AUTHORITY: a seven-panel reference sheet whose top row shows the same girl three times (FRONT, RIGHT, BACK) barefoot in a blue two-piece swimsuit. Image 2 is the COSTUME AUTHORITY: the same character wearing her blue-and-white dress and white boots.
+
+Task: in the top row of image 1, replace the swimsuit with the complete outfit from image 2, dressing the three existing bodies WITHOUT changing them. Output one finished sheet in the same seven-panel layout.
+
+Body rules (most important): every figure keeps exactly the position, scale, pose, head size, face, neck, shoulder width, upper-arm and forearm thickness, hand size, bust volume, ribcage and torso length, waist height, hip width, thigh and calf thickness and leg length that it has in image 1. The body in image 2 is slimmer, flatter-chested, narrower-shouldered and longer-legged; do NOT copy that body, copy only its clothes. The dress must be tailored to the fuller image-1 body: the royal-blue bodice follows the visible bust curve in the right profile and the wider shoulders in front and back, the waist seam sits at the image-1 waist, the skirt flares from the image-1 hips. Chin, shoulder, waist and knee heights stay where they are in image 1. Bare knees and the same thick thighs remain visible below the hem.
+
+Costume rules (from image 2): white blouse with high stand collar and small gold cross, short white puff sleeves with gold cuff band, opaque royal-blue square-neck pinafore bodice with gold trim and central gold emblem, gathered waist seam, flared royal-blue skirt with white front panel, gold fleur embroidery border, white ruffled underskirt, hem at upper-thigh level; white ankle boots with gold and teal straps and black soles on the image-1 feet. Boot soles add only a thin layer under the feet; do not lengthen the legs. Fully covered torso, no cleavage, no new accessories, no stockings.
+
+Hair: keep the image-1 hairstyle silhouette and head size, but use the lighter golden-blond hair colour of image 2 and of the bottom-row panels so the whole sheet matches.
+
+Keep unchanged: the four bottom panels (FACE FRONT, FACE RIGHT, HEAD TOP, SHOE SOLES) and all seven English labels in their positions, white background, soft neutral lighting, polished Japanese anime game reference rendering. No extra text, rulers or guide lines.

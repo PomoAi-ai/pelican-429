@@ -1,0 +1,95 @@
+{
+  "method": "unified ruler: each haired barefoot base = 3.1 tiles at 240 px/tile; forms share their character base body scale; sole alignment",
+  "foot_y": 1010,
+  "pixels_per_tile": 240,
+  "ruler_x": [
+    110,
+    2660
+  ],
+  "images": [
+    {
+      "source": "public/art-library/grassy-boy/grassy-boy-base-v1.png",
+      "crop": [
+        45,
+        15,
+        395,
+        742
+      ],
+      "scale": 1.0568181818181819,
+      "position": [
+        225,
+        250
+      ]
+    },
+    {
+      "source": "public/art-library/grassy-boy/grassy-boy-base-v1.png",
+      "crop": [
+        475,
+        15,
+        745,
+        742
+      ],
+      "scale": 1.0568181818181819,
+      "position": [
+        668,
+        246
+      ]
+    },
+    {
+      "source": "public/art-library/grassy-boy/grassy-boy-bald-v1.png",
+      "crop": [
+        45,
+        70,
+        395,
+        742
+      ],
+      "scale": 1.0568181818181819,
+      "position": [
+        1025,
+        308
+      ]
+    },
+    {
+      "source": "public/art-library/grassy-boy/grassy-boy-bald-v1.png",
+      "crop": [
+        475,
+        70,
+        745,
+        742
+      ],
+      "scale": 1.0568181818181819,
+      "position": [
+        1468,
+        304
+      ]
+    },
+    {
+      "source": "public/art-library/grassy-boy/grassy-boy-clothed-four-views.png",
+      "crop": [
+        45,
+        15,
+        395,
+        752
+      ],
+      "scale": 1.0524147727272728,
+      "position": [
+        1826,
+        247
+      ]
+    },
+    {
+      "source": "public/art-library/grassy-boy/grassy-boy-clothed-four-views.png",
+      "crop": [
+        475,
+        15,
+        745,
+        752
+      ],
+      "scale": 1.0524147727272728,
+      "position": [
+        2268,
+        239
+      ]
+    }
+  ]
+}

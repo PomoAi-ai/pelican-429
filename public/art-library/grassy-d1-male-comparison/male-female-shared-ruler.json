@@ -1,0 +1,179 @@
+{
+  "method": "unified ruler: each haired barefoot base = 3.1 tiles at 240 px/tile; forms share their character base body scale; sole alignment",
+  "foot_y": 1010,
+  "pixels_per_tile": 240,
+  "ruler_x": [
+    110,
+    5060
+  ],
+  "images": [
+    {
+      "source": "public/art-library/d1-base/d1-base-slim-legs-v1.png",
+      "crop": [
+        35,
+        25,
+        390,
+        744
+      ],
+      "scale": 1.087719298245614,
+      "position": [
+        217,
+        239
+      ]
+    },
+    {
+      "source": "public/art-library/d1-base/d1-base-slim-legs-v1.png",
+      "crop": [
+        455,
+        25,
+        760,
+        744
+      ],
+      "scale": 1.087719298245614,
+      "position": [
+        644,
+        236
+      ]
+    },
+    {
+      "source": "public/art-library/grassy-d1-male/grassy-d1-male-eight-final.png",
+      "crop": [
+        14,
+        20,
+        286,
+        618
+      ],
+      "scale": 1.2783505154639174,
+      "position": [
+        1036,
+        247
+      ]
+    },
+    {
+      "source": "public/art-library/grassy-d1-male/grassy-d1-male-eight-final.png",
+      "crop": [
+        352,
+        20,
+        580,
+        618
+      ],
+      "scale": 1.2783505154639174,
+      "position": [
+        1465,
+        247
+      ]
+    },
+    {
+      "source": "public/art-library/d1-seven/character-seven-views-slim-legs-v1.png",
+      "crop": [
+        215,
+        5,
+        505,
+        612
+      ],
+      "scale": 1.2872417730717327,
+      "position": [
+        1824,
+        242
+      ]
+    },
+    {
+      "source": "public/art-library/d1-seven/character-seven-views-slim-legs-v1.png",
+      "crop": [
+        620,
+        5,
+        880,
+        612
+      ],
+      "scale": 1.2872417730717327,
+      "position": [
+        2243,
+        242
+      ]
+    },
+    {
+      "source": "public/art-library/grassy-d1-male/grassy-d1-male-eight-final.png",
+      "crop": [
+        14,
+        645,
+        284,
+        1245
+      ],
+      "scale": 1.2783505154639174,
+      "position": [
+        2638,
+        244
+      ]
+    },
+    {
+      "source": "public/art-library/grassy-d1-male/grassy-d1-male-eight-final.png",
+      "crop": [
+        353,
+        645,
+        581,
+        1245
+      ],
+      "scale": 1.2783505154639174,
+      "position": [
+        3065,
+        244
+      ]
+    },
+    {
+      "source": "public/art-library/d1-equipped/d1-equipped-slim-legs-v1.png",
+      "crop": [
+        255,
+        5,
+        700,
+        912
+      ],
+      "scale": 0.8383723133954255,
+      "position": [
+        3424,
+        253
+      ]
+    },
+    {
+      "source": "public/art-library/d1-equipped/d1-equipped-slim-legs-v1.png",
+      "crop": [
+        845,
+        5,
+        1240,
+        912
+      ],
+      "scale": 0.8383723133954255,
+      "position": [
+        3845,
+        253
+      ]
+    },
+    {
+      "source": "public/art-library/grassy-d1-male/grassy-d1-male-eight-final.png",
+      "crop": [
+        622,
+        645,
+        899,
+        1245
+      ],
+      "scale": 1.2783505154639174,
+      "position": [
+        4233,
+        244
+      ]
+    },
+    {
+      "source": "public/art-library/grassy-d1-male/grassy-d1-male-eight-final.png",
+      "crop": [
+        965,
+        645,
+        1193,
+        1245
+      ],
+      "scale": 1.2783505154639174,
+      "position": [
+        4665,
+        244
+      ]
+    }
+  ]
+}

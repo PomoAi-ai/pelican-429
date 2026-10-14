@@ -1,0 +1,72 @@
+{
+  "source": "grassy-boy-bald-v1.png",
+  "source_sha256": "c6d7c7904047f68fd99128dabd4a7e0fab4564bd500de95b725cb6998082e9a0",
+  "crop_boxes": [
+    [
+      45,
+      70,
+      395,
+      742
+    ],
+    [
+      475,
+      70,
+      745,
+      742
+    ]
+  ],
+  "source_soles_y": [
+    734,
+    738
+  ],
+  "top_y": 79,
+  "chin_y": 260,
+  "head_pixels": 181,
+  "measured_head_units": 3.6187845303867405,
+  "head_unit_definition": "颅顶至下巴（不含头发）",
+  "pixels_per_tile": 240,
+  "uniform_scale": 1.0568181818181819,
+  "landmarks": [
+    {
+      "label": "颅顶",
+      "source_y": 79,
+      "tiles": 2.884
+    },
+    {
+      "label": "下巴",
+      "source_y": 260,
+      "tiles": 2.087
+    },
+    {
+      "label": "肩线",
+      "source_y": 288,
+      "tiles": 1.964
+    },
+    {
+      "label": "腰线",
+      "source_y": 430,
+      "tiles": 1.339
+    },
+    {
+      "label": "胯线",
+      "source_y": 505,
+      "tiles": 1.008
+    },
+    {
+      "label": "膝线",
+      "source_y": 575,
+      "tiles": 0.7
+    },
+    {
+      "label": "踝线",
+      "source_y": 685,
+      "tiles": 0.216
+    },
+    {
+      "label": "脚底",
+      "source_y": 734,
+      "tiles": 0.0
+    }
+  ],
+  "method": "unified ruler (public/concepts/character-ruler-standard.md); uniform resize; sole-aligned"
+}

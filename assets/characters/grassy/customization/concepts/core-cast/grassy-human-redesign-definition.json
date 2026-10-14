@@ -1,0 +1,22 @@
+{
+  "status": "candidate",
+  "title": "Grassy 男主角 · 蓝白金冒险装",
+  "method": "built-in image_gen",
+  "source": "public/art-library/core-cast/grassy-human-redesign.png",
+  "styleReference": "public/art-library/d1-equipped/slim-legs-front-right-v1.png",
+  "targetHeads": 3.3,
+  "frontVisibleHairOutline": {
+    "crownY": 22,
+    "chinY": 289,
+    "soleY": 913,
+    "ratio": 3.337078651685393,
+    "uncertaintyPixels": 6
+  },
+  "limits": [
+    "头发遮挡裸头顶，比例为可见轮廓估读",
+    "前侧视图朝向按画面目视检查，未由三维相机认证为精确45度",
+    "原图自动继承D1标签；此图定义为Grassy男主角，不是D1女主角",
+    "仅原画候选，未替换游戏模型"
+  ],
+  "definition": "栗棕层次短发、琥珀棕大眼、白皙中性肤色、温和自信笑容；蓝色短外套、象牙白立领衬衣、少量金色纹饰、棕腰带、修身深蓝长裤、白蓝金短靴；一套固定造型四视图。"
+}

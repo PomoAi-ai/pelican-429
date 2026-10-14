@@ -7,6 +7,7 @@
 ## 资料制作
 
 - 资料制作与整理直接执行，不创建 `task/` 目录或 PLAN、FIX、REVIEW 等任务跟踪文件，不走开发工作流。
+- 角色原画的标尺与多形态对比一律按 `public/concepts/character-ruler-standard.md`：1 格 = 240 px，有发赤脚基础版外观高 3.1 格，3.3 头身参照尺，用 `assets/concepts/d1-proportion-rulers/ruler_standard.py` 绘制。
 
 ## 命令
 

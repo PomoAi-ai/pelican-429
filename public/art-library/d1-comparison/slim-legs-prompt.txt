@@ -1,0 +1,13 @@
+Model: gpt-image-2.5-sunburst, quality max, input-fidelity high (openai images edit).
+Inputs: d1-base/d1-approved-swim-angle-soles-v2.png and d1-bald/d1-swim-bald-v1.png padded to 1680x944 (output 1673x940, scaled back to 1680x944 and cropped to the original size); d1-seven/character-seven-views-body-v3.png at 1536x1024. Equipped form uses d1-equipped/d1-equipped-slim-legs-v1.png.
+Reason: the user found the legs in the D1 four-form comparison slightly too thick.
+
+Use case: precise proportion correction on an approved game character reference sheet (front and right views of the heroine D1).
+Task: make BOTH legs in EVERY view slightly slimmer, about 15% narrower: slimmer thighs with a small natural gap between them at the top, slimmer knees and calves, slender ankles. This is a subtle refinement, still a cute chibi character.
+Do NOT change anything else: leg length and the heights of hips, crotch, knees and ankles stay exactly where they are; feet or boots keep their size and stay on the same ground line; head, face, hair, neck, shoulders, arms, hands, torso, clothing, colours, pose, labels and every figure's position and scale stay pixel-identical. Any clothing on the legs follows the new slimmer leg silhouette exactly.
+Keep the background, lighting and rendering style identical. No extra text, rulers, guide lines or characters.
+
+===== White base layer (d1-base, d1-bald; same padding and scale-back as above) =====
+Use case: precise colour change on an approved game character base-body reference sheet (the heroine D1, several views plus foot-sole close-ups).
+Task: change ONLY the colour of her two-piece base layer (sports crop top and fitted shorts) in EVERY view from royal blue to plain white: a clean soft white fabric with gentle light-grey shading so the shape still reads against the skin, and slightly off-white light-grey trim bands where the white trim bands are now. Same garment shape, coverage, size and fit as before; nothing becomes thinner, tighter, shorter or see-through.
+Do NOT change anything else: body shape, slim legs, proportions, skin, face, hair or bald head, pose, foot soles, labels, every figure's position and scale stay pixel-identical. Keep the background, lighting and rendering style identical. No extra text, rulers, guide lines or characters.

@@ -1,0 +1,67 @@
+{
+  "source": "grassy-d1-male-eight-final.png",
+  "source_sha256": "a2c86a5a5915853266643cd90b9924e7a2c651bf6459aeddd04fb22f82782e30",
+  "crop_boxes": [
+    [
+      622,
+      645,
+      899,
+      1245
+    ],
+    [
+      965,
+      645,
+      1193,
+      1245
+    ]
+  ],
+  "source_soles_y": [
+    1244,
+    1244
+  ],
+  "top_y": 664,
+  "chin_y": 842,
+  "head_pixels": 178,
+  "measured_head_units": 3.258426966292135,
+  "head_unit_definition": "发顶至下巴（含头发）",
+  "pixels_per_tile": 240,
+  "uniform_scale": 1.2783505154639174,
+  "landmarks": [
+    {
+      "label": "发顶",
+      "source_y": 664,
+      "tiles": 3.089
+    },
+    {
+      "label": "下巴",
+      "source_y": 842,
+      "tiles": 2.141
+    },
+    {
+      "label": "肩线",
+      "source_y": 864,
+      "tiles": 2.024
+    },
+    {
+      "label": "毛衣下摆",
+      "source_y": 994,
+      "tiles": 1.332
+    },
+    {
+      "label": "膝线",
+      "source_y": 1130,
+      "tiles": 0.607
+    },
+    {
+      "label": "裤脚",
+      "source_y": 1170,
+      "tiles": 0.394
+    },
+    {
+      "label": "鞋底",
+      "source_y": 1244,
+      "tiles": 0.0
+    }
+  ],
+  "method": "unified ruler (public/concepts/character-ruler-standard.md); uniform resize; sole-aligned"
+}

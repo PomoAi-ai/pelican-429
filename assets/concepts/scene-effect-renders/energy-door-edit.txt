@@ -1,0 +1,6 @@
+Edit ONLY the transparent masked areas of image 1: the two doorways in the LEFT side wall of the cutaway house (ground floor and upper floor). Everything outside the mask must stay pixel-identical: characters, furniture, walls, platforms, skyline, lighting.
+Replace each doorway with the ENERGY DOOR design from image 2, at the same size as the existing doorway (about 3 tiles tall, with the 1-tile header above it built into the frame):
+- A permanent white/pearl rounded segmented door frame made of stacked rounded modules, with small soft-cyan indicator light slots and one small dark access panel; the frame wraps the opening like a sealed edge.
+- Ground-floor door: CLOSED state, a translucent glowing blue energy barrier with a subtle hexagonal cell pattern inset inside the frame, sealed edges, soft cyan glow spilling slightly onto the floor.
+- Upper-floor door: OPEN state, the same frame with the barrier switched off, opening clear, only a thin faint cyan line at the inner edge.
+Seen from the side in the same straight-on perspective: the door plane faces right and recedes toward the vanishing point exactly like the existing wall, as in image 2. Same art style, scale and lighting as image 1. No text, no labels, no UI.

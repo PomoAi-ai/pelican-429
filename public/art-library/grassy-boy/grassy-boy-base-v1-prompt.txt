@@ -1,0 +1,13 @@
+Model: gpt-image-2.5-sunburst, quality max, input-fidelity high (openai images edit); requested 1680x944, returned 1673x940.
+Image 1: grassy-boy-clothed-four-views.png (public/characters/human/turnaround-master-v2 front/right/back/left, each 1254px scaled to 752px, centres x=210/630/1050/1470, pasted at y=8 on 1680x944 white).
+Image 2: ../d1-base/d1-approved-swim-angle-soles-v2.png (layout and base-layer style only).
+A bare-torso variant was made first; the bald edit of it was rejected by moderation, so the base layer became this two-piece.
+
+Use case: character base-body reference sheet derived from an approved costume turnaround.
+Image 1 is the EDIT TARGET and the sole AUTHORITY for identity, layout and proportions: the boy Grassy in FRONT, RIGHT, BACK and LEFT views with English labels. Image 2 is ONLY a style and garment-type reference (the female character's barefoot base sheet): copy its clean base-layer concept, white background and sole-detail panel, never her body, face or hair.
+
+Task: produce the same four-view sheet of the SAME boy as a barefoot customization base. Remove the red sweater, jeans and shoes. Dress him in a two-piece royal-blue athletic base layer matching the blue-and-white style of image 2: a fitted sleeveless crew-neck tank top with thin white trim at neck and armholes, ending at the waist, and fitted royal-blue shorts (boxer-brief length, ending at upper thigh) with a thin white waistband and white leg trim. Bare arms, bare legs, bare feet. Natural stylized child body, fully covered torso.
+
+Proportions (most important): every view keeps exactly its image-1 position and scale. Keep the head, face, hair, ears and neck pixel-identical in size and height. Chin, shoulder line, armpit, waist, hip, knee and ankle heights stay where the clothing implies them in image 1. The real body is slightly narrower than the thick knit sweater and loose jeans: the fitted tank top shows a soft, healthy, slightly chubby chibi child torso of moderate width, upper arms and forearms a little thinner than the sleeves, legs a little thinner than the jean legs; do not make him skinny, muscular or taller. Hands, arm pose and stance as in image 1. Without shoes the bare soles sit on the same ground line as the original shoe soles; do not lengthen the legs or move the head up.
+
+Add, centred in the empty band below the figures between the RIGHT and BACK labels, a small pair of bare-foot sole views labelled LEFT SOLE and RIGHT SOLE, in the manner of image 2. Keep the four labels FRONT, RIGHT, BACK, LEFT exactly where they are. White background, soft neutral lighting, the same polished sculptural stylized game-character rendering as image 1. No rulers, guide lines, extra text, accessories or second character.

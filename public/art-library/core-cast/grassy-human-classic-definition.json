@@ -1,0 +1,10 @@
+{
+  "id": "grassy-human-classic",
+  "title": "Grassy 男主角 · 经典红毛衣造型",
+  "status": "retained-by-user",
+  "source": "public/art-library/core-cast/grassy-human-classic.png",
+  "definition": "深棕蓬松短发、棕色圆眼、红色针织毛衣、卷边蓝色牛仔裤、米白运动鞋。保持用户提供的原图。",
+  "views": ["front", "right", "back", "front45"],
+  "relationship": "与 grassy-human-redesign 蓝白金冒险装并列保留，是两个独立造型；不覆盖任一版本。",
+  "validation": "本次只原样存档并核对文件一致性，未认证头身比例或三维视角精度，未替换运行时模型。"
+}

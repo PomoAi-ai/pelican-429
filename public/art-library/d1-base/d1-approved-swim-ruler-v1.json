@@ -1,0 +1,17 @@
+{
+  "source": "d1-base-slim-legs-v1.png",
+  "sha256": "8b381ee3fd5160ff5e7d2898a7c5648cf5dd64689bc759dc078c1962dd9f2980",
+  "source_size": [
+    1679,
+    937
+  ],
+  "units": "H includes hair",
+  "front_landmarks_px": {
+    "hair_top": 50,
+    "chin": 262,
+    "sole": 734
+  },
+  "height_in_heads": 3.2264150943396226,
+  "landmark_uncertainty_px": 5,
+  "method": "Python Pillow annotation; source swapped in place for the approved slim-leg, white base-layer sheet (same size and landmarks)"
+}

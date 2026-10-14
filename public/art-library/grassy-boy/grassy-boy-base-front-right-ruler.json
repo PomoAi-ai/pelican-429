@@ -1,0 +1,72 @@
+{
+  "source": "grassy-boy-base-v1.png",
+  "source_sha256": "1825e1ac74b53fae5c42c09c9876317a77b31324834ff6f790f7d9ae22b16583",
+  "crop_boxes": [
+    [
+      45,
+      15,
+      395,
+      742
+    ],
+    [
+      475,
+      15,
+      745,
+      742
+    ]
+  ],
+  "source_soles_y": [
+    734,
+    738
+  ],
+  "top_y": 30,
+  "chin_y": 260,
+  "head_pixels": 230,
+  "measured_head_units": 3.0608695652173914,
+  "head_unit_definition": "发顶至下巴（含头发）",
+  "pixels_per_tile": 240,
+  "uniform_scale": 1.0568181818181819,
+  "landmarks": [
+    {
+      "label": "发顶",
+      "source_y": 30,
+      "tiles": 3.1
+    },
+    {
+      "label": "下巴",
+      "source_y": 260,
+      "tiles": 2.087
+    },
+    {
+      "label": "肩线",
+      "source_y": 288,
+      "tiles": 1.964
+    },
+    {
+      "label": "腰线",
+      "source_y": 430,
+      "tiles": 1.339
+    },
+    {
+      "label": "胯线",
+      "source_y": 505,
+      "tiles": 1.008
+    },
+    {
+      "label": "膝线",
+      "source_y": 575,
+      "tiles": 0.7
+    },
+    {
+      "label": "踝线",
+      "source_y": 685,
+      "tiles": 0.216
+    },
+    {
+      "label": "脚底",
+      "source_y": 734,
+      "tiles": 0.0
+    }
+  ],
+  "method": "unified ruler (public/concepts/character-ruler-standard.md); uniform resize; sole-aligned"
+}

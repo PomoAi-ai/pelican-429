@@ -1,0 +1,67 @@
+{
+  "source": "grassy-boy-clothed-four-views.png",
+  "source_sha256": "eb7a4b38296d20f150b43df1e4a7e694c68df706f4105a9af5030ff24e6e2772",
+  "crop_boxes": [
+    [
+      45,
+      15,
+      395,
+      752
+    ],
+    [
+      475,
+      15,
+      745,
+      752
+    ]
+  ],
+  "source_soles_y": [
+    740,
+    748
+  ],
+  "top_y": 30,
+  "chin_y": 262,
+  "head_pixels": 232,
+  "measured_head_units": 3.060344827586207,
+  "head_unit_definition": "发顶至下巴（含头发）",
+  "pixels_per_tile": 240,
+  "uniform_scale": 1.0524147727272728,
+  "landmarks": [
+    {
+      "label": "发顶",
+      "source_y": 30,
+      "tiles": 3.113
+    },
+    {
+      "label": "下巴",
+      "source_y": 262,
+      "tiles": 2.096
+    },
+    {
+      "label": "肩线",
+      "source_y": 300,
+      "tiles": 1.929
+    },
+    {
+      "label": "毛衣下摆",
+      "source_y": 452,
+      "tiles": 1.263
+    },
+    {
+      "label": "膝线",
+      "source_y": 575,
+      "tiles": 0.724
+    },
+    {
+      "label": "裤脚",
+      "source_y": 668,
+      "tiles": 0.316
+    },
+    {
+      "label": "鞋底",
+      "source_y": 740,
+      "tiles": 0.0
+    }
+  ],
+  "method": "unified ruler (public/concepts/character-ruler-standard.md); uniform resize; sole-aligned"
+}

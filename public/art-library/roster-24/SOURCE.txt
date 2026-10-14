@@ -1,7 +1,9 @@
-24款角色绘图完成，2026-10-10。
-24款四视图原画、24张标尺检查页，6批；所有原画均由内置imagegen生成，并保存原始像素。
-用户尺度基准保存在references；胖瘦、发型、职业和季节定义在definitions。
-标尺是独立技术排版，原画仅等比展示，不局部拉伸。正面选点与实际比例见measurements-all.json；后20款侧背角度只做目视核对。
-R09/R12/R16/R22修正过比例，旧稿以-art-v1.png保留；最新源文件名见new-generation-sources.json。
-目标3.3头身、世界高3.1格；约3.15至3.40H为当前人工估测范围，不是精确工程认证。
-所有画稿待选型确认，未制作24个3D模型或UV贴图；材质提示词为后续制作参考。
+24款角色绘图完成，2026-10-10；2026-10-13补齐男版并重画13款女版。
+24个职业各有女版、男版四视图，共48张原画与48张标尺检查页，6批。第一版原画由内置imagegen生成；男版与重画女版由 gpt-image-2.5-sunburst（高质量档）生成，并保存原始像素。
+重画女版与全部男版以 batch-01/r01-art.png 为版型编辑生成，锁定头高、各地标高度与鞋底线，约3.2至3.3头身；提示词追加在各款 rXX-prompts.txt。
+原微胖女版留档为 -art-plump-v1.png，原健壮或男孩化女版留档为 -art-sturdy-v1.png；更早的比例修正稿以 -art-v1.png 保留，源文件名见 new-generation-sources.json。
+用户尺度基准保存在references；体型、发型、职业和季节定义在definitions。
+标尺按 public/concepts/character-ruler-standard.md：正面发冠至鞋底 = 3.1格，四视图同一倍率、鞋底对齐，原画只等比缩放。标尺画在 rXX-ruler.png / rXX-male-ruler.png，地标虚线在同名 .guides.json，资料库点“显示虚线”时叠画。
+生成脚本：assets/concepts/d1-proportion-rulers/draw_roster.py，读图值在同目录 roster-landmarks.json；实测结果见 measurements-all.json。
+发冠与下巴读图约±5px，肩腰膝约±10px；背面与45°只做目视核对，不是精确工程认证。
+所有画稿待选型确认，未制作3D模型或UV贴图；材质提示词为后续制作参考。

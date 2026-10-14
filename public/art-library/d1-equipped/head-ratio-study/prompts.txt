@@ -1,0 +1,34 @@
+Model: gpt-image-2.5-sunburst, quality max, input-fidelity high (openai images edit); 1536x1024; input ../d1-equipped-body-v2.png; one run per ratio.
+Reason: the user asked to see D1 drawn in the four common head-ratio tiers (super-deformed, chibi RPG, anime teen, realistic adult).
+
+===== 2.5 heads =====
+Use case: proportion study for a game character reference sheet.
+The input image shows the heroine D1 in FRONT and RIGHT views (about 3.3 heads tall). Redraw the SAME character, same outfit and gear, as a super-deformed chibi, exactly 2.5 heads tall: very large head, tiny body, short stubby legs, small hands, like a Nendoroid figure.
+
+Layout and scale (strict): same two views and same positions as the input (FRONT centred near x=474, RIGHT near x=1041), hair top at y=20, boot soles on y=908 for both views, so the total height stays the same as the input. Head height from hair top to chin = 355 px; the rest of the height is neck, body and legs in natural 2.5-head proportions.
+Keep the design: face identity (blue eyes, friendly smile), golden-orange braided bob hair, white stand collar with gold cross, puff sleeves, royal-blue bodice with gold emblem, gold fleur hem embroidery, white ruffled underskirt, opaque dark navy skin-tight tights from under the skirt into the boots (no wrinkles, no bare-skin gap), black tech backpack with straps and cyan chest buckle, silver wrist gauntlets with cyan rings, white boots with gold and blue trim. Modest, non-sexualised, neutral standing pose with arms down as in the input.
+Keep the plain white background, soft neutral lighting and polished anime game reference rendering. Labels "D1 · FRONT" and "D1 · RIGHT" under the figures as in the input. No other text, no rulers, no extra characters.
+
+===== 4 heads =====
+Use case: proportion study for a game character reference sheet.
+The input image shows the heroine D1 in FRONT and RIGHT views (about 3.3 heads tall). Redraw the SAME character, same outfit and gear, as a cute RPG child, exactly 4 heads tall: head still large, a slightly longer body and legs than the input, child of about 8 to 10 years old.
+
+Layout and scale (strict): same two views and same positions as the input (FRONT centred near x=474, RIGHT near x=1041), hair top at y=20, boot soles on y=908 for both views, so the total height stays the same as the input. Head height from hair top to chin = 222 px; the rest of the height is neck, body and legs in natural 4-head proportions.
+Keep the design: face identity (blue eyes, friendly smile), golden-orange braided bob hair, white stand collar with gold cross, puff sleeves, royal-blue bodice with gold emblem, gold fleur hem embroidery, white ruffled underskirt, opaque dark navy skin-tight tights from under the skirt into the boots (no wrinkles, no bare-skin gap), black tech backpack with straps and cyan chest buckle, silver wrist gauntlets with cyan rings, white boots with gold and blue trim. Modest, non-sexualised, neutral standing pose with arms down as in the input.
+Keep the plain white background, soft neutral lighting and polished anime game reference rendering. Labels "D1 · FRONT" and "D1 · RIGHT" under the figures as in the input. No other text, no rulers, no extra characters.
+
+===== 6 heads =====
+Use case: proportion study for a game character reference sheet.
+The input image shows the heroine D1 in FRONT and RIGHT views (about 3.3 heads tall). Redraw the SAME character, same outfit and gear, as a Japanese anime teenage girl, exactly 6 heads tall: about 15 years old, natural anime teen proportions, slim limbs, normal-sized head, eyes smaller than chibi style.
+
+Layout and scale (strict): same two views and same positions as the input (FRONT centred near x=474, RIGHT near x=1041), hair top at y=20, boot soles on y=908 for both views, so the total height stays the same as the input. Head height from hair top to chin = 148 px; the rest of the height is neck, body and legs in natural 6-head proportions.
+Keep the design: face identity (blue eyes, friendly smile), golden-orange braided bob hair, white stand collar with gold cross, puff sleeves, royal-blue bodice with gold emblem, gold fleur hem embroidery, white ruffled underskirt, opaque dark navy skin-tight tights from under the skirt into the boots (no wrinkles, no bare-skin gap), black tech backpack with straps and cyan chest buckle, silver wrist gauntlets with cyan rings, white boots with gold and blue trim. Modest, non-sexualised, neutral standing pose with arms down as in the input.
+Keep the plain white background, soft neutral lighting and polished anime game reference rendering. Labels "D1 · FRONT" and "D1 · RIGHT" under the figures as in the input. No other text, no rulers, no extra characters.
+
+===== 7.5 heads =====
+Use case: proportion study for a game character reference sheet.
+The input image shows the heroine D1 in FRONT and RIGHT views (about 3.3 heads tall). Redraw the SAME character, same outfit and gear, as a realistic young adult woman, exactly 7.5 heads tall: about 20 years old, realistic adult proportions, long legs, small head, realistic eye size, still rendered in the same polished anime game style.
+
+Layout and scale (strict): same two views and same positions as the input (FRONT centred near x=474, RIGHT near x=1041), hair top at y=20, boot soles on y=908 for both views, so the total height stays the same as the input. Head height from hair top to chin = 118 px; the rest of the height is neck, body and legs in natural 7.5-head proportions.
+Keep the design: face identity (blue eyes, friendly smile), golden-orange braided bob hair, white stand collar with gold cross, puff sleeves, royal-blue bodice with gold emblem, gold fleur hem embroidery, white ruffled underskirt, opaque dark navy skin-tight tights from under the skirt into the boots (no wrinkles, no bare-skin gap), black tech backpack with straps and cyan chest buckle, silver wrist gauntlets with cyan rings, white boots with gold and blue trim. Modest, non-sexualised, neutral standing pose with arms down as in the input.
+Keep the plain white background, soft neutral lighting and polished anime game reference rendering. Labels "D1 · FRONT" and "D1 · RIGHT" under the figures as in the input. No other text, no rulers, no extra characters.

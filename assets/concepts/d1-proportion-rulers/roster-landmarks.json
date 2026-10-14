@@ -1,0 +1,626 @@
+{
+  "r01-f": {
+    "art": "batch-01/r01-art.png",
+    "ruler": "r01-ruler.png",
+    "title": "R01 经典水手裙 · 女版",
+    "hair": "黑色齐肩直发；侧分刘海，发尾内收，露出部分耳廓",
+    "marks": [
+      118,
+      382,
+      430,
+      550,
+      785
+    ]
+  },
+  "r01-m": {
+    "art": "batch-01/r01-male-art.png",
+    "ruler": "r01-male-ruler.png",
+    "title": "R01 经典水手裙 · 男版",
+    "hair": "黑色利落短发，侧分",
+    "marks": [
+      108,
+      378,
+      431,
+      551,
+      783
+    ]
+  },
+  "r02-f": {
+    "art": "batch-01/r02-art.png",
+    "ruler": "r02-ruler.png",
+    "title": "R02 夏日水手短裤 · 女版",
+    "hair": "银灰耳上短发；蓬松侧扫，细碎后颈，单侧交叉发夹",
+    "marks": [
+      49,
+      294,
+      328,
+      442,
+      678
+    ]
+  },
+  "r02-m": {
+    "art": "batch-01/r02-male-art.png",
+    "ruler": "r02-male-ruler.png",
+    "title": "R02 夏日水手短裤 · 男版",
+    "hair": "银灰蓬松侧扫短发",
+    "marks": [
+      112,
+      378,
+      433,
+      553,
+      785
+    ]
+  },
+  "r03-f": {
+    "art": "batch-01/r03-art.png",
+    "ruler": "r03-ruler.png",
+    "title": "R03 牛仔背带短裤 · 女版",
+    "hair": "栗棕齐肩波浪半扎；小发束，后脑体积饱满",
+    "marks": [
+      118,
+      383,
+      432,
+      552,
+      784
+    ]
+  },
+  "r03-m": {
+    "art": "batch-01/r03-male-art.png",
+    "ruler": "r03-male-ruler.png",
+    "title": "R03 牛仔背带短裤 · 男版",
+    "hair": "栗棕短卷发",
+    "marks": [
+      108,
+      378,
+      429,
+      549,
+      781
+    ]
+  },
+  "r04-f": {
+    "art": "batch-02/r04-art.png",
+    "ruler": "r04-ruler.png",
+    "title": "R04 秋日针织 · 女版",
+    "hair": "深棕齐下巴圆弧波波头；短齐刘海，不遮眼",
+    "marks": [
+      117,
+      385,
+      433,
+      553,
+      785
+    ]
+  },
+  "r04-m": {
+    "art": "batch-02/r04-male-art.png",
+    "ruler": "r04-male-ruler.png",
+    "title": "R04 秋日针织 · 男版",
+    "hair": "深棕短发，柔软刘海不遮眼",
+    "marks": [
+      108,
+      380,
+      419,
+      539,
+      771
+    ]
+  },
+  "r05-f": {
+    "art": "batch-02/r05-art.png",
+    "ruler": "r05-ruler.png",
+    "title": "R05 冬日旅行 · 女版",
+    "hair": "橙金色单侧长辫；辫尾至腰，刘海与D1家族一致",
+    "marks": [
+      98,
+      353,
+      414,
+      540,
+      740
+    ]
+  },
+  "r05-m": {
+    "art": "batch-02/r05-male-art.png",
+    "ruler": "r05-male-ruler.png",
+    "title": "R05 冬日旅行 · 男版",
+    "hair": "橙金短发",
+    "marks": [
+      108,
+      375,
+      428,
+      548,
+      780
+    ]
+  },
+  "r06-f": {
+    "art": "batch-02/r06-art.png",
+    "ruler": "r06-ruler.png",
+    "title": "R06 东方轻装 · 女版",
+    "hair": "黑色低发髻；中分两条短鬓发，髻不超过头高基线",
+    "marks": [
+      45,
+      300,
+      333,
+      448,
+      678
+    ]
+  },
+  "r06-m": {
+    "art": "batch-02/r06-male-art.png",
+    "ruler": "r06-male-ruler.png",
+    "title": "R06 东方轻装 · 男版",
+    "hair": "黑发低束小发尾",
+    "marks": [
+      108,
+      378,
+      427,
+      547,
+      779
+    ]
+  },
+  "r07-f": {
+    "art": "batch-03/r07-art.png",
+    "ruler": "r07-ruler.png",
+    "title": "R07 医生 · 女版",
+    "hair": "暖棕低马尾；干净侧分刘海，不遮眼耳",
+    "marks": [
+      68,
+      345,
+      431,
+      560,
+      776
+    ]
+  },
+  "r07-m": {
+    "art": "batch-03/r07-male-art.png",
+    "ruler": "r07-male-ruler.png",
+    "title": "R07 医生 · 男版",
+    "hair": "暖棕利落短发，侧分",
+    "marks": [
+      108,
+      378,
+      427,
+      547,
+      779
+    ]
+  },
+  "r08-f": {
+    "art": "batch-03/r08-art.png",
+    "ruler": "r08-ruler.png",
+    "title": "R08 急救员 · 女版",
+    "hair": "黑色及肩直发",
+    "marks": [
+      118,
+      383,
+      430,
+      550,
+      782
+    ]
+  },
+  "r08-m": {
+    "art": "batch-03/r08-male-art.png",
+    "ruler": "r08-male-ruler.png",
+    "title": "R08 急救员 · 男版",
+    "hair": "黑色利落短发",
+    "marks": [
+      118,
+      379,
+      420,
+      540,
+      772
+    ]
+  },
+  "r09-f": {
+    "art": "batch-02/r09-art.png",
+    "ruler": "r09-ruler.png",
+    "title": "R09 野外训练军人 · 女版",
+    "hair": "黑色低发髻，短侧扫刘海，露耳",
+    "marks": [
+      116,
+      378,
+      429,
+      549,
+      781
+    ]
+  },
+  "r09-m": {
+    "art": "batch-02/r09-male-art.png",
+    "ruler": "r09-male-ruler.png",
+    "title": "R09 野外训练军人 · 男版",
+    "hair": "黑色极短碎发",
+    "marks": [
+      112,
+      378,
+      428,
+      548,
+      780
+    ]
+  },
+  "r10-f": {
+    "art": "batch-01/r10-art.png",
+    "ruler": "r10-ruler.png",
+    "title": "R10 田径运动员 · 女版",
+    "hair": "栗棕高马尾；侧分刘海，基础头顶与马尾分开识别",
+    "marks": [
+      105,
+      383,
+      431,
+      551,
+      783
+    ]
+  },
+  "r10-m": {
+    "art": "batch-01/r10-male-art.png",
+    "ruler": "r10-male-ruler.png",
+    "title": "R10 田径运动员 · 男版",
+    "hair": "栗棕运动短发",
+    "marks": [
+      106,
+      372,
+      433,
+      553,
+      785
+    ]
+  },
+  "r11-f": {
+    "art": "batch-03/r11-art.png",
+    "ruler": "r11-ruler.png",
+    "title": "R11 网球运动员 · 女版",
+    "hair": "蜂蜜金单侧辫；额前自然分束，辫尾至肩下",
+    "marks": [
+      50,
+      296,
+      355,
+      450,
+      662
+    ]
+  },
+  "r11-m": {
+    "art": "batch-03/r11-male-art.png",
+    "ruler": "r11-male-ruler.png",
+    "title": "R11 网球运动员 · 男版",
+    "hair": "蜂蜜金短发",
+    "marks": [
+      110,
+      378,
+      432,
+      552,
+      784
+    ]
+  },
+  "r12-f": {
+    "art": "batch-03/r12-art.png",
+    "ruler": "r12-ruler.png",
+    "title": "R12 篮球运动员 · 女版",
+    "hair": "深棕双编辫；两侧对称，辫尾到肩胛",
+    "marks": [
+      116,
+      383,
+      433,
+      553,
+      785
+    ]
+  },
+  "r12-m": {
+    "art": "batch-03/r12-male-art.png",
+    "ruler": "r12-male-ruler.png",
+    "title": "R12 篮球运动员 · 男版",
+    "hair": "深棕短发",
+    "marks": [
+      117,
+      381,
+      433,
+      553,
+      785
+    ]
+  },
+  "r13-f": {
+    "art": "batch-04/r13-art.png",
+    "ruler": "r13-ruler.png",
+    "title": "R13 学院休闲 · 女版",
+    "hair": "银紫不对称短波波；一侧耳上，另一侧到下巴",
+    "marks": [
+      50,
+      301,
+      330,
+      452,
+      655
+    ]
+  },
+  "r13-m": {
+    "art": "batch-04/r13-male-art.png",
+    "ruler": "r13-male-ruler.png",
+    "title": "R13 学院休闲 · 男版",
+    "hair": "银紫不对称短发",
+    "marks": [
+      110,
+      378,
+      423,
+      543,
+      775
+    ]
+  },
+  "r14-f": {
+    "art": "batch-04/r14-art.png",
+    "ruler": "r14-ruler.png",
+    "title": "R14 春日花瓣裙 · 女版",
+    "hair": "蜂蜜金半扎长卷发；发尾至肩胛，不遮腰",
+    "marks": [
+      114,
+      385,
+      430,
+      550,
+      782
+    ]
+  },
+  "r14-m": {
+    "art": "batch-04/r14-male-art.png",
+    "ruler": "r14-male-ruler.png",
+    "title": "R14 春日花瓣裙 · 男版",
+    "hair": "蜂蜜金柔卷中短发",
+    "marks": [
+      110,
+      378,
+      429,
+      549,
+      781
+    ]
+  },
+  "r15-f": {
+    "art": "batch-04/r15-art.png",
+    "ruler": "r15-ruler.png",
+    "title": "R15 咖啡师 · 女版",
+    "hair": "焦糖棕低双丸子；短卷刘海，体积不超过脸宽",
+    "marks": [
+      116,
+      385,
+      431,
+      551,
+      783
+    ]
+  },
+  "r15-m": {
+    "art": "batch-04/r15-male-art.png",
+    "ruler": "r15-male-ruler.png",
+    "title": "R15 咖啡师 · 男版",
+    "hair": "焦糖棕短卷发",
+    "marks": [
+      112,
+      378,
+      425,
+      545,
+      777
+    ]
+  },
+  "r16-f": {
+    "art": "batch-04/r16-art.png",
+    "ruler": "r16-ruler.png",
+    "title": "R16 消防员 · 女版",
+    "hair": "暖棕及肩发低马尾，柔软侧刘海；不戴头盔",
+    "marks": [
+      117,
+      380,
+      432,
+      552,
+      784
+    ]
+  },
+  "r16-m": {
+    "art": "batch-04/r16-male-art.png",
+    "ruler": "r16-male-ruler.png",
+    "title": "R16 消防员 · 男版",
+    "hair": "棕色短碎发",
+    "marks": [
+      112,
+      378,
+      431,
+      551,
+      783
+    ]
+  },
+  "r17-f": {
+    "art": "batch-05/r17-art.png",
+    "ruler": "r17-ruler.png",
+    "title": "R17 雨天出行 · 女版",
+    "hair": "蓝黑锁骨直发；轻薄齐刘海，露出双眼",
+    "marks": [
+      50,
+      299,
+      325,
+      505,
+      675
+    ]
+  },
+  "r17-m": {
+    "art": "batch-05/r17-male-art.png",
+    "ruler": "r17-male-ruler.png",
+    "title": "R17 雨天出行 · 男版",
+    "hair": "蓝黑直短发，轻薄刘海",
+    "marks": [
+      110,
+      378,
+      425,
+      545,
+      777
+    ]
+  },
+  "r18-f": {
+    "art": "batch-05/r18-art.png",
+    "ruler": "r18-ruler.png",
+    "title": "R18 都市侦探 · 女版",
+    "hair": "酒红耳下短发；侧分柔卷，后颈利落",
+    "marks": [
+      102,
+      361,
+      395,
+      560,
+      777
+    ]
+  },
+  "r18-m": {
+    "art": "batch-05/r18-male-art.png",
+    "ruler": "r18-male-ruler.png",
+    "title": "R18 都市侦探 · 男版",
+    "hair": "酒红侧分柔卷短发",
+    "marks": [
+      112,
+      378,
+      420,
+      540,
+      772
+    ]
+  },
+  "r19-f": {
+    "art": "batch-05/r19-art.png",
+    "ruler": "r19-ruler.png",
+    "title": "R19 园艺师 · 女版",
+    "hair": "铜棕蓬松及肩卷发，不戴帽",
+    "marks": [
+      112,
+      383,
+      430,
+      550,
+      782
+    ]
+  },
+  "r19-m": {
+    "art": "batch-05/r19-male-art.png",
+    "ruler": "r19-male-ruler.png",
+    "title": "R19 园艺师 · 男版",
+    "hair": "铜棕蓬松短卷发，淡雀斑",
+    "marks": [
+      94,
+      363,
+      413,
+      533,
+      765
+    ]
+  },
+  "r20-f": {
+    "art": "batch-05/r20-art.png",
+    "ruler": "r20-ruler.png",
+    "title": "R20 机械维修师 · 女版",
+    "hair": "银灰齐下巴波波头，侧扫刘海，一枚小发夹",
+    "marks": [
+      116,
+      380,
+      431,
+      551,
+      783
+    ]
+  },
+  "r20-m": {
+    "art": "batch-05/r20-male-art.png",
+    "ruler": "r20-male-ruler.png",
+    "title": "R20 机械维修师 · 男版",
+    "hair": "银灰短后梳",
+    "marks": [
+      111,
+      375,
+      420,
+      540,
+      772
+    ]
+  },
+  "r21-f": {
+    "art": "batch-06/r21-art.png",
+    "ruler": "r21-ruler.png",
+    "title": "R21 星纹法师 · 女版",
+    "hair": "橙金编辫短波波；单侧小白花，承接原参考女孩",
+    "marks": [
+      46,
+      294,
+      365,
+      440,
+      684
+    ]
+  },
+  "r21-m": {
+    "art": "batch-06/r21-male-art.png",
+    "ruler": "r21-male-ruler.png",
+    "title": "R21 星纹法师 · 男版",
+    "hair": "橙金短发",
+    "marks": [
+      104,
+      364,
+      425,
+      545,
+      777
+    ]
+  },
+  "r22-f": {
+    "art": "batch-06/r22-art.png",
+    "ruler": "r22-ruler.png",
+    "title": "R22 礼服军官 · 女版",
+    "hair": "黑色低盘发；偏分刘海，头后小髻",
+    "marks": [
+      108,
+      377,
+      406,
+      555,
+      763
+    ]
+  },
+  "r22-m": {
+    "art": "batch-06/r22-male-art.png",
+    "ruler": "r22-male-ruler.png",
+    "title": "R22 礼服军官 · 男版",
+    "hair": "黑色利落短发，侧分",
+    "marks": [
+      111,
+      371,
+      426,
+      546,
+      778
+    ]
+  },
+  "r23-f": {
+    "art": "batch-06/r23-art.png",
+    "ruler": "r23-ruler.png",
+    "title": "R23 冬日居家 · 女版",
+    "hair": "栗棕侧低松马尾；碎发自然，不遮面",
+    "marks": [
+      111,
+      385,
+      432,
+      552,
+      784
+    ]
+  },
+  "r23-m": {
+    "art": "batch-06/r23-male-art.png",
+    "ruler": "r23-male-ruler.png",
+    "title": "R23 冬日居家 · 男版",
+    "hair": "栗棕蓬松短发",
+    "marks": [
+      120,
+      370,
+      427,
+      547,
+      779
+    ]
+  },
+  "r24-f": {
+    "art": "batch-06/r24-art.png",
+    "ruler": "r24-ruler.png",
+    "title": "R24 足球运动员 · 女版",
+    "hair": "黑色短卷波波头，青色运动发带",
+    "marks": [
+      115,
+      383,
+      429,
+      549,
+      781
+    ]
+  },
+  "r24-m": {
+    "art": "batch-06/r24-male-art.png",
+    "ruler": "r24-male-ruler.png",
+    "title": "R24 足球运动员 · 男版",
+    "hair": "黑色短卷发；小麦肤色",
+    "marks": [
+      113,
+      371,
+      427,
+      547,
+      779
+    ]
+  }
+}

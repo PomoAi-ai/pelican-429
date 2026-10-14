@@ -1,0 +1,16 @@
+Model: gpt-image-2.5-sunburst, quality max, input-fidelity high (openai images edit); 1536x1024.
+Image 1: body guide on a 1536x1024 white canvas: ../d1-seven/character-seven-views-body-v3.png FRONT crop (215,5,505,612) and RIGHT crop (620,5,880,612) scaled by (908-19)/(602-23)=1.5354, soles on y=908, centred at x=474 / 1041; label strip y>=930 copied from image 2.
+Image 2: slim-legs-front-right-v1.png (gear and leggings reference only).
+Reason: the user found the old equipped sheet's head and leg proportions too different from the other forms to serve as a reference.
+
+Use case: add equipment and leggings onto a fixed, approved body; character reference sheet.
+Image 1 is the EDIT TARGET and the BODY AUTHORITY: the heroine D1 in her blue-and-white dress and white boots, FRONT and RIGHT views, labelled "D1 · FRONT" and "D1 · RIGHT". Image 2 is the EQUIPMENT AUTHORITY: an earlier sheet of the same character wearing the same dress plus dark leggings, a backpack and two wrist gauntlets.
+
+Task: in image 1, add exactly the gear from image 2 to the two existing figures WITHOUT changing them:
+- opaque dark navy leggings covering both legs from under the skirt down into the boots;
+- the compact black tech backpack with two shoulder straps and a chest strap with a glowing cyan rectangular buckle at the centre of the chest; in the RIGHT view the backpack is visible on her back with its cyan ring detail;
+- a silver and white wrist gauntlet with cyan glowing rings and a dark display slot on each forearm, sized relative to the forearm as in image 2.
+
+Body rules (most important): keep every image-1 proportion exactly — head size and position, face, golden-orange braided bob hair and its colour, neck, shoulder width, upper-body volume, waist seam height, hip and skirt shape, leg thickness and length, boot size, pose, and the position and scale of both figures. The body in image 2 has a larger head and thinner, longer legs: do NOT copy those proportions; copy only the gear. Leggings follow the image-1 leg silhouette exactly. Gear must not hide the face or change the dress design (white stand collar with gold cross, puff sleeves, royal-blue bodice with gold emblem, gold fleur hem embroidery, white ruffled underskirt).
+
+Keep the white background, the two labels, soft neutral lighting and the polished Japanese anime game reference rendering of image 1. No extra text, rulers, guide lines or additional characters.

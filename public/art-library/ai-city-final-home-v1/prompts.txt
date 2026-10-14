@@ -1,0 +1,31 @@
+AI 城市 · 能量门复合住宅 V1
+绘制日期：2026-10-13
+用户要求：绘制最终的，需要用能量门，房子可以复杂一些。
+状态：收束候选稿，待用户审阅；未作运行时认证。
+参考：ai-city-v1/4-transit-hub.png；post-ai-half-brick-v1/layout-guide.png；homestead-components/energy-door-sealed-edge.png。
+
+Create ONE beautifully finished 16:9 landscape hero concept illustration for a playable post-AI ultra-future garden-city home. This is a new, richer FINAL DESIGN drawing based on these three references, not a contact sheet. Keep the same straight-on front-open two-storey side-scrolling game view.
+
+REFERENCE ROLES:
+Image 1 is the approved DIRECTION for city, mood and the two clothed character identities. Advance its very plain white-box house into a sophisticated, designed futuristic home.
+Image 2 is the geometry/camera contract only: single-point perspective, horizontal floors and vertical sides, half-cell-thick roof/intermediate slabs/base/side walls, exactly two main occupied storeys. Keep its open central two-cell-wide vertical jumping shaft and two thin jump ledges. Fully REPLACE every colored guide placeholder; do not retain any capsule/block mannequins.
+Image 3 is the ENERGY DOOR close-up design: pearl ceramic segmented permanent frame, navy inner chassis, small cyan indicators, inset translucent blue fine hexagonal energy membrane. No solid door leaf. Use this designed door at BOTH left side-wall entrances, integrated in the receding side-wall plane, not flat on the back wall. Door clear aperture about 3.5 grid units high within a 4-unit component; characters about 3.1 units tall.
+
+ARCHITECTURE — make the HOUSE noticeably more complex, desirable, inhabited and futuristic, while preserving the readable 2-storey game cross-section:
+Keep the central structural shell and open front, but give it strong layered architectural articulation: pearlescent warm-white ceramic half-block modules, a distinctive deep-cobalt outer side service spine with inset energy conduits, fine champagne-metal junctions, rounded corners on fitted components, shallow inset alcoves and capsule-shaped blue-framed rear glazing. A low asymmetrical curved energy canopy on the roof holds elegant dark blue photovoltaic glass fins, with a compact rooftop garden and small communications orb at the opposite end. This is equipment and garden above the roof, NOT a third storey. A slim cantilevered left entry landing with a blue underside, an outdoor charging dock and planted retaining terraces makes the house belong to the city. Let the form have purposeful asymmetry and layered masses; avoid a featureless rectangle, arbitrary greeble noise, a castle, or an enormous mansion. Fine tile seams remain visible, less dark than silhouettes.
+
+ROOM FUNCTIONS:
+Upper left: a compact, low, rounded white-and-navy sleeping capsule bed with pale blue bedding and one ochre cushion; short enough that the entire bed base and all supports sit on the LEFT slab and stop before the central shaft. Recessed curved headboard light, slim integrated personal storage and a small plant. Upper right: the brown-haired boy in red sweatshirt, blue jeans and white sneakers from image 1; a quiet wall-integrated personal AI archive/niche and arched blue-framed glazing behind him.
+Lower left: orange-haired braided-bob girl in white puff sleeves, royal blue dress with tiny gold accents, white boots from image 1, shown in profile at proper height, with a small warm-white floating helper bot above/behind her, leaving her movement space clear.
+Lower right: an attractive rounded built-in white/navy AI workbench, one small hovering cyan volumetric star-map above its inset surface, a compact folded fabrication arm at the outer corner, a stool tucked underneath and flush storage. It must feel like an advanced domestic creative workshop, not an ordinary wood desk and laptop.
+Replace the two orange wooden jump ledges with thin pale ceramic/deep-blue engineered platforms with a tiny cyan status strip at the back attachment. They remain at the same two heights. The INTERMEDIATE FLOOR MUST BE INTERRUPTED by the full-width central shaft: no bridge, horizontal beam, bed, rail, glass, plants or decoration crossing the opening. Show the back wall clearly through the opening. No stairs filling it. Playable space remains legible.
+
+MATERIAL / WORLD:
+About 60 percent warm pearl/ivory, 25 percent ink/cobalt blue, 10 percent garden green and 5 percent warm gold/cyan accents. White is creamy ceramic, never blown-out featureless white; blue has rich clear depth. Restrained clean energy lighting ONLY at functional door seals, platform connections and interfaces. Warm human interior light balances a clear soft daylight sky. This should communicate a prosperous friendly AI civilization, architecturally playful postmodern geometry plus coherent ultra-future domestic technology.
+Around the house: beautifully designed garden terraces, a small reflective canal, flowering shrubs, clean capsule maglev on flowing elevated tracks, curving transit canopies, tall pale-blue distant city silhouettes and the slender Compute Spire with floating halo rings. Keep all these subordinate to the hero house; reduce background contrast and sharpness, do not fill every inch with detail. No recognizable real-world landmark.
+
+QUALITY / COMPOSITION:
+High-end stylized game key art, polished painterly 3D-animation quality, beautifully resolved material junctions, expressive warm character faces, convincing architectural ambient occlusion, crisp main-room shapes. Rich but calm. The house is the clear focus, central and about 47 percent of canvas width; landscaped side annexes can reach wider. Keep the whole base and roof equipment inside the frame with breathing room. Exactly TWO people, neither gigantic nor tiny. The front planes remain parallel to the image plane, depth edges recede to one vanishing point; not isometric, no camera tilt, not a dollhouse viewed from above. No typography, no labels, no UI, no measurements, no grid overlay, no split-screen.
+
+局部修订：统一男女人物外观高度。
+undefined

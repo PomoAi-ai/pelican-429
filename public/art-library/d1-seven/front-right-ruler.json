@@ -1,0 +1,72 @@
+{
+  "source": "character-seven-views-slim-legs-v1.png",
+  "source_sha256": "59daeca51e231b26e970c0e59623e235616c30bc3e4e92ef90f4fc0cb2bd81f7",
+  "crop_boxes": [
+    [
+      215,
+      5,
+      505,
+      612
+    ],
+    [
+      620,
+      5,
+      880,
+      612
+    ]
+  ],
+  "source_soles_y": [
+    602,
+    602
+  ],
+  "top_y": 23,
+  "chin_y": 201,
+  "head_pixels": 178,
+  "measured_head_units": 3.252808988764045,
+  "head_unit_definition": "发顶至下巴（含头发）",
+  "pixels_per_tile": 240,
+  "uniform_scale": 1.2872417730717327,
+  "landmarks": [
+    {
+      "label": "发顶",
+      "source_y": 23,
+      "tiles": 3.105
+    },
+    {
+      "label": "下巴",
+      "source_y": 201,
+      "tiles": 2.151
+    },
+    {
+      "label": "肩线",
+      "source_y": 221,
+      "tiles": 2.043
+    },
+    {
+      "label": "腰缝",
+      "source_y": 300,
+      "tiles": 1.62
+    },
+    {
+      "label": "裙摆",
+      "source_y": 425,
+      "tiles": 0.949
+    },
+    {
+      "label": "膝线",
+      "source_y": 466,
+      "tiles": 0.729
+    },
+    {
+      "label": "靴口",
+      "source_y": 532,
+      "tiles": 0.375
+    },
+    {
+      "label": "鞋底",
+      "source_y": 602,
+      "tiles": 0.0
+    }
+  ],
+  "method": "unified ruler (public/concepts/character-ruler-standard.md); uniform resize; sole-aligned"
+}

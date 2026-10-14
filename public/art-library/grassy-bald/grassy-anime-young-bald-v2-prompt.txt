@@ -1,0 +1,9 @@
+Model: gpt-image-2.5-sunburst, quality max, input-fidelity high (openai images edit); returned 1448x1086.
+Image 1: ../grassy-base/grassy-anime-young-base-v2.png
+
+Use case: game character modeling reference — hairless head variant so hairstyles can be modeled as separate swappable parts.
+Image 1 is the EDIT TARGET: a Japanese anime game character turnaround sheet of the young boy Grassy (FRONT, RIGHT, BACK, FRONT 45, plus LEFT SOLE / RIGHT SOLE panels).
+
+Task: remove the chestnut hair from the head in every view and show a smooth, plain, rounded bald head like an unpainted character-base mannequin head, skin-toned, with clean anime line art. Keep his eyebrows and eyelashes. The skull fits inside the former hair volume: crown lower than the old hair tips, full round back of head in the RIGHT, BACK and FRONT 45 views, ears fully visible and unchanged.
+
+Everything else stays identical to image 1: face, ears, neck, body, blue tank top and shorts, arms, hands, legs, feet, pose, every figure's position and scale, the ground line, the sole panel and all labels. Do not resize or move any figure, do not change proportions. White background, same rendering style. No hats, no extra text, rulers or guide lines.

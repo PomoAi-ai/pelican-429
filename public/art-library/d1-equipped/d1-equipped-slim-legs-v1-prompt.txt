@@ -1,0 +1,22 @@
+Model: gpt-image-2.5-sunburst, quality max, input-fidelity high (openai images edit); 1536x1024.
+Lineage: d1-equipped-body-v2-prompt.txt (gear on the V3 body) -> this sheet (legs about 15% slimmer, same length).
+Image 1: equipped V2 (edit target). Image 2: slim-legs-front-right-v1.png (leg reference only).
+Reason: the user found the equipped sheet and the four-form comparison legs slightly too thick; approved 2026-10-11.
+
+===== Slim legs (front/right) =====
+Image 1 is the EDIT TARGET: the heroine D1, FRONT and RIGHT views, blue-and-white dress, dark leggings, black tech backpack, silver wrist gauntlets, white boots, labelled "D1 · FRONT" and "D1 · RIGHT". Image 2 is a LEG REFERENCE only: an earlier sheet of the same outfit with slimmer, more graceful legs.
+
+Keep from image 1 unless the task says otherwise: face, golden-orange braided bob hair and colour, head size and position, neck, shoulders, upper-body volume, dress design (white stand collar with gold cross, puff sleeves, royal-blue bodice with gold emblem, gold fleur hem embroidery, white ruffled underskirt), backpack, gauntlets, boot design, pose, both figures' positions, the hair top height and the sole line at y=908 (total height must not change). Keep the white background, the two labels, soft neutral lighting and the polished Japanese anime game reference rendering. No extra text, rulers, guide lines or additional characters.
+
+Task (variant A · slim legs): make both legs slim like image 2 — narrow thighs with a small gap between them, slender knees, thin tapered calves, slim ankles into the boots. Leg width at mid-thigh about 80% of image 1. Do NOT change leg length, waist seam or skirt hem height.
+
+===== 45° view (d1-equipped-45-v1.png; input = the slim-legs sheet) =====
+Use case: character reference sheet, add a three-quarter view of an existing approved design.
+The input image shows one character, the heroine D1, in FRONT and RIGHT views. Redraw her as ONE single figure in a 45-degree three-quarter view, turned halfway between the input's front view and right view (she faces toward the right side of the image), standing relaxed with arms down as in the input.
+
+Proportions are the most important rule: copy exactly the input's head size, hair volume, neck, shoulder width, upper-body length, waist seam height, skirt length and hem height, leg thickness and leg length, boot size. Same scale as the input: the hair top at the same height as in the input (about y=20) and the boot soles on y=908. Centre the figure horizontally at x=768.
+
+Tights (pay special attention): the legs wear thin, skin-tight tights, NOT trousers or leggings with volume. Copy their colour and opacity exactly from the input (if the input shows semi-sheer tights with skin tone showing through, keep exactly that sheerness; if opaque, keep them opaque). They fit the leg like a second skin and follow its slim silhouette exactly, so the legs must not look thicker than in the input; a soft gentle sheen along the shin and thigh, no folds, wrinkles, seams, bagginess or patterns. They run continuously from under the skirt down into the boots with no gap of bare skin, and both legs match. Under the skirt in this view only the tights are visible, no underwear details.
+
+Copy exactly the rest of the design: face, hair colour and braided bob, white stand collar with gold cross, puff sleeves, royal-blue bodice with gold emblem, gold fleur hem embroidery, white ruffled underskirt, black tech backpack with straps and cyan chest buckle, silver wrist gauntlets with cyan rings, white boots with gold and blue trim.
+Keep the plain white background, soft neutral lighting and the polished Japanese anime game reference rendering. Put one small label "D1 · 45°" centred under the figure at about y=950 in the same dark grey font as the input labels. No other text, no rulers, no extra characters.

@@ -1,0 +1,10 @@
+{
+  "targetHeads": 3.3,
+  "visibleHairCrownY": 22,
+  "chinY": 286,
+  "soleY": 913,
+  "visibleOutlineRatio": 3.375,
+  "uncertaintyPixels": 6,
+  "status": "candidate",
+  "note": "含头发轮廓估读，不代表裸头精确比例。四视图经目视检查，未通过三维相机验证。"
+}

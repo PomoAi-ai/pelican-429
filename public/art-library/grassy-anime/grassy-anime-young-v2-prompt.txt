@@ -1,0 +1,9 @@
+Model: gpt-image-2.5-sunburst, quality max, input-fidelity high (openai images edit); 1536x1024.
+Image 1 (only input): ../core-cast/grassy-human-classic-handsome.png. The user found the earlier anime male too mature and asked for a younger, cuter look.
+
+Use case: character redesign of age and face appeal on an existing turnaround sheet.
+Image 1 is the EDIT TARGET: the male protagonist Grassy as a Japanese anime game character, red cable-knit sweater, rolled blue jeans and cream sneakers, shown FRONT, RIGHT, BACK and FRONT 45.
+
+Task: make him clearly YOUNGER and CUTER — an adorable young anime boy of about 13 years old, in the style of a polished Japanese anime RPG chibi-proportion hero. Face: rounder and softer, full cheeks, smaller and softer chin and jaw, larger bright amber-brown eyes with big highlights, short soft eyebrows, tiny nose, small cheerful closed-mouth smile, light blush. Remove every mature or sharp feature (no long narrow face, no sharp jawline, no heavy-lidded eyes). Hair: keep the same chestnut-brown fluffy layered short cut and silhouette with the small ahoge, just slightly softer and rounder. Body: youthful, slender boy, slightly narrower shoulders, softer limbs and hands.
+
+Keep unchanged: the four views and their positions, overall figure height and ground line (hair top about y=21 px, soles about y=915 px), stylized SD proportions of about 3.3 heads, the same pose, the red cable-knit sweater, rolled jeans, cream sneakers and their colours, white background, soft neutral lighting, clean polished Japanese anime game reference rendering and line quality. No text, labels, rulers or extra characters.
