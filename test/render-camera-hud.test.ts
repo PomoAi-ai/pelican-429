@@ -20,6 +20,20 @@ describe('camera floor', () => {
     assert.throws(() => cameraFloorY(Int16Array.from([3]), -1), /camera-rig/);
   });
 
+  test('向左扩展的世界在负坐标也能跟随，左右边缘按同一规则夹紧', () => {
+    const camera = new THREE.PerspectiveCamera(TUNING.camera.fov, 1, .5, 200);
+    const rig = createCameraRig({ camera, tuning: TUNING,
+      bounds: { minX: -100, width: 200, height: 100 },
+      viewport: () => ({ left: 0, top: 0, width: 900, height: 900 }) });
+    rig.snapTo(-50, 20, -1);
+    assert.equal(camera.position.x, -50 - TUNING.camera.lookAhead);
+    rig.snapTo(-100, 20, -1);
+    assert.ok(Math.abs(rig.visibleRect().x + 100) < 1e-9);
+    rig.snapTo(100, 20, 1);
+    const view = rig.visibleRect();
+    assert.ok(Math.abs(view.x + view.w - 100) < 1e-9);
+  });
+
   test('bounds.minY 夹紧相机下边界；范围不足取中点；非法 minY 即抛', () => {
     const make = (minY: number, height = 100) => {
       const camera = new THREE.PerspectiveCamera(TUNING.camera.fov, 16 / 9, 0.5, 200);

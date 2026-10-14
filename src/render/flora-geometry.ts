@@ -1,13 +1,13 @@
 /**
  * 地表花草与水草几何（草皮、草丛、雏菊、虞美人、风铃草、蕨、灌木、水草；其余草甸物种见 flora-meadow-geometry）。
  * 非索引、双面材质，配合 flora.ts 的风摆材质；顶点属性约定（color/aTip/aPetal/aFly）见 flora-builder。
- * - 局部坐标：根部在 y=0、x/z 以 0 为中心；turf 例外：x ∈ [−.5,.5] 铺满一格，z 为绝对值（GROUND_DECOR_Z_MIN..MAX，实例 z=0）。
+ * - 局部坐标：根部在 y=0、x/z 以 0 为中心；turf 例外：x ∈ [−.5,.5] 铺满一格，z 为绝对值（BLOCK_BACK_Z..BLOCK_FRONT_Z，实例 z=0）。
  * 形状内部随机只用 core/rng 的整数哈希（确定性）。
  */
 import * as THREE from 'three';
 import { C, FloraBuilder, PETAL_BASE, WHITE, along, blade, clumpLayout, corolla, curvedStem, rnd, rosette, stem, stemLeaf } from './flora-builder.ts';
 import type { V3 } from './flora-builder.ts';
-import { GROUND_DECOR_Z_MAX, GROUND_DECOR_Z_MIN } from './tile-geometry.ts';
+import { BLOCK_BACK_Z, BLOCK_FRONT_Z } from './tile-geometry.ts';
 
 /** 每根草叶的分段数（最后一段收成尖）。 */
 export const BLADE_SEGMENTS = 4;
@@ -28,13 +28,15 @@ const GRASS_TIPS = [C('#b8da6a'), C('#9ccc58'), C('#c8d86c'), C('#86bd50'), C('#
 export function createTurfGeometry(): THREE.BufferGeometry {
   const b = new FloraBuilder();
   const perRow = TURF_BLADES / TURF_ROWS;
-  const span = GROUND_DECOR_Z_MAX - GROUND_DECOR_Z_MIN;
+  const edgeInset = 0.02;
+  const span = BLOCK_FRONT_Z - BLOCK_BACK_Z - edgeInset * 2;
   for (let i = 0; i < TURF_BLADES; i++) {
     const row = Math.floor(i / perRow);
     const j = i % perRow;
     const r = (k: number): number => rnd(911, i, k);
-    const zc = GROUND_DECOR_Z_MIN + (span * (row + 0.5)) / TURF_ROWS;
-    const z = Math.min(GROUND_DECOR_Z_MAX, Math.max(GROUND_DECOR_Z_MIN, zc + (r(1) - 0.5) * (span / TURF_ROWS) * 0.9));
+    const zc = BLOCK_BACK_Z + edgeInset + (span * row) / (TURF_ROWS - 1);
+    const jitter = row === 0 ? r(1) * edgeInset : row === TURF_ROWS - 1 ? -r(1) * edgeInset : (r(1) - 0.5) * 0.25;
+    const z = zc + jitter;
     const front = row === TURF_ROWS - 1;
     const hMin = front ? 0.07 : 0.12;
     const hMax = front ? 0.15 : 0.26 - 0.04 * row;

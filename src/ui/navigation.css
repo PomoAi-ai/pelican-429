@@ -1,6 +1,6 @@
 :root { --site-nav-base-height: 72px; --site-nav-height: var(--site-nav-base-height); --dev-nav-height: var(--site-nav-height); }
-:root:has(#dev-navigation[data-context=game]), :root:has(#dev-navigation[data-context=resources]) { --site-nav-base-height: 24px; }
-:root:has(.dev-world-position) { --site-nav-height: calc(var(--site-nav-base-height) + 44px); }
+:root:has(#dev-navigation[data-context=game]), :root:has(#dev-navigation[data-context=resources]) { --site-nav-base-height: 40px; }
+:root:has(.dev-world-position), :root:has(.site-subnav) { --site-nav-height: calc(var(--site-nav-base-height) + 44px); }
 .minimap[hidden] { display: none !important; }
 #dev-navigation[hidden] { display: none; }
 #entry-index[hidden] { display: none; }
@@ -40,10 +40,15 @@ body .hud-status { top: calc(var(--dev-nav-height) + 44px); }
   .dev-world-position > span { display: none; }
   .dev-world-position select { max-width: 148px; }
 }
-/* Native select keeps keyboard and screen-reader support; appearance is reset so the chevron matches the dark nav. */
-.site-language { margin-left: auto; padding: 5px 26px 5px 10px; border: 1px solid #ffffff33; border-radius: 16px; color: #d9e8d0; background: #10191e url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23b6c7c9' stroke-width='1.5'/%3E%3C/svg%3E") no-repeat right 10px center / 10px 6px; font: inherit; font-size: 12px; appearance: none; -webkit-appearance: none; cursor: pointer; }
-.site-language option { color: #eef3eb; background: #0e1b26; }
-.site-language:focus-visible { outline: 2px solid #b8df9d; outline-offset: 2px; }
+.language-picker { padding: 6px 28px 6px 12px; border: 1px solid #ffffff33; border-radius: 8px; color: #d9e8d0; background: #10191e url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23b6c7c9' stroke-width='1.5'/%3E%3C/svg%3E") no-repeat right 10px center / 10px 6px; font: inherit; cursor: pointer; }
+.language-picker:focus-visible { outline: 2px solid #b8df9d; outline-offset: 2px; }
+.language-menu { box-sizing: border-box; position: fixed; inset: auto; width: 168px; max-width: calc(100vw - 16px); margin: 0; padding: 6px; border: 1px solid #ffffff26; border-radius: 12px; color: #f2f1e8; background: #0e1b26; box-shadow: 0 16px 40px #0008; }
+.language-menu:popover-open { display: grid; gap: 4px; }
+.language-menu .language-option { display: flex; align-items: center; justify-content: space-between; width: 100%; min-height: 40px; padding: 8px 12px; border: 0; border-radius: 7px; color: inherit; background: transparent; font: 14px/20px system-ui, sans-serif; text-align: left; cursor: pointer; }
+:is(#dev-navigation, .settings-panel) .language-menu .language-option:is(:hover, :focus-visible) { outline: none; color: #fff; background: #243845; }
+:is(#dev-navigation, .settings-panel) .language-menu .language-option[aria-checked=true] { color: #d6ed8d; background: #d6ed8d14; }
+:is(#dev-navigation, .settings-panel) .language-menu .language-option:focus-visible { outline: 2px solid #b8df9d; outline-offset: -2px; }
+.language-menu .language-option[aria-checked=true]::after { content: '✓'; }
 
 body:has(#game-navigation:not([open])) { --dev-nav-height: 0px; }
 .game-navigation-handle { position: fixed; z-index: 31; top: var(--dev-nav-height); left: 50%; transform: translateX(-50%); display: flex; align-items: center; justify-content: center; gap: 6px; height: 24px; padding: 0 6px; border: 0; border-radius: 0; background: #10191ed9; color: #d9e8d0; font-size: 11px; cursor: pointer; list-style: none; user-select: none; touch-action: manipulation; }
@@ -63,7 +68,6 @@ body:has(#game-navigation:not([open])) { --dev-nav-height: 0px; }
 #dev-navigation [hidden] { display: none; }
 #dev-navigation :is(a, button) { white-space: nowrap; }
 #dev-navigation a[aria-current=page]:not(.home-brand, .home-nav-play) { color: var(--home-accent); background: var(--home-surface-2); }
-.home-resources-toggle:has(+ .home-resources-menu a[aria-current=page]) { color: var(--home-accent); background: var(--home-surface-2); }
 #dev-navigation {
   position: fixed; inset: 0 0 auto; z-index: 30; height: var(--site-nav-height); padding: 0 clamp(16px, 3vw, 48px); display: flex; align-items: center; justify-content: space-between; gap: 24px;
   background: linear-gradient(#08111acc, #08111a66); backdrop-filter: blur(14px) saturate(1.4); -webkit-backdrop-filter: blur(14px) saturate(1.4); border-bottom: 1px solid var(--home-line);
@@ -72,23 +76,24 @@ body:has(#game-navigation:not([open])) { --dev-nav-height: 0px; }
 .home-brand small { display: block; margin-top: 4px; color: var(--home-dim); font-size: 10px; font-weight: 400; letter-spacing: 1.5px; }
 .home-brand-mark { display: inline-flex; align-items: baseline; font: italic 800 28px/1 Arial, sans-serif; letter-spacing: -2px; }
 .home-brand-mark span { font-size: 14px; color: var(--home-accent); letter-spacing: -0.5px; }
-.home-nav { --nav-text-inset: 14px; display: flex; align-items: center; gap: 6px; font-size: 14px; }
+.home-nav { --nav-text-inset: 14px; display: flex; align-items: center; gap: 6px; min-width: 0; overflow-x: auto; scrollbar-width: none; font-size: 14px; }
 .home-nav > :is(a, button, select, .home-play-control), .home-social { box-sizing: border-box; height: 40px; line-height: 20px; flex-shrink: 0; }
 .home-nav > :is(a, button) { display: inline-flex; align-items: center; justify-content: center; }
 #dev-navigation[data-context=home] .home-index-link, #dev-navigation:not([data-context=home]) .home-section-link { display: none; }
 #dev-navigation:not([data-context=home]) .home-brand { display: none; }
-#dev-navigation:not([data-context=home]) { gap: 0; padding-left: 4px; padding-right: 4px; background: #10191e; }
-#dev-navigation:not([data-context=home]) .home-nav { --nav-text-inset: 6px; width: 100%; gap: 2px; overflow-x: auto; scrollbar-width: none; font-size: 12px; }
+#dev-navigation:not([data-context=home]) { gap: 0; padding-left: 8px; padding-right: 8px; background: #10191e; }
+#dev-navigation:not([data-context=home]) .home-nav { --nav-text-inset: 12px; width: 100%; gap: 4px; overflow-x: auto; scrollbar-width: none; font-size: 14px; }
 #dev-navigation:not([data-context=home]) .home-nav::-webkit-scrollbar { display: none; }
-#dev-navigation:not([data-context=home]) .home-nav > :is(a, button, select, .home-play-control) { height: 20px; line-height: 18px; }
-#dev-navigation:not([data-context=home]) .home-nav > a { padding: 0 6px; }
-#dev-navigation:not([data-context=home]) .home-social { height: 20px; margin-left: auto; padding: 0; }
-#dev-navigation:not([data-context=home]) .home-social > :is(a, button) { width: 20px; height: 20px; }
-#dev-navigation:not([data-context=home]) .site-language { font-size: 12px; }
-#game-navigation[open]:has(#dev-navigation[data-context=resources]) > .game-navigation-handle { top: 0; left: auto; right: 4px; transform: none; background: transparent; }
+#dev-navigation:not([data-context=home]) .home-nav > :is(a, button, select, .home-play-control) { height: 32px; line-height: 20px; }
+#dev-navigation:not([data-context=home]) .home-nav > a { padding: 0 12px; }
+/* 左侧放浏览入口，右侧放开始游戏、帮助、社交与语言。 */
+#dev-navigation:not([data-context=home]) .home-play-control { margin-left: auto; }
+#dev-navigation:not([data-context=home]) .home-social { height: 32px; padding: 0; }
+#dev-navigation:not([data-context=home]) .home-social > :is(a, button) { width: 32px; height: 32px; }
+#dev-navigation:not([data-context=home]) .site-language { font-size: 14px; }
+#game-navigation[open]:has(#dev-navigation[data-context=resources]) > .game-navigation-handle { top: 8px; left: auto; right: 8px; transform: none; background: transparent; }
 #game-navigation[open] #dev-navigation[data-context=resources] { padding-right: 58px; }
 #dev-navigation .site-language { order: 2; }
-#home-scenes-menu { position-anchor: --home-scenes; }
 .home-play-control { anchor-name: --home-play; display: inline-flex; overflow: hidden; border-radius: 10px; background: var(--home-accent); }
 #dev-navigation .home-play-control > :is(a, button) { display: inline-flex; align-items: center; justify-content: center; height: 100%; margin: 0; border-radius: 0; color: #10180f; background: transparent; }
 #dev-navigation .home-play-toggle { anchor-name: none; padding: 0 10px; border-left: 1px solid #10180f33; }
@@ -121,7 +126,16 @@ body:has(#game-navigation:not([open])) { --dev-nav-height: 0px; }
 #dev-navigation .site-language:hover { color: #fff; background-color: #ffffff10; }
 
 
-#dev-navigation:has(.dev-world-position) { padding-bottom: 44px; }
+#dev-navigation:is(:has(.dev-world-position), :has(.site-subnav)) { padding-bottom: 44px; }
+/* 二级栏：同类页面平铺成一行，当前页下划线高亮；分段之间画竖线。窄屏横向滚动，不换行。 */
+.site-subnav { position: absolute; left: 0; right: 0; bottom: 0; display: flex; align-items: center; gap: 2px; height: 44px; padding: 0 8px; overflow-x: auto; scrollbar-width: none; border-top: 1px solid #ffffff12; background: #0c1418; font-size: 14px; }
+.site-subnav::-webkit-scrollbar { display: none; }
+#dev-navigation .site-subnav a { flex-shrink: 0; display: inline-flex; align-items: center; height: 44px; padding: 0 12px; border-bottom: 2px solid transparent; color: #a8b6bb; white-space: nowrap; }
+#dev-navigation .site-subnav a:hover { color: #fff; }
+#dev-navigation .site-subnav a[aria-current=page] { border-bottom-color: var(--home-accent); color: var(--home-accent); background: transparent; }
+.site-subnav-divider { flex-shrink: 0; width: 1px; height: 16px; margin: 0 8px; background: #ffffff26; }
+#dev-navigation:has(.site-subnav) .dev-world-position { z-index: 1; padding-left: 12px; background: #0c1418; }
+#dev-navigation .site-section-link[aria-current] { color: var(--home-accent); background: var(--home-surface-2); }
 #dev-navigation .dev-world-position { position: absolute; right: 20px; bottom: 7px; }
 @media (max-width: 1400px) {
   #dev-navigation[data-context=home] .home-section-link { display: none; }
@@ -145,17 +159,14 @@ body:has(#game-navigation:not([open])) { --dev-nav-height: 0px; }
   #dev-navigation[data-context=home] .home-brand > span:not(.home-brand-mark) { display: none; }
 }
 
-.home-scenes-toggle { anchor-name: --home-scenes; }
 
-#dev-navigation:not([data-context=home]) :is(a, button, select, .home-play-control, .home-social) { border: 0; border-radius: 0; background-color: transparent; }
-#dev-navigation:not([data-context=home]) a[aria-current=page] { background: transparent; }
-#dev-navigation:not([data-context=home]) .home-play-control > :is(a, button) { color: inherit; font-weight: 400; }
-#dev-navigation:not([data-context=home]) :is(a, button):hover { color: var(--home-accent); }
-#dev-navigation:not([data-context=home]) .site-language { padding: 0 20px 0 6px; background-position: right 5px center; }
-#dev-navigation:not([data-context=home]) .home-play-toggle { padding: 0 5px; }
-#dev-navigation:not([data-context=home]) :is(.home-resources-menu, .home-wechat-pop, .home-wechat-pop img) { border-radius: 0; }
-#dev-navigation:not([data-context=home]) .home-resources-menu { padding: 4px 0; }
-#dev-navigation:not([data-context=home]) .home-resources-menu a { height: 26px; padding: 0 10px; }
+#dev-navigation:not([data-context=home]) :is(a, button, select, .home-social) { border: 0; border-radius: 6px; background-color: transparent; }
+#dev-navigation:not([data-context=home]) .home-play-control { border-radius: 6px; }
+#dev-navigation:not([data-context=home]) .home-nav > :is(a, button, select):hover, #dev-navigation:not([data-context=home]) .home-social > :is(a, button):hover { color: #fff; background-color: #ffffff14; }
+#dev-navigation:not([data-context=home]) .site-language { padding: 0 26px 0 10px; background-position: right 10px center; }
+#dev-navigation:not([data-context=home]) .home-play-toggle { padding: 0 8px; }
+#dev-navigation:not([data-context=home]) .home-resources-menu { padding: 6px; border-radius: 10px; }
+#dev-navigation:not([data-context=home]) .home-resources-menu a { height: 36px; padding: 0 12px; border-radius: 6px; }
 
 .restart-confirm { box-sizing: border-box; width: min(440px, calc(100vw - 32px)); padding: 28px; border: 1px solid #d6ed8d55; border-radius: 18px; color: #f2f1e8; background: #0e1b26; box-shadow: 0 24px 80px #0009; }
 .restart-confirm::backdrop { background: #03090dcc; backdrop-filter: blur(8px); }

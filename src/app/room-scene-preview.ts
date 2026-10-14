@@ -2,50 +2,68 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GRASSY_HEIGHT } from '../config/grassy.ts';
 import { TUNING } from '../config/tuning.ts';
-import { createGrassyRig, disposeGrassyAssets, loadGrassyAsset } from '../render/grassy/grassy-rig.ts';
+import { DEFINITION_DEPTH } from '../config/definition-kit.ts';
+import { createGrassyRig, loadGrassyAsset } from '../render/grassy/grassy-rig.ts';
 import { animateGrassy } from '../render/grassy/grassy-animator.ts';
-import { createStage } from '../render/stage.ts';
+import { attachStage } from '../render/stage.ts';
+import { compileForStage, warmUpStage } from '../render/warm-up.ts';
 import { createDefinitionSceneLayout, type SceneSection } from './definition-scene-layout.ts';
-import { createDefinitionSettlementLayout } from './definition-settlement-layout.ts';
-import { createDefinitionDepthLayout, createDepthEnvironment, DEPTH_LAYERS, DEPTH_STOPS, type DepthLayerId } from './definition-depth-layout.ts';
+import { loadDefinitionSettlementLayout } from './definition-settlement-layout.ts';
+import { groundMaterial, type DepthTheme } from './depth-scenery.ts';
+import { createDefinitionDepthLayout, createDepthEnvironment, DEPTH_LAYERS, DEPTH_STOPS, type DepthLayerId, type DepthLayering } from './definition-depth-layout.ts';
 import { createCelestialSky, type SkyPhase } from '../render/celestial-sky.ts';
 import { createPerspectiveControls } from './perspective-controls.ts';
 import { createCharacterAppearanceStore } from './character-appearance.ts';
 import { createDefinitionInspection } from '../render/definition-inspection.ts';
-
-import { createFurniturePlayerRuler, measureFurniturePlayer } from './furniture-player-inspection.ts';
+import { createPerspectiveMinimap } from './perspective-minimap.ts';
+import { yieldScene, waitSceneResource, type SceneMountContext } from './scene-mount.ts';
+import type { PerspectiveSceneEntry } from './scene-catalog.ts';
 
 type View = 'front' | 'angle' | 'top';
 type SceneVariant = 'room' | 'settlement' | 'depth';
 
-function mountPreview(app: HTMLElement, sections: readonly SceneSection[], variant: SceneVariant): HTMLElement {
+function mountPreview(app: HTMLElement, sections: readonly SceneSection[], variant: SceneVariant): { container: HTMLElement; showTools(): void } {
   const settlement = variant === 'settlement';
   app.innerHTML = `
     <section class="room-preview ${settlement ? 'room-preview-settlement' : ''}" aria-label="透视">
       <header class="room-preview-toolbar">
-        <strong>透视 <span data-mode>游戏</span></strong>
-        <button type="button" data-play aria-pressed="true">暂停游玩</button>
-        ${variant === 'depth' ? '<button type="button" data-render-mode="wireframe" aria-pressed="true" title="淡色半透明格面与轮廓，保留砖块厚度">透视线框</button><button type="button" data-render-mode="solid" aria-pressed="false">实景</button><button type="button" data-landscape-view>大场景全览</button><button type="button" data-play-view>真实游玩视角</button>' : ''}
-        <button type="button" data-tools aria-expanded="true" aria-controls="perspective-tools">控制面板</button>
-        <a data-definition href="./?mode=concepts#${variant === 'depth' ? 'scene-depth-layers' : 'concept-building'}">定义 ↗</a>
+        <span class="room-preview-status" data-mode>游戏</span>
+        <div class="room-preview-group" role="group" aria-label="观察角度">
+          <button type="button" data-view="front" aria-pressed="true">正常视角</button>
+          <button type="button" data-view="angle" aria-pressed="false">斜视</button>
+          <button type="button" data-view="top" aria-pressed="false">俯视</button>
+        </div>
+        <div class="room-preview-group" role="group" aria-label="镜头">
+          <button type="button" data-camera aria-pressed="true">自由镜头</button>
+          <button type="button" data-overview>${variant === 'depth' ? '风景全览' : '全景'}</button>
+          <button type="button" data-player>玩家</button>
+          ${variant === 'depth' ? '<button type="button" data-depth-overview>侧看层距</button>' : ''}
+        </div>
+        <div class="room-preview-group" role="group" aria-label="显示">
+          <button type="button" data-grid aria-pressed="${variant !== 'depth'}">格线</button>
+          <button type="button" data-wire aria-pressed="${variant !== 'depth'}">半透明</button>
+          ${variant === 'depth' ? '<button type="button" data-render-mode="wireframe" aria-pressed="true" title="淡色半透明格面与轮廓，保留砖块厚度">透视线框</button><button type="button" data-render-mode="solid" aria-pressed="false">实景</button>' : ''}
+        </div>
+        ${variant === 'depth' ? '<div class="room-preview-group" role="group" aria-label="天空时段"><button type="button" data-sky="day" aria-pressed="true">白天</button><button type="button" data-sky="night" aria-pressed="false">夜晚</button></div><div class="room-preview-group" role="group" aria-label="层次效果"><button type="button" data-layering="flat" aria-pressed="false" title="对比用的旧层距：背景格子 −4 / −10、远景 −20 / −43 / −76，无距离雾，前景清晰">旧层次</button><button type="button" data-layering="deep" aria-pressed="true" title="规则层距：背景格子 −7 / −16、远景 −35 / −70 / −140，近处起渐浓的距离雾，前景下沉一格并模糊压暗，玩法地面换成与近景相同的贴图">景深 G</button></div><div class="room-preview-group" role="group" aria-label="分层视角"><button type="button" data-landscape-view>大场景全览</button><button type="button" data-play-view>真实游玩视角</button></div>' : `
+        <div class="room-preview-group room-preview-solar" role="group" aria-label="太阳与光照">
+          <label for="solar-direction">太阳 <output data-solar-position>上方</output></label>
+          <input id="solar-direction" type="range" min="-1" max="1" step="0.01" value="0" aria-label="太阳从左到右的位置"/>
+          <button type="button" data-solar-auto aria-pressed="true">自动追光</button>
+          <button type="button" data-sun-light aria-pressed="true">太阳光照</button>
+          <label for="sun-intensity">强度 <output data-sun-intensity>100%</output></label>
+          <input id="sun-intensity" type="range" min="0" max="2" step="0.05" value="1" aria-label="太阳光照强度"/>
+        </div>`}
+        <div class="room-preview-group">
+          <button type="button" data-play aria-pressed="true">暂停游玩</button>
+          <button type="button" data-tools aria-expanded="true" aria-controls="perspective-tools">面板</button>
+          <a data-definition href="./?mode=concepts#${variant === 'depth' ? 'scene-depth-layers' : 'concept-building'}">定义 ↗</a>
+        </div>
       </header>
       <div class="room-preview-workspace">
-        <aside class="room-preview-directory" aria-label="场景分区目录">
-          <nav class="room-preview-tabs" aria-label="场景类型">
-            <a href="./?mode=resources&scene=room" ${variant === 'room' ? 'aria-current="page"' : ''}>单独场景</a>
-            <a href="./?mode=resources&scene=settlement" ${settlement ? 'aria-current="page"' : ''}>大场景</a>
-            <a href="./?mode=resources&scene=depth" ${variant === 'depth' ? 'aria-current="page"' : ''}>场景分层</a>
-          </nav>
-          <h2 class="room-preview-heading">场景目录 <span>${sections.length}</span></h2>
-          <nav class="room-preview-sections" aria-label="场景列表">${sections.map((section, index) => `<button type="button" data-section="${index}" aria-pressed="false">${section.title}</button>`).join('')}</nav>
-
-          <details class="room-preview-description"><summary>场景说明</summary><div class="room-preview-caption" aria-live="polite"><strong data-title></strong><span data-description></span></div></details>
-          ${variant !== 'depth' ? '<p><a href="./?mode=concepts#solar-grid-and-load">太阳能定义与线框图 ↗</a></p>' : ''}
-          <details class="room-preview-coverage"><summary>完整覆盖清单</summary>${sections.map(section => `<h3>${section.title}</h3><ul>${section.items.map(item => `<li>${item}</li>`).join('')}</ul>`).join('')}</details>
-        </aside>
         <div class="room-preview-main">
           <div class="room-preview-viewport">
             <div class="room-preview-canvas" aria-label="可游玩并支持鼠标旋转缩放的三维透视场景"></div>
+            <p class="room-preview-hint">A / D 移动 · 空格跳跃</p>
             <div class="room-preview-hud" aria-label="玩家状态与技能">
               <button type="button" class="control-pad control-attack" data-skill="shoot" aria-label="近战攻击">
                 <span class="hud-skill-icon" data-icon="keyboard" aria-hidden="true"></span>
@@ -57,44 +75,9 @@ function mountPreview(app: HTMLElement, sections: readonly SceneSection[], varia
 
         </div>
         <aside id="perspective-tools" class="room-preview-tools" aria-label="控制面板">
-          <details class="room-preview-control-section" open>
-            <summary>视角</summary>
-            <div class="room-preview-camera-controls">
-              <div class="room-preview-views" role="group" aria-label="观察角度">
-                <button type="button" data-view="front" aria-pressed="true">正常视角</button>
-                <button type="button" data-view="angle" aria-pressed="false">斜视</button>
-                <button type="button" data-view="top" aria-pressed="false">俯视</button>
-              </div>
-              <div class="room-preview-control-row">
-                <button type="button" data-camera aria-pressed="true">自由镜头</button>
-                <button type="button" data-overview>${variant === 'depth' ? '风景全览' : '全景'}</button>
-                <button type="button" data-player>玩家</button>
-              </div>
-              ${variant === 'depth' ? '<button type="button" data-depth-overview>侧看层距</button>' : ''}
-            </div>
-          </details>
-          <details class="room-preview-control-section" open>
-            <summary>显示</summary>
-            <div class="room-preview-control-row">
-              <button type="button" data-grid aria-pressed="${variant !== 'depth'}">格线</button>
-              <button type="button" data-wire aria-pressed="${variant !== 'depth'}">半透明</button>
-            </div>
-          </details>
-          <details class="room-preview-control-section" open>
-            <summary>${variant === 'depth' ? '天空' : '太阳与光照'}</summary>
-            ${variant === 'depth' ? '<div class="room-preview-control-row" role="group" aria-label="天空时段"><button type="button" data-sky="day" aria-pressed="true">白天</button><button type="button" data-sky="night" aria-pressed="false">夜晚</button></div>' : `
-            <div class="room-preview-solar" role="group" aria-label="太阳与光照">
-              <label for="solar-direction">太阳位置 <output data-solar-position>上方</output></label>
-              <input id="solar-direction" type="range" min="-1" max="1" step="0.01" value="0" aria-label="太阳从左到右的位置"/>
-              <div class="room-preview-control-row">
-                <button type="button" data-solar-auto aria-pressed="true">自动追光</button>
-                <button type="button" data-sun-light aria-pressed="true">太阳光照</button>
-              </div>
-              <label for="sun-intensity">光照强度 <output data-sun-intensity>100%</output></label>
-              <input id="sun-intensity" type="range" min="0" max="2" step="0.05" value="1" aria-label="太阳光照强度"/>
-            </div>`}
-          </details>
           ${variant === 'depth' ? '<details class="room-preview-control-section" open><summary>观察点</summary><nav class="room-preview-depth-stops" data-depth-stops aria-label="场景观察点"></nav></details>' : ''}
+          <details class="room-preview-description"><summary>场景说明</summary><div class="room-preview-caption" aria-live="polite"><strong data-title></strong><span data-description></span></div></details>
+          <details class="room-preview-coverage"><summary>完整覆盖清单</summary>${sections.map(section => `<h3>${section.title}</h3><ul>${section.items.map(item => `<li>${item}</li>`).join('')}</ul>`).join('')}</details>
           <details class="room-preview-control-section" data-solar-trial hidden open>
             <summary>半格太阳能 · 踩踏试玩</summary>
             <p>快捷站到整排中间的面板上，再沿12块面板左右走动。脚下板受力，身后的板恢复追光；空格跳离。</p>
@@ -107,17 +90,9 @@ function mountPreview(app: HTMLElement, sections: readonly SceneSection[], varia
             <small>游玩暂停时面板也暂停。自动追光可关闭，固定太阳后观察回弹。</small>
             <p><a href="./concepts/solar-grid-and-load-perspective.png" target="_blank" rel="noopener">打开线框图 ↗</a></p>
           </details>
-            <div class="room-preview-comparison" hidden>
-              <strong>家具 × 人物 · 候选方案</strong><small class="room-preview-depth-key">玩家固定砖块中线 · 绿带：前半0.5 · 蓝带：后半0.5</small>
-              <label for="furniture-player-x">人物左右位置 <output data-player-position></output></label>
-              <input id="furniture-player-x" type="range" step="0.05" disabled />
-              <p data-player-measure aria-live="polite">正在加载原尺寸人物…</p>
-              <small>滑杆只摆放人物，不是物理行走；穿透与阻挡规则尚未定稿。</small>
-            </div>
           <details class="room-preview-control-section">
-            <summary>操作与尺寸</summary>
-            <p class="room-preview-hint">A / D 移动 · 空格跳跃</p>
-            <p class="room-preview-notes">1 格 = 1 世界单位<br>实体深 1 · 墙厚 0.2<br>平台深 0.5 / 0.75<br>男玩家高 ${GRASSY_HEIGHT} 格</p>
+            <summary>尺寸参考</summary>
+            <p class="room-preview-notes">1 格 = 1 世界单位<br>格子深 ${DEFINITION_DEPTH.tile}（泥土、岩层相同）· 前沿、后沿各 ${DEFINITION_DEPTH.reserve}<br>墙厚 ${DEFINITION_DEPTH.wall}，紧贴格子背面 · 平台深 ${DEFINITION_DEPTH.platform}，背后有墙挂到墙面<br>男玩家高 ${GRASSY_HEIGHT} 格</p>
           </details>
           ${variant === 'depth' ? `<details class="room-preview-control-section" open><summary>场景图层 · 由近到远</summary><p>逐层关闭，查看遮挡关系；玩家地面始终保留。</p><div class="room-preview-depth-layers">${DEPTH_LAYERS.map((layer, index) => `<label title="${layer.description}"><input type="checkbox" data-depth-layer="${layer.id}" checked /><span>${index + 1} · ${layer.label}<small>${layer.id === 'sky' ? '按画面比例显示' : layer.id === 'clouds' ? '多层漂浮 · 可遮挡天体' : `${layer.distance > 0 ? '玩家前方' : '玩家后方'} ${Math.abs(layer.distance)} 格`}</small></span></label>`).join('')}<button type="button" data-depth-reset>显示全部图层</button></div></details>` : ''}
         </aside>
@@ -125,50 +100,53 @@ function mountPreview(app: HTMLElement, sections: readonly SceneSection[], varia
     </section>`;
   const tools = app.querySelector<HTMLElement>('#perspective-tools')!;
   const toggleTools = app.querySelector<HTMLButtonElement>('[data-tools]')!;
-  tools.hidden = window.matchMedia('(max-width: 1000px)').matches;
-  toggleTools.setAttribute('aria-expanded', String(!tools.hidden));
+  // 默认把宽度留给画面；家具候选与太阳能试玩的操作在面板里，选到时再自动展开。
+  const setTools = (open: boolean): void => {
+    tools.hidden = !open;
+    toggleTools.setAttribute('aria-expanded', String(open));
+  };
+  setTools(false);
   toggleTools.addEventListener('click', () => {
-    tools.hidden = !tools.hidden;
-    toggleTools.setAttribute('aria-expanded', String(!tools.hidden));
+    setTools(toggleTools.getAttribute('aria-expanded') !== 'true');
     app.querySelector<HTMLCanvasElement>('canvas')!.focus({ preventScroll: true });
   });
-  return app.querySelector<HTMLElement>('.room-preview-canvas')!;
+  return { container: app.querySelector<HTMLElement>('.room-preview-canvas')!, showTools: () => setTools(true) };
 }
 
-/** 共享构件与游戏男玩家装配为独立场景或完整聚落。 */
-export async function startRoomScenePreview(variant: SceneVariant): Promise<void> {
-  document.body.classList.add('room-scene-page');
-  document.title = variant === 'depth' ? '透视 · 场景分层' : variant === 'settlement' ? '透视 · 大场景' : '透视 · 单独场景';
-  const app = document.getElementById('app')!;
+/** 透视保留原检查工具，目录与资源生命周期由场景工作区管理。 */
+export async function mountScenePerspective(context: SceneMountContext, entry: PerspectiveSceneEntry): Promise<void> {
+  const { root: app, renderer, signal } = context;
+  const variant = entry.variant;
   const disposers: Array<() => void> = [];
   let frame = 0;
   let disposed = false;
   const dispose = (): void => {
     disposed = true;
     cancelAnimationFrame(frame);
-    window.removeEventListener('pagehide', dispose);
     for (const release of disposers.splice(0).reverse()) release();
-    document.body.classList.remove('room-scene-page');
   };
-  window.addEventListener('pagehide', dispose, { once: true });
-  try {
-    const rooms = variant === 'room' ? createDefinitionSceneLayout() : null;
+  context.onDispose(dispose);
+  {
+    context.progress('装配透视构件');
+    await yieldScene(signal);
+    const rooms = variant === 'room' ? createDefinitionSceneLayout(entry.sectionId) : null;
     const depth = variant === 'depth' ? createDefinitionDepthLayout() : null;
-    const settlement = variant === 'settlement' ? createDefinitionSettlementLayout() : null;
+    const settlement = variant === 'settlement' ? await loadDefinitionSettlementLayout(signal) : null;
     const layout = depth ?? rooms ?? settlement!;
     const solarLayout = rooms ?? settlement;
     disposers.push(layout.dispose);
-    const container = mountPreview(app, layout.sections, variant);
+    const { container, showTools } = mountPreview(app, layout.sections, variant);
     app.querySelector<HTMLButtonElement>('[data-play]')!.disabled = true;
-    const stage = createStage(container, TUNING, { quality: 'high', antialias: 'smaa' });
+    const stage = attachStage(container, renderer, TUNING,
+      { quality: 'high', antialias: 'smaa' });
     disposers.push(() => stage.dispose());
     stage.canvas.setAttribute('aria-label', '全定义透视场景与当前男玩家');
-    // 资料从内沿看外延；游戏从 +Z 观察，统一映射整个建筑组，保持 X/Y 与深度尺寸。
+    // 定义套件以 +Z 指向背景墙建模；游戏从 +Z 观察，统一映射整个建筑组，保持 X/Y 与深度尺寸。
     layout.root.scale.z = -1;
     stage.scene.add(layout.root);
     const bounds = depth ? depth.bounds : new THREE.Box3().setFromObject(layout.root);
     const size = bounds.getSize(new THREE.Vector3());
-    const depthEnvironment = depth ? createDepthEnvironment(stage) : null;
+    const depthEnvironment = depth ? createDepthEnvironment(stage, entry.sectionId as DepthTheme) : null;
     if (depthEnvironment) disposers.push(() => depthEnvironment.dispose());
     const solarSky = solarLayout ? createCelestialSky() : null;
     if (solarSky) {
@@ -177,6 +155,17 @@ export async function startRoomScenePreview(variant: SceneVariant): Promise<void
     }
     let skyPhase: SkyPhase = 'day';
     const skyButtons = app.querySelectorAll<HTMLButtonElement>('[data-sky]');
+    const layeringButtons = app.querySelectorAll<HTMLButtonElement>('[data-layering]');
+    let layering: DepthLayering = 'deep';
+    const groundSkin = (): void => depth!.setGroundSkin(layering === 'deep' ? groundMaterial(current.id as DepthTheme) : null);
+    const setLayering = (mode: DepthLayering): void => { layering = mode; depthEnvironment!.setLayering(mode); groundSkin(); };
+    // 地面贴图随场景切换，在下面 select(current) 时设置。
+    depthEnvironment?.setLayering(layering);
+    for (const button of layeringButtons) button.addEventListener('click', () => {
+      setLayering(button.dataset.layering as DepthLayering);
+      for (const option of layeringButtons) option.setAttribute('aria-pressed', String(option === button));
+      if (gameplay?.playing) stage.canvas.focus({ preventScroll: true });
+    });
     const solarSlider = app.querySelector<HTMLInputElement>('#solar-direction');
     const solarAuto = app.querySelector<HTMLButtonElement>('[data-solar-auto]');
     const solarOutput = app.querySelector<HTMLOutputElement>('[data-solar-position]');
@@ -226,17 +215,19 @@ export async function startRoomScenePreview(variant: SceneVariant): Promise<void
     controls.maxDistance = size.x * 6;
     controls.minPolarAngle = 0.06;
     controls.maxPolarAngle = Math.PI * 0.78;
-    let current = layout.sections.find(section => section.id === (location.hash.slice(1) || 'room-full')) ?? layout.sections[0]!;
+    let current = layout.sections.find(section => section.id === entry.sectionId)!;
     let framing = current;
     let view: View = depth ? 'angle' : 'front';
     let showingDepth = false;
     let rig: ReturnType<typeof createGrassyRig> | null = null;
     let gameplay: ReturnType<typeof createPerspectiveControls> | null = null;
     const inspection = createDefinitionInspection(layout.root);
-    if (depth) { inspection.setTranslucent(false); inspection.setLines(false); }
+    inspection.setTranslucent(variant !== 'depth');
+    inspection.setLines(variant !== 'depth');
     disposers.push(() => inspection.dispose());
     const viewButtons = app.querySelectorAll<HTMLButtonElement>('[data-view]');
-    const viewAngles = (): readonly [number, number] => view === 'front' ? [0, 0] : view === 'top' ? [0, 78] : depth ? [6, 4] : [22, 24];
+    const viewAngles = (): readonly [number, number] => view === 'front' ? [0, 0] : view === 'top' ? [0, 78]
+      : depth ? [6, 4] : [22, 24];
     const setView = (): void => {
       if (showingDepth) {
         const depthSize = new THREE.Vector3(60, 26, 84);
@@ -250,7 +241,8 @@ export async function startRoomScenePreview(variant: SceneVariant): Promise<void
         return;
       }
       const [yaw, pitch] = viewAngles();
-      const height = Math.max(framing.height + 3, (framing.width + 4) / stage.camera.aspect) * (framing === overview ? 1.12 : 1);
+      const height = Math.max(framing.height + 3, (framing.width + 4) / stage.camera.aspect)
+        * (framing === overview ? 1.12 : 1);
       const distance = height / (2 * Math.tan(THREE.MathUtils.degToRad(stage.camera.fov) / 2));
       const azimuth = THREE.MathUtils.degToRad(yaw);
       const elevation = THREE.MathUtils.degToRad(pitch);
@@ -288,7 +280,6 @@ export async function startRoomScenePreview(variant: SceneVariant): Promise<void
         for (const item of navigation.querySelectorAll('button')) item.setAttribute('aria-pressed', String(item === button));
       });
     };
-    const comparison = installFurnitureComparison(app, stage.scene, disposers);
     const solarTrial = app.querySelector<HTMLElement>('[data-solar-trial]')!;
     const solarLoad = app.querySelector<HTMLOutputElement>('[data-solar-load]')!;
     for (const button of app.querySelectorAll<HTMLButtonElement>('[data-solar-step]')) button.addEventListener('click', () => {
@@ -304,16 +295,16 @@ export async function startRoomScenePreview(variant: SceneVariant): Promise<void
         rooms?.showSection(current.id);
         if (depth) skyPhase = current.id === 'ruins' ? 'night' : 'day';
         depthEnvironment?.select(current.id, skyPhase);
+        if (depth) groundSkin();
         for (const button of skyButtons) {
           button.disabled = current.id === 'cave';
           button.setAttribute('aria-pressed', String(button.dataset.sky === skyPhase));
         }
         for (const input of layerInputs) input.disabled = current.id === 'cave' && (input.dataset.depthLayer === 'sky' || input.dataset.depthLayer === 'clouds');
         showDepthStops();
-        comparison.select(current);
         solarTrial.hidden = !current.solarTrial;
-        history.replaceState(null, '', `${location.pathname}${location.search}#${current.id}`);
-      } else comparison.suspend();
+        if (current.solarTrial) showTools();
+      }
       title.textContent = section.title;
       description.textContent = section.description;
       app.querySelector<HTMLAnchorElement>('[data-definition]')!.href = `./?mode=concepts#${section.id.startsWith('rock-') ? 'natural-rock' : variant === 'depth' ? 'scene-depth-layers' : 'concept-building'}`;
@@ -404,13 +395,17 @@ export async function startRoomScenePreview(variant: SceneVariant): Promise<void
     const resize = new ResizeObserver(() => { stage.setSize(container.clientWidth, container.clientHeight); if (!gameplay?.following) setView(); });
     resize.observe(container);
     disposers.push(() => resize.disconnect());
-    comparison.select(current);
     select(current);
     depthEnvironment?.update(stage.camera, 0);
-    stage.render();
-    disposers.push(disposeGrassyAssets);
-    await loadGrassyAsset('game');
-    if (disposed) return;
+    // 新渲染器没有任何着色器程序：首帧同步编译全部程序会让主线程停十几秒，先异步预热（含隐藏的其他主题），与角色加载并行。
+    context.progress('加载角色', 0, 1);
+    await waitSceneResource(loadGrassyAsset('game'), signal);
+    signal.throwIfAborted();
+    context.progress('加载角色', 1, 1);
+    await yieldScene(signal);
+    context.progress('准备透视着色器');
+    await warmUpStage(stage, [], signal);
+    signal.throwIfAborted();
     rig = createGrassyRig('game', undefined, createCharacterAppearanceStore(window.localStorage).current());
     // 标记角色的实际像素轮廓，只让单向平台与检查线避让，不关闭实体墙的深度测试。
     rig.root.traverse(object => {
@@ -425,17 +420,25 @@ export async function startRoomScenePreview(variant: SceneVariant): Promise<void
     rig.root.position.set(current.playerX, current.playerY, 0);
     animateGrassy(rig, 'idle', 0, 0, null);
     stage.scene.add(rig.root);
-    comparison.attach(rig.root);
+    await compileForStage(stage, rig.root);
+    signal.throwIfAborted();
     gameplay = createPerspectiveControls(app, stage, controls, rig, layout.collision, bounds, current, viewAngles(), solarLayout ? solarLayout.solarPanels : []);
     disposers.push(() => gameplay!.dispose());
     gameplay.select(current);
+    const minimap = settlement ? createPerspectiveMinimap(app.querySelector<HTMLElement>('.room-preview-viewport')!, layout.collision,
+      { minX: bounds.min.x, minY: bounds.min.y, maxX: bounds.max.x, maxY: bounds.max.y }, (x, y) => {
+        // 分区之间的空隙不属于任何分区，保持当前分区高亮。
+        select(layout.sections.find(section => x >= section.x && x < section.x + section.width) ?? current);
+        gameplay!.select({ ...current, playerX: x, playerY: y });
+      }) : null;
+    if (minimap) disposers.push(() => minimap.dispose());
     if (playView) playView.disabled = false;
-    if (depth) { gameplay.observe(); setView(); }
-    document.getElementById('loading')!.hidden = true;
+    gameplay.observe(); setView();
     let previous: number | null = null;
     let time = 0;
-    const draw = (now: number): void => {
-      const dt = previous === null ? 0 : Math.min((now - previous) / 1000, 0.05);
+    const renderFrame = (now: number): void => {
+      if (signal.aborted || disposed) return;
+      const dt = previous === null ? 0 : Math.max(0, Math.min((now - previous) / 1000, 0.05));
       previous = now;
       time += dt;
       if (solarLayout) {
@@ -450,9 +453,10 @@ export async function startRoomScenePreview(variant: SceneVariant): Promise<void
         solarSky!.setSunDirection(sunDirection);
         solarLayout.setSunDirection(sunDirection);
         stage.setSunDirection(sunDirection);
-        solarOutput!.value = Math.abs(solarPosition) < .03 ? '上方' : `${solarPosition < 0 ? '左侧' : '右侧'} ${Math.round(THREE.MathUtils.radToDeg(Math.atan2(Math.abs(sunDirection.x), sunDirection.y)))}°`;
+        solarOutput!.value = Math.abs(sunDirection.x) < .03 ? '上方' : `${sunDirection.x < 0 ? '左侧' : '右侧'} ${Math.round(THREE.MathUtils.radToDeg(Math.atan2(Math.abs(sunDirection.x), sunDirection.y)))}°`;
       }
       gameplay!.update(dt);
+      minimap?.update(rig!.root.position.x, rig!.root.position.y);
       solarLayout?.update(time);
       if (current.solarTrial) {
         const panel = current.solarTrial;
@@ -462,82 +466,12 @@ export async function startRoomScenePreview(variant: SceneVariant): Promise<void
       solarSky?.update(stage.camera);
       depthEnvironment?.update(stage.camera, dt);
       stage.render();
+      depthEnvironment?.renderForeground();
       frame = requestAnimationFrame(draw);
     };
-    frame = requestAnimationFrame(draw);
-  } catch (error) {
-    dispose();
-    throw error;
+    const draw = (now: number): void => {
+      try { renderFrame(now); } catch (error) { context.reportError(error); }
+    };
+    renderFrame(performance.now());
   }
 }
-
-function installFurnitureComparison(app: HTMLElement, scene: THREE.Scene, disposers: Array<() => void>) {
-  const panel = app.querySelector<HTMLElement>('.room-preview-comparison')!;
-  const slider = app.querySelector<HTMLInputElement>('#furniture-player-x')!;
-  const position = app.querySelector<HTMLOutputElement>('[data-player-position]')!;
-  const measurement = app.querySelector<HTMLElement>('[data-player-measure]')!;
-  const ruler = createFurniturePlayerRuler();
-  scene.add(ruler.root);
-  ruler.root.visible = false;
-  disposers.push(() => ruler.dispose());
-  let player: THREE.Group | null = null;
-  let bounds: ReturnType<typeof measureFurniturePlayer> | null = null;
-  let current: SceneSection | null = null;
-  const fade = (root: THREE.Group, opacity: number): void => {
-    root.traverse(node => {
-      if (!(node instanceof THREE.Mesh)) return;
-      const materials = Array.isArray(node.material) ? node.material : [node.material];
-      for (const material of materials) {
-        material.transparent = opacity < 1;
-        material.opacity = opacity;
-        material.depthWrite = opacity === 1;
-      }
-      node.castShadow = opacity === 1;
-    });
-  };
-  const place = (): void => {
-    if (!player || !current) return; // 资源异步加载期间目录仍可使用。
-    const example = current.comparison;
-    player.position.set(example ? Number(slider.value) : current.playerX, current.playerY, 0);
-    player.rotation.y = example ? Math.PI / 2 : -.18;
-    ruler.root.visible = !!example;
-    ruler.root.position.copy(player.position);
-    if (!example) return;
-    position.textContent = `X ${(player.position.x - current.x).toFixed(2)} · 脚底 Y ${current.playerY.toFixed(2)} · 砖块中线 Z 0`;
-    if (example.fadeFurniture) fade(example.fadeFurniture, player.position.x > current.x + 2.6 && player.position.x < current.x + 6.4 ? .2 : 1);
-  };
-  slider.addEventListener('input', place);
-  const select = (section: SceneSection): void => {
-    if (current?.comparison?.fadeFurniture) fade(current.comparison.fadeFurniture, 1);
-    current = section;
-    const example = section.comparison;
-    panel.hidden = !example;
-    if (example) {
-      slider.min = String(example.fromX); slider.max = String(example.toX); slider.value = String(section.playerX);
-      if (bounds) {
-        const low = bounds.lowerMinZ;
-        const high = bounds.lowerMaxZ;
-        measurement.textContent = `待机采样：全身前后包络 ${(bounds.maxZ - bounds.minZ).toFixed(2)} 格；脚底上1格内包络 ${(bounds.lowerMaxZ - bounds.lowerMinZ).toFixed(2)} 格。`
-          + (section.id === 'furniture-half' ? ` 玩家位于砖块中线 Z=0，前半空间 Z=[0,0.5]，下肢包络 Z=[${low.toFixed(2)},${high.toFixed(2)}]，${low >= 0 && high <= .5 ? '此采样位于半格内' : '仍超出半格边界'}。` : '')
-          + ' 包络不等于精确碰撞，行走动画另需验证。';
-      }
-    }
-    place();
-  };
-  return {
-    select,
-    suspend(): void {
-      if (current?.comparison?.fadeFurniture) fade(current.comparison.fadeFurniture, 1);
-      panel.hidden = true;
-      ruler.root.visible = false;
-    },
-    attach(root: THREE.Group): void {
-      player = root;
-      root.rotation.y = Math.PI / 2;
-      bounds = measureFurniturePlayer(root);
-      slider.disabled = false;
-      select(current!);
-    },
-  };
-}
-

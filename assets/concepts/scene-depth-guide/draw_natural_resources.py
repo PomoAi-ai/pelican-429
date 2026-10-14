@@ -8,12 +8,12 @@ OUT = ROOT / 'public/concepts'
 FONT = '/System/Library/Fonts/STHeiti Medium.ttc'
 INK, BLUE, GREEN, GRAY = '#263F4C', '#376D9E', '#53896A', '#B7C6CB'
 ITEMS = [
-    ('grass', '01 地被 / 草丛', 1, .5, .4, -.4, '割短与连根清除分开；再长条件为草案。'),
-    ('flower', '02 花卉 / 草本', 1, 1, .4, -.4, '萌芽 → 长叶 → 开花；花期、产物待定。'),
-    ('shrub', '03 灌木 / 野果丛', 2, 1.5, .8, -.3, '采果保留植株；挂果不等于植株重新长大。'),
-    ('bonsai', '04 盆景 / 盆栽', 1, 2, 1, 0, '容器 + 活植物；深1沿用家具，生长为草案。'),
-    ('tree', '05 树木', 3, 5, 1.4, -.3, '自然再生是已有设计方向；时间与方式未定。'),
-    ('ore', '06 矿脉', 3, 2, 1, 0, '5个矿格位于3×2包围内；有限储量，不再生。'),
+    ('grass', '01 地被 / 草丛', 1, .5, 2.4, -.2, '割短与连根清除分开；再长条件为草案。'),
+    ('flower', '02 花卉 / 草本', 1, 1, .4, -1.2, '萌芽 → 长叶 → 开花；花期、产物待定。'),
+    ('shrub', '03 灌木 / 野果丛', 2, 1.5, .6, .6, '采果保留植株；挂果不等于植株重新长大。'),
+    ('bonsai', '04 盆景 / 盆栽', 1, 2, 1, .5, '容器 + 活植物；深1沿用家具，贴格子背面。'),
+    ('tree', '05 树木', 3, 5, .7, .65, '自然再生是已有设计方向；时间与方式未定。'),
+    ('ore', '06 矿脉', 3, 2, 2, 0, '5个矿格位于3×2包围内；有限储量，不再生。'),
 ]
 EDGES = ((0,1),(1,2),(2,3),(3,0),(4,5),(5,6),(6,7),(7,4),(0,4),(1,5),(2,6),(3,7))
 FACES = ((0,1,2,3),(4,7,6,5),(0,4,5,1),(3,2,6,7),(0,3,7,4),(1,5,6,2))
@@ -38,7 +38,7 @@ def model(kind,w,h,dep,zc):
             for j in range(8):faces.append(([point(i,j),point(i+1,j),point(i+1,j+1),point(i,j+1)],color))
     if kind=='grass':
         for i in range(9):
-            x=.12+i*.095; z=zc+((i%3)-1)*.12; high=.28+(i%3)*.11
+            x=.12+i*.095; z=zc+((i%3)-1)*.5; high=.28+(i%3)*.11
             faces.append(([(x-.035,0,z),(x+.035,0,z),(x+(.10 if i%2 else -.10),high,z+.025)],'#70A365'))
     elif kind=='flower':
         for x,high,z in ((.23,.65,zc-.09),(.55,.84,zc+.03),(.78,.72,zc-.01)):
@@ -50,27 +50,27 @@ def model(kind,w,h,dep,zc):
             ellipsoid(x,high,z-.025,.04,.04,.025,'#D9B853')
     elif kind=='shrub':
         for x in (.6,1,1.4):box(x-.025,0,zc-.025,.05,.85,.05,'#96744F')
-        ellipsoid(1,.94,zc,1,.56,.4,'#779968')
+        ellipsoid(1,.94,zc,1,.56,.3,'#779968')
         for x,y in ((.4,1.02),(.8,1.35),(1.35,.85),(1.55,1.18)):
-            ellipsoid(x,y,zc-.32,.05,.05,.05,'#B76365')
+            ellipsoid(x,y,zc-.24,.05,.05,.05,'#B76365')
     elif kind=='bonsai':
-        box(.15,0,-.35,.7,.45,.7,'#B38E72')
-        for z in (-.38,.32):box(.12,.4,z,.76,.1,.06,'#C7A084')
-        for x in (.12,.82):box(x,.4,-.32,.06,.1,.64,'#C7A084')
-        box(.18,.45,-.32,.64,.015,.64,'#685747')
-        box(.46,.46,-.05,.08,1.25,.1,'#8E7554')
-        ellipsoid(.33,1.1,0,.31,.27,.35,GREEN)
-        ellipsoid(.67,1.45,0,.30,.25,.35,'#6E986A')
-        ellipsoid(.45,1.78,0,.28,.22,.30,'#87A86F')
+        box(.15,0,zc-.35,.7,.45,.7,'#B38E72')
+        for z in (-.38,.32):box(.12,.4,zc+z,.76,.1,.06,'#C7A084')
+        for x in (.12,.82):box(x,.4,zc-.32,.06,.1,.64,'#C7A084')
+        box(.18,.45,zc-.32,.64,.015,.64,'#685747')
+        box(.46,.46,zc-.05,.08,1.25,.1,'#8E7554')
+        ellipsoid(.33,1.1,zc,.31,.27,.35,GREEN)
+        ellipsoid(.67,1.45,zc,.30,.25,.35,'#6E986A')
+        ellipsoid(.45,1.78,zc,.28,.22,.30,'#87A86F')
     elif kind=='tree':
         box(1.3,0,zc-.2,.4,3.3,.4,'#947352')
-        ellipsoid(1.5,3.6,zc,1.5,1.4,.7,'#72936B')
+        ellipsoid(1.5,3.6,zc,1.5,1.4,.35,'#72936B')
     else:
         for x,y in ((0,0),(1,0),(2,0),(0,1),(1,1)):
-            box(x,y,-.5,1,1,1,'#9A9D9A')
+            box(x,y,-1,1,1,2,'#9A9D9A')
             for j in range(3):
                 px=x+.2+j*.26; py=y+.23+((j+x)%3)*.2
-                faces.append(([(px-.09,py,-.501),(px,py+.13,-.501),(px+.1,py+.01,-.501),(px,py-.07,-.501)],'#64AEB0'))
+                faces.append(([(px-.09,py,-1.001),(px,py+.13,-1.001),(px+.1,py+.01,-1.001),(px,py-.07,-1.001)],'#64AEB0'))
     # Catch wrong envelope coordinates without asserting illustration style.
     for vertices,_ in faces:
         for x,y,z in vertices:
@@ -97,7 +97,7 @@ for index,(kind,title,w,h,dep,zc,note) in enumerate(ITEMS):
     cx=30+(index%2)*1190; cy=215+(index//2)*790
     draw.rounded_rectangle((cx,cy,cx+1150,cy+765),18,fill='white',outline='#D6E0E2',width=2)
     text(cx+25,cy+22,title,36,BLUE)
-    text(cx+25,cy+78,f'成熟外观包络 {w:g} × {h:g} × {dep:g} 格' if kind!='ore' else '矿脉包围 3 × 2 × 1；单格 1 × 1 × 1',27)
+    text(cx+25,cy+78,f'成熟外观包络 {w:g} × {h:g} × {dep:g} 格' if kind!='ore' else '矿脉包围 3 × 2 × 2；单格 1 × 1 × 2',27)
     text(cx+150,cy+135,'实体透视',24);text(cx+740,cy+135,'同镜头线框',24)
     faces=model(kind,w,h,dep,zc)
     scale=min(260/w,350/h)
@@ -107,12 +107,12 @@ for index,(kind,title,w,h,dep,zc,note) in enumerate(ITEMS):
             factor=scale*20/(20+dot(v,F))
             return (ox+factor*dot(v,R),cy+390-factor*dot(v,U))
         if kind!='ore':
-            floor=cube(0,-.14,-.5,w,.14,1)
+            floor=cube(0,-.14,-1,w,.14,2)
             for ids in FACES:
                 xy=[project(floor[j]) for j in ids]
                 if not wire:draw.polygon(xy,fill='#E5DED0')
                 draw.line(xy+[xy[0]],fill='#C6BCA9',width=1)
-            for x in range(math.ceil(w)+1):line(project((x,0,-.5)),project((x,0,.5)),'#9CAFA6',1)
+            for x in range(math.ceil(w)+1):line(project((x,0,-1)),project((x,0,1)),'#9CAFA6',1)
         for vertices,color in sorted(faces,key=lambda face:sum(dot(v,F) for v in face[0])/len(face[0]),reverse=True):
             xy=[project(v) for v in vertices]
             if not wire:draw.polygon(xy,fill=color)
@@ -124,34 +124,36 @@ for index,(kind,title,w,h,dep,zc,note) in enumerate(ITEMS):
         text(ox-55,cy+613,'1格标尺',20,BLUE)
         line((ox-scale/2,cy+648),(ox+scale/2,cy+648),BLUE,3)
         line((ox-scale/2,cy+642),(ox-scale/2,cy+654),BLUE,2);line((ox+scale/2,cy+642),(ox+scale/2,cy+654),BLUE,2)
-    text(cx+25,cy+680,f'Z=[{zc-dep/2:+g}, {zc+dep/2:+g}]  ·  '+note,23)
-    text(cx+25,cy+723,'浅色底板只表示承托面；枝叶可伸入预留区。' if kind!='ore' else '岩层中的含矿格；线框中的空位不生成矿格或碰撞。',23,GREEN)
-text(45,2610,'花草、灌木与树根均落在中央实体顶面；盆底必须有支撑。树冠平台、树干碰撞与外观分别定义。',27)
-text(45,2653,'盆景深1沿用家具定义；自然植被深度为本轮草案。矿色为通用示意，不表示阶段1已经支持金属矿。',25,BLUE)
+    # Geometry keeps the camera at −Z internally; labels use the +Z-toward-camera convention.
+    text(cx+25,cy+680,f'Z=[{0-zc-dep/2:+g}, {0-zc+dep/2:+g}]  ·  '+note,23)
+    text(cx+25,cy+723,'浅色底板为深2格子顶面；花草可伸入前沿。' if kind!='ore' else '岩层中的含矿格；线框中的空位不生成矿格或碰撞。',23,GREEN)
+text(45,2610,'花草、灌木与树根均落在格子顶面；盆底必须有支撑。树冠平台、树干碰撞与外观分别定义。',27)
+text(45,2653,'盆景按家具规则深1、贴格子背面；自然植被深度为本轮草案。矿色为通用示意，不表示阶段1已经支持金属矿。',25,BLUE)
 im.save(OUT/'natural-resources-perspective.png')
 
 im=Image.new('RGB',(2400,1430),'#F5F3EC');draw=ImageDraw.Draw(im)
 text(45,30,'植物与矿脉｜统一深度、支撑与生长状态',46)
-text(45,105,'YZ剖面：中央实体深1，两侧各额外0.5；墙厚0.2占外延区。叶冠可伸出，根不能悬空。',29,BLUE)
+text(45,105,'YZ剖面：格子深2，前沿、后沿在格子之外各0.5；墙厚0.2位于后沿。叶冠可伸出，根不能悬空。',29,BLUE)
 # Same unit in Y and Z; height is cropped to emphasize support and root placement.
-s=390; ox=510; oy=775
+s=260; ox=470; oy=775
 p=lambda z,y:(ox+z*s,oy-y*s)
-for lo,hi,color in ((-1,-.5,'#E5EFE3'),(-.5,.5,'#E5EBF0'),(.5,1,'#F2E3CE')):
+for lo,hi,color in ((-1.5,-1,'#E5EFE3'),(-1,1,'#E5EBF0'),(1,1.5,'#F2E3CE')):
     draw.rectangle((*p(lo,1.35),*p(hi,-.3)),fill=color)
-for i in range(-10,11):line(p(i/10,-.3),p(i/10,1.35),'#D1D9D8',1)
-for i in range(-3,14):line(p(-1,i/10),p(1,i/10),'#D1D9D8',1)
-draw.rectangle((*p(-.5,0),*p(.5,-.25)),fill='#BAA184',outline=INK,width=3)
-draw.rectangle((*p(.5,1.35),*p(.7,0)),fill='#B6C4CD',outline=BLUE,width=3)
+for i in range(-15,16):line(p(i/10,-.3),p(i/10,1.35),'#D1D9D8',1)
+for i in range(-3,14):line(p(-1.5,i/10),p(1.5,i/10),'#D1D9D8',1)
+draw.rectangle((*p(-1,0),*p(1,-.25)),fill='#BAA184',outline=INK,width=3)
+draw.rectangle((*p(1,1.35),*p(1.2,0)),fill='#B6C4CD',outline=BLUE,width=3)
 # Tree stem section is cropped; crown interval shown independently above it.
-draw.rectangle((*p(-.5,1.1),*p(-.1,0)),fill='#AD8E62',outline=INK,width=3)
-line(p(-1,1.15),p(.4,1.15),GREEN,5)
-text(140,180,'树冠纵深范围 [−1,+0.4]（树高在图谱中完整展示）',24,GREEN)
-text(385,440,'树干截面',24);text(730,295,'墙',26,BLUE)
-for z,label in ((-1,'−1'),(-.5,'−0.5'),(0,'0'),(.5,'+0.5'),(1,'+1')):text(p(z,0)[0]-20,910,label,23,BLUE)
-text(140,962,'内沿0.5',26,GREEN);text(410,962,'中央1格',26,BLUE);text(765,962,'外延0.5',26,'#A57447')
-text(120,1020,'地板顶面Y=0；根中心Z=−0.3。',26)
-text(120,1065,'树干底径0.4为样例，墙Z=[+0.5,+0.7]仅示例。',24)
-text(120,1110,'两侧预留区没有额外地板，不能当作承托面。',24)
+draw.rectangle((*p(.4,1.1),*p(.9,0)),fill='#AD8E62',outline=INK,width=3)
+line(p(.3,1.15),p(1,1.15),GREEN,5)
+text(140,180,'树冠纵深范围 [−1,−0.3]（树高在图谱中完整展示）',24,GREEN)
+text(470,440,'树干截面',24);text(800,295,'墙',26,BLUE)
+# Geometry keeps the camera at −Z internally; labels use the +Z-toward-camera convention.
+for z,label in ((-1.5,'+1.5'),(-1,'+1'),(0,'0'),(1,'−1'),(1.5,'−1.5')):text(p(z,0)[0]-20,910,label,23,BLUE)
+text(80,962,'前沿0.5',26,GREEN);text(410,962,'格子深2',26,BLUE);text(745,962,'后沿0.5',26,'#A57447')
+text(120,1020,'地板顶面Y=0；树根中心Z=−0.65。',26)
+text(120,1065,'树干Z=[−0.9,−0.4]；墙Z=[−1.2,−1]在后沿。',24)
+text(120,1110,'前沿、后沿没有地板，不能当作承托面。',24)
 text(1120,225,'生长状态（设计草案）',34,BLUE)
 for y,label,note in (
     (300,'草花：萌芽 → 成熟 → 割短/采花','再长与再开花条件未定；连根移除另外定义。'),

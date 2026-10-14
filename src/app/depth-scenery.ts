@@ -5,7 +5,7 @@ import type { DepthLayerId } from './definition-depth-layout.ts';
 
 export type DepthTheme = 'valley' | 'lake' | 'coast' | 'buildings' | 'ruins' | 'cave';
 
-const terrainTextures = generateTileTextures(128);
+export const terrainTextures = generateTileTextures(128);
 
 function blocks(kit: DefinitionKit, x: number, y: number, width: number, height: number): void {
   for (let dx = 0; dx < width; dx++) for (let dy = 0; dy < height; dy++) kit.solid('A', x + dx, y + dy);
@@ -20,9 +20,9 @@ function land(kit: DefinitionKit, left: number, bottom: number, runs: readonly (
     const next = column + 1 === heights.length ? top : heights[column + 1]!;
     const floor = next < top ? top - 1 : top;
     const x = left + column;
-    for (let y = bottom; y < floor; y++) cells.push({ x, y, shape: 'A', material: 'stone', ore: false });
-    if (next > top) cells.push({ x, y: top, shape: 'D', material: 'stone', ore: false });
-    else if (next < top) cells.push({ x, y: top - 1, shape: 'E', material: 'stone', ore: false });
+    for (let y = bottom; y < floor; y++) cells.push({ x, y, shape: 'A', layers: [{ shape: 'A', material: 'stone', ore: false }] });
+    if (next > top) cells.push({ x, y: top, shape: 'D', layers: [{ shape: 'D', material: 'stone', ore: false }] });
+    else if (next < top) cells.push({ x, y: top - 1, shape: 'E', layers: [{ shape: 'E', material: 'stone', ore: false }] });
   }
   kit.terrain(cells, terrainTextures);
 }
@@ -75,12 +75,17 @@ function bridge(kit: DefinitionKit, left: number, base: number, width: number, t
   }
 }
 
+/** 近景与景深方案的玩法地面共用同一种材质。 */
+export function groundMaterial(theme: DepthTheme): 'dirt' | 'stone' {
+  return theme === 'valley' || theme === 'lake' ? 'dirt' : 'stone';
+}
+
 function foreground(kit: DefinitionKit, theme: DepthTheme): void {
   const cells: RockTerrainCell[] = [];
-  const material = theme === 'valley' || theme === 'lake' ? 'dirt' : 'stone';
+  const material = groundMaterial(theme);
   for (const [left, width] of [[2, 8], [18, 12], [36, 10]] as const) {
     for (let x = left; x < left + width; x++) for (let y = -1; y < 1; y++) {
-      cells.push({ x, y, shape: 'A', material, ore: false });
+      cells.push({ x, y, shape: 'A', layers: [{ shape: 'A', material, ore: false }] });
     }
   }
   kit.terrain(cells, terrainTextures);
@@ -114,7 +119,7 @@ function lake(kit: DefinitionKit, layer: DepthLayerId): void {
     land(kit, -6, -3, [[8, 1], [8, 2], [2, 1], [2, 0]]);
     land(kit, 34, -3, [[2, 0], [2, 1], [8, 2], [4, 1]]);
     house(kit, -5, 1);
-    for (let x = 33; x < 40; x++) kit.platform('full', .75, 1, x);
+    for (let x = 33; x < 40; x++) kit.platform('full', 1, x);
   } else if (layer === 'background-far') {
     land(kit, -8, -3, [[4, 0], [16, 1], [2, 0]]);
     land(kit, 36, -3, [[2, 0], [2, 1], [10, 2], [4, 1]]);
@@ -135,7 +140,7 @@ function coast(kit: DefinitionKit, layer: DepthLayerId): void {
     land(kit, -8, -3, [[4, 0], [16, 1], [2, 0]]);
     land(kit, 36, -3, [[14, 2], [2, 1]]);
     house(kit, -4, 1); house(kit, 37, 2);
-    for (let x = 9; x < 14; x++) kit.platform('full', .75, .5, x);
+    for (let x = 9; x < 14; x++) kit.platform('full', .5, x);
   } else if (layer === 'distance-near') {
     land(kit, -15, -2, [[6, 0], [14, 1], [5, 2], [5, 1], [4, 0]]);
     house(kit, -4, 1, 3);

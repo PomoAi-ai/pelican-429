@@ -4,6 +4,7 @@ import type { DefinitionCollider } from '../physics/definition-collision.ts';
 import { createFluidMap, FLUID_FULL } from '../world/fluid-map.ts';
 import { createTileMap } from '../world/tile-map.ts';
 import { DEFAULT_TILES, TILE_STONE } from '../world/tile-types.ts';
+import { DEFINITION_DEPTH } from '../config/definition-kit.ts';
 import { createDefinitionKit } from './definition-kit.ts';
 import { createWaterView, WATER_FRONT_Z, WATER_TOP_BACK_Z } from './water-view.ts';
 
@@ -52,10 +53,10 @@ export function createDefinitionLiquid(): DefinitionLiquid {
       for (let x = 1; x < 5; x++) fluid.set(x, y, amount);
     }
     const water = createWaterView(fluid, { palette, marginChunks: 0 });
-    // 世界水面含后沿延伸；这里只把其完整 Z 包络装配到实体的 1 格深内。
+    // 世界水面含后沿延伸；这里只把其完整 Z 包络装配到格子深度内。
     const waterDepth = WATER_FRONT_Z - WATER_TOP_BACK_Z;
-    water.root.scale.z = -1 / waterDepth;
-    water.root.position.set(offset, 0, WATER_FRONT_Z / waterDepth - .5);
+    water.root.scale.z = -DEFINITION_DEPTH.tile / waterDepth;
+    water.root.position.set(offset, 0, DEFINITION_DEPTH.tile * (WATER_FRONT_Z / waterDepth - .5));
     root.add(water.root);
     water.update(view, 0);
     return { water, fluid };

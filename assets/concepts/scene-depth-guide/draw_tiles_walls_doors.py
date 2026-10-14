@@ -68,7 +68,7 @@ def box(x, y, w=1, h=1, back=-1, front=.5):
     face([(x,y,front),(x+w,y,front),(x+w,y+h,front),(x,y+h,front)], '#D5BD9B')
 
 text(60, 32, '横版空间｜正面投影、构件厚度与门净空', 52)
-text(62, 105, '当前实现核对图 · 主角 3.3 头身 · X 左右 / Y 上下 / Z 视觉纵深 · 未定位置不写成最终规范', 28, MUTED)
+text(62, 105, '当前实现核对图 · 玩家角色 3.3 头身 · X 左右 / Y 上下 / Z 视觉纵深 · 未定位置不写成最终规范', 28, MUTED)
 panel((60,170,2340,855))
 text(90,195,'A  同一地块：侧视标深度，正视看效果',37)
 text(90,250,'距离 30 格 / FOV 30°；下图为同投影局部放大，场景摆放与色块仅作尺度示意。',27,MUTED)
@@ -95,7 +95,7 @@ for n in range(4):
     yy=floor-n*UNIT
     d.line((1028,yy,1048,yy),fill=MUTED,width=2)
     text(972,yy-14,str(n),23,MUTED)
-text(1080,294,'主角侧面原图',24)
+text(1080,294,'玩家角色侧面原图',24)
 arrow((1250,620),(1380,620),ORANGE)
 text(1270,570,'沿 X 移动',24,ORANGE)
 # Equal-scale YZ side view makes physical depth explicit without exaggerating the frontal projection.
@@ -138,7 +138,7 @@ for z in (-1,-.5,0,.5):
     text(x-27,1020,f'{z:g}',25,MUTED)
 arrow((zx(-1.1),1060),(zx(.73),1060),MUTED,2)
 rows=[('自然地形',-1,.5,'#B3CC91','世界 Z；深 1.5'),
-      ('建筑实心格',-.45,.45,'#A5C0DC','局部 Z；深 0.9'),
+      ('建筑格',-.45,.45,'#A5C0DC','局部 Z；深 0.9'),
       ('建筑墙板',-.07,.07,'#CBD4DC','局部 Z；厚 0.14'),
       ('门 Z 跨度',-.7,.7,'#91B8CA','局部 Z；深 1.4')]
 for i,(name,lo,hi,color,note) in enumerate(rows):
@@ -193,7 +193,7 @@ panel((60,1670,2340,1840))
 text(90,1696,'使用边界',30)
 text(290,1700,'A 看真实投影关系；B 只比厚度；C 检查方向与通行净空。',29)
 text(290,1755,'当前实现数值 ≠ 最终统一规范。人物原图不改造型；游戏尺寸与玩法参数未改。',27,MUTED)
-text(65,1855,'依据：tile-geometry · building-kit · cave-wall-view · camera-rig · 主角 right-v1.png ｜ 本地 Python 绘制',24,MUTED)
+text(65,1855,'依据：tile-geometry · building-kit · cave-wall-view · camera-rig · 玩家角色 right-v1.png ｜ 本地 Python 绘制',24,MUTED)
 
 # Real projection checks: off-axis depth lines intersect the principal point and recede in size.
 assert project(0,CAM_Y,-1)==project(0,CAM_Y,.5)==(CX,CY)

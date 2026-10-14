@@ -25,7 +25,7 @@ def dim(a,b,label,pos,c=BLUE):
  text(*pos,label,24,c)
 text(55,30,'层间组合透视｜常规：上半砖、整砖 · 特殊：下半砖接坡',48)
 text(58,104,'同一世界方格、同一透视镜头；用已有形态解决衔接，背景墙不整体错格，门不必悬空。',29,BLUE)
-text(58,155,'形态索引：A整砖 · B下半砖 · C上半砖 · K/L左右半砖 · H缓坡高段（原分级为选做）。实体深1，墙厚0.2。',27)
+text(58,155,'形态索引：A整砖 · B下半砖 · C上半砖 · K/L左右半砖 · H缓坡高段（原分级为选做）。格子实体深2，墙厚0.2在后沿。',27)
 cases=[('① 整砖 A 楼板',5,6),('② 上半砖 C 楼板',5.5,6),('③ 下半砖 B ＋ 缓坡 H',5,5.5)]
 yaw=math.radians(15);pitch=math.radians(6)
 cy,sy=math.cos(yaw),math.sin(yaw);cp,sp=math.cos(pitch),math.sin(pitch)
@@ -61,44 +61,44 @@ for i,(name,bottom,top) in enumerate(cases):
  for x in range(1,10):
   for y in range(11):
    if x in (7,8) and y in (2,3,8,9):continue
-   box(x,y,.5,1,1,.2,WALL)
+   box(x,y,1,1,1,.2,WALL)
  for wy in (2,8):
-  box(7,wy,.61,2,2,.015,'#AED3E1')
-  for xx in (7,8.92):box(xx,wy,.48,.08,2,.23,INK)
-  for yy in (wy,wy+1.92):box(7,yy,.48,2,.08,.23,INK)
-  box(7.96,wy,.47,.08,2,.05,INK);box(7,wy+.96,.47,2,.08,.05,INK)
+  box(7,wy,1.11,2,2,.015,'#AED3E1')
+  for xx in (7,8.92):box(xx,wy,.98,.08,2,.23,INK)
+  for yy in (wy,wy+1.92):box(7,yy,.98,2,.08,.23,INK)
+  box(7.96,wy,.97,.08,2,.05,INK);box(7,wy+.96,.97,2,.08,.05,INK)
  # Whole K/L side half-bricks, with door components occupying their own cells.
  for y in range(11):
-  box(10,y,-.5,.5,1,1,SOLID)
-  if y not in (0,1,2,3,6,7,8,9):box(.5,y,-.5,.5,1,1,SOLID)
+  box(10,y,-1,.5,1,2,SOLID)
+  if y not in (0,1,2,3,6,7,8,9):box(.5,y,-1,.5,1,2,SOLID)
  for x in range(11):
-  box(x,-.5,-.5,1,.5,1,SOLID)
-  box(x,11,-.5,1,.5,1,SOLID)
+  box(x,-.5,-1,1,.5,2,SOLID)
+  box(x,11,-1,1,.5,2,SOLID)
  for x in range(1,10):
   if i==2 and x==1:
    # H occupies this cell by itself; do not stack a ramp over a half brick.
-   prism([(1,5),(2,5),(2,5.5),(1,6)],-.5,1,'#DBA35F')
-  else:box(x,bottom,-.5,1,top-bottom,1,SOLID)
+   prism([(1,5),(2,5),(2,5.5),(1,6)],-1,2,'#DBA35F')
+  else:box(x,bottom,-1,1,top-bottom,2,SOLID)
  for base in (0,6):
-  box(.5,base+3,-.5,.5,1,1,'#BD9465')
-  for z in (-.5,.38):box(.55,base,z,.12,3,.12,INK)
+  box(.5,base+3,-1,.5,1,2,'#BD9465')
+  for z in (-1,.88):box(.55,base,z,.12,3,.12,INK)
  for ceiling in (bottom,11):
-  box(5.34,ceiling-.08,-.14,.32,.08,.28,INK)
-  box(5.475,ceiling-.55,-.025,.05,.47,.05,INK)
-  prism([(5,ceiling-1),(6,ceiling-1),(5.72,ceiling-.53),(5.28,ceiling-.53)],-.18,.36,'#BC9565')
+  box(5.34,ceiling-.08,.36,.32,.08,.28,INK)
+  box(5.475,ceiling-.55,.475,.05,.47,.05,INK)
+  prism([(5,ceiling-1),(6,ceiling-1),(5.72,ceiling-.53),(5.28,ceiling-.53)],.32,.36,'#BC9565')
  # Furniture rests on actual support surfaces, independent of rear-wall tile lines.
- box(6.4,top,-.16,3,.42,.55,'#BC9565');box(6.4,top+.42,-.18,3,.28,.6,'#5A839E')
- for x in (6.5,9.15):box(x,0,-.1,.15,1.3,.25,INK)
- box(6.4,1.3,-.16,3,.15,.55,'#BC9565')
+ box(6.4,top,.45,3,.42,.55,'#BC9565');box(6.4,top+.42,.4,3,.28,.6,'#5A839E')
+ for x in (6.5,9.15):box(x,0,.6,.15,1.3,.25,INK)
+ box(6.4,1.3,.45,3,.15,.55,'#BC9565')
  for _,v,c in sorted(faces,key=lambda f:f[0],reverse=True):
   pts=[p3(t) for t in v];d.polygon(pts,fill=c);d.line(pts+pts[:1],fill='#71868E',width=2)
  # Dimension endpoints are projected from the same world coordinates as the geometry.
  dim(p3((11.3,0,0)),p3((11.3,bottom,0)),f'{bottom:g}',(left+845,980))
  dim(p3((11.3,top,0)),p3((11.3,11,0)),f'{11-top:g}',(left+845,590))
- a,b=p3((1,top,-.51)),p3((10,top,-.51));dashed(a,b,ORANGE,3)
+ a,b=p3((1,top,-1.01)),p3((10,top,-1.01));dashed(a,b,ORANGE,3)
  text(left+25,1215,f'楼板Y={bottom:g}～{top:g}；主体落脚Y={top:g}',27,BLUE)
  if i==2:
-  line((left+58,864),p3((1.5,5.75,-.51)),ORANGE,2)
+  line((left+58,864),p3((1.5,5.75,-1.01)),ORANGE,2)
   text(left+22,825,'H 接门口',23,ORANGE)
   text(left+24,875,'升高0.5',22,ORANGE)
  notes=[
@@ -120,23 +120,23 @@ for i,(name,bottom,top) in enumerate(cases):
    n=(k+1)%len(poly)
    line(pd(near[k]),pd(near[n]),c,2);line(pd(far[k]),pd(far[n]),c,2);line(pd(near[k]),pd(far[k]),c,2)
  for x in range(3):
-  for y in (4,5,6):wire([(x,y),(x+1,y),(x+1,y+1),(x,y+1)],.5,.2,GREEN)
+  for y in (4,5,6):wire([(x,y),(x+1,y),(x+1,y+1),(x,y+1)],1,.2,GREEN)
  for x in range(3):
   if i==2 and x==0:poly=[(0,5),(1,5),(1,5.5),(0,6)]
   else:poly=[(x,bottom),(x+1,bottom),(x+1,top),(x,top)]
-  wire(poly,-.5,1,ORANGE if i==2 and x==0 else BLUE,True)
+  wire(poly,-1,2,ORANGE if i==2 and x==0 else BLUE,True)
  if i==2:
   text(left+75,1555,'门口6 → H → B地面5.5',25,ORANGE)
-  for xx,label in ((.5,'H'),(1.5,'B'),(2.5,'B')):text(*pd((xx-.1,5.15,-.51)),label,25,BLUE)
- dim(pd((3.4,bottom,-.5)),pd((3.4,top,-.5)),f'高{top-bottom:g}',(left+802,1800))
- dim(pd((0,4.1,-.5)),pd((0,4.1,.5)),'深1',(left+150,2010))
- text(left+28,2050,'蓝：实体格  绿：完整背景墙  橙：缓坡衔接',23)
+  for xx,label in ((.5,'H'),(1.5,'B'),(2.5,'B')):text(*pd((xx-.1,5.15,-1.01)),label,25,BLUE)
+ dim(pd((3.4,bottom,-1)),pd((3.4,top,-1)),f'高{top-bottom:g}',(left+802,1800))
+ dim(pd((0,4.1,-1)),pd((0,4.1,1)),'深2',(left+150,2010))
+ text(left+28,2050,'蓝：建筑格  绿：完整背景墙  橙：缓坡衔接',23)
  assert math.isclose(bottom+(top-bottom)+(11-top),11)
  if i==2:
   h_top=lambda x:6-.5*x
   assert h_top(0)==6 and h_top(1)==top
  # All schemes retain disjoint solid and background depth intervals.
- assert -.5+1==.5 and .5+.2<=1
+ assert -1+2==1 and 1+.2<=1.5
 text(58,2150,'常规楼板采用上半砖或整砖，落脚顶面同为Y=6；下半砖接缓坡保留作特殊组合，不作为常规层间做法。',29,BLUE)
 im.save(OUT)
 print(f'Saved {OUT}; slab boundaries and H-to-B seam checks passed.')

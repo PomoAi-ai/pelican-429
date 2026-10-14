@@ -2,7 +2,6 @@ import type { Texture } from 'three';
 import { loadInteriorBackgroundTexture } from '../render/free-world-interior-textures.ts';
 import { CHARACTER_CATALOG, CHARACTER_HISTORY_CATALOG } from '../config/showcase.ts';
 import type { ShowcaseCard } from '../config/showcase.ts';
-import { RESOURCE_CATALOG, LAB_CATALOG } from '../render/resource-catalog.ts';
 import { TUNING, validateTuning } from '../config/tuning.ts';
 import { createShowcaseRenderer } from '../render/showcase-renderer.ts';
 import { createShowcaseModel } from '../ui/showcase-model.ts';
@@ -18,31 +17,29 @@ import { disposeNpcAssets } from '../render/npc/npc-rig.ts';
 import { startCharacterStage } from './character-stage-app.ts';
 import { CHARACTER_STAGE_PARAMS, readCharacterStageLocation } from '../ui/character-stage-location.ts';
 
-export async function startShowcase(mode: 'showcase' | 'resources' | 'lab'): Promise<void> {
+export async function startShowcase(mode: 'showcase' | 'resources' | 'lab', reportError: (error: unknown) => void): Promise<void> {
+  if (mode === 'resources' || mode === 'lab') {
+    const { startSceneWorkspace } = await import('./scene-workspace.ts');
+    await startSceneWorkspace(reportError);
+    return;
+  }
   validateTuning(TUNING);
   document.body.classList.add('showcase-mode');
   const params = new URLSearchParams(location.search);
-  if (mode === 'resources' && params.has('scene')) {
-    const scene = params.get('scene');
-    if (scene !== 'room' && scene !== 'settlement' && scene !== 'depth') throw new Error(`未知资源场景：${scene}`);
-    const { startRoomScenePreview } = await import('./room-scene-preview.ts');
-    await startRoomScenePreview(scene);
-    return;
-  }
   const library = params.get('library');
   if (mode === 'showcase' && library !== null && library !== 'history') throw new Error(`未知角色资料库：${library}`);
   const historicalDemo = CHARACTER_HISTORY_CATALOG.demos!.some((demo) => demo.id === params.get('demo'));
   const isHistory = mode === 'showcase' && (library === 'history' || historicalDemo);
   if (isHistory) { params.set('library', 'history'); history.replaceState(null, '', `${location.pathname}?${params}`); }
-  const catalog = mode === 'lab' ? LAB_CATALOG : mode === 'resources' ? RESOURCE_CATALOG : isHistory ? CHARACTER_HISTORY_CATALOG : CHARACTER_CATALOG;
+  const catalog = isHistory ? CHARACTER_HISTORY_CATALOG : CHARACTER_CATALOG;
   document.title = `${catalog.title} · Pelican 429`;
   const app = document.getElementById('app')!;
   const loading = document.getElementById('loading')!;
   const model = createShowcaseModel(catalog);
   const stageLocation = mode === 'showcase' && !isHistory ? readCharacterStageLocation(params, catalog) : null;
   if (mode === 'showcase') { model.clear(); model.selectActor('human', true); }
-  if (mode === 'lab' || mode === 'resources' || (mode === 'showcase' && params.has('demo'))) {
-    const demoId = params.get('demo') ?? (mode === 'resources' ? 'building-kit' : 'compositions');
+  if (params.has('demo')) {
+    const demoId = params.get('demo')!;
     const demo = catalog.demos!.find((item) => item.id === demoId);
     if (!demo) throw new Error(`未知的场景功能演示：${demoId}`);
     model.showDemo(demo);

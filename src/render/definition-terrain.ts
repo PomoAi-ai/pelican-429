@@ -1,11 +1,11 @@
 import * as THREE from 'three';
-import { TILE_SHAPE_DEFINITIONS } from '../config/definition-kit.ts';
-import type { RockTerrainCell } from '../config/rock-terrain.ts';
+import { DEFINITION_DEPTH, TILE_SHAPE_DEFINITIONS } from '../config/definition-kit.ts';
+import type { RockTerrainCell, RockTerrainLayer } from '../config/rock-terrain.ts';
 import { crystalGeometry } from './cave-geometry.ts';
 import { createCaveDecorMaterial } from './cave-decor-view.ts';
 import { tileLayerIndex, TILE_TEXTURE_PERIOD, type TileTextureData } from './tile-textures.ts';
 
-/** 共享地形纹理适配定义轮廓；不使用旧地形深1.5的几何。 */
+/** 共享地形纹理适配定义轮廓；土与岩层都居中占满格子深度。 */
 export function createDefinitionTerrain(cells: readonly RockTerrainCell[], data: TileTextureData) {
   const root = new THREE.Group();
   const textures: THREE.DataTexture[] = [];
@@ -24,7 +24,7 @@ export function createDefinitionTerrain(cells: readonly RockTerrainCell[], data:
     const material = new THREE.MeshStandardMaterial({ map: texture, roughness: .95 });
     material.name = `definition-${kind}`;
     return [kind, material];
-  })) as Record<RockTerrainCell['material'], THREE.MeshStandardMaterial>;
+  })) as Record<RockTerrainLayer['material'], THREE.MeshStandardMaterial>;
   const oreMaterial = createCaveDecorMaterial({ value: 0 }, 'definition-ore');
   const oreGeometry = crystalGeometry('cyan', 0, false);
   oreGeometry.computeBoundingBox();
@@ -36,17 +36,21 @@ export function createDefinitionTerrain(cells: readonly RockTerrainCell[], data:
   geometries.push(oreGeometry);
   const mineral = (x: number, y: number, width: number, height: number): void => {
     const mesh = new THREE.Mesh(oreGeometry, oreMaterial);
-    // 露头只位于前暴露面，最外沿−0.53；矿格共享面不额外贴矿。
-    mesh.position.set(x, y, -.51);
+    // 矿皮随宿主前表面移动，露出0.03；矿格共享面不额外贴矿。
+    mesh.position.set(x, y, -DEFINITION_DEPTH.tile / 2 - .01);
     mesh.scale.set(width, height, .04);
     root.add(mesh);
   };
-  const oreCells = new Set(cells.filter(cell => cell.ore).map(cell => `${cell.x},${cell.y}`));
-  for (const cell of cells) {
-    const points = TILE_SHAPE_DEFINITIONS.find(shape => shape.id === cell.shape)!.points;
-    const geometry = new THREE.ExtrudeGeometry(new THREE.Shape(points.map(([x, y]) => new THREE.Vector2(x, y))),
-      { depth: 1, bevelEnabled: false, steps: 1 });
-    geometry.translate(cell.x, cell.y, -.5);
+  const oreCells = new Set(cells.filter(cell => cell.layers.some(layer => layer.ore)).map(cell => `${cell.x},${cell.y}`));
+  for (const cell of cells) for (const layer of cell.layers) {
+    const points = layer.points ?? TILE_SHAPE_DEFINITIONS.find(shape => shape.id === layer.shape)!.points;
+    const depth = DEFINITION_DEPTH.tile;
+    const shape = new THREE.Shape(points.map(([x, y]) => new THREE.Vector2(x, y)));
+    if (layer.holes) for (const hole of layer.holes) {
+      shape.holes.push(new THREE.Path(hole.map(([x, y]) => new THREE.Vector2(x, y))));
+    }
+    const geometry = new THREE.ExtrudeGeometry(shape, { depth, bevelEnabled: false, steps: 1 });
+    geometry.translate(cell.x, cell.y, -depth / 2);
     const positions = geometry.getAttribute('position');
     const normals = geometry.getAttribute('normal');
     const uv = geometry.getAttribute('uv');
@@ -57,10 +61,10 @@ export function createDefinitionTerrain(cells: readonly RockTerrainCell[], data:
       uv.setXY(i, (front || top ? x : z) / TILE_TEXTURE_PERIOD, (front || !top ? y : z) / TILE_TEXTURE_PERIOD);
     }
     geometries.push(geometry);
-    const mesh = new THREE.Mesh(geometry, materials[cell.material]);
+    const mesh = new THREE.Mesh(geometry, materials[layer.material]);
     mesh.castShadow = mesh.receiveShadow = true;
     root.add(mesh);
-    if (cell.ore) {
+    if (layer.ore) {
       mineral(cell.x + .5, cell.y + .5, .64, .64);
       if (oreCells.has(`${cell.x + 1},${cell.y}`)) mineral(cell.x + 1, cell.y + .5, 1, .18);
       if (oreCells.has(`${cell.x},${cell.y + 1}`)) mineral(cell.x + .5, cell.y + 1, .18, 1);

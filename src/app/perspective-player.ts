@@ -10,7 +10,7 @@ import { createPelicanEntity, type Entity } from '../entities/entity.ts';
 import { humanOverloadHitSource } from '../entities/human-combat.ts';
 import { resolvePelicanState, updatePelican, type PelicanInput } from '../entities/pelican-controller.ts';
 import { createProjectileEntity, stepProjectile } from '../entities/projectile.ts';
-import { savePrev } from '../physics/body.ts';
+import { savePrev, type Body } from '../physics/body.ts';
 import { moveDefinitionBody, standingOnDefinitionPlatform, type DefinitionCollision } from '../physics/definition-collision.ts';
 import { stepSolarPanels, type SolarPanelState } from '../physics/solar-panel.ts';
 import { createTileMap } from '../world/tile-map.ts';
@@ -19,7 +19,8 @@ import { collectProjectileRequests } from '../sim/weapon-system.ts';
 
 /** 复用游戏角色控制器；定义场的非整格轮廓交给同源多边形碰撞。 */
 export function createPerspectivePlayer(collision: DefinitionCollision, spawn: Vec2, bounds: { width: number; height: number },
-  solarPanels: readonly SolarPanelState[] = []) {
+  solarPanels: readonly SolarPanelState[] = [], unlimitedFlight = true,
+  forces: { applyForce?: (body: Body, dt: number) => void; airWind?: (body: Body) => number } = {}) {
   const controllerMap = createTileMap(Math.ceil(bounds.width), Math.ceil(bounds.height), DEFAULT_TILES);
   // 检视空间没有人工边墙和限高；人物与弹体均由真实定义轮廓处理碰撞。
   const flightMap = { ...controllerMap, height: Infinity, collisionAt: () => 'none' as const };
@@ -51,14 +52,15 @@ export function createPerspectivePlayer(collision: DefinitionCollision, spawn: V
       updatePelican(entity, {
         ...input, transformPressed: false,
         jumpPressed: input.jumpPressed && !dropping,
-      }, flightMap, TUNING, TUNING.sim.step, null, 0, rideProbe);
-      player.flightTicks = player.flightMaxTicks;
+      }, flightMap, TUNING, TUNING.sim.step, null, forces.airWind ? forces.airWind(body) : 0, rideProbe);
+      if (unlimitedFlight) player.flightTicks = player.flightMaxTicks;
       if (dropping && player.ride.mode !== 'mounting') {
         body.dropThroughTicks = TUNING.player.dropThroughTicks;
         body.onGround = false;
         player.flightNeedsRepress = true;
         player.coyoteTicks = player.jumpBufferTicks = 0;
       }
+      forces.applyForce?.(body, TUNING.sim.step);
       stepSolarPanels(solarPanels, body, TUNING.sim.step);
       moveDefinitionBody(body, collision, TUNING.sim.step);
       resolvePelicanRide(entity, rideProbe, TUNING);

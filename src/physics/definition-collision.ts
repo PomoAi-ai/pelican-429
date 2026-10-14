@@ -70,10 +70,10 @@ function support(b: Body, geometry: DefinitionCollision, low: number, high: numb
     const range = definitionColliderSection(solid, 0, b.x - b.halfWidth + EPS, b.x + b.halfWidth - EPS);
     if (range !== null) accept(range[1]);
   }
-  if (b.dropThroughTicks === 0) {
-    for (const platform of geometry.platforms) {
-      if (b.x + b.halfWidth > platform.left + EPS && b.x - b.halfWidth < platform.right - EPS) accept(platform.top);
-    }
+  // 下穿只放过起跳那层：叠在下方的平台（如平台上的椅面下面）仍要接住人物。
+  for (const platform of geometry.platforms) {
+    if (b.dropThroughTicks > 0 && platform.top >= b.y - EPS) continue;
+    if (b.x + b.halfWidth > platform.left + EPS && b.x - b.halfWidth < platform.right - EPS) accept(platform.top);
   }
   return top;
 }
@@ -122,6 +122,8 @@ export function moveDefinitionBody(b: Body, geometry: DefinitionCollision, dt: n
         b.y = top;
         b.vy = 0;
         b.onGround = true;
+        // 落到下一层就结束下穿，否则下一步会把脚下这层也当作起跳层放过。
+        b.dropThroughTicks = 0;
       }
     }
   }

@@ -98,3 +98,11 @@ natural-attachments-space.png（2400×2200）、natural-flora-space.png（2400×
 修正大砖面按整面排序造成的错误遮挡，natural_depth_raster.py 对枝叶和宿主逐像素比较深度；叶片补接叶柄，垂藤根部接到真实上棱。修剪保留成熟植株的上段枝叶位置，仅截断下段；悬崖盆景取消叶顶强行削平，垂枝树补齐冠内至垂枝挂点的木质连接。
 新增 natural-drooping-flower-states.png、natural-drooping-bonsai-states.png、natural-drooping-tree-states.png（均2400×2850），分别6、5、6阶段；与垂藤4阶段共21个下垂状态。绘图使用 draw_natural_space.py 与 draw_drooping_states.py，同类共用透视镜头、比例与支承物，尺寸取实际几何包络。
 检查：遮挡前后顺序、宿主大面遮挡、修剪保留叶片、实际包络与承托台避让自检通过；新图已逐张目视复核，独立定义与页面快照同步。仅透视制图与资料，未运行游戏测试、typecheck或build，未提交或推送。
+
+2026-10-10 树木灌木向里摆放与格子底面悬生补充：
+树/灌木根中心固定Z=+0.1，前侧Z=[−0.5,−0.25]留空；树冠深0.7、灌木冠深0.6，垂枝树同步后置。草仍覆盖整格，树根口移到Z=[−0.15,+0.35]。新增natural-plant-rear-clearance.png（2400×2050），源draw_plant_clearance.py；同步各阶段、树木组合及灌木透视。此0.25为植物排除区，不作为人物厚度或动作已经验收的结论。
+新增natural-underside-forms.png和natural-underside-states.png（2400×2280），源draw_natural_underside.py。仰视展示真实底面Y=-1内部两排六个根点；苔须、垂藤、垂花三形及藤叶萌芽/生长/成熟/修剪四状态。全部本地Pillow几何制图，无外部素材。
+检查：状态包络、树/灌木前侧排除区、底面根点接触与修剪原位保留自检通过；输出图已目视复核。资料任务未运行游戏测试/typecheck/build，未修改运行时、未提交或推送。
+
+2026-10-10 坐标与术语统一（按 docs/core-coordinates.md、docs/core-glossary.md）：
+全部制图标注改为 +Z 朝镜头：旧 Z 值 z→−z、区间 [a,b]→[−b,−a]；内沿→前延预留、外延→后延预留；单向/跳跃/落脚/悬浮平台→平台；主角→玩家角色；实心格→地形格；坡形改用右升/左升命名。自然资源、岩石脚本内部几何仍以 −Z 为镜头侧，只在输出文字取反；building-depth.png 改几何，墙移到后延预留 Z=[−0.7,−0.5]、离镜头最远。本条之前的记录保留旧坐标写法，按 core-coordinates.md 第 4 节换算。标注“现行游戏/当前实现”的数值（自然砖 Z=[−1,+0.5]、远景 −121、洞壁 −1.01 等）未翻转。

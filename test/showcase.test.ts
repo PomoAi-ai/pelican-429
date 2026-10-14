@@ -614,3 +614,57 @@ test('鱼类对比可打开角色卡片，各品种创建对应的真实游动�
     again.dispose();
   }
 });
+
+test('植物组合宿主承托树根，并为底面生长留下实际空气空间', () => {
+  const model = createShowcaseModel(LAB_CATALOG);
+  model.showDemo(LAB_CATALOG.demos!.find((demo) => demo.id === 'plants')!);
+  for (const card of model.cards) {
+    const scenario = createResourceScenario(card);
+    const { map, trees } = scenario.world.level;
+    assert.equal(map.collisionAt(24, scenario.groundY - 1), 'solid', `${card.entryId} 的植物宿主应存在`);
+    for (let y = scenario.groundY - 4; y < scenario.groundY - 1; y++) {
+      assert.equal(map.collisionAt(24, y), 'none', `${card.entryId} 底下应留出生长净空`);
+    }
+    assert.equal(map.collisionAt(17, scenario.groundY - 1), 'none', '外围不能遗留崖壁遮挡旋转视角');
+    assert.equal(map.collisionAt(24, scenario.groundY - 6), 'none', '仰视时不能遗留底部地面');
+    for (let tick = 0; tick < 60; tick++) scenario.step();
+    assert.equal(getPlayer(scenario.world).body.y, scenario.groundY, '参照人物应一直站在宿主顶面');
+    if (card.entryId === 'climber.woodland') {
+      assert.ok(trees.length > 0);
+      for (const tree of trees) assert.equal(map.collisionAt(tree.x, tree.baseY - 1), 'solid');
+    }
+    scenario.dispose();
+  }
+});
+
+test('D1 切模型、动作和复制保留独立的头发与精细度，链接能恢复', () => {
+  const model = createShowcaseModel();
+  model.showActor('d1');
+  const card = model.cards[0]!;
+  assert.equal(card.d1Variant, 'game');
+  model.changeAction(card, 'd1.bare-head');
+  model.changeAction(card, 'd1.walk');
+  model.update(card, { d1Variant: 'light', playing: false }, true);
+  model.duplicate(card);
+  const copy = model.cards[1]!;
+  model.update(copy, { d1Variant: 'detailed', d1HairVisible: true }, true);
+  assert.equal(card.entryId, 'd1.walk');
+  assert.equal(card.d1HairVisible, false);
+  assert.equal(card.playing, false);
+  assert.equal(copy.entryId, 'd1.walk');
+  assert.equal(copy.d1Variant, 'detailed');
+  assert.equal(card.d1Variant, 'light');
+  const params = new URLSearchParams();
+  const view = { zoom: 2, angle: 0, environment: 'surface' as const };
+  writeCharacterStageLocation(params, model.cards, view);
+  const restored = readCharacterStageLocation(params, CHARACTER_CATALOG)!;
+  assert.deepEqual(restored.cards.map(({ entryId, d1Variant, d1HairVisible, playing }) => ({ entryId, d1Variant, d1HairVisible, playing })), [
+    { entryId: 'd1.walk', d1Variant: 'light', d1HairVisible: false, playing: false },
+    { entryId: 'd1.walk', d1Variant: 'detailed', d1HairVisible: true, playing: false },
+  ]);
+  params.delete('stageActor');
+  params.append('stageActor', 'd1.bare-head,1,0,0,0,1,1');
+  const old = readCharacterStageLocation(params, CHARACTER_CATALOG)!.cards[0]!;
+  assert.equal(old.d1Variant, 'game');
+  assert.equal(old.d1HairVisible, false);
+});

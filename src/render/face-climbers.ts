@@ -32,6 +32,7 @@ export const CLIMBER_FRINGE = 0.42;
 export const CLIMBER_VARIANTS = [
   'up0', 'up1', 'up2', 'diag0', 'diag1', 'diag2', 'hang0', 'hang1', 'hang2', 'mat0', 'mat1', 'mat2',
   'patch0', 'patch1', 'sprig0', 'sprig1', 'sprig2', 'accent0', 'accent1', 'accent2',
+  'bottomMoss0', 'bottomVine0', 'bottomFlower0',
 ] as const;
 export type ClimberVariant = (typeof CLIMBER_VARIANTS)[number];
 type IvyVariant = Extract<ClimberVariant, `up${number}` | `diag${number}` | `hang${number}`>;
@@ -50,6 +51,7 @@ const IVY: Readonly<Record<IvyVariant, { readonly len: number; readonly dir: 1 |
 };
 
 export const CLIMBER_SETS = {
+  attachment: ['mat0', 'patch0', 'diag0', 'hang0', 'bottomMoss0', 'bottomVine0', 'bottomFlower0'],
   island: ['up0', 'up1', 'up2', 'diag0', 'diag1', 'diag2', 'hang0', 'hang1', 'mat0', 'mat1', 'mat2', 'patch0', 'patch1', 'sprig0', 'sprig1', 'sprig2', 'accent0', 'accent1', 'accent2'],
   ground: ['diag0', 'diag1', 'diag2', 'hang0', 'hang1', 'hang2', 'mat0', 'mat1', 'mat2', 'sprig0', 'sprig1', 'sprig2', 'accent0', 'accent1', 'accent2'],
 } as const satisfies Record<string, readonly ClimberVariant[]>;
@@ -274,6 +276,33 @@ function addAccent(b: MeshBuilder, idx: number, h: Hash): void {
   }
 }
 
+/** 底面内部根点向下长；叶片从根点以下起排，避免穿进宿主。 */
+function addUnderside(b: MeshBuilder, kind: string, h: Hash): void {
+  const moss = kind === 'bottomMoss';
+  const flower = kind === 'bottomFlower';
+  const length = moss ? 0.9 : flower ? 1.25 : 1.5;
+  const strands = moss ? 5 : 2;
+  for (let k = 0; k < strands; k++) {
+    const dx = (k - (strands - 1) / 2) * (moss ? 0.045 : 0.1);
+    const len = length * (0.7 + 0.3 * h(k, 2));
+    const path = (t: number): Vec3 => ({ x: dx + Math.sin(t * 4 + k) * 0.055 * t, y: -len * t,
+      z: FACE + (k % 2 === 0 ? -1 : 1) * 0.05 * t });
+    addFaceStem(b, Array.from({ length: 9 }, (_, i) => path(i / 8)), 0, 1, moss ? 0.018 : 0.024, rgb(moss ? DEEP : STEM, 1));
+    for (let j = 1; j <= 7; j++) {
+      const t = j / 8;
+      const p = path(t);
+      const side = j % 2 === 0 ? -1 : 1;
+      const size = (moss ? 0.038 : 0.08) * (1 - t * 0.25);
+      addFaceCard(b, moss ? FERN_UV : IVY_UV, p.x + side * size * 0.7, p.y, p.z, size, side * 0.5,
+        rgb(j > 5 ? TIP : MID, 0.9 + h(k, j) * 0.2), climbSway(t), side * 0.3);
+      if (flower && j >= 4 && j % 2 === 0) {
+        addFaceCard(b, FLOWER_UV, p.x - side * 0.085, p.y - 0.035, p.z + 0.016, 0.075,
+          0.2, rgb(k % 2 === 0 ? PINK : CREAM, 1.1), climbSway(t), 0);
+      }
+    }
+  }
+}
+
 /** y 镜像（下垂藤）：翻转 y 后三角形绕序随之反转，交换索引恢复朝 +z。 */
 function mirrorY(g: THREE.BufferGeometry): void {
   g.scale(1, -1, 1);
@@ -292,7 +321,8 @@ function climberGeometry(v: ClimberVariant): THREE.BufferGeometry {
   const h: Hash = (k, n) => hash01(vi * 8 + k, n, salt);
   const kind = v.replace(/[0-9]+$/, '');
   const idx = Number(v.slice(kind.length));
-  if (kind === 'patch') addPatch(b, idx, h);
+  if (kind.startsWith('bottom')) addUnderside(b, kind, h);
+  else if (kind === 'patch') addPatch(b, idx, h);
   else if (kind === 'mat') addMat(b, idx, salt, h);
   else if (kind === 'sprig') addSprig(b, idx, h);
   else if (kind === 'accent') addAccent(b, idx, h);

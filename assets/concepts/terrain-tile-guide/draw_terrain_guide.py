@@ -57,11 +57,11 @@ def title(d, name, subtitle):
 def basics():
     im = Image.new('RGB',(2200,1920),'white')
     d = ImageDraw.Draw(im)
-    title(d,'地形瓦片｜基础形状与拼接','逻辑说明图 · 世界坐标 x 向右、y 向上 · 同一行内所有方格等大 · 不代表游戏材质')
+    title(d,'地形格｜基础形状与拼接','逻辑说明图 · 世界坐标 x 向右、y 向上 · 同一行内所有方格等大 · 不代表游戏材质')
     txt(d,(70,190),'01  实心地形：4 种形状，统一占用一个 1 × 1 格',36)
     defs = [('整砖 FULL',0,'实心尺寸 1 × 1 格','顶面高度 = 1'),
-            ('左低右高 R',1,'左低右高，45°','顶面高度 = 格内 x'),
-            ('左高右低 L',2,'左高右低，45°','顶面高度 = 1 − 格内 x'),
+            ('右升全坡 D',1,'从左往右升高，45°','顶面高度 = 格内 x'),
+            ('左升全坡 E',2,'从右往左升高，45°','顶面高度 = 1 − 格内 x'),
             ('下半砖 HALF',3,'实心尺寸 1 × 0.5 格','上半格为空；没有上半砖形状')]
     for i,(name,shape,note,detail) in enumerate(defs):
         x=70+i*530
@@ -77,7 +77,7 @@ def basics():
     txt(d,(70,702),'02  独立类别：平台与背景墙，不是新增实心形状',36)
     box(d,(70,765,1090,1000))
     box(d,(1120,765,2140,1000))
-    txt(d,(95,787),'单向平台 / 树冠平台',34)
+    txt(d,(95,787),'平台 / 树冠平台',34)
     grid(d,115,854,3,1,75)
     d.line((115,854,340,854),fill=PURPLE,width=9)
     arrow(d,(228,920),(228,834),PURPLE)
@@ -139,7 +139,7 @@ def compositions():
     assert len(data['compositions'])==8
     im=Image.new('RGB',(2200,3530),'white')
     d=ImageDraw.Draw(im)
-    title(d,'地形瓦片｜8 类现有组合','真实关卡格子导出 · seed 429 · 草地材质 / 地表环境 · 组合说明图，不是材质效果图')
+    title(d,'地形格｜8 类现有组合','真实关卡格子导出 · seed 429 · 草地材质 / 地表环境 · 组合说明图，不是材质效果图')
     txt(d,(70,170),'统一窗口：横向 24 格 × 纵向 20 格；每格 32 px。x = 0 为组合起点，y = 0 为基准地面。',29,MUTED)
     notes={
         'meadow':'连续平地；用于观察铺装与植被跨格衔接。',
@@ -199,11 +199,11 @@ def compositions():
                       'platform_cells':sum(c['id']==6 for c in comp['cells']),
                       'fluid_cells':sum(c['fluid']>0 for c in comp['cells'])})
     yy=3435
-    for x,color,label in [(70,GREEN,'草表层'),(340,DIRT,'土层'),(610,STONE,'石层'),(880,BLUE,'液体'),(1150,PURPLE,'单向平台')]:
+    for x,color,label in [(70,GREEN,'草表层'),(340,DIRT,'土层'),(610,STONE,'石层'),(880,BLUE,'液体'),(1150,PURPLE,'平台')]:
         d.rectangle((x,yy,x+34,yy+28),fill=color)
         txt(d,(x+48,yy-2),label,28)
     txt(d,(1510,yy-2),'橙虚线 = 基准地面 y 0',27,MUTED)
-    txt(d,(70,3490),'格子取自 createTerrainCompositionLevel；树干 / 树冠浅色轮廓仅辅助识别，不是额外实心瓦片。',24,MUTED)
+    txt(d,(70,3490),'格子取自 createTerrainCompositionLevel；树干 / 树冠浅色轮廓仅辅助识别，不是额外地形格。',24,MUTED)
     im.save(OUT/'terrain-combinations.png')
     (HERE/'drawing-checks.json').write_text(json.dumps({'canvas_basics':[2200,1920],'canvas_combinations':[2200,3530],
         'composition_cell_size_px':32,'bounds':data['bounds'],'source':'createTerrainCompositionLevel, seed 429, grass, surface',

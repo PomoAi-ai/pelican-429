@@ -22,7 +22,7 @@ import { SHRUB_WIND } from './tree-wind.ts';
 
 /** 构建时的 z 基准（低于树前沿，避免 tree-foliage 的 z 夹取压扁冠团）。 */
 const ZB = -0.62;
-/** 叶团 z 向扁度（与树骨架 Z_SQUASH 一致）。 */
+/** 叶团 z 向扁度：灌木整株留在身体区之后，冠团保持扁。 */
 const Z_SQUASH = 0.6;
 /** 每个冠团的三角形上限（变体图集里每实例都要跑全图集顶点，保持小）。 */
 export const SHRUB_CLUMP_MAX_TRIS = 200;

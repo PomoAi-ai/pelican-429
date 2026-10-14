@@ -45,7 +45,7 @@ def perspective(x,y,u,poly,hole=None):
 BORDER=.1
 assert 0<BORDER<.5 and math.isclose((1-2*BORDER)**2,.64)
 text(55,30,'背景墙形态与窗口｜格子为基础，窗口按区域组合',44)
-text(58,103,'固定规则：标准模块 1×1；墙厚 0.2，位于外延预留区。开窗是有意切除墙面，不是把整块墙缩小。',27,BLUE)
+text(58,103,'固定规则：标准模块 1×1；墙厚 0.2，位于后沿 Z=[−1.2,−1]。开窗是有意切除墙面，不是把整块墙缩小。',27,BLUE)
 text(58,151,'本轮设计方案，尚未实现。窗框正面边宽 b=0.1 为可调草案；与 Z 厚度 0.2 分开。',27,ORANGE)
 for idx,(code,name,note) in enumerate([
  ('W0','完整墙格','完整覆盖 1×1；不缩边。'),
@@ -86,7 +86,7 @@ for i,(name,poly) in enumerate(halves):
 panel(50,2250,2300,175)
 text(80,2272,'3 不重要：圆窗、拱窗、不规则破损。先保留方向，不扩充旋转图谱、不进入当前实现。',28)
 text(80,2330,'玻璃与窗棂属于选做表现层；窗口是背景开口，不自动成为门、通道或角色碰撞缺口。',27,ORANGE)
-text(60,2450,'窗口按完整区域定义；玻璃、窗框不能重复叠在未挖空的墙面上。墙在外延区的固定偏移仍沿用深度文档的未定项。',24)
+text(60,2450,'窗口按完整区域定义；玻璃、窗框不能重复叠在未挖空的墙面上。墙固定在后沿，紧贴格子背面。',24)
 # The ring is four disjoint bands, leaving a genuinely empty inner opening.
 for w,h in [(1,1),(3,2)]:
  band_area=2*w*BORDER+2*(h-2*BORDER)*BORDER

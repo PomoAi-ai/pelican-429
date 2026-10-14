@@ -5,7 +5,6 @@
 .tc-eyebrow { margin: 0 0 8px; color: #adc68e; font-size: 10px; letter-spacing: 2px; }
 .tc-header h1 { font-size: 28px; margin: 0 0 7px; }
 .tc-subtitle { margin: 0; color: #9eb1b8; font-size: 12px; line-height: 1.6; }
-.tc-header .sc-library-tabs { min-width: 300px; margin: 0; }
 .tc-toolbar { margin-top: 22px; display: flex; flex-wrap: wrap; align-items: center; gap: 14px; padding: 14px; background: #16242a; border: 1px solid #2f4148; border-radius: 10px; }
 .tc-toolbar label { display: flex; align-items: center; gap: 8px; color: #b2c2c6; font-size: 12px; }
 .tc-toolbar select { min-height: 32px; max-width: 190px; }
@@ -31,7 +30,6 @@
 @media (max-width: 760px) {
   .tc-page.showcase-app { padding: 18px 12px; }
   .tc-header { display: block; }
-  .tc-header .sc-library-tabs { margin-top: 18px; min-width: 0; }
   .tc-toolbar { gap: 10px; }
   .tc-grid { grid-template-columns: repeat(5, 260px); }
   .tc-viewport { height: 410px; }

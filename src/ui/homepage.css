@@ -241,13 +241,3 @@
 #dev-index a:focus-visible { outline: 2px solid var(--home-accent); outline-offset: 5px; }
 #dev-index h1 { margin: 16px 0; font-size: clamp(36px, 5vw, 64px); }
 .dev-catalog-description { max-width: 680px; color: var(--home-muted); font-size: 16px; line-height: 1.9; }
-#dev-catalog { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-top: 40px; counter-reset: scene; }
-#dev-catalog a { display: grid; grid-template-columns: 1fr auto; gap: 30px; padding: 26px; border-radius: var(--home-radius); border: 1px solid var(--home-line); background: var(--home-surface); font-size: 19px; transition: border-color 150ms, background 150ms, transform 150ms; }
-#dev-catalog a::before { grid-column: 1 / -1; counter-increment: scene; content: 'DEV / ' counter(scene, decimal-leading-zero); color: #a8bf79; font: 11px/1.5 ui-monospace, monospace; letter-spacing: 2px; }
-#dev-catalog a::after { content: '↗'; color: var(--home-accent); }
-#dev-catalog a:hover { border-color: #d6ed8d88; background: var(--home-surface-2); transform: translateY(-2px); }
-@media (max-width: 900px) { #dev-catalog { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (max-width: 640px) {
-  #dev-catalog { grid-template-columns: 1fr; gap: 12px; margin-top: 28px; }
-  #dev-catalog a { padding: 22px; gap: 18px; font-size: 18px; }
-}

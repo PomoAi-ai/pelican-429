@@ -29,7 +29,7 @@ export function createResourceScenario(card: ShowcaseCard): ShowcaseScenario {
   const lastSample = sampleColumns[sampleColumns.length - 1]!;
   const sampleCenter = (firstSample + lastSample + 1) / 2;
   const rng = mulberry32(options.seed);
-  const treeKind = entry.actor === 'tree' ? entry.action : entry.actor === 'terrain' && entry.action === 'branch' ? 'oak' : options.habitat === 'wood' ? 'oak' : null;
+  const treeKind = entry.actor === 'climber' && entry.action === 'woodland' ? 'oak' : entry.actor === 'tree' ? entry.action : entry.actor === 'terrain' && entry.action === 'branch' ? 'oak' : options.habitat === 'wood' ? 'oak' : null;
   const hut = entry.actor === 'hut' || (entry.actor === 'terrain' && entry.action === 'roof');
   const singleTile = entry.actor === 'terrain' && entry.action !== 'branch' && !hut && (options.layout === 'single' || options.layout === 'raised');
   const trees = treeKind ? (singleTile ? sampleColumns : [24]).map((x, i) => planTree(treeKind, x, groundY, rng, i + 1)) : [];
@@ -55,6 +55,13 @@ export function createResourceScenario(card: ShowcaseCard): ShowcaseScenario {
   if (options.habitat === 'desert' && entry.actor === 'terrain' && entry.action === 'sand') {
     for (let x = 2; x < base.map.width - 2; x++) for (let y = groundY - 4; y < groundY - 1; y++) base.map.set(x, y, TILE_SANDSTONE);
   }
+  if (entry.actor === 'climber') {
+    // 任意视角只看宿主，避免外围崖壁或远处地面遮住正背面和底面。
+    base.map.load(new Uint16Array(base.map.width * base.map.height).fill(TILE_AIR));
+    base.caves.mask.fill(0);
+    const halfWidth = entry.action === 'woodland' ? 4 : 1;
+    for (let x = 24 - halfWidth; x <= 24 + halfWidth; x++) base.map.set(x, groundY - 1, TILE_GRASS);
+  }
   const ceiling = entry.actor === 'cave' && (entry.action.includes('Ceil') || entry.action.startsWith('stalactite') || entry.action.startsWith('cobweb'));
   if (ceiling) for (let x = 21; x <= 27; x++) base.map.set(x, groundY + 3, TILE_STONE);
   if ((entry.actor === 'grass' && entry.action === 'vine') || (entry.actor === 'cover' && entry.action === 'drape')) {
@@ -75,7 +82,7 @@ export function createResourceScenario(card: ShowcaseCard): ShowcaseScenario {
     height = 3; width = lastSample - firstSample + 5;
     referenceX = firstSample - 2.5;
   }
-  if (trees.length && (entry.actor === 'tree' || (entry.actor === 'terrain' && entry.action === 'branch') || options.assembly)) {
+  if (trees.length && (entry.actor === 'climber' || entry.actor === 'tree' || (entry.actor === 'terrain' && entry.action === 'branch') || options.assembly)) {
     const tree = trees[0]!;
     height = Math.max(...trees.map((item) => item.trunkHeight + item.canopyHeight)) + 3;
     const left = Math.min(...trees.map((item) => item.x - item.canopyHalfWidth - Math.abs(item.crownDx)));
@@ -83,6 +90,10 @@ export function createResourceScenario(card: ShowcaseCard): ShowcaseScenario {
     width = right - left + 6;
     focus = { x: trees.length === 1 ? tree.x + 0.5 + tree.crownDx / 2 : (left + right + 1) / 2, y: groundY + (height - 3) / 2 };
     referenceX = tree.x - 2;
+  }
+  if (entry.actor === 'climber' && entry.action !== 'woodland') {
+    focus = { x: 24.5, y: groundY - 1 }; height = 5.4; width = 6;
+    referenceX = 24.5;
   }
   if (water && singleTile) {
     // 岸边水槽避开每个样本及承托列，保持形状对照完整。

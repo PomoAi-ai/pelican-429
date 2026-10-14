@@ -1,0 +1,995 @@
+{
+  "metadata": {
+    "material": "白色混凝土",
+    "scope": "本轮图片完整覆盖已定义的33种实体形态；旧优先级仅保留来源记录，不缩减本轮绘制范围。",
+    "sources": [
+      "public/concepts/tile-shape-definitions.md",
+      "assets/concepts/scene-depth-guide/draw_shape_definitions.py"
+    ],
+    "coordinateSystem": "单个逻辑格局部XY；X向右，Y向上；顶点按顺序闭合。",
+    "logicalCell": [
+      1,
+      1
+    ],
+    "depth": 2,
+    "zRange": [
+      -1,
+      1
+    ],
+    "rotationConvention": "-90/-180/-270：绕逻辑格中心在XY平面逆时针旋转；-U：沿y=0.5上下镜像。",
+    "runtimeStatus": "仅为美术资料提取，不表示游戏运行时已实现。",
+    "shapeCount": 33
+  },
+  "groups": [
+    {
+      "id": "full",
+      "name": "整砖",
+      "shapeIds": [
+        "A"
+      ]
+    },
+    {
+      "id": "rectangular-half",
+      "name": "矩形半砖",
+      "shapeIds": [
+        "B",
+        "C",
+        "K",
+        "L"
+      ]
+    },
+    {
+      "id": "quarter",
+      "name": "四分之一砖",
+      "shapeIds": [
+        "M",
+        "N",
+        "O",
+        "P"
+      ]
+    },
+    {
+      "id": "full-triangle",
+      "name": "整格三角坡",
+      "shapeIds": [
+        "D",
+        "E",
+        "D-U",
+        "E-U"
+      ]
+    },
+    {
+      "id": "half-single-slope",
+      "name": "半尺寸单斜块",
+      "shapeIds": [
+        "F",
+        "F-90",
+        "F-180",
+        "F-270",
+        "I",
+        "I-90",
+        "I-180",
+        "I-270"
+      ]
+    },
+    {
+      "id": "double-slope-peak",
+      "name": "双斜尖顶",
+      "shapeIds": [
+        "J",
+        "J-90",
+        "J-180",
+        "J-270"
+      ]
+    },
+    {
+      "id": "shallow-slope-high",
+      "name": "缓坡高段",
+      "shapeIds": [
+        "G",
+        "G-90",
+        "G-180",
+        "G-270",
+        "H",
+        "H-90",
+        "H-180",
+        "H-270"
+      ]
+    }
+  ],
+  "shapes": [
+    {
+      "id": "A",
+      "name": "整砖",
+      "vertices": [
+        [
+          0.0,
+          0.0
+        ],
+        [
+          1.0,
+          0.0
+        ],
+        [
+          1.0,
+          1.0
+        ],
+        [
+          0.0,
+          1.0
+        ]
+      ],
+      "width": 1.0,
+      "height": 1.0,
+      "depth": 2.0,
+      "area": 1.0,
+      "sourcePriority": "1 必须做",
+      "sourceStatus": "已有实现 · XY轮廓",
+      "group": "full"
+    },
+    {
+      "id": "B",
+      "name": "下半砖",
+      "vertices": [
+        [
+          0.0,
+          0.0
+        ],
+        [
+          1.0,
+          0.0
+        ],
+        [
+          1.0,
+          0.5
+        ],
+        [
+          0.0,
+          0.5
+        ]
+      ],
+      "width": 1.0,
+      "height": 0.5,
+      "depth": 2.0,
+      "area": 0.5,
+      "sourcePriority": "1 必须做",
+      "sourceStatus": "已有实现 · XY轮廓",
+      "group": "rectangular-half"
+    },
+    {
+      "id": "C",
+      "name": "上半砖",
+      "vertices": [
+        [
+          0.0,
+          0.5
+        ],
+        [
+          1.0,
+          0.5
+        ],
+        [
+          1.0,
+          1.0
+        ],
+        [
+          0.0,
+          1.0
+        ]
+      ],
+      "width": 1.0,
+      "height": 0.5,
+      "depth": 2.0,
+      "area": 0.5,
+      "sourcePriority": "1 必须做",
+      "sourceStatus": "设计已确认 · 待实现",
+      "group": "rectangular-half"
+    },
+    {
+      "id": "K",
+      "name": "左半砖",
+      "vertices": [
+        [
+          0.0,
+          0.0
+        ],
+        [
+          0.5,
+          0.0
+        ],
+        [
+          0.5,
+          1.0
+        ],
+        [
+          0.0,
+          1.0
+        ]
+      ],
+      "width": 0.5,
+      "height": 1.0,
+      "depth": 2.0,
+      "area": 0.5,
+      "sourcePriority": "1 必须做",
+      "sourceStatus": "设计已确认 · 待实现",
+      "group": "rectangular-half"
+    },
+    {
+      "id": "L",
+      "name": "右半砖",
+      "vertices": [
+        [
+          0.5,
+          0.0
+        ],
+        [
+          1.0,
+          0.0
+        ],
+        [
+          1.0,
+          1.0
+        ],
+        [
+          0.5,
+          1.0
+        ]
+      ],
+      "width": 0.5,
+      "height": 1.0,
+      "depth": 2.0,
+      "area": 0.5,
+      "sourcePriority": "1 必须做",
+      "sourceStatus": "设计已确认 · 待实现",
+      "group": "rectangular-half"
+    },
+    {
+      "id": "M",
+      "name": "左下四分之一砖",
+      "vertices": [
+        [
+          0.0,
+          0.0
+        ],
+        [
+          0.5,
+          0.0
+        ],
+        [
+          0.5,
+          0.5
+        ],
+        [
+          0.0,
+          0.5
+        ]
+      ],
+      "width": 0.5,
+      "height": 0.5,
+      "depth": 2.0,
+      "area": 0.25,
+      "sourcePriority": "1 必须做",
+      "sourceStatus": "设计已确认 · 待实现",
+      "group": "quarter"
+    },
+    {
+      "id": "N",
+      "name": "右下四分之一砖",
+      "vertices": [
+        [
+          0.5,
+          0.0
+        ],
+        [
+          1.0,
+          0.0
+        ],
+        [
+          1.0,
+          0.5
+        ],
+        [
+          0.5,
+          0.5
+        ]
+      ],
+      "width": 0.5,
+      "height": 0.5,
+      "depth": 2.0,
+      "area": 0.25,
+      "sourcePriority": "1 必须做",
+      "sourceStatus": "设计已确认 · 待实现",
+      "group": "quarter"
+    },
+    {
+      "id": "O",
+      "name": "左上四分之一砖",
+      "vertices": [
+        [
+          0.0,
+          0.5
+        ],
+        [
+          0.5,
+          0.5
+        ],
+        [
+          0.5,
+          1.0
+        ],
+        [
+          0.0,
+          1.0
+        ]
+      ],
+      "width": 0.5,
+      "height": 0.5,
+      "depth": 2.0,
+      "area": 0.25,
+      "sourcePriority": "1 必须做",
+      "sourceStatus": "设计已确认 · 待实现",
+      "group": "quarter"
+    },
+    {
+      "id": "P",
+      "name": "右上四分之一砖",
+      "vertices": [
+        [
+          0.5,
+          0.5
+        ],
+        [
+          1.0,
+          0.5
+        ],
+        [
+          1.0,
+          1.0
+        ],
+        [
+          0.5,
+          1.0
+        ]
+      ],
+      "width": 0.5,
+      "height": 0.5,
+      "depth": 2.0,
+      "area": 0.25,
+      "sourcePriority": "1 必须做",
+      "sourceStatus": "设计已确认 · 待实现",
+      "group": "quarter"
+    },
+    {
+      "id": "D",
+      "name": "右升全坡",
+      "vertices": [
+        [
+          0.0,
+          0.0
+        ],
+        [
+          1.0,
+          0.0
+        ],
+        [
+          1.0,
+          1.0
+        ]
+      ],
+      "width": 1.0,
+      "height": 1.0,
+      "depth": 2.0,
+      "area": 0.5,
+      "sourcePriority": "1 必须做",
+      "sourceStatus": "已有实现 · XY轮廓",
+      "group": "full-triangle"
+    },
+    {
+      "id": "E",
+      "name": "左升全坡",
+      "vertices": [
+        [
+          0.0,
+          0.0
+        ],
+        [
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0
+        ]
+      ],
+      "width": 1.0,
+      "height": 1.0,
+      "depth": 2.0,
+      "area": 0.5,
+      "sourcePriority": "1 必须做",
+      "sourceStatus": "已有实现 · XY轮廓",
+      "group": "full-triangle"
+    },
+    {
+      "id": "D-U",
+      "name": "右上实体",
+      "vertices": [
+        [
+          0.0,
+          1.0
+        ],
+        [
+          1.0,
+          1.0
+        ],
+        [
+          1.0,
+          0.0
+        ]
+      ],
+      "width": 1.0,
+      "height": 1.0,
+      "depth": 2.0,
+      "area": 0.5,
+      "sourcePriority": "2 选做",
+      "sourceStatus": "可选参考 · 非必做",
+      "group": "full-triangle"
+    },
+    {
+      "id": "E-U",
+      "name": "左上实体",
+      "vertices": [
+        [
+          0.0,
+          1.0
+        ],
+        [
+          1.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0
+        ]
+      ],
+      "width": 1.0,
+      "height": 1.0,
+      "depth": 2.0,
+      "area": 0.5,
+      "sourcePriority": "2 选做",
+      "sourceStatus": "可选参考 · 非必做",
+      "group": "full-triangle"
+    },
+    {
+      "id": "F",
+      "name": "右升低坡",
+      "vertices": [
+        [
+          0.0,
+          0.0
+        ],
+        [
+          1.0,
+          0.0
+        ],
+        [
+          1.0,
+          0.5
+        ]
+      ],
+      "width": 1.0,
+      "height": 0.5,
+      "depth": 2.0,
+      "area": 0.25,
+      "sourcePriority": "1 必须做",
+      "sourceStatus": "设计已确认 · 待实现",
+      "group": "half-single-slope"
+    },
+    {
+      "id": "F-90",
+      "name": "F 逆时针 90°",
+      "vertices": [
+        [
+          1.0,
+          0.0
+        ],
+        [
+          1.0,
+          1.0
+        ],
+        [
+          0.5,
+          1.0
+        ]
+      ],
+      "width": 0.5,
+      "height": 1.0,
+      "depth": 2.0,
+      "area": 0.25,
+      "sourcePriority": "3 不重要",
+      "sourceStatus": "可选参考 · 非必做",
+      "group": "half-single-slope"
+    },
+    {
+      "id": "F-180",
+      "name": "F 逆时针 180°",
+      "vertices": [
+        [
+          1.0,
+          1.0
+        ],
+        [
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.5
+        ]
+      ],
+      "width": 1.0,
+      "height": 0.5,
+      "depth": 2.0,
+      "area": 0.25,
+      "sourcePriority": "3 不重要",
+      "sourceStatus": "可选参考 · 非必做",
+      "group": "half-single-slope"
+    },
+    {
+      "id": "F-270",
+      "name": "F 逆时针 270°",
+      "vertices": [
+        [
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0
+        ],
+        [
+          0.5,
+          0.0
+        ]
+      ],
+      "width": 0.5,
+      "height": 1.0,
+      "depth": 2.0,
+      "area": 0.25,
+      "sourcePriority": "3 不重要",
+      "sourceStatus": "可选参考 · 非必做",
+      "group": "half-single-slope"
+    },
+    {
+      "id": "I",
+      "name": "左升低坡",
+      "vertices": [
+        [
+          0.0,
+          0.0
+        ],
+        [
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.5
+        ]
+      ],
+      "width": 1.0,
+      "height": 0.5,
+      "depth": 2.0,
+      "area": 0.25,
+      "sourcePriority": "1 必须做",
+      "sourceStatus": "设计已确认 · 待实现",
+      "group": "half-single-slope"
+    },
+    {
+      "id": "I-90",
+      "name": "I 逆时针 90°",
+      "vertices": [
+        [
+          1.0,
+          0.0
+        ],
+        [
+          1.0,
+          1.0
+        ],
+        [
+          0.5,
+          0.0
+        ]
+      ],
+      "width": 0.5,
+      "height": 1.0,
+      "depth": 2.0,
+      "area": 0.25,
+      "sourcePriority": "3 不重要",
+      "sourceStatus": "可选参考 · 非必做",
+      "group": "half-single-slope"
+    },
+    {
+      "id": "I-180",
+      "name": "I 逆时针 180°",
+      "vertices": [
+        [
+          1.0,
+          1.0
+        ],
+        [
+          0.0,
+          1.0
+        ],
+        [
+          1.0,
+          0.5
+        ]
+      ],
+      "width": 1.0,
+      "height": 0.5,
+      "depth": 2.0,
+      "area": 0.25,
+      "sourcePriority": "3 不重要",
+      "sourceStatus": "可选参考 · 非必做",
+      "group": "half-single-slope"
+    },
+    {
+      "id": "I-270",
+      "name": "I 逆时针 270°",
+      "vertices": [
+        [
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0
+        ],
+        [
+          0.5,
+          1.0
+        ]
+      ],
+      "width": 0.5,
+      "height": 1.0,
+      "depth": 2.0,
+      "area": 0.25,
+      "sourcePriority": "3 不重要",
+      "sourceStatus": "可选参考 · 非必做",
+      "group": "half-single-slope"
+    },
+    {
+      "id": "J",
+      "name": "尖顶",
+      "vertices": [
+        [
+          0.0,
+          0.0
+        ],
+        [
+          1.0,
+          0.0
+        ],
+        [
+          0.5,
+          0.5
+        ]
+      ],
+      "width": 1.0,
+      "height": 0.5,
+      "depth": 2.0,
+      "area": 0.25,
+      "sourcePriority": "1 必须做",
+      "sourceStatus": "设计已确认 · 待实现",
+      "group": "double-slope-peak"
+    },
+    {
+      "id": "J-90",
+      "name": "朝左尖顶",
+      "vertices": [
+        [
+          1.0,
+          0.0
+        ],
+        [
+          1.0,
+          1.0
+        ],
+        [
+          0.5,
+          0.5
+        ]
+      ],
+      "width": 0.5,
+      "height": 1.0,
+      "depth": 2.0,
+      "area": 0.25,
+      "sourcePriority": "3 不重要",
+      "sourceStatus": "可选参考 · 非必做",
+      "group": "double-slope-peak"
+    },
+    {
+      "id": "J-180",
+      "name": "朝下尖顶",
+      "vertices": [
+        [
+          1.0,
+          1.0
+        ],
+        [
+          0.0,
+          1.0
+        ],
+        [
+          0.5,
+          0.5
+        ]
+      ],
+      "width": 1.0,
+      "height": 0.5,
+      "depth": 2.0,
+      "area": 0.25,
+      "sourcePriority": "3 不重要",
+      "sourceStatus": "可选参考 · 非必做",
+      "group": "double-slope-peak"
+    },
+    {
+      "id": "J-270",
+      "name": "朝右尖顶",
+      "vertices": [
+        [
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0
+        ],
+        [
+          0.5,
+          0.5
+        ]
+      ],
+      "width": 0.5,
+      "height": 1.0,
+      "depth": 2.0,
+      "area": 0.25,
+      "sourcePriority": "3 不重要",
+      "sourceStatus": "可选参考 · 非必做",
+      "group": "double-slope-peak"
+    },
+    {
+      "id": "G",
+      "name": "右升缓坡高段",
+      "vertices": [
+        [
+          0.0,
+          0.0
+        ],
+        [
+          1.0,
+          0.0
+        ],
+        [
+          1.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.5
+        ]
+      ],
+      "width": 1.0,
+      "height": 1.0,
+      "depth": 2.0,
+      "area": 0.75,
+      "sourcePriority": "2 选做",
+      "sourceStatus": "可选参考 · 非必做",
+      "group": "shallow-slope-high"
+    },
+    {
+      "id": "G-90",
+      "name": "G 逆时针 90°",
+      "vertices": [
+        [
+          1.0,
+          0.0
+        ],
+        [
+          1.0,
+          1.0
+        ],
+        [
+          0.0,
+          1.0
+        ],
+        [
+          0.5,
+          0.0
+        ]
+      ],
+      "width": 1.0,
+      "height": 1.0,
+      "depth": 2.0,
+      "area": 0.75,
+      "sourcePriority": "3 不重要",
+      "sourceStatus": "可选参考 · 非必做",
+      "group": "shallow-slope-high"
+    },
+    {
+      "id": "G-180",
+      "name": "G 逆时针 180°",
+      "vertices": [
+        [
+          1.0,
+          1.0
+        ],
+        [
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0
+        ],
+        [
+          1.0,
+          0.5
+        ]
+      ],
+      "width": 1.0,
+      "height": 1.0,
+      "depth": 2.0,
+      "area": 0.75,
+      "sourcePriority": "3 不重要",
+      "sourceStatus": "可选参考 · 非必做",
+      "group": "shallow-slope-high"
+    },
+    {
+      "id": "G-270",
+      "name": "G 逆时针 270°",
+      "vertices": [
+        [
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0
+        ],
+        [
+          1.0,
+          0.0
+        ],
+        [
+          0.5,
+          1.0
+        ]
+      ],
+      "width": 1.0,
+      "height": 1.0,
+      "depth": 2.0,
+      "area": 0.75,
+      "sourcePriority": "3 不重要",
+      "sourceStatus": "可选参考 · 非必做",
+      "group": "shallow-slope-high"
+    },
+    {
+      "id": "H",
+      "name": "左升缓坡高段",
+      "vertices": [
+        [
+          0.0,
+          0.0
+        ],
+        [
+          1.0,
+          0.0
+        ],
+        [
+          1.0,
+          0.5
+        ],
+        [
+          0.0,
+          1.0
+        ]
+      ],
+      "width": 1.0,
+      "height": 1.0,
+      "depth": 2.0,
+      "area": 0.75,
+      "sourcePriority": "2 选做",
+      "sourceStatus": "可选参考 · 非必做",
+      "group": "shallow-slope-high"
+    },
+    {
+      "id": "H-90",
+      "name": "H 逆时针 90°",
+      "vertices": [
+        [
+          1.0,
+          0.0
+        ],
+        [
+          1.0,
+          1.0
+        ],
+        [
+          0.5,
+          1.0
+        ],
+        [
+          0.0,
+          0.0
+        ]
+      ],
+      "width": 1.0,
+      "height": 1.0,
+      "depth": 2.0,
+      "area": 0.75,
+      "sourcePriority": "3 不重要",
+      "sourceStatus": "可选参考 · 非必做",
+      "group": "shallow-slope-high"
+    },
+    {
+      "id": "H-180",
+      "name": "H 逆时针 180°",
+      "vertices": [
+        [
+          1.0,
+          1.0
+        ],
+        [
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.5
+        ],
+        [
+          1.0,
+          0.0
+        ]
+      ],
+      "width": 1.0,
+      "height": 1.0,
+      "depth": 2.0,
+      "area": 0.75,
+      "sourcePriority": "3 不重要",
+      "sourceStatus": "可选参考 · 非必做",
+      "group": "shallow-slope-high"
+    },
+    {
+      "id": "H-270",
+      "name": "H 逆时针 270°",
+      "vertices": [
+        [
+          0.0,
+          1.0
+        ],
+        [
+          0.0,
+          0.0
+        ],
+        [
+          0.5,
+          0.0
+        ],
+        [
+          1.0,
+          1.0
+        ]
+      ],
+      "width": 1.0,
+      "height": 1.0,
+      "depth": 2.0,
+      "area": 0.75,
+      "sourcePriority": "3 不重要",
+      "sourceStatus": "可选参考 · 非必做",
+      "group": "shallow-slope-high"
+    }
+  ]
+}

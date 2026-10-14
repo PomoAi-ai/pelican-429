@@ -24,7 +24,7 @@ def render_drooping_states(Sheet, items):
                 high=[max(v[k] for v in points) for k in range(3)]
                 dims=[high[k]-low[k] for k in range(3)]
                 sheet.text(x+30,y+85,'当前宽×高×深：'+' × '.join(f'{n:.3f}'.rstrip('0').rstrip('.') for n in dims),26)
-                sheet.text(x+30,y+127,f'最低Y={low[1]:.3f}；最高Y={high[1]:.3f}；Z=[{low[2]:.3f},{high[2]:.3f}]',24)
+                sheet.text(x+30,y+127,f'最低Y={low[1]:.3f}；最高Y={high[1]:.3f}；Z=[{0-high[2]:.3f},{0-low[2]:.3f}]',24)
                 print(item['kind'],label,'bounds',[(round(low[k],4),round(high[k],4)) for k in range(3)])
             else:
                 sheet.text(x+30,y+85,'无植物实体；支撑砖保留。',26)

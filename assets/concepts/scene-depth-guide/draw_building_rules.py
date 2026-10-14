@@ -52,7 +52,7 @@ for x in range(1,7):
 art=Image.open(ROOT/'assets/characters/grassy/customization/female/concepts/d1-no-gear/individual/right-v1.png').convert('RGB').crop((224,34,758,1408))
 h=round(3.1*s);art=art.resize((round(h*art.width/art.height),h),Image.Resampling.LANCZOS);im.paste(art,(80,oy+6*s-h))
 # Furniture placement regions; their collision policy remains separate.
-for bx,bw,bh,label,col in ((1,3,1,'床 3×1','#CEDFEA'),(4,3,2,'桌 3×2','#E8D7BD')):
+for bx,bw,bh,label,col in ((1,3,1,'床 3×1','#CEDFEA'),(4,2,2,'桌 2×2','#E8D7BD')):
     b=(ox+bx*s+5,oy+(6-bh)*s+5,ox+(bx+bw)*s-5,oy+6*s-5)
     d.rectangle(b,fill=col,outline=ORANGE,width=2)
     for k in range(1,bw):d.line((ox+(bx+k)*s,b[1],ox+(bx+k)*s,b[3]),fill=LINE,width=1)
@@ -61,13 +61,13 @@ for bx,bw,bh,label,col in ((1,3,1,'床 3×1','#CEDFEA'),(4,3,2,'桌 3×2','#E8D7
 dim(d,(ox+8*s+45,oy),(ox+8*s+45,oy+7*s),'总高7',(1305,715))
 txt(d,90,1250,'一格宽高相等；前面敞开观察，墙体深度位置以最新深度图为准。',27)
 txt(d,1580,220,'四类东西分开',34,BLUE)
-for yy,title,desc in ((320,'实体边界','地板、屋顶、封闭侧墙会阻挡。'),(440,'背景墙','在外延预留区，厚0.2。'),(560,'门与门沿','门占左半格或右半格；上方是门沿。'),(680,'家具 / 设施','按宽×高占格，另外定义支撑与碰撞。')):
+for yy,title,desc in ((320,'实体边界','地板、屋顶、封闭侧墙会阻挡。'),(440,'背景墙','在后沿[−1.2,−1]，厚0.2。'),(560,'门与门沿','门占左半格或右半格；上方是门沿。'),(680,'家具 / 设施','按宽×高占格，另外定义支撑与碰撞。')):
     txt(d,1580,yy,title,29,BLUE);txt(d,1580,yy+50,desc,25)
 txt(d,1580,840,'门洞净高3格，薄门沿放在其上方。',26,ORANGE)
 txt(d,1580,886,'门沿区仅表示安装范围，不填成整块砖。',24,ORANGE)
-txt(d,1580,966,'房体实体深度统一1格。',27)
-txt(d,1580,1014,'床3×1、桌3×2为草案；通行碰撞另定。',24)
-txt(d,1580,1090,'主角：3.3头身，外观高3.1格。',25)
+txt(d,1580,966,'房体实体深度统一2格。',27)
+txt(d,1580,1014,'床3×1、桌2×2为草案；通行碰撞另定。',24)
+txt(d,1580,1090,'玩家角色：3.3头身，外观高3.1格。',25)
 txt(d,1580,1135,'碰撞高2.8格；门口还需核对发梢净空。',24)
 txt(d,60,1400,'本图定义房间组成与格子边界；不把示意门、家具、背景墙自动视为游戏已实现的建造规则。',26,MUTED)
 save(im,'building-house.png')
@@ -102,12 +102,12 @@ txt(d,1705,755,'安装在X左半格或右半格。',25)
 txt(d,1705,800,'门洞横跨Z，角色沿X穿过。',25)
 txt(d,1705,900,'上沿和门框作为同一个组件，',25,MUTED)
 txt(d,1705,944,'再往上才补普通墙格。',25,MUTED)
-txt(d,60,1350,'门上沿占上方一格高度，沿X占外侧半格，沿Z深1；普通墙格从Y=4开始。背景墙厚0.2另行定义。',25,MUTED)
+txt(d,60,1350,'门上沿占上方一格高度，沿X占外侧半格，沿Z深2；普通墙格从Y=4开始。背景墙厚0.2另行定义。',25,MUTED)
 save(im,'building-door.png')
 # 06: approved dimensions are a draft, not an implemented collision contract.
-im,d=page('06 建筑物与家具｜床3×1，桌3×2（草案）','已确认按宽×高表达：床占3格、桌占6格；深度、支撑、碰撞和交互另列，不混成一个“大小”。')
+im,d=page('06 建筑物与家具｜床3×1，桌2×2（草案）','已确认按宽×高表达：床占3格、桌占4格；深度、支撑、碰撞和交互另列，不混成一个“大小”。')
 panel(d,(60,180,1160,1050));txt(d,90,220,'尺寸定义 · 先作为草案',32,BLUE)
-for row,(name,w,h) in enumerate((('床',3,1),('桌',3,2))):
+for row,(name,w,h) in enumerate((('床',3,1),('桌',2,2))):
     yy=340+row*315;sc=120
     txt(d,95,yy-35,f'{name}：宽{w} × 高{h} = {w*h}格',29)
     grid(d,105,yy+20,w,h,sc)
@@ -119,7 +119,7 @@ for row,(name,w,h) in enumerate((('床',3,1),('桌',3,2))):
 panel(d,(1190,180,2330,1050));txt(d,1220,220,'放进房间核对 · 示例内宽6、净高5',32,BLUE)
 gx,gy,ss=1330,340,110
 grid(d,gx,gy,6,5,ss)
-for x,w,h,label,c in ((0,3,1,'床3×1','#CEDFEA'),(3,3,2,'桌3×2','#E8D7BD')):
+for x,w,h,label,c in ((0,3,1,'床3×1','#CEDFEA'),(3,2,2,'桌2×2','#E8D7BD')):
     d.rectangle((gx+x*ss,gy+(5-h)*ss,gx+(x+w)*ss,gy+5*ss),fill=c,outline=ORANGE,width=2)
     for k in range(1,w):d.line((gx+(x+k)*ss,gy+(5-h)*ss,gx+(x+k)*ss,gy+5*ss),fill=LINE,width=1)
     if h==2:d.line((gx+x*ss,gy+4*ss,gx+(x+w)*ss,gy+4*ss),fill=LINE,width=1)
@@ -129,6 +129,6 @@ panel(d,(60,1080,2330,1420));txt(d,90,1110,'每种家具至少记录以下字段
 for x,title,desc in ((95,'放置占格','宽W × 高H；锚点、允许朝向。'),(830,'支撑要求','落地 / 挂墙 / 吊顶；需要几格支撑。'),(1620,'碰撞与交互','阻挡 / 可穿过；交互范围另记。')):
     txt(d,x,1185,title,29,BLUE);txt(d,x,1235,desc,25)
 txt(d,90,1330,'外观轮廓、放置占格、碰撞范围、交互范围分别定义；床桌不是把整个占格区域填满的实体砖。',26)
-txt(d,60,1450,'床3×1、桌3×2作为尺寸草案；家具Z深度不自动继承实体砖深1。正式数值还需配合人物姿态检查。',25,MUTED)
+txt(d,60,1450,'床3×1、桌2×2作为尺寸草案；家具深1贴格子背面，不继承实体砖深2。正式数值还需配合人物姿态检查。',25,MUTED)
 save(im,'building-furniture.png')
 print('created depth / house / door / furniture diagrams')

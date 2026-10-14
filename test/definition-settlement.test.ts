@@ -1,9 +1,39 @@
 import assert from 'node:assert/strict';
-import { test } from 'node:test';
+import { after, before, test } from 'node:test';
 import { createDefinitionSettlementLayout } from '../src/app/definition-settlement-layout.ts';
 import { createPerspectivePlayer } from '../src/app/perspective-player.ts';
 import { NEUTRAL_INPUT } from '../src/entities/pelican-controller.ts';
 import { TUNING } from '../src/config/tuning.ts';
+
+const globals = globalThis as { document?: unknown };
+const previousDocument = globals.document;
+before(() => {
+  globals.document = { createElement: () => ({ getContext: () => ({
+    clearRect() {}, strokeText() {}, fillText() {}, fillRect() {}, beginPath() {}, moveTo() {}, lineTo() {},
+    quadraticCurveTo() {}, closePath() {}, fill() {}, arc() {}, createLinearGradient: () => ({ addColorStop() {} }),
+  }) }) };
+});
+after(() => {
+  if (previousDocument === undefined) delete globals.document;
+  else globals.document = previousDocument;
+});
+
+test('住宅正常飞行会耗尽推进并滑翔，默认展示飞行保持上升', () => {
+  const collision = { solids: [], platforms: [] };
+  const start = { x: 2, y: 10 };
+  const bounds = { width: 56, height: 30 };
+  const normal = createPerspectivePlayer(collision, start, bounds, [], false);
+  const inspection = createPerspectivePlayer(collision, start, bounds);
+  for (let tick = 0; tick < TUNING.player.flight.maxTicks + 60; tick++) {
+    normal.step({ ...NEUTRAL_INPUT, jumpHeld: true });
+    inspection.step({ ...NEUTRAL_INPUT, jumpHeld: true });
+  }
+  assert.equal(normal.entity.pelican!.flightMode, 'glide');
+  assert.ok(normal.entity.body.vy < 0, '推进耗尽后应进入下降滑翔');
+  assert.equal(inspection.entity.pelican!.flightMode, 'fly');
+  assert.ok(inspection.entity.body.vy > 0, '检视模式应保持持续推进');
+  assert.ok(inspection.entity.body.y > normal.entity.body.y);
+});
 
 function traveler(collision: ReturnType<typeof createDefinitionSettlementLayout>['collision']) {
   const player = createPerspectivePlayer(collision, { x: 2, y: 3 }, { width: 240, height: 30 });

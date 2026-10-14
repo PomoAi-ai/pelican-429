@@ -1,8 +1,10 @@
-import type { ShowcaseCard } from '../config/showcase.ts';
+import { D1_ARTWORK, type ShowcaseCard } from '../config/showcase.ts';
+import { ART_LIBRARY_GROUPS, type ArtLibraryEntry, type ArtLibraryImage } from '../config/art-library.ts';
 import type { ShowcaseModel } from './showcase-model.ts';
 import { createCard } from './showcase-panel.ts';
 import type { PreviewCardView } from './showcase-panel.ts';
 import { translateShowcaseText } from './showcase-language.ts';
+import { guidedImageUrl } from './ruler-guides.ts';
 import { writeCharacterStageLocation } from './character-stage-location.ts';
 import type { CharacterStageView } from './character-stage-location.ts';
 
@@ -16,6 +18,100 @@ function button(parent: HTMLElement, label: string, action: () => void, classNam
   const node = element('button', parent, className, label);
   node.type = 'button'; node.addEventListener('click', action);
   return node;
+}
+
+// 每张默认原画所在的资料库条目；下拉列出同条目的其他原画。登记的路径不在资料库里时启动即报错。
+const ARTWORK_ENTRIES = new Map<string, ArtLibraryEntry>(Object.values(D1_ARTWORK).map((path) => {
+  const entry = ART_LIBRARY_GROUPS.flatMap((group) => group.entries).find((item) => item.images.some((image) => image.path === path));
+  if (!entry) throw new Error(`原画对比路径不在原画资料库中：${path}`);
+  return [path, entry];
+}));
+
+/** 右侧原画对比栏：跟随选中（否则第一个）D1 角色的变体；滚轮以指针为中心缩放，拖动平移，双击复位；拖左边缘调宽度。 */
+function createArtwork(parent: HTMLElement, model: ShowcaseModel) {
+  const root = element('aside', parent, 'sc-stage-artwork');
+  root.setAttribute('aria-label', '原画对比');
+  const handle = element('div', root, 'sc-stage-artwork-resize');
+  handle.setAttribute('role', 'separator'); handle.setAttribute('aria-orientation', 'vertical'); handle.setAttribute('aria-label', '拖动调整原画栏宽度');
+  handle.addEventListener('pointerdown', (event) => {
+    handle.setPointerCapture(event.pointerId);
+    const resize = (move: PointerEvent): void => {
+      const width = Math.min(innerWidth * .7, Math.max(220, parent.getBoundingClientRect().right - move.clientX));
+      parent.style.setProperty('--sc-artwork-width', `${Math.round(width)}px`);
+    };
+    handle.addEventListener('pointermove', resize);
+    handle.addEventListener('lostpointercapture', () => handle.removeEventListener('pointermove', resize), { once: true });
+  });
+  const head = element('div', root, 'sc-stage-artwork-head');
+  element('strong', head, '', '原画对比');
+  const select = element('select', head, '');
+  select.setAttribute('aria-label', '选择原画');
+  const guidesToggle = element('label', head, 'sc-stage-artwork-guides');
+  const guides = element('input', guidesToggle, '');
+  guides.type = 'checkbox';
+  guides.checked = true;
+  guidesToggle.append('虚线');
+  guidesToggle.title = '显示或隐藏标尺虚线';
+  const frame = element('div', root, 'sc-stage-artwork-frame');
+  const image = element('img', frame, '');
+  image.alt = '原画'; image.decoding = 'async';
+  image.draggable = false;
+  let scale = 1, x = 0, y = 0;
+  const place = (): void => { image.style.transform = `translate(${x}px, ${y}px) scale(${scale})`; };
+  // 横版原画放在竖栏里会只占顶部，复位时垂直居中。
+  const reset = (): void => { scale = 1; x = 0; y = Math.max(0, (frame.clientHeight - image.clientHeight) / 2); place(); };
+  image.addEventListener('load', reset);
+  frame.addEventListener('wheel', (event) => {
+    event.preventDefault();
+    const rect = frame.getBoundingClientRect();
+    const px = event.clientX - rect.left, py = event.clientY - rect.top;
+    const next = Math.min(10, Math.max(1, scale * Math.exp(-event.deltaY * .0015)));
+    x = px - (px - x) * next / scale; y = py - (py - y) * next / scale; scale = next;
+    place();
+  }, { passive: false });
+  let drag: { id: number; x: number; y: number } | null = null;
+  frame.addEventListener('pointerdown', (event) => {
+    drag = { id: event.pointerId, x: event.clientX - x, y: event.clientY - y };
+    frame.setPointerCapture(event.pointerId);
+  });
+  frame.addEventListener('pointermove', (event) => {
+    if (drag?.id !== event.pointerId) return;
+    x = event.clientX - drag.x; y = event.clientY - drag.y;
+    place();
+  });
+  const release = (event: PointerEvent): void => { if (drag?.id === event.pointerId) drag = null; };
+  frame.addEventListener('pointerup', release);
+  frame.addEventListener('pointercancel', release);
+  frame.addEventListener('dblclick', reset);
+  let images: readonly ArtLibraryImage[] = [];
+  // 开关状态在切换原画时保留；当前原画没有虚线版就隐藏开关。
+  const show = (): void => {
+    const current = images.find((item) => item.path === select.value)!;
+    guidesToggle.hidden = !current.guides;
+    if (!(guides.checked && current.guides)) { image.src = current.path; return; }
+    void guidedImageUrl(current.path, current.guides).then((url) => {
+      if (select.value === current.path && guides.checked) image.src = url;
+    });
+  };
+  select.addEventListener('change', show);
+  guides.addEventListener('change', show);
+  const empty = element('p', root, 'sc-no-results', '场景中没有登记原画的角色');
+  let shown: string | null = null;
+  return (selectedId: number | null): void => {
+    const cards = model.cards.filter((card) => model.entry(card.entryId).actor === 'd1');
+    const card = cards.find((item) => item.id === selectedId) ?? cards[0];
+    const path = card ? D1_ARTWORK[card.d1Variant] : null;
+    empty.hidden = path !== null; select.hidden = frame.hidden = path === null;
+    if (path === shown) return;
+    shown = path;
+    if (path === null) return;
+    images = ARTWORK_ENTRIES.get(path)!.images;
+    select.replaceChildren(...images.map(({ label, path: value }) => {
+      const option = document.createElement('option'); option.value = value; option.textContent = label[0];
+      return option;
+    }));
+    select.value = path; show();
+  };
 }
 
 function createDirectory(parent: HTMLElement, model: ShowcaseModel, addActor: (id: string) => void) {
@@ -66,16 +162,6 @@ export function createCharacterStagePanel(parent: HTMLElement, model: ShowcaseMo
   const brandText = element('div', brand, '');
   element('strong', brandText, '', '角色展示场');
   element('span', brandText, '', 'PELICAN 429 · CHARACTER STUDIO');
-  const libraries = element('nav', sidebar, 'sc-library-tabs');
-  libraries.setAttribute('aria-label', '角色资料库导航');
-  const current = element('a', libraries, '', '角色场景');
-  current.href = './?mode=showcase'; current.setAttribute('aria-current', 'page');
-  const history = element('a', libraries, '', '历史资料'); history.href = './?mode=showcase&library=history';
-  const compare = element('a', libraries, '', '画质对比'); compare.href = './?mode=compare';
-  const references = element('nav', sidebar, 'sc-library-tabs');
-  references.setAttribute('aria-label', '设计资料');
-  const concepts = element('a', references, '', '基础概念定义'); concepts.href = './?mode=concepts';
-  const artwork = element('a', references, '', '原画资料库'); artwork.href = './?mode=art-library';
   const main = element('main', root, 'sc-stage-main');
   const toolbar = element('header', main, 'sc-stage-toolbar');
   const directoryToggle = button(toolbar, '☰ 目录', () => {
@@ -111,8 +197,19 @@ export function createCharacterStagePanel(parent: HTMLElement, model: ShowcaseMo
     const option = element('option', environment, '', label); option.value = value;
   }
   environment.value = view.environment;
+  const sunLabel = element('label', controls, 'sc-stage-zoom', '太阳');
+  const sun = element('input', sunLabel, '');
+  sun.type = 'range'; sun.min = '-1'; sun.max = '1'; sun.step = '0.01'; sun.value = '-0.5'; sun.setAttribute('aria-label', '太阳位置');
+  const sunPosition = element('output', sunLabel, '');
+  const updateSunPosition = (): void => {
+    const position = Number(sun.value);
+    sunPosition.value = Math.abs(position) < .03 ? '上方' : position < 0 ? '左侧' : '右侧';
+  };
+  sun.addEventListener('input', updateSunPosition);
+  updateSunPosition();
   const applyEnvironment = (): void => {
     const next = environment.value as ShowcaseCard['environment'];
+    sun.disabled = next === 'underground';
     for (const card of model.cards) if (card.environment !== next) model.update(card, { environment: next }, true);
   };
   applyEnvironment();
@@ -122,6 +219,10 @@ export function createCharacterStagePanel(parent: HTMLElement, model: ShowcaseMo
   zoom.type = 'range'; zoom.min = '0.65'; zoom.max = '12'; zoom.step = '0.05'; zoom.value = String(view.zoom); zoom.setAttribute('aria-label', '场景镜头缩放');
   const resetCamera = element('button', controls, '', '重置镜头');
   resetCamera.type = 'button';
+  const artworkToggle = button(controls, '原画对比', () => {
+    artworkToggle.setAttribute('aria-pressed', String(!root.classList.toggle('sc-artwork-hidden')));
+  });
+  artworkToggle.setAttribute('aria-pressed', 'true');
   const viewport = element('div', main, 'sc-stage-viewport');
   viewport.setAttribute('role', 'region'); viewport.setAttribute('aria-label', '角色展示场景');
   const actionbar = element('section', main, 'sc-stage-actionbar');
@@ -147,6 +248,7 @@ export function createCharacterStagePanel(parent: HTMLElement, model: ShowcaseMo
   const empty = element('div', viewport, 'sc-stage-empty');
   element('strong', empty, '', '场景中还没有角色');
   element('p', empty, '', '点击左侧角色即可添加。');
+  const refreshArtwork = createArtwork(root, model);
   const status = element('footer', main, 'sc-stage-status');
   const note = element('span', status, '', '正在准备场景…');
   button(status, '清空场景', () => model.clear());
@@ -157,6 +259,7 @@ export function createCharacterStagePanel(parent: HTMLElement, model: ShowcaseMo
     for (const [key, view] of views) view.root.hidden = key !== id;
     actionbar.hidden = id === null;
     hint.hidden = id !== null || model.cards.length === 0;
+    refreshArtwork(id);
   };
   const refresh = (): void => {
     const ids = new Set(model.cards.map((card) => card.id));
@@ -178,12 +281,15 @@ export function createCharacterStagePanel(parent: HTMLElement, model: ShowcaseMo
         body.querySelector('.sc-stage-view-row')!.append(remove);
         const closeControls = button(header, '×', () => selectActor(null), 'sc-stage-close-controls');
         closeControls.setAttribute('aria-label', '关闭角色操作栏');
-        header.insertBefore(body.querySelector('.sc-action-list')!, closeControls);
+        // Two rows: actions + playback on the label row, model options + images on the view row.
+        const playback = body.querySelector('.sc-card-controls > .sc-card-row:not(.sc-stage-view-row):not(.sc-secondary)')!;
+        closeControls.before(body.querySelector('.sc-action-list')!, ...playback.children, body.querySelector('.sc-card-bottom')!);
         const options = body.querySelector('.sc-actions')!;
         body.querySelector('.sc-stage-view-row')!.prepend(...options.children);
         const assets = element('details', body, 'sc-stage-control-assets');
         element('summary', assets, '', '图片资料');
         assets.append(body.querySelector('.sc-assets')!);
+        remove.before(assets);
       }
       views.get(card.id)!.refresh();
     }
@@ -206,6 +312,7 @@ export function createCharacterStagePanel(parent: HTMLElement, model: ShowcaseMo
     get zoom() { return Number(zoom.value); },
     setZoom(value: number) { zoom.value = String(value); },
     get environment() { return environment.value as ShowcaseCard['environment']; },
+    get sunPosition() { return Number(sun.value); },
     setNote(text: string) { if (note.textContent !== text) note.textContent = text; },
     dispose() { unsubscribe(); for (const view of views.values()) view.dispose(); views.clear(); root.remove(); },
   };

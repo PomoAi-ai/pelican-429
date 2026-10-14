@@ -22,6 +22,7 @@ import { createLumaShowcaseSession } from './luma-session.ts';
 import { createNpcShowcaseSession } from './npc-session.ts';
 import { createLumaCompanion } from '../../render/luma/luma-companion.ts';
 import { DUMMY_HEALTH_LAYER } from '../../render/entity-views.ts';
+import { warmUpStage } from '../../render/warm-up.ts';
 
 function createSceneContent(stage: ReturnType<typeof createStageView>, rig: ReturnType<typeof createPelicanRig>, card: ShowcaseCard, caveBackground: THREE.Texture) {
   const disposers: Array<() => void> = [];
@@ -59,7 +60,7 @@ function createSceneContent(stage: ReturnType<typeof createStageView>, rig: Retu
     const dispose = (): void => { for (const d of disposers.splice(0).reverse()) d(); };
     return {
       scenario, runner, dispose,
-      render(rect: DOMRect, dt: number, worldScale: boolean): THREE.Texture {
+      updateFrame(rect: DOMRect, dt: number, worldScale: boolean): void {
         const w = Math.max(1, Math.round(rect.width));
         const h = Math.max(1, Math.round(rect.height));
         if (w !== width || h !== height) { width = w; height = h; stage.setSize(w, h); }
@@ -111,7 +112,6 @@ function createSceneContent(stage: ReturnType<typeof createStageView>, rig: Retu
         }
         lighting.worldLight.update(stage.scene, frameIndex++);
         stage.renderer.setScissorTest(false);
-        return stage.renderTexture();
       },
       aim(clientX: number, clientY: number, rect: DOMRect) {
         screen.set((clientX - rect.left) / rect.width * 2 - 1, 1 - (clientY - rect.top) / rect.height * 2, 0.5).unproject(stage.camera);
@@ -134,6 +134,10 @@ export function createShowcaseSession(renderer: THREE.WebGLRenderer, card: Showc
     if (actor === 'luma') return createLumaShowcaseSession(renderer, card);
     if (actor === 'sam' || actor === 'tibo') return createNpcShowcaseSession(renderer, card, caveBackground);
   }
+  return createWorldShowcaseSession(renderer, card, caveBackground);
+}
+
+export function createWorldShowcaseSession(renderer: THREE.WebGLRenderer, card: ShowcaseCard, caveBackground: THREE.Texture) {
   const stage = createStageView(renderer, TUNING, { quality: 'high', antialias: 'msaa' });
   stage.camera.layers.enable(DUMMY_HEALTH_LAYER);
   let rig: ReturnType<typeof createPelicanRig>;
@@ -159,7 +163,14 @@ export function createShowcaseSession(renderer: THREE.WebGLRenderer, card: Showc
       return content.runner.advance(elapsed, card.speed, playing, manual);
     },
     get needsReset() { return revision !== card.revision; },
-    render(rect: DOMRect, dt: number, worldScale: boolean) { return content.render(rect, dt, worldScale); },
+    async prepare(rect: DOMRect, signal: AbortSignal): Promise<void> {
+      content.updateFrame(rect, 0, false);
+      await warmUpStage(stage, [], signal);
+    },
+    render(rect: DOMRect, dt: number, worldScale: boolean) {
+      content.updateFrame(rect, dt, worldScale);
+      return stage.renderTexture();
+    },
     aim(clientX: number, clientY: number, rect: DOMRect) { return content.aim(clientX, clientY, rect); },
     dispose() {
       if (disposed) return;

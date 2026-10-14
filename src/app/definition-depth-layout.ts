@@ -1,5 +1,7 @@
 import * as THREE from 'three';
+import { FullScreenQuad } from 'three/addons/postprocessing/Pass.js';
 import { TUNING } from '../config/tuning.ts';
+import { DEFINITION_DEPTH } from '../config/definition-kit.ts';
 import { createDefinitionKit, type DefinitionKit } from '../render/definition-kit.ts';
 import { createDefinitionInspection } from '../render/definition-inspection.ts';
 import { createBackdrop, createSkyTexture, type Stage } from '../render/stage.ts';
@@ -9,22 +11,69 @@ import { createTreeView, type TreeView } from '../render/tree-view.ts';
 import type { TreeKind } from '../world/level.ts';
 import { planTree } from '../world/trees.ts';
 import { mulberry32 } from '../core/rng.ts';
-import { buildDepthScenery, type DepthTheme } from './depth-scenery.ts';
+import { buildDepthScenery, terrainTextures, type DepthTheme } from './depth-scenery.ts';
 import { createDepthLandscapeDetails } from './depth-landscape-details.ts';
 import { createWindController } from '../world/wind.ts';
 import type { SceneSection } from './definition-scene-layout.ts';
 
 export const DEPTH_LAYERS = [
   { id: 'foreground', label: '近景遮挡', distance: 3, description: '镜头一侧的矮石、断墙和洞缘；只局部遮挡。' },
-  { id: 'background-near', label: '背景格子一', distance: -4, description: '离角色较近的阶地、门墙或洞壁，保留真实开口。' },
-  { id: 'background-far', label: '背景格子二', distance: -10, description: '错位的岩桥、建筑和洞壁，可从前层缺口看见。' },
-  { id: 'distance-near', label: '远景一', distance: -20, description: '近林、远处街区或洞柱群。' },
-  { id: 'distance-mid', label: '远景二', distance: -43, description: '山坡、城镇塔楼或悬空岩桥。' },
-  { id: 'distance-far', label: '远景三', distance: -76, description: '远山、天际线或深处洞厅。' },
+  { id: 'background-near', label: '背景格子一', distance: -7, description: '离角色较近的阶地、门墙或洞壁，保留真实开口。' },
+  { id: 'background-far', label: '背景格子二', distance: -16, description: '错位的岩桥、建筑和洞壁，可从前层缺口看见。' },
+  { id: 'distance-near', label: '远景一', distance: -35, description: '近林、远处街区或洞柱群。' },
+  { id: 'distance-mid', label: '远景二', distance: -70, description: '山坡、城镇塔楼或悬空岩桥。' },
+  { id: 'distance-far', label: '远景三', distance: -140, description: '远山、天际线或深处洞厅。' },
   { id: 'clouds', label: '远近云', distance: -24, description: '共享天气系统的多深度云，遮住部分日月星光。' },
   { id: 'sky', label: '太阳 / 月亮 / 星星', distance: -700, description: '按画面大小显示天体；关闭后仍保留天空底色。' },
 ] as const;
 export type DepthLayerId = typeof DEPTH_LAYERS[number]['id'];
+/** 景深 = 规则层距（视差约 0.81/0.65/0.46/0.30/0.18）、距离雾、前景下沉一格并模糊；原层次只为对比保留旧层距。 */
+export type DepthLayering = 'flat' | 'deep';
+// 旧层距，也是远景山林的建模距离。
+const FLAT_DISTANCE: Partial<Record<DepthLayerId, number>> = { 'background-near': -4, 'background-far': -10, 'distance-near': -20, 'distance-mid': -43, 'distance-far': -76 };
+// 远景是构图用的山林，推远后按透视比例放大，从镜头看大小不变、只是移动变慢；背景格子保持真实格子尺寸。
+const SCENERY_LAYERS: readonly DepthLayerId[] = ['distance-near', 'distance-mid', 'distance-far'];
+const SCENERY_PIVOT = { x: 24, y: 4 };
+// 层 1 已被训练假人血条占用。
+const FOREGROUND_BLUR_LAYER = 2;
+const BLUR_VERTEX = /* glsl */ `varying vec2 vUv; void main() { vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }`;
+const BLUR_FRAGMENT = /* glsl */ `
+  uniform sampler2D tMap;
+  uniform vec2 uStep;
+  varying vec2 vUv;
+  void main() {
+    vec4 sum = vec4(0.0);
+    float total = 0.0;
+    for (int i = -7; i <= 7; i++) {
+      float x = float(i) / 3.0;
+      float w = exp(-0.5 * x * x);
+      sum += texture2D(tMap, vUv + uStep * x) * w;
+      total += w;
+    }
+    gl_FragColor = sum / total;
+  }`;
+// 模糊在预乘透明度上进行；输出前还原颜色做色调映射与 sRGB，再预乘叠到画面上。
+// three 的线性雾用 smoothstep，离玩法平面几格内几乎为零，两层背景格子拉不开。景深方案改成从玩法平面起按距离指数加深：
+// fogFar − fogNear 是雾色达到一半的距离，最多混到 HAZE_MAX，避免远处地形比身后的远山还淡。
+const HAZE_HALF_DISTANCE = 25;
+const HAZE_MAX = .65;
+const HAZE_FRAGMENT = /* glsl */ `
+  #ifdef USE_FOG
+    float fogFactor = min(1.0 - exp2(-max(vFogDepth - fogNear, 0.0) / (fogFar - fogNear)), ${HAZE_MAX.toFixed(2)});
+    gl_FragColor.rgb = mix(gl_FragColor.rgb, fogColor, fogFactor);
+  #endif`;
+const COMPOSITE_FRAGMENT = /* glsl */ `
+  uniform sampler2D tMap;
+  uniform float uShade;
+  varying vec2 vUv;
+  void main() {
+    vec4 c = texture2D(tMap, vUv);
+    if (c.a < 0.002) discard;
+    gl_FragColor = vec4(c.rgb / c.a * uShade, c.a);
+    #include <tonemapping_fragment>
+    #include <colorspace_fragment>
+    gl_FragColor.rgb *= gl_FragColor.a;
+  }`;
 const themes: readonly DepthTheme[] = ['valley', 'lake', 'coast', 'buildings', 'ruins', 'cave'];
 const SCENES: Record<DepthTheme, { title: string; description: string; palette: readonly number[]; sky: readonly [string, string] }> = {
   valley: { title: '花园山谷', description: '花带绕过岩桥，樱树与白桦在两岸成荫，三重青山从中央谷口退向天空。', palette: [0x76866b,0xc9b995,0xa9b496,0x759a89,0x92b4ad,0xb4cdc6], sky: ['#72baca','#e4eed2'] },
@@ -47,17 +96,30 @@ export const DEPTH_STOPS = {
 export function createDefinitionDepthLayout() {
   const kit = createDefinitionKit();
   for (let x = 0; x < 48; x++) kit.solid('A', x, 0);
+  // 景深方案给玩法地面换上与近景同一种贴图；只换外观，碰撞仍来自上面的实心格。
+  const skins = Object.fromEntries((['dirt', 'stone'] as const).map(material => {
+    const skin = createDefinitionKit();
+    skin.terrain(Array.from({ length: 48 }, (_, x) => ({ x, y: 0, shape: 'A', layers: [{ shape: 'A', material, ore: false }] })), terrainTextures);
+    skin.root.visible = false; kit.root.add(skin.root);
+    return [material, skin];
+  })) as Record<'dirt' | 'stone', DefinitionKit>;
+  const plainGround = kit.root.children.filter(object => object instanceof THREE.Mesh && (object.material as THREE.Material).name === 'definition-solid');
   for (const [left, top] of [[15, 3], [23, 5], [31, 3]] as const) {
-    for (let x = left; x < left + 4; x++) kit.platform('full', .75, top, x);
+    for (let x = left; x < left + 4; x++) kit.platform('full', top, x);
   }
   const sections: SceneSection[] = themes.map(id => ({
     id, title: SCENES[id].title, description: SCENES[id].description, x: 0, y: 0, width: 48, height: 16, playerX: 24, playerY: 1,
-    items: ['共用48格可行走地面', '两层背景格子 · 距玩法平面4 / 10',
+    items: ['共用48格可行走地面', '两层背景格子 · 距玩法平面7 / 16',
       id === 'cave' ? '三层远处洞柱与洞拱' : '三层远山 · 远近云 · 白天太阳 / 夜晚月亮与星星', '三组可跳跃平台'],
   }));
   return { root: kit.root, sections, collision: { solids: kit.solids, platforms: kit.platforms },
-    bounds: new THREE.Box3(new THREE.Vector3(0, 0, -.5), new THREE.Vector3(48, 16, .5)),
-    dispose: () => kit.dispose() };
+    bounds: new THREE.Box3(new THREE.Vector3(0, 0, -DEFINITION_DEPTH.tile / 2), new THREE.Vector3(48, 16, DEFINITION_DEPTH.tile / 2)),
+    /** null = 原来的定义色地面。 */
+    setGroundSkin(material: 'dirt' | 'stone' | null): void {
+      for (const [name, skin] of Object.entries(skins)) skin.root.visible = name === material;
+      for (const object of plainGround) object.visible = material === null;
+    },
+    dispose: () => { skins.dirt.dispose(); skins.stone.dispose(); kit.dispose(); } };
 }
 
 function colorKit(kit: DefinitionKit, color: number): void {
@@ -76,14 +138,14 @@ function colorKit(kit: DefinitionKit, color: number): void {
 }
 
 /** 只装配共享构件、山脊、天气云和天体，环境不提供玩法碰撞。 */
-export function createDepthEnvironment(stage: Stage) {
+export function createDepthEnvironment(stage: Stage, selectedTheme: DepthTheme) {
   const root = new THREE.Group();
   root.name = 'depth-environment'; stage.scene.add(root);
   const kits: DefinitionKit[] = [];
   const groves: TreeView[] = [];
   const backdrops: ReturnType<typeof createBackdrop>[] = [];
   const details: Array<{ theme: DepthTheme; view: ReturnType<typeof createDepthLandscapeDetails> }> = [];
-  const daylight = new Map(themes.map(theme => [theme, createSkyTexture(...SCENES[theme].sky)]));
+  const daylight = new Map([[selectedTheme, createSkyTexture(...SCENES[selectedTheme].sky)]]);
   const groups = new Map<string, Map<DepthLayerId, THREE.Group>>();
   const enabled = new Map<DepthLayerId, boolean>(DEPTH_LAYERS.map(layer => [layer.id, true]));
   const terrainLayers = DEPTH_LAYERS.slice(0, 6);
@@ -95,7 +157,7 @@ export function createDepthEnvironment(stage: Stage) {
     view.root.position.x = offsetX;
     view.update({ x: -32, y: -5, w: 128, h: 40 }); parent.add(view.root); groves.push(view);
   };
-  for (const theme of themes) {
+  for (const theme of [selectedTheme]) {
     const layers = new Map<DepthLayerId, THREE.Group>(); groups.set(theme, layers);
     for (const layer of terrainLayers) {
       const group = new THREE.Group(); group.name = `${theme}-${layer.id}`; group.position.z = layer.distance;
@@ -130,30 +192,125 @@ export function createDepthEnvironment(stage: Stage) {
       }
     }
   }
+  // 环境里的材质改用上面的指数雾；玩家与玩法地面不在这里，仍走 three 默认雾，在玩法平面上为零。
+  // 检查视图的线框、半透明材质克隆自原材质并沿用它的 onBeforeCompile，所以要在创建检查视图之前注入。
+  const hazed = new Set<THREE.Material>();
+  const haze = (): void => root.traverse(object => {
+    const mesh = object as THREE.Mesh;
+    if (!mesh.material) return;
+    for (const material of Array.isArray(mesh.material) ? mesh.material : [mesh.material]) {
+      if (!('fog' in material) || !material.fog || hazed.has(material)) continue;
+      hazed.add(material);
+      const compile = material.onBeforeCompile, key = material.customProgramCacheKey;
+      material.onBeforeCompile = (shader, renderer) => {
+        compile.call(material, shader, renderer);
+        shader.fragmentShader = shader.fragmentShader.replace('#include <fog_fragment>', HAZE_FRAGMENT);
+      };
+      material.customProgramCacheKey = () => `${key.call(material)}|depth-haze`;
+    }
+  });
+  haze();
   const inspection = createDefinitionInspection(root); inspection.setTranslucent(false); inspection.setLines(false);
   const sky = createCelestialSky(); root.add(sky.root);
   const weather = { ...TUNING.render.weather,
     particles: { ...TUNING.render.weather.particles, lineMax: 0, lineRate: 0, debrisMax: 0, debrisRate: 0 } };
   const wind = createWindController(weather, 'breeze');
   const clouds = createWeatherFx({ scene: root, weather, wind, cameraDistance: TUNING.camera.distance });
+  haze();
   const initialBackground = stage.scene.background;
   const lights = [stage.keyLight, stage.rimLight, stage.hemiLight];
   const lightDefaults = lights.map(light => ({ color: light.color.clone(), intensity: light.intensity }));
   const groundColor = stage.hemiLight.groundColor.clone();
   const background = new THREE.Color('#16222f'); const forward = new THREE.Vector3();
-  const cloudView = { x: 0, y: 0, w: 48, h: 26 }; let theme: DepthTheme = 'valley'; let time = 0;
+  const cloudView = { x: 0, y: 0, w: 48, h: 26 }; let theme: DepthTheme = selectedTheme; let time = 0;
   const visibility = (): void => {
     for (const [name, layers] of groups) for (const [id, group] of layers) group.visible = name === theme && enabled.get(id)!;
     sky.root.visible = theme !== 'cave' && enabled.get('sky')!; clouds.setEnabled(theme !== 'cave' && enabled.get('clouds')!);
   };
   visibility();
+  let layering: DepthLayering = 'flat'; let fogPhase: SkyPhase = 'day';
+  const fog = new THREE.Fog(0xffffff, 0, 1);
+  const fogColor = (): void => {
+    if (theme === 'cave') fog.color.set('#16222f');
+    else if (fogPhase === 'night') fog.color.set('#3a4a66');
+    else fog.color.set(SCENES[theme].sky[0]).lerp(new THREE.Color(SCENES[theme].sky[1]), .6);
+  };
+  // 前景同时在层 0 和层 2：主渲染里它照常生成阴影，但不写颜色和深度；颜色由层 2 的单独通道画到半分辨率缓冲，
+  // 两遍高斯模糊后叠回画面。单独通道没有主场景深度，只在近正面镜头使用，其余视角前景回到普通渲染。
+  for (const light of lights) light.layers.enable(FOREGROUND_BLUR_LAYER);
+  let separate = false; let foregroundPass = false;
+  const masked = new Map<THREE.Material, readonly [boolean, boolean]>();
+  for (const layers of groups.values()) layers.get('foreground')!.traverse(object => {
+    object.layers.enable(FOREGROUND_BLUR_LAYER);
+    const before = object.onBeforeRender, after = object.onAfterRender;
+    object.onBeforeRender = (renderer, scene, camera, geometry, material, group) => {
+      before.call(object, renderer, scene, camera, geometry, material, group);
+      if (!separate || foregroundPass) return;
+      masked.set(material, [material.colorWrite, material.depthWrite]);
+      material.colorWrite = false; material.depthWrite = false;
+    };
+    object.onAfterRender = (renderer, scene, camera, geometry, material, group) => {
+      after.call(object, renderer, scene, camera, geometry, material, group);
+      const saved = masked.get(material);
+      if (!saved) return;
+      masked.delete(material); [material.colorWrite, material.depthWrite] = saved;
+    };
+  });
+  const sharp = new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType });
+  const soft = new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType, depthBuffer: false });
+  const blur = new THREE.ShaderMaterial({ uniforms: { tMap: { value: null }, uStep: { value: new THREE.Vector2() } }, vertexShader: BLUR_VERTEX, fragmentShader: BLUR_FRAGMENT, depthTest: false, depthWrite: false });
+  const composite = new THREE.ShaderMaterial({ uniforms: { tMap: { value: null }, uShade: { value: .82 } }, vertexShader: BLUR_VERTEX, fragmentShader: COMPOSITE_FRAGMENT,
+    transparent: true, blending: THREE.CustomBlending, blendSrc: THREE.OneFactor, blendDst: THREE.OneMinusSrcAlphaFactor, depthTest: false, depthWrite: false });
+  const quad = new FullScreenQuad(blur);
+  const bufferSize = new THREE.Vector2(); const clearColor = new THREE.Color();
   return {
+    setLayering(mode: DepthLayering): void {
+      layering = mode; const deep = mode === 'deep';
+      for (const layers of groups.values()) {
+        for (const layer of terrainLayers) {
+          const group = layers.get(layer.id)!;
+          const modeled = FLAT_DISTANCE[layer.id] ?? layer.distance;
+          group.position.z = deep ? layer.distance : modeled;
+          if (!SCENERY_LAYERS.includes(layer.id)) continue;
+          const scale = (TUNING.camera.distance - group.position.z) / (TUNING.camera.distance - modeled);
+          group.scale.set(scale, scale, 1);
+          group.position.x = SCENERY_PIVOT.x * (1 - scale); group.position.y = SCENERY_PIVOT.y * (1 - scale);
+        }
+        const foreground = layers.get('foreground')!;
+        foreground.position.y = deep ? -1 : 0;
+      }
+    },
+    /** 在 stage.render() 之后调用：把模糊、压暗的前景叠到已输出的画面上。 */
+    renderForeground(): void {
+      if (!separate) return;
+      const { renderer, camera, scene } = stage;
+      renderer.getDrawingBufferSize(bufferSize);
+      const width = Math.max(1, Math.round(bufferSize.x / 2)), height = Math.max(1, Math.round(bufferSize.y / 2));
+      if (sharp.width !== width || sharp.height !== height) { sharp.setSize(width, height); soft.setSize(width, height); }
+      const mask = camera.layers.mask, background = scene.background, shadows = renderer.shadowMap.autoUpdate;
+      const clearAlpha = renderer.getClearAlpha(); renderer.getClearColor(clearColor);
+      camera.layers.set(FOREGROUND_BLUR_LAYER); scene.background = null; renderer.shadowMap.autoUpdate = false;
+      renderer.setClearColor(0x000000, 0); renderer.setRenderTarget(sharp);
+      foregroundPass = true; renderer.render(scene, camera); foregroundPass = false;
+      camera.layers.mask = mask; scene.background = background; renderer.shadowMap.autoUpdate = shadows; renderer.setClearColor(clearColor, clearAlpha);
+      // 模糊半径按画面高度取，换屏幕像素比时虚化程度不变。
+      const sigma = .0024 * height;
+      quad.material = blur;
+      blur.uniforms.tMap!.value = sharp.texture; blur.uniforms.uStep!.value.set(sigma / width, 0);
+      renderer.setRenderTarget(soft); quad.render(renderer);
+      blur.uniforms.tMap!.value = soft.texture; blur.uniforms.uStep!.value.set(0, sigma / height);
+      renderer.setRenderTarget(sharp); quad.render(renderer);
+      quad.material = composite; composite.uniforms.tMap!.value = sharp.texture;
+      const autoClear = renderer.autoClear; renderer.autoClear = false;
+      renderer.setRenderTarget(null); quad.render(renderer); renderer.autoClear = autoClear;
+    },
     setWireframe: inspection.setWireframe,
     setLines: inspection.setLines,
     setTranslucent: inspection.setTranslucent,
     setLayerVisible(id: DepthLayerId, visible: boolean): void { enabled.set(id, visible); visibility(); },
     select(id: string, phase: SkyPhase): void {
       theme = id as DepthTheme; const underground = id === 'cave'; visibility(); sky.setPhase(phase);
+      fogPhase = phase; fogColor();
       stage.scene.background = underground ? background : phase === 'night' ? sky.background : daylight.get(theme)!; clouds.setOvercast(0, phase === 'night' ? .85 : 0);
       const dark = underground || phase === 'night';
       for (const backdrop of backdrops) for (const mountain of Object.values(backdrop.layers)) {
@@ -169,9 +326,14 @@ export function createDepthEnvironment(stage: Stage) {
     },
     update(camera: THREE.PerspectiveCamera, dt: number): void {
       time += dt; wind.update(time); sky.update(camera);
+      // 背景格子一约一成八、背景格子二约三成六、近林约六成，再远封顶；远山自带颜色不受雾影响。
+      // 侧看、俯视时视线不再垂直各层，按视深算雾会把整个场景罩住；雾与前景单独模糊都只在近正面镜头启用。
+      camera.getWorldDirection(forward);
+      separate = layering === 'deep' && forward.z < -.95;
+      stage.scene.fog = separate ? fog : null;
+      fog.near = camera.position.z - .3; fog.far = fog.near + HAZE_HALF_DISTANCE;
       for (const item of details) if (item.theme === theme) item.view.update(time);
       for (const trees of groves) if (trees.root.parent!.visible) trees.update({ x: -32, y: -5, w: 128, h: 40 }, time);
-      camera.getWorldDirection(forward);
       // 云沿游戏XY平面漂移；绕到侧后方观察时保留最后的云区域，不把云拉成相机贴片。
       if (forward.z < -.8 && camera.position.z > 0) {
         const distance = -camera.position.z / forward.z;
@@ -183,7 +345,9 @@ export function createDepthEnvironment(stage: Stage) {
       clouds.update(cloudView, dt, () => 1);
     },
     dispose(): void {
-      stage.scene.background = initialBackground;
+      stage.scene.background = initialBackground; stage.scene.fog = null;
+      for (const light of lights) light.layers.disable(FOREGROUND_BLUR_LAYER);
+      sharp.dispose(); soft.dispose(); blur.dispose(); composite.dispose(); quad.dispose();
       for (const [index, light] of lights.entries()) {
         light.color.copy(lightDefaults[index]!.color); light.intensity = lightDefaults[index]!.intensity;
       }

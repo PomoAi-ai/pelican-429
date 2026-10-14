@@ -25,6 +25,7 @@ import {
 import { createPrecipView, precipSurfaceRoots } from '../src/render/precip-view.ts';
 import { createRainFx, planDripEmitters } from '../src/render/rain-fx.ts';
 import { createSnowFx } from '../src/render/snow-fx.ts';
+import { residenceWeatherRoofs } from '../src/render/residence-weather.ts';
 import { createWeatherFx } from '../src/render/weather-fx.ts';
 import { createWindController } from '../src/world/wind.ts';
 import type { DesertInfo, TreeInstance } from '../src/world/level.ts';
@@ -227,6 +228,16 @@ describe('闪电（确定性，只在大雨）', () => {
 });
 
 describe('列数据（雨被遮挡 / 水面 / 沙漠）', () => {
+  test('住宅负坐标的半砖屋顶遮雨，拆除后降水落到地面', () => {
+    const ground = { points: [[-3, 0], [3, 0], [3, 1.5], [-3, 1.5]] as const };
+    const roof = { points: [[-2, 5], [-1, 5], [-1, 5.5], [-2, 5.5]] as const };
+    const covered = residenceWeatherRoofs([ground, roof], -3, 6);
+    assert.equal(covered[1], 5.5);
+    assert.equal(covered[0], 1.5);
+    assert.equal(covered[2], 1.5);
+    const open = residenceWeatherRoofs([ground], -3, 6);
+    assert.equal(open[1], 1.5);
+  });
   test('roof = 最高遮挡格顶边；悬挑下方不是落点；水面列 stop = 水面且标记水；refresh 只在变化时标记更新', () => {
     const { map, fluid } = flatWorld();
     for (let x = 10; x < 15; x++) map.set(x, 14, TILE_STONE); // 浮空块/屋顶
@@ -338,7 +349,7 @@ describe('表面注入：湿润/积雪', () => {
 describe('GPU 粒子（CPU 不逐粒子更新）与 draw call 上限', () => {
   test('雨：instanceCount 随密度；每帧只改 uniform，实例属性数组不变、不重新上传', () => {
     const { map } = flatWorld();
-    const rain = createRainFx({ rules: P, map, roof: () => 8, trees: [] });
+    const rain = createRainFx({ rules: P, emitters: planDripEmitters(map, () => 8, [], P.rain.dripMax, P.seed) });
     const seedAttr = (rain.streaks.geometry as THREE.InstancedBufferGeometry).getAttribute('aSeed') as THREE.InstancedBufferAttribute;
     const before = Float32Array.from(seedAttr.array as Float32Array);
     const v0 = seedAttr.version;

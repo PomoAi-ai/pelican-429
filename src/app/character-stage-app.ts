@@ -3,6 +3,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { TUNING } from '../config/tuning.ts';
 import type { ShowcaseCard } from '../config/showcase.ts';
 import { createStage } from '../render/stage.ts';
+import { createCelestialSky } from '../render/celestial-sky.ts';
 import { disposeGrassyAssets } from '../render/grassy/grassy-rig.ts';
 import { disposeGrassyStaticAssets } from '../render/grassy/grassy-static.ts';
 import { disposeD1Assets } from '../render/grassy/d1-rig.ts';
@@ -12,6 +13,7 @@ import { DUMMY_HEALTH_LAYER } from '../render/entity-views.ts';
 import { createCharacterStagePanel } from '../ui/character-stage-panel.ts';
 import type { ShowcaseModel } from '../ui/showcase-model.ts';
 import { createStageActor } from './showcase/stage-actor.ts';
+import { compileForStage } from '../render/warm-up.ts';
 import type { StageActor } from './showcase/stage-actor.ts';
 import { createStageGround } from './showcase/stage-ground.ts';
 import { createStageDragControls } from './showcase/stage-drag-controls.ts';
@@ -31,7 +33,11 @@ export function startCharacterStage(parent: HTMLElement, model: ShowcaseModel, r
   const stage = createStage(panel.viewport, TUNING, { quality: 'low', antialias: 'msaa' });
   stage.camera.layers.enable(DUMMY_HEALTH_LAYER);
   stage.camera.near = .05;
+  stage.camera.far = 1000;
   stage.camera.updateProjectionMatrix();
+  const sky = createCelestialSky();
+  stage.scene.add(sky.root);
+  const sunIntensity = stage.keyLight.intensity;
   stage.canvas.setAttribute('aria-label', '角色草地场景：点击角色或按 Enter 选择角色并打开工具条，拖动角色调整位置，拖动空白平移摄像头，滚轮或双指缩放，点击空白或按左右方向键切换轻微角度');
   stage.canvas.tabIndex = 0;
   const cameraControls = new OrbitControls(stage.camera, stage.canvas);
@@ -119,6 +125,7 @@ export function startCharacterStage(parent: HTMLElement, model: ShowcaseModel, r
     for (const { actor } of actors.values()) actor.dispose();
     actors.clear();
     ground.dispose();
+    sky.dispose();
     stage.canvas.removeEventListener('click', onSceneClick);
     stage.canvas.removeEventListener('keydown', onSceneKey);
     stage.canvas.removeEventListener('pointermove', onSceneAim);
@@ -166,7 +173,9 @@ export function startCharacterStage(parent: HTMLElement, model: ShowcaseModel, r
         const requestedKey = key(pending);
         preparing.set(pending.id, requestedKey);
         const isCurrent = (): boolean => !stopped && model.cards.includes(pending) && key(pending) === requestedKey;
-        void createStageActor(pending, isCurrent).then((actor) => {
+        void createStageActor(pending, isCurrent).then(async (actor) => {
+          // 编译完成前保持“准备中”，避免下一帧重复创建；新角色的着色器同步编译曾让添加时卡住一两秒。
+          if (actor) await compileForStage(stage, actor.root);
           if (preparing.get(pending.id) === requestedKey) preparing.delete(pending.id);
           if (!actor) return;
           if (!isCurrent()) { actor.dispose(); return; }
@@ -227,7 +236,16 @@ export function startCharacterStage(parent: HTMLElement, model: ShowcaseModel, r
           const underground = environment === 'underground';
           stage.scene.background = new THREE.Color(underground ? '#172b3b' : '#b8ccc4');
           stage.hemiLight.intensity = TUNING.render.hemi * (underground ? 0.65 : 1);
+          sky.root.visible = !underground;
+          stage.keyLight.intensity = underground ? 0 : sunIntensity;
         }
+        const sunAngle = panel.sunPosition * Math.PI / 2;
+        // 窄窗口为太阳光晕预留边距，避免滑杆端点把天体推到画面外。
+        const skyHalfHeight = Math.tan(THREE.MathUtils.degToRad(stage.camera.fov) / 2);
+        const sunSpan = Math.max(0, Math.min(.26, skyHalfHeight * (stage.camera.aspect - .2)));
+        const sunDirection = { x: sunSpan * Math.sin(sunAngle), y: .19 + .01 * Math.cos(sunAngle), z: -1 };
+        sky.setSunDirection(sunDirection);
+        stage.setSunDirection(sunDirection);
         for (const card of model.cards) {
           const item = actors.get(card.id);
           const view = panel.views.get(card.id)!;
@@ -255,6 +273,7 @@ export function startCharacterStage(parent: HTMLElement, model: ShowcaseModel, r
           groundBounds.expandByPoint(groundCorner);
         }
         ground.update({ x: groundBounds.min.x - 4, y: groundBounds.min.y - 4, w: groundBounds.max.x - groundBounds.min.x + 8, h: groundBounds.max.y - groundBounds.min.y + 8 }, now / 1000);
+        sky.update(stage.camera);
         stage.render();
         panel.setNote(`场景中 ${model.cards.length} 个角色 · 角度 ${angles[angleIndex]}° · 点击空白切换`);
         loading.hidden = true;

@@ -1,0 +1,25 @@
+{
+  "image": "white-concrete-game-camera.png",
+  "material": "White concrete - shared by all profiles",
+  "resolution": [
+    3200,
+    1800
+  ],
+  "solidCount": 33,
+  "wallEntryCount": 22,
+  "cameraType": "PERSP",
+  "cameraLocation": [
+    0.0,
+    0.0,
+    30.0
+  ],
+  "cameraRotation": [
+    0.0,
+    0.0,
+    0.0
+  ],
+  "verticalFieldOfViewDegrees": 30.000000834826057,
+  "solidDepth": 2,
+  "wallDepth": 0.2,
+  "stage": "artwork only; not game runtime integration"
+}

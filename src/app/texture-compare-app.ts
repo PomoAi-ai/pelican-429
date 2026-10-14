@@ -88,12 +88,6 @@ export async function startTextureCompare(onError: (error: unknown) => void): Pr
   element(title, 'p', 'PELICAN 429 / TEXTURE LAB', 'tc-eyebrow');
   element(title, 'h1', '画质对比');
   element(title, 'p', '同一模型、灯光、镜头与动作时间。先看全身，再拉近检查脸部、毛发和衣料。', 'tc-subtitle');
-  const nav = element(header, 'nav', '', 'sc-library-tabs');
-  nav.setAttribute('aria-label', '角色资料库导航');
-  for (const [label, href] of [['角色场景', './?mode=showcase'], ['历史资料', './?mode=showcase&library=history'], ['画质对比', './?mode=compare']] as const) {
-    const link = element(nav, 'a', label); link.href = href;
-    if (label === '画质对比') link.setAttribute('aria-current', 'page');
-  }
   const toolbar = element(page, 'section', '', 'tc-toolbar');
   const compactLabel = element(toolbar, 'label', '同步压缩模型数据（KTX2 两栏）');
   const compact = element(compactLabel, 'input'); compact.type = 'checkbox'; compact.checked = true;

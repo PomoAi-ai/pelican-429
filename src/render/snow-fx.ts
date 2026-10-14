@@ -104,6 +104,7 @@ export function createSnowFx(rules: PrecipTuning): SnowFx {
   const u = {
     uPrCols: pu.uPrCols,
     uPrColsW: pu.uPrColsW,
+    uPrColsOrigin: pu.uPrColsOrigin,
     uCam: { value: new THREE.Vector3() },
     uTan: { value: new THREE.Vector2(1, 1) },
     uZ: { value: new THREE.Vector2(F.zFar, F.zNear) },

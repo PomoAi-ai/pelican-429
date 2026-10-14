@@ -9,7 +9,7 @@ import type { Stage } from './stage.ts';
  * 所以每次编译后再关掉视锥剔除真实渲染一帧，把这些都在加载层显示期间做完。
  * 须在世界光照补丁（worldLight.update）之后调用，否则补丁会改掉程序键，预热白做。
  */
-export async function warmUpStage(stage: Stage, lightGroups: readonly THREE.Object3D[]): Promise<void> {
+export async function warmUpStage(stage: Stage, lightGroups: readonly THREE.Object3D[], signal?: AbortSignal): Promise<void> {
   const { renderer, scene } = stage;
   scene.traverse((node) => {
     if (!(node instanceof THREE.Mesh || node instanceof THREE.Points || node instanceof THREE.Line || node instanceof THREE.Sprite)) return;
@@ -22,22 +22,31 @@ export async function warmUpStage(stage: Stage, lightGroups: readonly THREE.Obje
   });
   const culled: THREE.Object3D[] = [];
   scene.traverse((node) => { if (node.frustumCulled) { node.frustumCulled = false; culled.push(node); } });
-  await compile(stage);
-  stage.render();
-  for (const group of lightGroups) {
-    group.visible = true;
-    await compile(stage);
+  try {
+    await compileForStage(stage, stage.scene);
+    signal?.throwIfAborted();
     stage.render();
-    group.visible = false;
+    for (const group of lightGroups) {
+      group.visible = true;
+      try {
+        await compileForStage(stage, stage.scene);
+        signal?.throwIfAborted();
+        stage.render();
+      } finally { group.visible = false; }
+    }
+  } finally {
+    for (const node of culled) node.frustumCulled = true;
   }
-  for (const node of culled) node.frustumCulled = true;
 }
 
-/** 场景实际画进后期的 HDR 目标（线性输出、不做色调映射）；编译时绑定同一目标，程序键才与真实渲染一致。 */
-function compile({ renderer, scene, camera, postFx }: Stage): Promise<unknown> {
+/**
+ * 场景实际画进后期的 HDR 目标（线性输出、不做色调映射）；编译时绑定同一目标，程序键才与真实渲染一致。
+ * root 可以是尚未挂进场景的对象：按场景灯光异步编译，挂上后首帧不再同步编译。
+ */
+export function compileForStage({ renderer, scene, camera, postFx }: Stage, root: THREE.Object3D): Promise<unknown> {
   const target = renderer.getRenderTarget();
   renderer.setRenderTarget(postFx.sceneTarget);
-  const ready = renderer.compileAsync(scene, camera);
+  const ready = renderer.compileAsync(root, camera, scene);
   renderer.setRenderTarget(target);
   return ready;
 }

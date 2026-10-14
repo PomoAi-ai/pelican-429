@@ -70,7 +70,7 @@ def project(p):
     v = sub((p[0], p[1], -p[2]), EYE)
     depth = dot(v, FORWARD)
     assert depth > 0
-    return (1150 + 2800 * dot(v, RIGHT) / depth, 665 - 2800 * dot(v, UP) / depth)
+    return (1150 + 2300 * dot(v, RIGHT) / depth, 640 - 2300 * dot(v, UP) / depth)
 
 
 faces = []
@@ -89,41 +89,41 @@ def box(x, y, z, w, h, depth, colors):
 
 text(60, 38, '液体定义｜水体、占格与透视', 54)
 text(63, 114, '程序已有水 · 本图补齐空间定义 · 蓝色是可进入的水体，棕色是挡水地形', 29, MUTED)
-panel((50, 185, 2350, 1105), '01  水池剖切透视 · 新版中间深度 1 格')
-text(85, 260, '设计坐标：内沿 −Z / 外延 +Z；斜上方检查视角，不是游戏默认镜头。', 27, MUTED)
+panel((50, 185, 2350, 1105), '01  水池剖切透视 · 新版格子深度 2 格')
+text(85, 260, '设计坐标：前沿 +Z（镜头侧）/ 后沿 −Z；斜上方检查视角，不是游戏默认镜头。', 27, MUTED)
 
 stone = ('#BBA184', '#D9C6A9', '#947C66')
 for x in range(6):
-    box(x, 0, -.5, 1, 1, 1, stone)
+    box(x, 0, -1, 1, 1, 2, stone)
 for x in (0, 5):
     for y in (1, 2):
-        box(x, y, -.5, 1, 1, 1, stone)
-box(1, 1, .5, 4, 2, .2, ('#D9E1E7', '#ECF0F4', '#B8C8D2'))
+        box(x, y, -1, 1, 1, 2, stone)
+box(1, 1, 1, 4, 2, .2, ('#D9E1E7', '#ECF0F4', '#B8C8D2'))
 # One connected volume: no internal glass-box seams between water cells.
-face([(1,1,-.5), (5,1,-.5), (5,2.5,-.5), (1,2.5,-.5)], '#75BFD3')
-face([(1,2.5,-.5), (5,2.5,-.5), (5,2.5,.5), (1,2.5,.5)], '#ADE4E6')
+face([(1,1,-1), (5,1,-1), (5,2.5,-1), (1,2.5,-1)], '#75BFD3')
+face([(1,2.5,-1), (5,2.5,-1), (5,2.5,1), (1,2.5,1)], '#ADE4E6')
 for _, points, color in sorted(faces, key=lambda f: f[0], reverse=True):
     pts = [project(p) for p in points]
     d.polygon(pts, fill=color)
     d.line(pts + [pts[0]], fill='#607D89', width=2)
-for z in (-.28, 0, .27):
+for z in (-.6, 0, .6):
     d.line([project((x, 2.505, z + .025 * math.sin(x * 6))) for x in [1.2 + i * .08 for i in range(45)]], fill='#E8FCFF', width=3)
 
 text(90, 370, '水面：水平顶面 + 轻微波动', 29, BLUE)
 d.line([(510,410), (620,410), project((3,2.5,0))], fill=BLUE, width=3)
-text(90, 490, '岸壁、池底：实心格挡水', 28)
-d.line([(480,530), project((.5,2.8,-.5))], fill=MUTED, width=3)
+text(90, 490, '岸壁、池底：地形格挡水', 28)
+d.line([(480,530), project((.5,2.8,-1))], fill=MUTED, width=3)
 text(1720, 375, '背景墙在水体后方', 29)
-text(1720, 419, '厚 0.2；此处位置为示例', 25, MUTED)
-d.line([(1710,470), project((4.7,2.9,.5))], fill=MUTED, width=3)
+text(1720, 419, '厚 0.2；位于后沿 Z=[−1.2,−1]', 25, MUTED)
+d.line([(1710,470), project((4.7,2.9,1))], fill=MUTED, width=3)
 text(1780, 690, '水下截面', 31, BLUE)
 text(1780, 737, '观察剖面，不是玻璃墙', 25, MUTED)
-d.line([(1760,720), project((4,1.8,-.5))], fill=BLUE, width=3)
-dimension(project((1,.7,-.7)), project((5,.7,-.7)))
+d.line([(1760,720), project((4,1.8,-1))], fill=BLUE, width=3)
+dimension(project((1,.7,-1.2)), project((5,.7,-1.2)))
 text(920, 960, '示例水池内宽 4 格', 28, BLUE)
-dimension(project((6.25,1,-.5)), project((6.25,1,.5)))
-text(1830, 925, '水体深 1 格', 28, BLUE)
-text(85, 1037, '水面下降只改变 Y 高度，Z 深度保持 1；相邻水格拼成连续水体，不画内部盒边。', 28, MUTED)
+dimension(project((6.25,1,-1)), project((6.25,1,1)))
+text(1830, 925, '水体深 2 格', 28, BLUE)
+text(85, 1037, '水面下降只改变 Y 高度，Z 深度保持 2；相邻水格拼成连续水体，不画内部盒边。', 28, MUTED)
 
 panel((50, 1140, 1175, 1780), '02  正视 XY · 水量决定水位')
 u, ox, oy = 132, 235, 1615
@@ -142,27 +142,28 @@ text(399, 1433, 'q=255 · 满格水', 27, BLUE)
 text(85, 1650, '每格 0～255；顶格水面 Y=j+q/255。', 27)
 text(85, 1703, '波纹、水膜和格线仅是表现，不增加水量。', 27, MUTED)
 
-panel((1205, 1140, 2350, 1780), '03  等比例 YZ · 预留区不注满')
-u, ox, oy = 255, 1450, 1600
-# One world unit is the same number of pixels on both axes.
-d.rectangle((ox,oy-u,ox+2*u,oy), fill='#FAFCFD', outline=GRID, width=2)
-for i in range(21):
+panel((1205, 1140, 2350, 1780), '03  等比例 YZ · 前沿后沿不注满')
+u, ox, oy = 200, 1440, 1600
+# One world unit is the same number of pixels on both axes; +Z faces the camera, drawn on the left.
+zx = lambda z: ox + (1.5 - z) * u
+d.rectangle((ox,oy-u,zx(-1.5),oy), fill='#FAFCFD', outline=GRID, width=2)
+for i in range(31):
     x = ox + i*u/10
     d.line((x,oy-u,x,oy), fill=GRID, width=1)
 for i in range(11):
     y = oy-i*u/10
-    d.line((ox,y,ox+2*u,y), fill=GRID, width=1)
-d.rectangle((ox+.5*u,oy-u,ox+1.5*u,oy), fill='#80CADC', outline=BLUE, width=3)
-d.rectangle((ox+1.5*u,oy-u,ox+1.7*u,oy), fill='#CBD6DE', outline='#718898', width=2)
-dashed((ox+u,oy-u-20),(ox+u,oy+20),'#BB7138')
-text(1478, 1274, '内沿', 25, MUTED)
-text(1644, 1274, '水体深 1', 27, BLUE)
-text(1850, 1274, '外延', 25, MUTED)
-for z in (-1, -.5, 0, .5, 1):
-    text(ox+(z+1)*u-24, oy+17, f'{z:g}', 23, MUTED)
-text(2002, 1360, '墙厚 0.2', 26)
-text(2002, 1415, '人物 Z=0', 26, '#BB7138')
-text(1240, 1675, '中间 1 + 两侧各 0.5 = 总空间 2 格。', 27)
+    d.line((ox,y,zx(-1.5),y), fill=GRID, width=1)
+d.rectangle((zx(1),oy-u,zx(-1),oy), fill='#80CADC', outline=BLUE, width=3)
+d.rectangle((zx(-1),oy-u,zx(-1.2),oy), fill='#CBD6DE', outline='#718898', width=2)
+dashed((zx(0),oy-u-20),(zx(0),oy+20),'#BB7138')
+text(zx(1.45), 1274, '前沿', 25, MUTED)
+text(zx(.3), 1274, '水体深 2', 27, BLUE)
+text(zx(-1.05), 1274, '后沿', 25, MUTED)
+for z in (1.5, 1, .5, 0, -.5, -1, -1.5):
+    text(zx(z)-24, oy+17, f'{z:+g}' if z else '0', 23, MUTED)
+text(2075, 1360, '墙厚 0.2', 26)
+text(2075, 1415, '人物 Z=0', 26, '#BB7138')
+text(1240, 1675, '格子深 2 + 格子外前沿、后沿各 0.5 = 总空间带 3 格。', 27)
 text(1240, 1722, '此为新版设计；不与现行世界 Z 坐标混用。', 27, MUTED)
 
 panel((50, 1815, 2350, 2140), '04  已有规则与实现边界')

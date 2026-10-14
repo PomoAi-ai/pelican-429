@@ -1,5 +1,4 @@
 import { parseAppMode, RELEASE_MODES } from './config/app-mode.ts';
-import { parseFacilityChapter } from './config/facility-scenes.ts';
 import { attachDomLanguage } from './ui/dom-language.ts';
 import { STORY_SAVE_KEY } from './config/story-save.ts';
 import { getLanguage, onLanguageChange } from './ui/language.ts';
@@ -7,7 +6,7 @@ import { mountMobileGameViewport } from './ui/mobile-game-viewport.ts';
 import { homeScreenInstallState } from './ui/home-screen-install.ts';
 import { fullscreenOnFirstTap } from './ui/fullscreen.ts';
 import { mountSitePage } from './ui/site-pages.ts';
-import { mountArtLibrary } from './ui/art-library.ts';
+import { mountSiteNavigation } from './ui/site-navigation.ts';
 
 function bootError(error: unknown): void {
   console.error(error);
@@ -55,8 +54,8 @@ async function boot(): Promise<void> {
       if (url.origin === location.origin && url.searchParams.has('mode') && !RELEASE_MODES.includes(url.searchParams.get('mode')!)) link.remove();
     }
   }
+  const sceneWorkspace = mode === 'lab' || mode === 'resources' || mode === 'facility';
   const playing = mode === 'game' || mode === 'homestead' || mode === 'story' || mode === 'controls';
-  const perspective = mode === 'resources' && (params.get('scene') === 'room' || params.get('scene') === 'settlement' || params.get('scene') === 'depth');
   if (playing) {
     document.documentElement.classList.add('game-interface');
     document.querySelector<HTMLMetaElement>('meta[name="viewport"]')!.content = 'width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover';
@@ -68,20 +67,8 @@ async function boot(): Promise<void> {
   }
   const navigation = document.getElementById('dev-navigation')!;
   navigation.dataset.context = mode === 'index' ? 'home' : playing ? 'game' : 'resources';
-  const currentPage = mode === 'showcase' && params.get('library') === 'history' ? 'history'
-    : perspective ? 'perspective'
-    : mode === 'homestead' ? 'game'
-    : mode === 'game' && params.get('level') === 'boss-arena' ? 'boss-arena'
-    : mode === 'game' && params.get('free') === '1' ? 'game'
-    : mode === 'game' && params.get('level') === 'facility' ? `chapter-${parseFacilityChapter(params)}` : mode;
-  navigation.querySelector<HTMLAnchorElement>(`[data-page="${currentPage}"]`)!.setAttribute('aria-current', 'page');
-  if (!release) {
-    const showcaseParams = new URLSearchParams(params);
-    showcaseParams.delete('demo');
-    showcaseParams.delete('library');
-    showcaseParams.set('mode', 'showcase');
-    (document.getElementById('dev-showcase-link') as HTMLAnchorElement).href = `${location.pathname}?${showcaseParams}`;
-  }
+  // 首页与帮助是顶栏固定链接；其余页面由两级导航按地址高亮。
+  if (mode === 'index' || mode === 'about') navigation.querySelector<HTMLAnchorElement>(`[data-page="${mode}"]`)!.setAttribute('aria-current', 'page');
   // 导航聚焦时的按键不传递给游戏控制器。
   for (const type of ['keydown', 'keyup']) navigation.addEventListener(type, event => event.stopPropagation());
   if (localStorage.getItem(STORY_SAVE_KEY) !== null) {
@@ -94,33 +81,14 @@ async function boot(): Promise<void> {
     navigation.querySelector('.home-play-toggle')!.remove();
     document.getElementById('home-play-menu')!.remove();
   }
-  if (mode !== 'index' && !perspective) {
+  // 放在“继续游戏”改名之后，二级栏里的“主线”保持原名。
+  mountSiteNavigation(navigation, params, release);
+  if (mode !== 'index' && !sceneWorkspace) {
     attachGameNavigation(navigation, playing);
-  }
-  if (mode === 'art-library') {
-    attachDomLanguage();
-    mountArtLibrary();
-    return;
   }
   if (mode === 'catalog' || mode === 'about' || mode === 'concepts') {
     attachDomLanguage();
-    mountSitePage(mode, navigation);
-    return;
-  }
-  if (mode === 'dev') {
-    document.body.classList.add('site-home');
-    const catalog = document.getElementById('dev-catalog')!;
-    for (const source of navigation.querySelectorAll<HTMLAnchorElement>('.home-primary-link, .home-resources-menu a:not([data-page="dev"])')) {
-      const link = document.createElement('a');
-      link.href = source.href;
-      link.textContent = source.textContent;
-      catalog.append(link);
-    }
-    document.getElementById('dev-index')!.hidden = false;
-    document.getElementById('loading')!.hidden = true;
-    document.title = '资源展示 · 鹈鹕 429';
-    // Attach after copying the links so the catalog keeps the Chinese originals to switch back to.
-    attachDomLanguage();
+    mountSitePage(mode);
     return;
   }
   if (mode === 'story') {
@@ -196,21 +164,25 @@ async function boot(): Promise<void> {
     return;
   }
   attachDomLanguage();
-  if (mode === 'compare') {
+  if (sceneWorkspace) {
+    const { startSceneWorkspace } = await import('./app/scene-workspace.ts');
+    startSceneWorkspace(bootError);
+  } else if (mode === 'compare') {
     const { startTextureCompare } = await import('./app/texture-compare-app.ts');
     await startTextureCompare(bootError);
-  } else if (mode === 'facility') {
-    const { startFacility } = await import('./app/facility-app.ts');
-    await startFacility(bootError);
+
   } else if (mode === 'sounds') {
     const { startSoundGallery } = await import('./app/sound-gallery.ts');
     startSoundGallery();
   } else if (mode === 'intro') {
     const { startIntro } = await import('./app/intro-app.ts');
     await startIntro(bootError);
-  } else if (mode === 'showcase' || mode === 'resources' || mode === 'lab') {
+  } else if (mode === 'homestead' && params.get('scene') === 'residence') {
+    const { startResidence } = await import('./app/residence-app.ts');
+    await startResidence('saved', bootError);
+  } else if (mode === 'showcase') {
     const { startShowcase } = await import('./app/showcase-app.ts');
-    await startShowcase(mode);
+    await startShowcase(mode, bootError);
   } else {
     const { startGame } = await import('./app/game-app.ts');
     await startGame();

@@ -224,7 +224,8 @@ function landmarkOk(env: DecorEnv, x: number, half: number, desert: boolean): bo
   return env.relief(x) <= (desert ? 1 : 2);
 }
 
-function landmarkInstance(env: DecorEnv, kind: RockKind, x: number, salt: number): RockInstance {
+/** 列 x 处的一件景观岩（岩壁 / 砂岩柱 / 拱门）：宽、z、色由哈希决定。planLandmarks 用它选位后生成，定义场景按指定种类直接取用。 */
+export function landmarkInstance(env: DecorEnv, kind: RockKind, x: number, salt: number): RockInstance {
   const h = (k: number): number => hash01(x, k, salt);
   const range = kind === 'cliff' ? ROCK_SIZE.cliff : kind === 'hoodoo' ? ROCK_SIZE.hoodoo : ROCK_SIZE.arch;
   const width = lerp(range[0], range[1], h(1));
@@ -315,15 +316,23 @@ function pickMain(env: DecorEnv, x: number, cls: 'mid' | 'big', h: (k: number) =
 export function rockGroupInstances(env: DecorEnv, x: number): RockInstance[] {
   const cls = rockClass(env, x);
   const out: RockInstance[] = [];
-  if (cls !== null) planGroup(env, x, cls, out);
+  if (cls !== null) planGroup(env, x, pickMain(env, x, cls, (k) => hash01(x, k, ROCK_SALT)), out);
   return out;
 }
 
-/** 一组岩石（主体 + 附石 + 碎石 + 裙边 + 石缝草）。 */
-function planGroup(env: DecorEnv, x: number, cls: 'mid' | 'big', out: RockInstance[]): void {
+/** 以指定中石或大石为主体，在列 x 生成整组岩石（定义场景按种类逐一展示时用；游戏由 rockGroupInstances 按生境选主体）。纯函数。 */
+export function rockGroupFor(env: DecorEnv, x: number, kind: RockKind): RockInstance[] {
+  if (!BIG_ROCKS.has(kind) && !MID_ROCKS.has(kind)) throw new Error(`surface-decor: ${kind} is not a mid or big rock`);
+  const out: RockInstance[] = [];
+  planGroup(env, x, kind, out);
+  return out;
+}
+
+/** 一组岩石（主体 + 附石 + 碎石 + 裙边 + 石缝草）；中石、大石由主体种类决定。 */
+function planGroup(env: DecorEnv, x: number, kind: RockKind, out: RockInstance[]): void {
   const h = (k: number): number => hash01(x, k, ROCK_SALT);
   const desert = isDesertCol(env, x);
-  const kind = pickMain(env, x, cls, h);
+  const cls = BIG_ROCKS.has(kind) ? 'big' : 'mid';
   const native = ROCK_NATIVE[kind];
   const width = cls === 'mid' ? lerp(ROCK_SIZE.mid[0], ROCK_SIZE.mid[1], h(3)) : kind === 'outcrop' || kind === 'sandOutcrop' ? lerp(ROCK_SIZE.outcrop[0], ROCK_SIZE.outcrop[1], h(3)) : lerp(ROCK_SIZE.boulder[0], ROCK_SIZE.boulder[1], h(3));
   const zr = cls === 'big' ? ROCK_Z.big : ROCK_Z.mid;
@@ -391,16 +400,22 @@ export function planRocks(env: DecorEnv, x0: number, x1: number): RockInstance[]
     // 前景散石。
     const h = (k: number): number => hash01(x, k, ROCK_SALT + 5);
     if (h(0) < scatterLambda(env, x)) {
-      const desert = isDesertCol(env, x);
-      const kind: RockKind = desert ? 'sandPebbles' : h(1) < 0.45 ? 'pebbles' : h(1) < 0.75 ? 'cobbles' : 'rubble';
-      const width = lerp(ROCK_SIZE.pebbles[0], ROCK_SIZE.pebbles[1], h(2)) * (kind === 'rubble' ? 1.3 : 1);
-      const px = x + 0.2 + 0.6 * h(3);
-      const slope = (env.surfaceY(px + 0.3) - env.surfaceY(px - 0.3)) / 0.6;
-      const hab = rockHabitat(env, x);
-      out.push({ kind, x: px, y: seat(env, px, width, ROCK_NATIVE[kind].height / ROCK_NATIVE[kind].width, ROCK_SINK.small), z: lerp(ROCK_Z.small[0], ROCK_Z.small[1], h(4)), yaw: (h(5) - 0.5) * 3, tilt: Math.atan(slope) * 0.8, width, stretch: 0.85 + 0.35 * h(6), tint: habitatTint(hab, h(7)), moss: ROCK_HABITAT[hab].moss });
+      const kind: RockKind = isDesertCol(env, x) ? 'sandPebbles' : h(1) < 0.45 ? 'pebbles' : h(1) < 0.75 ? 'cobbles' : 'rubble';
+      out.push(scatterRockFor(env, x, kind));
     }
   }
   return out;
+}
+
+/** 列 x 的一处前景散石（小件，可到前景 z）；planRocks 按生境选种类，定义场景按种类直接取用。纯函数。 */
+export function scatterRockFor(env: DecorEnv, x: number, kind: RockKind): RockInstance {
+  if (!SMALL_ROCKS.has(kind)) throw new Error(`surface-decor: ${kind} is not a small rock`);
+  const h = (k: number): number => hash01(x, k, ROCK_SALT + 5);
+  const width = lerp(ROCK_SIZE.pebbles[0], ROCK_SIZE.pebbles[1], h(2)) * (kind === 'rubble' ? 1.3 : 1);
+  const px = x + 0.2 + 0.6 * h(3);
+  const slope = (env.surfaceY(px + 0.3) - env.surfaceY(px - 0.3)) / 0.6;
+  const hab = rockHabitat(env, x);
+  return { kind, x: px, y: seat(env, px, width, ROCK_NATIVE[kind].height / ROCK_NATIVE[kind].width, ROCK_SINK.small), z: lerp(ROCK_Z.small[0], ROCK_Z.small[1], h(4)), yaw: (h(5) - 0.5) * 3, tilt: Math.atan(slope) * 0.8, width, stretch: 0.85 + 0.35 * h(6), tint: habitatTint(hab, h(7)), moss: ROCK_HABITAT[hab].moss };
 }
 
 /** 主石（中/大石与景观）周围的草丛退让量（每列 0..1；第三轮：主石外缘 1 格内草丛降密度，石头不被草淹没）。纯函数。 */

@@ -20,7 +20,7 @@ import {
 } from '../src/render/flora.ts';
 import type { FloraEnv, FloraInstance, FloraSite } from '../src/render/flora.ts';
 import { TURF_BLADES } from '../src/render/flora-geometry.ts';
-import { GROUND_DECOR_Z_MAX, GROUND_DECOR_Z_MIN } from '../src/render/tile-geometry.ts';
+import { BLOCK_BACK_Z, BLOCK_FRONT_Z, GROUND_DECOR_Z_MAX, GROUND_DECOR_Z_MIN } from '../src/render/tile-geometry.ts';
 import { ORGANIC_TOP_AMP, organicTopOffset } from '../src/render/tile-organic.ts';
 import { createTileView } from '../src/render/tile-view.ts';
 import {
@@ -386,7 +386,7 @@ describe('flora 网格与材质', () => {
     const turf = geos.turf;
     const box = new THREE.Box3().setFromBufferAttribute(turf.getAttribute('position') as THREE.BufferAttribute);
     assert.ok(box.min.x <= -0.45 && box.max.x >= 0.45, 'turf spans the whole cell');
-    assert.ok(box.min.z >= GROUND_DECOR_Z_MIN - 0.1 && box.max.z <= GROUND_DECOR_Z_MAX + 0.1, `turf z ${box.min.z}..${box.max.z}`);
+    assert.ok(box.min.z >= BLOCK_BACK_Z - 0.1 && box.max.z <= BLOCK_FRONT_Z + 0.1, `turf z ${box.min.z}..${box.max.z}`);
     assert.equal(turf.getAttribute('position').count, TURF_BLADES * (2 * 6 + 3));
     for (const g of Object.values(geos)) g.dispose();
   });

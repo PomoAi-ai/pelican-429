@@ -1,5 +1,5 @@
 .homestead-hud { position: fixed; inset: 0; pointer-events: none; z-index: 14; color: #eef6ee; font: 13px/1.5 system-ui, sans-serif; }
-.homestead-hud button { pointer-events: auto; cursor: pointer; touch-action: manipulation; font: 600 13px/1.4 system-ui, sans-serif; }
+.homestead-hud :is(button, a.hs-action) { pointer-events: auto; cursor: pointer; touch-action: manipulation; font: 600 13px/1.4 system-ui, sans-serif; }
 .hs-bar { position: absolute; top: max(10px, env(safe-area-inset-top)); left: 50%; transform: translateX(-50%); display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px 14px; max-width: calc(100vw - 420px); padding: 7px 14px; border: 1px solid #9fd8b04d; border-radius: 14px; background: #0d1d1ad9; box-shadow: 0 8px 26px #0006; backdrop-filter: blur(10px); pointer-events: auto; }
 .hs-time { color: #ffe39a; font-weight: 600; }
 .hs-tokens { color: #9fe0ff; }
@@ -22,7 +22,7 @@
 .hs-tool-on { border-color: #5fe6ff; background: #1f4f74; color: #fff; }
 .hs-hint { flex-basis: 100%; text-align: center; color: #b9cfc6; font-size: 12px; }
 .hs-actions { position: absolute; right: max(14px, env(safe-area-inset-right)); bottom: 132px; display: grid; gap: 8px; justify-items: end; }
-.hs-action { padding: 8px 16px; border: 1px solid #b4e6a5; border-radius: 12px; background: #203e2bdd; color: #f3fbef; box-shadow: 0 6px 18px #0006; }
+.hs-action { padding: 8px 16px; border: 1px solid #b4e6a5; border-radius: 12px; background: #203e2bdd; color: #f3fbef; box-shadow: 0 6px 18px #0006; text-decoration: none; }
 .hs-action[hidden] { display: none; }
 .hs-toast { position: absolute; left: 50%; bottom: 128px; transform: translateX(-50%); padding: 6px 14px; border-radius: 10px; background: #0d1d1aee; opacity: 0; transition: opacity .2s; }
 .hs-toast-on { opacity: 1; }

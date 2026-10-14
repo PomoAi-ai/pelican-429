@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { mulberry32 } from '../core/rng.ts';
+import { DEFINITION_DEPTH } from '../config/definition-kit.ts';
 import { createTileMap } from '../world/tile-map.ts';
 import { DEFAULT_TILES } from '../world/tile-types.ts';
 import { createFluidMap, FLUID_FULL } from '../world/fluid-map.ts';
@@ -32,6 +33,9 @@ export function createDepthLandscapeDetails(theme: DepthTheme, layers: ReadonlyM
     [id, { flowers: [], shrubs: [], rocks: [], crystals: [] }]));
   const rng = mulberry32(0x1a4dcafe);
   const sample = ([low, high]: readonly [number, number]): number => low + (high - low) * rng();
+  // 世界坐标 +Z 朝镜头：花草在格子前沿，灌木与大岩在后沿。
+  const { tile, reserve } = DEFINITION_DEPTH;
+  const frontReserve = (): number => tile / 2 + .05 + rng() * (reserve - .1);
   const flowers = (layer: DepthLayerId, left: number, right: number, y: number, species: readonly FloraSpecies[]): void => {
     const plan = plans.get(layer)!.flowers;
     const count = Math.ceil((right - left) * 7);
@@ -39,18 +43,18 @@ export function createDepthLandscapeDetails(theme: DepthTheme, layers: ReadonlyM
       const kind = species[i % species.length]!;
       const rule = FLORA_RULES[kind];
       const size = sample(rule.size);
-      plan.push({ species: kind, x: left + (i + rng()) / count * (right - left), y, z: (rng() - .5) * .65,
+      plan.push({ species: kind, x: left + (i + rng()) / count * (right - left), y, z: frontReserve(),
         yaw: rng() * Math.PI * 2, tilt: 0, sx: size, sy: size * sample(rule.stretch), shear: 0,
         tint: rule.palette.length ? rule.palette[Math.floor(rng() * rule.palette.length)]! : 0xffffff });
     }
   };
   const shrub = (layer: DepthLayerId, kind: ShrubKind, x: number, y: number): void => {
     const rule = SHRUB_RULES[kind];
-    plans.get(layer)!.shrubs.push({ kind, x, y, z: -.12, yaw: rng() * Math.PI,
+    plans.get(layer)!.shrubs.push({ kind, x, y, z: -tile / 2 - reserve / 2, yaw: rng() * Math.PI,
       height: sample(rule.height), tint: rule.palette[Math.floor(rng() * rule.palette.length)]! });
   };
   const rock = (layer: DepthLayerId, kind: RockKind, x: number, y: number, width: number, moss = 1): void => {
-    plans.get(layer)!.rocks.push({ kind, x, y, z: 0, yaw: (rng() - .5) * .6,
+    plans.get(layer)!.rocks.push({ kind, x, y, z: -tile / 2 - reserve / 2, yaw: (rng() - .5) * .6,
       tilt: 0, width, stretch: 1, tint: 0xffffff, moss });
   };
   const crystal = (layer: DepthLayerId, kind: CaveDecorKind, x: number, y: number, size: number): void => {

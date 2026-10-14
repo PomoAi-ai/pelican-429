@@ -30,7 +30,7 @@ export interface CameraRigOptions {
   readonly camera: THREE.PerspectiveCamera;
   readonly tuning: Tuning;
   /** 地图尺寸（瓦片）；minY（默认 0）为可视区域下边界，见 cameraFloorY。 */
-  readonly bounds: { readonly width: number; readonly height: number; readonly minY?: number };
+  readonly bounds: { readonly width: number; readonly height: number; readonly minX?: number; readonly minY?: number };
   /** 画布在视口中的位置与尺寸（CSS 像素）。 */
   readonly viewport: () => Viewport;
   /** 跟随注视点的主光（可选）。 */
@@ -76,6 +76,7 @@ export function createCameraRig(options: CameraRigOptions): CameraRig {
   const { camera, tuning, bounds, viewport, light } = options;
   const lightOffset = options.lightOffset ?? { x: 3, y: 7.5, z: 10 };
   if (!(bounds.width > 0 && bounds.height > 0)) throw new Error(`camera-rig: invalid bounds ${bounds.width}×${bounds.height}`);
+  const minX = bounds.minX ?? 0;
   const minY = bounds.minY ?? 0;
   if (!(Number.isFinite(minY) && minY >= 0 && minY < bounds.height)) {
     throw new Error(`camera-rig: invalid bounds.minY ${minY} (must be in [0, ${bounds.height}))`);
@@ -102,7 +103,7 @@ export function createCameraRig(options: CameraRigOptions): CameraRig {
 
   const clampAt = (fx: number, fy: number, distance: number): { x: number; y: number; hw: number; hh: number } => {
     const { hw, hh } = halfExtents(distance);
-    return { x: clampRange(fx, hw, bounds.width - hw), y: clampRange(fy, minY + hh, bounds.height - hh), hw, hh };
+    return { x: clampRange(fx, minX + hw, minX + bounds.width - hw), y: clampRange(fy, minY + hh, bounds.height - hh), hw, hh };
   };
 
   /** 当前相机：跟随位置（常规距离夹紧）；开场取景时与取景（按其距离夹紧）按 introBlend 混合。 */

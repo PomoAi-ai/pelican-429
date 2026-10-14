@@ -256,6 +256,9 @@ export function createStageRenderer(tuning: Tuning): THREE.WebGLRenderer {
   const r = tuning.render;
   const l = r.lighting;
   const renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: 'high-performance' });
+  // 着色器错误检查让每个程序首次使用时同步读取编译日志；GPU 进程忙时每次往返上百毫秒，新建渲染器（切换透视标签）累计可达十秒。
+  // 只在 ?debug 下开启；关闭时着色器出错仍有浏览器的 WebGL 警告。
+  renderer.debug.checkShaderErrors = new URLSearchParams(location.search).has('debug');
   const pixelRatio = Math.min(window.devicePixelRatio || 1, l.maxPixelRatio);
   renderer.setPixelRatio(pixelRatio);
   renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -268,8 +271,20 @@ export function createStageRenderer(tuning: Tuning): THREE.WebGLRenderer {
 }
 
 export function createStage(container: HTMLElement, tuning: Tuning, options: StageOptions): Stage {
-  if (!container?.isConnected) throw new Error('stage: container element is missing or detached');
   const renderer = createStageRenderer(tuning);
+  const stage = attachStage(container, renderer, tuning, options);
+  const detach = stage.dispose;
+  stage.dispose = () => {
+    detach();
+    disposeCharacterTextures();
+    renderer.dispose();
+  };
+  return stage;
+}
+
+/** 把已有渲染器挂进容器并建立场景视图；释放时只摘下画布，渲染器留给调用方继续复用。 */
+export function attachStage(container: HTMLElement, renderer: THREE.WebGLRenderer, tuning: Tuning, options: StageOptions): Stage {
+  if (!container?.isConnected) throw new Error('stage: container element is missing or detached');
   const canvas = renderer.domElement;
   canvas.tabIndex = 0;
   canvas.setAttribute('aria-label', '游戏画面');
@@ -288,14 +303,11 @@ export function createStage(container: HTMLElement, tuning: Tuning, options: Sta
   stage.dispose = () => {
     observer.disconnect();
     disposeView();
-    disposeCharacterTextures();
-    renderer.dispose();
     canvas.remove();
   };
   return stage;
 }
 
-/** 仅拥有场景资源；尺寸与 renderer 生命周期由页面宿主管理。 */
 export function createStageView(renderer: THREE.WebGLRenderer, tuning: Tuning, options: StageOptions): Stage {
   const r = tuning.render;
   const l = r.lighting;

@@ -29,6 +29,7 @@ export const PRECIP_SNOW_COLOR = '#e6edf5';
 export interface PrecipUniforms {
   readonly uPrCols: THREE.IUniform<THREE.Texture>;
   readonly uPrColsW: THREE.IUniform<number>;
+  readonly uPrColsOrigin: THREE.IUniform<number>;
   readonly uPrWet: THREE.IUniform<number>;
   readonly uPrSnow: THREE.IUniform<number>;
   readonly uPrSnowColor: THREE.IUniform<THREE.Color>;
@@ -49,6 +50,7 @@ export function createPrecipUniforms(): PrecipUniforms {
   return Object.freeze({
     uPrCols: { value: placeholderColumns() as THREE.Texture },
     uPrColsW: { value: 1 },
+    uPrColsOrigin: { value: 0 },
     uPrWet: { value: 0 },
     uPrSnow: { value: 0 },
     uPrSnowColor: { value: new THREE.Color(PRECIP_SNOW_COLOR) },
@@ -72,8 +74,9 @@ const f = (n: number): string => {
 export const PRECIP_COLUMN_GLSL = /* glsl */ `
 uniform sampler2D uPrCols;
 uniform float uPrColsW;
+uniform float uPrColsOrigin;
 vec4 precipColumn( float x ) {
-  float cx = clamp( floor( x ), 0.0, uPrColsW - 1.0 );
+  float cx = clamp( floor( x - uPrColsOrigin ), 0.0, uPrColsW - 1.0 );
   return texture2D( uPrCols, vec2( ( cx + 0.5 ) / uPrColsW, 0.5 ) );
 }
 `;

@@ -369,3 +369,16 @@ test('平台上同时按上下车与下键优先上车，上车完成后才能�
   assert.ok(preview.entity.body.y < 4);
   assert.ok(preview.entity.body.vy < 0);
 });
+
+test('环境外力在同一物理步内抬升角色，仍由实体屋顶阻挡', () => {
+  const preview = createPerspectivePlayer({
+    solids: [{ points: [[0, 5], [20, 5], [20, 6], [0, 6]] }],
+    platforms: [{ left: 0, right: 20, top: 1 }],
+  }, { x: 4, y: 1 }, { width: 20, height: 20 }, [], false, {
+    applyForce(body) { body.vy = 12; body.onGround = false; },
+  });
+  preview.step(NEUTRAL_INPUT);
+  assert.ok(Math.abs(preview.entity.body.y - (1 + 12 * TUNING.sim.step)) < 1e-6);
+  for (let tick = 0; tick < 60; tick++) preview.step(NEUTRAL_INPUT);
+  assert.ok(Math.abs(preview.entity.body.y + preview.entity.body.height - 5) < 1e-6);
+});

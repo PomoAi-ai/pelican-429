@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { mulberry32 } from '../core/rng.ts';
+import type { WorldTime } from '../core/world-clock.ts';
 import { createSkyTexture, SKY_BOTTOM, SKY_TOP } from './stage.ts';
 
 export type SkyPhase = 'day' | 'night';
@@ -58,9 +59,9 @@ export function createCelestialSky() {
   const rng = mulberry32(0xced157);
   const positions: number[] = [];
   const colors: number[] = [];
-  for (let i = 0; i < 180; i++) {
+  for (let i = 0; i < 900; i++) {
     const azimuth = (rng() - .5) * 2.5;
-    const elevation = .02 + rng() * .78;
+    const elevation = -.12 + rng() * .9;
     positions.push(Math.sin(azimuth) * Math.cos(elevation) * SKY_RADIUS,
       Math.sin(elevation) * SKY_RADIUS, -Math.cos(azimuth) * Math.cos(elevation) * SKY_RADIUS);
     const brightness = .45 + rng() * .55;
@@ -69,7 +70,8 @@ export function createCelestialSky() {
   const starGeometry = new THREE.BufferGeometry();
   starGeometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
   starGeometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
-  const starMaterial = new THREE.PointsMaterial({ size: 1.8, sizeAttenuation: false,
+  const starTexture = celestialTexture('day');
+  const starMaterial = new THREE.PointsMaterial({ size: 3, sizeAttenuation: false, map: starTexture,
     vertexColors: true, transparent: true, depthWrite: false, fog: false, toneMapped: false });
   const stars = new THREE.Points(starGeometry, starMaterial);
   stars.name = 'stars';
@@ -89,6 +91,18 @@ export function createCelestialSky() {
       bodies[0]!.visible = phase === 'day';
       bodies[1]!.visible = stars.visible = phase === 'night';
     },
+    setWorldTime(world: WorldTime, cloudCover = 0): void {
+      const sun = bodies[0]!;
+      const moon = bodies[1]!;
+      sun.position.copy(world.celestialSunDirection).normalize().multiplyScalar(SKY_RADIUS);
+      moon.position.copy(world.celestialMoonDirection).normalize().multiplyScalar(SKY_RADIUS);
+      sun.material.opacity = world.daylight * (1 - cloudCover * .98);
+      sun.material.color.set('#ffffff').lerp(new THREE.Color('#ffba76'), world.twilight);
+      moon.material.opacity = world.night * (1 - cloudCover * .95);
+      sun.visible = world.daylight > 0;
+      moon.visible = stars.visible = world.night > 0;
+      starMaterial.opacity = world.night * world.night * (1 - cloudCover);
+    },
     update(camera: THREE.PerspectiveCamera): void {
       root.position.copy(camera.position);
       const diameter = 2 * SKY_RADIUS * Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2) * .1;
@@ -103,6 +117,7 @@ export function createCelestialSky() {
       }
       starGeometry.dispose();
       starMaterial.dispose();
+      starTexture.dispose();
       for (const texture of Object.values(backgrounds)) texture.dispose();
       root.clear();
     },

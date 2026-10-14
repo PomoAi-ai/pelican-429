@@ -63,9 +63,11 @@ vec3 precipBoxPos( vec4 seed, float fallMul, float driftMul, float fall, float d
   vec2 p = boxMin + mod( seed.xy * size + vec2( drift * driftMul, -fall * fallMul ) - boxMin, size );
   return vec3( p, z );
 }
-// 沿相机视线投到 z = 0 平面（落点判定按画面上的位置：近景粒子不会画到地面线以下，远景粒子不会从地面后方“漏”出来）。
+// 遮雨按真实视线投到 z = 0；uCam 只定义粒子盒，斜视和俯视时不代表实际相机。
 vec2 precipGroundProj( vec3 p ) {
-  return uCam.xy + ( p.xy - uCam.xy ) * ( uCam.z / max( uCam.z - p.z, 0.001 ) );
+  float depth = cameraPosition.z - p.z;
+  depth = depth < 0.0 ? min( depth, -0.001 ) : max( depth, 0.001 );
+  return cameraPosition.xy + ( p.xy - cameraPosition.xy ) * ( cameraPosition.z / depth );
 }
 `;
 
@@ -304,9 +306,7 @@ export interface RainFx {
 
 export interface RainFxOptions {
   readonly rules: PrecipTuning;
-  readonly map: TileQuery;
-  readonly roof: (tx: number) => number;
-  readonly trees: readonly TreeInstance[];
+  readonly emitters: Float32Array;
 }
 
 const RAIN_COLOR = new THREE.Color(0.62, 0.68, 0.78);
@@ -345,6 +345,7 @@ export function createRainFx(options: RainFxOptions): RainFx {
     ...wind,
     uPrCols: pu.uPrCols,
     uPrColsW: pu.uPrColsW,
+    uPrColsOrigin: pu.uPrColsOrigin,
     ...cam,
     uZ: { value: new THREE.Vector2(R.zFar, R.zNear) },
     uFall: { value: 0 },
@@ -366,6 +367,7 @@ export function createRainFx(options: RainFxOptions): RainFx {
   const splashU = {
     uPrCols: pu.uPrCols,
     uPrColsW: pu.uPrColsW,
+    uPrColsOrigin: pu.uPrColsOrigin,
     uBox: { value: new THREE.Vector4() },
     uTime: { value: 0 },
     uCount: { value: 0 },
@@ -376,13 +378,14 @@ export function createRainFx(options: RainFxOptions): RainFx {
   };
   const splashes = mesh('precip-rain-splashes', splashGeo, material('precip-rain-splashes', SPLASH_VERTEX, SPLASH_FRAGMENT, splashU));
 
-  const emitters = planDripEmitters(options.map, options.roof, options.trees, R.dripMax, rules.seed);
+  const emitters = options.emitters;
   const dripGeo = quadGeometry(-0.5, 0.5, -0.5, 0.5);
   dripGeo.setAttribute('aDrip', new THREE.InstancedBufferAttribute(emitters.length > 0 ? emitters : new Float32Array(4), 4));
   dripGeo.instanceCount = emitters.length / 4;
   const dripU = {
     uPrCols: pu.uPrCols,
     uPrColsW: pu.uPrColsW,
+    uPrColsOrigin: pu.uPrColsOrigin,
     uBox: { value: new THREE.Vector4() },
     uTime: { value: 0 },
     uDrip: { value: 0 },

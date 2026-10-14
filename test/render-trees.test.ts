@@ -9,6 +9,7 @@ import { createPetalFx } from '../src/render/petal-fx.ts';
 import { BLOCK_BACK_Z } from '../src/render/tile-geometry.ts';
 import { triangleCount } from '../src/render/tree-builder.ts';
 import { buildTreeGeometry, LIMB_RADIAL, TREE_TRIANGLE_BUDGET, TREE_FRONT_MAX, TREE_Z, TRUNK_RADIAL, visualGroundAt } from '../src/render/tree-geometry.ts';
+import { TREE_BACK_MIN } from '../src/render/tree-skeleton.ts';
 import type { TreeGeometry } from '../src/render/tree-geometry.ts';
 import { TREE_KIND_TEMPLATES } from '../src/render/tree-kinds.ts';
 import { BARK_CHANNEL } from '../src/render/tree-material.ts';
@@ -240,7 +241,7 @@ function box(g: TreeGeometry): THREE.Box3 {
 const positions = (g: TreeGeometry): number[] => [...g.bark.getAttribute('position').array, ...g.leaf.getAttribute('position').array];
 
 describe('tree-geometry', () => {
-  test(`9 种：在鹈鹕后方（前沿 ≤ −.1，z 中心 −0.7）、根部下埋 .4、三角形 ≤ ${TREE_TRIANGLE_BUDGET}、确定性、树皮带 uv/aBark、叶带 uv`, () => {
+  test(`9 种：主干在鹈鹕后方（z 中心 −0.7）、整树在冠深 [TREE_BACK_MIN, TREE_FRONT_MAX] 内、根部下埋 .4、三角形 ≤ ${TREE_TRIANGLE_BUDGET}、确定性、树皮带 uv/aBark、叶带 uv`, () => {
     assert.equal(TREE_Z, -0.7);
     assert.equal(TREE_TRIANGLE_BUDGET, 8000);
     const report: string[] = [];
@@ -251,6 +252,7 @@ describe('tree-geometry', () => {
         const g = buildTreeGeometry(tree);
         const b = box(g);
         assert.ok(b.max.z <= TREE_FRONT_MAX + 1e-6, `${kind} front ${b.max.z}`);
+        assert.ok(b.min.z >= TREE_BACK_MIN - 1e-6, `${kind} back ${b.min.z}`);
         assert.ok(b.min.y <= tree.baseY - 0.4 + 1e-6 && b.min.y > tree.baseY - 0.6, `${kind} roots ${b.min.y}`);
         for (const a of ['position', 'normal', 'uv', 'color', 'aSway', 'aBark']) assert.ok(g.bark.getAttribute(a), `${kind} bark attribute ${a}`);
         for (const a of ['position', 'normal', 'uv', 'color', 'aSway']) assert.ok(g.leaf.getAttribute(a), `${kind} leaf attribute ${a}`);

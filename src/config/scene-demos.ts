@@ -3,6 +3,12 @@ import { MAX_SHOWCASE_CARDS } from './showcase.ts';
 import { TERRAIN_COMPOSITIONS } from './terrain-compositions.ts';
 
 export const SCENE_DEMOS: readonly ShowcaseDemo[] = [
+  { id: 'plants', title: '植物空间组合', description: '整格草、前后贴面、沿边下垂、底面苔须／藤蔓／垂花，以及后置树灌木。切换背面或仰视可检查格子下面的内部根点。', cards:
+    ['front', 'back', 'edge', 'underside-moss', 'underside-vine', 'underside-flower', 'woodland', 'mixed'].map((form) => ({
+      entryId: `climber.${form}`, resource: { context: true, vegetation: 'ground' as const, assembly: false, platforms: false, reference: false,
+        yaw: form === 'back' ? 155 : 35, pitch: form.startsWith('underside-') || form === 'mixed' ? -25 : 20 },
+    })),
+  },
   { id: 'tiles', title: '01 · 瓦片与形状', description: '整格与半高度格优先展示；四种形状全部平铺，每张卡内八个自然样本。', cards:
     [
       ...(['raised', 'single'] as const).flatMap((layout) => [0, 3].map((shapeIndex) => ({ layout, shapeIndex }))),

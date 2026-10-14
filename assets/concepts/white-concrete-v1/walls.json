@@ -1,0 +1,1213 @@
+{
+  "metadata": {
+    "material": "白色混凝土",
+    "entryCount": 22,
+    "coordinateSystem": "各条目左下角为原点，X向右、Y向上；width/height为逻辑格占位范围，实体覆盖由polygons唯一确定。",
+    "depth": 0.2,
+    "zRange": [
+      -1.2,
+      -1
+    ],
+    "frameWidth": 0.1,
+    "cornerCut": 0.5,
+    "dimensionStatus": "b=0.1、c=0.5沿用来源草案。",
+    "polygons": "各条目由无正面积重叠的简单多边形并集表达；没有多边形的区域为空洞。组合条目的内部多边形接缝不是实体挡板或窗棂。",
+    "sources": [
+      "public/concepts/wall-window-definitions.md",
+      "assets/concepts/scene-depth-guide/draw_wall_complete_catalog.py",
+      "assets/concepts/scene-depth-guide/draw_wall_window_variants.py"
+    ],
+    "runtimeStatus": "仅为美术资料，不代表运行时已实现。"
+  },
+  "walls": [
+    {
+      "id": "W0",
+      "name": "完整墙格",
+      "width": 1,
+      "height": 1,
+      "depth": 0.2,
+      "polygons": [
+        [
+          [
+            0,
+            0
+          ],
+          [
+            1,
+            0
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            0,
+            1
+          ]
+        ]
+      ],
+      "sourceNote": "来源：public/concepts/wall-window-definitions.md、draw_wall_complete_catalog.py、draw_wall_window_variants.py；墙厚0.2，Z=[-1.2,-1]。窗框b=0.1、斜切c=0.5均为来源绘图草案，尚非最终制作参数。整格完整覆盖，不缩边。"
+    },
+    {
+      "id": "W1",
+      "name": "镂空墙格",
+      "width": 1,
+      "height": 1,
+      "depth": 0.2,
+      "polygons": [],
+      "sourceNote": "来源：public/concepts/wall-window-definitions.md、draw_wall_complete_catalog.py、draw_wall_window_variants.py；墙厚0.2，Z=[-1.2,-1]。窗框b=0.1、斜切c=0.5均为来源绘图草案，尚非最终制作参数。只保留逻辑格位；完全不生成墙几何。"
+    },
+    {
+      "id": "W2",
+      "name": "单格矩形窗",
+      "width": 1,
+      "height": 1,
+      "depth": 0.2,
+      "polygons": [
+        [
+          [
+            0,
+            0
+          ],
+          [
+            1,
+            0
+          ],
+          [
+            1,
+            0.1
+          ],
+          [
+            0,
+            0.1
+          ]
+        ],
+        [
+          [
+            0,
+            0.9
+          ],
+          [
+            1,
+            0.9
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            0,
+            1
+          ]
+        ],
+        [
+          [
+            0,
+            0.1
+          ],
+          [
+            0.1,
+            0.1
+          ],
+          [
+            0.1,
+            0.9
+          ],
+          [
+            0,
+            0.9
+          ]
+        ],
+        [
+          [
+            0.9,
+            0.1
+          ],
+          [
+            1,
+            0.1
+          ],
+          [
+            1,
+            0.9
+          ],
+          [
+            0.9,
+            0.9
+          ]
+        ]
+      ],
+      "sourceNote": "来源：public/concepts/wall-window-definitions.md、draw_wall_complete_catalog.py、draw_wall_window_variants.py；墙厚0.2，Z=[-1.2,-1]。窗框b=0.1、斜切c=0.5均为来源绘图草案，尚非最终制作参数。净洞0.8×0.8；窗洞贯穿整段墙深。"
+    },
+    {
+      "id": "W3",
+      "name": "上半墙",
+      "width": 1,
+      "height": 1,
+      "depth": 0.2,
+      "polygons": [
+        [
+          [
+            0,
+            0.5
+          ],
+          [
+            1,
+            0.5
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            0,
+            1
+          ]
+        ]
+      ],
+      "sourceNote": "来源：public/concepts/wall-window-definitions.md、draw_wall_complete_catalog.py、draw_wall_window_variants.py；墙厚0.2，Z=[-1.2,-1]。窗框b=0.1、斜切c=0.5均为来源绘图草案，尚非最终制作参数。占一个1×1逻辑格，实体仅覆盖指定半格，另一半留空。"
+    },
+    {
+      "id": "W4",
+      "name": "下半墙",
+      "width": 1,
+      "height": 1,
+      "depth": 0.2,
+      "polygons": [
+        [
+          [
+            0,
+            0
+          ],
+          [
+            1,
+            0
+          ],
+          [
+            1,
+            0.5
+          ],
+          [
+            0,
+            0.5
+          ]
+        ]
+      ],
+      "sourceNote": "来源：public/concepts/wall-window-definitions.md、draw_wall_complete_catalog.py、draw_wall_window_variants.py；墙厚0.2，Z=[-1.2,-1]。窗框b=0.1、斜切c=0.5均为来源绘图草案，尚非最终制作参数。占一个1×1逻辑格，实体仅覆盖指定半格，另一半留空。"
+    },
+    {
+      "id": "W5",
+      "name": "左半墙",
+      "width": 1,
+      "height": 1,
+      "depth": 0.2,
+      "polygons": [
+        [
+          [
+            0,
+            0
+          ],
+          [
+            0.5,
+            0
+          ],
+          [
+            0.5,
+            1
+          ],
+          [
+            0,
+            1
+          ]
+        ]
+      ],
+      "sourceNote": "来源：public/concepts/wall-window-definitions.md、draw_wall_complete_catalog.py、draw_wall_window_variants.py；墙厚0.2，Z=[-1.2,-1]。窗框b=0.1、斜切c=0.5均为来源绘图草案，尚非最终制作参数。占一个1×1逻辑格，实体仅覆盖指定半格，另一半留空。"
+    },
+    {
+      "id": "W6",
+      "name": "右半墙",
+      "width": 1,
+      "height": 1,
+      "depth": 0.2,
+      "polygons": [
+        [
+          [
+            0.5,
+            0
+          ],
+          [
+            1,
+            0
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            0.5,
+            1
+          ]
+        ]
+      ],
+      "sourceNote": "来源：public/concepts/wall-window-definitions.md、draw_wall_complete_catalog.py、draw_wall_window_variants.py；墙厚0.2，Z=[-1.2,-1]。窗框b=0.1、斜切c=0.5均为来源绘图草案，尚非最终制作参数。占一个1×1逻辑格，实体仅覆盖指定半格，另一半留空。"
+    },
+    {
+      "id": "W7-1",
+      "name": "45°斜墙·左下实心",
+      "width": 1,
+      "height": 1,
+      "depth": 0.2,
+      "polygons": [
+        [
+          [
+            0,
+            0
+          ],
+          [
+            1,
+            0
+          ],
+          [
+            0,
+            1
+          ]
+        ]
+      ],
+      "sourceNote": "来源：public/concepts/wall-window-definitions.md、draw_wall_complete_catalog.py、draw_wall_window_variants.py；墙厚0.2，Z=[-1.2,-1]。窗框b=0.1、斜切c=0.5均为来源绘图草案，尚非最终制作参数。沿单格对角线切分，实心面积0.5。"
+    },
+    {
+      "id": "W7-2",
+      "name": "45°斜墙·右下实心",
+      "width": 1,
+      "height": 1,
+      "depth": 0.2,
+      "polygons": [
+        [
+          [
+            0,
+            0
+          ],
+          [
+            1,
+            0
+          ],
+          [
+            1,
+            1
+          ]
+        ]
+      ],
+      "sourceNote": "来源：public/concepts/wall-window-definitions.md、draw_wall_complete_catalog.py、draw_wall_window_variants.py；墙厚0.2，Z=[-1.2,-1]。窗框b=0.1、斜切c=0.5均为来源绘图草案，尚非最终制作参数。沿单格对角线切分，实心面积0.5。"
+    },
+    {
+      "id": "W7-3",
+      "name": "45°斜墙·左上实心",
+      "width": 1,
+      "height": 1,
+      "depth": 0.2,
+      "polygons": [
+        [
+          [
+            0,
+            0
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            0,
+            1
+          ]
+        ]
+      ],
+      "sourceNote": "来源：public/concepts/wall-window-definitions.md、draw_wall_complete_catalog.py、draw_wall_window_variants.py；墙厚0.2，Z=[-1.2,-1]。窗框b=0.1、斜切c=0.5均为来源绘图草案，尚非最终制作参数。沿单格对角线切分，实心面积0.5。"
+    },
+    {
+      "id": "W7-4",
+      "name": "45°斜墙·右上实心",
+      "width": 1,
+      "height": 1,
+      "depth": 0.2,
+      "polygons": [
+        [
+          [
+            1,
+            0
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            0,
+            1
+          ]
+        ]
+      ],
+      "sourceNote": "来源：public/concepts/wall-window-definitions.md、draw_wall_complete_catalog.py、draw_wall_window_variants.py；墙厚0.2，Z=[-1.2,-1]。窗框b=0.1、斜切c=0.5均为来源绘图草案，尚非最终制作参数。沿单格对角线切分，实心面积0.5。"
+    },
+    {
+      "id": "W2-TL",
+      "name": "矩形窗角·左上",
+      "width": 1,
+      "height": 1,
+      "depth": 0.2,
+      "polygons": [
+        [
+          [
+            0,
+            1
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            1,
+            0.9
+          ],
+          [
+            0.1,
+            0.9
+          ],
+          [
+            0.1,
+            0
+          ],
+          [
+            0,
+            0
+          ]
+        ]
+      ],
+      "sourceNote": "来源：public/concepts/wall-window-definitions.md、draw_wall_complete_catalog.py、draw_wall_window_variants.py；墙厚0.2，Z=[-1.2,-1]。窗框b=0.1、斜切c=0.5均为来源绘图草案，尚非最终制作参数。仅外侧两边留L形框，朝窗内部两边敞开。"
+    },
+    {
+      "id": "W2-TR",
+      "name": "矩形窗角·右上",
+      "width": 1,
+      "height": 1,
+      "depth": 0.2,
+      "polygons": [
+        [
+          [
+            1,
+            1
+          ],
+          [
+            0,
+            1
+          ],
+          [
+            0,
+            0.9
+          ],
+          [
+            0.9,
+            0.9
+          ],
+          [
+            0.9,
+            0
+          ],
+          [
+            1,
+            0
+          ]
+        ]
+      ],
+      "sourceNote": "来源：public/concepts/wall-window-definitions.md、draw_wall_complete_catalog.py、draw_wall_window_variants.py；墙厚0.2，Z=[-1.2,-1]。窗框b=0.1、斜切c=0.5均为来源绘图草案，尚非最终制作参数。仅外侧两边留L形框，朝窗内部两边敞开。"
+    },
+    {
+      "id": "W2-BL",
+      "name": "矩形窗角·左下",
+      "width": 1,
+      "height": 1,
+      "depth": 0.2,
+      "polygons": [
+        [
+          [
+            0,
+            0
+          ],
+          [
+            1,
+            0
+          ],
+          [
+            1,
+            0.1
+          ],
+          [
+            0.1,
+            0.1
+          ],
+          [
+            0.1,
+            1
+          ],
+          [
+            0,
+            1
+          ]
+        ]
+      ],
+      "sourceNote": "来源：public/concepts/wall-window-definitions.md、draw_wall_complete_catalog.py、draw_wall_window_variants.py；墙厚0.2，Z=[-1.2,-1]。窗框b=0.1、斜切c=0.5均为来源绘图草案，尚非最终制作参数。仅外侧两边留L形框，朝窗内部两边敞开。"
+    },
+    {
+      "id": "W2-BR",
+      "name": "矩形窗角·右下",
+      "width": 1,
+      "height": 1,
+      "depth": 0.2,
+      "polygons": [
+        [
+          [
+            1,
+            0
+          ],
+          [
+            0,
+            0
+          ],
+          [
+            0,
+            0.1
+          ],
+          [
+            0.9,
+            0.1
+          ],
+          [
+            0.9,
+            1
+          ],
+          [
+            1,
+            1
+          ]
+        ]
+      ],
+      "sourceNote": "来源：public/concepts/wall-window-definitions.md、draw_wall_complete_catalog.py、draw_wall_window_variants.py；墙厚0.2，Z=[-1.2,-1]。窗框b=0.1、斜切c=0.5均为来源绘图草案，尚非最终制作参数。仅外侧两边留L形框，朝窗内部两边敞开。"
+    },
+    {
+      "id": "W2-2x2",
+      "name": "四块组合矩形大窗",
+      "width": 2,
+      "height": 2,
+      "depth": 0.2,
+      "polygons": [
+        [
+          [
+            0,
+            2
+          ],
+          [
+            1,
+            2
+          ],
+          [
+            1,
+            1.9
+          ],
+          [
+            0.1,
+            1.9
+          ],
+          [
+            0.1,
+            1
+          ],
+          [
+            0,
+            1
+          ]
+        ],
+        [
+          [
+            2,
+            2
+          ],
+          [
+            1,
+            2
+          ],
+          [
+            1,
+            1.9
+          ],
+          [
+            1.9,
+            1.9
+          ],
+          [
+            1.9,
+            1
+          ],
+          [
+            2,
+            1
+          ]
+        ],
+        [
+          [
+            0,
+            0
+          ],
+          [
+            1,
+            0
+          ],
+          [
+            1,
+            0.1
+          ],
+          [
+            0.1,
+            0.1
+          ],
+          [
+            0.1,
+            1
+          ],
+          [
+            0,
+            1
+          ]
+        ],
+        [
+          [
+            2,
+            0
+          ],
+          [
+            1,
+            0
+          ],
+          [
+            1,
+            0.1
+          ],
+          [
+            1.9,
+            0.1
+          ],
+          [
+            1.9,
+            1
+          ],
+          [
+            2,
+            1
+          ]
+        ]
+      ],
+      "sourceNote": "来源：public/concepts/wall-window-definitions.md、draw_wall_complete_catalog.py、draw_wall_window_variants.py；墙厚0.2，Z=[-1.2,-1]。窗框b=0.1、斜切c=0.5均为来源绘图草案，尚非最终制作参数。四个1×1窗角按TL/TR/BL/BR贴合；内部格界不生成框，净洞1.8×1.8。"
+    },
+    {
+      "id": "W2-3x2",
+      "name": "跨格矩形长窗",
+      "width": 3,
+      "height": 2,
+      "depth": 0.2,
+      "polygons": [
+        [
+          [
+            0,
+            0
+          ],
+          [
+            3,
+            0
+          ],
+          [
+            3,
+            0.1
+          ],
+          [
+            0,
+            0.1
+          ]
+        ],
+        [
+          [
+            0,
+            1.9
+          ],
+          [
+            3,
+            1.9
+          ],
+          [
+            3,
+            2
+          ],
+          [
+            0,
+            2
+          ]
+        ],
+        [
+          [
+            0,
+            0.1
+          ],
+          [
+            0.1,
+            0.1
+          ],
+          [
+            0.1,
+            1.9
+          ],
+          [
+            0,
+            1.9
+          ]
+        ],
+        [
+          [
+            2.9,
+            0.1
+          ],
+          [
+            3,
+            0.1
+          ],
+          [
+            3,
+            1.9
+          ],
+          [
+            2.9,
+            1.9
+          ]
+        ]
+      ],
+      "sourceNote": "来源：public/concepts/wall-window-definitions.md、draw_wall_complete_catalog.py、draw_wall_window_variants.py；墙厚0.2，Z=[-1.2,-1]。窗框b=0.1、斜切c=0.5均为来源绘图草案，尚非最终制作参数。整个3×2区域仅外围有框，净洞2.8×1.8；不是六个独立小窗。"
+    },
+    {
+      "id": "W8-TL",
+      "name": "斜角窗角·左上",
+      "width": 1,
+      "height": 1,
+      "depth": 0.2,
+      "polygons": [
+        [
+          [
+            0,
+            1
+          ],
+          [
+            0,
+            0.5
+          ],
+          [
+            0.5,
+            1
+          ]
+        ],
+        [
+          [
+            1.0,
+            1.0
+          ],
+          [
+            0.5,
+            1
+          ],
+          [
+            0.5414213562373095,
+            0.8999999999999999
+          ],
+          [
+            1.0,
+            0.8999999999999999
+          ]
+        ],
+        [
+          [
+            0.5,
+            1
+          ],
+          [
+            0,
+            0.5
+          ],
+          [
+            0.1,
+            0.4585786437626904
+          ],
+          [
+            0.5414213562373095,
+            0.8999999999999999
+          ]
+        ],
+        [
+          [
+            0,
+            0.5
+          ],
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.1,
+            0.0
+          ],
+          [
+            0.1,
+            0.4585786437626904
+          ]
+        ]
+      ],
+      "sourceNote": "来源：public/concepts/wall-window-definitions.md、draw_wall_complete_catalog.py、draw_wall_window_variants.py；墙厚0.2，Z=[-1.2,-1]。窗框b=0.1、斜切c=0.5均为来源绘图草案，尚非最终制作参数。从源定义完整2×2斜角窗裁出对应1×1格；三角墙片加斜框，内部两边敞开；斜框法向宽b。"
+    },
+    {
+      "id": "W8-TR",
+      "name": "斜角窗角·右上",
+      "width": 1,
+      "height": 1,
+      "depth": 0.2,
+      "polygons": [
+        [
+          [
+            1,
+            1
+          ],
+          [
+            0.5,
+            1
+          ],
+          [
+            1,
+            0.5
+          ]
+        ],
+        [
+          [
+            1.0,
+            0.0
+          ],
+          [
+            1,
+            0.5
+          ],
+          [
+            0.8999999999999999,
+            0.4585786437626904
+          ],
+          [
+            0.8999999999999999,
+            0.0
+          ]
+        ],
+        [
+          [
+            1,
+            0.5
+          ],
+          [
+            0.5,
+            1
+          ],
+          [
+            0.4585786437626904,
+            0.8999999999999999
+          ],
+          [
+            0.8999999999999999,
+            0.4585786437626904
+          ]
+        ],
+        [
+          [
+            0.5,
+            1
+          ],
+          [
+            0.0,
+            1.0
+          ],
+          [
+            0.0,
+            0.8999999999999999
+          ],
+          [
+            0.4585786437626904,
+            0.8999999999999999
+          ]
+        ]
+      ],
+      "sourceNote": "来源：public/concepts/wall-window-definitions.md、draw_wall_complete_catalog.py、draw_wall_window_variants.py；墙厚0.2，Z=[-1.2,-1]。窗框b=0.1、斜切c=0.5均为来源绘图草案，尚非最终制作参数。从源定义完整2×2斜角窗裁出对应1×1格；三角墙片加斜框，内部两边敞开；斜框法向宽b。"
+    },
+    {
+      "id": "W8-BL",
+      "name": "斜角窗角·左下",
+      "width": 1,
+      "height": 1,
+      "depth": 0.2,
+      "polygons": [
+        [
+          [
+            0,
+            0
+          ],
+          [
+            0.5,
+            0
+          ],
+          [
+            0,
+            0.5
+          ]
+        ],
+        [
+          [
+            0.5,
+            0
+          ],
+          [
+            1.0,
+            0.0
+          ],
+          [
+            1.0,
+            0.1
+          ],
+          [
+            0.5414213562373095,
+            0.1
+          ]
+        ],
+        [
+          [
+            0.0,
+            1.0
+          ],
+          [
+            0,
+            0.5
+          ],
+          [
+            0.1,
+            0.5414213562373095
+          ],
+          [
+            0.1,
+            1.0
+          ]
+        ],
+        [
+          [
+            0,
+            0.5
+          ],
+          [
+            0.5,
+            0
+          ],
+          [
+            0.5414213562373095,
+            0.1
+          ],
+          [
+            0.1,
+            0.5414213562373095
+          ]
+        ]
+      ],
+      "sourceNote": "来源：public/concepts/wall-window-definitions.md、draw_wall_complete_catalog.py、draw_wall_window_variants.py；墙厚0.2，Z=[-1.2,-1]。窗框b=0.1、斜切c=0.5均为来源绘图草案，尚非最终制作参数。从源定义完整2×2斜角窗裁出对应1×1格；三角墙片加斜框，内部两边敞开；斜框法向宽b。"
+    },
+    {
+      "id": "W8-BR",
+      "name": "斜角窗角·右下",
+      "width": 1,
+      "height": 1,
+      "depth": 0.2,
+      "polygons": [
+        [
+          [
+            1,
+            0
+          ],
+          [
+            1,
+            0.5
+          ],
+          [
+            0.5,
+            0
+          ]
+        ],
+        [
+          [
+            0.0,
+            0.0
+          ],
+          [
+            0.5,
+            0
+          ],
+          [
+            0.4585786437626904,
+            0.1
+          ],
+          [
+            0.0,
+            0.1
+          ]
+        ],
+        [
+          [
+            0.5,
+            0
+          ],
+          [
+            1,
+            0.5
+          ],
+          [
+            0.8999999999999999,
+            0.5414213562373095
+          ],
+          [
+            0.4585786437626904,
+            0.1
+          ]
+        ],
+        [
+          [
+            1,
+            0.5
+          ],
+          [
+            1.0,
+            1.0
+          ],
+          [
+            0.8999999999999999,
+            1.0
+          ],
+          [
+            0.8999999999999999,
+            0.5414213562373095
+          ]
+        ]
+      ],
+      "sourceNote": "来源：public/concepts/wall-window-definitions.md、draw_wall_complete_catalog.py、draw_wall_window_variants.py；墙厚0.2，Z=[-1.2,-1]。窗框b=0.1、斜切c=0.5均为来源绘图草案，尚非最终制作参数。从源定义完整2×2斜角窗裁出对应1×1格；三角墙片加斜框，内部两边敞开；斜框法向宽b。"
+    },
+    {
+      "id": "W8-2x2",
+      "name": "四块组合斜角大窗",
+      "width": 2,
+      "height": 2,
+      "depth": 0.2,
+      "polygons": [
+        [
+          [
+            0,
+            0
+          ],
+          [
+            0.5,
+            0
+          ],
+          [
+            0,
+            0.5
+          ]
+        ],
+        [
+          [
+            2,
+            0
+          ],
+          [
+            2,
+            0.5
+          ],
+          [
+            1.5,
+            0
+          ]
+        ],
+        [
+          [
+            2,
+            2
+          ],
+          [
+            1.5,
+            2
+          ],
+          [
+            2,
+            1.5
+          ]
+        ],
+        [
+          [
+            0,
+            2
+          ],
+          [
+            0,
+            1.5
+          ],
+          [
+            0.5,
+            2
+          ]
+        ],
+        [
+          [
+            0.5,
+            0
+          ],
+          [
+            1.5,
+            0
+          ],
+          [
+            1.4585786437626904,
+            0.1
+          ],
+          [
+            0.5414213562373095,
+            0.1
+          ]
+        ],
+        [
+          [
+            1.5,
+            0
+          ],
+          [
+            2,
+            0.5
+          ],
+          [
+            1.9,
+            0.5414213562373095
+          ],
+          [
+            1.4585786437626904,
+            0.1
+          ]
+        ],
+        [
+          [
+            2,
+            0.5
+          ],
+          [
+            2,
+            1.5
+          ],
+          [
+            1.9,
+            1.4585786437626904
+          ],
+          [
+            1.9,
+            0.5414213562373095
+          ]
+        ],
+        [
+          [
+            2,
+            1.5
+          ],
+          [
+            1.5,
+            2
+          ],
+          [
+            1.4585786437626904,
+            1.9
+          ],
+          [
+            1.9,
+            1.4585786437626904
+          ]
+        ],
+        [
+          [
+            1.5,
+            2
+          ],
+          [
+            0.5,
+            2
+          ],
+          [
+            0.5414213562373095,
+            1.9
+          ],
+          [
+            1.4585786437626904,
+            1.9
+          ]
+        ],
+        [
+          [
+            0.5,
+            2
+          ],
+          [
+            0,
+            1.5
+          ],
+          [
+            0.1,
+            1.4585786437626904
+          ],
+          [
+            0.5414213562373095,
+            1.9
+          ]
+        ],
+        [
+          [
+            0,
+            1.5
+          ],
+          [
+            0,
+            0.5
+          ],
+          [
+            0.1,
+            0.5414213562373095
+          ],
+          [
+            0.1,
+            1.4585786437626904
+          ]
+        ],
+        [
+          [
+            0,
+            0.5
+          ],
+          [
+            0.5,
+            0
+          ],
+          [
+            0.5414213562373095,
+            0.1
+          ],
+          [
+            0.1,
+            0.5414213562373095
+          ]
+        ]
+      ],
+      "sourceNote": "来源：public/concepts/wall-window-definitions.md、draw_wall_complete_catalog.py、draw_wall_window_variants.py；墙厚0.2，Z=[-1.2,-1]。窗框b=0.1、斜切c=0.5均为来源绘图草案，尚非最终制作参数。四角保留三角墙片，中间是一个贯穿的八边形净洞；内部格界不封边。Q=c+b×(√2−1)，保持斜框法向宽b。"
+    }
+  ]
+}

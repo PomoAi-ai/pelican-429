@@ -83,27 +83,28 @@ def tilt(point, angle, pivot):
     return px + x * cos(angle) - y * sin(angle), py + x * sin(angle) + y * cos(angle), z
 
 
-def solar(view, angle=15, center_z=0, envelope=False):
-    """整板在半格高包络内转动；偏移安装时底座仍锚定中央实体。"""
+def solar(view, angle=15, depth=2, envelope=False):
+    """整板在半格高包络内转动；以Z=0居中，底座只占中央一格，加深只延长板面与转轴。"""
     radians = angle * pi / 180
-    pivot = (.5, .27, center_z)
+    pivot = (.5, .27, 0)
     transform = lambda p: tilt(p, radians, pivot)
-    foot_z = center_z * .7
+    half = depth / 2
     if envelope:
-        view.box((0, 0, center_z - .5), (1, .5, center_z + .5), GREEN, 2, True)
-    view.box((.32, 0, foot_z - .12), (.68, .075, foot_z + .12), INK, 3)
+        view.box((0, 0, -half), (1, .5, half), GREEN, 2, True)
+    view.box((.32, 0, -.12), (.68, .075, .12), INK, 3)
     for x in (.46, .54):
-        view.path([(x, .075, foot_z - .06), (x, .245, center_z - .06),
-                   (x, .245, center_z + .06), (x, .075, foot_z + .06)], INK, 2, close=True)
-    for z in (center_z - .14, center_z + .14):
+        view.path([(x, .075, -.06), (x, .245, -.06), (x, .245, .06), (x, .075, .06)], INK, 2, close=True)
+    for z in (.36 - half, half - .36):
         view.path([(.5 + .025 * cos(t * pi / 12), .27 + .025 * sin(t * pi / 12), z)
                    for t in range(25)], INK, 2)
-    view.path([(.5, .295, center_z - .14), (.5, .295, center_z + .14)], INK, 2)
-    view.box((.03, .245, center_z - .47), (.97, .295, center_z + .47), BLUE, 4, transform=transform)
+    view.path([(.5, .295, .36 - half), (.5, .295, half - .36)], INK, 2)
+    view.box((.03, .245, .03 - half), (.97, .295, half - .03), BLUE, 4, transform=transform)
+    cell = (depth - .12 - .03 * (depth * 2 - 1)) / (depth * 2)
     for col in range(4):
-        for row in range(2):
+        for row in range(depth * 2):
             x1, x2 = .055 + col * .224, .26 + col * .224
-            z1, z2 = center_z - .44 + row * .45, center_z - .02 + row * .45
+            z1 = .06 - half + row * (cell + .03)
+            z2 = z1 + cell
             view.path([transform((x1, .298, z1)), transform((x2, .298, z1)),
                        transform((x2, .298, z2)), transform((x1, .298, z2))], BLUE, 2, close=True)
 
@@ -140,7 +141,7 @@ def sun(x, y, end):
 
 
 text(100, 42, '半格太阳能板｜占格、踩踏与追光', 64)
-text(103, 129, '一整块活动面板，不拆片。宽 1 × 高 0.5 × 深 1 格；底座固定，面板可左右倾转。', 32, BLUE)
+text(103, 129, '一整块活动面板，不拆片。宽 1 × 高 0.5；深 2 或深 3，都以人物平面 Z=0 居中；底座固定，面板可左右倾转。', 32, BLUE)
 line((100, 193), (3300, 193), GRAY, 2)
 text(100, 224, '01  方格定义：半格指总高度，包含底座与面板的完整转动范围', 38)
 text(100, 283, '正视图 X/Y 等比例；每个大方格为 1×1，小格为 0.1。绿色虚框是物件包络，不是实心碰撞砖。', 27)
@@ -173,26 +174,25 @@ cx = 2850
 text(cx, 365, 'C  同一物件的线框透视', 30, INK, 'mm')
 v = View((cx, 690), 360)
 solar(v, 15, envelope=True)
-text(cx, 978, '整件包络：宽 1 × 高 0.5 × 深 1', 28, GREEN, 'mm')
+text(cx, 978, '整件包络：宽 1 × 高 0.5 × 深 2', 28, GREEN, 'mm')
 text(cx, 1030, '板面小格只是电池纹理，不是游戏方格', 25, INK, 'mm')
 
 line((100, 1110), (3300, 1110), GRAY, 2)
-text(100, 1140, '02  内沿 / 居中 / 外延：保持深 1，不把太阳能板压成半深', 38)
-text(100, 1200, '偏移安装为候选：向内或向外移动 0.5，跨“半格预留＋半格实体”；预留区用虚线表示，不自动填砖。', 27)
-for i, (title, z, color, band) in enumerate([
-    ('内沿偏置', -.5, GREEN, '物件 Z=[-1, 0]'),
-    ('居中放置', 0, BLUE, '物件 Z=[-0.5, +0.5]'),
-    ('外延偏置', .5, GOLD, '物件 Z=[0, +1]'),
+text(100, 1140, '02  两种正式深度：深 2 与深 3，都以 Z=0 居中', 38)
+text(100, 1200, '深2与格子Z=[-1,+1]同深；深3向前后各外延0.5到前沿、后沿，板面悬空不占砖。底座只占中央一格，不挡人物行走；背后有墙时只能用深2。', 27)
+for i, (title, depth, color, band) in enumerate([
+    ('深 2 · 与格子同深', 2, BLUE, '物件 Z=[-1, +1]'),
+    ('深 3 · 外延到前后沿', 3, GREEN, '物件 Z=[-1.5, +1.5]'),
 ]):
-    cx = 620 + i * 1120
+    cx = 1000 + i * 1400
     text(cx, 1255, title, 32, color, 'mm')
-    v = View((cx, 1515), 310, target=(.5, -.10, 0))
-    v.box((0, -.5, -.5), (1, 0, .5), '#bcc7d0', 2)
-    v.box((0, -.5, -1), (1, 0, -.5), GREEN, 1, True)
-    v.box((0, -.5, .5), (1, 0, 1), GOLD, 1, True)
-    solar(v, 0, z)
-    text(cx, 1830, band + ' · 深度始终为 1', 27, color, 'mm')
-    text(cx, 1874, '底座锚在实体上；外伸部分由支架承托' if z else '底座与面板居中，支撑顶面不变', 24, INK, 'mm')
+    v = View((cx, 1470), 200, target=(.5, -.10, 0))
+    v.box((0, -.5, -1), (1, 0, 1), '#bcc7d0', 2)
+    v.box((0, -.5, -1.5), (1, 0, -1), GREEN, 1, True)
+    v.box((0, -.5, 1), (1, 0, 1.5), GOLD, 1, True)
+    solar(v, 0, depth)
+    text(cx, 1830, band + f' · 深 {depth}', 27, color, 'mm')
+    text(cx, 1874, '板面落在格子范围内' if depth == 2 else '板面伸进前沿与后沿各0.5，后沿有墙时不可用', 24, INK, 'mm')
 
 line((100, 1940), (3300, 1940), GRAY, 2)
 text(100, 1970, '03  受力过程：追光 → 玩家踩压 → 离开回弹 → 再次对准太阳', 38)
@@ -219,14 +219,14 @@ for i, (label, angle) in enumerate([('① 无人：朝向太阳', 15), ('② 踩
 text(100, 2610, '已定含义：半格高的整板，踩上会偏转，离开恢复追光。候选参数：约 ±22° 限位、回弹速度、承重与安装支架。', 27)
 text(100, 2655, '本轮仅重绘设计图；没有把绿色包络当作实心砖，也没有新增玩家碰撞或场景逻辑。', 25, '#6f8293')
 
-# 改变转轴或角度后仍须满足半格包络；偏置底座必须落在中间实体内。
+# 改变转轴或角度后仍须满足半格高包络；偏置底座必须落在格子内。
 for degrees in range(-22, 23):
     for x in (.03, .97):
         for y in (.245, .298):
             px, py, _ = tilt((x, y, 0), degrees * pi / 180, (.5, .27, 0))
             assert 0 <= px <= 1 and 0 <= py <= .5
-for z in (-.5, 0, .5):
-    assert -.5 <= z * .7 - .12 < z * .7 + .12 <= .5
+for depth in (2, 3):
+    assert depth / 2 <= 1.5
 assert tilt((.9, .27, 0), -22 * pi / 180, (.5, .27, 0))[1] < .27
 image.save(OUT / 'solar-grid-and-load-perspective.png')
 print(OUT / 'solar-grid-and-load-perspective.png')

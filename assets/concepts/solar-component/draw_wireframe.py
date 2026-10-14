@@ -150,23 +150,24 @@ for index, (name, active, angle) in enumerate([('A  上半片转动', 'upper', 2
     text(cx, 896, '独立转轴沿深度 Z；绕轴倾转，使面板朝左 / 朝右受光', 27, INK, 'mm')
 
 line((100, 947), (3100, 947), GRAY, 2)
-text(100, 977, '02  摆放：同一件半深家具，三种安装位置', 38)
-text(100, 1034, '中间实体深 1；内沿、外延各预留 0.5。灰色砖和侧托板只是安装参照，不并入太阳能物件。', 28)
+text(100, 977, '02  摆放：同一件深1家具，三种格内安装位置', 38)
+text(100, 1034, '格子深 2；格子外前沿、后沿各 0.5。灰色砖和侧托板只是安装参照，不并入太阳能物件。', 28)
 
 for i, (name, center_z, color, band) in enumerate([
-    ('内沿安装', -.75, GREEN, 'Z = -1 ～ -0.5'),
-    ('居中安装', 0, BLUE, 'Z = -0.25 ～ +0.25'),
-    ('外延安装', .75, GOLD, 'Z = +0.5 ～ +1'),
+    # Geometry keeps the camera at −Z internally; labels use the +Z-toward-camera convention.
+    ('前偏安装', -.5, GREEN, 'Z = 0 ～ +1'),
+    ('居中安装', 0, BLUE, 'Z = -0.5 ～ +0.5'),
+    ('后偏安装', .5, GOLD, 'Z = -1 ～ 0'),
 ]):
     cx = 590 + i * 1020
     text(cx, 1120, name, 36, color, 'mm')
-    v = View((cx, 1390), 350, target=(.5, -.05, 0))
-    v.box((0, -.55, -.5), (1, 0, .5), GRAY, 2)
-    v.box((0, -.12, -1), (1, 0, -.5), GREEN, 2)
-    v.box((0, -.12, .5), (1, 0, 1), GOLD, 2)
-    panel(v, 'upper', 15, .5, center_z)
+    v = View((cx, 1390), 260, target=(.5, -.05, 0))
+    v.box((0, -.55, -1), (1, 0, 1), GRAY, 2)
+    v.box((0, -.12, -1.5), (1, 0, -1), GREEN, 2)
+    v.box((0, -.12, 1), (1, 0, 1.5), GOLD, 2)
+    panel(v, 'upper', 15, 1, center_z)
     text(cx, 1670, band, 28, color, 'mm')
-    text(cx, 1719, '物件尺寸 1 × 0.5 × 0.5 格', 26, INK, 'mm')
+    text(cx, 1719, '物件尺寸 1 × 0.5 × 1 格', 26, INK, 'mm')
 
 line((100, 1785), (3100, 1785), GRAY, 2)
 text(100, 1815, '03  追光：同一件“上半转”构件的三个姿态', 38)

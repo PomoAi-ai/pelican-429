@@ -1,0 +1,25 @@
+{
+  "image": "white-concrete-walls-22.png",
+  "material": "White concrete - shared by all profiles",
+  "resolution": [
+    3200,
+    3227
+  ],
+  "solidCount": 33,
+  "wallEntryCount": 22,
+  "cameraType": "ORTHO",
+  "cameraLocation": [
+    11.699999809265137,
+    11.800000190734863,
+    60.0
+  ],
+  "cameraRotation": [
+    0.0,
+    0.0,
+    0.0
+  ],
+  "verticalFieldOfViewDegrees": null,
+  "solidDepth": 2,
+  "wallDepth": 0.2,
+  "stage": "artwork only; not game runtime integration"
+}

@@ -23,7 +23,11 @@ import { BED_KINDS, FLOAT_KINDS, MOTE_KINDS } from './water-flora.ts';
 import type { BedKind, FloatKind, MoteKind } from './water-flora.ts';
 import { TREE_LABELS, SHRUB_LABELS, FLORA_LABELS, COVER_LABELS, ROCK_LABELS, DESERT_LABELS, CAVE_LABELS, AQUATIC_LABELS } from './resource-labels.ts';
 
+import { PLANT_ATTACHMENT_KINDS, PLANT_ATTACHMENT_LABELS, PLANT_ATTACHMENT_DESCRIPTIONS } from './plant-attachments.ts';
+import type { PlantAttachmentKind } from './plant-attachments.ts';
+
 interface ResourceActions {
+  climber: PlantAttachmentKind;
   block: (typeof BUILDING_KIT_VARIANTS.block)[number];
   wall: (typeof BUILDING_KIT_VARIANTS.wall)[number];
   door: (typeof BUILDING_KIT_VARIANTS.door)[number];
@@ -63,6 +67,7 @@ const resources = [
   resource('tree', '树木', '全部树种，使用游戏生成规则、树冠和枝干', variants(TREE_KINDS, TREE_LABELS)),
   resource('shrub', '灌木', '全部灌丛与植株轮廓', variants(SHRUB_KINDS, SHRUB_LABELS)),
   resource('grass', '花草', '自然组合与全部花草物种', [['natural', '自然花草'], ...variants(FLORA_SPECIES, FLORA_LABELS)]),
+  resource('climber', '附着与下垂植物', '植物的顶面、正背面、边缘与底面空间组合', variants(PLANT_ATTACHMENT_KINDS, PLANT_ATTACHMENT_LABELS), 'cover'),
   resource('cover', '地被', '苔藓、嫩芽、落叶与垂挂地被', variants(COVER_KINDS, COVER_LABELS)),
   resource('rock', '岩石', '碎石、巨石、地标岩与岩脚装饰', variants(ROCK_KINDS, ROCK_LABELS)),
   resource('desert', '沙漠装饰', '仙人掌、荒漠植物、骨骸与沙纹', variants(DESERT_KINDS, DESERT_LABELS)),
@@ -75,7 +80,7 @@ const resources = [
   resource('door', '能量门', '沿通行方向厚 0.14 格；基础门高 3、Z 跨度 1.4；一体门楣高 4、Z 跨度 1.5，齐地形前后沿；开启只关闭屏障', variants(BUILDING_KIT_VARIANTS.door, { closed: '关闭状态', open: '开启状态', 'lintel-closed': '一体门楣 · 关闭', 'lintel-open': '一体门楣 · 开启' }), 'free-world/building-kit/door'),
   resource('solar', '太阳能板', '宽 1、高 0.5、深 1 格；整板左右倾转，踩踏受力，离开后渐进恢复追光；支撑砖独立', variants(BUILDING_KIT_VARIANTS.solar, { left: '向左受光', level: '水平面板', right: '向右受光' }), 'free-world/building-kit/solar'),
 ];
-export const RESOURCE_ENTRIES: readonly ResourceEntry[] = resources.flatMap((r) => r.entries);
+export const RESOURCE_ENTRIES: readonly ResourceEntry[] = resources.flatMap((r) => r.entries).map((entry) => entry.actor === 'climber' ? { ...entry, description: PLANT_ATTACHMENT_DESCRIPTIONS[entry.action] } : entry);
 export const RESOURCE_CATALOG: ShowcaseCatalog = {
   mode: 'resources', title: '场景资源展示场', entries: RESOURCE_ENTRIES, subjects: resources.map((r) => r.subject), maxCards: MAX_SHOWCASE_CARDS,
   demos: [{

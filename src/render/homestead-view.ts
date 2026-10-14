@@ -228,12 +228,14 @@ export function createHomesteadView(scene: THREE.Scene, trees: readonly TreeInst
       const daylight = hour > dawnHour && hour < duskHour;
       const sunAngle = (hour - dawnHour) / (duskHour - dawnHour) * Math.PI;
       const sun = { x: -Math.cos(sunAngle), y: daylight ? Math.sin(sunAngle) : 0 };
-      for (const item of furniture) item.update?.(time, solarTrackingAngle(sun));
       const e = state.economy;
       screen!.emissiveIntensity = e.workstationOn ? 1.4 : 0.05;
       const level = e.stored / (e.batteries * HOMESTEAD.power.batteryCapacity);
       battery!.scale.y = Math.max(0.02, level * 1.4);
       battery!.position.y = 0.3 + battery!.scale.y / 2;
+      const panelAngle = solarTrackingAngle(sun);
+      // 全息显示与本帧供电状态同步，太阳能继续使用同一追光角度。
+      for (const item of furniture) item.update?.(time, panelAngle);
 
       while (drones.length < state.drones.length) drones.push(createDroneParts());
       state.drones.forEach((drone, i) => {

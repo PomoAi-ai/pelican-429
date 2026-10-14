@@ -246,6 +246,9 @@ interface LoadedBand {
   readonly desertCounts: Readonly<Record<string, number>>;
 }
 
+/** 岩石 z 向厚度的缩放上限：放大的石头不跟着变厚，裙边可略宽于主体，岩壁与拱门保持本体厚度。 */
+export const rockMaxDepth = (k: RockKind): number => (k.startsWith('skirt') ? 1.4 : k === 'cliff' || k === 'arch' ? 1 : 1.1);
+
 export function createSurfaceDecorView(level: LevelData, options: SurfaceDecorViewOptions): SurfaceDecorView {
   if (!level || !level.map) throw new Error('surface-decor: level with map is required');
   if (typeof options?.ground !== 'function') throw new Error('surface-decor: options.ground (visual ground profile) is required');
@@ -255,7 +258,7 @@ export function createSurfaceDecorView(level: LevelData, options: SurfaceDecorVi
   const uTime: THREE.IUniform<number> = { value: 0 };
   const rockMat = createRockMaterial();
   const rockParts = createRockParts();
-  const rocks = createDecorBatch(ROCK_KINDS, rockParts, rockMat, 'surface-rocks', (k: RockKind) => ROCK_NATIVE[k].width, (k: RockKind) => (k.startsWith('skirt') ? 1.4 : k === 'cliff' || k === 'arch' ? 1 : 1.1));
+  const rocks = createDecorBatch(ROCK_KINDS, rockParts, rockMat, 'surface-rocks', (k: RockKind) => ROCK_NATIVE[k].width, rockMaxDepth);
   for (const g of rockParts) g.dispose();
   root.add(rocks.mesh);
   // 接地 AO 晕（透明批，主石各一片；+1 draw call）。

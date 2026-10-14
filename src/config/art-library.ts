@@ -1,15 +1,23 @@
 export interface ArtLibraryImage {
   readonly label: readonly [string, string];
   readonly path: string;
+  /** 标尺虚线数据（*.guides.json，图片像素坐标）；资料库页与原画对比栏点按钮时叠画到图上。 */
+  readonly guides?: string;
 }
 
 export interface ArtLibraryEntry {
   readonly id: string;
   readonly title: readonly [string, string];
+  /** 目录里同一分组内的小标题（如体型），相邻同名条目归在一起。 */
+  readonly subgroup?: readonly [string, string];
   readonly status: 'confirmed' | 'derived' | 'candidate';
   readonly description: readonly [string, string];
   readonly evidence: readonly [string, string];
+  /** 定义字段（发型、服装、配色…），按行显示在来源说明之后。 */
+  readonly facts?: readonly (readonly [readonly [string, string], string])[];
   readonly images: readonly ArtLibraryImage[];
+  /** 非图片附件：提示词、定义文本、测量记录等。 */
+  readonly files?: readonly ArtLibraryImage[];
 }
 
 export interface ArtLibraryGroup {
@@ -18,341 +26,70 @@ export interface ArtLibraryGroup {
   readonly entries: readonly ArtLibraryEntry[];
 }
 
+/** 手写条目；24 款与古典角色两组由定义 JSON 生成，见 art-library-sets.ts。 */
 export const ART_LIBRARY_GROUPS: readonly ArtLibraryGroup[] = [
-  {
-    id: "roster-24", label: ["24款换装角色","24 character variants"], entries: [
-      {
-        id: "roster-24-definitions", title: ["24款角色 · 四视图已齐全","24 characters · All four-view sheets"], status: "derived",
-        description: ["24款原画与标尺全部齐全，季节、服装、发型和胖瘦各有变化。画稿见“包含待核对稿”或24款角色图册。","All 24 four-view artworks and rulers are available. Show candidates or open the roster gallery."],
-        evidence: ["全部24款已绘制；画稿待用户选型确认，尚非3D模型。","All 24 are drawn; approval pending. These are not 3D assets."],
-        images: [{"label":["第1批定义","Batch 1 definitions"],"path":"./art-library/roster-24/definitions/batch-01.svg"},{"label":["第2批定义","Batch 2 definitions"],"path":"./art-library/roster-24/definitions/batch-02.svg"},{"label":["第3批定义","Batch 3 definitions"],"path":"./art-library/roster-24/definitions/batch-03.svg"},{"label":["第4批定义","Batch 4 definitions"],"path":"./art-library/roster-24/definitions/batch-04.svg"},{"label":["第5批定义","Batch 5 definitions"],"path":"./art-library/roster-24/definitions/batch-05.svg"},{"label":["第6批定义","Batch 6 definitions"],"path":"./art-library/roster-24/definitions/batch-06.svg"}],
-      },
-      {
-        id: "roster-r01", title: ["R01 · 经典水手裙","R01 · Character draft"], status: "candidate",
-        description: ["黑色齐肩直发；侧分刘海，发尾内收，露出部分耳廓；均衡体型。象牙白水手领短袖上衣、藏蓝百褶短裙、暗红领结。正面估测约3.23H，目标3.30H。","Four-view concept artwork. Approximate measured front ratio 3.23 heads; target 3.30."],
-        evidence: ["四视图原画与独立计算标尺已保存，人工选点误差约±5像素；不是最终定稿或3D比例认证。","Artwork and calculated ruler retained; manual landmarks have approximately ±5 px uncertainty. Final approval pending."],
-        images: [{"label":["四视图与标尺检查","Four views with ruler"],"path":"./art-library/roster-24/batch-01/r01-ruler.png"},{"label":["无尺原画","Clean artwork"],"path":"./art-library/roster-24/batch-01/r01-art.png"}],
-      },
-      {
-        id: "roster-r02", title: ["R02 · 夏日水手短裤","R02 · Character draft"], status: "candidate",
-        description: ["银灰耳上短发；蓬松侧扫，细碎后颈，单侧交叉发夹；纤细体型。天蓝短袖水手上衣、象牙白领巾、藏蓝高腰短裤。正面估测约3.18H，目标3.30H。","Four-view concept artwork. Approximate measured front ratio 3.18 heads; target 3.30."],
-        evidence: ["四视图原画与独立计算标尺已保存，人工选点误差约±5像素；不是最终定稿或3D比例认证。","Artwork and calculated ruler retained; manual landmarks have approximately ±5 px uncertainty. Final approval pending."],
-        images: [{"label":["四视图与标尺检查","Four views with ruler"],"path":"./art-library/roster-24/batch-01/r02-ruler.png"},{"label":["无尺原画","Clean artwork"],"path":"./art-library/roster-24/batch-01/r02-art.png"}],
-      },
-      {
-        id: "roster-r03", title: ["R03 · 牛仔背带短裤","R03 · Character draft"], status: "candidate",
-        description: ["栗棕齐肩波浪半扎；小发束，后脑体积饱满；微胖体型。杏色圆领短袖、浅蓝牛仔背带短裤、雏菊胸袋。正面估测约3.32H，目标3.30H。","Four-view concept artwork. Approximate measured front ratio 3.32 heads; target 3.30."],
-        evidence: ["四视图原画与独立计算标尺已保存，人工选点误差约±5像素；不是最终定稿或3D比例认证。","Artwork and calculated ruler retained; manual landmarks have approximately ±5 px uncertainty. Final approval pending."],
-        images: [{"label":["四视图与标尺检查","Four views with ruler"],"path":"./art-library/roster-24/batch-01/r03-ruler.png"},{"label":["无尺原画","Clean artwork"],"path":"./art-library/roster-24/batch-01/r03-art.png"}],
-      },
-      {
-        id: "roster-r04", title: ["R04 · 秋日针织","R04 · Character draft"], status: "candidate",
-        description: ["深棕齐下巴圆弧波波头；短齐刘海，不遮眼；微胖体型。苔绿宽松短开衫、奶油内搭、焦糖A字短裙。正面估测约3.31H，目标3.30H。","Four-view concept artwork. Approximate measured front ratio 3.31 heads; target 3.30."],
-        evidence: ["四视图原画与独立计算标尺已保存，人工选点误差约±5像素；不是最终定稿或3D比例认证。","Artwork and calculated ruler retained; manual landmarks have approximately ±5 px uncertainty. Final approval pending."],
-        images: [{"label":["四视图与标尺检查","Four views with ruler"],"path":"./art-library/roster-24/batch-02/r04-ruler.png"},{"label":["无尺原画","Clean artwork"],"path":"./art-library/roster-24/batch-02/r04-art.png"}],
-      },
-      {
-        id: "roster-r05", title: ["R05 · 冬日旅行","R05 · Character draft"], status: "candidate",
-        description: ["橙金色单侧长辫；辫尾至腰，刘海与D1家族一致；均衡体型。象牙白短呢大衣、青绿围巾、藏蓝直筒长裤。正面估测约3.35H，目标3.30H。","Four-view concept artwork. Approximate measured front ratio 3.35 heads; target 3.30."],
-        evidence: ["四视图原画与独立计算标尺已保存，人工选点误差约±5像素；不是最终定稿或3D比例认证。","Artwork and calculated ruler retained; manual landmarks have approximately ±5 px uncertainty. Final approval pending."],
-        images: [{"label":["四视图与标尺检查","Four views with ruler"],"path":"./art-library/roster-24/batch-02/r05-ruler.png"},{"label":["无尺原画","Clean artwork"],"path":"./art-library/roster-24/batch-02/r05-art.png"}],
-      },
-      {
-        id: "roster-r06", title: ["R06 · 东方轻装","R06 · Character draft"], status: "candidate",
-        description: ["黑色低发髻；中分两条短鬓发，髻不超过头高基线；纤细体型。玉色交领短外套、米白九分直筒裤、深青布腰带。正面估测约3.16H，目标3.30H。","Four-view concept artwork. Approximate measured front ratio 3.16 heads; target 3.30."],
-        evidence: ["四视图原画与独立计算标尺已保存，人工选点误差约±5像素；不是最终定稿或3D比例认证。","Artwork and calculated ruler retained; manual landmarks have approximately ±5 px uncertainty. Final approval pending."],
-        images: [{"label":["四视图与标尺检查","Four views with ruler"],"path":"./art-library/roster-24/batch-02/r06-ruler.png"},{"label":["无尺原画","Clean artwork"],"path":"./art-library/roster-24/batch-02/r06-art.png"}],
-      },
-      {
-        id: "roster-r07", title: ["R07 · 医生","R07 · Character draft"], status: "candidate",
-        description: ["暖棕低马尾；干净侧分刘海，不遮眼耳；均衡体型。白色短医师外套、淡蓝刷手衣、深蓝直筒长裤。正面估测约3.26H，目标3.30H。","Four-view concept artwork. Approximate measured front ratio 3.26 heads; target 3.30."],
-        evidence: ["四视图原画与独立计算标尺已保存，人工选点误差约±5像素；不是最终定稿或3D比例认证。","Artwork and calculated ruler retained; manual landmarks have approximately ±5 px uncertainty. Final approval pending."],
-        images: [{"label":["四视图与标尺检查","Four views with ruler"],"path":"./art-library/roster-24/batch-03/r07-ruler.png"},{"label":["无尺原画","Clean artwork"],"path":"./art-library/roster-24/batch-03/r07-art.png"}],
-      },
-      {
-        id: "roster-r08", title: ["R08 · 急救员","R08 · Character draft"], status: "candidate",
-        description: ["黑色利落短发；偏分，后颈贴合；微胖体型。藏蓝急救夹克、橙色肩部拼片、藏蓝工装长裤。正面估测约3.31H，目标3.30H。","Four-view concept artwork. Approximate measured front ratio 3.31 heads; target 3.30."],
-        evidence: ["四视图原画与独立计算标尺已保存，人工选点误差约±5像素；不是最终定稿或3D比例认证。","Artwork and calculated ruler retained; manual landmarks have approximately ±5 px uncertainty. Final approval pending."],
-        images: [{"label":["四视图与标尺检查","Four views with ruler"],"path":"./art-library/roster-24/batch-03/r08-ruler.png"},{"label":["无尺原画","Clean artwork"],"path":"./art-library/roster-24/batch-03/r08-art.png"}],
-      },
-      {
-        id: "roster-r09", title: ["R09 · 野外训练军人","R09 · Character draft"], status: "candidate",
-        description: ["黑色极短碎发；露耳，短鬓角，不剃光；健壮体型。橄榄绿训练夹克、低对比迷彩工装长裤、深绿腰带。正面估测约3.29H，目标3.30H。","Four-view concept artwork. Approximate measured front ratio 3.29 heads; target 3.30."],
-        evidence: ["四视图原画与独立计算标尺已保存，人工选点误差约±5像素；不是最终定稿或3D比例认证。","Artwork and calculated ruler retained; manual landmarks have approximately ±5 px uncertainty. Final approval pending."],
-        images: [{"label":["四视图与标尺检查","Four views with ruler"],"path":"./art-library/roster-24/batch-02/r09-ruler.png"},{"label":["无尺原画","Clean artwork"],"path":"./art-library/roster-24/batch-02/r09-art.png"}],
-      },
-      {
-        id: "roster-r10", title: ["R10 · 田径运动员","R10 · Character draft"], status: "candidate",
-        description: ["栗棕高马尾；侧分刘海，基础头顶与马尾分开识别；健壮体型。蓝白全长运动背心、藏蓝侧条纹跑步短裤。正面估测约3.29H，目标3.30H。","Four-view concept artwork. Approximate measured front ratio 3.29 heads; target 3.30."],
-        evidence: ["四视图原画与独立计算标尺已保存，人工选点误差约±5像素；不是最终定稿或3D比例认证。","Artwork and calculated ruler retained; manual landmarks have approximately ±5 px uncertainty. Final approval pending."],
-        images: [{"label":["四视图与标尺检查","Four views with ruler"],"path":"./art-library/roster-24/batch-01/r10-ruler.png"},{"label":["无尺原画","Clean artwork"],"path":"./art-library/roster-24/batch-01/r10-art.png"}],
-      },
-      {
-        id: "roster-r11", title: ["R11 · 网球运动员","R11 · Character draft"], status: "candidate",
-        description: ["蜂蜜金单侧辫；额前自然分束，辫尾至肩下；纤细体型。白绿翻领运动上衣、白色百褶运动裙，内置同色安全短裤。正面估测约3.33H，目标3.30H。","Four-view concept artwork. Approximate measured front ratio 3.33 heads; target 3.30."],
-        evidence: ["四视图原画与独立计算标尺已保存，人工选点误差约±5像素；不是最终定稿或3D比例认证。","Artwork and calculated ruler retained; manual landmarks have approximately ±5 px uncertainty. Final approval pending."],
-        images: [{"label":["四视图与标尺检查","Four views with ruler"],"path":"./art-library/roster-24/batch-03/r11-ruler.png"},{"label":["无尺原画","Clean artwork"],"path":"./art-library/roster-24/batch-03/r11-art.png"}],
-      },
-      {
-        id: "roster-r12", title: ["R12 · 篮球运动员","R12 · Character draft"], status: "candidate",
-        description: ["深棕双编辫；两侧对称，辫尾到肩胛；健壮体型。酒红宽松篮球背心、同色及膝篮球短裤、奶油侧条。正面估测约3.40H，目标3.30H。","Four-view concept artwork. Approximate measured front ratio 3.40 heads; target 3.30."],
-        evidence: ["四视图原画与独立计算标尺已保存，人工选点误差约±5像素；不是最终定稿或3D比例认证。","Artwork and calculated ruler retained; manual landmarks have approximately ±5 px uncertainty. Final approval pending."],
-        images: [{"label":["四视图与标尺检查","Four views with ruler"],"path":"./art-library/roster-24/batch-03/r12-ruler.png"},{"label":["无尺原画","Clean artwork"],"path":"./art-library/roster-24/batch-03/r12-art.png"}],
-      },
-      {
-        id: "roster-r13", title: ["R13 · 学院休闲","R13 · Character draft"], status: "candidate",
-        description: ["银紫不对称短波波；一侧耳上，另一侧到下巴；纤细体型。藏蓝短西装、浅灰针织内搭、灰蓝格纹A字裙。正面估测约3.23H，目标3.30H。","Four-view concept artwork. Approximate measured front ratio 3.23 heads; target 3.30."],
-        evidence: ["四视图原画与独立计算标尺已保存，人工选点误差约±5像素；不是最终定稿或3D比例认证。","Artwork and calculated ruler retained; manual landmarks have approximately ±5 px uncertainty. Final approval pending."],
-        images: [{"label":["四视图与标尺检查","Four views with ruler"],"path":"./art-library/roster-24/batch-04/r13-ruler.png"},{"label":["无尺原画","Clean artwork"],"path":"./art-library/roster-24/batch-04/r13-art.png"}],
-      },
-      {
-        id: "roster-r14", title: ["R14 · 春日花瓣裙","R14 · Character draft"], status: "candidate",
-        description: ["蜂蜜金半扎长卷发；发尾至肩胛，不遮腰；均衡体型。灰玫瑰色短袖连衣裙、花瓣叠片裙摆、奶油细腰带。正面估测约3.20H，目标3.30H。","Four-view concept artwork. Approximate measured front ratio 3.20 heads; target 3.30."],
-        evidence: ["四视图原画与独立计算标尺已保存，人工选点误差约±5像素；不是最终定稿或3D比例认证。","Artwork and calculated ruler retained; manual landmarks have approximately ±5 px uncertainty. Final approval pending."],
-        images: [{"label":["四视图与标尺检查","Four views with ruler"],"path":"./art-library/roster-24/batch-04/r14-ruler.png"},{"label":["无尺原画","Clean artwork"],"path":"./art-library/roster-24/batch-04/r14-art.png"}],
-      },
-      {
-        id: "roster-r15", title: ["R15 · 咖啡师","R15 · Character draft"], status: "candidate",
-        description: ["焦糖棕低双丸子；短卷刘海，体积不超过脸宽；微胖体型。奶油衬衣、咖啡棕短围裙、深绿宽松长裤。正面估测约3.25H，目标3.30H。","Four-view concept artwork. Approximate measured front ratio 3.25 heads; target 3.30."],
-        evidence: ["四视图原画与独立计算标尺已保存，人工选点误差约±5像素；不是最终定稿或3D比例认证。","Artwork and calculated ruler retained; manual landmarks have approximately ±5 px uncertainty. Final approval pending."],
-        images: [{"label":["四视图与标尺检查","Four views with ruler"],"path":"./art-library/roster-24/batch-04/r15-ruler.png"},{"label":["无尺原画","Clean artwork"],"path":"./art-library/roster-24/batch-04/r15-art.png"}],
-      },
-      {
-        id: "roster-r16", title: ["R16 · 消防员","R16 · Character draft"], status: "candidate",
-        description: ["棕色短碎发；露耳，干净后颈；健壮体型。深炭色防护夹克与长裤、黄灰反光带。正面估测约3.21H，目标3.30H。","Four-view concept artwork. Approximate measured front ratio 3.21 heads; target 3.30."],
-        evidence: ["四视图原画与独立计算标尺已保存，人工选点误差约±5像素；不是最终定稿或3D比例认证。","Artwork and calculated ruler retained; manual landmarks have approximately ±5 px uncertainty. Final approval pending."],
-        images: [{"label":["四视图与标尺检查","Four views with ruler"],"path":"./art-library/roster-24/batch-04/r16-ruler.png"},{"label":["无尺原画","Clean artwork"],"path":"./art-library/roster-24/batch-04/r16-art.png"}],
-      },
-      {
-        id: "roster-r17", title: ["R17 · 雨天出行","R17 · Character draft"], status: "candidate",
-        description: ["蓝黑锁骨直发；轻薄齐刘海，露出双眼；纤细体型。湖蓝短雨衣、米白短裤、袖口收束。正面估测约3.28H，目标3.30H。","Four-view concept artwork. Approximate measured front ratio 3.28 heads; target 3.30."],
-        evidence: ["四视图原画与独立计算标尺已保存，人工选点误差约±5像素；不是最终定稿或3D比例认证。","Artwork and calculated ruler retained; manual landmarks have approximately ±5 px uncertainty. Final approval pending."],
-        images: [{"label":["四视图与标尺检查","Four views with ruler"],"path":"./art-library/roster-24/batch-05/r17-ruler.png"},{"label":["无尺原画","Clean artwork"],"path":"./art-library/roster-24/batch-05/r17-art.png"}],
-      },
-      {
-        id: "roster-r18", title: ["R18 · 都市侦探","R18 · Character draft"], status: "candidate",
-        description: ["酒红耳下短发；侧分柔卷，后颈利落；均衡体型。驼色短风衣、炭灰马甲、米白衬衣、细格长裤。正面估测约3.30H，目标3.30H。","Four-view concept artwork. Approximate measured front ratio 3.30 heads; target 3.30."],
-        evidence: ["四视图原画与独立计算标尺已保存，人工选点误差约±5像素；不是最终定稿或3D比例认证。","Artwork and calculated ruler retained; manual landmarks have approximately ±5 px uncertainty. Final approval pending."],
-        images: [{"label":["四视图与标尺检查","Four views with ruler"],"path":"./art-library/roster-24/batch-05/r18-ruler.png"},{"label":["无尺原画","Clean artwork"],"path":"./art-library/roster-24/batch-05/r18-art.png"}],
-      },
-      {
-        id: "roster-r19", title: ["R19 · 园艺师","R19 · Character draft"], status: "candidate",
-        description: ["铜棕蓬松短卷发；自然圆轮廓，不戴帽；微胖体型。浅绿短袖、卡其背带长裤、布质腰袋。正面估测约3.40H，目标3.30H。","Four-view concept artwork. Approximate measured front ratio 3.40 heads; target 3.30."],
-        evidence: ["四视图原画与独立计算标尺已保存，人工选点误差约±5像素；不是最终定稿或3D比例认证。","Artwork and calculated ruler retained; manual landmarks have approximately ±5 px uncertainty. Final approval pending."],
-        images: [{"label":["四视图与标尺检查","Four views with ruler"],"path":"./art-library/roster-24/batch-05/r19-ruler.png"},{"label":["无尺原画","Clean artwork"],"path":"./art-library/roster-24/batch-05/r19-art.png"}],
-      },
-      {
-        id: "roster-r20", title: ["R20 · 机械维修师","R20 · Character draft"], status: "candidate",
-        description: ["银灰短后梳；两侧短，顶部低体积；健壮体型。灰蓝连体工装，腰部自然收束、袖子卷至肘下、少量橙色标识。正面估测约3.34H，目标3.30H。","Four-view concept artwork. Approximate measured front ratio 3.34 heads; target 3.30."],
-        evidence: ["四视图原画与独立计算标尺已保存，人工选点误差约±5像素；不是最终定稿或3D比例认证。","Artwork and calculated ruler retained; manual landmarks have approximately ±5 px uncertainty. Final approval pending."],
-        images: [{"label":["四视图与标尺检查","Four views with ruler"],"path":"./art-library/roster-24/batch-05/r20-ruler.png"},{"label":["无尺原画","Clean artwork"],"path":"./art-library/roster-24/batch-05/r20-art.png"}],
-      },
-      {
-        id: "roster-r21", title: ["R21 · 星纹法师","R21 · Character draft"], status: "candidate",
-        description: ["橙金编辫短波波；单侧小白花，承接原参考女孩；纤细体型。深蓝金边短斗篷、星纹长袖上衣、藏蓝直筒裤。正面估测约3.27H，目标3.30H。","Four-view concept artwork. Approximate measured front ratio 3.27 heads; target 3.30."],
-        evidence: ["四视图原画与独立计算标尺已保存，人工选点误差约±5像素；不是最终定稿或3D比例认证。","Artwork and calculated ruler retained; manual landmarks have approximately ±5 px uncertainty. Final approval pending."],
-        images: [{"label":["四视图与标尺检查","Four views with ruler"],"path":"./art-library/roster-24/batch-06/r21-ruler.png"},{"label":["无尺原画","Clean artwork"],"path":"./art-library/roster-24/batch-06/r21-art.png"}],
-      },
-      {
-        id: "roster-r22", title: ["R22 · 礼服军官","R22 · Character draft"], status: "candidate",
-        description: ["黑色低盘发；偏分刘海，头后小髻；均衡体型。藏蓝立领礼服短上衣、银色滚边、同色直筒长裤。正面估测约3.15H，目标3.30H。","Four-view concept artwork. Approximate measured front ratio 3.15 heads; target 3.30."],
-        evidence: ["四视图原画与独立计算标尺已保存，人工选点误差约±5像素；不是最终定稿或3D比例认证。","Artwork and calculated ruler retained; manual landmarks have approximately ±5 px uncertainty. Final approval pending."],
-        images: [{"label":["四视图与标尺检查","Four views with ruler"],"path":"./art-library/roster-24/batch-06/r22-ruler.png"},{"label":["无尺原画","Clean artwork"],"path":"./art-library/roster-24/batch-06/r22-art.png"}],
-      },
-      {
-        id: "roster-r23", title: ["R23 · 冬日居家","R23 · Character draft"], status: "candidate",
-        description: ["栗棕侧低松马尾；碎发自然，不遮面；微胖体型。燕麦色宽松针织上衣、淡灰绿家居长裤。正面估测约3.29H，目标3.30H。","Four-view concept artwork. Approximate measured front ratio 3.29 heads; target 3.30."],
-        evidence: ["四视图原画与独立计算标尺已保存，人工选点误差约±5像素；不是最终定稿或3D比例认证。","Artwork and calculated ruler retained; manual landmarks have approximately ±5 px uncertainty. Final approval pending."],
-        images: [{"label":["四视图与标尺检查","Four views with ruler"],"path":"./art-library/roster-24/batch-06/r23-ruler.png"},{"label":["无尺原画","Clean artwork"],"path":"./art-library/roster-24/batch-06/r23-art.png"}],
-      },
-      {
-        id: "roster-r24", title: ["R24 · 足球运动员","R24 · Character draft"], status: "candidate",
-        description: ["黑色耳上短卷发；小束卷曲，轮廓紧凑；健壮体型。青白足球短袖球衣、深青运动短裤、白色长运动袜。正面估测约3.31H，目标3.30H。","Four-view concept artwork. Approximate measured front ratio 3.31 heads; target 3.30."],
-        evidence: ["四视图原画与独立计算标尺已保存，人工选点误差约±5像素；不是最终定稿或3D比例认证。","Artwork and calculated ruler retained; manual landmarks have approximately ±5 px uncertainty. Final approval pending."],
-        images: [{"label":["四视图与标尺检查","Four views with ruler"],"path":"./art-library/roster-24/batch-06/r24-ruler.png"},{"label":["无尺原画","Clean artwork"],"path":"./art-library/roster-24/batch-06/r24-art.png"}],
-      },
-    ],
-  },
-  {
-    "id": "classics-7",
-    "label": [
-      "刘关张与西游师徒",
-      "Chinese classical characters"
-    ],
-    "entries": [
-      {
-        "id": "classics-7-overview",
-        "title": [
-          "刘关张与悟空 · 第一批重绘",
-          "Liu Bei, Guan Yu, Zhang Fei and Wukong · Redraw batch1"
-        ],
-        "status": "candidate",
-        "description": [
-          "四款重绘，每人一个固定造型、四个视角。其余三款旧稿已否决，待下一批。",
-          "Four redrawn designs with one fixed appearance each; three others pending."
-        ],
-        "evidence": [
-          "用户否决旧风格；以游戏主角原图重新制作，尚待选型。",
-          "Previous style rejected. Redrawn against the game protagonist; approval pending."
-        ],
-        "images": [
-          {
-            "label": [
-              "第一批四款重绘",
-              "Four redrawn sheets"
-            ],
-            "path": "./art-library/classics-7/overview-game-v2.png"
-          }
-        ]
-      },
-      {
-        "id": "classics-c01",
-        "title": [
-          "刘备 · 游戏画风重绘",
-          "Liu Bei · Game-style redraw"
-        ],
-        "status": "candidate",
-        "description": [
-          "温和圆脸、棕色大眼睛，黑色低束髻与细短髭。玉绿色及膝外袍配象牙白交领内衣，简洁小肩甲、棕色腰带、青灰宽松长裤和浅棕短靴；均衡体型。",
-          "Liu Bei. Kind adult male, bright brown rounded eyes, soft rounded-square jaw, calm smile, black swept hair with LOW compact tied bun. Only a fine small moustache and tiny separated chin goatee, jaw still visible. Simple ivory cross-collar tunic with jade-green short open coat, thin clean gold border, brown waist belt, dark blue-green trousers, cream/brown low ankle boots. Robe hem near knees rather than hiding all legs. Small plain shoulder guards, NO elaborate armor. Warm friendly gentleman-warrior, slim-balanced width."
-        ],
-        "evidence": [
-          "可见基础发冠与下巴轮廓估读，束髻和小山羊胡不计H。 新稿待选型。",
-          "Outline estimates or target guide only; pending approval."
-        ],
-        "images": [
-          {
-            "label": [
-              "唯一造型四视图",
-              "Single-design four views"
-            ],
-            "path": "./art-library/classics-7/c01-game-v2.png"
-          },
-          {
-            "label": [
-              "比例检查标尺",
-              "Proportion ruler"
-            ],
-            "path": "./art-library/classics-7/c01-game-v2-ruler.png"
-          }
-        ]
-      },
-      {
-        "id": "classics-c02",
-        "title": [
-          "关羽 · 游戏画风重绘",
-          "Guan Yu · Game-style redraw"
-        ],
-        "status": "candidate",
-        "description": [
-          "沉稳的圆眼和枣红脸，绿色低头巾、黑色长须。深绿战袍配简化金色胸甲与护腕，棕色腰带和短战靴；肩部略宽，保持主角的紧凑四肢。",
-          "Guan Yu. Adult male general with warm muted reddish complexion (intentional character cue), big calm rounded amber eyes, level bold eyebrows, full rounded cranium. Deep green low close-fitting headcloth no towering knot. Iconic long black smooth tapered beard (three clean sculpted clumps, not wiry) begins UNDER visible jawline. Deep jade green knee-length robe over cream cross-collar inner, simple muted gold chest guard with broad clean panels, brown belt, dark trousers, neat brown boots. Moderately broad shoulders, dignified expression; no terrifying scowl or ultra-muscular limbs. Bright green/gold, NOT blackened medieval armor."
-        ],
-        "evidence": [
-          "头巾遮住头顶、长须遮住下颌；头部选点为估读，紫尺只作3.3H目标参考。 新稿待选型。",
-          "Outline estimates or target guide only; pending approval."
-        ],
-        "images": [
-          {
-            "label": [
-              "唯一造型四视图",
-              "Single-design four views"
-            ],
-            "path": "./art-library/classics-7/c02-game-v2.png"
-          },
-          {
-            "label": [
-              "比例检查标尺",
-              "Proportion ruler"
-            ],
-            "path": "./art-library/classics-7/c02-game-v2-ruler.png"
-          }
-        ]
-      },
-      {
-        "id": "classics-c03",
-        "title": [
-          "张飞 · 游戏画风重绘",
-          "Zhang Fei · Game-style redraw"
-        ],
-        "status": "candidate",
-        "description": [
-          "黑色蓬松短发与红发带，浓眉、大圆眼、爽朗笑容和短络腮胡。赤红短战袍配深灰小肩甲，藏蓝裤、棕金短靴；宽肩厚实，腿部不过度加粗。",
-          "Zhang Fei. Adult stocky strong male, lively big rounded darkbrown eyes, broad friendly rounded-square face, thick eyebrows gently curved rather than angry V, wide determined grin. Short black tousled sculpted hair with small red tie, short rounded black beard below clearly legible chin. Warm medium skin, red jacket with dark charcoal simple armor panels and narrow gold trim, cream cross collar, brown belt, navy compact trousers, brown ankleboots. Stronger shoulder/torso width and forearms, SAME head/height rhythm as hero, NOT thick stump-like legs. Clean cheerful gamehero quality, no tiny scales or dragon filigree."
-        ],
-        "evidence": [
-          "束髻不计H，下颌被短须覆盖；紫尺为目标参考，不认证裸头比例。 新稿待选型。",
-          "Outline estimates or target guide only; pending approval."
-        ],
-        "images": [
-          {
-            "label": [
-              "唯一造型四视图",
-              "Single-design four views"
-            ],
-            "path": "./art-library/classics-7/c03-game-v2.png"
-          },
-          {
-            "label": [
-              "比例检查标尺",
-              "Proportion ruler"
-            ],
-            "path": "./art-library/classics-7/c03-game-v2-ruler.png"
-          }
-        ]
-      },
-      {
-        "id": "classics-c04",
-        "title": [
-          "孙悟空 · 游戏画风重绘",
-          "Sun Wukong · Game-style redraw"
-        ],
-        "status": "candidate",
-        "description": [
-          "金色块状头毛、圆猴耳、奶油色面部和棕金大眼，低金箍。红金短外套、象牙白内衣、腰部小块虎皮、藏蓝裤与绑腿短靴；灵巧体型，细尾巴。",
-          "Sun Wukong. Adult anthropomorphic monkey hero with lively big rounded gold-brown eyes, warm golden fur, cream smooth monkeyface heart-shaped patch, compact rounded cranium and small rounded monkeyears. Swept golden sculpted hair clumps with low gold circlet, friendly confident closed-mouth smile. Scarlet short jacket with simple gold trim and creaminner, small clean gold chest panel, tigerstripe small waistcloth limited to waist, navy compact trousers, cream legwraps, brown/gold low boots. Slender agile width, SAME3.3 head anatomy as source. One slim curved tail visible in side/back45 attached anatomically to lower back; not oversized. No staff in hand, no dragon filigree, no battle glare."
-        ],
-        "evidence": [
-          "以基础头毛轮廓估读；高翘毛束、猴耳和尾巴不计H。 新稿待选型。",
-          "Outline estimates or target guide only; pending approval."
-        ],
-        "images": [
-          {
-            "label": [
-              "唯一造型四视图",
-              "Single-design four views"
-            ],
-            "path": "./art-library/classics-7/c04-game-v2.png"
-          },
-          {
-            "label": [
-              "比例检查标尺",
-              "Proportion ruler"
-            ],
-            "path": "./art-library/classics-7/c04-game-v2-ruler.png"
-          }
-        ]
-      }
-    ]
-  },
   {
     id: 'characters', label: ["角色设定","Characters"], entries: [
       {
+        id: 'd1-shared-ruler', title: ["D1 · 四种形态拉通对比","D1 · Four-form comparison"], status: 'derived',
+        description: ["赤脚基础版、无头发基础版、蓝白裙版、带装备版的正面与右侧共八个视图，使用统一角色标尺：有发赤脚基础版外观高 3.1 格，左侧 3.3 头身参照尺、右侧格子尺。四种形态按同一身体倍率放置、脚底对齐，保留头发与鞋底高度差。四种形态均为细腿定稿：在各自原稿上把腿收细约 15%，腿长与胯、膝、踝高度不变；蓝白裙以身材对齐基础版的 V3 为底，带装备以蓝白裙身体为底加丝袜裤、背包与护腕。","Eight front/right views (base, bald, dress, equipped) on the unified character ruler: the haired barefoot base stands 3.1 tiles tall beside a 3.3-head reference and a tile ruler. All forms share one body scale with aligned soles, preserving hair and boot-sole height. Every form uses the approved slim-leg sheet: legs about 15% slimmer with unchanged length and hip, knee and ankle heights."],
+        evidence: ["按用户要求使用 Python 裁取现有资料并绘制统一标尺；标尺脚本不重新绘制角色。用户反馈“腿稍微粗了一点”后对比了细腿候选，确认“就是这个”（2026-10-11）；细腿重绘的输入与提示词见附件。","Python composition of existing reference artwork with a shared ruler. After the user found the legs slightly thick, the slim-leg sheets were compared and approved (2026-10-11); inputs and prompt attached."],
+        images: [
+          { label: ["四种形态 · 八视图共用标尺","Four forms · eight views on one ruler"], path: './art-library/d1-comparison/three-forms-shared-ruler.png', guides: './art-library/d1-comparison/three-forms-shared-ruler.guides.json' },
+          { label: ["立体重绘 V1 · 八视图共用标尺（待确认）","Volumetric redraw V1 · eight views on one ruler (pending)"], path: './art-library/d1-comparison/three-forms-volumetric-shared-ruler.png', guides: './art-library/d1-comparison/three-forms-volumetric-shared-ruler.guides.json' },
+          { label: ["立体重绘 V1 · 淡阴影 · 四种形态拉通对比","Volumetric redraw V1 · soft shading · four-form comparison"], path: './art-library/d1-comparison/three-forms-volumetric-soft-shared-ruler.png', guides: './art-library/d1-comparison/three-forms-volumetric-soft-shared-ruler.guides.json' },
+          { label: ["立体重绘 V1 · AI 原图","Volumetric redraw V1 · raw output"], path: './art-library/d1-comparison/d1-volumetric-eight-v1.png' },
+        ],
+        files: [
+          { label: ["细腿重绘输入与提示词","Slim-leg redraw inputs and prompt"], path: './art-library/d1-comparison/slim-legs-prompt.txt' },
+          { label: ["立体重绘 V1 输入与提示词","Volumetric redraw V1 inputs and prompt"], path: './art-library/d1-comparison/volumetric-v1-prompt.txt' },
+        ],
+      },
+      {
         id: 'd1-base', title: ["D1 · 无外服赤脚基础版","D1 · Barefoot base design"], status: 'confirmed',
-        description: ["用于捏人和换装的基础造型：保留蓝色两件式泳装，去掉外服、装备和鞋子。原确认稿为造型依据；首图是后续补齐斜前视角与脚底的修订。约 3.3 头身是设计目标，未进行精确图像测量。","A base for customization, with blue two-piece swimwear and no outer outfit, equipment or shoes. The approved source defines the design; the first image adds a three-quarter view and soles. Approximately 3.3 heads is a design target, not a measured result."],
+        description: ["用于捏人和换装的基础造型：两件式基础内衣，去掉外服、装备和鞋子。现行版本为白色内衣细腿定稿（腿收细约 15%，腿长不变）；确认原稿为蓝色泳装。保留原独立四视图标尺，并附 Python 正侧共用标尺图，脚底对齐，按正面发顶至下巴为一个含发头高，读图约 3.23 头身；这与无头发版的颅顶测量口径不同。原确认稿及干净参考图保留。","A customization base with a two-piece base layer and bare feet. The current sheet is the approved white base layer with slim legs (about 15% slimmer, same length); the approved source wore blue swimwear. The original independent four-view ruler is retained, followed by a Python-drawn front/right ruler with aligned soles: approximately 3.23 heads, measured from hair crown to chin. This differs from the bald skull-based measurement. Approved source and clean references are retained."],
         evidence: ["指定会话「设计主角捏人方案 (2)」：用户对原图说“这个就合适”，随后要求提高画质、修正斜前视角、补充脚底。高清稿与脚底稿是按该确认制作的派生版本。","In the specified design chat, the user approved the source, then requested a clearer redraw, a corrected three-quarter view and sole references. The redraws derive from that approval."],
         images: [
-          { label: ["视角与脚底修订 V2","View and sole revision V2"], path: './art-library/d1-base/d1-approved-swim-angle-soles-v2.png' },
+          { label: ["原独立标尺 · 四视图与脚底","Original independent ruler · four views and soles"], path: './art-library/d1-base/d1-approved-swim-ruler-v1.png' },
+          { label: ["统一标尺 · 读图含发顶约 3.23 头身","Unified ruler · 3.23 heads including hair"], path: './art-library/d1-base/front-right-ruler.png', guides: './art-library/d1-base/front-right-ruler.guides.json' },
+          { label: ["细腿白色内衣定稿","Approved slim legs, white base layer"], path: './art-library/d1-base/d1-base-slim-legs-v1.png' },
+          { label: ["立体重绘 V1 · 正面与右侧（待确认）","Volumetric redraw V1 · front and right (pending)"], path: './art-library/d1-base/d1-base-volumetric-v1.png', guides: './art-library/d1-base/d1-base-volumetric-v1.guides.json' },
+          { label: ["立体重绘 V1 · 淡阴影 · 正面与右侧（待确认）","Volumetric redraw V1 · soft shading · front and right (pending)"], path: './art-library/d1-base/d1-base-volumetric-soft-v1.png', guides: './art-library/d1-base/d1-base-volumetric-soft-v1.guides.json' },
+          { label: ["立体重绘 V1 · 四种形态拉通对比","Volumetric redraw V1 · four-form comparison"], path: './art-library/d1-comparison/three-forms-volumetric-shared-ruler.png', guides: './art-library/d1-comparison/three-forms-volumetric-shared-ruler.guides.json' },
+          { label: ["立体重绘 V1 · 淡阴影 · 四种形态拉通对比","Volumetric redraw V1 · soft shading · four-form comparison"], path: './art-library/d1-comparison/three-forms-volumetric-soft-shared-ruler.png', guides: './art-library/d1-comparison/three-forms-volumetric-soft-shared-ruler.guides.json' },
+          { label: ["四种形态拉通对比 · 立体重绘前","Four-form comparison · before volumetric redraw"], path: './art-library/d1-comparison/three-forms-shared-ruler.png', guides: './art-library/d1-comparison/three-forms-shared-ruler.guides.json' },
+          { label: ["视角与脚底修订 V2 · 细腿前（蓝色）","View and sole revision V2 · before slim legs (blue)"], path: './art-library/d1-base/d1-approved-swim-angle-soles-v2.png' },
           { label: ["用户确认的原图","User-approved original"], path: './art-library/d1-base/d1-approved-swim-source.jpg' },
           { label: ["高清重绘 V1","Clear redraw V1"], path: './art-library/d1-base/d1-approved-swim-restored-v1.png' },
         ],
       },
       {
         id: 'd1-bald', title: ["D1 · 无头发基础版","D1 · Bald base"], status: 'derived',
-        description: ["去掉头发，保留泳装与赤脚，用于观察头型和制作可替换发型。四个全身视角及脚底图均保留。","Hair removed for interchangeable hairstyles; swimwear, bare feet, four body views and soles are retained."],
+        description: ["保留原独立四视图标尺，并附 Python 正侧共用标尺，脚底对齐，以颅顶至下巴为 1H，读图约 3.42 头身。现行版本为白色内衣细腿定稿。保留原图、四个全身视角及脚底图，用于身体建模与可替换发型。","The original independent four-view ruler is retained, followed by a Python-drawn front/right ruler with aligned soles: approximately 3.42 skull-to-chin head units. Original artwork, four body views and soles are retained for body modeling and interchangeable hairstyles."],
         evidence: ["用户在确认基础造型后要求制作“不带头发的版本”；本图为按确认稿派生，未找到对这张结果单独定稿的记录。","Requested after the base approval; this is a derivative without separate final approval."],
         images: [
-          { label: ["无头发四视图与脚底","Bald views and soles"], path: './art-library/d1-bald/d1-swim-bald-v1.png' },
+          { label: ["原独立标尺 · 四视图与脚底","Original independent ruler · four views and soles"], path: './art-library/d1-bald/d1-swim-bald-ruler-v1.svg' },
+          { label: ["统一标尺 · 读图颅顶约 3.42 头身","Unified ruler · 3.42 skull-based heads"], path: './art-library/d1-bald/front-right-ruler.png', guides: './art-library/d1-bald/front-right-ruler.guides.json' },
+          { label: ["细腿白色内衣定稿","Approved slim legs, white base layer"], path: './art-library/d1-bald/d1-bald-slim-legs-v1.png' },
+          { label: ["立体重绘 V1 · 正面与右侧（待确认）","Volumetric redraw V1 · front and right (pending)"], path: './art-library/d1-bald/d1-bald-volumetric-v1.png', guides: './art-library/d1-bald/d1-bald-volumetric-v1.guides.json' },
+          { label: ["立体重绘 V1 · 淡阴影 · 正面与右侧（待确认）","Volumetric redraw V1 · soft shading · front and right (pending)"], path: './art-library/d1-bald/d1-bald-volumetric-soft-v1.png', guides: './art-library/d1-bald/d1-bald-volumetric-soft-v1.guides.json' },
+          { label: ["无头发四视图与脚底 · 细腿前（蓝色）","Bald views and soles · before slim legs (blue)"], path: './art-library/d1-bald/d1-swim-bald-v1.png' },
+        ],
+      },
+      {
+        id: 'd1-bald-split', title: ["D1 · 细腿身体拆分视图","D1 · Slim-leg body views, split"], status: 'candidate',
+        description: ["从无头发细腿定稿（白色两件式打底）按原像素拆出正面、右侧、背面、斜前 45° 与脚底，不重绘、不改体型；四个全身视图同一倍率（1.3 倍）、脚底对齐到同一高度，只把与画面边缘相连的底色清成纯白。另附正、右、背三张无头版：在下巴下方的颈部（原图 y=267）水平切掉头部，用作 Hyper3D 单独生成身体的输入。","Front, right, back, three-quarter and sole views cut pixel-for-pixel from the approved bald slim-leg sheet (white two-piece base layer), with no redraw or body change. The four full-body views share one scale (1.3×) and sole height; only the background connected to the image edge is cleaned to white. Three headless views cut horizontally at the neck below the chin (source y=267) are the inputs for generating the body alone in Hyper3D."],
+        evidence: ["用户要求按四种形态拉通对比里的细腿版本重做身体参考，“拆好图片，放到原画资料库里面等我看看”（2026-10-11）；待用户确认。","Requested by the user for the body rebuild from the slim-leg version in the four-form comparison (2026-10-11); awaiting review."],
+        images: [
+          { label: ["总览 · 拆分视图与无头版","Overview · split and headless views"], path: './art-library/d1-bald/split/overview.png' },
+          { label: ["正面","Front"], path: './art-library/d1-bald/split/front.png' },
+          { label: ["右侧","Right"], path: './art-library/d1-bald/split/right.png' },
+          { label: ["背面","Back"], path: './art-library/d1-bald/split/back.png' },
+          { label: ["斜前 45°","Front 45°"], path: './art-library/d1-bald/split/front45.png' },
+          { label: ["脚底","Soles"], path: './art-library/d1-bald/split/soles.png' },
+          { label: ["无头 · 正面","Headless · front"], path: './art-library/d1-bald/split/front-headless.png' },
+          { label: ["无头 · 右侧","Headless · right"], path: './art-library/d1-bald/split/right-headless.png' },
+          { label: ["无头 · 背面","Headless · back"], path: './art-library/d1-bald/split/back-headless.png' },
         ],
       },
       {
@@ -368,18 +105,147 @@ export const ART_LIBRARY_GROUPS: readonly ArtLibraryGroup[] = [
       },
       {
         id: 'd1-seven', title: ["D1 · 蓝白裙七视图","D1 · Blue-white dress sheet"], status: 'confirmed',
-        description: ["较早确认的蓝白金裙装参考，包含全身、脸部、头顶和鞋底细节；与最新泳装基础版分别保留。","Earlier approved blue-white-gold costume sheet with body, face, crown and sole details, retained separately from the newer base."],
-        evidence: ["精修记录明确以用户确认的七视图为依据；仓库副本与原始生成图 SHA-256 一致。","The refinement record identifies the approved seven-view reference; its repository copy matches the original SHA-256."],
+        description: ["首图为 Python 绘制的正面＋右侧共用标尺，量的是细腿定稿：含发顶、穿靴约 3.25 头身（基础版 3.23）。它以 V3 为底（三个全身视图的头身比、肩宽、上半身体积和腰线与无外服赤脚基础版一致，服装、发色和下排细节格沿用原七视图），再把腿收细约 15%、腿长不变。较早确认的原七视图（约 3.50 头身）保留。","The Python-drawn front/right ruler measures the approved slim-leg sheet: approximately 3.25 head units including hair and boots (base: 3.23). It builds on V3, which redrew the full-body views on the barefoot base body while keeping the costume, hair colour and detail panels, with legs about 15% slimmer at the same length. The earlier approved seven-view sheet (about 3.50 heads) is retained."],
+        evidence: ["精修记录明确以用户确认的七视图为依据；仓库副本与原始生成图 SHA-256 一致。V3 按用户“身材与基础版有距离”的要求用 gpt-image-2.5-sunburst 重绘（见 body-v3-prompt.txt），细腿由用户确认（见 d1-comparison/slim-legs-prompt.txt）。","The refinement record identifies the approved seven-view reference; its repository copy matches the original SHA-256. V3 was redrawn with gpt-image-2.5-sunburst after the user noted the body differed from the base (body-v3-prompt.txt); the slim legs were approved by the user (d1-comparison/slim-legs-prompt.txt)."],
         images: [
-          { label: ["七视图原画","Seven-view artwork"], path: './art-library/d1-seven/character-seven-views.png' },
+          { label: ["统一标尺 · 读图含发顶约 3.25 头身","Unified ruler · 3.25 heads including hair"], path: './art-library/d1-seven/front-right-ruler.png', guides: './art-library/d1-seven/front-right-ruler.guides.json' },
+          { label: ["细腿定稿","Approved slim legs"], path: './art-library/d1-seven/character-seven-views-slim-legs-v1.png' },
+          { label: ["立体重绘 V1 · 正面与右侧（待确认）","Volumetric redraw V1 · front and right (pending)"], path: './art-library/d1-seven/d1-seven-volumetric-v1.png', guides: './art-library/d1-seven/d1-seven-volumetric-v1.guides.json' },
+          { label: ["立体重绘 V1 · 淡阴影 · 正面与右侧（待确认）","Volumetric redraw V1 · soft shading · front and right (pending)"], path: './art-library/d1-seven/d1-seven-volumetric-soft-v1.png', guides: './art-library/d1-seven/d1-seven-volumetric-soft-v1.guides.json' },
+          { label: ["较早确认的七视图原画","Earlier approved seven-view artwork"], path: './art-library/d1-seven/character-seven-views.png' },
+        ],
+      },
+      {
+        id: 'd1-blink', title: ["D1 · 眨眼四帧","D1 · Blink frames"], status: 'derived',
+        description: ["游戏眼部贴片用的眨眼帧：睁眼、半闭、将闭、闭眼。睁眼帧以头部贴图上原有的左眼为底，按蓝白裙七视图脸部特写的画风重绘；其余三帧以睁眼帧为底只移动上眼睑，内外眼角位置不变。运行时虹膜由着色器绘制，这里的虹膜只作画面参考。","Blink frames for the in-game eye decal: open, half, nearly closed and closed. The open frame repaints the head texture's original left eye in the style of the dress sheet's face close-up; the other three keep the eye corners fixed and only lower the upper lid. At runtime the iris is drawn by the shader; the painted iris is only a visual guide."],
+        evidence: ["用户要求“用 openai 调用 image2.5 做一下眨眼效果”并把眨眼帧放进人物原画（2026-10-12）。gpt-image-2.5-sunburst（max）生成，输入与提示词见附件；资产链副本在 body-v2/head-look/eye-frames/。","Requested by the user (2026-10-12): draw the blink with gpt-image 2.5 and add the frames to the character art. Generated with gpt-image-2.5-sunburst (max); inputs and prompts attached; the asset-chain copy lives in body-v2/head-look/eye-frames/."],
+        images: [
+          { label: ["睁眼 · 半闭 · 将闭 · 闭眼","Open · half · nearly closed · closed"], path: './art-library/d1-blink/d1-blink-frames-v1.png' },
+        ],
+        files: [
+          { label: ["输入与提示词","Inputs and prompts"], path: './art-library/d1-blink/d1-blink-prompt.txt' },
         ],
       },
       {
         id: 'd1-equipped', title: ["D1 · 带装备正侧设定","D1 · Equipped design"], status: 'confirmed',
-        description: ["较早确认的短细腿蓝白裙方案，带护腕和背包，保留为服饰版本。","Earlier slim-leg dress design with wrist gear and a backpack, retained as a costume version."],
-        evidence: ["d1-comparison/README.md 明确登记为“已确认的设计”。","The model-comparison source record explicitly marks this design as approved."],
+        description: ["首图为统一标尺，量的是带装备细腿定稿：以蓝白裙的正面和右侧为身体底图，加深色丝袜裤、科技背包和双护腕，再把腿收细约 15%、腿长不变；读图含发穿靴约 3.26 头身。另附 45° 视图。较早确认的旧稿（头大、腿细长）保留在最后，不再用于比例参考。","The unified ruler measures the approved slim-leg equipped sheet: the dress front/right body with dark tights, tech backpack and wrist gauntlets, legs about 15% slimmer at the same length (about 3.26 heads with hair and boots). A 45° view is included. The earlier approved sheet (larger head, longer thin legs) is kept last and no longer used for proportions."],
+        evidence: ["旧稿由 d1-comparison/README.md 登记为已确认设计。用户认为旧稿比例与其他形态差距大，按 V3 身体重绘装备后又反馈腿偏粗；在四个细腿候选中比较后，随四种形态细腿对比一起确认（2026-10-11）。gpt-image-2.5-sunburst（max）生成，输入与提示词见附件。","The earlier sheet is recorded as approved. After the gear was redrawn on the V3 body, the user found the legs thick; the slim-leg version was approved with the four-form comparison (2026-10-11). Generated with gpt-image-2.5-sunburst (max); inputs and prompts attached."],
         images: [
-          { label: ["正面与右侧","Front and right"], path: './art-library/d1-equipped/slim-legs-front-right-v1.png' },
+          { label: ["统一标尺 · 读图含发顶约 3.26 头身","Unified ruler · 3.26 heads including hair"], path: './art-library/d1-equipped/front-right-ruler.png', guides: './art-library/d1-equipped/front-right-ruler.guides.json' },
+          { label: ["细腿定稿 · 正面与右侧","Approved slim legs · front and right"], path: './art-library/d1-equipped/d1-equipped-slim-legs-v1.png' },
+          { label: ["立体重绘 V1 · 正面与右侧（待确认）","Volumetric redraw V1 · front and right (pending)"], path: './art-library/d1-equipped/d1-equipped-volumetric-v1.png', guides: './art-library/d1-equipped/d1-equipped-volumetric-v1.guides.json' },
+          { label: ["立体重绘 V1 · 淡阴影 · 正面与右侧（待确认）","Volumetric redraw V1 · soft shading · front and right (pending)"], path: './art-library/d1-equipped/d1-equipped-volumetric-soft-v1.png', guides: './art-library/d1-equipped/d1-equipped-volumetric-soft-v1.guides.json' },
+          { label: ["45° 视图","45° view"], path: './art-library/d1-equipped/d1-equipped-45-v1.png' },
+          { label: ["较早确认的旧稿 · 比例不同，不作参考","Earlier approved sheet · different proportions"], path: './art-library/d1-equipped/slim-legs-front-right-v1.png' },
+        ],
+        files: [
+          { label: ["装备重绘输入与提示词","Gear redraw inputs and prompt"], path: './art-library/d1-equipped/d1-equipped-body-v2-prompt.txt' },
+          { label: ["细腿与 45° 输入与提示词","Slim legs and 45° inputs and prompts"], path: './art-library/d1-equipped/d1-equipped-slim-legs-v1-prompt.txt' },
+        ],
+      },
+      {
+        id: 'd1-head-ratio-study', title: ["D1 · 四种头身比例对照","D1 · Head-ratio study"], status: 'candidate',
+        description: ["同一套带装备设计按四种常见头身重画：超 Q 版 2.5、Q 版 RPG 4、日系少女 6、写实成人 7.5，与现稿 3.3 头身并排；外观高统一为 3.1 格，鞋底对齐。仅作比例参考，不替换现有设定。","The same equipped design redrawn at four common head ratios (2.5 super-deformed, 4 chibi RPG, 6 anime teen, 7.5 realistic adult) beside the current 3.3-head sheet, all at 3.1 tiles. Reference only."],
+        evidence: ["用户问“正常别人都是什么样的比例”后要求“这 4 个你都绘制给我看看”。gpt-image-2.5-sunburst（max）以带装备 V2（细腿前）为输入逐档生成，输入与提示词见附件。","Requested by the user after asking what proportions other games use. Generated with gpt-image-2.5-sunburst (max) from equipped V2; inputs and prompts attached."],
+        images: [
+          { label: ["五档对照 · 统一标尺","Five ratios · unified ruler"], path: './art-library/d1-equipped/head-ratio-study/head-ratio-overview.png' },
+          { label: ["超 Q 版 · 2.5 头身","Super-deformed · 2.5 heads"], path: './art-library/d1-equipped/head-ratio-study/d1-heads-2.5.png' },
+          { label: ["Q 版 RPG · 4 头身","Chibi RPG · 4 heads"], path: './art-library/d1-equipped/head-ratio-study/d1-heads-4.png' },
+          { label: ["日系少女 · 6 头身","Anime teen · 6 heads"], path: './art-library/d1-equipped/head-ratio-study/d1-heads-6.png' },
+          { label: ["写实成人 · 7.5 头身","Realistic adult · 7.5 heads"], path: './art-library/d1-equipped/head-ratio-study/d1-heads-7.5.png' },
+        ],
+        files: [
+          { label: ["输入与提示词","Inputs and prompts"], path: './art-library/d1-equipped/head-ratio-study/prompts.txt' },
+        ],
+      },
+      {
+        id: 'grassy-d1-male-comparison', title: ["Grassy 男主定稿 · 四种形态拉通对比","Grassy hero final · Four-form comparison"], status: 'derived',
+        description: ["男主定稿：B8 鹅蛋脸，深棕短发，与 D1 同画风、同身体比例。以「D1 · 四种形态拉通对比」为底稿逐格绘制赤脚基础版（白色背心短裤）、无头发版、红毛衣版、带装备版，八个视图同一张图、同一倍率。统一角色标尺：有发赤脚基础版 = 3.1 格，下颚、胸、腰、膝线贯穿四种形态。初版含发头高 1.06 格（1.13 H）、腿偏短，已用 Python 以下巴为基点把头连发缩小约 9%、拉长腿部补足总高，下颚线 2.13 格、膝线 0.70 格，与 D1 的 2.14、0.72 一致；读图含发约 3.2 头身。男孩不用 D1 的细腿：腿部再横向加粗 12%，膝宽 0.25 格，比 D1 的 0.19 格结实约 30%。红毛衣与带装备视图另下移上半身 7 px，与基础版的下巴、肩、膝对齐。","Final hero: B8 egg-shaped face and dark-brown short hair in D1's art style and body proportions. Drawn slot by slot over the D1 four-form comparison: barefoot base (white tank top and shorts), bald, red sweater and equipped, eight views on one sheet at one scale. Unified ruler with the base at 3.1 tiles. The first sheet's head with hair measured 1.13 H with short legs; a deterministic Python edit shrank the head about 9% around the chin and lengthened the legs, bringing chin and knee lines to 2.13 and 0.70 tiles (D1: 2.14 and 0.72); about 3.2 heads with hair. The boy's legs were then widened 12% (knee 0.25 tiles vs D1's slim 0.19)."],
+        evidence: ["用户从脸型试画中指定“上身试画 · B8 鹅蛋八视图就这个作为最终的”，并要求删除中间产物。生成步骤：脸型设计图 → 脸线精修 → 取 B8 脸型 → 按 D1 底稿绘制八视图 → 按用户“看上去是头”的意见用 Python 修正头身 → 按“男的不要细腿”加粗腿部，步骤与提示词见附件。","The user chose the B8 egg-face eight-view fit test as final and asked to delete intermediates. Steps: face-shape sheet, contour cleanup, B8 crop, eight views over the D1 guide; prompts attached."],
+        images: [
+          { label: ["四种形态 · 统一标尺","Four forms · unified ruler"], path: './art-library/grassy-d1-male-comparison/three-forms-shared-ruler.png', guides: './art-library/grassy-d1-male-comparison/three-forms-shared-ruler.guides.json' },
+          { label: ["男女主角对比 · 统一标尺","Hero and heroine · unified ruler"], path: './art-library/grassy-d1-male-comparison/male-female-shared-ruler.png', guides: './art-library/grassy-d1-male-comparison/male-female-shared-ruler.guides.json' },
+          { label: ["八视图定稿","Final eight-view artwork"], path: './art-library/grassy-d1-male/grassy-d1-male-eight-final.png' },
+          { label: ["基础版 · 统一标尺","Base · unified ruler"], path: './art-library/grassy-d1-male/grassy-d1-male-base-front-right-ruler.png', guides: './art-library/grassy-d1-male/grassy-d1-male-base-front-right-ruler.guides.json' },
+          { label: ["无头发版 · 统一标尺","Bald · unified ruler"], path: './art-library/grassy-d1-male/grassy-d1-male-bald-front-right-ruler.png', guides: './art-library/grassy-d1-male/grassy-d1-male-bald-front-right-ruler.guides.json' },
+          { label: ["红毛衣 · 统一标尺","Red sweater · unified ruler"], path: './art-library/grassy-d1-male/grassy-d1-male-outfit-front-right-ruler.png', guides: './art-library/grassy-d1-male/grassy-d1-male-outfit-front-right-ruler.guides.json' },
+          { label: ["带装备版 · 统一标尺","Equipped · unified ruler"], path: './art-library/grassy-d1-male/grassy-d1-male-equipped-front-right-ruler.png', guides: './art-library/grassy-d1-male/grassy-d1-male-equipped-front-right-ruler.guides.json' },
+        ],
+        files: [
+          { label: ["生成步骤与提示词","Steps and prompts"], path: './art-library/grassy-d1-male/grassy-d1-male-eight-final-prompt.txt' },
+          { label: ["B8 脸型参考","B8 face reference"], path: './art-library/grassy-d1-male/grassy-d1-male-face-b8-ref.png' },
+        ],
+      },
+      {
+        id: 'grassy-shared-ruler', title: ["Grassy 日系版 · 三种形态拉通对比","Grassy anime · Three-form comparison"], status: 'derived',
+        description: ["日系男主年轻版三种形态的正面与右侧共六个视图，使用统一角色标尺（有发赤脚基础版 = 3.1 格，3.3 头身参照）：基础版与无头发版同画布、同倍率；红毛衣稿按基础版生成时的输出倍率换算到同一身体，脚底（鞋底）对齐。下颚、胸、腰、膝线在三形态间对齐。","Six front/right views of the younger anime male's three forms on the unified character ruler (haired barefoot base = 3.1 tiles, 3.3-head reference); shared body scale, aligned soles, matching chin, chest, waist and knee lines."],
+        evidence: ["Python 按角色标尺标准绘制，不重新绘制角色；脚本见 assets/concepts/d1-proportion-rulers。","Drawn with Python to the character ruler standard; characters are not redrawn."],
+        images: [
+          { label: ["三种形态 · 统一标尺","Three forms · unified ruler"], path: './art-library/grassy-comparison/three-forms-shared-ruler.png', guides: './art-library/grassy-comparison/three-forms-shared-ruler.guides.json' },
+        ],
+      },
+      {
+        id: 'grassy-base', title: ["Grassy 日系版 · 无外服赤脚基础版","Grassy anime · Barefoot base"], status: 'derived',
+        description: ["年轻版日系男主的捏人基础造型：圆脸大眼、约 13 岁的少年气质；去掉红毛衣、牛仔裤和球鞋，换成与 D1 同系的蓝色背心＋短裤，赤脚并附左右脚底。统一标尺读图含发约 3.31 头身。旧的偏成熟 v1 保留在后面。","Younger anime male customization base: round face, big eyes, about 13; blue two-piece base layer like D1, barefoot with soles. Unified-ruler reading about 3.31 heads with hair. The older, more mature v1 is kept below."],
+        evidence: ["用户认为日系 v1“太丑”，要求“年轻一些更可爱”；以年轻版红毛衣稿为唯一输入，gpt-image-2.5-sunburst（max）生成。待用户确认。","The user found v1 unattractive and asked for a younger, cuter look; generated from the young red-sweater sheet with gpt-image-2.5-sunburst (max). Pending review."],
+        images: [
+          { label: ["统一标尺 · 读图含发顶约 3.31 头身","Unified ruler · 3.31 heads including hair"], path: './art-library/grassy-base/grassy-anime-young-base-v2-front-right-ruler.png', guides: './art-library/grassy-base/grassy-anime-young-base-v2-front-right-ruler.guides.json' },
+          { label: ["年轻版 v2 · 四视图与脚底","Young v2 · four views and soles"], path: './art-library/grassy-base/grassy-anime-young-base-v2.png' },
+          { label: ["旧版 v1 · 偏成熟，已替换","Older v1 · too mature, replaced"], path: './art-library/grassy-base/grassy-anime-base-v1.png' },
+        ],
+        files: [
+          { label: ["v2 输入与提示词","v2 inputs and prompt"], path: './art-library/grassy-base/grassy-anime-young-base-v2-prompt.txt' },
+          { label: ["v1 输入与提示词","v1 inputs and prompt"], path: './art-library/grassy-base/grassy-anime-base-v1-prompt.txt' },
+        ],
+      },
+      {
+        id: 'grassy-bald', title: ["Grassy 日系版 · 无头发基础版","Grassy anime · Bald base"], status: 'derived',
+        description: ["由年轻版赤脚基础版去掉头发，保留眉毛、耳朵、身体与脚底，用于身体建模与可替换发型。统一标尺下与基础版同一身体倍率；读图颅顶至下巴约 3.85 头身，与含发口径不同。旧版 v1 保留在后面。","Hair removed from the young base, keeping brows, ears, body and soles. Same body scale as the base on the unified ruler; skull-to-chin reading about 3.85 heads. The older v1 is kept below."],
+        evidence: ["按 D1 无头发版做法派生，gpt-image-2.5-sunburst（max）生成。待用户确认。","Derived like the D1 bald sheet with gpt-image-2.5-sunburst (max). Pending review."],
+        images: [
+          { label: ["统一标尺 · 读图颅顶约 3.85 头身","Unified ruler · 3.85 skull-based heads"], path: './art-library/grassy-bald/grassy-anime-young-bald-v2-front-right-ruler.png', guides: './art-library/grassy-bald/grassy-anime-young-bald-v2-front-right-ruler.guides.json' },
+          { label: ["年轻版 v2 · 无头发四视图与脚底","Young v2 · bald views and soles"], path: './art-library/grassy-bald/grassy-anime-young-bald-v2.png' },
+          { label: ["旧版 v1 · 偏成熟，已替换","Older v1 · too mature, replaced"], path: './art-library/grassy-bald/grassy-anime-bald-v1.png' },
+        ],
+        files: [
+          { label: ["v2 输入与提示词","v2 inputs and prompt"], path: './art-library/grassy-bald/grassy-anime-young-bald-v2-prompt.txt' },
+          { label: ["v1 输入与提示词","v1 inputs and prompt"], path: './art-library/grassy-bald/grassy-anime-bald-v1-prompt.txt' },
+        ],
+      },
+      {
+        id: 'grassy-anime', title: ["Grassy 日系版 · 红毛衣四视图","Grassy anime · Red sweater sheet"], status: 'derived',
+        description: ["年轻版日系男主：圆脸、大眼、小下巴，约 13 岁的可爱少年；栗棕层次短发、红色麻花针织毛衣、卷边牛仔裤、米白球鞋，正面、右侧、背面、前侧约 45°。统一标尺读图含发、穿鞋约 3.31 头身。它是两张基础版的生成依据；旧的偏成熟原稿保留在后面，3D 卡通男孩版另列条目。","Younger anime Grassy: round face, big eyes, small chin, about 13; red cable-knit sweater, rolled jeans, cream sneakers, four views. Unified-ruler reading about 3.31 heads. Source for both base sheets; the older mature sheet is kept below."],
+        evidence: ["用户认为日系 v1“太丑”，要求“年轻一些更可爱”；以 core-cast/grassy-human-classic-handsome.png 为唯一输入，gpt-image-2.5-sunburst（max）重绘年龄与脸部，服装、站姿、高度不变。待用户确认。","Redrawn for a younger, cuter face from the older sheet with gpt-image-2.5-sunburst (max); outfit, pose and height unchanged. Pending review."],
+        images: [
+          { label: ["统一标尺 · 读图含发顶约 3.31 头身","Unified ruler · 3.31 heads including hair"], path: './art-library/grassy-anime/grassy-anime-young-v2-front-right-ruler.png', guides: './art-library/grassy-anime/grassy-anime-young-v2-front-right-ruler.guides.json' },
+          { label: ["年轻版 v2 · 四视图","Young v2 · four views"], path: './art-library/grassy-anime/grassy-anime-young-v2.png' },
+          { label: ["旧版 · 偏成熟原稿","Older mature sheet"], path: './art-library/core-cast/grassy-human-classic-handsome.png' },
+        ],
+        files: [
+          { label: ["v2 输入与提示词","v2 inputs and prompt"], path: './art-library/grassy-anime/grassy-anime-young-v2-prompt.txt' },
+        ],
+      },
+      {
+        id: 'grassy-boy-shared-ruler', title: ["Grassy 男孩版 · 三种形态拉通对比","Grassy boy · Three-form comparison"], status: 'derived',
+        description: ["男孩版（3D 卡通黑发）三种形态的正面与右侧共六个视图，使用统一角色标尺：有发赤脚基础版外观高 3.1 格，左侧 3.3 头身参照尺、右侧格子尺；三形态同一身体倍率、脚底对齐。与日系版并列保留，待选型。","Six front/right views of the 3D-cartoon boy's three forms on the unified character ruler: haired barefoot base = 3.1 tiles, 3.3-head reference, shared body scale and aligned soles. Kept alongside the anime version pending selection."],
+        evidence: ["用户选择“两套都保留”；Python 按角色标尺标准绘制，不重新绘制角色。","The user chose to keep both sets; drawn with Python to the character ruler standard without redrawing characters."],
+        images: [
+          { label: ["三种形态 · 统一标尺","Three forms · unified ruler"], path: './art-library/grassy-boy-comparison/three-forms-shared-ruler.png', guides: './art-library/grassy-boy-comparison/three-forms-shared-ruler.guides.json' },
+        ],
+      },
+      {
+        id: 'grassy-boy-base', title: ["Grassy 男孩版 · 赤脚基础版与无头发版","Grassy boy · Barefoot and bald bases"], status: 'derived',
+        description: ["以已确认的红毛衣四向母版为底，换成与 D1 同系的蓝色背心＋短裤、赤脚并附脚底；另有去掉头发的无头发版。统一标尺读图：含发约 3.06 头身，颅顶约 3.62 头身，均低于 3.3 设计目标（头偏大）。","Built on the approved red-sweater turnaround: blue two-piece base layer like D1, barefoot with soles, plus a hairless version. Unified-ruler readings: about 3.06 heads with hair and 3.62 skull-based, both below the 3.3 target (large head)."],
+        evidence: ["gpt-image-2.5-sunburst（max）生成，输入与提示词见附件；最初的光上身版本在做无头发版时被内容审核拦截，改为两件式。待用户确认。","Generated with gpt-image-2.5-sunburst (max); a bare-torso first try was blocked by moderation at the bald step. Pending user review."],
+        images: [
+          { label: ["基础版统一标尺 · 读图含发顶约 3.06 头身","Base · unified ruler, 3.06 heads with hair"], path: './art-library/grassy-boy/grassy-boy-base-front-right-ruler.png', guides: './art-library/grassy-boy/grassy-boy-base-front-right-ruler.guides.json' },
+          { label: ["基础版四视图与脚底","Base · four views and soles"], path: './art-library/grassy-boy/grassy-boy-base-v1.png' },
+          { label: ["无头发版统一标尺 · 读图颅顶约 3.62 头身","Bald · unified ruler, 3.62 skull-based heads"], path: './art-library/grassy-boy/grassy-boy-bald-front-right-ruler.png', guides: './art-library/grassy-boy/grassy-boy-bald-front-right-ruler.guides.json' },
+          { label: ["无头发四视图与脚底","Bald · four views and soles"], path: './art-library/grassy-boy/grassy-boy-bald-v1.png' },
+        ],
+        files: [
+          { label: ["基础版输入与提示词","Base inputs and prompt"], path: './art-library/grassy-boy/grassy-boy-base-v1-prompt.txt' },
+          { label: ["无头发版输入与提示词","Bald inputs and prompt"], path: './art-library/grassy-boy/grassy-boy-bald-v1-prompt.txt' },
         ],
       },
       {
@@ -387,6 +253,8 @@ export const ART_LIBRARY_GROUPS: readonly ArtLibraryGroup[] = [
         description: ["保留既有人形四方向母版。右侧为确认原图，其他方向及角色卡按确认造型绘制。","The established four-view master: approved right profile, with derived views and character card."],
         evidence: ["public/characters/human/SOURCE.md 与历史来源说明记录右侧母版和最终四向参考。","Human character source records identify the approved right master and the final reference set."],
         images: [
+          { label: ["统一标尺 · 读图含发顶约 3.06 头身","Unified ruler · 3.06 heads including hair"], path: './art-library/grassy-boy/grassy-boy-clothed-front-right-ruler.png', guides: './art-library/grassy-boy/grassy-boy-clothed-front-right-ruler.guides.json' },
+          { label: ["四向等比排版","Four views on one sheet"], path: './art-library/grassy-boy/grassy-boy-clothed-four-views.png' },
           { label: ["右侧母版","Right master"], path: './characters/human/turnaround-master-v2/right.png' },
           { label: ["正面","Front"], path: './characters/human/turnaround-master-v2/front.png' },
           { label: ["背面","Back"], path: './characters/human/turnaround-master-v2/back.png' },
@@ -592,6 +460,178 @@ export const ART_LIBRARY_GROUPS: readonly ArtLibraryGroup[] = [
   {
     id: 'scenes', label: ["场景与建筑","Scenes and buildings"], entries: [
       {
+        id: 'ai-city-final-home-v1', title: ["AI 城市 · 能量门复合住宅 V1","AI city · Energy-door home V1"], status: 'candidate',
+        description: ["沿 AI 城市交通枢纽方向绘制的收束设计稿：双层半砖、平视单点透视，两层左侧均用白色分段门框与蓝色六边形屏障的能量门。建筑增加深蓝设备柱、屋顶光伏花园、悬挑入口露台与充电设施，室内改为胶囊床、内嵌储物、全息工作台与折叠机械臂；中央楼板缺口与两级薄跳台保留。暖白、深蓝、少量青金灯光，融合宜居花园与超未来基础设施。","A consolidated design following the AI city transit-hub direction: a two-storey half-brick home in frontal one-point perspective, with segmented white frames and blue hexagonal energy barriers at both left-side entrances. Added blue service spines, a photovoltaic roof garden, a cantilevered entry terrace and charging facilities; interiors feature a capsule bed, fitted storage, a holographic workbench and a folded fabrication arm. The central floor opening and two thin jump ledges remain. Warm pearl white, deep blue and restrained cyan-gold lighting combine a garden home with advanced infrastructure."],
+        evidence: ["用户要求“绘制最终的，需要用能量门，房子可以复杂一些”（2026-10-13）。使用内置 imagegen，参考 AI 城市交通枢纽、最新半砖布局导图及家园能量门。作为最终方向的候选原画，待用户审阅；格数、门净空与碰撞仍需制作时按定义核对。","Requested by the user: draw the final design with energy doors and a more complex house (2026-10-13). Created with built-in imagegen from the AI city transit hub, latest half-brick layout guide and homestead energy door. This is a final-direction candidate awaiting user review; exact grid dimensions, doorway clearance and collision require production verification."],
+        images: [
+          { label: ["最终方向稿 · 能量门复合住宅","Final-direction concept · Energy-door home"], path: './art-library/ai-city-final-home-v1/final-energy-home.png' },
+        ],
+        files: [
+          { label: ["设计说明与绘制提示词","Design notes and generation prompt"], path: './art-library/ai-city-final-home-v1/prompts.txt' },
+          { label: ["制作记录与验收范围","Production record and verification scope"], path: './art-library/ai-city-final-home-v1/SOURCE.md' },
+        ],
+      },
+      {
+        id: 'ai-city-v1', title: ["AI 城市 · 八城区 V1","AI city · Eight districts V1"], status: 'candidate',
+        description: ["一座原创后 AI 时代城市的八个城区，统一建筑语言：暖白与珍珠白的圆润楼群配深蓝腰线、圆窗与胶囊窗、克制的青色光线和少量金色点缀，楼楼有绿化；每个城区都能看到城市地标「算力尖塔」（三道悬浮光环的白色细高塔）。AI 基础设施做成美好而安静的日常：绿顶数据厅、余热温室、白色磁悬浮、有序的无人机航道与服务机器人，不做监控感与霓虹广告。八城区：中枢区、花园住宅区、机器人工坊区、交通枢纽、能源冷却湖区、人机学院、自动化港区、黄昏全景。底图与比例同半砖两层房间，画面规则沿用融合八方案。左墙两处门洞为家园能量门：正面镜头下门几乎侧对镜头，所以门框模块（白色分段前柱与门框顶、青色指示灯）嵌在左墙厚度里，屏障只显出蓝色边光并照亮地面；构图底图已画入门模块。","Eight districts of one original post-AI city with a single design language: warm-white and pearl-white rounded buildings with deep-blue trim bands, round and pill windows, sparing cyan light lines and small gold accents, greenery on every building; the landmark Compute Spire (a slender white tower with three floating halo rings) appears in every district. AI infrastructure is calm and beautiful: green-roofed data halls, waste-heat greenhouses, white maglev, orderly drone lanes and service robots, without surveillance mood or neon ads. Districts: core, garden residential, robotics workshops, transit hub, energy and cooling lake, human-AI academy, autonomous harbor and twilight panorama. Same half-brick guide and scale; image rules follow the fusion set. Both left-wall doorways use the homestead energy door: seen nearly edge-on by the frontal camera, the white segmented frame with cyan indicators sits inside the wall thickness and the barrier shows as a blue edge glow lighting the floor; the door module is drawn into the layout guide."],
+        evidence: ["用户要求“一个后 AI 时代的现代化城市，你来制作最多 8 个，新的一套，参考所有经验，重中之重的 AI 城市”（2026-10-13）。风格参考已确认的「白蓝科技世界」「花园城区」；gpt-image-2.5 编辑模式；尚未确认。","Requested by the user: a new set of up to eight for a modern post-AI city, using all prior lessons, with the AI city as the top priority (2026-10-13). Style references: the approved clean-future and garden-city images; gpt-image-2.5 edit mode; not yet approved."],
+        images: [
+          { label: ["1 中枢区 · 算力尖塔","1 Core · Compute Spire"], path: './art-library/ai-city-v1/1-core.png' },
+          { label: ["2 花园住宅区","2 Garden residential"], path: './art-library/ai-city-v1/2-residential.png' },
+          { label: ["3 机器人工坊区","3 Robotics workshops"], path: './art-library/ai-city-v1/3-robot-workshop.png' },
+          { label: ["4 交通枢纽","4 Transit hub"], path: './art-library/ai-city-v1/4-transit-hub.png' },
+          { label: ["5 能源冷却湖区","5 Energy and cooling lake"], path: './art-library/ai-city-v1/5-energy-lake.png' },
+          { label: ["6 人机学院","6 Human-AI academy"], path: './art-library/ai-city-v1/6-academy.png' },
+          { label: ["7 自动化港区","7 Autonomous harbor"], path: './art-library/ai-city-v1/7-harbor.png' },
+          { label: ["8 黄昏全景","8 Twilight panorama"], path: './art-library/ai-city-v1/8-twilight-panorama.png' },
+          { label: ["构图底图 · 半砖两层＋能量门","Layout guide · half-brick two-storey with energy doors"], path: './art-library/ai-city-v1/layout-guide-door.png' },
+        ],
+        files: [
+          { label: ["提示词（画面规则、城市设定与八城区）","Prompts (image rules, city bible and eight districts)"], path: './art-library/ai-city-v1/prompts.txt' },
+        ],
+      },
+      {
+        id: 'post-ai-fusion-v1', title: ["双层房间 · 融合八方案","Two-storey room · Eight fusion designs"], status: 'candidate',
+        description: ["融合「原创八方案」的画面规则（墙面安静、主体最清晰、远景低两档、通口留空、占位完全替换）与城市 V2 的地标取景，并补足其不足：加入 2–4 处克制的现代科技元素（光伏、服务机器人、无人机、轻轨），两侧格子改为高低错落的景观台地而非城垛，每层 3–5 组边缘陈设，远景只用白天或黄昏。八套：迪拜晨光白金、新加坡花园城市、巴黎黄昏、杏橙科技工坊、湖蓝运河科技居所、墨蓝星象实验室、上海晨雾、东京晴日。","Combines the original eight designs' image rules (quiet walls, clearest main room, distance two value steps down, open shaft, full placeholder replacement) with the city V2 landmark framing, and fixes their gaps: 2–4 restrained modern-tech touches (solar, service robot, drone, light rail), landscaped stepped terraces instead of battlements, 3–5 edge clusters per floor, and daylight or golden hour only. Eight sets: Dubai white-gold morning, Singapore garden city, Paris golden hour, apricot tech atelier, canal blue tech home, ink-blue observatory lab, Shanghai misty morning and Tokyo clear day."],
+        evidence: ["用户让比较另一会话的八方案后“觉得不足就自己添加，继续添加”（2026-10-13）。共用提示词沿用原创八方案并追加修正规则；gpt-image-2.5 编辑模式；尚未确认。","After comparing with the other session's eight designs, the user asked to fill the gaps and keep adding (2026-10-13). Shared prompt reuses the original eight with added fix rules; gpt-image-2.5 edit mode; not yet approved."],
+        images: [
+          { label: ["1 迪拜 · 晨光白金","1 Dubai · white-gold morning"], path: './art-library/post-ai-fusion-v1/1-dubai-morning.png' },
+          { label: ["2 新加坡 · 花园城市","2 Singapore · garden city"], path: './art-library/post-ai-fusion-v1/2-singapore-garden.png' },
+          { label: ["3 巴黎 · 黄昏","3 Paris · golden hour"], path: './art-library/post-ai-fusion-v1/3-paris-golden.png' },
+          { label: ["4 杏橙科技工坊","4 Apricot tech atelier"], path: './art-library/post-ai-fusion-v1/4-apricot-tech.png' },
+          { label: ["5 湖蓝运河科技居所","5 Canal blue tech home"], path: './art-library/post-ai-fusion-v1/5-canal-tech.png' },
+          { label: ["6 墨蓝星象实验室","6 Ink-blue observatory lab"], path: './art-library/post-ai-fusion-v1/6-ink-observatory-tech.png' },
+          { label: ["7 上海 · 晨雾","7 Shanghai · misty morning"], path: './art-library/post-ai-fusion-v1/7-shanghai-morning.png' },
+          { label: ["8 东京 · 晴日","8 Tokyo · clear day"], path: './art-library/post-ai-fusion-v1/8-tokyo-clear.png' },
+        ],
+        files: [
+          { label: ["提示词（共用规则、修正规则与八方案）","Prompts (shared rules, fix rules and eight designs)"], path: './art-library/post-ai-fusion-v1/prompts.txt' },
+        ],
+      },
+      {
+        id: 'original-two-storey-eight-v1', title: ["双层房间 · 原创八方案 V1","Two-storey room · Eight original designs V1"], status: 'candidate',
+        description: ["独立设计的八套双层房间效果图。沿用最新统一世界方格的半砖构图底图与单点透视，固定房间布置，比较建筑材质、家具、照明与室外环境：杏橙白瓷、松绿釉砖、湖蓝白木、赤陶米白、墨蓝黄铜、珊瑚浅灰、雪白枫木、烟紫银灰。这批图用于美术方向选型，不作为精确尺寸或游戏实装认证。","Eight independently designed two-storey room concepts. They use the latest half-brick guide with a shared world grid and one-point perspective, keeping the room layout consistent while comparing building materials, furniture, lighting and outdoor settings: apricot porcelain, moss glazed tile, canal blue and white timber, clay and ivory, ink blue and brass, coral and pale gray, snow white and maple, and lilac and silver gray. These are visual direction candidates, not dimensional or in-game implementation certifications."],
+        evidence: ["用户要求“你自己制作8个加入这个页面”，使用既有双层透视图自行设计（2026-10-13）。构图参考 post-ai-half-brick-v1/layout-guide.png；图片生成结果仍待逐项选型与后续制作核对，尚未确认。","The user requested eight original designs for this page using the existing two-storey perspective guide (2026-10-13). Composition reference: post-ai-half-brick-v1/layout-guide.png. Generated images await design selection and further production checks; not yet approved."],
+        images: [
+          { label: ["01 杏橙白瓷 · 晴日工坊","01 Apricot porcelain · Sunny atelier"], path: './art-library/original-two-storey-eight-v1/01-apricot-atelier.png' },
+          { label: ["02 松绿釉砖 · 雨后庭院","02 Moss glazed tile · Courtyard after rain"], path: './art-library/original-two-storey-eight-v1/02-moss-courtyard.png' },
+          { label: ["03 湖蓝白木 · 运河居所","03 Canal blue and white timber · Canal home"], path: './art-library/original-two-storey-eight-v1/03-canal-blue.png' },
+          { label: ["04 赤陶米白 · 坡地小屋","04 Clay and ivory · Hillside cottage"], path: './art-library/original-two-storey-eight-v1/04-clay-terrace.png' },
+          { label: ["05 墨蓝黄铜 · 星象书房","05 Ink blue and brass · Observatory study"], path: './art-library/original-two-storey-eight-v1/05-ink-observatory.png' },
+          { label: ["06 珊瑚浅灰 · 海风驿站","06 Coral and pale gray · Sea-breeze station"], path: './art-library/original-two-storey-eight-v1/06-coral-breeze.png' },
+          { label: ["07 雪白枫木 · 冬日暖居","07 Snow white and maple · Winter retreat"], path: './art-library/original-two-storey-eight-v1/07-snow-maple.png' },
+          { label: ["08 烟紫银灰 · 黄昏果园","08 Lilac and silver gray · Twilight orchard"], path: './art-library/original-two-storey-eight-v1/08-lilac-orchard.png' },
+        ],
+        files: [
+          { label: ["设计说明与提示词","Design notes and prompts"], path: './art-library/original-two-storey-eight-v1/prompts.txt' },
+          { label: ["制作记录与画面偏差","Production notes and visual deviations"], path: './art-library/original-two-storey-eight-v1/SOURCE.md' },
+          { label: ["源底图 · 半砖双层单点透视","Source guide · Half-brick two-storey one-point perspective"], path: './art-library/post-ai-half-brick-v1/layout-guide.png' },
+        ],
+      },
+      {
+        id: 'post-ai-cities-v2', title: ["半砖两层房间 · 城市八风格 V2","Half-brick two-storey · Eight city styles V2"], status: 'candidate',
+        description: ["按各城市宣传图与经典天际线重画：统一取蓝调时刻与水面倒影，地标按最常见的取景组合——迪拜哈利法塔＋音乐喷泉湖、纽约布鲁克林两桥看曼哈顿、新加坡擎天树＋金沙酒店、东京东京塔＋晴空塔＋富士山、上海外滩看陆家嘴、深圳湾灯光秀、首尔汉江彩虹喷泉＋南山塔＋乐天塔、巴黎特罗卡德罗看埃菲尔铁塔。室内改为各城高端住宅风格。底图与比例同半砖两层房间。","Redrawn from each city's tourism imagery and classic skylines: blue hour with water reflections and the most common landmark compositions — Dubai's Burj Khalifa and fountain lake, Manhattan from the Brooklyn bridges, Singapore's Supertrees and Marina Bay Sands, Tokyo Tower with Skytree and Fuji, Lujiazui from the Bund, the Shenzhen Bay light show, Seoul's Han River rainbow fountain with Namsan and Lotte towers, and the Eiffel Tower from Trocadéro. Interiors follow each city's upscale residential style. Same half-brick guide and scale."],
+        evidence: ["用户指出“迪拜为啥要弄黄沙的感觉”，要求参考这些城市的宣传图片和天际线里最漂亮的（2026-10-13）。检索各城摄影与旅游指南后改写提示词；gpt-image-2.5 编辑模式；尚未确认。","The user questioned the sandy Dubai look and asked to follow each city's best promotional skyline imagery (2026-10-13). Prompts rewritten after reviewing photography and tourism guides; gpt-image-2.5 edit mode; not yet approved."],
+        images: [
+          { label: ["迪拜 · 哈利法塔与喷泉湖","Dubai · Burj Khalifa and fountain lake"], path: './art-library/post-ai-cities-v2/09-dubai.png' },
+          { label: ["纽约 · 布鲁克林大桥看曼哈顿","New York · Manhattan from the Brooklyn bridges"], path: './art-library/post-ai-cities-v2/10-new-york.png' },
+          { label: ["新加坡 · 滨海湾与擎天树","Singapore · Marina Bay and Supertrees"], path: './art-library/post-ai-cities-v2/11-singapore.png' },
+          { label: ["东京 · 东京塔与富士山","Tokyo · Tokyo Tower and Fuji"], path: './art-library/post-ai-cities-v2/12-tokyo.png' },
+          { label: ["上海 · 外滩看陆家嘴","Shanghai · Lujiazui from the Bund"], path: './art-library/post-ai-cities-v2/13-shanghai.png' },
+          { label: ["深圳 · 深圳湾灯光秀","Shenzhen · Shenzhen Bay light show"], path: './art-library/post-ai-cities-v2/14-shenzhen.png' },
+          { label: ["首尔 · 汉江彩虹喷泉","Seoul · Han River rainbow fountain"], path: './art-library/post-ai-cities-v2/15-seoul.png' },
+          { label: ["巴黎 · 特罗卡德罗看铁塔","Paris · Eiffel Tower from Trocadéro"], path: './art-library/post-ai-cities-v2/16-paris.png' },
+        ],
+        files: [
+          { label: ["提示词（共用规则与八城市 V2）","Prompts (shared rules and eight cities V2)"], path: './art-library/post-ai-cities-v2/prompts.txt' },
+        ],
+      },
+      {
+        id: 'post-ai-cities-v1', title: ["半砖两层房间 · 城市八风格","Half-brick two-storey · Eight city styles"], status: 'candidate',
+        description: ["同一张半砖两层房间底图（②上半砖 C，真实镜头 FOV30°、距 30 格，人物 3.1 格），按城市特色适配房屋材质、室内陈设与远景天际线：迪拜、纽约、新加坡、东京、上海、深圳、首尔、巴黎，均为后 AI 时代的未来版本。首尔版在顶板上加了韩屋屋顶，超出底图。","The same half-brick two-storey guide (upper-half brick C floor, real camera FOV 30°, 30 tiles, 3.1-tile characters), adapted to each city's materials, interiors and skyline: Dubai, New York, Singapore, Tokyo, Shanghai, Shenzhen, Seoul and Paris, all as post-AI futures. The Seoul version adds a hanok roof beyond the guide."],
+        evidence: ["用户要求“再加 8 个，迪拜、纽约、新加坡、东京、上海，适配他们的风格”（2026-10-13）；深圳、首尔、巴黎为补足 8 个所选。gpt-image-2.5 编辑模式；尚未确认。","Requested by the user: eight more, Dubai, New York, Singapore, Tokyo and Shanghai in their own styles (2026-10-13); Shenzhen, Seoul and Paris were added to make eight. gpt-image-2.5 edit mode; not yet approved."],
+        images: [
+          { label: ["迪拜 · 黄金时刻","Dubai · golden hour"], path: './art-library/post-ai-cities-v1/09-dubai.png' },
+          { label: ["纽约 · 秋日早晨","New York · autumn morning"], path: './art-library/post-ai-cities-v1/10-new-york.png' },
+          { label: ["新加坡 · 雨后傍晚","Singapore · evening after rain"], path: './art-library/post-ai-cities-v1/11-singapore.png' },
+          { label: ["东京 · 入夜","Tokyo · early night"], path: './art-library/post-ai-cities-v1/12-tokyo.png' },
+          { label: ["上海 · 外滩蓝调","Shanghai · the Bund at blue hour"], path: './art-library/post-ai-cities-v1/13-shanghai.png' },
+          { label: ["深圳 · 晴天","Shenzhen · clear day"], path: './art-library/post-ai-cities-v1/14-shenzhen.png' },
+          { label: ["首尔 · 春夜","Seoul · spring evening"], path: './art-library/post-ai-cities-v1/15-seoul.png' },
+          { label: ["巴黎 · 清晨","Paris · morning"], path: './art-library/post-ai-cities-v1/16-paris.png' },
+          { label: ["半砖构图底图 · 真实镜头投影","Half-brick layout guide · real camera projection"], path: './art-library/post-ai-half-brick-v1/layout-guide.png' },
+        ],
+        files: [
+          { label: ["提示词（共用规则与八城市）","Prompts (shared rules and eight cities)"], path: './art-library/post-ai-cities-v1/prompts.txt' },
+        ],
+      },
+      {
+        id: 'post-ai-half-brick-v1', title: ["半砖两层房间 · 后 AI 时代八风格","Half-brick two-storey · Eight post-AI styles"], status: 'candidate',
+        description: ["按半砖层间组合 ②上半砖 C 绘制构图底图：侧墙 K/L 宽 0.5，底板、层间楼板、顶板均为半砖，总高 12，一层净高 5.5、二层 5；真实镜头 FOV30°、距 30 格，人物 3.1 格。八种风格：海上浮城、太空电梯小镇、极地科研站、沙漠绿洲光伏城、云上山城、复古未来、机器人工坊街区、AI 学院春日。","Layout guide for the regular half-brick floor (option ② upper-half brick C): 0.5-wide K/L side walls, half-brick base, floor and roof slabs, total height 12, clear heights 5.5 and 5; real camera FOV 30°, 30 tiles; 3.1-tile characters. Eight styles: floating ocean city, space-elevator town, arctic station, desert oasis solar city, cloud mountain city, retro-futurism, robotics workshop district and AI academy in spring."],
+        evidence: ["用户要求“多一些，继续可以用半砖 2 层那个”（2026-10-13）。gpt-image-2.5 编辑模式；尚未确认。","Requested by the user: more styles using the half-brick two-storey layout (2026-10-13). gpt-image-2.5 edit mode; not yet approved."],
+        images: [
+          { label: ["1 海上浮城","1 Floating ocean city"], path: './art-library/post-ai-half-brick-v1/1-ocean-city.png' },
+          { label: ["2 太空电梯小镇","2 Space-elevator town"], path: './art-library/post-ai-half-brick-v1/2-space-elevator.png' },
+          { label: ["3 极地科研站 · 极光","3 Arctic station · aurora"], path: './art-library/post-ai-half-brick-v1/3-arctic-station.png' },
+          { label: ["4 沙漠绿洲光伏城","4 Desert oasis solar city"], path: './art-library/post-ai-half-brick-v1/4-desert-oasis.png' },
+          { label: ["5 云上山城","5 Cloud mountain city"], path: './art-library/post-ai-half-brick-v1/5-cloud-mountain.png' },
+          { label: ["6 复古未来","6 Retro-futurism"], path: './art-library/post-ai-half-brick-v1/6-retro-futurism.png' },
+          { label: ["7 机器人工坊街区","7 Robotics workshop district"], path: './art-library/post-ai-half-brick-v1/7-robot-workshop.png' },
+          { label: ["8 AI 学院 · 春日","8 AI academy · spring"], path: './art-library/post-ai-half-brick-v1/8-academy-spring.png' },
+          { label: ["半砖构图底图 · 真实镜头投影","Half-brick layout guide · real camera projection"], path: './art-library/post-ai-half-brick-v1/layout-guide.png' },
+        ],
+        files: [
+          { label: ["提示词（共用规则与八风格）","Prompts (shared rules and eight styles)"], path: './art-library/post-ai-half-brick-v1/prompts.txt' },
+        ],
+      },
+      {
+        id: 'post-ai-two-storey-v1', title: ["现代科技 · 后 AI 时代六风格","Modern tech · Six post-AI styles"], status: 'candidate',
+        description: ["同一张两层房间构图底图（真实镜头 FOV30°、距 30 格，人物 3.1 格）下的六种现代科技风格：太阳朋克共生、旧算力中心改造社区、极简白色未来、东亚现代科技城、自动化农业边境、雨夜城市。用于比较场景风格方向，结构与比例沿用底图。","Six modern-tech styles on the same two-storey layout guide (real camera FOV 30°, 30 tiles, 3.1-tile characters): solarpunk symbiosis, retired compute center turned neighborhood, minimal white future, East-Asian tech city, automated farm frontier and rainy night city. For comparing scene style directions; structure and scale follow the guide."],
+        evidence: ["用户要求“多绘制几个风格的，现代科技风，后ai 时代”（2026-10-13）。gpt-image-2.5 编辑模式；尚未确认。","Requested by the user: more styles, modern tech, post-AI era (2026-10-13). gpt-image-2.5 edit mode; not yet approved."],
+        images: [
+          { label: ["1 太阳朋克 · 共生","1 Solarpunk symbiosis"], path: './art-library/post-ai-two-storey-v1/1-solarpunk.png' },
+          { label: ["2 旧算力中心改造社区","2 Repurposed compute center"], path: './art-library/post-ai-two-storey-v1/2-compute-reuse.png' },
+          { label: ["3 极简白色未来","3 Minimal white future"], path: './art-library/post-ai-two-storey-v1/3-minimal-white.png' },
+          { label: ["4 东亚现代科技城 · 蓝调时刻","4 East-Asian tech city · blue hour"], path: './art-library/post-ai-two-storey-v1/4-east-asian-tech.png' },
+          { label: ["5 自动化农业边境","5 Automated farm frontier"], path: './art-library/post-ai-two-storey-v1/5-vertical-farm.png' },
+          { label: ["6 雨夜城市","6 Rainy night city"], path: './art-library/post-ai-two-storey-v1/6-rain-night.png' },
+          { label: ["构图底图 · 真实镜头投影","Layout guide · real camera projection"], path: './art-library/scifi-two-storey-v1/layout-guide.png' },
+        ],
+        files: [
+          { label: ["提示词（共用规则与六风格）","Prompts (shared rules and six styles)"], path: './art-library/post-ai-two-storey-v1/prompts.txt' },
+        ],
+      },
+      {
+        id: 'scifi-two-storey-v1', title: ["现代科幻 · 两层房间＋远景 V1","Modern sci-fi · Two-storey house and distance V1"], status: 'candidate',
+        description: ["现代科幻场景风格效果图：以已选「白蓝科技世界」「花园城区」为风格依据，男女主同框。先按游戏真实镜头（FOV30°、距 30 格）绘制构图底图，房屋按两层房屋定义 11×13 格、门洞 3＋上沿 1、2×2 窗、通口平台 2/4/6，人物 3.1 格，背景格子 −7/−16、前景 +3 下沉 1 格；再由模型按底图上色。三版为花园城区白天、白蓝科技海岸、花园城区黄昏。背景墙板与个别平台、窗尺寸和底图有出入。","Modern sci-fi style key art built on the approved clean-future and garden-city styles, with both heroes. A layout guide was first drawn with the real game camera (FOV 30°, 30 tiles): the 11×13 two-storey house, 3-tile doorways with 1-tile headers, 2×2 windows, platforms at 2/4/6, 3.1-tile characters, background tiles at −7/−16 and foreground at +3 lowered by one tile; the model then painted over it. Variants: garden day, white-blue coast, garden dusk. Back-wall panels and the sizes of some platforms and windows deviate from the guide."],
+        evidence: ["用户要求在透视与男女主确定后明确场景风格为现代科幻，“特别是要绘制2层房间+远景 按照我们的透视的效果图”（2026-10-13）。gpt-image-2.5 编辑模式；尚未确认。","Requested by the user to settle the scene style as modern sci-fi, especially a two-storey house with distance in the agreed perspective (2026-10-13). gpt-image-2.5 edit mode; not yet approved."],
+        images: [
+          { label: ["A 花园城区 · 白天","A Garden city · day"], path: './art-library/scifi-two-storey-v1/a-garden-day.png' },
+          { label: ["B 白蓝科技海岸","B White-blue tech coast"], path: './art-library/scifi-two-storey-v1/b-clean-coast.png' },
+          { label: ["C 花园城区 · 黄昏","C Garden city · dusk"], path: './art-library/scifi-two-storey-v1/c-garden-dusk.png' },
+          { label: ["构图底图 · 真实镜头投影","Layout guide · real camera projection"], path: './art-library/scifi-two-storey-v1/layout-guide.png' },
+        ],
+        files: [
+          { label: ["提示词（共用规则与三版）","Prompts (shared rules and three variants)"], path: './art-library/scifi-two-storey-v1/prompts.txt' },
+        ],
+      },
+      {
+        id: 'scene-effect-v1', title: ["场景效果图 · 六场景 V1","Scene key art · six scenes V1"], status: 'candidate',
+        description: ["按景深 G 层距与正面透视（FOV30°、镜头距 30 格）绘制的六个场景效果图，场景内容与色板取自资源页「透视 · 场景分层」。人物约 1.6–2 格高、画面约 13 格宽，未达 3.1 格 / 约 28 格的规范，仅作氛围参考，不作尺寸依据。","Key art for the six depth-layer scenes using the G layer distances and frontal perspective (FOV 30°, camera 30 tiles away). The character is only about 1.6–2 tiles tall and the frame about 13 tiles wide, short of the 3.1-tile / ~28-tile standard; mood reference only, not a scale reference."],
+        evidence: ["用户要求透视确定后用 image2.5 绘制效果图，六场景“都按照新规则优化”（2026-10-13）。gpt-image-2.5 编辑模式，以主角右侧原图为参考；尚未确认。","Requested by the user after the perspective was settled (2026-10-13). gpt-image-2.5 edit mode with the protagonist right view as reference; not yet approved."],
+        images: [
+          { label: ["花园山谷","Garden valley"], path: './art-library/scene-effect-v1/valley.png' },
+          { label: ["湖畔松林","Lakeside pines"], path: './art-library/scene-effect-v1/lake.png' },
+          { label: ["海岸小镇","Coastal village"], path: './art-library/scene-effect-v1/coast.png' },
+          { label: ["层叠城镇","Layered town"], path: './art-library/scene-effect-v1/buildings.png' },
+          { label: ["月夜遗迹","Moonlit ruins"], path: './art-library/scene-effect-v1/ruins.png' },
+          { label: ["晶石洞厅","Crystal cavern"], path: './art-library/scene-effect-v1/cave.png' },
+        ],
+        files: [
+          { label: ["提示词（共用规则与六场景）","Prompts (shared rules and six scenes)"], path: './art-library/scene-effect-v1/prompts.txt' },
+        ],
+      },
+      {
         id: 'expanded-style-studies', title: ["世界画风 · 水墨与其他探索","World styles · Expanded studies"], status: 'candidate',
         description: ["用于研究不同风格的对照原画，尚未选为游戏统一美术方案。","Comparative artwork for researching visual styles; not selected as the final game art direction."],
         evidence: ["会话「设计主角捏人方案 (3)」中用户要求“都进行绘制”及“扩大风格范围”；这些是探索请求，未找到逐款选定记录。","The user requested multiple styles and a broader exploration. These requests do not approve individual alternatives."],
@@ -766,8 +806,8 @@ export const ART_LIBRARY_GROUPS: readonly ArtLibraryGroup[] = [
     id: 'standards', label: ["比例与规范","Scale and guides"], entries: [
       {
         id: 'solar-grid-and-load', title: ["半格太阳能板 · 占格、踩踏与追光","Half-height solar panel · Grid, load and tracking"], status: 'confirmed',
-        description: ["整板宽1、高0.5、深1格，踩踏时左右倾转，离开后渐进恢复朝向太阳。含整砖、半砖支撑与内沿、外延安装候选。","One panel occupies 1 × 0.5 × 1 tiles, tilts under the player and gradually returns toward the sun after they leave. Includes full/half-tile supports and offset placement candidates."],
-        evidence: ["用户确认最新Python线框透视图并要求接入资源与透视场景；半格指整件的高度，内沿和外延偏移仍为摆放候选。","The user approved the latest Python wireframe and requested resource and scene integration. Half a tile refers to the entire object's height; depth offsets remain placement candidates."],
+        description: ["整板宽1、高0.5、深1格，踩踏时左右倾转，离开后渐进恢复朝向太阳。含整砖、半砖支撑与格内前偏、后偏安装候选。","One panel occupies 1 × 0.5 × 1 tiles, tilts under the player and gradually returns toward the sun after they leave. Includes full/half-tile supports and offset placement candidates."],
+        evidence: ["用户确认最新Python线框透视图并要求接入资源与透视场景；半格指整件的高度，格内前偏和后偏仍为摆放候选。","The user approved the latest Python wireframe and requested resource and scene integration. Half a tile refers to the entire object's height; depth offsets remain placement candidates."],
         images: [
           { label: ["半格占位、踩踏倾转与追光线框透视","Half-height occupancy, load response and solar tracking wireframe"], path: './concepts/solar-grid-and-load-perspective.png' },
         ],

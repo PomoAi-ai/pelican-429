@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { BUILDING_KIT } from '../config/building-kit.ts';
 import { BLOCK_BACK_Z, BLOCK_FRONT_Z } from './tile-geometry.ts';
-import type { BuildingKitKind, BuildingKitVariant, SolarMounting } from '../config/building-kit.ts';
+import type { BuildingKitKind, BuildingKitVariant, SolarDepth } from '../config/building-kit.ts';
 
 export interface BuildingKitView {
   readonly root: THREE.Group;
@@ -12,7 +12,7 @@ export interface BuildingKitView {
 
 /** 游戏设施与资源展示共用同一套几何、材质和局部坐标。 */
 export function createBuildingKit(kind: BuildingKitKind, variant: BuildingKitVariant,
-  mounting: SolarMounting = 'center'): BuildingKitView {
+  solarDepth: SolarDepth | typeof BUILDING_KIT.solar.depth = BUILDING_KIT.solar.depth): BuildingKitView {
   const root = new THREE.Group();
   root.name = `building-${kind}-${variant}`;
   const geometries = new Map<string, THREE.BufferGeometry>();
@@ -172,36 +172,34 @@ export function createBuildingKit(kind: BuildingKitKind, variant: BuildingKitVar
 
   let solarPivot: THREE.Group | null = null;
   if (kind === 'solar') {
-    const { depth, tilt, pivotHeight, panelWidth, panelBottom, panelTop } = BUILDING_KIT.solar;
-    const centerZ = mounting === 'inner' ? -0.5 : mounting === 'outer' ? 0.5 : 0;
-    const footZ = centerZ * 0.6;
-    part(root, cobalt, 0.44, 0.075, 0.38, 0.5, 0.0375, footZ, 0.025);
-    part(root, ivory, 0.37, 0.035, 0.31, 0.5, 0.0825, footZ, 0.014);
-    // 悬挑只移动板面，脚座始终落在中央实体格内。
-    const support = part(root, seam, 0.105, Math.hypot(0.15, centerZ - footZ), mounting === 'center' ? 0.19 : 0.12,
-      0.5, 0.173, (footZ + centerZ) / 2, 0.012);
-    support.rotation.x = Math.atan2(centerZ - footZ, 0.15);
+    const { tilt, pivotHeight, panelWidth, panelBottom, panelTop } = BUILDING_KIT.solar;
+    const depth = solarDepth;
+    // 脚座始终落在中央一格内，加深只延长板面与转轴。
+    part(root, cobalt, 0.44, 0.075, 0.38, 0.5, 0.0375, 0, 0.025);
+    part(root, ivory, 0.37, 0.035, 0.31, 0.5, 0.0825, 0, 0.014);
+    part(root, seam, 0.105, 0.15, 0.19, 0.5, 0.173, 0, 0.012);
     for (const side of [-1, 1]) {
-      const z = centerZ + side * 0.103;
+      const z = side * (depth / 2 - 0.397);
       cylinder(root, ivory, 0.052, 0.033, 0.5, pivotHeight, z);
       cylinder(root, cobalt, 0.036, 0.037, 0.5, pivotHeight, z);
       cylinder(root, silver, 0.016, 0.041, 0.5, pivotHeight, z);
     }
     const panel = new THREE.Group();
     panel.name = 'solar-panel-pivot';
-    panel.position.set(0.5, pivotHeight, centerZ);
+    panel.position.set(0.5, pivotHeight, 0);
     panel.rotation.z = variant === 'right' ? -tilt : variant === 'left' ? tilt : 0;
     solarPivot = panel;
     root.add(panel);
     part(panel, ivory, panelWidth, -panelBottom * 2, depth, 0, 0, 0, 0.021);
     part(panel, cobalt, 0.884, 0.016, depth - 0.056, 0, 0.026, 0, 0.009);
-    for (let col = 0; col < 4; col++) for (const z of [-0.232, 0.232]) {
+    for (let col = 0; col < 4; col++) for (let row = 0; row < depth * 2; row++) {
       const x = -0.324 + col * 0.216;
+      const z = (row - depth + 0.5) * 0.464;
       part(panel, glass, 0.208, 0.012, 0.452, x, 0.035, z, 0.008);
       for (const dx of [-0.052, 0.052]) part(panel, cellLine, 0.003, 0.0015, 0.431, x + dx, 0.042, z, 0);
       for (const dz of [-0.1, 0.1]) part(panel, cellLine, 0.192, 0.0015, 0.0015, x, panelTop - 0.00075, z + dz, 0);
     }
-    part(root, cyan, 0.055, 0.012, 0.003, 0.5, 0.041, footZ + 0.19, 0.001);
+    part(root, cyan, 0.055, 0.012, 0.003, 0.5, 0.041, 0.19, 0.001);
   }
 
   return {

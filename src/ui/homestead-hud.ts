@@ -103,6 +103,8 @@ export function createHomesteadHud(parent: HTMLElement, options: HomesteadHudOpt
   }
   const hint = element('span', 'hs-hint', tools);
   const actions = element('div', 'hs-actions', root);
+  const residence = element('a', 'hs-action', actions, '进入住宅建造 ↗');
+  residence.href = './?mode=homestead&scene=residence';
   const terminalButton = element('button', 'hs-action', actions);
   terminalButton.type = 'button';
   const sleepButton = element('button', 'hs-action', actions, '睡到天亮（跳过的时段收益七成）');

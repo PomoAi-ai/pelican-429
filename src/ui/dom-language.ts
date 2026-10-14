@@ -1,4 +1,5 @@
-import { LANGUAGES, getLanguage, onLanguageChange, setLanguage, type Language } from './language.ts';
+import { getLanguage, onLanguageChange } from './language.ts';
+import { createLanguagePicker } from './language-picker.ts';
 import { translateShowcaseText } from './showcase-language.ts';
 import { HOME_ENGLISH } from './homepage-language.ts';
 import { SOUND_ENGLISH, translateSoundText } from './sound-language.ts';
@@ -96,13 +97,7 @@ export function attachDomLanguage(): void {
   observer.observe(document.documentElement, { subtree: true, childList: true, characterData: true, attributes: true, attributeFilter: ['aria-label', 'title', 'placeholder', 'alt'] });
   onLanguageChange(() => translate(document));
 
-  const picker = document.createElement('select');
-  picker.className = 'site-language';
-  picker.setAttribute('aria-label', '语言 / Language');
-  for (const { id, label } of LANGUAGES) picker.add(new Option(label, id));
-  picker.value = getLanguage();
-  picker.addEventListener('change', () => setLanguage(picker.value as Language));
-  // The settings panel can also switch language, so keep the menu in sync.
-  onLanguageChange((language) => { picker.value = language; });
-  document.querySelector('#dev-navigation .home-play-control')!.before(picker);
+  const picker = createLanguagePicker('site-language-menu');
+  picker.button.classList.add('site-language');
+  document.querySelector('#dev-navigation .home-play-control')!.before(picker.button, picker.menu);
 }

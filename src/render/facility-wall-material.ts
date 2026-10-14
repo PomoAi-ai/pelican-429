@@ -17,12 +17,19 @@ export function createFacilityWallMaterial(background: THREE.Texture): THREE.Mes
       vWallCover = vec2( min( 1.0, wallViewportAspect / uWallAspect ), min( 1.0, uWallAspect / wallViewportAspect ) );
     `, 'facility-wall');
     shader.fragmentShader = injectAfter(shader.fragmentShader, 'common', declarations, 'facility-wall');
+    // 保留标准注入点，后续降水与光照挂接仍可在这些纹理采样前后处理表面。
     shader.fragmentShader = shader.fragmentShader.replace('#include <map_fragment>', `
       vec2 wallUv = ( vWallClip.xy / vWallClip.w ) * 0.5 * vWallCover + 0.5;
       wallUv.y = 1.0 - wallUv.y;
-      ${THREE.ShaderChunk.map_fragment.replaceAll('vMapUv', 'wallUv')}
-    `).replace('#include <emissivemap_fragment>', THREE.ShaderChunk.emissivemap_fragment.replaceAll('vEmissiveMapUv', 'wallUv'));
+      #define vMapUv wallUv
+      #include <map_fragment>
+      #undef vMapUv
+    `).replace('#include <emissivemap_fragment>', `
+      #define vEmissiveMapUv wallUv
+      #include <emissivemap_fragment>
+      #undef vEmissiveMapUv
+    `);
   };
-  material.customProgramCacheKey = () => 'facility-wall-projected';
+  material.customProgramCacheKey = () => 'facility-wall-projected-v2';
   return material;
 }

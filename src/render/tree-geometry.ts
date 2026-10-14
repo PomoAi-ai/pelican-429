@@ -93,9 +93,9 @@ const BARK: Readonly<Record<BarkTone, THREE.Color>> = Object.freeze({
 const FRUIT = new THREE.Color('#6b4a2a');
 /** 根盘隆起：与地表草顶面同色（tile-textures 的 GRASS），边缘埋入地面自然过渡。 */
 const MOUND = new THREE.Color('#62a440');
-/** 根须 z 方向可达范围：不越过方块顶面后沿（BLOCK_BACK_Z）、不越过树前沿上限。 */
+/** 根须 z 方向可达范围：不越过方块顶面后沿（BLOCK_BACK_Z），前端止于人物平面，不压到脚前。 */
 const ROOT_Z_MIN = BLOCK_BACK_Z + 0.06;
-const ROOT_Z_MAX = TREE_FRONT_MAX - 0.1;
+const ROOT_Z_MAX = 0;
 /** 主干后沿下限（方块顶面后沿之后 .1 内）。 */
 const TRUNK_Z_MIN = BLOCK_BACK_Z - 0.1;
 /** 接触阴影：地面处压暗到 AO_MIN，向上 AO_HEIGHT 内渐亮到 1。 */
@@ -444,24 +444,25 @@ function buttressFlare(tree: TreeInstance, bt: Buttresses): (dx: number, dz: num
   };
 }
 
-/** 伏地根须：每条板根方位一条弧形渐细圆管，从主干内伸出、尖端埋入地面 .06。 */
+/**
+ * 伏地根须：每条板根方位一条弧形渐细圆管，从主干内伸出、尖端埋入地面 .06。
+ * 根梢伸出板根 .3–.5（离树心约 .75–1.5 格），左右合起来跨 2 格以上，中段拱出地面；z 向按椭圆缩进 [ROOT_Z_MIN, ROOT_Z_MAX]，朝前朝后的根整条变短，不在边界上截平。
+ */
 function addRootFlares(b: MeshBuilder, tree: TreeInstance, bt: Buttresses, color: THREE.Color, channel: number): void {
   const rng = mulberry32((tree.visualSeed ^ 0x700f) >>> 0);
   const cx = tree.x + 0.5;
   const r = tree.trunkRadius;
   const ao = contactShade(tree.baseY);
-  const zc = (z: number, pad: number): number => Math.min(ROOT_Z_MAX - pad, Math.max(ROOT_Z_MIN + pad, z));
   bt.angles.forEach((a, i) => {
-    const len = r * (1.1 + 0.9 * rng()) * (0.8 + 0.25 * (bt.amps[i] as number));
-    const rr = r * (0.3 + 0.08 * rng());
+    // 板根在地面已外张到 (1.2 + amp)·r（粗干约 1 格），根梢要再伸出 .3–.5 才看得到。
+    const reach = r * (1.2 + (bt.amps[i] as number)) + 0.3 + 0.2 * rng();
+    const rr = r * (0.42 + 0.1 * rng());
     const ca = Math.cos(a);
     const sa = Math.sin(a);
-    const path: Vec3[] = [
-      { x: cx + ca * r * 0.4, y: tree.baseY + 0.42, z: zc(TREE_Z + sa * r * 0.4, rr) },
-      { x: cx + ca * r * 1.05, y: tree.baseY + 0.12, z: zc(TREE_Z + sa * r * 1.05, rr * 0.8) },
-      { x: cx + ca * (r + len * 0.6), y: tree.baseY + 0.0, z: zc(TREE_Z + sa * (r + len * 0.6), rr * 0.4) },
-      { x: cx + ca * (r + len), y: tree.baseY - 0.06, z: zc(TREE_Z + sa * (r + len), 0.03) },
-    ];
+    const kz = Math.min(1, ((sa > 0 ? ROOT_Z_MAX - TREE_Z : TREE_Z - ROOT_Z_MIN) - 0.05) / reach);
+    const at = (d: number, y: number): Vec3 => ({ x: cx + ca * d, y, z: TREE_Z + sa * d * kz });
+    // 中段拱出地面约 .1，才不会被整格草盖住。
+    const path: Vec3[] = [at(r * 0.4, tree.baseY + 0.45), at(r * 1.05, tree.baseY + 0.2), at(r + (reach - r) * 0.55, tree.baseY + 0.1), at(reach, tree.baseY - 0.06)];
     const tr = track(path, [rr, rr * 0.8, rr * 0.45, 0.025], 4);
     addTube(b, tr, { radial: LIMB_RADIAL, stations: uniformStations(tr.total, 0.18, 4), twist: 0, noise: 0.05, seed: hashU32(i, 0x9007, tree.visualSeed), cap: false, color, channel, sway: 0, ao });
   });

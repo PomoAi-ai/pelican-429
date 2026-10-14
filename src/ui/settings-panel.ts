@@ -7,7 +7,8 @@
 import { SETTING_DEFS, SETTING_GROUPS, parseSeed } from '../config/game-settings.ts';
 import type { GameSettings, NumericSettingKey, SettingKey } from '../config/game-settings.ts';
 import type { SettingsController } from './settings-model.ts';
-import { LANGUAGES, getLanguage, onLanguageChange, setLanguage, type Language } from './language.ts';
+import { getLanguage, onLanguageChange } from './language.ts';
+import { createLanguagePicker } from './language-picker.ts';
 
 const EN: Record<string, string> = {
   '技能瞄准样式': 'Skill aim style', '范围箭头': 'Range arrow', '落点圆环': 'Target ring', '金色扇形': 'Golden fan',
@@ -124,14 +125,8 @@ export function createSettingsPanel(options: SettingsPanelOptions): SettingsPane
   if (options.chapter) label(el('div', 'settings-note', card), '场景预览使用固定天气，无战斗，可调整画面与水色。');
   const languageRow = el('div', 'settings-row', card);
   label(el('span', 'settings-label', languageRow), '语言');
-  const languageSelect = el('select', 'settings-language-select', languageRow);
-  for (const { id, label: text } of LANGUAGES) {
-    const option = el('option', '', languageSelect);
-    option.value = id;
-    option.textContent = text;
-  }
-  languageSelect.value = getLanguage();
-  languageSelect.addEventListener('change', () => setLanguage(languageSelect.value as Language));
+  const languagePicker = createLanguagePicker('settings-language-menu');
+  languageRow.append(languagePicker.button, languagePicker.menu);
   if (options.onCharacter) {
     const character = label(el('button', 'settings-footer', card), '捏人 · 角色外观');
     character.type = 'button';
@@ -281,7 +276,6 @@ export function createSettingsPanel(options: SettingsPanelOptions): SettingsPane
     seedInput.placeholder = tr('留空随机');
     seedInput.setAttribute('aria-label', tr('世界种子'));
     for (const slider of sliders) slider.input.setAttribute('aria-label', tr(SETTING_DEFS.find((d) => d.key === slider.key)!.title));
-    languageSelect.value = getLanguage();
     if (!seedError.hidden) translateSeedError();
     shownIssues = -1;
     refresh(true);
@@ -296,12 +290,16 @@ export function createSettingsPanel(options: SettingsPanelOptions): SettingsPane
         shownOpen = open;
         card.hidden = !open;
         gear.classList.toggle('settings-gear-open', open);
-        if (!open) seedError.hidden = true;
+        if (!open) {
+          seedError.hidden = true;
+          languagePicker.close();
+        }
       }
       if (open) refresh();
     },
     dispose() {
       unsubscribe();
+      languagePicker.dispose();
       gear.removeEventListener('click', onGear);
       seedInput.removeEventListener('keydown', onSeedKey);
       seedInput.removeEventListener('keyup', onSeedKey);

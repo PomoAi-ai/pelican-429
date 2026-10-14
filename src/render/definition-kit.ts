@@ -1,10 +1,12 @@
 import * as THREE from 'three';
-import { TILE_SHAPE_DEFINITIONS } from '../config/definition-kit.ts';
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
+import { DEFINITION_DEPTH, TILE_SHAPE_DEFINITIONS } from '../config/definition-kit.ts';
 import type { DefinitionPoint, DefinitionPlatformWidth, DefinitionWindowKind } from '../config/definition-kit.ts';
 import type { DefinitionCollider, DefinitionPlatform } from '../physics/definition-collision.ts';
 import type { RockTerrainCell } from '../config/rock-terrain.ts';
 import { createDefinitionTerrain } from './definition-terrain.ts';
 import type { TileTextureData } from './tile-textures.ts';
+import { createAiCityMaterial, type AiCityBuildingMaterial } from './ai-city-architecture.ts';
 
 export interface DefinitionGridCell {
   x: number;
@@ -18,11 +20,12 @@ export interface DefinitionKit {
   readonly root: THREE.Group;
   readonly solids: DefinitionCollider[];
   readonly platforms: DefinitionPlatform[];
-  solid(shapeId: string, x: number, y: number): void;
+  solid(shapeId: string, x: number, y: number, material?: AiCityBuildingMaterial): void;
   terrain(cells: readonly RockTerrainCell[], textures: TileTextureData): void;
   wall(id: string, x: number, y: number): void;
   window(width: number, height: number, x: number, y: number, kind: DefinitionWindowKind, glass?: boolean, mullion?: boolean): void;
-  platform(width: DefinitionPlatformWidth, depth: .5 | .75, top: number, x: number): void;
+  /** 背后有墙时挂到墙面（深1.5），否则以人物平面居中（深1）；墙要先于平台铺设。 */
+  platform(width: DefinitionPlatformWidth, top: number, x: number): void;
   door(side: 'left' | 'right', x: number, y: number, openingHeight: 3 | 3.5): void;
   dispose(): void;
 }
@@ -33,10 +36,40 @@ function shapePath(points: readonly DefinitionPoint[]): THREE.Shape {
   return new THREE.Shape(points.map(([x, y]) => new THREE.Vector2(x, y)));
 }
 
-function windowOpening(width: number, height: number, kind: DefinitionWindowKind): THREE.Path {
-  const b = .1;
+/** 沿真实凸轮廓内收，斜坡和四分砖的面板不会盖住格内空隙。 */
+function insetPolygon(points: readonly DefinitionPoint[], inset: number): DefinitionPoint[] {
+  const area = points.reduce((sum, [x, y], i) => {
+    const next = points[(i + 1) % points.length]!;
+    return sum + x * next[1] - next[0] * y;
+  }, 0);
+  const normals = points.map(([x, y], i) => {
+    const next = points[(i + 1) % points.length]!;
+    const dx = next[0] - x, dy = next[1] - y;
+    const factor = Math.sign(area) / Math.hypot(dx, dy);
+    return new THREE.Vector2(-dy * factor, dx * factor);
+  });
+  return points.map(([x, y], i) => {
+    const a = normals[(i + points.length - 1) % points.length]!, b = normals[i]!;
+    const distance = inset / (1 + a.dot(b));
+    return [x + (a.x + b.x) * distance, y + (a.y + b.y) * distance];
+  });
+}
+
+function windowOpening(width: number, height: number, kind: DefinitionWindowKind, b = .1,
+  cornerRadius = Math.min(.28, width / 4, height / 4)): THREE.Path {
   const path = new THREE.Path();
-  if (kind === 'round') {
+  if (kind === 'rounded') {
+    const r = cornerRadius;
+    path.moveTo(b + r, b);
+    path.lineTo(width - b - r, b);
+    path.quadraticCurveTo(width - b, b, width - b, b + r);
+    path.lineTo(width - b, height - b - r);
+    path.quadraticCurveTo(width - b, height - b, width - b - r, height - b);
+    path.lineTo(b + r, height - b);
+    path.quadraticCurveTo(b, height - b, b, height - b - r);
+    path.lineTo(b, b + r);
+    path.quadraticCurveTo(b, b, b + r, b);
+  } else if (kind === 'round') {
     path.absellipse(width / 2, height / 2, width / 2 - b, height / 2 - b, 0, Math.PI * 2, true, 0);
   } else if (kind === 'arch') {
     const radius = width / 2 - b;
@@ -72,8 +105,11 @@ const wallPolygons: Readonly<Record<string, readonly DefinitionPoint[]>> = {
   'W7-4': [[1, 0], [1, 1], [0, 1]],
 };
 
-/** 定义坐标沿 +Z 指向外延墙；装配层决定观察方向。 */
-export function createDefinitionKit(): DefinitionKit {
+// 定义坐标 +Z 指向后沿；装配层决定观察方向。格子占 [TILE_FRONT, WALL_Z]，墙从格子背面向后沿延伸。
+const TILE_FRONT = -DEFINITION_DEPTH.tile / 2;
+const WALL_Z = DEFINITION_DEPTH.tile / 2;
+
+export function createDefinitionKit({ style = 'definition' }: { style?: 'definition' | 'ai-city' } = {}): DefinitionKit {
   const root = new THREE.Group();
   const solids: DefinitionCollider[] = [];
   const platforms: DefinitionPlatform[] = [];
@@ -81,25 +117,43 @@ export function createDefinitionKit(): DefinitionKit {
   root.name = 'definition-kit';
   const grid: DefinitionGridCell[] = [];
   root.userData.definitionGrid = grid;
+  const wallCells = new Set<string>();
+  const floatingCells = new Set<string>();
   const gridCells = (x: number, y: number, width: number, height: number,
     z: number, depth: number, role: DefinitionGridCell['role']): void => {
     for (let row = 0; row < height; row++) for (let column = 0; column < width; column++) {
       grid.push({ x: x + column, y: y + row, z, depth, role });
+      if (role !== 'wall') continue;
+      const cell = `${x + column},${y + row}`;
+      // 平台形态在放置时按已铺的墙决定，事后补墙会留下一块仍然居中的平台。
+      if (floatingCells.has(cell)) throw new Error(`墙必须先于平台铺设：${cell}`);
+      wallCells.add(cell);
     }
   };
   const geometries = new Map<string, THREE.BufferGeometry>();
-  const solidMaterial = new THREE.MeshStandardMaterial({ color: 0xd6dfda, roughness: .8 });
-  const wallMaterial = new THREE.MeshStandardMaterial({ color: 0x719a96, roughness: .85 });
-  const frameMaterial = new THREE.MeshStandardMaterial({ color: 0x235373, roughness: .5, metalness: .25 });
-  // 单向平台后绘制，用玩家轮廓遮罩让穿越中的角色保持可见；实体深度仍居中。
-  const platformMaterial = new THREE.MeshStandardMaterial({ color: 0xd09c52, roughness: .65,
-    transparent: true, depthWrite: false, stencilWrite: true, stencilRef: 1, stencilFunc: THREE.NotEqualStencilFunc,
-    stencilWriteMask: 0 });
+  const city = style === 'ai-city';
+  const solidMaterial = city ? createAiCityMaterial('ceramic') : new THREE.MeshStandardMaterial({ color: 0xd6dfda, roughness: .8 });
+  const alloyMaterial = createAiCityMaterial('alloy');
+  const wallMaterial = city ? createAiCityMaterial('wall') : new THREE.MeshStandardMaterial({ color: 0x719a96, roughness: .85 });
+  const frameMaterial = city ? createAiCityMaterial('alloy') : new THREE.MeshStandardMaterial({ color: 0x235373, roughness: .5, metalness: .25 });
+  // 单向平台后绘制，用玩家轮廓遮罩让穿越中的角色保持可见。
+  const platformMaterial = city ? createAiCityMaterial('alloy') : new THREE.MeshStandardMaterial({ color: 0xd09c52, roughness: .65 });
+  const platformTop = createAiCityMaterial('ceramic');
+  const platformGlow = createAiCityMaterial('cyan');
+  const brassMaterial = createAiCityMaterial('gold');
+  const seamMaterial = createAiCityMaterial('dark');
+  const signalMaterial = createAiCityMaterial('cyan');
+  const platformMaterials = [platformMaterial, platformTop, platformGlow];
+  const platformSurfaces = new Set<THREE.Material>(platformMaterials);
+  for (const material of platformMaterials) Object.assign(material, { transparent: true, depthWrite: false,
+    stencilWrite: true, stencilRef: 1, stencilFunc: THREE.NotEqualStencilFunc, stencilWriteMask: 0 });
   const doorMaterial = new THREE.MeshStandardMaterial({ color: 0x9d6743, roughness: .8 });
-  const glassMaterial = new THREE.MeshStandardMaterial({ color: 0x8bd2e1, transparent: true, opacity: .27,
+  const glassMaterial = city ? createAiCityMaterial('glass') : new THREE.MeshStandardMaterial({ color: 0x8bd2e1, transparent: true, opacity: .27,
     roughness: .18, metalness: .15, depthWrite: false, side: THREE.DoubleSide });
-  const materials = [solidMaterial, wallMaterial, frameMaterial, platformMaterial, doorMaterial, glassMaterial];
-  materials.forEach((material, index) => { material.name = ['definition-solid', 'definition-wall', 'definition-frame', 'definition-platform', 'definition-door', 'definition-glass'][index]!; });
+  const materials = [solidMaterial, wallMaterial, frameMaterial, platformMaterial, doorMaterial, glassMaterial,
+    alloyMaterial, platformTop, platformGlow, brassMaterial, seamMaterial, signalMaterial];
+  const names = ['definition-solid', 'definition-wall', 'definition-frame', 'definition-platform', 'definition-door', 'definition-glass'];
+  names.forEach((name, index) => { materials[index]!.name = name; });
 
   const mesh = (key: string, create: () => THREE.BufferGeometry, material: THREE.Material,
     x: number, y: number, z: number): void => {
@@ -110,31 +164,50 @@ export function createDefinitionKit(): DefinitionKit {
     }
     const object = new THREE.Mesh(geometry, material);
     object.position.set(x, y, z);
-    object.castShadow = material !== glassMaterial && material !== platformMaterial;
-    if (material === platformMaterial) object.renderOrder = 2;
+    object.castShadow = material !== glassMaterial && !platformSurfaces.has(material);
+    if (platformSurfaces.has(material)) object.renderOrder = 2;
     object.receiveShadow = true;
     root.add(object);
   };
   const box = (material: THREE.Material, w: number, h: number, d: number, x: number, y: number, z: number): void =>
-    mesh(`box:${w}:${h}:${d}`, () => new THREE.BoxGeometry(w, h, d), material, x + w / 2, y + h / 2, z + d / 2);
+    mesh(`box:${w}:${h}:${d}`, () => city
+      ? new RoundedBoxGeometry(w, h, d, 2, Math.min(.025, w / 4, h / 4, d / 4))
+      : new THREE.BoxGeometry(w, h, d), material, x + w / 2, y + h / 2, z + d / 2);
   const extrude = (key: string, shape: THREE.Shape, depth: number, material: THREE.Material,
-    x: number, y: number, z: number): void => mesh(key, () => new THREE.ExtrudeGeometry(shape,
-    { depth, bevelEnabled: false, steps: 1, curveSegments: 32 }), material, x, y, z);
+    x: number, y: number, z: number, rounding = .018): void => {
+    const bevel = city && material !== glassMaterial ? Math.min(rounding, depth / 4) : 0;
+    // 倒角向轮廓内部收，不越过整数/半整数格的实际碰撞边界。
+    mesh(key, () => new THREE.ExtrudeGeometry(shape, { depth: depth - bevel * 2, bevelEnabled: bevel > 0,
+      bevelThickness: bevel, bevelSize: bevel, bevelOffset: -bevel, bevelSegments: 3, steps: 1, curveSegments: city ? 24 : 32 }),
+    material, x, y, z + bevel);
+  };
   const mullion = (width: number, height: number, x: number, y: number): void => {
-    box(frameMaterial, .08, height - .2, .12, x + width / 2 - .04, y + .1, .52);
+    box(frameMaterial, .08, height - .2, .12, x + width / 2 - .04, y + .1, WALL_Z + .02);
     for (const offset of [.1, width / 2 + .04]) {
-      box(frameMaterial, width / 2 - .14, .08, .12, x + offset, y + height / 2 - .04, .52);
+      box(frameMaterial, width / 2 - .14, .08, .12, x + offset, y + height / 2 - .04, WALL_Z + .02);
     }
   };
   const window = (width: number, height: number, x: number, y: number,
     kind: DefinitionWindowKind, glass = false, bars = false): void => {
-    gridCells(x, y, width, height, .5, .2, 'wall');
-    const opening = windowOpening(width, height, kind);
+    gridCells(x, y, width, height, WALL_Z, DEFINITION_DEPTH.wall, 'wall');
+    const corner = city ? Math.min(.48, width * .18, height * .2) : Math.min(.28, width / 4, height / 4);
+    const opening = windowOpening(width, height, kind, city ? .22 : .1, corner);
     const shape = shapePath(rectangle(width, height));
-    shape.holes.push(opening);
-    extrude(`window:${kind}:${width}:${height}`, shape, .2, frameMaterial, x, y, .5);
+    shape.holes.push(city ? windowOpening(width, height, kind, .07, corner) : opening);
+    extrude(`window:${kind}:${width}:${height}`, shape, DEFINITION_DEPTH.wall - (city ? .08 : 0),
+      city ? wallMaterial : frameMaterial, x, y, WALL_Z + (city ? .08 : 0));
+    if (city) {
+      const rim = new THREE.Shape(windowOpening(width, height, kind, .055, corner).getPoints(48));
+      rim.holes.push(windowOpening(width, height, kind, .2, corner));
+      extrude(`window-frame:${kind}:${width}:${height}`, rim, .13, frameMaterial, x, y, WALL_Z + .008, .012);
+      const liner = new THREE.Shape(windowOpening(width, height, kind, .195, corner).getPoints(48));
+      liner.holes.push(opening);
+      extrude(`window-liner:${kind}:${width}:${height}`, liner, .06, brassMaterial, x, y, WALL_Z, .003);
+    }
     if (glass) {
-      extrude(`glass:${kind}:${width}:${height}`, new THREE.Shape(opening.getPoints(48)), .015, glassMaterial, x, y, .59);
+      const pane = new THREE.Shape(opening.getPoints(48));
+      if (city) mesh(`glass:${kind}:${width}:${height}`, () => new THREE.ShapeGeometry(pane), glassMaterial, x, y, WALL_Z + .145);
+      else extrude(`glass:${kind}:${width}:${height}`, pane, .015, glassMaterial, x, y, WALL_Z + .09);
     }
     if (bars) mullion(width, height, x, y);
   };
@@ -143,15 +216,38 @@ export function createDefinitionKit(): DefinitionKit {
     root,
     solids,
     platforms,
-    solid(shapeId, x, y) {
-      gridCells(x, y, 1, 1, -.5, 1, 'solid');
+    solid(shapeId, x, y, material = 'ceramic') {
+      gridCells(x, y, 1, 1, TILE_FRONT, DEFINITION_DEPTH.tile, 'solid');
       const definition = TILE_SHAPE_DEFINITIONS.find(({ id }) => id === shapeId)!;
       solids.push({ points: definition.points.map(([px, py]) => [x + px, y + py]) });
-      extrude(`solid:${shapeId}`, shapePath(definition.points), 1, solidMaterial, x, y, -.5);
+      const surface = material === 'alloy' ? alloyMaterial : solidMaterial;
+      if (!city) {
+        extrude(`solid:${shapeId}`, shapePath(definition.points), DEFINITION_DEPTH.tile, surface, x, y, TILE_FRONT);
+        return;
+      }
+      extrude(`solid:${shapeId}`, shapePath(definition.points), DEFINITION_DEPTH.tile - .025,
+        surface, x, y, TILE_FRONT + .025, .035);
+      const service = material === 'alloy' && (shapeId === 'K' || shapeId === 'L');
+      const panel = shapePath(insetPolygon(definition.points, .045));
+      const left = shapeId === 'L' ? .5 : 0;
+      if (service) {
+        const slot = shapePath(rectangle(.07, .46).map(([px, py]) => [px + left + .215, py + .27]));
+        panel.holes.push(slot);
+      }
+      extrude(`solid-panel:${shapeId}:${service}`, panel, service ? .021 : .025,
+        surface, x, y, TILE_FRONT + (service ? .004 : 0), .005);
+      if (service) {
+        box(seamMaterial, .072, .462, .008, x + left + .214, y + .269, TILE_FRONT + .018);
+        box(signalMaterial, .032, .34, .008, x + left + .234, y + .33, TILE_FRONT + .01);
+        for (const cy of [.1, .875]) {
+          box(brassMaterial, .075, .025, .014, x + left + .075, y + cy, TILE_FRONT);
+          box(seamMaterial, .025, .018, .008, x + left + .372, y + cy + .003, TILE_FRONT);
+        }
+      }
     },
     terrain(cells, textures) {
       for (const { shape, x, y } of cells) {
-        gridCells(x, y, 1, 1, -.5, 1, 'solid');
+        gridCells(x, y, 1, 1, TILE_FRONT, DEFINITION_DEPTH.tile, 'solid');
         const definition = TILE_SHAPE_DEFINITIONS.find(item => item.id === shape)!;
         solids.push({ points: definition.points.map(([px, py]) => [x + px, y + py]) });
       }
@@ -167,8 +263,11 @@ export function createDefinitionKit(): DefinitionKit {
       if (id === 'W8') return window(2, 2, x, y, 'bevel');
       if (id === 'glass-mullion') return window(2, 2, x, y, 'rectangle', true, true);
       if (id === 'round' || id === 'arch' || id === 'broken') return window(2, 2, x, y, id);
-      gridCells(x, y, 1, 1, .5, .2, 'wall');
-      if (id === 'glass') return box(glassMaterial, .8, .8, .015, x + .1, y + .1, .59);
+      gridCells(x, y, 1, 1, WALL_Z, DEFINITION_DEPTH.wall, 'wall');
+      if (id === 'glass') {
+        if (city) return mesh('glass:single', () => new THREE.PlaneGeometry(.8, .8), glassMaterial, x + .5, y + .5, WALL_Z + .09);
+        return box(glassMaterial, .8, .8, .015, x + .1, y + .1, WALL_Z + .09);
+      }
       if (id === 'mullion') return mullion(1, 1, x, y);
       if (id.startsWith('W2-') || id.startsWith('W8-')) {
         const c = .5 + .1 * Math.SQRT2 - .1;
@@ -178,25 +277,34 @@ export function createDefinitionKit(): DefinitionKit {
         const corner = id.slice(3);
         const transformed = points.map(([px, py]): DefinitionPoint =>
           [corner.endsWith('R') ? 1 - px : px, corner.startsWith('T') ? 1 - py : py]);
-        return extrude(`wall:${id}`, shapePath(transformed), .2, frameMaterial, x, y, .5);
+        return extrude(`wall:${id}`, shapePath(transformed), DEFINITION_DEPTH.wall, city ? wallMaterial : frameMaterial, x, y, WALL_Z);
       }
-      extrude(`wall:${id}`, shapePath(wallPolygons[id]!), .2, wallMaterial, x, y, .5);
+      extrude(`wall:${id}`, shapePath(wallPolygons[id]!), DEFINITION_DEPTH.wall, wallMaterial, x, y, WALL_Z);
     },
     window,
-    platform(width, depth, top, x) {
-      gridCells(x, Math.ceil(top) - 1, 1, 1, -depth / 2, depth, 'solid');
+    platform(width, top, x) {
       const w = width === 'full' ? 1 : .5;
       const left = x + (width === 'right' ? .5 : 0);
+      const cell = `${Math.floor(left + w / 2)},${Math.ceil(top) - 1}`;
+      const front = -DEFINITION_DEPTH.platform / 2;
+      const hung = wallCells.has(cell);
+      if (!hung) floatingCells.add(cell);
+      const depth = hung ? WALL_Z - front : DEFINITION_DEPTH.platform;
+      gridCells(x, Math.ceil(top) - 1, 1, 1, front, depth, 'solid');
       platforms.push({ left, right: left + w, top });
-      box(platformMaterial, w, .2, depth, x + (width === 'right' ? .5 : 0), top - .2, -depth / 2);
+      if (city) {
+        box(platformMaterial, w, .165, depth - .01, left, top - .2, front + .01);
+        box(platformTop, w - .025, .035, depth - .025, left + .0125, top - .035, front + .0125);
+        box(platformGlow, w * .4, .027, .012, left + w * .3, top - .12, front);
+      } else box(platformMaterial, w, .2, depth, left, top - .2, front);
     },
     door(side, x, y, openingHeight) {
-      gridCells(x, y, 1, 4, -.5, 1, 'solid');
+      gridCells(x, y, 1, 4, TILE_FRONT, DEFINITION_DEPTH.tile, 'solid');
       const left = x + (side === 'left' ? 0 : .5);
       solids.push({ points: rectangle(.5, 4 - openingHeight).map(([px, py]) => [left + px, y + openingHeight + py]) });
       // 两根门柱在前后沿，保证沿 X 通行时没有横跨洞口的门槛。
-      for (const z of [-.5, .4]) box(doorMaterial, .12, openingHeight, .1, left + (side === 'left' ? 0 : .38), y, z);
-      box(doorMaterial, .5, 4 - openingHeight, 1, left, y + openingHeight, -.5);
+      for (const z of [TILE_FRONT, WALL_Z - .1]) box(doorMaterial, .12, openingHeight, .1, left + (side === 'left' ? 0 : .38), y, z);
+      box(doorMaterial, .5, 4 - openingHeight, DEFINITION_DEPTH.tile, left, y + openingHeight, TILE_FRONT);
     },
     dispose() {
       for (const view of terrainViews) view.dispose();

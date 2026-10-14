@@ -67,6 +67,7 @@ export class FakeElement {
   }
   focus(): void {}
   blur(): void {}
+  hidePopover(): void {}
   addEventListener(type: string, fn: (e: unknown) => void): void {
     const list = this.listeners.get(type) ?? [];
     list.push(fn);

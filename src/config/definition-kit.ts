@@ -56,8 +56,9 @@ export const WALL_DEFINITIONS = [
   { id: 'round', label: '圆窗' }, { id: 'arch', label: '拱窗' }, { id: 'broken', label: '不规则破损' },
 ] as const;
 
-export type DefinitionPlatformWidth = 'full' | 'left' | 'right';
-export type DefinitionWindowKind = 'rectangle' | 'bevel' | 'round' | 'arch' | 'broken';
+/** 定义深度：格子深2居中（定义坐标 +Z 朝后沿，格子 Z=[−1,+1]）；墙厚0.2紧贴格子背面、位于后沿；前沿、后沿各0.5在格子之外。
+ * 平台深1以人物平面居中；背后有墙时向后挂到墙面（深1.5），两种前沿相同。 */
+export const DEFINITION_DEPTH = { tile: 2, wall: .2, reserve: .5, platform: 1 } as const;
 
-export const PLATFORM_DEFINITIONS = (['full', 'left', 'right'] as const).flatMap((width) =>
-  ([.75, .5] as const).flatMap((depth) => ([1, .5, .2] as const).map((top) => ({ width, depth, top }))));
+export type DefinitionPlatformWidth = 'full' | 'left' | 'right';
+export type DefinitionWindowKind = 'rectangle' | 'rounded' | 'bevel' | 'round' | 'arch' | 'broken';

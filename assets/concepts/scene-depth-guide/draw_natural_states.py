@@ -35,17 +35,17 @@ def make_model(kind, state):
         box(-width/2,y,-width/2,width,height,width,'#9B7855')
     if sid in ('removed','depleted'): return faces
     if kind=='grass':
-        # The base covers the actual tile top; only the front leaves enter the reserve.
-        faces.append(([(-.5,.012,-.3),(.5,.012,-.3),(.5,.012,.7),(-.5,.012,.7)],'#769757'))
-        for row in range(8):
+        # The base covers the 2-deep tile top (local −0.8～+1.2); only the front leaves enter the front edge.
+        faces.append(([(-.5,.012,-.8),(.5,.012,-.8),(.5,.012,1.2),(-.5,.012,1.2)],'#769757'))
+        for row in range(12):
             for col in range(9):
-                x=-.45+col*.1125;z=-.3+row/7*.96
-                high=h*(1 if (row,col)==(3,4) else .55+((row*7+col*3)%8)*.06)
+                x=-.45+col*.1125;z=-.8+row/11*1.96
+                high=h*(1 if (row,col)==(5,4) else .55+((row*7+col*3)%8)*.06)
                 tx=max(-.5,min(.5,x+(.045 if (row+col)%2 else -.045)))
-                tz=-.7 if row==0 else max(-.3,min(.7,z+(.06 if col%2 else -.06)))
+                tz=-1.2 if row==0 else max(-.8,min(1.2,z+(.06 if col%2 else -.06)))
                 color=('#698E51','#88A963','#789B59')[(row+col)%3]
                 faces.append(([(x-.032,.012,z),(x+.032,.012,z),(tx,high,tz)],color))
-                faces.append(([(x,.012,z-.018),(x,.012,min(.7,z+.018)),(tx,high,tz)],color))
+                faces.append(([(x,.012,z-.018),(x,.012,min(1.2,z+.018)),(tx,high,tz)],color))
     elif kind=='flower':
         for i,x in enumerate((-.25*w,0,.25*w)):
             high=h*(.86 if sid in ('mature','bud') else 1)*(.8 if i!=1 else 1)
@@ -80,25 +80,25 @@ def make_model(kind, state):
             for x,y,rx,ry in ((-.18,.43,.31,.19),(.18,.66,.30,.17),(-.02,.84,.28,.16)):
                 ball((x+.005)*foliage_w/.97,.45+y*ph,0,rx*foliage_w/.97,ry*ph,d*(.33 if sid=='seedling' else .5),'#73965F')
     elif kind=='tree':
-        widths={'seedling':.06,'young':.12,'growing':.25,'mature':.4,'stump':.4,'sprout':.4}
-        heights={'seedling':.35,'young':1.2,'growing':2.2,'mature':3.3,'stump':.3,'sprout':.3}
+        widths={'seedling':.06,'young':.15,'growing':.3,'mature':.5,'stump':.5,'sprout':.5}
+        heights={'seedling':.35,'young':1.2,'growing':2,'mature':3,'stump':.3,'sprout':.3}
         trunk(widths[sid],heights[sid])
         if sid=='sprout':
             trunk(.055,.32,.3);ball(0,.64,0,w/2,.16,d/2,'#8EA669')
         elif sid!='stump':ball(0,h*.72,0,w/2,h*.28,d/2,'#79986A')
         if sid in ('stump','sprout'):
-            box(-.17,.299,-.17,.34,.001,.34,'#D2B38A')
+            box(-.22,.299,-.22,.44,.001,.44,'#D2B38A')
     elif kind=='ore':
         cells=[(0,0),(1,0),(2,0),(0,1),(1,1)] if sid=='intact' else [(0,0),(1,0),(0,1)]
         for x,y in cells:
-            box(x-1.5,y,-.5,1,1,1,'#A0A39E')
+            box(x-1.5,y,-d/2,1,1,d,'#A0A39E')
             partial=sid=='partial' and (x,y)==(1,0)
             for j in range(1 if partial else 3):
                 px=x-1.5+.2+j*.26;py=y+.25+((j+x)%3)*.18
-                faces.append(([(px-.08,py,-.501),(px,py+.12,-.501),(px+.08,py,-.501),(px,py-.07,-.501)],'#68ADAD'))
+                faces.append(([(px-.08,py,-d/2-.001),(px,py+.12,-d/2-.001),(px+.08,py,-d/2-.001),(px,py-.07,-d/2-.001)],'#68ADAD'))
             if partial:
                 for px,py in ((-.25,.3),(-.05,.5),(.25,.6)):
-                    faces.append(([(px,py,-.502),(px+.04,py+.18,-.502),(px+.02,py+.17,-.502)],'#6A625A'))
+                    faces.append(([(px,py,-d/2-.002),(px+.04,py+.18,-d/2-.002),(px+.02,py+.17,-d/2-.002)],'#6A625A'))
     if kind=='flower' and faces:
         faces=[([(x,y,(d/2)*(1-y/h)-abs(z)*(y/h)) for x,y,z in vertices],color) for vertices,color in faces]
         vertices=[v for points,_ in faces for v in points]
@@ -133,17 +133,17 @@ def render_sheet(item):
         for j,k in EDGES:
             if dashed:dash(p(vertices[j]),p(vertices[k]),color)
             else:line(p(vertices[j]),p(vertices[k]),color,2)
-    scale=min(340/rh,350/rw,350/max(rd,1))
+    scale=min(340/rh,350/rw,350/max(rd,2))
     text(40,28,item['title']+'｜逐状态透视与尺寸定义',44)
     text(40,98,'同页镜头、比例、基线完全相同 · 单位：格 · 橙线为当前高度 · 灰虚线为成熟/初始区域',27,BLUE)
-    text(40,145,'新增尺寸与状态均为绘图草案；彩色为实体，蓝色为同镜头线框。空框不产生实体或碰撞。',26)
+    text(40,145,'岩层与泥土同为格子深2，Z=[−1,+1]；采掘状态为草案。空框不产生实体或碰撞。' if kind=='ore' else '新增尺寸与状态均为绘图草案；彩色为实体，蓝色为同镜头线框。空框不产生实体或碰撞。',26)
     for index,state in enumerate(states):
         cx=30+(index%2)*1190;cy=210+(index//2)*790
         draw.rounded_rectangle((cx,cy,cx+1150,cy+765),18,fill='white',outline='#D3DFDF',width=2)
         text(cx+25,cy+20,f'{index+1:02d}  '+state['label'],34,BLUE)
         w,h,d=(state[key] for key in ('w','h','d'))
         text(cx+25,cy+75,f'当前包络：宽 {w:g} × 高 {h:g} × 深 {d:g}',27)
-        text(cx+25,cy+118,('盆底Y=0；土面上株高 '+f'{max(h-.45,0):g}'+'；盆高0.5') if kind=='bonsai' and state['id']!='empty' else (f'顶部Y={h:g}；整格顶面1×1；含前叶深1.4' if kind=='grass' and h else f'顶部Y={h:g}；Z后沿−0.5；前沿={-.5-d:g}' if kind=='flower' and h else (f'顶部Y={h:g}；Z中心{item["zc"]:+g}；成熟/原区域 {rw:g}×{rh:g}×{rd:g}' if h else f'无实体；灰框仅作原区域对照 {rw:g}×{rh:g}×{rd:g}')),24)
+        text(cx+25,cy+118,('盆底Y=0；土面上株高 '+f'{max(h-.45,0):g}'+'；盆高0.5') if kind=='bonsai' and state['id']!='empty' else (f'顶部Y={h:g}；整格顶面1×2；含前叶深2.4' if kind=='grass' and h else f'顶部Y={h:g}；根部Z=+1；前端Z=+{1+d:g}' if kind=='flower' and h else (f'顶部Y={h:g}；Z中心{0-item["zc"]:+g}；成熟/原区域 {rw:g}×{rh:g}×{rd:g}' if h else f'无实体；灰框仅作原区域对照 {rw:g}×{rh:g}×{rd:g}')),24)
         zc=item['mount_z']-d/2 if 'mount_z' in item else item['zc']
         zshift=zc-item['zc']
         faces=make_model(kind,state)
@@ -151,6 +151,9 @@ def render_sheet(item):
             rock=[v for vertices,color in faces if color=='#A0A39E' for v in vertices]
             extents=[max(v[i] for v in rock)-min(v[i] for v in rock) for i in range(3)]
             assert all(math.isclose(actual,expected) for actual,expected in zip(extents,(w,h,d))),(state['id'],extents)
+        if kind in ('tree','shrub'):
+            # Internal z = −Z: the whole plant stays behind the body zone (Z ≤ −0.3) and inside the tile (Z ≥ −1).
+            assert all(.3-1e-9<=v[2]+item['zc']<=1+1e-9 for vs,_ in faces for v in vs),'plant entered body zone or left the band'
         if kind!='ore' and faces:
             points=[v for vertices,_ in faces for v in vertices]
             assert math.isclose(max(v[1] for v in points),h),(kind,state['id'],'top height')
@@ -164,26 +167,30 @@ def render_sheet(item):
             def p(v):
                 v=(v[0],v[1]-rh/2,v[2]); factor=scale*20/(20+dot(v,F))
                 return ox+factor*dot(v,R),cy+405-factor*dot(v,U)
-            support=cube(-rw/2,-.12,-.5-item['zc'],rw,.12,1)
+            support=cube(-rw/2,-.12,-1-item['zc'],rw,.12,2)
             if not wire:
                 for ids in FACES:
                     xy=[p(support[j]) for j in ids];draw.polygon(xy,fill='#E4DED0');draw.line(xy+[xy[0]],fill='#C4BCAA',width=1)
             else:box_lines(support,p,'#C9C1B1')
             for i in range(1,math.ceil(rw)):
                 x=-rw/2+i
-                line(p((x,0,-.5-item['zc'])),p((x,0,.5-item['zc'])),'#C3CDC4',1)
+                line(p((x,0,-1-item['zc'])),p((x,0,1-item['zc'])),'#C3CDC4',1)
             box_lines(cube(-rw/2,0,-rd/2,rw,rh,rd),p,'#D6DEDF',True)
             if kind=='ore':
                 for x,y in ((0,0),(1,0),(2,0),(0,1),(1,1)):
-                    box_lines(cube(x-1.5,y,-.5,1,1,1),p,'#D0D9DB',True)
+                    box_lines(cube(x-1.5,y,-rd/2,1,1,rd),p,'#D0D9DB',True)
             for vertices,color in sorted(faces,key=lambda f:sum(dot(v,F) for v in f[0])/len(f[0]),reverse=True):
                 xy=[p(v) for v in vertices]
                 if not wire:
                     draw.polygon(xy,fill=color);draw.line(xy+[xy[0]],fill='#617663',width=1)
                 else:draw.line(xy+[xy[0]],fill=BLUE,width=1)
             if kind=='ore' and state['id']=='partial':
-                px,py=p((0,.35,-.505));text(px-24,py,'50%',18,'#9C5D32')
+                px,py=p((0,.35,-rd/2-.005));text(px-24,py,'50%',18,'#9C5D32')
             if kind!='ore' and h>0:box_lines(cube(-w/2,0,-d/2+zshift,w,h,d),p,'#80A2B7',True)
+            for x0,x1,yy in state.get('platforms',()):
+                # Platform collision lives on the player plane Z=0; the crown pad seen behind it is only its look.
+                line(p((x0,yy,-item['zc'])),p((x1,yy,-item['zc'])),'#8A5BB8',5)
+                px,py=p((x1,yy,-item['zc']));text(px+8,py-14,'平台 Z=0',20,'#8A5BB8')
             if h>0:
                 xx=rw/2+.18
                 line(p((xx,0,-rd/2)),p((xx,h,-rd/2)),'#B27B4A',3)

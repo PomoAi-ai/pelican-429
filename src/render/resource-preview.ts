@@ -24,6 +24,7 @@ import { BED_KINDS, FLOAT_KINDS } from './water-flora.ts';
 import type { WorldViews } from './world-views.ts';
 import { isBuildingKitKind } from '../config/building-kit.ts';
 import type { BuildingKitVariant } from '../config/building-kit.ts';
+import { createPlantAttachments } from './plant-attachments.ts';
 import { createBuildingKit } from './building-kit.ts';
 
 /** 单件预览使用游戏工厂，只替换实例规划，不复制几何和着色器。 */
@@ -51,6 +52,24 @@ export function createResourcePreview(scene: THREE.Scene, level: LevelData, grou
       building.root.position.set(24, groundY, 0);
       root.add(building.root);
       disposers.push(() => building!.dispose());
+    }
+    if (entry.actor === 'climber') {
+      const woodland = entry.action === 'woodland';
+      const columns = woodland ? [20, 21, 22, 23, 24, 25, 26, 27, 28] : [23, 24, 25];
+      for (const x of woodland ? [] : columns) {
+        const plants = createPlantAttachments(entry.action, time);
+        plants.root.position.set(x + 0.5, groundY, 0);
+        root.add(plants.root); disposers.push(() => plants.dispose());
+      }
+      const geometries = createFloraGeometries(); Object.values(geometries).forEach(geometry);
+      const grass = createFloraMeshes(columns.map((x) => ({ species: 'turf' as const, x: x + 0.5, y: groundY + 0.015,
+        z: 0, yaw: 0, tilt: 0, sx: 1, sy: 1, shear: 0, tint: 0x8abf57 })), geometries, material(createWindMaterial(time)), 'plant-host');
+      root.add(...grass); disposers.push(() => grass.forEach((mesh) => mesh.dispose()));
+      if (woodland) {
+        const shrubs = createShrubMesh([22, 27].map((x) => ({ kind: 'azalea' as const, x: x + 0.5, y: groundY,
+          z: -0.68, yaw: 0, height: 1.4, tint: 0xffffff })), geometry(createShrubAtlas()), material(createShrubMaterial(time)), 'plant-woodland')!;
+        root.add(shrubs); disposers.push(() => { shrubs.dispose(); shrubs.geometry.dispose(); });
+      }
     }
     if (entry.actor === 'shrub') {
       const rule = SHRUB_RULES[entry.action];
@@ -117,14 +136,14 @@ export function createResourcePreview(scene: THREE.Scene, level: LevelData, grou
     }
     const center = bounds.getCenter(new THREE.Vector3());
     const extent = bounds.getSize(new THREE.Vector3());
-    const groundResource = (entry.actor === 'terrain' && !['branch', 'roof'].includes(entry.action)) || (entry.actor === 'grass' && entry.action === 'natural');
+    const groundResource = entry.actor === 'climber' || (entry.actor === 'terrain' && !['branch', 'roof'].includes(entry.action)) || (entry.actor === 'grass' && entry.action === 'natural');
     const framing = entry.actor === 'aquatic' && options.reference ? { x: 21.5, y: groundY - 0.75, width: 14, height: 11 } : entry.actor === 'aquatic' ? { x: 24, y: groundY + ((BED_KINDS as readonly string[]).includes(entry.action) ? -4.6 : (FLOAT_KINDS as readonly string[]).includes(entry.action) ? -0.2 : -2), width: 6, height: 3 } : !options.assembly && !groundResource && ['shrub', 'grass', 'cover', 'rock', 'desert', 'cave'].includes(entry.actor)
       ? { x: center.x, y: center.y, width: Math.max(3, extent.x * 1.4), height: Math.max(2, extent.y * 1.5) } : null;
     const buildingFrame = building ? { x: center.x, y: center.y, width: Math.max(1.5, Math.hypot(extent.x, extent.z) * 1.4), height: Math.max(1.2, extent.y * 1.4 + extent.z * 0.3) } : null;
     const inspection = createResourceInspection(level, groundY, options, buildingFrame ?? frame, groundResource,
-      entry.actor === 'tree' || (entry.actor === 'terrain' && entry.action === 'branch'), building !== null);
+      entry.actor === 'climber' && entry.action === 'woodland' || entry.actor === 'tree' || (entry.actor === 'terrain' && entry.action === 'branch'), building !== null);
     root.add(inspection.root); disposers.push(() => inspection.dispose());
-    world.tiles.setVegetation(groundResource || options.assembly ? options.vegetation : 'ground');
+    world.tiles.setVegetation(entry.actor === 'climber' ? 'ground' : groundResource || options.assembly ? options.vegetation : 'ground');
     world.tiles.root.visible = options.context || groundResource;
     world.caveWall.root.visible = options.context;
     world.decor.root.visible = options.assembly && (!options.composition || options.vegetation === 'all');

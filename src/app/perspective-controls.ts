@@ -1,12 +1,13 @@
 import * as THREE from 'three';
 import type { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { DEFAULT_BINDINGS, buildBindingLookup, type GameAction } from '../config/keybindings.ts';
-import { TUNING } from '../config/tuning.ts';
+import { TUNING, type Tuning } from '../config/tuning.ts';
 import { createFixedStepper } from '../core/fixed-step.ts';
 import { damp } from '../core/math.ts';
 import { getSkillWaitTicks } from '../entities/skill-wait.ts';
 import { createActionTracker } from '../input/action-map.ts';
 import { bindKeyboardMouse, type KeyboardMouseBinding } from '../input/keyboard-mouse.ts';
+import type { Body } from '../physics/body.ts';
 import type { DefinitionCollision } from '../physics/definition-collision.ts';
 import type { SolarPanelState } from '../physics/solar-panel.ts';
 import { createCameraRig } from '../render/camera-rig.ts';
@@ -21,15 +22,17 @@ import type { SceneSection } from './definition-scene-layout.ts';
 import { createPerspectivePlayer } from './perspective-player.ts';
 
 export function createPerspectiveControls(app: HTMLElement, stage: Stage, orbit: OrbitControls,
-  rig: GrassyRig, collision: DefinitionCollision, bounds: THREE.Box3, initial: SceneSection, viewAngles: readonly [number, number], solarPanels: readonly SolarPanelState[]) {
+  rig: GrassyRig, collision: DefinitionCollision, bounds: THREE.Box3, initial: SceneSection, viewAngles: readonly [number, number], solarPanels: readonly SolarPanelState[], unlimitedFlight = true,
+  options: { cameraMode: 'game' | 'inspection'; tuning: Tuning; applyForce?: (body: Body, dt: number) => void; airWind?: (body: Body) => number } = { cameraMode: 'inspection', tuning: TUNING }) {
   const world = { width: Math.ceil(bounds.max.x + 1), height: Math.ceil(bounds.max.y + 8) };
-  const player = createPerspectivePlayer(collision, { x: initial.playerX, y: initial.playerY }, world, solarPanels);
+  const player = createPerspectivePlayer(collision, { x: initial.playerX, y: initial.playerY }, world, solarPanels, unlimitedFlight, options);
   const stepper = createFixedStepper(TUNING.sim);
   const tracker = createActionTracker();
   const lookup = buildBindingLookup(DEFAULT_BINDINGS);
   const projectileViews = createGrassyProjectileViews();
   const projectiles = createViewRegistry(stage.scene, { codexShot: projectileViews.factory, bugShot: projectileViews.factory });
-  const follow = createCameraRig({ camera: stage.camera, tuning: TUNING, bounds: world,
+  const follow = createCameraRig({ camera: stage.camera, tuning: options.tuning,
+    bounds: { ...world, minX: bounds.min.x, width: bounds.max.x - bounds.min.x + 1 },
     viewport: () => stage.canvas.getBoundingClientRect() });
   const button = app.querySelector<HTMLButtonElement>('[data-play]')!;
   const cameraButton = app.querySelector<HTMLButtonElement>('[data-camera]')!;
@@ -72,9 +75,12 @@ export function createPerspectiveControls(app: HTMLElement, stage: Stage, orbit:
   rig.effects.setProjectilePreview(false);
 
   const aim = (): void => {
-    // 工具栏占用的高度只裁掉视野，保持每格的屏幕尺寸与全屏游戏一致。
+    if (options.cameraMode === 'game') {
+      orbit.target.set(stage.camera.position.x, stage.camera.position.y, 0);
+      return;
+    }
     const camera = stage.camera;
-    const distance = TUNING.camera.distance * stage.canvas.clientHeight / window.innerHeight;
+    const distance = options.tuning.camera.distance;
     const yaw = THREE.MathUtils.degToRad(angles[0]);
     const pitch = THREE.MathUtils.degToRad(angles[1]);
     orbit.target.set(follow.focus.x, follow.focus.y, 0);
@@ -100,6 +106,7 @@ export function createPerspectiveControls(app: HTMLElement, stage: Stage, orbit:
       ? following ? 'A / D 移动 · 按住空格无限飞行 · 松开滑翔 / S 下降 · R 上下车 · J / 右键 / 1 / 2 技能 · 中键旋转 · 滚轮缩放'
         : '正常游玩中 · 按住空格无限飞行 · S 下降 · R 上下车 · 中键旋转 · Shift + 中键平移 · 滚轮缩放 · 技能照常释放'
       : following ? '玩法已暂停 · 可切换自由镜头检查场景' : '玩法已暂停 · 左键旋转 · 右键平移 · 滚轮缩放';
+    if (!unlimitedFlight && playing) hint.textContent = 'A / D 移动 · 空格跳跃 / 飞行 · S 下穿平台 · 能量门自动感应 · 中键调整镜头';
   };
   const setFollowing = (enabled: boolean): void => {
     following = enabled;
@@ -138,22 +145,24 @@ export function createPerspectiveControls(app: HTMLElement, stage: Stage, orbit:
   app.addEventListener('keydown', stopKey);
 
   return {
+    get body() { return player.entity.body; },
     get playing(): boolean { return playing; },
     get following(): boolean { return following; },
-    setViewAngles(value: readonly [number, number]): void { angles = value; setFollowing(!current.comparison); },
+    setPlaying,
+    setFollowing,
+    setViewAngles(value: readonly [number, number]): void { angles = value; setFollowing(true); },
     select(section: SceneSection): void {
       current = section;
       player.teleport(section.playerX, section.playerY);
-      rig.root.position.set(section.playerX, section.playerY, 0);
+      rig.root.position.set(section.playerX, section.playerY, section.walkZ ? section.walkZ(section.playerX, section.playerY) : 0);
       rig.root.rotation.y = player.entity.facing * Math.PI / 2;
       projectiles.sync(player.projectiles, 0, 0);
       animator.reset(player.entity);
       animator.update(player.entity, 0, 0);
       updateHud(0);
-      // 家具候选仍使用其原有站位滑杆，避免替未确定的家具通行规则作决定。
-      button.disabled = !!section.comparison;
-      setPlaying(playing && !section.comparison);
-      setFollowing(following && !section.comparison);
+      button.disabled = false;
+      setPlaying(playing);
+      setFollowing(following);
     },
     observe(): void { setFollowing(false); },
     update(dt: number): void {
@@ -173,7 +182,8 @@ export function createPerspectiveControls(app: HTMLElement, stage: Stage, orbit:
       const body = entity.body;
       const x = THREE.MathUtils.lerp(body.prevX, body.x, alpha);
       const y = THREE.MathUtils.lerp(body.prevY, body.y, alpha);
-      rig.root.position.set(x, y, 0);
+      // 有落地家具的分区：中线行走，过家具前让、站上家具回到其深度中心，平滑过渡；其余分区固定 Z=0。
+      rig.root.position.set(x, y, current.walkZ ? damp(rig.root.position.z, current.walkZ(x, y), 12, dt) : 0);
       const p = entity.pelican!;
       if (p.moveX !== 0 || entity.attack !== undefined || p.humanCombat.action !== null || p.shotTicks >= 0) {
         rig.root.rotation.y = damp(rig.root.rotation.y, entity.facing * Math.PI / 2, DEFAULT_PELICAN_ANIM_TUNING.yawRate, dt);

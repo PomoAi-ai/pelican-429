@@ -8,7 +8,8 @@ export const BUILDING_KIT_VARIANTS = {
 export type BuildingKitKind = keyof typeof BUILDING_KIT_VARIANTS;
 export type BuildingKitVariant = (typeof BUILDING_KIT_VARIANTS)[BuildingKitKind][number];
 export type SolarVariant = (typeof BUILDING_KIT_VARIANTS.solar)[number];
-export type SolarMounting = 'inner' | 'center' | 'outer';
+/** 新定义的太阳能板以人物平面居中：深2与格子同深，深3外延到前后沿；BUILDING_KIT.solar.depth 仍是游戏现行的深1。 */
+export type SolarDepth = 2 | 3;
 
 export function isBuildingKitKind(value: string): value is BuildingKitKind {
   return Object.hasOwn(BUILDING_KIT_VARIANTS, value);

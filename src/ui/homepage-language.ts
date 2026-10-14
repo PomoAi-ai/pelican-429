@@ -132,6 +132,5 @@ export const HOME_ENGLISH: Record<string, string> = {
 
   // Asset gallery page
   '返回首页': 'Back to home', '资源展示导航': 'Asset gallery navigation',
-  '当前游戏的全部开发场景。查看角色与动作、场景资源、声音，或进入各个关卡自由探索。': 'Every development scene in the current game. Inspect characters and actions, scene assets, and sounds, or explore each level freely.',
-  '全部开发场景': 'All development scenes', '声音目录': 'Sound library',
+  '声音目录': 'Sound library',
 };

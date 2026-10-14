@@ -17,6 +17,7 @@ const treeEntry = (entry: ShowcaseEntry<string>): boolean => entry.actor === 'tr
 export function labCardText(card: ShowcaseCard, model: ShowcaseModel): { title: string; detail: string } {
   const entry = model.entry(card.entryId);
   const options = card.resource!;
+  if (entry.actor === 'climber') return { title: entry.label, detail: entry.description };
   if (options.composition) {
     const composition = TERRAIN_COMPOSITIONS.find(({ id }) => id === options.composition)!;
     return { title: `${composition.label} · ${entry.label}`, detail: `${composition.description} · 种子 ${options.seed} · ${layers[options.vegetation]}${options.platforms ? ' · 青线：可站立' : ''}` };

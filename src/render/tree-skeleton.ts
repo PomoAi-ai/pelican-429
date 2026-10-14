@@ -10,7 +10,7 @@
  *    不另起可站外观的叶团，看起来能站的冠团都有平台。递归细枝（深度 ≤ 1+twigDepth）只用于秃枝。
  *    总量受预算：枝 ≤ MAX_LIMBS、叶团 ≤ MAX_CLUSTERS（平台锚点优先，超预算 fail-fast）。
  *
- * 坐标：世界瓦片坐标（x 右、y 上），z 为深度（树中心 TREE_Z，前沿 ≤ TREE_FRONT_MAX，在鹈鹕之后）。
+ * 坐标：世界瓦片坐标（x 右、y 上），z 为深度（主干中心 TREE_Z 在鹈鹕之后；冠团在 [TREE_BACK_MIN, TREE_FRONT_MAX]）。
  * 确定性：mulberry32(visualSeed)。
  */
 import type { Rect } from '../core/math.ts';
@@ -24,8 +24,10 @@ import type { BarkTone, Span, TreeKindTemplate } from './tree-kinds.ts';
 
 /** 树的中心 z（鹈鹕在 z=0；地面方块顶面后沿见 tile-geometry.BLOCK_BACK_Z）。 */
 export const TREE_Z = -0.7;
-/** 树的最前沿 z 上限（鹈鹕在 z=0，厚度约 ±0.5）。 */
-export const TREE_FRONT_MAX = -0.1;
+/** 树冠的前沿 z 上限：冠团用满格子深度，前缘进入身体区，角色站进树冠时允许与叶团穿插（主干、根仍在身体区之后）。 */
+export const TREE_FRONT_MAX = 0.3;
+/** 树冠的后沿 z 下限：伸进后沿，树生长处不铺背景墙。 */
+export const TREE_BACK_MIN = -1.5;
 /** 平台上方叶团视觉顶的抬升（让脚落在叶团里而非悬空；= 逻辑层 CROWN_PAD_LIFT）。 */
 export const TOP_LIFT = CROWN_PAD_LIFT;
 /** 主干埋入地表以下的深度。 */
@@ -33,8 +35,9 @@ export const ROOT_DEPTH = 0.4;
 /** 每棵树的枝（不含主干）与叶团预算。 */
 export const MAX_LIMBS = 40;
 export const MAX_CLUSTERS = 22;
-/** 叶团 z 压扁与 x 拉伸。 */
-const Z_SQUASH = 0.6;
+/** 叶团 z 半深上限：冠深 [TREE_BACK_MIN, TREE_FRONT_MAX] 的一半，小叶团保持圆形，大叶团只压到放得下。 */
+const CLUSTER_Z_HALF = (TREE_FRONT_MAX - TREE_BACK_MIN) / 2;
+/** 叶团 x 拉伸。 */
 const CLUSTER_SX = 1.1;
 
 export interface Vec3 {
@@ -135,9 +138,12 @@ function fail(tree: TreeInstance, msg: string): never {
   throw new Error(`tree-skeleton: tree ${tree.id} (${tree.kind}) ${msg}`);
 }
 
-/** 叶团 z：树中心附近抖动，前沿不越过 TREE_FRONT_MAX。 */
+const clusterSz = (r: number): number => Math.min(1, CLUSTER_Z_HALF / r);
+
+/** 叶团 z：在整段冠深里前后散开，叶团整体留在 [TREE_BACK_MIN, TREE_FRONT_MAX] 内。 */
 function clusterZ(rng: Rng, r: number): number {
-  return Math.min(TREE_Z + (rng() - 0.5) * 0.5, TREE_FRONT_MAX - 0.02 - r * Z_SQUASH);
+  const half = r * clusterSz(r);
+  return clamp((TREE_BACK_MIN + TREE_FRONT_MAX) / 2 + (rng() - 0.5) * 1.2, TREE_BACK_MIN + half, TREE_FRONT_MAX - half);
 }
 
 function addLimb(ctx: Ctx, path: Vec3[], r0: number, r1: number, depth: number, platform: number | null = null): boolean {
@@ -157,7 +163,7 @@ function addCluster(ctx: Ctx, x: number, y: number, z: number, r: number, sx: nu
     return null;
   }
   const color = ctx.tpl.foliage === 'blossom' ? 'blossom' : 'leaf';
-  const c: LeafCluster = Object.freeze({ x, y, z, r, sx, sy, sz: Z_SQUASH, platform, tone: 1 + (ctx.rng() * 2 - 1) * 0.08, color });
+  const c: LeafCluster = Object.freeze({ x, y, z, r, sx, sy, sz: clusterSz(r), platform, tone: 1 + (ctx.rng() * 2 - 1) * 0.08, color });
   ctx.clusters.push(c);
   return c;
 }
@@ -621,7 +627,7 @@ function growPalm(ctx: Ctx): void {
   for (let k = 0; k < count; k++) {
     const th = phase + (2 * Math.PI * k) / count + (rng() - 0.5) * 0.3;
     const len = ctx.hw * (1.05 + 0.25 * rng());
-    const fdz = clamp(Math.sin(th) * len * 0.5, -1.1, TREE_FRONT_MAX - base.z - 0.12);
+    const fdz = clamp(Math.sin(th) * len * 0.5, TREE_BACK_MIN - base.z + 0.3, TREE_FRONT_MAX - base.z - 0.12);
     ctx.fronds.push(Object.freeze({ base, dx: Math.cos(th) * len * (Math.abs(Math.cos(th)) < 0.5 ? 0.75 : 1), dz: fdz, droop: len * (0.5 + 0.18 * rng()), width: 0.55 + 0.1 * rng() }));
   }
   const nf = pickInt(rng, tpl.fruits as Span);

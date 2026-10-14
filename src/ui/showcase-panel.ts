@@ -1,7 +1,7 @@
 import { isEnemyKind } from '../config/enemy-models.ts';
 import { isBuildingKitKind } from '../config/building-kit.ts';
 import { WIND_LABELS } from '../config/weather-rules.ts';
-import { GRASSY_ANIMATED_MODELS, GRASSY_FLIGHTS, isGrassyAttack } from '../config/grassy.ts';
+import { D1_ANIMATED_MODELS, D1_SHADINGS, GRASSY_ANIMATED_MODELS, GRASSY_FLIGHTS, isGrassyAttack } from '../config/grassy.ts';
 import { NPCS, npcModel } from '../config/npc.ts';
 import type { NpcForm, NpcKind } from '../config/npc.ts';
 import { showcaseEntry } from '../config/showcase.ts';
@@ -13,6 +13,7 @@ import { createLabControls, labCardText } from './lab-controls.ts';
 import { attachResourceCameraInteraction, createResourceCameraControls } from './resource-camera-controls.ts';
 import { createModelCameraControls } from './model-camera-controls.ts';
 import { translateShowcaseText } from './showcase-language.ts';
+import { createSceneDemoDirectory } from './scene-demo-directory.ts';
 
 export interface PreviewCardView {
   readonly root: HTMLElement;
@@ -113,15 +114,26 @@ export function createCard(parent: HTMLElement, card: ShowcaseCard, model: Showc
   const footer = el('div', 'sc-card-controls', root);
   const mainRow = el('div', 'sc-card-row', footer);
   if (sharedScene) mainRow.classList.add('sc-stage-view-row');
-  const modelVersions = sharedScene ? model.catalog.entries.filter((item) => item.actor === actor && (item.staticModel !== undefined || item.d1HairVisible === false)) : [];
-  const modelVersion = modelVersions.length ? select(mainRow, '模型版本', modelVersions.map((item) => [item.id, item.label]), (value) => model.changeAction(card, value)) : null;
-  const animatedEntry = modelVersion ? model.catalog.entries.find((item) => item.actor === actor && !modelVersions.includes(item)) : undefined;
+  const d1Character = actor === 'd1';
+  const modelVersions = sharedScene ? model.catalog.entries.filter((item) => item.actor === actor && item.staticModel !== undefined) : [];
+  const modelOptions: Array<readonly [string, string]> = modelVersions.map(item => [item.id, item.label]);
+  if (d1Character) modelOptions.unshift(...D1_ANIMATED_MODELS.map(item => [item.id, item.label] as const));
+  const modelVersion = modelOptions.length ? select(mainRow, '模型版本', modelOptions, (value) => {
+    const animated = d1Character ? D1_ANIMATED_MODELS.find(item => item.id === value) : undefined;
+    if (animated) {
+      model.update(card, { d1Variant: animated.id }, true);
+      if (model.entry(card.entryId).staticModel) model.changeAction(card, 'd1.idle');
+    } else model.changeAction(card, value);
+  }) : null;
+  const animatedEntry = !d1Character && modelVersion ? model.catalog.entries.find((item) => item.actor === actor && !modelVersions.includes(item)) : undefined;
   const animatedModel = animatedEntry ? document.createElement('option') : null;
   if (animatedModel) {
     animatedModel.textContent = '动画模型';
     animatedModel.value = animatedEntry!.id;
     modelVersion!.prepend(animatedModel);
   }
+  const hairVisible = d1Character ? button(mainRow, '显示头发', () => model.update(card, { d1HairVisible: !card.d1HairVisible }, true)) : null;
+  const shading = d1Character ? select(mainRow, '渲染风格', D1_SHADINGS.map(item => [item.id, item.label] as const), (value) => model.update(card, { d1Shading: D1_SHADINGS.find(item => item.id === value)!.id }, true)) : null;
   const environment = select(mainRow, '环境', [['surface', '地上'], ['underground', '地下']], (value) => model.update(card, { environment: value as ShowcaseCard['environment'] }, true));
   environment.parentElement!.hidden = sharedScene;
   let modelCamera: ReturnType<typeof createModelCameraControls> | null = null;
@@ -159,8 +171,9 @@ export function createCard(parent: HTMLElement, card: ShowcaseCard, model: Showc
   let actionSet = '';
   const refresh = (showDetails = false): void => {
     const entry = model.entry(card.entryId);
+    const animation = entry.grassyAnimation;
     const photon = entry.actor === 'human' && entry.action === 'photon_burst';
-    const humanWorld = equipmentCharacter && card.humanView === 'world';
+    const humanWorld = equipmentCharacter && animation !== undefined && card.humanView === 'world';
     const actorInfo = model.catalog.subjects.find((a) => a.id === entry.actor)!;
     const npc = entry.npcForm ? npcModel(entry.actor as NpcKind, entry.npcForm) : null;
     const caveAssembly = entry.actor === 'cave' && card.resource?.assembly === true;
@@ -196,7 +209,7 @@ export function createCard(parent: HTMLElement, card: ShowcaseCard, model: Showc
       actionList.replaceChildren();
       actionButtons.clear();
       const groups = new Map<string, HTMLElement>();
-      for (const item of model.catalog.entries.filter((e) => e.actor === entry.actor && e.npcForm === entry.npcForm && (!equipmentCharacter || (e.grassyAnimation!.variant === entry.grassyAnimation!.variant && (!(isGrassyAttack(e.grassyAnimation!.clip) || e.action === 'photon_burst') || e.grassyAnimation!.flight === entry.grassyAnimation!.flight))))) {
+      for (const item of model.catalog.entries.filter((e) => e.actor === entry.actor && e.npcForm === entry.npcForm && (!equipmentCharacter || (animation !== undefined && e.grassyAnimation !== undefined && e.grassyAnimation.variant === animation.variant && (!(isGrassyAttack(e.grassyAnimation.clip) || e.action === 'photon_burst') || e.grassyAnimation.flight === animation.flight))))) {
         if (sharedScene && (item.staticModel !== undefined || item.d1HairVisible === false)) continue;
         let choices = groups.get(item.group);
         if (!choices) {
@@ -211,22 +224,38 @@ export function createCard(parent: HTMLElement, card: ShowcaseCard, model: Showc
       }
     }
     if (animatedModel && !modelVersions.some((item) => item.id === card.entryId)) animatedModel.value = card.entryId;
-    if (modelVersion) modelVersion.value = card.entryId;
-    for (const [id, choice] of actionButtons) {
-      choice.classList.toggle('sc-active', id === card.entryId);
-      choice.setAttribute('aria-pressed', String(id === card.entryId));
+    if (modelVersion) modelVersion.value = d1Character && entry.d1Animation ? card.d1Variant : card.entryId;
+    if (hairVisible) {
+      hairVisible.disabled = entry.staticModel !== undefined;
+      hairVisible.classList.toggle('sc-active', card.d1HairVisible);
+      hairVisible.setAttribute('aria-pressed', String(card.d1HairVisible));
     }
-    if (humanView) { humanView.value = card.humanView; humanView.disabled = photon; }
+    if (shading) {
+      shading.disabled = entry.staticModel !== undefined;
+      shading.value = card.d1Shading;
+    }
+    for (const [id, choice] of actionButtons) {
+      const selected = id === card.entryId || d1Character && entry.d1Animation !== undefined && model.entry(id).d1Animation === entry.d1Animation;
+      choice.classList.toggle('sc-active', selected);
+      choice.setAttribute('aria-pressed', String(selected));
+    }
+    if (humanView) {
+      humanView.parentElement!.hidden = animation === undefined;
+      humanView.value = card.humanView; humanView.disabled = photon;
+    }
     if (attackMotion) {
       attackMotion.value = card.attackMotion;
-      attackMotion.parentElement!.hidden = !humanWorld || !(isGrassyAttack(entry.grassyAnimation!.clip) || photon) || entry.grassyAnimation!.flight !== undefined;
+      attackMotion.parentElement!.hidden = !humanWorld || !(isGrassyAttack(animation!.clip) || photon) || animation!.flight !== undefined;
     }
-    if (quality) quality.value = entry.grassyAnimation!.variant;
+    if (quality) {
+      quality.parentElement!.hidden = animation === undefined;
+      if (animation) quality.value = animation.variant;
+    }
     if (formControl) formControl.value = entry.npcForm!;
     if (transform) transform.textContent = entry.npcForm === 'human' ? '变为怪物' : '变为人形';
     if (flightControl) {
-      flightControl.parentElement!.hidden = !(isGrassyAttack(entry.grassyAnimation!.clip) || photon);
-      flightControl.value = entry.grassyAnimation!.flight ?? 'ground';
+      flightControl.parentElement!.hidden = animation === undefined || !(isGrassyAttack(animation.clip) || photon);
+      if (animation) flightControl.value = animation.flight ?? 'ground';
     }
     environment.value = card.environment;
     environmentBadge.textContent = card.environment === 'surface' ? '☀ 地上' : `◐ 地下${card.resource?.inspectionLight ? ' · 检视补光' : ''}`;
@@ -234,12 +263,12 @@ export function createCard(parent: HTMLElement, card: ShowcaseCard, model: Showc
     play.textContent = card.playing ? 'Ⅱ 暂停' : '▶ 播放';
     play.setAttribute('aria-label', card.playing ? '暂停此预览' : '播放此预览');
     loop.classList.toggle('sc-active', card.loop); loop.setAttribute('aria-pressed', String(card.loop));
-    const staticModel = entry.staticModel !== undefined || entry.actor === 'human' && !entry.grassyAnimation;
+    const staticModel = entry.staticModel !== undefined || entry.actor === 'human' && !entry.grassyAnimation || entry.actor === 'ruler';
     controls.hidden = staticModel;
     progress.hidden = staticModel;
     play.hidden = staticModel;
     actions.setAttribute('aria-label', entry.actor === 'human' ? equipmentCharacter ? '角色动作与精细度' : '历史模型版本选择' : isResource ? '资源变体选择' : '动作选择');
-    const supportsModelView = sharedScene || entry.staticModel !== undefined || entry.d1Animation !== undefined || isEnemyKind(entry.actor) || (entry.actor === 'human' && !humanWorld) || entry.actor === 'luma';
+    const supportsModelView = entry.actor !== 'ruler' && sharedScene || entry.staticModel !== undefined || entry.d1Animation !== undefined || isEnemyKind(entry.actor) || (entry.actor === 'human' && !humanWorld) || entry.actor === 'luma';
     if (supportsModelView && !modelCamera) modelCamera = createModelCameraControls(mainRow, sharedScene ? null : viewport, card, model);
     else if (!supportsModelView && modelCamera) {
       modelCamera.dispose(); modelCamera = null;
@@ -293,29 +322,14 @@ export function createShowcasePanel(parent: HTMLElement, model: ShowcaseModel, r
   const subject = isResource ? '资源' : isHistory ? '历史角色' : '角色';
   const action = isResource ? '变体' : '动作';
   const root = el('div', 'showcase-app', parent);
+  root.classList.toggle('scene-lab', model.catalog.mode === 'lab');
   const sidebar = el('aside', 'sc-sidebar', root);
+  if (model.catalog.mode === 'lab') sidebar.setAttribute('aria-label', '场景目录');
   const brand = el('div', 'sc-brand', sidebar);
   el('span', 'sc-brand-mark', brand, 'P');
   const brandText = el('div', '', brand);
-  el('strong', '', brandText, model.catalog.title);
+  el('strong', '', brandText, model.catalog.mode === 'lab' ? '场景目录' : model.catalog.title);
   el('span', '', brandText, 'PELICAN 429 · DEV STUDIO');
-  if (!isResource) {
-    const libraries = el('nav', 'sc-library-tabs', sidebar);
-    libraries.setAttribute('aria-label', '角色资料库导航');
-    for (const [historical, label, url] of [[false, '角色资料', './?mode=showcase'], [true, '历史资料', './?mode=showcase&library=history']] as const) {
-      const link = el('a', '', libraries, label); link.href = url;
-      if (isHistory === historical) link.setAttribute('aria-current', 'page');
-    }
-    const compare = el('a', '', libraries, '画质对比'); compare.href = './?mode=compare';
-  }
-  const references = el('nav', 'sc-library-tabs', sidebar);
-  references.setAttribute('aria-label', '设计资料');
-  const concepts = el('a', '', references, '基础概念定义'); concepts.href = './?mode=concepts';
-  const artwork = el('a', '', references, '原画资料库'); artwork.href = './?mode=art-library';
-  if (model.catalog.mode === 'resources') {
-    const room = el('a', '', references, '透视 · 单独场景'); room.href = './?mode=resources&scene=room';
-    const settlement = el('a', '', references, '透视 · 大场景'); settlement.href = './?mode=resources&scene=settlement';
-  }
   const demoViews = model.catalog.demos ? createDemoDirectory(sidebar, model) : [];
   const searchWrap = el('div', 'sc-search', sidebar);
   searchWrap.hidden = model.catalog.mode === 'lab';
@@ -355,6 +369,7 @@ export function createShowcasePanel(parent: HTMLElement, model: ShowcaseModel, r
   const noResults = el('p', 'sc-no-results', directory, `没有匹配的${subject}`);
   noResults.hidden = true;
   const sidebarBottom = el('div', 'sc-sidebar-bottom', sidebar);
+  sidebarBottom.hidden = model.catalog.mode === 'lab';
   button(sidebarBottom, '清空选择', () => model.clear());
   const back = el('a', '', sidebarBottom, '↗ 返回游戏'); back.href = returnUrl;
   const home = el('a', 'sc-home-link', sidebarBottom, '首页索引'); home.href = './';
@@ -409,7 +424,7 @@ export function createShowcasePanel(parent: HTMLElement, model: ShowcaseModel, r
     grid.style.setProperty('--sc-lab-columns', String(model.activeDemo?.id === 'tiles' ? 1 : model.activeDemo?.id === 'compositions' ? 2 : model.cards.length === 3 || model.cards.length === 6 ? 3 : Math.min(4, Math.max(1, model.cards.length))));
     toolbar.hidden = overview;
     if (model.catalog.mode === 'lab') {
-      for (const { id, button: choice } of demoViews) { choice.classList.toggle('sc-active', model.activeDemo?.id === id); choice.setAttribute('aria-pressed', String(model.activeDemo?.id === id)); }
+      for (const { id, button: choice } of demoViews) choice.setAttribute('aria-current', model.activeDemo?.id === id ? 'page' : 'false');
     }
     labControls?.refresh();
     cameraControls?.refresh();
@@ -483,6 +498,12 @@ function createResourceBrowser(parent: HTMLElement, model: ShowcaseModel) {
 }
 
 function createDemoDirectory(parent: HTMLElement, model: ShowcaseModel) {
+  if (model.catalog.mode === 'lab') return createSceneDemoDirectory(parent, model.activeDemo!.id, demo => {
+    model.showDemo(demo);
+    const params = new URLSearchParams(location.search);
+    params.set('demo', demo.id);
+    history.replaceState(null, '', `${location.pathname}?${params}`);
+  });
   const nav = el('nav', 'sc-directory sc-demo-directory', parent);
   nav.setAttribute('aria-label', '功能演示目录');
   return model.catalog.demos!.map((demo) => {

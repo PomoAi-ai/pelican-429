@@ -23,6 +23,7 @@
     <title>鹈鹕 429 / Pelican 429</title>
     <link rel="stylesheet" href="/src/ui/showcase.css" />
     <link rel="stylesheet" href="/src/ui/room-scene-preview.css" />
+    <link rel="stylesheet" href="/src/ui/residence.css" />
     <link rel="stylesheet" href="/src/ui/character-stage.css" />
     <link rel="stylesheet" href="/src/ui/character-editor.css" />
     <link rel="stylesheet" href="/src/ui/texture-compare.css" />
@@ -231,8 +232,7 @@
         background: rgba(0, 0, 0, 0.35); color: var(--fg); font: 12px/1.4 ui-monospace, 'SF Mono', Menlo, monospace; user-select: text;
       }
       .settings-seed:focus { outline: none; border-color: #ffe29a; }
-      .settings-language-select { flex: 1; min-width: 0; padding: 4px 8px; border-radius: 6px; border: 1px solid rgba(255, 255, 255, 0.2); background: #20252c; color: var(--fg); font: inherit; }
-      .settings-language-select:focus-visible { outline: 2px solid #ffe29a; outline-offset: 2px; }
+      .settings-row > .language-picker { flex: 1; min-width: 0; text-align: left; }
       .settings-new-world {
         flex: none; padding: 4px 10px; border-radius: 6px; border: 1px solid rgba(255, 210, 120, 0.6); background: rgba(255, 210, 120, 0.16);
         color: #ffe9b0; font: inherit; font-size: 12px; cursor: pointer;
@@ -260,6 +260,7 @@
     <link rel="stylesheet" href="/src/ui/homepage.css" />
     <link rel="stylesheet" href="/src/ui/site-pages.css" />
     <link rel="stylesheet" href="/src/ui/art-library.css" />
+    <link rel="stylesheet" href="/src/ui/scene-workspace.css" />
   </head>
   <body>
     <main id="entry-index" hidden>
@@ -372,7 +373,7 @@
       <footer class="home-footer">
         <div class="home-footer-top">
           <div><a class="home-footer-title" href="./?"><span class="home-brand-mark">P<span>429</span></span>鹈鹕 429</a><p>前沿模型，人人有权使用。</p></div>
-          <nav class="home-footer-links" aria-label="页脚导航"><a href="./?mode=story">进入游戏</a><a href="./?mode=intro&amp;opening=finale">序章动画</a><a href="./?mode=dev">资源展示</a><a href="https://github.com/PomoAi-ai/pelican-429" target="_blank" rel="noopener">GitHub</a><a href="https://x.com/grassy429" target="_blank" rel="noopener">X</a><a href="https://www.pomoai.ai" target="_blank" rel="sponsored noopener">赞助 PomoAI</a><a href="#home-community">联系作者</a></nav>
+          <nav class="home-footer-links" aria-label="页脚导航"><a href="./?mode=story">进入游戏</a><a href="./?mode=intro&amp;opening=finale">序章动画</a><a href="./?mode=concepts">设定资料</a><a href="https://github.com/PomoAi-ai/pelican-429" target="_blank" rel="noopener">GitHub</a><a href="https://x.com/grassy429" target="_blank" rel="noopener">X</a><a href="https://www.pomoai.ai" target="_blank" rel="sponsored noopener">赞助 PomoAI</a><a href="#home-community">联系作者</a></nav>
         </div>
         <div class="home-footer-bottom"><span><span class="home-status-dot"></span>主线制作中，下一段旅程正在发生。</span><span>pelican429.pomoai.vip · <a href="https://github.com/PomoAi-ai/pelican-429/blob/main/LICENSE" target="_blank" rel="noopener">Apache 2.0 + Commons Clause</a></span></div>
       </footer>
@@ -395,43 +396,12 @@
       </div>
     </main>
     <main id="dev-index" hidden>
-
-      <section class="home-section">
-        <p class="home-eyebrow">PELICAN 429 / DEV SCENES</p>
-        <h1>资源展示</h1>
-        <p class="dev-catalog-description">当前游戏的全部开发场景。查看角色与动作、场景资源、声音，或进入各个关卡自由探索。</p>
-        <nav id="dev-catalog" aria-label="全部开发场景"></nav>
-      </section>
+      <section class="home-section"></section>
     </main>
       <svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="icon-github" viewBox="0 0 16 16"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></symbol></svg>
       <header id="dev-navigation" class="home-header">
         <a class="home-brand" href="./" data-page="index" aria-label="鹈鹕 429 首页"><span class="home-brand-mark">P<span>429</span></span><span>PELICAN 429<small>一场越过边界的冒险</small></span></a>
         <nav class="home-nav dev-links" aria-label="网站导航"><a class="home-section-link" href="./#home-world">游戏介绍</a><a class="home-section-link" href="./#home-journey">章节</a><a class="home-section-link" href="./#home-cast">角色</a><a class="home-section-link" href="./#home-open-source">开源</a><a class="home-section-link" href="./#home-community">赞助</a><a class="home-primary-link home-index-link" href="./">首页</a>
-        <button type="button" class="home-resources-toggle" popovertarget="home-resources-menu"><span>资源</span><span aria-hidden="true"></span></button>
-        <div id="home-resources-menu" class="home-resources-menu" popover>
-          <a href="./?mode=catalog" data-page="catalog">资源总览</a>
-          <a href="./?mode=concepts" data-page="concepts">基础概念定义</a>
-          <a href="./?mode=art-library" data-page="art-library">原画资料库</a>
-          <a href="./?mode=showcase" data-page="showcase" id="dev-showcase-link">角色展示场</a>
-          <a href="./?mode=showcase&amp;library=history" data-page="history">历史资料</a>
-          <a href="./?mode=compare" data-page="compare">画质对比</a>
-          <a href="./?mode=resources" data-page="resources">场景资源</a>
-          <a href="./?mode=sounds" data-page="sounds">声音目录</a>
-        </div>
-        <button type="button" class="home-resources-toggle home-scenes-toggle" popovertarget="home-scenes-menu"><span>场景</span><span aria-hidden="true"></span></button>
-        <div id="home-scenes-menu" class="home-resources-menu" popover>
-          <a href="./?mode=intro&amp;opening=finale" data-page="intro">序章动画</a>
-          <a href="./?mode=lab" data-page="lab">场景功能展示</a>
-          <a href="./?mode=controls&amp;level=test" data-page="controls">手机展示</a>
-          <a href="./?mode=game&amp;level=boss-arena" data-page="boss-arena">Boss 场</a>
-          <a href="./?mode=game&amp;level=facility&amp;scene=fortress" data-page="chapter-fortress">01 山体堡垒</a>
-          <a href="./?mode=game&amp;level=facility&amp;scene=cathedral" data-page="chapter-cathedral">02 算力大教堂</a>
-          <a href="./?mode=game&amp;level=facility&amp;scene=abyss" data-page="chapter-abyss">03 光纤深渊</a>
-          <a href="./?mode=facility" data-page="facility">机房预览</a>
-          <a href="./?mode=dev" data-page="dev">全部开发场景</a>
-        </div>
-        <a class="home-primary-link" href="./?mode=resources&amp;scene=settlement" data-page="perspective">透视</a>
-        <a class="home-primary-link" href="./?mode=game" data-page="game">自由世界</a>
         <span class="home-play-control">
           <a class="home-nav-play" href="./?mode=story" data-page="story">开始游戏</a>
           <button type="button" class="home-resources-toggle home-play-toggle" popovertarget="home-play-menu" aria-label="更多游戏选项" hidden><span aria-hidden="true"></span></button>

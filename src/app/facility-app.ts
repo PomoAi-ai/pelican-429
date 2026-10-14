@@ -1,217 +1,188 @@
 import * as THREE from 'three';
+import { DEFAULT_BINDINGS, buildBindingLookup, type GameAction } from '../config/keybindings.ts';
+import { FACILITY_SCENES, type FacilitySceneId } from '../config/facility-scenes.ts';
+import { DEFAULT_PRECIP } from '../config/precip-rules.ts';
 import { TUNING } from '../config/tuning.ts';
-import { createStage } from '../render/stage.ts';
-import { loadGrassyAsset, disposeGrassyAssets } from '../render/grassy/grassy-rig.ts';
-import { FACILITY_SCENES, FACILITY_SCENE_IDS, parseFacilityScene } from '../config/facility-scenes.ts';
-import type { FacilitySceneId } from '../config/facility-scenes.ts';
-import { createFacilityEnvironment } from './facility-environment.ts';
-import { createFacilityPresentation, frameFacilityCamera } from './facility-presentation.ts';
-import { FACILITY_EN } from '../ui/facility-minimap.ts';
-import { getLanguage, onLanguageChange } from '../ui/language.ts';
+import { DEFAULT_WATER_PALETTE } from '../config/water-palettes.ts';
+import { createFixedStepper } from '../core/fixed-step.ts';
+import { sampleWorldTime } from '../core/world-clock.ts';
+import { getSkillWaitTicks } from '../entities/skill-wait.ts';
+import { createActionTracker } from '../input/action-map.ts';
+import { bindKeyboardMouse } from '../input/keyboard-mouse.ts';
+import { tileDefinitionCollision } from '../physics/tile-definition-collision.ts';
+import { createAiCityLighting } from '../render/ai-city-lighting.ts';
+import { createCameraRig } from '../render/camera-rig.ts';
+import { loadEnemyAsset } from '../render/enemy-rig.ts';
+import { loadGrassyAsset } from '../render/grassy/grassy-rig.ts';
+import { createPelicanRig } from '../render/pelican/pelican-rig.ts';
+import { computePrecipColumn } from '../render/precip-columns.ts';
+import { createResidenceWeather } from '../render/residence-weather.ts';
+import { levelGroundColumns } from '../render/surface-decor-view.ts';
+import { warmUpStage } from '../render/warm-up.ts';
+import { createWorldViews } from '../render/world-views.ts';
+import { createSimWorld, getPlayer, stepSim } from '../sim/sim-world.ts';
+import { setPrecipIntensity, setPrecipMode, setTornado, setTornadoCount, setTornadoPower } from '../sim/environment.ts';
+import { createWeaponHud } from '../ui/weapon-hud.ts';
+import { createFacilityLevel } from '../world/facility-level.ts';
+import { createFacilityPresentation, facilityGameTuning } from './facility-presentation.ts';
+import { createWorldLighting } from './lighting-wiring.ts';
+import { createSceneDemoStage } from './scene-demo-stage.ts';
+import { createEntityViews } from './scene-wiring.ts';
+import { waitSceneResource, yieldScene, type SceneMountContext } from './scene-mount.ts';
 
-function createFacilityPage(sceneId: FacilitySceneId): HTMLElement {
-  const scene = FACILITY_SCENES[sceneId];
-  const shots = [scene.overview, ...scene.shots];
-  const page = document.createElement('main');
-  page.className = 'facility-page';
-  page.innerHTML = `
-    <header class="facility-header">
-      <div><p class="facility-eyebrow">SCENE PREVIEW / ${scene.number}</p><h1>${scene.name}</h1><p class="facility-subtitle">${scene.subtitle}</p></div>
-      <nav class="facility-scene-list" aria-label="机房场景选择">
-        ${FACILITY_SCENE_IDS.map((id) => `<a href="./?mode=facility&amp;scene=${id}" ${id === sceneId ? 'aria-current="page"' : ''}><span>${FACILITY_SCENES[id].number}</span>${FACILITY_SCENES[id].name}</a>`).join('')}
-      </nav>
-      ${sceneId === 'original' ? '' : `<a class="facility-play" href="./?mode=game&amp;level=facility&amp;scene=${sceneId}">进入场景 · 自由探索</a>`}
-    </header>
-    <section class="facility-viewport" aria-label="机房内外场景">
-      <div class="facility-location"><span>实时场景预览</span><strong data-location>${scene.overview.caption}</strong></div>
-      <div class="facility-tools" role="group" aria-label="画面控制">
-        <button type="button" data-action="zoom-out" aria-label="缩小场景">−</button>
-        <output data-zoom aria-label="当前缩放">100%</output>
-        <button type="button" data-action="zoom-in" aria-label="放大场景">＋</button>
-        <button type="button" data-action="reset">复位</button>
-        <button type="button" data-action="motion" aria-pressed="false">暂停动画</button>
-      </div>
-      <p class="facility-hint">拖动平移 · 滚轮缩放 · 方向键移动 · Home 全景</p>
-    </section>
-    <footer class="facility-footer">
-      <nav class="facility-shots" aria-label="场景区域">
-        ${shots.map((shot, index) => `<button type="button" data-shot="${index}" aria-pressed="${index === 0}"><span>0${index}</span>${shot.label}</button>`).join('')}
-      </nav>
-      <label class="facility-travel"><span>横向查看</span><input type="range" min="0" max="${scene.width}" step="0.1" value="${scene.overview.x}" aria-label="镜头横向位置"/><span aria-hidden="true">↔</span></label>
-    </footer>`;
-  document.body.append(page);
-  return page;
-}
-
-/** 独立场景只装配共享资源和镜头，不依赖游戏或展示卡片的页面状态。 */
-export async function startFacility(onError: (error: unknown) => void): Promise<void> {
-  const sceneId = parseFacilityScene(new URLSearchParams(window.location.search));
-  const scene = FACILITY_SCENES[sceneId];
-  const shots = [scene.overview, ...scene.shots];
-  document.title = `${getLanguage() === 'en' ? FACILITY_EN[sceneId].name : scene.name} · ${getLanguage() === 'en' ? 'PELICAN 429' : '鹈鹕 429'}`;
-  const page = createFacilityPage(sceneId);
-  const viewport = page.querySelector<HTMLElement>('.facility-viewport')!;
-  const location = page.querySelector<HTMLElement>('[data-location]')!;
-  const zoomOutput = page.querySelector<HTMLOutputElement>('[data-zoom]')!;
-  const travel = page.querySelector<HTMLInputElement>('.facility-travel input')!;
-  const motion = page.querySelector<HTMLButtonElement>('[data-action="motion"]')!;
-  const buttons = [...page.querySelectorAll<HTMLButtonElement>('[data-shot]')];
-  const listeners = new AbortController();
-  const disposers: Array<() => void> = [() => page.remove(), () => listeners.abort()];
-  let frame = 0;
-  const dispose = (): void => {
-    cancelAnimationFrame(frame);
-    for (const release of disposers.splice(0).reverse()) release();
+/** 四个机房复用正式关卡、模拟世界、实体视图与机房镜头。 */
+export async function mountFacilityDemo(context: SceneMountContext, sceneId: FacilitySceneId): Promise<void> {
+  const tuning = facilityGameTuning();
+  const { page, stage, orbit, visibleView } = createSceneDemoStage(context, tuning);
+  const disposers: Array<() => void> = [];
+  context.onDispose(() => { for (const dispose of disposers.reverse()) dispose(); });
+  const level = createFacilityLevel(sceneId);
+  context.onDispose(() => level.fluid.dispose());
+  const world = createSimWorld({ level, tuning: TUNING, playerForm: 'human', windMode: 'breeze',
+    precipMode: 'manual', precipState: { rain: 'none', snow: 'none' } });
+  const dependencies = [loadGrassyAsset('game'), ...[...new Set(world.entities.flatMap(entity => entity.enemy ? [entity.enemy.kind] : []))].map(kind => loadEnemyAsset(kind))];
+  let loaded = 0;
+  context.progress('加载主角与机房角色', 0, dependencies.length);
+  await waitSceneResource(Promise.all(dependencies.map(promise => promise.then(() => {
+    context.progress('加载主角与机房角色', ++loaded, dependencies.length);
+  }))), context.signal);
+  context.progress('装配机房背景与设施');
+  const facility = await waitSceneResource(createFacilityPresentation(stage, sceneId).then(instance => {
+    if (context.signal.aborted) instance.dispose();
+    else context.onDispose(() => instance.dispose());
+    return instance;
+  }), context.signal);
+  context.signal.throwIfAborted();
+  await yieldScene(context.signal);
+  const ground = levelGroundColumns(level);
+  if (sceneId === 'original') stage.addBackdrop({ width: level.map.width, height: level.map.height, surface: ground });
+  const views = createWorldViews({ caveBackground: null, scene: stage.scene, level, fish: world.fish, ground,
+    wind: world.env.wind, pelican: () => getPlayer(world).body, actors: () => world.entities });
+  context.onDispose(() => views.dispose());
+  views.weather.setEnabled(false);
+  const pelicanRig = createPelicanRig({ scale: TUNING.render.pelicanScale });
+  context.onDispose(() => pelicanRig.dispose());
+  const entities = createEntityViews(stage, level, disposers, () => world.entities, views.treeRide, world.env.wind, pelicanRig, 'game');
+  const lighting = createWorldLighting(level, world, DEFAULT_WATER_PALETTE, disposers, tuning.render.lighting);
+  const sky = createAiCityLighting(stage);
+  sky.setEnabled(true);
+  context.onDispose(() => sky.dispose());
+  const collision = tileDefinitionCollision(level.map);
+  const precipSource = { map: level.map, fluid: level.fluid, deserts: level.deserts, desertFactor: DEFAULT_PRECIP.snow.desertFactor };
+  const weather = createResidenceWeather(stage, () => collision.solids, { minX: 0, width: level.map.width,
+    wind: world.env.wind,
+    precipColumns: columns => {
+      for (let x = 0; x < level.map.width; x++) {
+        const column = computePrecipColumn(precipSource, x);
+        columns.set([column.roof, column.stop, column.snow, column.water ? 1 : 0], x * 4);
+      }
+    } });
+  context.onDispose(() => weather.dispose());
+  const camera = createCameraRig({ camera: stage.camera, tuning, bounds: { width: level.map.width, height: level.map.height },
+    viewport: () => stage.canvas.getBoundingClientRect() });
+  const player = () => getPlayer(world);
+  camera.snapTo(player().body.x, player().body.y, player().facing);
+  const tracker = createActionTracker();
+  const binding = bindKeyboardMouse({ target: window, canvas: stage.canvas, doc: document, tracker, lookup: buildBindingLookup(DEFAULT_BINDINGS) });
+  context.onDispose(() => { binding.dispose(); tracker.releaseAll(); });
+  const cast = (action: GameAction): void => { tracker.press(action, 'keyboard', 'skill-button'); tracker.release(action, 'skill-button'); };
+  const projected = new THREE.Vector3();
+  const hud = createWeaponHud(page.querySelector('.room-preview-hud')!, { weapons: TUNING.weapons,
+    project(x, y) {
+      projected.set(x, y, 0).project(stage.camera);
+      const rect = stage.canvas.getBoundingClientRect();
+      return projected.z < -1 || projected.z > 1 ? null : { x: (projected.x + 1) * rect.width / 2, y: (1 - projected.y) * rect.height / 2 };
+    }, onTransform: () => cast('transform'), onSkill: cast });
+  context.onDispose(() => hud.dispose());
+  let playing = true;
+  let following = true;
+  const play = page.querySelector<HTMLButtonElement>('[data-play]')!;
+  const cameraButton = page.querySelector<HTMLButtonElement>('[data-camera]')!;
+  const syncControls = (): void => {
+    play.textContent = playing ? '暂停游玩' : '继续游玩';
+    play.setAttribute('aria-pressed', String(playing));
+    cameraButton.textContent = following ? '自由镜头' : '跟随玩家';
+    cameraButton.setAttribute('aria-pressed', String(following));
+    page.querySelector('[data-mode]')!.textContent = `${playing ? '游玩中' : '已暂停'} · ${following ? '跟随镜头' : '自由镜头'}`;
+    orbit.enabled = !following;
+    tracker.releaseAll();
+    stage.canvas.focus({ preventScroll: true });
   };
-  const signal = listeners.signal;
-  window.addEventListener('pagehide', dispose, { once: true, signal });
-  // 返回缓存页面不会重新执行入口，需重建已释放的 WebGL 场景。
-  window.addEventListener('pageshow', (event) => { if (event.persisted) window.location.reload(); });
-  try {
-    const stage = createStage(viewport, TUNING, { quality: 'high', antialias: 'smaa' });
-    disposers.push(() => stage.dispose());
-    disposers.push(disposeGrassyAssets);
-    await loadGrassyAsset('game');
-    if (signal.aborted) return;
-    const facility = await createFacilityPresentation(stage, sceneId);
-    if (signal.aborted) { facility.dispose(); return; }
-    disposers.push(() => facility.dispose());
-    stage.canvas.setAttribute('aria-label', '机房内外实时场景。方向键平移，加减号缩放，Home 查看全景。');
-    const environment = await createFacilityEnvironment(stage, sceneId, { enemies: true, grassyVariant: 'game' });
-    if (signal.aborted) { environment.dispose(); return; }
-    disposers.push(() => environment.dispose());
-    const target = { x: scene.overview.x as number, y: scene.overview.y as number, zoom: 1 };
-    const current = { ...target };
-    let paused = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    let time = 0;
-    let previous = performance.now();
-    let drag: { id: number; x: number; y: number } | null = null;
-    const baseHeight = (): number => Math.max(scene.overview.height, scene.overview.width / stage.camera.aspect);
-    const updateMotion = (): void => {
-      motion.textContent = getLanguage() === 'en' ? paused ? 'Play animation' : 'Pause animation' : paused ? '播放动画' : '暂停动画';
-      motion.setAttribute('aria-pressed', String(paused));
-    };
-    const freeView = (): void => {
-      buttons.forEach((button) => button.setAttribute('aria-pressed', 'false'));
-      location.textContent = getLanguage() === 'en' ? 'Free view' : '自由查看';
-    };
-    const zoom = (factor: number): void => {
-      target.zoom = THREE.MathUtils.clamp(target.zoom * factor, 0.75, 5);
-      freeView();
-    };
-    const shot = (index: number): void => {
-      const chosen = shots[index]!;
-      target.x = chosen.x; target.y = chosen.y;
-      target.zoom = index === 0 ? 1 : THREE.MathUtils.clamp(baseHeight() / Math.max(chosen.height, chosen.width / stage.camera.aspect), 0.75, 5);
-      location.textContent = getLanguage() === 'en' ? index === 0 ? FACILITY_EN[sceneId].overview : FACILITY_EN[sceneId].shots[index - 1]![1] : chosen.caption;
-      buttons.forEach((button, i) => button.setAttribute('aria-pressed', String(i === index)));
-    };
-    const pan = (x: number, y: number): void => {
-      target.x = THREE.MathUtils.clamp(target.x + x, 0, scene.width);
-      target.y = THREE.MathUtils.clamp(target.y + y, 5, scene.height);
-      freeView();
-    };
-    const syncLanguage = (): void => {
-      const en = getLanguage() === 'en';
-      const copy = FACILITY_EN[sceneId];
-      document.title = `${en ? copy.name : scene.name} · ${en ? 'PELICAN 429' : '鹈鹕 429'}`;
-      page.querySelector('h1')!.textContent = en ? copy.name : scene.name;
-      page.querySelector('.facility-subtitle')!.textContent = en ? copy.subtitle : scene.subtitle;
-      page.querySelector('.facility-scene-list')!.setAttribute('aria-label', en ? 'Choose data center scene' : '机房场景选择');
-      page.querySelectorAll('.facility-scene-list a').forEach((link, index) => {
-        const id = FACILITY_SCENE_IDS[index]!;
-        link.lastChild!.textContent = en ? FACILITY_EN[id].name : FACILITY_SCENES[id].name;
-      });
-      const play = page.querySelector('.facility-play');
-      if (play) play.textContent = en ? 'Enter scene · Free exploration' : '进入场景 · 自由探索';
-      page.querySelector('.facility-viewport')!.setAttribute('aria-label', en ? 'Data center interior and exterior' : '机房内外场景');
-      page.querySelector('.facility-location span')!.textContent = en ? 'Live scene preview' : '实时场景预览';
-      page.querySelector('.facility-tools')!.setAttribute('aria-label', en ? 'View controls' : '画面控制');
-      page.querySelector('[data-action="zoom-out"]')!.setAttribute('aria-label', en ? 'Zoom out' : '缩小场景');
-      zoomOutput.setAttribute('aria-label', en ? 'Current zoom' : '当前缩放');
-      page.querySelector('[data-action="zoom-in"]')!.setAttribute('aria-label', en ? 'Zoom in' : '放大场景');
-      page.querySelector('[data-action="reset"]')!.textContent = en ? 'Reset' : '复位';
-      page.querySelector('.facility-hint')!.textContent = en ? 'Drag to pan · Scroll to zoom · Arrow keys to move · Home for overview' : '拖动平移 · 滚轮缩放 · 方向键移动 · Home 全景';
-      page.querySelector('.facility-shots')!.setAttribute('aria-label', en ? 'Scene areas' : '场景区域');
-      buttons.forEach((button, index) => { button.lastChild!.textContent = en ? index === 0 ? 'Overview' : copy.shots[index - 1]![0] : shots[index]!.label; });
-      page.querySelector('.facility-travel span')!.textContent = en ? 'Pan horizontally' : '横向查看';
-      travel.setAttribute('aria-label', en ? 'Horizontal camera position' : '镜头横向位置');
-      stage.canvas.setAttribute('aria-label', en ? 'Live data center scene. Arrow keys to pan, plus and minus to zoom, Home for overview.' : '机房内外实时场景。方向键平移，加减号缩放，Home 查看全景。');
-      const active = buttons.findIndex((button) => button.getAttribute('aria-pressed') === 'true');
-      location.textContent = active < 0 ? en ? 'Free view' : '自由查看' : en ? active === 0 ? copy.overview : copy.shots[active - 1]![1] : shots[active]!.caption;
-      updateMotion();
-    };
-    syncLanguage();
-    disposers.push(onLanguageChange(syncLanguage));
-    buttons.forEach((button, index) => button.addEventListener('click', () => shot(index), { signal }));
-    page.querySelector('[data-action="zoom-in"]')!.addEventListener('click', () => zoom(1.2), { signal });
-    page.querySelector('[data-action="zoom-out"]')!.addEventListener('click', () => zoom(1 / 1.2), { signal });
-    page.querySelector('[data-action="reset"]')!.addEventListener('click', () => shot(0), { signal });
-    motion.addEventListener('click', () => { paused = !paused; updateMotion(); }, { signal });
-    travel.addEventListener('input', () => { target.x = travel.valueAsNumber; freeView(); }, { signal });
-    stage.canvas.addEventListener('pointerdown', (event) => {
-      if (event.button !== 0) return;
-      drag = { id: event.pointerId, x: event.clientX, y: event.clientY };
-      stage.canvas.setPointerCapture(event.pointerId);
-      stage.canvas.focus({ preventScroll: true });
-    }, { signal });
-    stage.canvas.addEventListener('pointermove', (event) => {
-      if (!drag || drag.id !== event.pointerId) return;
-      const unit = baseHeight() / current.zoom / viewport.clientHeight;
-      pan((drag.x - event.clientX) * unit, (event.clientY - drag.y) * unit);
-      drag.x = event.clientX; drag.y = event.clientY;
-    }, { signal });
-    stage.canvas.addEventListener('lostpointercapture', () => { drag = null; }, { signal });
-    stage.canvas.addEventListener('pointerup', (event) => {
-      if (drag?.id === event.pointerId) stage.canvas.releasePointerCapture(event.pointerId);
-    }, { signal });
-    stage.canvas.addEventListener('wheel', (event) => {
-      event.preventDefault();
-      zoom(Math.exp(-THREE.MathUtils.clamp(event.deltaY, -100, 100) * 0.002));
-    }, { passive: false, signal });
-    stage.canvas.addEventListener('keydown', (event) => {
-      const step = event.shiftKey ? 5 : 1.5;
-      switch (event.key) {
-        case 'ArrowLeft': pan(-step, 0); break;
-        case 'ArrowRight': pan(step, 0); break;
-        case 'ArrowUp': pan(0, step); break;
-        case 'ArrowDown': pan(0, -step); break;
-        case '+': case '=': zoom(1.2); break;
-        case '-': zoom(1 / 1.2); break;
-        case 'Home': shot(0); break;
-        default: return;
-      }
-      event.preventDefault();
-    }, { signal });
-    document.addEventListener('visibilitychange', () => { previous = performance.now(); }, { signal });
-    updateMotion();
-    const draw = (now: number): void => {
-      try {
-        // 恢复可见时，排队中的 rAF 时间戳可能早于 visibilitychange 的时钟重置。
-        const dt = THREE.MathUtils.clamp((now - previous) / 1000, 0, 0.05);
-        previous = now;
-        const blend = 1 - Math.exp(-dt * 12);
-        current.x += (target.x - current.x) * blend;
-        current.y += (target.y - current.y) * blend;
-        current.zoom += (target.zoom - current.zoom) * blend;
-        const view = frameFacilityCamera(stage, current.x, current.y, baseHeight() / current.zoom);
-        const animationDt = paused || document.hidden ? 0 : dt;
-        time += animationDt;
-        environment.update(view, time, animationDt);
-        facility.update(time);
-        stage.render();
-        zoomOutput.value = `${Math.round(current.zoom * 100)}%`;
-        if (document.activeElement !== travel) travel.value = String(current.x);
-        frame = requestAnimationFrame(draw);
-      } catch (error) {
-        dispose();
-        onError(error);
-      }
-    };
-    document.getElementById('loading')!.hidden = true;
-    frame = requestAnimationFrame(draw);
-  } catch (error) {
-    dispose();
-    throw error;
-  }
+  const stepper = createFixedStepper(TUNING.sim);
+  play.addEventListener('click', () => { playing = !playing; stepper.reset(); syncControls(); }, { signal: context.signal });
+  cameraButton.addEventListener('click', () => {
+    following = !following;
+    if (following) camera.snapTo(player().body.x, player().body.y, player().facing);
+    else orbit.target.set(camera.focus.x, camera.focus.y, 0);
+    syncControls();
+  }, { signal: context.signal });
+  page.querySelector('[data-reset-player]')!.addEventListener('click', () => {
+    Object.assign(player().body, { x: level.spawn.x, y: level.spawn.y, prevX: level.spawn.x, prevY: level.spawn.y, vx: 0, vy: 0 });
+    camera.snapTo(player().body.x, player().body.y, player().facing);
+    following = true; syncControls();
+  }, { signal: context.signal });
+  page.querySelector('.room-preview-hint')!.textContent = 'A / D 移动 · 空格跳跃 / 飞行 · S 下穿 · F 变身 · R 骑行 · J / 右键 / 1 / 2 技能';
+  page.querySelector('[data-sample-label]')!.textContent = FACILITY_SCENES[sceneId].name;
+  syncControls();
+  let previous = performance.now();
+  let frame = 0;
+  let lightFrame = 0;
+  let tornadoEnabled = false;
+  context.onDispose(() => cancelAnimationFrame(frame));
+  const update = (dt: number): void => {
+    context.world.clock.update(dt);
+    const settings = context.world.weatherConfig;
+    if (world.env.wind.mode !== settings.wind) world.env.wind.setMode(settings.wind);
+    world.env.wind.setPower(settings.windPower);
+    world.env.wind.setDirection(settings.windDirection);
+    if (world.env.mode !== settings.precip) setPrecipMode(world, settings.precip);
+    if (world.env.manual.rain !== settings.rain) setPrecipIntensity(world, 'rain', settings.rain);
+    if (world.env.manual.snow !== settings.snow) setPrecipIntensity(world, 'snow', settings.snow);
+    world.env.rainPower = settings.rainPower; world.env.snowPower = settings.snowPower;
+    if (world.env.tornadoPower !== settings.tornadoPower) setTornadoPower(world, settings.tornadoPower);
+    if (world.env.tornadoCount !== settings.tornadoCount) setTornadoCount(world, settings.tornadoCount);
+    if (tornadoEnabled !== settings.tornado) { setTornado(world, settings.tornado); tornadoEnabled = settings.tornado; }
+    const previousTick = world.tick;
+    const alpha = playing ? stepper.advance(dt, () => {
+      const pointer = binding.pointer;
+      const aim = pointer.inside ? camera.screenToWorld(pointer.clientX, pointer.clientY, { x: 0, y: 0 }) : null;
+      stepSim(world, tracker.consume(aim));
+    }) : 0;
+    const time = world.tick * TUNING.sim.step;
+    const simulationDt = (world.tick - previousTick) * TUNING.sim.step;
+    const body = player().body;
+    if (following) camera.update(THREE.MathUtils.lerp(body.prevX, body.x, alpha), THREE.MathUtils.lerp(body.prevY, body.y, alpha), player().facing, dt);
+    else orbit.update();
+    const view = following ? camera.visibleRect(4) : visibleView();
+    const events = world.events.drain();
+    views.handleEvents(events); entities.orbFx.handleEvents(events); entities.projectileFx.handleEvents(events); hud.handleEvents(events);
+    if (view) views.update(view, time, simulationDt, alpha);
+    entities.views.sync(world.entities, alpha, playing ? dt : 0);
+    entities.orbs.update(world.entities, alpha); entities.orbFx.update(dt); entities.projectileFx.update(world.entities, alpha, dt);
+    lighting.updateAura(player(), alpha, dt); lighting.worldLight.update(stage.scene, lightFrame++);
+    facility.update(time);
+    const worldTime = sampleWorldTime(context.world.clock.hour);
+    weather.setWeather(context.world.weather);
+    weather.setSettings(settings);
+    const atmosphere = weather.update(time, simulationDt, worldTime, world.env);
+    sky.setWorldTime(worldTime, atmosphere); sky.update();
+    hud.update({ entities: world.entities, playerId: world.playerId, frameDt: dt,
+      skillWaitTicks: [0, 1, 2, 3].map(index => getSkillWaitTicks(player(), index, TUNING, world.photon.cooldownTicks, world.photon.activeTicks)),
+      photonCooldownTicks: world.photon.cooldownTicks, photonChargeTicks: world.photon.chargeTicks, photonActiveTicks: world.photon.activeTicks, transformUnlocked: true });
+  };
+  update(0);
+  context.progress('准备机房着色器与首帧');
+  await warmUpStage(stage, [], context.signal);
+  context.signal.throwIfAborted();
+  stage.render();
+  const draw = (now: number): void => {
+    if (context.signal.aborted) return;
+    try {
+      update(Math.max(0, Math.min((now - previous) / 1000, .05)));
+      previous = now;
+      stage.render();
+      frame = requestAnimationFrame(draw);
+    } catch (error) { context.reportError(error); }
+  };
+  frame = requestAnimationFrame(draw);
 }
