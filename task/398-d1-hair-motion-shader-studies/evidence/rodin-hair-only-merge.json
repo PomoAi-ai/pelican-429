@@ -1,0 +1,36 @@
+{
+  "baseline": "public/characters/human/render-lab/d1-outfit-baseline.web-1k.glb",
+  "donor": "public/characters/human/render-lab/d1-outfit-rodin.web-1k.glb",
+  "output": "public/characters/human/render-lab/d1-outfit-rodin-hair.web-1k.glb",
+  "outputBytes": 6745352,
+  "outputSha256": "327eba11ff0c4a56f49f658560d83984ebaea02e863b6bb8eca6878d7375b434",
+  "hairCoordinateScale": 1.0002980956999845,
+  "hairVertices": 10049,
+  "headJointIndex": 17,
+  "hairJointWeights": "head=1",
+  "oldBinaryPrefixIdentical": true,
+  "oldNodesSkinsAnimationsScenesIdentical": true,
+  "oldAccessorsViewsMaterialsTexturesImagesSamplersPreserved": true,
+  "allNonHairMeshesIdentical": true,
+  "appendedDataLosslessRoundtrip": true,
+  "hairAccessorBounds": {
+    "min": [
+      -0.5611616969108582,
+      1.9275678396224976,
+      -0.5806818008422852
+    ],
+    "max": [
+      0.5606719255447388,
+      3.1001482009887695,
+      0.5759374499320984
+    ]
+  },
+  "runtimeValidation": {
+    "height": 3.1001480783080018,
+    "footBottom": 1.4981705248684542e-7,
+    "heightContractPass": true,
+    "allHairVerticesBoundToOldHead": true,
+    "generatedGaitTracksExactlyEqualToBaseline": true,
+    "originalClipsExactlyEqualToBaseline": true
+  }
+}

@@ -10,7 +10,13 @@ export default defineConfig(({ command, mode }) => ({
   define: { 'import.meta.env.VITE_APP_VERSION': JSON.stringify(JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8')).version) },
   server: { host: '127.0.0.1', port: 5174 },
   preview: { host: '127.0.0.1', port: 4174 },
-  build: { target: 'es2022', copyPublicDir: mode === 'full' },
+  build: {
+    target: 'es2022', copyPublicDir: mode === 'full',
+    ...(mode === 'full' ? { rolldownOptions: { input: {
+      main: fileURLToPath(new URL('./index.html', import.meta.url)),
+      renderLab: fileURLToPath(new URL('./render-lab.html', import.meta.url)),
+    } } } : {}),
+  },
   plugins: command === 'build' && mode !== 'full' ? [{
     name: 'release-assets',
     generateBundle() {

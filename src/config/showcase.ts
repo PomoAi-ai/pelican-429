@@ -2,8 +2,8 @@ import { ENEMY_RULES } from './enemy-rules.ts';
 import type { EnemyKind } from './enemy-rules.ts';
 import { ENEMY_KINDS, ENEMY_MODEL_DIRS } from './enemy-models.ts';
 import type { ResourceOptions } from './resource-showcase.ts';
-import { D1_ACTIONS, D1_MODELS, GRASSY_ACTIONS, GRASSY_ANIMATED_MODELS, GRASSY_MODELS, GRASSY_FLIGHTS, isGrassyAttack } from './grassy.ts';
-import type { D1Action, GrassyAction, GrassyAnimatedVariant, GrassyFlight, GrassyModelVariant } from './grassy.ts';
+import { D1_ACTIONS, D1_MODELS, GRASSY_ACTIONS, GRASSY_ANIMATED_MODELS, GRASSY_CUSTOMIZATION_MODELS, GRASSY_MODELS, GRASSY_FLIGHTS, isGrassyAttack } from './grassy.ts';
+import type { D1AnimatedVariant, D1Action, D1Shading, GrassyAction, GrassyAnimatedVariant, GrassyFlight, GrassyModelVariant } from './grassy.ts';
 import { LUMA_ACTIONS } from './luma.ts';
 import { FISH_SPECIES } from './fish-appearance.ts';
 import type { FishSpeciesId } from './fish-appearance.ts';
@@ -11,7 +11,7 @@ import { NPCS, NPC_ACTIONS } from './npc.ts';
 import type { NpcKind, NpcForm } from './npc.ts';
 
 export type ShowcaseEnvironment = 'surface' | 'underground';
-export type ShowcaseActor = 'pelican' | 'human' | 'd1' | 'luma' | 'dummy' | 'fish' | NpcKind | EnemyKind;
+export type ShowcaseActor = 'pelican' | 'human' | 'd1' | 'luma' | 'dummy' | 'fish' | 'ruler' | NpcKind | EnemyKind;
 
 export const MODEL_SHOWCASE_VIEWS = {
   threeQuarter: { label: '三分之四', yaw: Math.PI / 4 },
@@ -41,18 +41,29 @@ export interface ShowcaseEntry<Actor extends string = ShowcaseActor> {
 
 export const MAX_SHOWCASE_CARDS = 8;
 
+/** 展示场右侧原画对比：各 D1 变体默认显示的原画，路径取自原画资料库条目。 */
+const D1_BASE_ARTWORK = './art-library/d1-base/d1-base-slim-legs-v1.png';
+export const D1_ARTWORK: Readonly<Record<D1AnimatedVariant, string>> = {
+  detailed: D1_BASE_ARTWORK,
+  game: D1_BASE_ARTWORK,
+  light: D1_BASE_ARTWORK,
+  outfit: './art-library/d1-seven/character-seven-views-slim-legs-v1.png',
+  equipped: './art-library/d1-equipped/d1-equipped-slim-legs-v1.png',
+};
+
 export const SHOWCASE_ACTORS: ReadonlyArray<{ id: ShowcaseActor; name: string; image: string; description: string; defaultEntry: string }> = [
-  { id: 'pelican', name: '鹈鹕', image: './resourcesprivate-source/pelican.webp', description: '原画、参考图与实时模型', defaultEntry: 'pelican.idle' },
-  { id: 'human', name: 'Grassy · 人类', image: './resourcesprivate-source/grassy.webp', description: '正式装备角色 · 骑行、键盘战斗与推进飞行', defaultEntry: 'human.rodin-animated-game.idle' },
-  { id: 'd1', name: 'D1 · 女性角色', image: './characters/human/customization/d1-rodin-front.png', description: '口鼻与暖肤色修正版 · 待机、行走、跑步、跳跃', defaultEntry: 'd1.idle' },
+  { id: 'pelican', name: '鹈鹕', image: './resources/home/pelican.webp', description: '原画、参考图与实时模型', defaultEntry: 'pelican.idle' },
+  { id: 'human', name: 'Grassy · 人类', image: './resources/home/grassy.webp', description: '正式装备角色 · 骑行、键盘战斗与推进飞行', defaultEntry: 'human.rodin-animated-game.idle' },
+  { id: 'd1', name: 'D1 · 女性角色', image: './characters/human/customization/d1-base-front.png', description: '无外服赤脚基础版 · 独立头发与已确认头部 · 待机、行走、跑步、跳跃', defaultEntry: 'd1.idle' },
   { id: 'luma', name: '光子', image: './characters/luma/portrait.jpg', description: '飞行微光 · 自由游弋与环境照明', defaultEntry: 'luma.idle' },
   ...(Object.keys(NPCS) as NpcKind[]).map((id) => ({
     id, name: `${NPCS[id].name} · ${NPCS[id].title}`, image: `./characters/${id}/render-front.png`,
     description: NPCS[id].description, defaultEntry: `${id}.monster.idle`,
   })),
   { id: 'dummy', name: '训练假人', image: './showcase/dummy.jpg', description: '受击、射击与漂浮', defaultEntry: 'dummy.idle' },
-  ...ENEMY_KINDS.map((id) => ({ id, name: ENEMY_RULES[id].name, image: `./resourcesprivate-source/${ENEMY_MODEL_DIRS[id].split('/').at(-1)}.webp`, description: ENEMY_RULES[id].skills.map((skill) => skill.name).join(' · '), defaultEntry: `${id}.idle` })),
+  ...ENEMY_KINDS.map((id) => ({ id, name: ENEMY_RULES[id].name, image: `./resources/home/${ENEMY_MODEL_DIRS[id].split('/').at(-1)}.webp`, description: ENEMY_RULES[id].skills.map((skill) => skill.name).join(' · '), defaultEntry: `${id}.idle` })),
   { id: 'fish', name: '鱼类', image: './showcase/fish.jpg', description: '七种鱼的外形、游动与扑腾', defaultEntry: 'fish.species.minnow' },
+  { id: 'ruler', name: '标尺', image: './concepts/character-tile-scale.png', description: '橙色格子尺与紫色 3.3 头身参照尺 · 1 格 = 1 世界单位，拖到角色旁对比尺寸', defaultEntry: 'ruler.standard' },
 ];
 
 const entries = (actor: ShowcaseActor, group: string, rows: ReadonlyArray<readonly [string, string, string, number]>): ShowcaseEntry[] =>
@@ -62,6 +73,7 @@ export const SHOWCASE_ENTRIES: readonly ShowcaseEntry[] = [
   ...D1_ACTIONS.map(action => ({ ...action, id: `d1.${action.id}`, actor: 'd1' as const, action: action.id, group: '基础动作', d1Animation: action.id })),
   { id: 'd1.bare-head', actor: 'd1', action: 'idle', label: '头部检查 · 隐藏头发', description: '隐藏独立发型，查看新脸型、眼睑与鼻唇曲面。', seconds: 3.2, loop: true, group: '模型检查', d1Animation: 'idle', d1HairVisible: false },
   ...D1_MODELS.map((model) => ({ id: `d1.${model.id.replace('d1-rodin-', '')}`, actor: 'd1' as const, action: model.id, label: model.label, description: model.description, seconds: 0, group: '模型检查', staticModel: model.id })),
+  ...GRASSY_CUSTOMIZATION_MODELS.map((model) => ({ id: `human.${model.id}`, actor: 'human' as const, action: model.id, label: model.label, description: model.description, seconds: 0, group: '模型检查', staticModel: model.id })),
   ...GRASSY_ANIMATED_MODELS.flatMap((model) => GRASSY_ACTIONS.map((action) => ({
     id: `human.rodin-animated-${model.id}.${action.id}`, actor: 'human' as const, action: action.id,
     label: action.label, group: action.id === 'ride' ? '自行车' : ['keyboard_smash', 'codex_attack', 'bug_attack', 'server_overload'].includes(action.id) ? '键盘战斗' : ['takeoff', 'hover', 'fly_forward', 'fly_fast', 'land'].includes(action.id) ? '推进飞行' : '基础动作',
@@ -146,6 +158,9 @@ export const SHOWCASE_ENTRIES: readonly ShowcaseEntry[] = [
     ['stranded', '搁浅扑腾', '岸边蹦跳、侧翻与尾巴扭动', 3],
     ['return', '重新入水', '岸边扑腾后回到水中', 4],
   ]),
+  ...entries('ruler', '尺寸参照', [
+    ['standard', '角色标尺', '橙色格子尺 0–4 格，紫色 3.3 头身参照尺；共用地面与 3.1 格外观高顶线', 0],
+  ]),
 ];
 
 export function showcaseEntry(id: string): ShowcaseEntry {
@@ -169,6 +184,9 @@ export interface ShowcaseCard {
   manual: boolean;
   humanView: 'world' | 'model';
   attackMotion: 'still' | 'walk' | 'run';
+  d1Variant: D1AnimatedVariant;
+  d1HairVisible: boolean;
+  d1Shading: D1Shading;
   /** 配置变化后重建该卡片的演示，其他卡片保持原进度。 */
   revision: number;
   npcTransformationRevision: number;
@@ -193,13 +211,16 @@ export interface ShowcaseCatalog {
   readonly entries: readonly ShowcaseEntry<string>[];
 }
 
-const currentEntries = SHOWCASE_ENTRIES.filter((entry) => entry.actor !== 'human' || entry.grassyAnimation);
-const historyEntries = SHOWCASE_ENTRIES.filter((entry) => entry.actor === 'human' && !entry.grassyAnimation);
+const currentEntries = SHOWCASE_ENTRIES.filter((entry) => entry.actor !== 'human' || entry.grassyAnimation || entry.staticModel);
+const historyEntries = SHOWCASE_ENTRIES.filter((entry) => entry.actor === 'human' && !entry.grassyAnimation && !entry.staticModel);
 
 export const CHARACTER_CATALOG: ShowcaseCatalog = {
   mode: 'showcase', title: '角色展示场', subjects: SHOWCASE_ACTORS, entries: currentEntries,
   maxCards: MAX_SHOWCASE_CARDS,
   demos: [{
+    id: 'grassy-modular', title: 'Grassy · 分件基础版', description: '独立头部、头发、身体、贴身 T 恤与短裤，在游戏场景中检查比例和材质；静态模型，尚未绑定骨骼。',
+    cards: [{ entryId: 'human.grassy-modular-static' }],
+  }, {
     id: 'd1-modular', title: 'D1 · 新头部与独立发型', description: '同一角色显示或隐藏独立发型，检查曲面与动作跟随。',
     cards: [{ entryId: 'd1.idle' }, { entryId: 'd1.bare-head' }],
   }, {

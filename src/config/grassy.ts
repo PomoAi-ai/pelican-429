@@ -24,16 +24,36 @@ export const GRASSY_MODELS = [
   { id: 'rodin-refined-game', label: 'Rodin 精修版 · 游戏标准版', description: '从同一精修高模减面到约 4.5 万面，保留校准后的轮廓与 PBR 材质，适用于游戏正常视距。', path: './characters/human/history/models-rodin-refined/grassy-rodin-refined-game.glb', renderPrefix: './characters/human/history/models-rodin-refined/render-game' },
   { id: 'rodin-refined-light', label: 'Rodin 精修版 · 游戏轻量版', description: '从同一精修高模减面到约 2 万面，保留相同造型与 3.1 格高度，供远视距与多实例比较。', path: './characters/human/history/models-rodin-refined/grassy-rodin-refined-light.glb', renderPrefix: './characters/human/history/models-rodin-refined/render-light' },
 ] as const;
+export const GRASSY_CUSTOMIZATION_MODELS = [
+  { id: 'grassy-modular-static', label: 'Grassy · 分件基础版', description: '独立头部、头发、身体、贴身 T 恤与短裤；全高 3.1 格，静态检查，尚未绑定骨骼。', path: './characters/human/customization/grassy-modular-static.glb' },
+] as const;
 export const D1_MODELS = [
+  { id: 'd1-base-modular', label: 'D1 · 无外服赤脚基础版', description: '已确认头部、独立短发与新身体装配；保留蓝色基础服和裸脚，静态检查。', path: './characters/human/customization/d1-base-static.glb' },
   { id: 'd1-rodin-83da83be-pbr', label: 'D1 · 新版 Rodin 材质', description: '新生成的 Rodin 造型与 PBR 材质；静态检查，尚未绑定骨骼。', path: './characters/human/customization/d1-rodin-83da83be-pbr.glb' },
   { id: 'd1-rodin-83da83be-clay', label: 'D1 · 新版白模', description: '新版几何移除贴图，检查脸型、发束与裙摆轮廓；静态模型，尚未绑定骨骼。', path: './characters/human/customization/d1-rodin-83da83be-clay.glb' },
   { id: 'd1-rodin-refined', label: 'D1 · 参考校准版', description: '对照七视图校准肤色、金铜发色与刘海；保留原 UV 和头身比例，尚未绑定。', path: './characters/human/customization/d1-rodin-refined.glb' },
   { id: 'd1-rodin-pbr', label: 'D1 · Rodin 原版', description: 'Rodin 原始造型与 2K PBR 材质；静态检查，尚未绑定骨骼。', path: './characters/human/customization/d1-rodin-pbr.glb' },
   { id: 'd1-rodin-clay', label: 'D1 · 白模', description: '同一几何移除贴图，检查脸型、发束与裙摆轮廓。', path: './characters/human/customization/d1-rodin-clay.glb' },
 ] as const;
-export type GrassyModelVariant = typeof GRASSY_MODELS[number]['id'] | typeof D1_MODELS[number]['id'];
+export type GrassyModelVariant = typeof GRASSY_MODELS[number]['id'] | typeof GRASSY_CUSTOMIZATION_MODELS[number]['id'] | typeof D1_MODELS[number]['id'];
 
-export const D1_ANIMATED_MODEL = { path: './characters/human/customization/d1-modular-animated.glb' } as const;
+export const D1_ANIMATED_MODELS = [
+  { id: 'detailed', label: '精细检查版', path: './characters/human/customization/d1-base-animated.glb' },
+  { id: 'game', label: '游戏标准版', path: './characters/human/customization/d1-base-game.glb' },
+  { id: 'light', label: '游戏轻量版', path: './characters/human/customization/d1-base-light.glb' },
+  { id: 'outfit', label: '外服与鞋 · 标准版', path: './characters/human/customization/d1-outfit-game.glb' },
+  { id: 'equipped', label: '外服与装备 · 标准版', path: './characters/human/customization/d1-equipped-game.glb' },
+] as const;
+export type D1AnimatedVariant = typeof D1_ANIMATED_MODELS[number]['id'];
+/** D1 渲染风格：游戏用 anime，展示场可切换对比；studio 参照渲染实验 V2 原画初调（瓷白肤色、细深描边、正面柔光、杏色发）。 */
+export const D1_SHADINGS = [
+  { id: 'anime', label: '动漫柔光' },
+  { id: 'cel', label: '赛璐璐硬边' },
+  { id: 'paint', label: '原画淡彩' },
+  { id: 'flat', label: '平涂' },
+  { id: 'studio', label: '原画初调' },
+] as const;
+export type D1Shading = typeof D1_SHADINGS[number]['id'];
 export const D1_ACTIONS = [
   { id: 'idle', label: '待机呼吸', description: '轻微呼吸与重心调整，双脚接地。', seconds: 3.2, loop: true },
   { id: 'walk', label: '走路', description: '原地交替迈步，屈膝与反向摆臂。', seconds: 1.2, loop: true },

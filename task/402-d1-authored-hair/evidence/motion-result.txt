@@ -1,0 +1,35 @@
+{"ms":4268.4455,"count":56631,"triangles":112884,"bounds":{"min":[-0.5867134714126587,2.0395388221740722,-0.5524794840812683],"max":[0.5867238426208496,3.0584240341186524,0.5191023433208466]},"locks":55,"finite":true}
+{
+  "invalid": 0,
+  "pauseStable": true,
+  "versionStable": true,
+  "resetStable": true,
+  "originalStatic": true,
+  "restored": true,
+  "runs": [
+    {
+      "clip": "idle",
+      "maxRoot": 0,
+      "maxTip": 0.000289653415691881,
+      "movingLocks": 31
+    },
+    {
+      "clip": "walk",
+      "maxRoot": 0,
+      "maxTip": 0.003057517633520858,
+      "movingLocks": 31
+    },
+    {
+      "clip": "run",
+      "maxRoot": 0,
+      "maxTip": 0.010692209779713961,
+      "movingLocks": 31
+    },
+    {
+      "clip": "jump",
+      "maxRoot": 0,
+      "maxTip": 0.023815716378561006,
+      "movingLocks": 31
+    }
+  ]
+}

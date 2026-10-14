@@ -1,7 +1,7 @@
 import * as THREE from 'three';
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { characterTextureTier, loadCharacterModel, type TextureTier } from '../character-model.ts';
 import type { GLTF } from 'three/addons/loaders/GLTFLoader.js';
-import { D1_MODELS, GRASSY_HEIGHT, GRASSY_MODELS } from '../../config/grassy.ts';
+import { D1_MODELS, GRASSY_CUSTOMIZATION_MODELS, GRASSY_HEIGHT, GRASSY_MODELS } from '../../config/grassy.ts';
 import type { GrassyModelVariant } from '../../config/grassy.ts';
 
 export interface GrassyStaticModel {
@@ -9,8 +9,10 @@ export interface GrassyStaticModel {
   dispose(): void;
 }
 
-const assets = new Map<GrassyModelVariant, THREE.Group>();
-const loading = new Map<GrassyModelVariant, Promise<void>>();
+type StaticAssetKey = `${GrassyModelVariant}:${TextureTier}`;
+const assets = new Map<StaticAssetKey, THREE.Group>();
+const loading = new Map<StaticAssetKey, Promise<void>>();
+let generation = 0;
 
 function disposeScene(scene: THREE.Group): void {
   const geometries = new Set<THREE.BufferGeometry>();
@@ -57,18 +59,23 @@ function readStaticAsset(gltf: GLTF, path: string): THREE.Group {
  * Loads one version on first use: all versions together are hundreds of MB, parsing them up front
  * stalls the page while only a few are on screen. Callers share geometry, materials and dimensions.
  */
-export function loadGrassyStaticAsset(variant: GrassyModelVariant): Promise<void> {
-  let pending = loading.get(variant);
+export function loadGrassyStaticAsset(variant: GrassyModelVariant, tier: TextureTier = characterTextureTier()): Promise<void> {
+  const key: StaticAssetKey = `${variant}:${tier}`;
+  let pending = loading.get(key);
   if (!pending) {
-    const { path } = [...GRASSY_MODELS, ...D1_MODELS].find((model) => model.id === variant)!;
-    pending = new GLTFLoader().loadAsync(path).then((gltf) => { assets.set(variant, readStaticAsset(gltf, path)); });
-    loading.set(variant, pending);
+    const { path } = [...GRASSY_MODELS, ...GRASSY_CUSTOMIZATION_MODELS, ...D1_MODELS].find((model) => model.id === variant)!;
+    const requestedGeneration = generation;
+    pending = loadCharacterModel(path, tier).then(gltf => {
+      if (requestedGeneration !== generation) { disposeScene(gltf.scene); return; }
+      assets.set(key, readStaticAsset(gltf, path));
+    }).catch(error => { if (loading.get(key) === pending) loading.delete(key); throw error; });
+    loading.set(key, pending);
   }
   return pending;
 }
 
-export function createGrassyStaticModel(variant: GrassyModelVariant): GrassyStaticModel {
-  const asset = assets.get(variant);
+export function createGrassyStaticModel(variant: GrassyModelVariant, tier: TextureTier = characterTextureTier()): GrassyStaticModel {
+  const asset = assets.get(`${variant}:${tier}`);
   if (!asset) throw new Error(`Grassy 静态模型 ${variant} 尚未加载；请先等待 loadGrassyStaticAsset()`);
   const root = asset.clone(true);
   root.name = `grassy-${variant}`;
@@ -83,6 +90,7 @@ export function createGrassyStaticModel(variant: GrassyModelVariant): GrassyStat
 
 /** Dispose instances first; their meshes share these resources. */
 export function disposeGrassyStaticAssets(): void {
+  generation++;
   for (const scene of assets.values()) disposeScene(scene);
   assets.clear();
   loading.clear();

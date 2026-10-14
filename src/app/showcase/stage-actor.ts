@@ -24,6 +24,7 @@ import { createLumaUltimate } from '../../render/luma/luma-ultimate.ts';
 import { createNpcTransformation, loadNpcForms } from '../../render/npc/npc-transformation.ts';
 import { createNpcTargets } from '../../render/npc/npc-targets.ts';
 import { createPelicanRig } from '../../render/pelican/pelican-rig.ts';
+import { createSizeRuler, RULER_TILES } from '../../render/size-ruler.ts';
 import { getPlayer } from '../../sim/sim-world.ts';
 import { BossScore } from '../boss-audio.ts';
 import { createEntityViews } from '../scene-wiring.ts';
@@ -49,8 +50,9 @@ export interface StageActor {
 /** 每个角色保留游戏自身的模拟和动画，所有可见对象挂到同一个舞台。 */
 export async function createStageActor(card: ShowcaseCard, isCurrent: () => boolean): Promise<StageActor | null> {
   const entry = showcaseEntry(card.entryId);
+  if (entry.actor === 'ruler') return createRulerActor();
   if (entry.d1Animation) {
-    await loadD1Asset();
+    await loadD1Asset(card.d1Variant);
     if (!isCurrent()) return null;
     return createD1Actor(card, entry);
   }
@@ -84,9 +86,21 @@ export async function createStageActor(card: ShowcaseCard, isCurrent: () => bool
   return createSimulatedActor(card, entry);
 }
 
+/** 标尺始终正对镜头，不跟随模型角度滑条，保证刻度可读。 */
+function createRulerActor(): StageActor {
+  const ruler = createSizeRuler();
+  return {
+    root: ruler.root, anchor: new THREE.Vector3(0, RULER_TILES + .4, 0),
+    framing: { x: 0, y: RULER_TILES / 2, width: 2, height: RULER_TILES },
+    ready: true, complete: false, progress: 0, status: '标尺 · 1 格 = 1 世界单位',
+    update() {}, reset() {},
+    dispose: ruler.dispose,
+  };
+}
+
 function createD1Actor(card: ShowcaseCard, entry: ShowcaseEntry): StageActor {
-  const rig = createD1Rig();
-  rig.setHairVisible(entry.d1HairVisible !== false);
+  const rig = createD1Rig(card.d1Variant, card.d1Shading);
+  rig.setHairVisible(card.d1HairVisible);
   const root = new THREE.Group();
   root.add(rig.root);
   const action = rig.actions[entry.d1Animation!];
@@ -108,7 +122,7 @@ function createD1Actor(card: ShowcaseCard, entry: ShowcaseEntry): StageActor {
       if (!card.playing || time >= duration) return;
       const dt = Math.min(Math.min(elapsed, TUNING.sim.maxFrameTime) * card.speed, duration - time);
       time += dt;
-      rig.mixer.update(dt);
+      rig.update(dt);
     },
     reset,
     dispose() { rig.dispose(); root.removeFromParent(); },
@@ -124,6 +138,8 @@ function createSimulatedActor(card: ShowcaseCard, entry: ShowcaseEntry): StageAc
   const humanCombat = entry.actor === 'human' && (isGrassyAttack(entry.grassyAnimation!.clip) || entry.action === 'photon_burst');
   const photon = entry.action === 'photon_burst' || entry.action === 'ultimate';
   const disposers: Array<() => void> = [];
+  // 鹈鹕骨架构建约半秒；循环重播只重建模拟，骨架沿用（视图销毁只把它从场景摘下）。
+  const rig = createPelicanRig({ scale: TUNING.render.pelicanScale });
   let simulation: ReturnType<typeof createContent>;
   let aim: Vec2 | undefined;
 
@@ -142,8 +158,6 @@ function createSimulatedActor(card: ShowcaseCard, entry: ShowcaseEntry): StageAc
         : isEnemyKind(entry.actor) ? world.entities.find(entity => entity.enemy)!
           : player;
     const originY = Math.min(scenario.groundY, subject.body.y);
-    const rig = createPelicanRig({ scale: TUNING.render.pelicanScale });
-    disposers.push(() => rig.dispose());
     const clip = entry.grassyAnimation?.clip;
     const gait = clip === 'run' || clip === 'sprint' ? clip : undefined;
     // 目录展示原版主角，游戏里保存的捏人搭配不改变资源身份。
@@ -212,7 +226,7 @@ function createSimulatedActor(card: ShowcaseCard, entry: ShowcaseEntry): StageAc
     },
     aimAt(x, y) { aim = { x, y }; },
     reset,
-    dispose() { disposeContent(); root.removeFromParent(); },
+    dispose() { disposeContent(); rig.dispose(); root.removeFromParent(); },
   };
 }
 

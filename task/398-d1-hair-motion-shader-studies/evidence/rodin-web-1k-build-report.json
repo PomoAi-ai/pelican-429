@@ -1,0 +1,163 @@
+{
+  "imageMagick": "Version: ImageMagick 7.1.2-11 Q16-HDRI aarch64 23470 https://imagemagick.org",
+  "webp": "1.6.0\nlibsharpyuv: 0.4.2",
+  "textureLimit": 1024,
+  "meshopt": "0.22.0",
+  "models": [
+    {
+      "source": "./characters/human/render-lab/d1-outfit-rodin.glb",
+      "output": "./characters/human/render-lab/d1-outfit-rodin.web-1k.glb",
+      "sourceSha256": "0705697c13395646a28843c87fad74e18284d107a2e6466862db9e628882d4b5",
+      "sourceBytes": 40415720,
+      "outputBytes": 6235244,
+      "sourceBufferBytes": 5088356,
+      "storedBufferBytes": 2572827,
+      "images": [
+        {
+          "name": "texture_diffuse_skin",
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 1024,
+          "outputHeight": 1024,
+          "kind": "color",
+          "sourceBytes": 2207330,
+          "outputBytes": 42414,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 5592404
+        },
+        {
+          "name": "texture_metallic-texture_roughness",
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 1024,
+          "outputHeight": 1024,
+          "kind": "data",
+          "sourceBytes": 2051136,
+          "outputBytes": 323196,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 5592404
+        },
+        {
+          "name": "hair-basecolor",
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 1024,
+          "outputHeight": 1024,
+          "kind": "color",
+          "sourceBytes": 3165548,
+          "outputBytes": 70386,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 5592404
+        },
+        {
+          "name": "head-normal",
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 1024,
+          "outputHeight": 1024,
+          "kind": "normal",
+          "sourceBytes": 3969091,
+          "outputBytes": 448004,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 5592404
+        },
+        {
+          "name": "head-diffuse",
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 1024,
+          "outputHeight": 1024,
+          "kind": "color",
+          "sourceBytes": 2680676,
+          "outputBytes": 34116,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 5592404
+        },
+        {
+          "name": "texture_metallic-texture_roughness",
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 1024,
+          "outputHeight": 1024,
+          "kind": "data",
+          "sourceBytes": 2178343,
+          "outputBytes": 289690,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 5592404
+        },
+        {
+          "name": "eye-atlas",
+          "width": 1024,
+          "height": 1024,
+          "outputWidth": 1024,
+          "outputHeight": 1024,
+          "kind": "color",
+          "sourceBytes": 104145,
+          "outputBytes": 25664,
+          "sourceRgbaMipBytes": 5592404,
+          "outputRgbaMipBytes": 5592404
+        },
+        {
+          "name": "texture_diffuse",
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 1024,
+          "outputHeight": 1024,
+          "kind": "color",
+          "sourceBytes": 3438107,
+          "outputBytes": 130646,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 5592404
+        },
+        {
+          "name": "texture_pbr",
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 1024,
+          "outputHeight": 1024,
+          "kind": "data",
+          "sourceBytes": 2467134,
+          "outputBytes": 463058,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 5592404
+        },
+        {
+          "name": "normal",
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 1024,
+          "outputHeight": 1024,
+          "kind": "normal",
+          "sourceBytes": 6009263,
+          "outputBytes": 1086076,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 5592404
+        },
+        {
+          "name": "base-color",
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 1024,
+          "outputHeight": 1024,
+          "kind": "color",
+          "sourceBytes": 4556224,
+          "outputBytes": 212528,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 5592404
+        },
+        {
+          "name": "texture_metallic.png-texture_roughness.png",
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 1024,
+          "outputHeight": 1024,
+          "kind": "data",
+          "sourceBytes": 2412755,
+          "outputBytes": 433100,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 5592404
+        }
+      ]
+    }
+  ]
+}

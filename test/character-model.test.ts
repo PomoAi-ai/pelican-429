@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { AnimationClip, BoxGeometry, CompressedTexture, Mesh, MeshStandardMaterial, NumberKeyframeTrack, type WebGLRenderer } from 'three';
+import { AnimationClip, Bone, Skeleton, SkinnedMesh, Float32BufferAttribute, Uint16BufferAttribute, BoxGeometry, CompressedTexture, Mesh, MeshStandardMaterial, NumberKeyframeTrack, type WebGLRenderer } from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import type { GLTF } from 'three/addons/loaders/GLTFLoader.js';
 import { KTX2Loader } from 'three/addons/loaders/KTX2Loader.js';
@@ -10,6 +10,7 @@ import { configureCharacterTextures, disposeCharacterTextures, loadCharacterMode
 import { createEnemyRig, disposeEnemyAssets, loadEnemyAsset } from '../src/render/enemy-rig.ts';
 import { createFacilityPresentation, disposePreloadedFortressTextures, preloadFortressTextures } from '../src/app/facility-presentation.ts';
 import type { Stage } from '../src/render/stage.ts';
+import { createD1Rig, disposeD1Assets, loadD1Asset } from '../src/render/grassy/d1-rig.ts';
 import { CUSTOMIZATION_MODELS } from '../src/config/character-customization-assets.ts';
 import { disposeCustomizationAssets, loadCustomizationAssets } from '../src/render/grassy/grassy-appearance.ts';
 
@@ -263,4 +264,45 @@ test('已退出的定制资源请求延迟失败时不删除新场景的加载�
   assert.equal(failures.length, count * 2, '重复读取不能再次下载整组定制模型');
   for (const fail of failures.slice(count)) fail(new Error('new download'));
   await currentFailure;
+});
+
+test('D1 三档与贴图缓存独立，复制实例不串用模型或头发开关', async (t) => {
+  const rigs: ReturnType<typeof createD1Rig>[] = [];
+  t.after(() => { for (const rig of rigs) rig.dispose(); disposeD1Assets(); disposeCharacterTextures(); });
+  const requested: string[] = [];
+  t.mock.method(GLTFLoader.prototype, 'loadAsync', async function (this: GLTFLoader, path: string) {
+    requested.push(path);
+    const gltf = await new GLTFLoader().parseAsync(JSON.stringify({ asset: { version: '2.0' }, scene: 0, scenes: [{}] }), '');
+    gltf.scene.name = path;
+    const geometry = new BoxGeometry(1, 3.1, 1).translate(0, 1.55, 0);
+    const count = geometry.getAttribute('position').count;
+    geometry.setAttribute('skinIndex', new Uint16BufferAttribute(new Uint16Array(count * 4), 4));
+    const weights = new Float32Array(count * 4);
+    for (let i = 0; i < count; i++) weights[i * 4] = 1;
+    geometry.setAttribute('skinWeight', new Float32BufferAttribute(weights, 4));
+    const mesh = new SkinnedMesh(geometry, new MeshStandardMaterial({ name: 'model.001' }));
+    mesh.name = 'Hair'; mesh.userData.characterPart = 'hair';
+    const bone = new Bone(); mesh.add(bone); mesh.bind(new Skeleton([bone]));
+    gltf.scene.add(mesh);
+    gltf.animations = ['idle', 'walk', 'run', 'jump'].map(name => new AnimationClip(name, 1, [new NumberKeyframeTrack('.position[x]', [0, 1], [0, 1])]));
+    return gltf;
+  });
+  await Promise.all([
+    loadD1Asset('game', 'original'), loadD1Asset('game', 'original'),
+    loadD1Asset('game', 'web'), loadD1Asset('detailed', 'original'), loadD1Asset('light', 'original'),
+  ]);
+  assert.equal(requested.length, 4, '相同档位请求合并，不同模型和贴图分别加载');
+  for (const [variant, tier, suffix] of [
+    ['game', 'original', 'd1-base-game.glb'], ['game', 'web', 'd1-base-game.web.glb'],
+    ['detailed', 'original', 'd1-base-animated.glb'], ['light', 'original', 'd1-base-light.glb'],
+  ] as const) {
+    const rig = createD1Rig(variant, 'anime', tier); rigs.push(rig);
+    assert.equal(rig.root.children[0]!.name, `./characters/human/customization/${suffix}`);
+    rig.actions.walk.play(); rig.mixer.update(.5);
+    assert.equal(rig.actions.walk.time, .5);
+  }
+  const copy = createD1Rig('game', 'anime', 'original'); rigs.push(copy);
+  rigs[0]!.setHairVisible(false);
+  assert.equal(rigs[0]!.root.getObjectByName('Hair')!.visible, false);
+  assert.equal(copy.root.getObjectByName('Hair')!.visible, true, '另一个角色的头发不能跟随隐藏');
 });

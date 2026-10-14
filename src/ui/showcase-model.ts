@@ -22,9 +22,9 @@ export function createShowcaseModel(catalog: ShowcaseCatalog = CHARACTER_CATALOG
     const building = isBuildingKitKind(entry(entryId).actor);
     const card: ShowcaseCard = {
       id: nextId++, entryId, environment: 'surface', facing: 1, modelYaw: isEnemyKind(entry(entryId).actor) ? Math.PI / 2 : Math.PI / 4, modelPitch: 0, speed: 1, zoom: 1,
-      playing: true, loop: entry(entryId).loop ?? true, manual: false, targetDodge: false, humanView: 'world', attackMotion: 'still', revision: 0, npcTransformationRevision: 0,
+      playing: true, loop: entry(entryId).loop ?? true, manual: false, targetDodge: false, humanView: 'world', attackMotion: 'still', revision: 0, npcTransformationRevision: 0, d1Variant: 'game', d1HairVisible: entry(entryId).d1HairVisible !== false, d1Shading: 'anime',
       resource: catalog.mode !== 'showcase' ? { layout: 'flat', shapeIndex: 0, sampleIndex: 0, sampleCount: 1, yaw: entry(entryId).actor === 'door' ? 65 : building ? 35 : 0, pitch: building ? 18 : 0, habitat: 'open', assembly: false, composition: null, vegetation: 'all', seed: 429, wind: 'breeze', reference: false, context: !building && entry(entryId).actor !== 'aquatic', grid: false, platforms: true, inspectionLight: true } : null,
-      ...(from ? { environment: from.environment, facing: from.facing, humanView: from.humanView, attackMotion: from.attackMotion, targetDodge: from.targetDodge, modelYaw: from.modelYaw, modelPitch: from.modelPitch, speed: from.speed, zoom: from.zoom, playing: from.playing, loop: from.loop, resource: from.resource ? { ...from.resource } : null } : {}),
+      ...(from ? { environment: from.environment, facing: from.facing, humanView: from.humanView, attackMotion: from.attackMotion, targetDodge: from.targetDodge, d1Variant: from.d1Variant, d1HairVisible: from.d1HairVisible, d1Shading: from.d1Shading, modelYaw: from.modelYaw, modelPitch: from.modelPitch, speed: from.speed, zoom: from.zoom, playing: from.playing, loop: from.loop, resource: from.resource ? { ...from.resource } : null } : {}),
     };
     cards.push(card);
   };
@@ -139,6 +139,7 @@ export function createShowcaseModel(catalog: ShowcaseCatalog = CHARACTER_CATALOG
         card.resource.assembly = false;
       }
       card.entryId = entryId; card.revision++; card.manual = false;
+      if (nextEntry.d1HairVisible === false) card.d1HairVisible = false;
       if (nextEntry.actor === 'human' && nextEntry.action === 'photon_burst') card.humanView = 'world';
       if (nextEntry.loop !== undefined) { card.loop = nextEntry.loop; card.playing = true; }
       synchronized = false;

@@ -1,0 +1,3421 @@
+{
+  "bounds": {
+    "old": {
+      "min": [
+        -0.706187542483526,
+        1.4981705248684542e-7,
+        -0.7525963967849958
+      ],
+      "max": [
+        0.7064288220654877,
+        3.0991573608217573,
+        0.552428441078743
+      ],
+      "height": 3.0991572110047048
+    },
+    "rodin": {
+      "min": [
+        -0.7059771768964086,
+        1.5745629805067232e-7,
+        -0.580508688149129
+      ],
+      "max": [
+        0.7062183969293054,
+        3.0992241256049136,
+        0.5757657523992662
+      ],
+      "height": 3.0992239681486153
+    },
+    "passesRigHeight": true
+  },
+  "parts": [
+    {
+      "name": "Body",
+      "oldVertices": 11144,
+      "newVertices": 11152,
+      "uniquePositionsAt1e5": {
+        "old": 9144,
+        "new": 9144,
+        "missingFromNew": 9144,
+        "addedToNew": 9144
+      },
+      "primitives": [
+        {
+          "indicesMaxDiff": null,
+          "attributes": {
+            "position": {
+              "oldCount": 6261,
+              "newCount": 6272,
+              "maxDiff": null
+            },
+            "normal": {
+              "oldCount": 6261,
+              "newCount": 6272,
+              "maxDiff": null
+            },
+            "uv": {
+              "oldCount": 6261,
+              "newCount": 6272,
+              "maxDiff": null
+            },
+            "color": {
+              "oldCount": 6261,
+              "newCount": 6272,
+              "maxDiff": null
+            },
+            "skinIndex": {
+              "oldCount": 6261,
+              "newCount": 6272,
+              "maxDiff": null
+            },
+            "skinWeight": {
+              "oldCount": 6261,
+              "newCount": 6272,
+              "maxDiff": null
+            }
+          }
+        },
+        {
+          "indicesMaxDiff": null,
+          "attributes": {
+            "position": {
+              "oldCount": 43,
+              "newCount": 45,
+              "maxDiff": null
+            },
+            "normal": {
+              "oldCount": 43,
+              "newCount": 45,
+              "maxDiff": null
+            },
+            "uv": {
+              "oldCount": 43,
+              "newCount": 45,
+              "maxDiff": null
+            },
+            "color": {
+              "oldCount": 43,
+              "newCount": 45,
+              "maxDiff": null
+            },
+            "skinIndex": {
+              "oldCount": 43,
+              "newCount": 45,
+              "maxDiff": null
+            },
+            "skinWeight": {
+              "oldCount": 43,
+              "newCount": 45,
+              "maxDiff": null
+            }
+          }
+        },
+        {
+          "indicesMaxDiff": null,
+          "attributes": {
+            "position": {
+              "oldCount": 812,
+              "newCount": 810,
+              "maxDiff": null
+            },
+            "normal": {
+              "oldCount": 812,
+              "newCount": 810,
+              "maxDiff": null
+            },
+            "uv": {
+              "oldCount": 812,
+              "newCount": 810,
+              "maxDiff": null
+            },
+            "color": {
+              "oldCount": 812,
+              "newCount": 810,
+              "maxDiff": null
+            },
+            "skinIndex": {
+              "oldCount": 812,
+              "newCount": 810,
+              "maxDiff": null
+            },
+            "skinWeight": {
+              "oldCount": 812,
+              "newCount": 810,
+              "maxDiff": null
+            }
+          }
+        },
+        {
+          "indicesMaxDiff": null,
+          "attributes": {
+            "position": {
+              "oldCount": 3043,
+              "newCount": 3042,
+              "maxDiff": null
+            },
+            "normal": {
+              "oldCount": 3043,
+              "newCount": 3042,
+              "maxDiff": null
+            },
+            "uv": {
+              "oldCount": 3043,
+              "newCount": 3042,
+              "maxDiff": null
+            },
+            "color": {
+              "oldCount": 3043,
+              "newCount": 3042,
+              "maxDiff": null
+            },
+            "skinIndex": {
+              "oldCount": 3043,
+              "newCount": 3042,
+              "maxDiff": null
+            },
+            "skinWeight": {
+              "oldCount": 3043,
+              "newCount": 3042,
+              "maxDiff": null
+            }
+          }
+        },
+        {
+          "indicesMaxDiff": null,
+          "attributes": {
+            "position": {
+              "oldCount": 188,
+              "newCount": 188,
+              "maxDiff": 0.0006189346313476562
+            },
+            "normal": {
+              "oldCount": 188,
+              "newCount": 188,
+              "maxDiff": 0.0033893585205078125
+            },
+            "uv": {
+              "oldCount": 188,
+              "newCount": 188,
+              "maxDiff": 5.960464477539063e-8
+            },
+            "color": {
+              "oldCount": 188,
+              "newCount": 188,
+              "maxDiff": 0
+            },
+            "skinIndex": {
+              "oldCount": 188,
+              "newCount": 188,
+              "maxDiff": 0
+            },
+            "skinWeight": {
+              "oldCount": 188,
+              "newCount": 188,
+              "maxDiff": 0
+            }
+          }
+        },
+        {
+          "indicesMaxDiff": null,
+          "attributes": {
+            "position": {
+              "oldCount": 797,
+              "newCount": 795,
+              "maxDiff": null
+            },
+            "normal": {
+              "oldCount": 797,
+              "newCount": 795,
+              "maxDiff": null
+            },
+            "uv": {
+              "oldCount": 797,
+              "newCount": 795,
+              "maxDiff": null
+            },
+            "color": {
+              "oldCount": 797,
+              "newCount": 795,
+              "maxDiff": null
+            },
+            "skinIndex": {
+              "oldCount": 797,
+              "newCount": 795,
+              "maxDiff": null
+            },
+            "skinWeight": {
+              "oldCount": 797,
+              "newCount": 795,
+              "maxDiff": null
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Head",
+      "oldVertices": 30778,
+      "newVertices": 30776,
+      "uniquePositionsAt1e5": {
+        "old": 29498,
+        "new": 29498,
+        "missingFromNew": 29498,
+        "addedToNew": 29498
+      },
+      "primitives": [
+        {
+          "indicesMaxDiff": 0,
+          "attributes": {
+            "position": {
+              "oldCount": 16160,
+              "newCount": 16160,
+              "maxDiff": 0.0008838176727294922
+            },
+            "normal": {
+              "oldCount": 16160,
+              "newCount": 16160,
+              "maxDiff": 0.0019872188568115234
+            },
+            "uv": {
+              "oldCount": 16160,
+              "newCount": 16160,
+              "maxDiff": 0
+            },
+            "skinIndex": {
+              "oldCount": 16160,
+              "newCount": 16160,
+              "maxDiff": 0
+            },
+            "skinWeight": {
+              "oldCount": 16160,
+              "newCount": 16160,
+              "maxDiff": 0
+            }
+          }
+        },
+        {
+          "indicesMaxDiff": 4,
+          "attributes": {
+            "position": {
+              "oldCount": 14618,
+              "newCount": 14616,
+              "maxDiff": null
+            },
+            "normal": {
+              "oldCount": 14618,
+              "newCount": 14616,
+              "maxDiff": null
+            },
+            "uv": {
+              "oldCount": 14618,
+              "newCount": 14616,
+              "maxDiff": null
+            },
+            "skinIndex": {
+              "oldCount": 14618,
+              "newCount": 14616,
+              "maxDiff": null
+            },
+            "skinWeight": {
+              "oldCount": 14618,
+              "newCount": 14616,
+              "maxDiff": null
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Outfit",
+      "oldVertices": 22950,
+      "newVertices": 22950,
+      "uniquePositionsAt1e5": {
+        "old": 18968,
+        "new": 18968,
+        "missingFromNew": 7217,
+        "addedToNew": 7217
+      },
+      "primitives": [
+        {
+          "indicesMaxDiff": 6714,
+          "attributes": {
+            "position": {
+              "oldCount": 22950,
+              "newCount": 22950,
+              "maxDiff": 0.0363612174987793
+            },
+            "normal": {
+              "oldCount": 22950,
+              "newCount": 22950,
+              "maxDiff": 0.5574155830545351
+            },
+            "uv": {
+              "oldCount": 22950,
+              "newCount": 22950,
+              "maxDiff": 0
+            },
+            "skinIndex": {
+              "oldCount": 22950,
+              "newCount": 22950,
+              "maxDiff": 17
+            },
+            "skinWeight": {
+              "oldCount": 22950,
+              "newCount": 22950,
+              "maxDiff": 0.3506397008895874
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "ShoeL",
+      "oldVertices": 2106,
+      "newVertices": 2106,
+      "uniquePositionsAt1e5": {
+        "old": 1600,
+        "new": 1600,
+        "missingFromNew": 0,
+        "addedToNew": 0
+      },
+      "primitives": [
+        {
+          "indicesMaxDiff": 0,
+          "attributes": {
+            "position": {
+              "oldCount": 1666,
+              "newCount": 1666,
+              "maxDiff": 0
+            },
+            "normal": {
+              "oldCount": 1666,
+              "newCount": 1666,
+              "maxDiff": 0
+            },
+            "uv": {
+              "oldCount": 1666,
+              "newCount": 1666,
+              "maxDiff": 0
+            },
+            "skinIndex": {
+              "oldCount": 1666,
+              "newCount": 1666,
+              "maxDiff": 0
+            },
+            "skinWeight": {
+              "oldCount": 1666,
+              "newCount": 1666,
+              "maxDiff": 0
+            }
+          }
+        },
+        {
+          "indicesMaxDiff": 0,
+          "attributes": {
+            "position": {
+              "oldCount": 212,
+              "newCount": 212,
+              "maxDiff": 0
+            },
+            "normal": {
+              "oldCount": 212,
+              "newCount": 212,
+              "maxDiff": 0
+            },
+            "uv": {
+              "oldCount": 212,
+              "newCount": 212,
+              "maxDiff": 0
+            },
+            "skinIndex": {
+              "oldCount": 212,
+              "newCount": 212,
+              "maxDiff": 0
+            },
+            "skinWeight": {
+              "oldCount": 212,
+              "newCount": 212,
+              "maxDiff": 0
+            }
+          }
+        },
+        {
+          "indicesMaxDiff": 0,
+          "attributes": {
+            "normal": {
+              "oldCount": 228,
+              "newCount": 228,
+              "maxDiff": 0
+            },
+            "position": {
+              "oldCount": 228,
+              "newCount": 228,
+              "maxDiff": 0
+            },
+            "uv": {
+              "oldCount": 228,
+              "newCount": 228,
+              "maxDiff": 0
+            },
+            "skinIndex": {
+              "oldCount": 228,
+              "newCount": 228,
+              "maxDiff": 0
+            },
+            "skinWeight": {
+              "oldCount": 228,
+              "newCount": 228,
+              "maxDiff": 0
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "ShoeR",
+      "oldVertices": 2110,
+      "newVertices": 2110,
+      "uniquePositionsAt1e5": {
+        "old": 1600,
+        "new": 1600,
+        "missingFromNew": 0,
+        "addedToNew": 0
+      },
+      "primitives": [
+        {
+          "indicesMaxDiff": 0,
+          "attributes": {
+            "position": {
+              "oldCount": 1652,
+              "newCount": 1652,
+              "maxDiff": 0
+            },
+            "normal": {
+              "oldCount": 1652,
+              "newCount": 1652,
+              "maxDiff": 0
+            },
+            "uv": {
+              "oldCount": 1652,
+              "newCount": 1652,
+              "maxDiff": 0
+            },
+            "skinIndex": {
+              "oldCount": 1652,
+              "newCount": 1652,
+              "maxDiff": 0
+            },
+            "skinWeight": {
+              "oldCount": 1652,
+              "newCount": 1652,
+              "maxDiff": 0
+            }
+          }
+        },
+        {
+          "indicesMaxDiff": 0,
+          "attributes": {
+            "position": {
+              "oldCount": 210,
+              "newCount": 210,
+              "maxDiff": 0
+            },
+            "normal": {
+              "oldCount": 210,
+              "newCount": 210,
+              "maxDiff": 0
+            },
+            "uv": {
+              "oldCount": 210,
+              "newCount": 210,
+              "maxDiff": 0
+            },
+            "skinIndex": {
+              "oldCount": 210,
+              "newCount": 210,
+              "maxDiff": 0
+            },
+            "skinWeight": {
+              "oldCount": 210,
+              "newCount": 210,
+              "maxDiff": 0
+            }
+          }
+        },
+        {
+          "indicesMaxDiff": 0,
+          "attributes": {
+            "position": {
+              "oldCount": 248,
+              "newCount": 248,
+              "maxDiff": 0
+            },
+            "normal": {
+              "oldCount": 248,
+              "newCount": 248,
+              "maxDiff": 0
+            },
+            "uv": {
+              "oldCount": 248,
+              "newCount": 248,
+              "maxDiff": 0
+            },
+            "skinIndex": {
+              "oldCount": 248,
+              "newCount": 248,
+              "maxDiff": 0
+            },
+            "skinWeight": {
+              "oldCount": 248,
+              "newCount": 248,
+              "maxDiff": 0
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Hair",
+      "oldVertices": 14516,
+      "newVertices": 10049,
+      "uniquePositionsAt1e5": {
+        "old": 12968,
+        "new": 8377,
+        "missingFromNew": 12968,
+        "addedToNew": 8377
+      },
+      "primitives": [
+        {
+          "indicesMaxDiff": null,
+          "attributes": {
+            "position": {
+              "oldCount": 14516,
+              "newCount": 10049,
+              "maxDiff": null
+            },
+            "normal": {
+              "oldCount": 14516,
+              "newCount": 10049,
+              "maxDiff": null
+            },
+            "uv": {
+              "oldCount": 14516,
+              "newCount": 10049,
+              "maxDiff": null
+            },
+            "skinIndex": {
+              "oldCount": 14516,
+              "newCount": 10049,
+              "maxDiff": null
+            },
+            "skinWeight": {
+              "oldCount": 14516,
+              "newCount": 10049,
+              "maxDiff": null
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "originalClipDifferences": [
+    {
+      "name": "idle",
+      "durationSame": true,
+      "tracks": [
+        {
+          "name": "hips.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00037384033203125
+        },
+        {
+          "name": "hips.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 7.450580596923828e-9
+        },
+        {
+          "name": "hips.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 5.960464477539063e-8
+        },
+        {
+          "name": "skirtBack.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00036793947219848633
+        },
+        {
+          "name": "skirtBack.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 5.960464477539063e-8
+        },
+        {
+          "name": "skirtBack.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 7.748603820800781e-7
+        },
+        {
+          "name": "skirtFront.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.000367969274520874
+        },
+        {
+          "name": "skirtFront.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.1920928955078125e-7
+        },
+        {
+          "name": "skirtL.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.0003679990768432617
+        },
+        {
+          "name": "skirtL.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 2.2351741790771484e-7
+        },
+        {
+          "name": "skirtL.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.0000010728836059570312
+        },
+        {
+          "name": "skirtR.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.0003679990768432617
+        },
+        {
+          "name": "skirtR.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 2.2351741790771484e-7
+        },
+        {
+          "name": "skirtR.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.0000010728836059570312
+        },
+        {
+          "name": "spine.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00008034706115722656
+        },
+        {
+          "name": "spine.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 5.960464477539063e-8
+        },
+        {
+          "name": "spine.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 5.960464477539063e-8
+        },
+        {
+          "name": "chest.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00008472800254821777
+        },
+        {
+          "name": "chest.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 5.960464477539063e-8
+        },
+        {
+          "name": "chest.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 5.960464477539063e-8
+        },
+        {
+          "name": "clavicleL.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 2.144439150697508e-7
+        },
+        {
+          "name": "clavicleL.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 2.086162567138672e-7
+        },
+        {
+          "name": "clavicleL.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.1920928955078125e-7
+        },
+        {
+          "name": "upper_armL.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00009137392044067383
+        },
+        {
+          "name": "upper_armL.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 2.980232238769531e-7
+        },
+        {
+          "name": "upper_armL.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.1920928955078125e-7
+        },
+        {
+          "name": "forearmL.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00011792778968811035
+        },
+        {
+          "name": "forearmL.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.043081283569336e-7
+        },
+        {
+          "name": "forearmL.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 6.556510925292969e-7
+        },
+        {
+          "name": "handL.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00009813904762268066
+        },
+        {
+          "name": "handL.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 5.736947059631348e-7
+        },
+        {
+          "name": "handL.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.1920928955078125e-7
+        },
+        {
+          "name": "clavicleR.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 2.144439150697508e-7
+        },
+        {
+          "name": "clavicleR.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 2.086162567138672e-7
+        },
+        {
+          "name": "clavicleR.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.1920928955078125e-7
+        },
+        {
+          "name": "upper_armR.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00009137392044067383
+        },
+        {
+          "name": "upper_armR.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 2.980232238769531e-7
+        },
+        {
+          "name": "upper_armR.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.1920928955078125e-7
+        },
+        {
+          "name": "forearmR.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00011792778968811035
+        },
+        {
+          "name": "forearmR.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.043081283569336e-7
+        },
+        {
+          "name": "forearmR.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 6.556510925292969e-7
+        },
+        {
+          "name": "handR.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00009813904762268066
+        },
+        {
+          "name": "handR.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 5.736947059631348e-7
+        },
+        {
+          "name": "handR.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.1920928955078125e-7
+        },
+        {
+          "name": "neck.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00007002055644989014
+        },
+        {
+          "name": "neck.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.4901161193847656e-7
+        },
+        {
+          "name": "neck.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 5.960464477539063e-8
+        },
+        {
+          "name": "head.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.000012036412954330444
+        },
+        {
+          "name": "head.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 7.450580596923828e-9
+        },
+        {
+          "name": "head.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.1920928955078125e-7
+        },
+        {
+          "name": "thighL.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.000046759843826293945
+        },
+        {
+          "name": "thighL.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 3.91155481338501e-8
+        },
+        {
+          "name": "thighL.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.7881393432617188e-7
+        },
+        {
+          "name": "shinL.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00015461444854736328
+        },
+        {
+          "name": "shinL.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 2.421438694000244e-8
+        },
+        {
+          "name": "shinL.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.7881393432617188e-7
+        },
+        {
+          "name": "footL.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00015819072723388672
+        },
+        {
+          "name": "footL.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.1920928955078125e-7
+        },
+        {
+          "name": "footL.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.7881393432617188e-7
+        },
+        {
+          "name": "toeL.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00007855892181396484
+        },
+        {
+          "name": "toeL.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 4.470348358154297e-7
+        },
+        {
+          "name": "toeL.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 3.5762786865234375e-7
+        },
+        {
+          "name": "thighR.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.000046759843826293945
+        },
+        {
+          "name": "thighR.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 3.91155481338501e-8
+        },
+        {
+          "name": "thighR.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.7881393432617188e-7
+        },
+        {
+          "name": "shinR.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00015461444854736328
+        },
+        {
+          "name": "shinR.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 2.421438694000244e-8
+        },
+        {
+          "name": "shinR.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.7881393432617188e-7
+        },
+        {
+          "name": "footR.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00015819072723388672
+        },
+        {
+          "name": "footR.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.1920928955078125e-7
+        },
+        {
+          "name": "footR.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.7881393432617188e-7
+        },
+        {
+          "name": "toeR.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00007855892181396484
+        },
+        {
+          "name": "toeR.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 4.470348358154297e-7
+        },
+        {
+          "name": "toeR.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 3.5762786865234375e-7
+        }
+      ]
+    },
+    {
+      "name": "walk",
+      "durationSame": true,
+      "tracks": [
+        {
+          "name": "hips.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.0003739595413208008
+        },
+        {
+          "name": "hips.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.4901161193847656e-8
+        },
+        {
+          "name": "hips.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 5.960464477539063e-8
+        },
+        {
+          "name": "skirtBack.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00036832690238952637
+        },
+        {
+          "name": "skirtBack.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 5.960464477539063e-8
+        },
+        {
+          "name": "skirtBack.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 7.748603820800781e-7
+        },
+        {
+          "name": "skirtFront.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.000368267297744751
+        },
+        {
+          "name": "skirtFront.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 8.940696716308594e-8
+        },
+        {
+          "name": "skirtFront.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.1920928955078125e-7
+        },
+        {
+          "name": "skirtL.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.0003681480884552002
+        },
+        {
+          "name": "skirtL.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 2.5331974029541016e-7
+        },
+        {
+          "name": "skirtL.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.0000010728836059570312
+        },
+        {
+          "name": "skirtR.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.0003681480884552002
+        },
+        {
+          "name": "skirtR.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 2.5331974029541016e-7
+        },
+        {
+          "name": "skirtR.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.0000010728836059570312
+        },
+        {
+          "name": "spine.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.000080108642578125
+        },
+        {
+          "name": "spine.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 5.960464477539063e-8
+        },
+        {
+          "name": "spine.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 5.960464477539063e-8
+        },
+        {
+          "name": "chest.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00008448958396911621
+        },
+        {
+          "name": "chest.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 5.960464477539063e-8
+        },
+        {
+          "name": "chest.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 5.960464477539063e-8
+        },
+        {
+          "name": "clavicleL.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.669638081125413e-7
+        },
+        {
+          "name": "clavicleL.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 2.086162567138672e-7
+        },
+        {
+          "name": "clavicleL.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.1920928955078125e-7
+        },
+        {
+          "name": "upper_armL.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00009137392044067383
+        },
+        {
+          "name": "upper_armL.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 2.384185791015625e-7
+        },
+        {
+          "name": "upper_armL.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.1920928955078125e-7
+        },
+        {
+          "name": "forearmL.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00011774897575378418
+        },
+        {
+          "name": "forearmL.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 8.940696716308594e-8
+        },
+        {
+          "name": "forearmL.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 5.364418029785156e-7
+        },
+        {
+          "name": "handL.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00009760260581970215
+        },
+        {
+          "name": "handL.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 5.140900611877441e-7
+        },
+        {
+          "name": "handL.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 4.172325134277344e-7
+        },
+        {
+          "name": "clavicleR.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.669638081125413e-7
+        },
+        {
+          "name": "clavicleR.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 2.086162567138672e-7
+        },
+        {
+          "name": "clavicleR.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.1920928955078125e-7
+        },
+        {
+          "name": "upper_armR.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00009137392044067383
+        },
+        {
+          "name": "upper_armR.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 2.384185791015625e-7
+        },
+        {
+          "name": "upper_armR.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.7881393432617188e-7
+        },
+        {
+          "name": "forearmR.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00011774897575378418
+        },
+        {
+          "name": "forearmR.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.4156103134155273e-7
+        },
+        {
+          "name": "forearmR.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 5.364418029785156e-7
+        },
+        {
+          "name": "handR.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00009801983833312988
+        },
+        {
+          "name": "handR.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 5.21540641784668e-7
+        },
+        {
+          "name": "handR.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.1920928955078125e-7
+        },
+        {
+          "name": "neck.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00006982684135437012
+        },
+        {
+          "name": "neck.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.4901161193847656e-7
+        },
+        {
+          "name": "neck.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 5.960464477539063e-8
+        },
+        {
+          "name": "head.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.000011809170246124268
+        },
+        {
+          "name": "head.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 7.450580596923828e-9
+        },
+        {
+          "name": "head.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.1920928955078125e-7
+        },
+        {
+          "name": "thighL.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.000046759843826293945
+        },
+        {
+          "name": "thighL.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00005486607551574707
+        },
+        {
+          "name": "thighL.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.7881393432617188e-7
+        },
+        {
+          "name": "shinL.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.0001544356346130371
+        },
+        {
+          "name": "shinL.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00007194280624389648
+        },
+        {
+          "name": "shinL.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 2.980232238769531e-7
+        },
+        {
+          "name": "footL.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.0001583099365234375
+        },
+        {
+          "name": "footL.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00003898143768310547
+        },
+        {
+          "name": "footL.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.7881393432617188e-7
+        },
+        {
+          "name": "toeL.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00007849931716918945
+        },
+        {
+          "name": "toeL.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 4.470348358154297e-7
+        },
+        {
+          "name": "toeL.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 4.172325134277344e-7
+        },
+        {
+          "name": "thighR.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.000046759843826293945
+        },
+        {
+          "name": "thighR.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00005486607551574707
+        },
+        {
+          "name": "thighR.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.1920928955078125e-7
+        },
+        {
+          "name": "shinR.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00015461444854736328
+        },
+        {
+          "name": "shinR.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00007194280624389648
+        },
+        {
+          "name": "shinR.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 3.5762786865234375e-7
+        },
+        {
+          "name": "footR.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00015813112258911133
+        },
+        {
+          "name": "footR.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00003898143768310547
+        },
+        {
+          "name": "footR.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.1920928955078125e-7
+        },
+        {
+          "name": "toeR.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00007855892181396484
+        },
+        {
+          "name": "toeR.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 5.066394805908203e-7
+        },
+        {
+          "name": "toeR.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 2.384185791015625e-7
+        }
+      ]
+    },
+    {
+      "name": "run",
+      "durationSame": true,
+      "tracks": [
+        {
+          "name": "hips.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.0003739595413208008
+        },
+        {
+          "name": "hips.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.4901161193847656e-8
+        },
+        {
+          "name": "hips.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 5.960464477539063e-8
+        },
+        {
+          "name": "skirtBack.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00036841630935668945
+        },
+        {
+          "name": "skirtBack.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 7.450580596923828e-8
+        },
+        {
+          "name": "skirtBack.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 7.748603820800781e-7
+        },
+        {
+          "name": "skirtFront.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.0003682076930999756
+        },
+        {
+          "name": "skirtFront.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.1920928955078125e-7
+        },
+        {
+          "name": "skirtFront.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.1920928955078125e-7
+        },
+        {
+          "name": "skirtL.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00036793947219848633
+        },
+        {
+          "name": "skirtL.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 2.8312206268310547e-7
+        },
+        {
+          "name": "skirtL.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.0000010728836059570312
+        },
+        {
+          "name": "skirtR.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00036793947219848633
+        },
+        {
+          "name": "skirtR.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 2.8312206268310547e-7
+        },
+        {
+          "name": "skirtR.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.0000010728836059570312
+        },
+        {
+          "name": "spine.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00008058547973632812
+        },
+        {
+          "name": "spine.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 7.450580596923828e-9
+        },
+        {
+          "name": "spine.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 5.960464477539063e-8
+        },
+        {
+          "name": "chest.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00008416175842285156
+        },
+        {
+          "name": "chest.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 2.9802322387695312e-8
+        },
+        {
+          "name": "chest.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 5.960464477539063e-8
+        },
+        {
+          "name": "clavicleL.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.6547063497185377e-7
+        },
+        {
+          "name": "clavicleL.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.7881393432617188e-7
+        },
+        {
+          "name": "clavicleL.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.7881393432617188e-7
+        },
+        {
+          "name": "upper_armL.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.0000915825366973877
+        },
+        {
+          "name": "upper_armL.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 2.384185791015625e-7
+        },
+        {
+          "name": "upper_armL.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 2.384185791015625e-7
+        },
+        {
+          "name": "forearmL.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00011804699897766113
+        },
+        {
+          "name": "forearmL.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.341104507446289e-7
+        },
+        {
+          "name": "forearmL.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 4.76837158203125e-7
+        },
+        {
+          "name": "handL.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00009784102439880371
+        },
+        {
+          "name": "handL.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 5.438923835754395e-7
+        },
+        {
+          "name": "handL.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 2.980232238769531e-7
+        },
+        {
+          "name": "clavicleR.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.6547063497185377e-7
+        },
+        {
+          "name": "clavicleR.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.7881393432617188e-7
+        },
+        {
+          "name": "clavicleR.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.7881393432617188e-7
+        },
+        {
+          "name": "upper_armR.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.0000915825366973877
+        },
+        {
+          "name": "upper_armR.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 2.384185791015625e-7
+        },
+        {
+          "name": "upper_armR.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 3.5762786865234375e-7
+        },
+        {
+          "name": "forearmR.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00011783838272094727
+        },
+        {
+          "name": "forearmR.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 6.239861249923706e-8
+        },
+        {
+          "name": "forearmR.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 5.364418029785156e-7
+        },
+        {
+          "name": "handR.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00009801983833312988
+        },
+        {
+          "name": "handR.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 5.289912223815918e-7
+        },
+        {
+          "name": "handR.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.7881393432617188e-7
+        },
+        {
+          "name": "neck.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00006978213787078857
+        },
+        {
+          "name": "neck.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.1920928955078125e-7
+        },
+        {
+          "name": "head.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.000011768192052841187
+        },
+        {
+          "name": "head.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.4901161193847656e-8
+        },
+        {
+          "name": "head.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 5.960464477539063e-8
+        },
+        {
+          "name": "thighL.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.000046759843826293945
+        },
+        {
+          "name": "thighL.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00006812810897827148
+        },
+        {
+          "name": "thighL.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 4.172325134277344e-7
+        },
+        {
+          "name": "shinL.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00015431642532348633
+        },
+        {
+          "name": "shinL.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00008165836334228516
+        },
+        {
+          "name": "shinL.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.7881393432617188e-7
+        },
+        {
+          "name": "footL.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00015819072723388672
+        },
+        {
+          "name": "footL.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.000059545040130615234
+        },
+        {
+          "name": "footL.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.1920928955078125e-7
+        },
+        {
+          "name": "toeL.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00007852911949157715
+        },
+        {
+          "name": "toeL.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 4.470348358154297e-7
+        },
+        {
+          "name": "toeL.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 2.980232238769531e-7
+        },
+        {
+          "name": "thighR.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.000046759843826293945
+        },
+        {
+          "name": "thighR.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00006812810897827148
+        },
+        {
+          "name": "thighR.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.7881393432617188e-7
+        },
+        {
+          "name": "shinR.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00015473365783691406
+        },
+        {
+          "name": "shinR.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00008165836334228516
+        },
+        {
+          "name": "shinR.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 2.980232238769531e-7
+        },
+        {
+          "name": "footR.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00015807151794433594
+        },
+        {
+          "name": "footR.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.000059545040130615234
+        },
+        {
+          "name": "footR.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.7881393432617188e-7
+        },
+        {
+          "name": "toeR.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00007858872413635254
+        },
+        {
+          "name": "toeR.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 5.066394805908203e-7
+        },
+        {
+          "name": "toeR.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 3.5762786865234375e-7
+        }
+      ]
+    },
+    {
+      "name": "jump",
+      "durationSame": true,
+      "tracks": [
+        {
+          "name": "hips.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00037384033203125
+        },
+        {
+          "name": "hips.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 7.450580596923828e-9
+        },
+        {
+          "name": "hips.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 5.960464477539063e-8
+        },
+        {
+          "name": "skirtBack.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00036793947219848633
+        },
+        {
+          "name": "skirtBack.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.043081283569336e-7
+        },
+        {
+          "name": "skirtBack.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 7.748603820800781e-7
+        },
+        {
+          "name": "skirtFront.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.000367969274520874
+        },
+        {
+          "name": "skirtFront.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 5.960464477539063e-8
+        },
+        {
+          "name": "skirtFront.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.1920928955078125e-7
+        },
+        {
+          "name": "skirtL.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.0003679990768432617
+        },
+        {
+          "name": "skirtL.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 2.384185791015625e-7
+        },
+        {
+          "name": "skirtL.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.0000010728836059570312
+        },
+        {
+          "name": "skirtR.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.0003679990768432617
+        },
+        {
+          "name": "skirtR.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 2.384185791015625e-7
+        },
+        {
+          "name": "skirtR.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.0000010728836059570312
+        },
+        {
+          "name": "spine.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00008034706115722656
+        },
+        {
+          "name": "spine.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 5.960464477539063e-8
+        },
+        {
+          "name": "spine.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 5.960464477539063e-8
+        },
+        {
+          "name": "chest.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00008440017700195312
+        },
+        {
+          "name": "chest.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 5.960464477539063e-8
+        },
+        {
+          "name": "chest.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 5.960464477539063e-8
+        },
+        {
+          "name": "clavicleL.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 2.144439150697508e-7
+        },
+        {
+          "name": "clavicleL.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 2.086162567138672e-7
+        },
+        {
+          "name": "clavicleL.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.1920928955078125e-7
+        },
+        {
+          "name": "upper_armL.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00009137392044067383
+        },
+        {
+          "name": "upper_armL.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 2.682209014892578e-7
+        },
+        {
+          "name": "upper_armL.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.1920928955078125e-7
+        },
+        {
+          "name": "forearmL.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00011792778968811035
+        },
+        {
+          "name": "forearmL.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.043081283569336e-7
+        },
+        {
+          "name": "forearmL.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 6.556510925292969e-7
+        },
+        {
+          "name": "handL.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00009813904762268066
+        },
+        {
+          "name": "handL.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 5.736947059631348e-7
+        },
+        {
+          "name": "handL.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.1920928955078125e-7
+        },
+        {
+          "name": "clavicleR.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 2.144439150697508e-7
+        },
+        {
+          "name": "clavicleR.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 2.086162567138672e-7
+        },
+        {
+          "name": "clavicleR.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.1920928955078125e-7
+        },
+        {
+          "name": "upper_armR.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00009137392044067383
+        },
+        {
+          "name": "upper_armR.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 2.682209014892578e-7
+        },
+        {
+          "name": "upper_armR.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.1920928955078125e-7
+        },
+        {
+          "name": "forearmR.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00011792778968811035
+        },
+        {
+          "name": "forearmR.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.043081283569336e-7
+        },
+        {
+          "name": "forearmR.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 6.556510925292969e-7
+        },
+        {
+          "name": "handR.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00009813904762268066
+        },
+        {
+          "name": "handR.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 5.736947059631348e-7
+        },
+        {
+          "name": "handR.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.1920928955078125e-7
+        },
+        {
+          "name": "neck.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00007002055644989014
+        },
+        {
+          "name": "neck.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.4901161193847656e-7
+        },
+        {
+          "name": "neck.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 5.960464477539063e-8
+        },
+        {
+          "name": "head.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.000012036412954330444
+        },
+        {
+          "name": "head.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 7.450580596923828e-9
+        },
+        {
+          "name": "head.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.1920928955078125e-7
+        },
+        {
+          "name": "thighL.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.000046759843826293945
+        },
+        {
+          "name": "thighL.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.000038295984268188477
+        },
+        {
+          "name": "thighL.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 2.384185791015625e-7
+        },
+        {
+          "name": "shinL.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.0001545548439025879
+        },
+        {
+          "name": "shinL.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00007021427154541016
+        },
+        {
+          "name": "shinL.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.1920928955078125e-7
+        },
+        {
+          "name": "footL.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.0001583695411682129
+        },
+        {
+          "name": "footL.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.000030219554901123047
+        },
+        {
+          "name": "footL.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 2.980232238769531e-7
+        },
+        {
+          "name": "toeL.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00007864832878112793
+        },
+        {
+          "name": "toeL.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 5.066394805908203e-7
+        },
+        {
+          "name": "toeL.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 4.172325134277344e-7
+        },
+        {
+          "name": "thighR.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.000046759843826293945
+        },
+        {
+          "name": "thighR.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.000038295984268188477
+        },
+        {
+          "name": "thighR.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 2.384185791015625e-7
+        },
+        {
+          "name": "shinR.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.0001545548439025879
+        },
+        {
+          "name": "shinR.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00007021427154541016
+        },
+        {
+          "name": "shinR.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.1920928955078125e-7
+        },
+        {
+          "name": "footR.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.0001583695411682129
+        },
+        {
+          "name": "footR.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.000030219554901123047
+        },
+        {
+          "name": "footR.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 2.980232238769531e-7
+        },
+        {
+          "name": "toeR.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00007864832878112793
+        },
+        {
+          "name": "toeR.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 5.066394805908203e-7
+        },
+        {
+          "name": "toeR.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 4.172325134277344e-7
+        }
+      ]
+    }
+  ],
+  "candidateClipDifferences": [
+    {
+      "name": "walk-smooth-gait",
+      "durationSame": true,
+      "tracks": [
+        {
+          "name": "hips.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.0003739595413208008
+        },
+        {
+          "name": "hips.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.4901161193847656e-8
+        },
+        {
+          "name": "hips.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 5.960464477539063e-8
+        },
+        {
+          "name": "skirtBack.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00036832690238952637
+        },
+        {
+          "name": "skirtBack.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 5.960464477539063e-8
+        },
+        {
+          "name": "skirtBack.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 7.748603820800781e-7
+        },
+        {
+          "name": "skirtFront.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.000368267297744751
+        },
+        {
+          "name": "skirtFront.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 8.940696716308594e-8
+        },
+        {
+          "name": "skirtFront.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.1920928955078125e-7
+        },
+        {
+          "name": "skirtL.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.0003681480884552002
+        },
+        {
+          "name": "skirtL.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 2.5331974029541016e-7
+        },
+        {
+          "name": "skirtL.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.0000010728836059570312
+        },
+        {
+          "name": "skirtR.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.0003681480884552002
+        },
+        {
+          "name": "skirtR.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 2.5331974029541016e-7
+        },
+        {
+          "name": "skirtR.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.0000010728836059570312
+        },
+        {
+          "name": "spine.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.000080108642578125
+        },
+        {
+          "name": "spine.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 5.960464477539063e-8
+        },
+        {
+          "name": "spine.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 5.960464477539063e-8
+        },
+        {
+          "name": "chest.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00008448958396911621
+        },
+        {
+          "name": "chest.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 5.960464477539063e-8
+        },
+        {
+          "name": "chest.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 5.960464477539063e-8
+        },
+        {
+          "name": "clavicleL.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.669638081125413e-7
+        },
+        {
+          "name": "clavicleL.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 2.086162567138672e-7
+        },
+        {
+          "name": "clavicleL.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.1920928955078125e-7
+        },
+        {
+          "name": "upper_armL.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00009137392044067383
+        },
+        {
+          "name": "upper_armL.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 2.384185791015625e-7
+        },
+        {
+          "name": "upper_armL.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.1920928955078125e-7
+        },
+        {
+          "name": "forearmL.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00011774897575378418
+        },
+        {
+          "name": "forearmL.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 8.940696716308594e-8
+        },
+        {
+          "name": "forearmL.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 5.364418029785156e-7
+        },
+        {
+          "name": "handL.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00009760260581970215
+        },
+        {
+          "name": "handL.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 5.140900611877441e-7
+        },
+        {
+          "name": "handL.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 4.172325134277344e-7
+        },
+        {
+          "name": "clavicleR.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.669638081125413e-7
+        },
+        {
+          "name": "clavicleR.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 2.086162567138672e-7
+        },
+        {
+          "name": "clavicleR.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.1920928955078125e-7
+        },
+        {
+          "name": "upper_armR.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00009137392044067383
+        },
+        {
+          "name": "upper_armR.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 2.384185791015625e-7
+        },
+        {
+          "name": "upper_armR.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.7881393432617188e-7
+        },
+        {
+          "name": "forearmR.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00011774897575378418
+        },
+        {
+          "name": "forearmR.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.4156103134155273e-7
+        },
+        {
+          "name": "forearmR.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 5.364418029785156e-7
+        },
+        {
+          "name": "handR.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00009801983833312988
+        },
+        {
+          "name": "handR.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 5.21540641784668e-7
+        },
+        {
+          "name": "handR.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.1920928955078125e-7
+        },
+        {
+          "name": "neck.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00006982684135437012
+        },
+        {
+          "name": "neck.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.4901161193847656e-7
+        },
+        {
+          "name": "neck.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 5.960464477539063e-8
+        },
+        {
+          "name": "head.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.000011809170246124268
+        },
+        {
+          "name": "head.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 7.450580596923828e-9
+        },
+        {
+          "name": "head.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.1920928955078125e-7
+        },
+        {
+          "name": "thighL.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.000046759843826293945
+        },
+        {
+          "name": "thighL.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.000057190656661987305
+        },
+        {
+          "name": "thighL.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.7881393432617188e-7
+        },
+        {
+          "name": "shinL.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.0001544356346130371
+        },
+        {
+          "name": "shinL.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00007218122482299805
+        },
+        {
+          "name": "shinL.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 2.980232238769531e-7
+        },
+        {
+          "name": "footL.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.0001583099365234375
+        },
+        {
+          "name": "footL.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00004029273986816406
+        },
+        {
+          "name": "footL.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.7881393432617188e-7
+        },
+        {
+          "name": "toeL.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00007849931716918945
+        },
+        {
+          "name": "toeL.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 4.470348358154297e-7
+        },
+        {
+          "name": "toeL.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 4.172325134277344e-7
+        },
+        {
+          "name": "thighR.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.000046759843826293945
+        },
+        {
+          "name": "thighR.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.000057190656661987305
+        },
+        {
+          "name": "thighR.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.1920928955078125e-7
+        },
+        {
+          "name": "shinR.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00015461444854736328
+        },
+        {
+          "name": "shinR.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00007218122482299805
+        },
+        {
+          "name": "shinR.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 3.5762786865234375e-7
+        },
+        {
+          "name": "footR.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00015813112258911133
+        },
+        {
+          "name": "footR.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00004029273986816406
+        },
+        {
+          "name": "footR.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.1920928955078125e-7
+        },
+        {
+          "name": "toeR.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00007855892181396484
+        },
+        {
+          "name": "toeR.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 5.066394805908203e-7
+        },
+        {
+          "name": "toeR.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 2.384185791015625e-7
+        }
+      ]
+    },
+    {
+      "name": "run-smooth-gait",
+      "durationSame": true,
+      "tracks": [
+        {
+          "name": "hips.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.0003739595413208008
+        },
+        {
+          "name": "hips.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.4901161193847656e-8
+        },
+        {
+          "name": "hips.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 5.960464477539063e-8
+        },
+        {
+          "name": "skirtBack.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00036841630935668945
+        },
+        {
+          "name": "skirtBack.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 7.450580596923828e-8
+        },
+        {
+          "name": "skirtBack.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 7.748603820800781e-7
+        },
+        {
+          "name": "skirtFront.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.0003682076930999756
+        },
+        {
+          "name": "skirtFront.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.1920928955078125e-7
+        },
+        {
+          "name": "skirtFront.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.1920928955078125e-7
+        },
+        {
+          "name": "skirtL.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00036793947219848633
+        },
+        {
+          "name": "skirtL.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 2.8312206268310547e-7
+        },
+        {
+          "name": "skirtL.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.0000010728836059570312
+        },
+        {
+          "name": "skirtR.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00036793947219848633
+        },
+        {
+          "name": "skirtR.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 2.8312206268310547e-7
+        },
+        {
+          "name": "skirtR.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.0000010728836059570312
+        },
+        {
+          "name": "spine.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00008058547973632812
+        },
+        {
+          "name": "spine.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 7.450580596923828e-9
+        },
+        {
+          "name": "spine.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 5.960464477539063e-8
+        },
+        {
+          "name": "chest.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00008416175842285156
+        },
+        {
+          "name": "chest.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 2.9802322387695312e-8
+        },
+        {
+          "name": "chest.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 5.960464477539063e-8
+        },
+        {
+          "name": "clavicleL.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.6547063497185377e-7
+        },
+        {
+          "name": "clavicleL.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.7881393432617188e-7
+        },
+        {
+          "name": "clavicleL.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.7881393432617188e-7
+        },
+        {
+          "name": "upper_armL.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.0000915825366973877
+        },
+        {
+          "name": "upper_armL.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 2.384185791015625e-7
+        },
+        {
+          "name": "upper_armL.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 2.384185791015625e-7
+        },
+        {
+          "name": "forearmL.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00011804699897766113
+        },
+        {
+          "name": "forearmL.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.341104507446289e-7
+        },
+        {
+          "name": "forearmL.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 4.76837158203125e-7
+        },
+        {
+          "name": "handL.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00009784102439880371
+        },
+        {
+          "name": "handL.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 5.438923835754395e-7
+        },
+        {
+          "name": "handL.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 2.980232238769531e-7
+        },
+        {
+          "name": "clavicleR.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.6547063497185377e-7
+        },
+        {
+          "name": "clavicleR.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.7881393432617188e-7
+        },
+        {
+          "name": "clavicleR.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.7881393432617188e-7
+        },
+        {
+          "name": "upper_armR.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.0000915825366973877
+        },
+        {
+          "name": "upper_armR.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 2.384185791015625e-7
+        },
+        {
+          "name": "upper_armR.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 3.5762786865234375e-7
+        },
+        {
+          "name": "forearmR.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00011783838272094727
+        },
+        {
+          "name": "forearmR.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 6.239861249923706e-8
+        },
+        {
+          "name": "forearmR.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 5.364418029785156e-7
+        },
+        {
+          "name": "handR.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00009801983833312988
+        },
+        {
+          "name": "handR.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 5.289912223815918e-7
+        },
+        {
+          "name": "handR.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.7881393432617188e-7
+        },
+        {
+          "name": "neck.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00006978213787078857
+        },
+        {
+          "name": "neck.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.1920928955078125e-7
+        },
+        {
+          "name": "head.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.000011768192052841187
+        },
+        {
+          "name": "head.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.4901161193847656e-8
+        },
+        {
+          "name": "head.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 5.960464477539063e-8
+        },
+        {
+          "name": "thighL.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.000046759843826293945
+        },
+        {
+          "name": "thighL.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00008194800466299057
+        },
+        {
+          "name": "thighL.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 4.172325134277344e-7
+        },
+        {
+          "name": "shinL.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00015431642532348633
+        },
+        {
+          "name": "shinL.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00008231401443481445
+        },
+        {
+          "name": "shinL.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.7881393432617188e-7
+        },
+        {
+          "name": "footL.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00015819072723388672
+        },
+        {
+          "name": "footL.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.0000642538070678711
+        },
+        {
+          "name": "footL.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.1920928955078125e-7
+        },
+        {
+          "name": "toeL.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00007852911949157715
+        },
+        {
+          "name": "toeL.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 4.470348358154297e-7
+        },
+        {
+          "name": "toeL.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 2.980232238769531e-7
+        },
+        {
+          "name": "thighR.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.000046759843826293945
+        },
+        {
+          "name": "thighR.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00008189119398593903
+        },
+        {
+          "name": "thighR.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.7881393432617188e-7
+        },
+        {
+          "name": "shinR.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00015473365783691406
+        },
+        {
+          "name": "shinR.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00008231401443481445
+        },
+        {
+          "name": "shinR.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 2.980232238769531e-7
+        },
+        {
+          "name": "footR.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00015807151794433594
+        },
+        {
+          "name": "footR.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.0000642538070678711
+        },
+        {
+          "name": "footR.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 1.7881393432617188e-7
+        },
+        {
+          "name": "toeR.position",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 0.00007858872413635254
+        },
+        {
+          "name": "toeR.quaternion",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 5.066394805908203e-7
+        },
+        {
+          "name": "toeR.scale",
+          "nameSame": true,
+          "timesMaxDiff": 0,
+          "valuesMaxDiff": 3.5762786865234375e-7
+        }
+      ]
+    }
+  ],
+  "surfaceChanges": {
+    "headUniformScale": 0.9997019931345806,
+    "headUniformScaleMaxResidual": 2.3457832432072223e-7,
+    "outfit": {
+      "movedExportedVertices": 8242,
+      "totalExportedVertices": 22950,
+      "minMovedY": 0.930317759513855,
+      "maxMovedY": 2.122084617614746,
+      "maxDisplacement": 0.04149006519127055,
+      "meanDisplacement": 0.0005928556118295395,
+      "atOld": [
+        -0.2708023190498352,
+        1.183004379272461,
+        0.10378846526145935
+      ],
+      "atNew": [
+        -0.2886822819709778,
+        1.2193655967712402,
+        0.09486690163612366
+      ],
+      "bins": {
+        "belowWaist": 3791,
+        "waist": 3006,
+        "torso": 818,
+        "shoulder": 627
+      }
+    },
+    "jointListSame": true
+  },
+  "newAssetGait": {
+    "file": "public/characters/human/render-lab/d1-outfit-rodin.web-1k.glb",
+    "measurements": {
+      "walk": {
+        "original": {
+          "minSole120": -0.00012346812541189425,
+          "minSole480": -0.00012346812541189425,
+          "maxVertexLoopDifference": 0,
+          "leftShoeLoopVelocity": {
+            "start": -0.6142934429568084,
+            "end": 0.18885697347600333,
+            "difference": 0.8031504164328118
+          }
+        },
+        "smooth": {
+          "minSole120": 8.85398412833055e-8,
+          "minSole480": -0.000009654509363422534,
+          "maxVertexLoopDifference": 0,
+          "leftShoeLoopVelocity": {
+            "start": -0.6118640016559767,
+            "end": -0.5307741245988653,
+            "difference": 0.08108987705711135
+          }
+        }
+      },
+      "run": {
+        "original": {
+          "minSole120": -0.0005779609225174589,
+          "minSole480": -0.0005779609225174589,
+          "maxVertexLoopDifference": 0,
+          "leftShoeLoopVelocity": {
+            "start": -1.8315965238358853,
+            "end": 0.30967174409497505,
+            "difference": 2.1412682679308603
+          }
+        },
+        "smooth": {
+          "minSole120": 1.0027892719715117e-7,
+          "minSole480": -0.00004983368216166309,
+          "maxVertexLoopDifference": 0,
+          "leftShoeLoopVelocity": {
+            "start": -1.8212994738340842,
+            "end": -1.6373148652369274,
+            "difference": 0.18398460859715682
+          }
+        }
+      }
+    }
+  }
+}

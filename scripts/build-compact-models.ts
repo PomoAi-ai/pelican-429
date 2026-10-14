@@ -22,7 +22,7 @@ type Document = {
   bufferViews: View[]; accessors: Accessor[];
   meshes: { primitives: { attributes: Record<string, number>; indices?: number; targets?: Record<string, number>[] }[] }[];
   animations?: { samplers: { input: number; output: number }[]; channels: { sampler: number; target: { path: string } }[] }[];
-  images?: { bufferView: number }[]; skins: { inverseBindMatrices: number }[];
+  images?: { bufferView: number }[]; skins?: { inverseBindMatrices: number }[];
 };
 type ModelReport = { source: string; output: string; sourceSha256: string; sourceBytes: number; outputBytes: number;
   sourceBufferBytes: number; storedBufferBytes: number; images: unknown[] };
@@ -85,7 +85,7 @@ function selectedViews(json: Document) {
   for (const animation of json.animations ?? []) for (const sampler of animation.samplers) {
     assert.ok(!labels.has(sampler.input), 'Animation time accessor shares quantized data');
   }
-  for (const skin of json.skins) assert.ok(!labels.has(skin.inverseBindMatrices), 'Inverse bind accessor shares quantized data');
+  for (const skin of json.skins ?? []) assert.ok(!labels.has(skin.inverseBindMatrices), 'Inverse bind accessor shares quantized data');
   const selected = new Map<number, { stride: number; count: number; labels: Set<string> }>();
   for (const [index, accessor] of json.accessors.entries()) {
     const names = labels.get(index), stride = components[accessor.type]! * 4;

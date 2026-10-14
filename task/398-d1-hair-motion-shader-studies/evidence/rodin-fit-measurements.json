@@ -1,0 +1,79 @@
+{
+  "asset": "public/characters/human/render-lab/d1-outfit-rodin-hair.web-1k.glb",
+  "units": "游戏格",
+  "scope": "独立rodin-fit实例几何，原始资源保持",
+  "sourceVertices": 10049,
+  "addedVertices": 964,
+  "addedTriangles": 1872,
+  "maxInnerRootChange": 0.07000003895706414,
+  "outerVerticesMoved": 0,
+  "fringeTipsMoved": 0,
+  "centralPartingMoved": 0,
+  "coreRootClearance": {
+    "samples": 53,
+    "min": 0.017999948086111217,
+    "median": 0.018000019256647792,
+    "p90": 0.030355522665328205
+  },
+  "sideWindow": {
+    "sampling": "y=2.20..2.425,z=0..0.14，步长0.0125，沿±X观察",
+    "left": {
+      "total": 216,
+      "beforeExposed": 162,
+      "afterExposed": 5
+    },
+    "right": {
+      "total": 216,
+      "beforeExposed": 153,
+      "afterExposed": 5
+    }
+  },
+  "frontOutline": {
+    "rowCount": 94,
+    "horizontalStep": 0.01,
+    "maximumChange": 0
+  },
+  "boundsUnchanged": true,
+  "hiddenRootEmbedding": {
+    "count": 45,
+    "minRadialGap": -0.022971847479156815,
+    "yRange": [
+      2.5299999713897705,
+      2.622999906539917
+    ],
+    "exposedFromFrontAndSides": 0,
+    "note": "内圈根部埋入头部，全部在原发束/头部后面；该高度形变权重为0。可见外层保持在头部外。"
+  },
+  "motion": {
+    "maxRootTarget": 0,
+    "maxTipTarget": 0.019709015265107155,
+    "clips": {
+      "idle": {
+        "maxAddedTipDisplacement": 0.00011942560179768984
+      },
+      "walk": {
+        "maxAddedTipDisplacement": 0.005765619515573658
+      },
+      "run": {
+        "maxAddedTipDisplacement": 0.004313719055133282
+      },
+      "jump": {
+        "maxAddedTipDisplacement": 0.008599643482923374
+      }
+    }
+  },
+  "checks": {
+    "finiteAttributes": true,
+    "sourcePositionNormalUvIndexUnchanged": true,
+    "hullSharesGeometryAndWeights": true,
+    "motionOffResets": true,
+    "disposeRestoresFitThenOriginal": true
+  },
+  "visualEvidence": [
+    "rodin-fit-before-front.png",
+    "rodin-fit-before-side.png",
+    "rodin-fit-front-final.png",
+    "rodin-fit-side-final.png"
+  ],
+  "limitations": "侧窗下缘保留少量自然间隙；保留隐蔽内圈根部嵌入，不宣称完全无几何相交。"
+}

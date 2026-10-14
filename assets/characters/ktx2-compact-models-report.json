@@ -1760,6 +1760,1076 @@
           "values": 56140
         }
       }
+    },
+    {
+      "source": "./characters/human/customization/d1-base-static.glb",
+      "output": "./characters/human/customization/d1-base-static.ktx2-compact.glb",
+      "sourceSha256": "cbd5ed5b8c097630c02513f485442debc699cdcd6376a8708275cc57196c7c5a",
+      "sourceBytes": 24453488,
+      "outputBytes": 2130176,
+      "sourceBufferBytes": 2841460,
+      "storedBufferBytes": 1308533,
+      "images": [
+        {
+          "name": "texture_diffuse_skin",
+          "compression": "ETC1S",
+          "transferFunction": "sRGB",
+          "mipLevels": 10,
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 512,
+          "outputHeight": 512,
+          "kind": "color",
+          "sourceBytes": 2207330,
+          "outputBytes": 42744,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 1398100
+        },
+        {
+          "name": "texture_metallic-texture_roughness",
+          "compression": "UASTC",
+          "transferFunction": "linear",
+          "rdoLambda": 0.5,
+          "mipLevels": 10,
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 512,
+          "outputHeight": 512,
+          "kind": "data",
+          "sourceBytes": 2051136,
+          "outputBytes": 129353,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 1398100
+        },
+        {
+          "name": "texture_normal",
+          "compression": "UASTC",
+          "transferFunction": "linear",
+          "mipLevels": 10,
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 512,
+          "outputHeight": 512,
+          "kind": "normal",
+          "sourceBytes": 2993403,
+          "outputBytes": 170489,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 1398100
+        },
+        {
+          "name": "hair-diffuse",
+          "compression": "ETC1S",
+          "transferFunction": "sRGB",
+          "mipLevels": 10,
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 512,
+          "outputHeight": 512,
+          "kind": "color",
+          "sourceBytes": 2995898,
+          "outputBytes": 54635,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 1398100
+        },
+        {
+          "name": "texture_metallic-texture_roughness",
+          "compression": "UASTC",
+          "transferFunction": "linear",
+          "rdoLambda": 0.5,
+          "mipLevels": 10,
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 512,
+          "outputHeight": 512,
+          "kind": "data",
+          "sourceBytes": 2262248,
+          "outputBytes": 126121,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 1398100
+        },
+        {
+          "name": "head-normal",
+          "compression": "UASTC",
+          "transferFunction": "linear",
+          "mipLevels": 10,
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 512,
+          "outputHeight": 512,
+          "kind": "normal",
+          "sourceBytes": 4106565,
+          "outputBytes": 135213,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 1398100
+        },
+        {
+          "name": "head-diffuse",
+          "compression": "ETC1S",
+          "transferFunction": "sRGB",
+          "mipLevels": 10,
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 512,
+          "outputHeight": 512,
+          "kind": "color",
+          "sourceBytes": 2810517,
+          "outputBytes": 36347,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 1398100
+        },
+        {
+          "name": "texture_metallic-texture_roughness",
+          "compression": "UASTC",
+          "transferFunction": "linear",
+          "rdoLambda": 0.5,
+          "mipLevels": 10,
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 512,
+          "outputHeight": 512,
+          "kind": "data",
+          "sourceBytes": 2178343,
+          "outputBytes": 116158,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 1398100
+        }
+      ],
+      "before": "./characters/human/customization/d1-base-static.ktx2.glb",
+      "beforeBytes": 2656364,
+      "beforeSha256": "02ca948abdde72419017418dde9c518c26404c6eb42630d4172eca2ec4cc68d7",
+      "quantizedViews": 16,
+      "bufferErrors": {
+        "POSITION": {
+          "maxAbsoluteError": 0.0000152587890625,
+          "values": 184686
+        },
+        "NORMAL": {
+          "maxAbsoluteError": 0.00000762939453125,
+          "values": 184686
+        },
+        "TEXCOORD_0": {
+          "maxAbsoluteError": 0.000003814697265625,
+          "values": 123124
+        },
+        "COLOR_0": {
+          "maxAbsoluteError": 0.0000037550926208496094,
+          "values": 642
+        }
+      }
+    },
+    {
+      "source": "./characters/human/customization/d1-base-animated.glb",
+      "output": "./characters/human/customization/d1-base-animated.ktx2-compact.glb",
+      "sourceSha256": "58e5cfc49032ab1a4eccc1e84ebf5bf9d0dce0a88f5c4c045f443115b6577346",
+      "sourceBytes": 21309608,
+      "outputBytes": 2511456,
+      "sourceBufferBytes": 5966524,
+      "storedBufferBytes": 1929035,
+      "images": [
+        {
+          "name": "texture_diffuse_skin",
+          "compression": "ETC1S",
+          "transferFunction": "sRGB",
+          "mipLevels": 10,
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 512,
+          "outputHeight": 512,
+          "kind": "color",
+          "sourceBytes": 2207330,
+          "outputBytes": 42744,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 1398100
+        },
+        {
+          "name": "texture_metallic-texture_roughness",
+          "compression": "UASTC",
+          "transferFunction": "linear",
+          "rdoLambda": 0.5,
+          "mipLevels": 10,
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 512,
+          "outputHeight": 512,
+          "kind": "data",
+          "sourceBytes": 2051136,
+          "outputBytes": 129353,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 1398100
+        },
+        {
+          "name": "hair-basecolor",
+          "compression": "ETC1S",
+          "transferFunction": "sRGB",
+          "mipLevels": 10,
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 512,
+          "outputHeight": 512,
+          "kind": "color",
+          "sourceBytes": 2327445,
+          "outputBytes": 44366,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 1398100
+        },
+        {
+          "name": "head-normal",
+          "compression": "UASTC",
+          "transferFunction": "linear",
+          "mipLevels": 10,
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 512,
+          "outputHeight": 512,
+          "kind": "normal",
+          "sourceBytes": 3780641,
+          "outputBytes": 121358,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 1398100
+        },
+        {
+          "name": "head-diffuse",
+          "compression": "ETC1S",
+          "transferFunction": "sRGB",
+          "mipLevels": 10,
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 512,
+          "outputHeight": 512,
+          "kind": "color",
+          "sourceBytes": 2631826,
+          "outputBytes": 33429,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 1398100
+        },
+        {
+          "name": "texture_metallic-texture_roughness",
+          "compression": "UASTC",
+          "transferFunction": "linear",
+          "rdoLambda": 0.5,
+          "mipLevels": 10,
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 512,
+          "outputHeight": 512,
+          "kind": "data",
+          "sourceBytes": 2178343,
+          "outputBytes": 116158,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 1398100
+        },
+        {
+          "name": "eye-atlas",
+          "compression": "ETC1S",
+          "transferFunction": "sRGB",
+          "mipLevels": 10,
+          "width": 1024,
+          "height": 1024,
+          "outputWidth": 512,
+          "outputHeight": 512,
+          "kind": "color",
+          "sourceBytes": 104145,
+          "outputBytes": 23365,
+          "sourceRgbaMipBytes": 5592404,
+          "outputRgbaMipBytes": 1398100
+        }
+      ],
+      "before": "./characters/human/customization/d1-base-animated.ktx2.glb",
+      "beforeBytes": 3273956,
+      "beforeSha256": "83f68912ebb85dc96e79ee87efd041211ecc94b5322a06b9ab0f75db4c982a1c",
+      "quantizedViews": 42,
+      "bufferErrors": {
+        "POSITION": {
+          "maxAbsoluteError": 0.0000152587890625,
+          "values": 272415
+        },
+        "NORMAL": {
+          "maxAbsoluteError": 0.00000762939453125,
+          "values": 272415
+        },
+        "TEXCOORD_0": {
+          "maxAbsoluteError": 0.000003814697265625,
+          "values": 181610
+        },
+        "WEIGHTS_0": {
+          "maxAbsoluteError": 0.00000762939453125,
+          "values": 73220
+        },
+        "COLOR_0": {
+          "maxAbsoluteError": 0.0000037550926208496094,
+          "values": 636
+        },
+        "animation:rotation": {
+          "maxAbsoluteError": 0.000003814697265625,
+          "values": 4508
+        },
+        "animation:translation": {
+          "maxAbsoluteError": 0.000003769993782043457,
+          "values": 438
+        }
+      }
+    },
+    {
+      "source": "./characters/human/customization/d1-base-game.glb",
+      "output": "./characters/human/customization/d1-base-game.ktx2-compact.glb",
+      "sourceSha256": "f9f531a570992242f963aa5b8ddde2c72247b14278911535834e00a444b15d1f",
+      "sourceBytes": 19101424,
+      "outputBytes": 1817296,
+      "sourceBufferBytes": 3758330,
+      "storedBufferBytes": 1234909,
+      "images": [
+        {
+          "name": "texture_diffuse_skin",
+          "compression": "ETC1S",
+          "transferFunction": "sRGB",
+          "mipLevels": 10,
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 512,
+          "outputHeight": 512,
+          "kind": "color",
+          "sourceBytes": 2207330,
+          "outputBytes": 42744,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 1398100
+        },
+        {
+          "name": "texture_metallic-texture_roughness",
+          "compression": "UASTC",
+          "transferFunction": "linear",
+          "rdoLambda": 0.5,
+          "mipLevels": 10,
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 512,
+          "outputHeight": 512,
+          "kind": "data",
+          "sourceBytes": 2051136,
+          "outputBytes": 129353,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 1398100
+        },
+        {
+          "name": "hair-basecolor",
+          "compression": "ETC1S",
+          "transferFunction": "sRGB",
+          "mipLevels": 10,
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 512,
+          "outputHeight": 512,
+          "kind": "color",
+          "sourceBytes": 2327445,
+          "outputBytes": 44366,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 1398100
+        },
+        {
+          "name": "head-normal",
+          "compression": "UASTC",
+          "transferFunction": "linear",
+          "mipLevels": 10,
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 512,
+          "outputHeight": 512,
+          "kind": "normal",
+          "sourceBytes": 3780641,
+          "outputBytes": 121358,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 1398100
+        },
+        {
+          "name": "head-diffuse",
+          "compression": "ETC1S",
+          "transferFunction": "sRGB",
+          "mipLevels": 10,
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 512,
+          "outputHeight": 512,
+          "kind": "color",
+          "sourceBytes": 2631826,
+          "outputBytes": 33429,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 1398100
+        },
+        {
+          "name": "texture_metallic-texture_roughness",
+          "compression": "UASTC",
+          "transferFunction": "linear",
+          "rdoLambda": 0.5,
+          "mipLevels": 10,
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 512,
+          "outputHeight": 512,
+          "kind": "data",
+          "sourceBytes": 2178343,
+          "outputBytes": 116158,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 1398100
+        },
+        {
+          "name": "eye-atlas",
+          "compression": "ETC1S",
+          "transferFunction": "sRGB",
+          "mipLevels": 10,
+          "width": 1024,
+          "height": 1024,
+          "outputWidth": 512,
+          "outputHeight": 512,
+          "kind": "color",
+          "sourceBytes": 104145,
+          "outputBytes": 23365,
+          "sourceRgbaMipBytes": 5592404,
+          "outputRgbaMipBytes": 1398100
+        }
+      ],
+      "before": "./characters/human/customization/d1-base-game.ktx2.glb",
+      "beforeBytes": 2301220,
+      "beforeSha256": "693c4e2b8419d4ddc4e7720bd170c947660b0a5f2220dac2a8a284a729ed2b0f",
+      "quantizedViews": 42,
+      "bufferErrors": {
+        "POSITION": {
+          "maxAbsoluteError": 0.0000152587890625,
+          "values": 172365
+        },
+        "NORMAL": {
+          "maxAbsoluteError": 0.00000762939453125,
+          "values": 172365
+        },
+        "TEXCOORD_0": {
+          "maxAbsoluteError": 0.000003814697265625,
+          "values": 114910
+        },
+        "WEIGHTS_0": {
+          "maxAbsoluteError": 0.00000762939453125,
+          "values": 41728
+        },
+        "COLOR_0": {
+          "maxAbsoluteError": 0.0000037550926208496094,
+          "values": 636
+        },
+        "animation:rotation": {
+          "maxAbsoluteError": 0.000003814697265625,
+          "values": 4508
+        },
+        "animation:translation": {
+          "maxAbsoluteError": 0.000003769993782043457,
+          "values": 438
+        }
+      }
+    },
+    {
+      "source": "./characters/human/customization/d1-base-light.glb",
+      "output": "./characters/human/customization/d1-base-light.ktx2-compact.glb",
+      "sourceSha256": "f839e2ef51fb13ff46aa20f05a702e786d161fc3fda1192b147479f8ab3d07ae",
+      "sourceBytes": 18364656,
+      "outputBytes": 1568948,
+      "sourceBufferBytes": 3021582,
+      "storedBufferBytes": 986589,
+      "images": [
+        {
+          "name": "texture_diffuse_skin",
+          "compression": "ETC1S",
+          "transferFunction": "sRGB",
+          "mipLevels": 10,
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 512,
+          "outputHeight": 512,
+          "kind": "color",
+          "sourceBytes": 2207330,
+          "outputBytes": 42744,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 1398100
+        },
+        {
+          "name": "texture_metallic-texture_roughness",
+          "compression": "UASTC",
+          "transferFunction": "linear",
+          "rdoLambda": 0.5,
+          "mipLevels": 10,
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 512,
+          "outputHeight": 512,
+          "kind": "data",
+          "sourceBytes": 2051136,
+          "outputBytes": 129353,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 1398100
+        },
+        {
+          "name": "hair-basecolor",
+          "compression": "ETC1S",
+          "transferFunction": "sRGB",
+          "mipLevels": 10,
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 512,
+          "outputHeight": 512,
+          "kind": "color",
+          "sourceBytes": 2327445,
+          "outputBytes": 44366,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 1398100
+        },
+        {
+          "name": "head-normal",
+          "compression": "UASTC",
+          "transferFunction": "linear",
+          "mipLevels": 10,
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 512,
+          "outputHeight": 512,
+          "kind": "normal",
+          "sourceBytes": 3780641,
+          "outputBytes": 121358,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 1398100
+        },
+        {
+          "name": "head-diffuse",
+          "compression": "ETC1S",
+          "transferFunction": "sRGB",
+          "mipLevels": 10,
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 512,
+          "outputHeight": 512,
+          "kind": "color",
+          "sourceBytes": 2631826,
+          "outputBytes": 33429,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 1398100
+        },
+        {
+          "name": "texture_metallic-texture_roughness",
+          "compression": "UASTC",
+          "transferFunction": "linear",
+          "rdoLambda": 0.5,
+          "mipLevels": 10,
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 512,
+          "outputHeight": 512,
+          "kind": "data",
+          "sourceBytes": 2178343,
+          "outputBytes": 116158,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 1398100
+        },
+        {
+          "name": "eye-atlas",
+          "compression": "ETC1S",
+          "transferFunction": "sRGB",
+          "mipLevels": 10,
+          "width": 1024,
+          "height": 1024,
+          "outputWidth": 512,
+          "outputHeight": 512,
+          "kind": "color",
+          "sourceBytes": 104145,
+          "outputBytes": 23365,
+          "sourceRgbaMipBytes": 5592404,
+          "outputRgbaMipBytes": 1398100
+        }
+      ],
+      "before": "./characters/human/customization/d1-base-light.ktx2.glb",
+      "beforeBytes": 1952872,
+      "beforeSha256": "ea0cf9930a835d75759fb2bb108c16b3a497730f41180840425229491647df20",
+      "quantizedViews": 42,
+      "bufferErrors": {
+        "POSITION": {
+          "maxAbsoluteError": 0.0000152587890625,
+          "values": 139698
+        },
+        "NORMAL": {
+          "maxAbsoluteError": 0.00000762939453125,
+          "values": 139698
+        },
+        "TEXCOORD_0": {
+          "maxAbsoluteError": 0.000003814697265625,
+          "values": 93132
+        },
+        "WEIGHTS_0": {
+          "maxAbsoluteError": 0.00000762939453125,
+          "values": 23732
+        },
+        "COLOR_0": {
+          "maxAbsoluteError": 0.0000037550926208496094,
+          "values": 636
+        },
+        "animation:rotation": {
+          "maxAbsoluteError": 0.000003814697265625,
+          "values": 4508
+        },
+        "animation:translation": {
+          "maxAbsoluteError": 0.000003769993782043457,
+          "values": 438
+        }
+      }
+    },
+    {
+      "source": "./characters/human/customization/d1-outfit-game.glb",
+      "output": "./characters/human/customization/d1-outfit-game.ktx2-compact.glb",
+      "sourceSha256": "869506d98d5966d8e023a5718e174d27cd2b60988743827eb53c94eeecf6fb62",
+      "sourceBytes": 39727620,
+      "outputBytes": 3349032,
+      "sourceBufferBytes": 5477370,
+      "storedBufferBytes": 1954466,
+      "images": [
+        {
+          "name": "texture_diffuse_skin",
+          "compression": "ETC1S",
+          "transferFunction": "sRGB",
+          "mipLevels": 10,
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 512,
+          "outputHeight": 512,
+          "kind": "color",
+          "sourceBytes": 2207330,
+          "outputBytes": 42744,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 1398100
+        },
+        {
+          "name": "texture_metallic-texture_roughness",
+          "compression": "UASTC",
+          "transferFunction": "linear",
+          "rdoLambda": 0.5,
+          "mipLevels": 10,
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 512,
+          "outputHeight": 512,
+          "kind": "data",
+          "sourceBytes": 2051136,
+          "outputBytes": 129353,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 1398100
+        },
+        {
+          "name": "hair-basecolor",
+          "compression": "ETC1S",
+          "transferFunction": "sRGB",
+          "mipLevels": 10,
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 512,
+          "outputHeight": 512,
+          "kind": "color",
+          "sourceBytes": 2327445,
+          "outputBytes": 44366,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 1398100
+        },
+        {
+          "name": "head-normal",
+          "compression": "UASTC",
+          "transferFunction": "linear",
+          "mipLevels": 10,
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 512,
+          "outputHeight": 512,
+          "kind": "normal",
+          "sourceBytes": 3780641,
+          "outputBytes": 121358,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 1398100
+        },
+        {
+          "name": "head-diffuse",
+          "compression": "ETC1S",
+          "transferFunction": "sRGB",
+          "mipLevels": 10,
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 512,
+          "outputHeight": 512,
+          "kind": "color",
+          "sourceBytes": 2631826,
+          "outputBytes": 33429,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 1398100
+        },
+        {
+          "name": "texture_metallic-texture_roughness",
+          "compression": "UASTC",
+          "transferFunction": "linear",
+          "rdoLambda": 0.5,
+          "mipLevels": 10,
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 512,
+          "outputHeight": 512,
+          "kind": "data",
+          "sourceBytes": 2178343,
+          "outputBytes": 116158,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 1398100
+        },
+        {
+          "name": "eye-atlas",
+          "compression": "ETC1S",
+          "transferFunction": "sRGB",
+          "mipLevels": 10,
+          "width": 1024,
+          "height": 1024,
+          "outputWidth": 512,
+          "outputHeight": 512,
+          "kind": "color",
+          "sourceBytes": 104145,
+          "outputBytes": 23365,
+          "sourceRgbaMipBytes": 5592404,
+          "outputRgbaMipBytes": 1398100
+        },
+        {
+          "name": "texture_diffuse",
+          "compression": "ETC1S",
+          "transferFunction": "sRGB",
+          "mipLevels": 10,
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 512,
+          "outputHeight": 512,
+          "kind": "color",
+          "sourceBytes": 3438107,
+          "outputBytes": 77981,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 1398100
+        },
+        {
+          "name": "texture_pbr",
+          "compression": "UASTC",
+          "transferFunction": "linear",
+          "rdoLambda": 0.5,
+          "mipLevels": 10,
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 512,
+          "outputHeight": 512,
+          "kind": "data",
+          "sourceBytes": 2467134,
+          "outputBytes": 163423,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 1398100
+        },
+        {
+          "name": "normal",
+          "compression": "UASTC",
+          "transferFunction": "linear",
+          "mipLevels": 10,
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 512,
+          "outputHeight": 512,
+          "kind": "normal",
+          "sourceBytes": 6009263,
+          "outputBytes": 266683,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 1398100
+        },
+        {
+          "name": "base-color",
+          "compression": "ETC1S",
+          "transferFunction": "sRGB",
+          "mipLevels": 10,
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 512,
+          "outputHeight": 512,
+          "kind": "color",
+          "sourceBytes": 4556224,
+          "outputBytes": 89791,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 1398100
+        },
+        {
+          "name": "texture_metallic.png-texture_roughness.png",
+          "compression": "UASTC",
+          "transferFunction": "linear",
+          "rdoLambda": 0.5,
+          "mipLevels": 10,
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 512,
+          "outputHeight": 512,
+          "kind": "data",
+          "sourceBytes": 2412755,
+          "outputBytes": 178495,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 1398100
+        }
+      ],
+      "before": "./characters/human/customization/d1-outfit-game.ktx2.glb",
+      "beforeBytes": 4132960,
+      "beforeSha256": "3891269de15d9bead06c2d29f92b2b8b15acfa91bd04fa50509120c87409e0c6",
+      "quantizedViews": 92,
+      "bufferErrors": {
+        "POSITION": {
+          "maxAbsoluteError": 0.0000152587890625,
+          "values": 255372
+        },
+        "NORMAL": {
+          "maxAbsoluteError": 0.00000762939453125,
+          "values": 255372
+        },
+        "TEXCOORD_0": {
+          "maxAbsoluteError": 0.000003814697265625,
+          "values": 170248
+        },
+        "WEIGHTS_0": {
+          "maxAbsoluteError": 0.00000762939453125,
+          "values": 152404
+        },
+        "COLOR_0": {
+          "maxAbsoluteError": 0.0000037550926208496094,
+          "values": 636
+        },
+        "animation:rotation": {
+          "maxAbsoluteError": 0.000003814697265625,
+          "values": 6084
+        },
+        "animation:translation": {
+          "maxAbsoluteError": 0.000003769993782043457,
+          "values": 438
+        }
+      }
+    },
+    {
+      "source": "./characters/human/customization/d1-equipped-game.glb",
+      "output": "./characters/human/customization/d1-equipped-game.ktx2-compact.glb",
+      "sourceSha256": "e9528aa744be1a9657b696276951e553ae3b4d66928e97a2a657ba530e5fe78d",
+      "sourceBytes": 40355616,
+      "outputBytes": 3657808,
+      "sourceBufferBytes": 6087250,
+      "storedBufferBytes": 2234422,
+      "images": [
+        {
+          "name": "texture_diffuse_skin",
+          "compression": "ETC1S",
+          "transferFunction": "sRGB",
+          "mipLevels": 10,
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 512,
+          "outputHeight": 512,
+          "kind": "color",
+          "sourceBytes": 2207330,
+          "outputBytes": 42744,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 1398100
+        },
+        {
+          "name": "texture_metallic-texture_roughness",
+          "compression": "UASTC",
+          "transferFunction": "linear",
+          "rdoLambda": 0.5,
+          "mipLevels": 10,
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 512,
+          "outputHeight": 512,
+          "kind": "data",
+          "sourceBytes": 2051136,
+          "outputBytes": 129353,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 1398100
+        },
+        {
+          "name": "hair-basecolor",
+          "compression": "ETC1S",
+          "transferFunction": "sRGB",
+          "mipLevels": 10,
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 512,
+          "outputHeight": 512,
+          "kind": "color",
+          "sourceBytes": 2327445,
+          "outputBytes": 44366,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 1398100
+        },
+        {
+          "name": "head-normal",
+          "compression": "UASTC",
+          "transferFunction": "linear",
+          "mipLevels": 10,
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 512,
+          "outputHeight": 512,
+          "kind": "normal",
+          "sourceBytes": 3780641,
+          "outputBytes": 121358,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 1398100
+        },
+        {
+          "name": "head-diffuse",
+          "compression": "ETC1S",
+          "transferFunction": "sRGB",
+          "mipLevels": 10,
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 512,
+          "outputHeight": 512,
+          "kind": "color",
+          "sourceBytes": 2631826,
+          "outputBytes": 33429,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 1398100
+        },
+        {
+          "name": "texture_metallic-texture_roughness",
+          "compression": "UASTC",
+          "transferFunction": "linear",
+          "rdoLambda": 0.5,
+          "mipLevels": 10,
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 512,
+          "outputHeight": 512,
+          "kind": "data",
+          "sourceBytes": 2178343,
+          "outputBytes": 116158,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 1398100
+        },
+        {
+          "name": "eye-atlas",
+          "compression": "ETC1S",
+          "transferFunction": "sRGB",
+          "mipLevels": 10,
+          "width": 1024,
+          "height": 1024,
+          "outputWidth": 512,
+          "outputHeight": 512,
+          "kind": "color",
+          "sourceBytes": 104145,
+          "outputBytes": 23365,
+          "sourceRgbaMipBytes": 5592404,
+          "outputRgbaMipBytes": 1398100
+        },
+        {
+          "name": "texture_diffuse",
+          "compression": "ETC1S",
+          "transferFunction": "sRGB",
+          "mipLevels": 10,
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 512,
+          "outputHeight": 512,
+          "kind": "color",
+          "sourceBytes": 3438107,
+          "outputBytes": 77981,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 1398100
+        },
+        {
+          "name": "texture_pbr",
+          "compression": "UASTC",
+          "transferFunction": "linear",
+          "rdoLambda": 0.5,
+          "mipLevels": 10,
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 512,
+          "outputHeight": 512,
+          "kind": "data",
+          "sourceBytes": 2467134,
+          "outputBytes": 163423,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 1398100
+        },
+        {
+          "name": "normal",
+          "compression": "UASTC",
+          "transferFunction": "linear",
+          "mipLevels": 10,
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 512,
+          "outputHeight": 512,
+          "kind": "normal",
+          "sourceBytes": 6009263,
+          "outputBytes": 266683,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 1398100
+        },
+        {
+          "name": "base-color",
+          "compression": "ETC1S",
+          "transferFunction": "sRGB",
+          "mipLevels": 10,
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 512,
+          "outputHeight": 512,
+          "kind": "color",
+          "sourceBytes": 4556224,
+          "outputBytes": 89791,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 1398100
+        },
+        {
+          "name": "texture_metallic.png-texture_roughness.png",
+          "compression": "UASTC",
+          "transferFunction": "linear",
+          "rdoLambda": 0.5,
+          "mipLevels": 10,
+          "width": 2048,
+          "height": 2048,
+          "outputWidth": 512,
+          "outputHeight": 512,
+          "kind": "data",
+          "sourceBytes": 2412755,
+          "outputBytes": 178495,
+          "sourceRgbaMipBytes": 22369620,
+          "outputRgbaMipBytes": 1398100
+        }
+      ],
+      "before": "./characters/human/customization/d1-equipped-game.ktx2.glb",
+      "beforeBytes": 4549432,
+      "beforeSha256": "ed8f22188269178763fd29efad1fc4eb175d45ec4416af0bd180e53146ce3663",
+      "quantizedViews": 144,
+      "bufferErrors": {
+        "POSITION": {
+          "maxAbsoluteError": 0.0000152587890625,
+          "values": 301062
+        },
+        "NORMAL": {
+          "maxAbsoluteError": 0.00000762939453125,
+          "values": 301062
+        },
+        "TEXCOORD_0": {
+          "maxAbsoluteError": 0.00000762939453125,
+          "values": 199530
+        },
+        "WEIGHTS_0": {
+          "maxAbsoluteError": 0.00000762939453125,
+          "values": 152404
+        },
+        "COLOR_0": {
+          "maxAbsoluteError": 0.0000037550926208496094,
+          "values": 636
+        },
+        "animation:rotation": {
+          "maxAbsoluteError": 0.000003814697265625,
+          "values": 6084
+        },
+        "animation:translation": {
+          "maxAbsoluteError": 0.000003769993782043457,
+          "values": 438
+        }
+      }
     }
   ],
   "modelCompression": {
