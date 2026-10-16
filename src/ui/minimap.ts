@@ -401,7 +401,8 @@ export function createMinimap(options: MinimapOptions): Minimap {
     e.preventDefault();
     if (bigView === null || e.deltaY === 0) return;
     resetDrag();
-    bigView = zoomBigMapAt(bigView, MINIMAP_ZOOM_STEP ** -Math.sign(e.deltaY), e.clientX, e.clientY, limits());
+    const rect = bigCanvas.getBoundingClientRect();
+    bigView = zoomBigMapAt(bigView, MINIMAP_ZOOM_STEP ** -Math.sign(e.deltaY), e.clientX - rect.left, e.clientY - rect.top, limits());
   }, { passive: false });
   on<MouseLike>(big, 'mousedown', (e) => {
     if (e.button !== 0) {
@@ -431,8 +432,10 @@ export function createMinimap(options: MinimapOptions): Minimap {
     if (e.button !== 0 || gesture === null || gesture.moved || !teleportEnabled || bigView === null) return;
     if (Math.hypot(e.clientX - gesture.startX, e.clientY - gesture.startY) >= 5) return;
     const l = limits();
-    if (e.clientX < 0 || e.clientY < 0 || e.clientX >= l.screenW || e.clientY >= l.screenH) return;
-    const point = viewToWorld(bigMapRect(bigView, l), bigView.scale, e.clientX, e.clientY);
+    const rect = bigCanvas.getBoundingClientRect();
+    const x = e.clientX - rect.left; const y = e.clientY - rect.top;
+    if (x < 0 || y < 0 || x >= l.screenW || y >= l.screenH) return;
+    const point = viewToWorld(bigMapRect(bigView, l), bigView.scale, x, y);
     if (point.x < 0 || point.y < 0 || point.x >= worldW || point.y >= worldH) return;
     if (options.onTeleport!(point)) setOpen(false);
     else bigHint.textContent = getLanguage() === 'en' ? 'No room for the player near this point. Try another location · Drag to pan · Scroll to zoom · M / Esc to close' : '该位置附近没有可容纳角色的空间，请点击其它位置 · 拖动平移 · 滚轮缩放 · M / Esc 关闭';

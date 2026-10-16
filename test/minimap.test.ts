@@ -6,6 +6,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { FakeElement } from './helpers/fake-dom.ts';
 import {
+  MINIMAP_ZOOM_STEP,
   BIG_MAP_MAX_SCALE,
   CANOPY_COLORS,
   HUT_WALL_COLOR,
@@ -462,6 +463,8 @@ class FakeTarget {
 
 class FakeNode extends FakeElement {
   readonly events = new FakeTarget();
+  rect = { left: 0, top: 0 };
+  getBoundingClientRect(): { left: number; top: number } { return this.rect; }
   width = 0;
   height = 0;
   readonly calls: Call[] = [];
@@ -651,7 +654,13 @@ describe('minimap DOM', () => {
     const mm = withDoc(fake, () => createMinimap(miniOptions(fake, w)));
     mm.toggleBigMap(true);
     const big = fake.body.find('minimap-big') as FakeNode;
+    const canvas = fake.body.find('minimap-big-canvas') as FakeNode;
+    canvas.rect = { left: 200, top: 120 };
+    const initial = mm.bigMapView!;
+    const expected = zoomBigMapAt(initial, MINIMAP_ZOOM_STEP, 600, 330,
+      { worldW: 400, worldH: 100, screenW: 1600, screenH: 900 });
     big.events.dispatch('wheel', { deltaY: -1, clientX: 800, clientY: 450, button: 0 });
+    assert.deepEqual(mm.bigMapView, expected, 'embedded map zoom uses canvas-local cursor coordinates');
     big.events.dispatch('wheel', { deltaY: -1, clientX: 800, clientY: 450, button: 0 });
     const zoomed = mm.bigMapView;
     assert.ok(zoomed && zoomed.scale > bigMapFitScale({ worldW: 400, worldH: 100, screenW: 1600, screenH: 900 }));
