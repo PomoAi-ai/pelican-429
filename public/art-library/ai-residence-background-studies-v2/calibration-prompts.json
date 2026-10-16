@@ -1,0 +1,20 @@
+{
+  "tool": "built-in image_gen",
+  "status": "01–14 rejected by user review; previous self-review acceptance withdrawn; drafts only",
+  "images": [
+    {
+      "number": 13,
+      "file": "13-reference-style-calibration.png",
+      "title": "原画风格校准 · 蓝色尚未修正",
+      "prompt": "Use case: style-transfer / environment repaint.\nEdit the supplied full game concept painting into ONE complete background-only city panorama, widescreen 16:9.\nRemove the foreground cutaway house, both people, furniture, floor tiles, garden furniture and near foreground pond. Continue the futuristic city scenery naturally across the area where the house was.\nPreserve the reference's appealing stylized 3D game-art look: clean rounded ceramic forms, rich softly modeled green trees, readable crafted stone cliffs, gentle material highlights and lively sunny color. Keep it clearly a designed game world, with the same visual language as the reference.\nScene: a welcoming AI-era ecological city, warm-white modern towers with suspended horizontal orbit rings, stepped rooftop gardens, a graceful slim transit bridge carrying one small pearl-white train, white waterfalls on pale stone cliffs, a few small autonomous civilian flying pods, distant soft mountains and cumulus clouds.\nPalette: architecture mainly warm-white ceramic and light silver, green vegetation and pale stone; small champagne trims, soft ivory technology lights, only tiny muted mint accents. Glass is gray-green, without large cobalt-blue surfaces. Sky can be natural light blue.\nCamera: broad near-level view across the city, matching the background camera of the reference. The scene should be naturally composed across the whole width. Do not divide it into illustrated layers or force an empty center.\nHigh clarity suitable for reviewing the complete environment. No people, playable building interior, game grid, UI, text or watermark.",
+      "review": "style calibration, blue palette not accepted"
+    },
+    {
+      "number": 14,
+      "file": "14-warm-palette-calibration.png",
+      "title": "配色校准 · 暖白生态主城",
+      "prompt": "Use case: precise-object-edit / material-color correction.\nChange ONLY the material colors and light colors in this image. Preserve the composition, camera, buildings, bridges, train, aircraft, trees, cliffs, waterfalls, clouds and the polished stylized 3D game-art rendering exactly.\n\nRepaint all cobalt-blue and cyan building glass and panels as pale desaturated gray-green glass. Towers remain pearl warm-white ceramic with brushed warm-silver details. Repaint blue/cyan glowing vertical strips, tower emblems, rail lamps and aircraft accents as subtle soft ivory light, with very few small mint-green indicator points. Train glass becomes neutral charcoal-gray instead of blue.\nChange the river and water reflections from saturated blue to natural jade/sage-gray; keep the waterfall foam white. Far mountains become soft warm gray-violet without blue glow. Natural sky stays light blue, clouds stay white. Preserve vivid healthy green foliage and warm sunlight.\nThe finished city should feel white, green and pale stone overall, rather than blue. Maintain rich luminous colors, not a sepia filter or global desaturation. No added objects, no people, no text.",
+      "review": "rejected by user; previous concept direction self-review withdrawn"
+    }
+  ]
+}

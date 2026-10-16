@@ -1,0 +1,109 @@
+=== 01-blue-hour-harbor
+Scene: a futuristic post-AI megacity seen from across a still harbor at blue hour, 20 minutes after sunset.
+Subject: a dense skyline of tapered towers in polished steel, pale stone and clear glass, linked by curved skybridges at several heights, one slender landmark AI tower with thin white halo rings at the center.
+Details: deep cobalt sky fading to a soft peach band at the horizon, thousands of warm-white windows, white beacon lights on the tallest spires, long calm reflections in the water. Cinematic architectural visualization, photorealistic CGI, premium sci-fi film establishing shot.
+
+=== 02-clear-noon
+Scene: a futuristic megacity under clear midday sun, crisp dry air, high visibility.
+Subject: supertall towers in white ceramic, brushed aluminum, graphite steel and clear low-iron glass; diagrid exoskeletons, vertical fins, cantilevered sky lobbies, rooftop drone ports.
+Details: hard bright daylight with sharp clean shadows, saturated clear sky blue only in the sky, facades true neutral white and silver, light haze only at the far edge. Architectural photography style, photorealistic, crisp and precise.
+
+=== 03-overcast-silver
+Scene: a vast modern city under a bright, flat overcast sky in the morning.
+Subject: an endless mix of glass curtain-wall towers, pale concrete mega-blocks, perforated metal screens and dark bronze glass, a central monolithic AI compute tower.
+Details: soft shadowless documentation light, true material colors, silver-grey palette with small touches of terracotta and dark green glass, thin mist drifting between the lower buildings. Architectural archive photography look, photorealistic, calm and precise.
+
+=== 04-night-calm
+Scene: a futuristic AI city at night, clear dark-navy sky with a few stars.
+Subject: the skyline is lit only by architectural light: warm-white and soft-white windows, thin white light lines tracing tower edges, a glowing white ring around the central AI spire, slow drone traffic visible as thin streams of small white and red lights in orderly sky lanes.
+Details: no neon advertising, no billboards, elegant restrained lighting, mirror-like reflections in a wide river. Cinematic night cityscape photograph, long exposure, photorealistic.
+
+=== 05-after-rain
+Scene: a futuristic megacity just after a heavy rain, storm clouds breaking apart.
+Subject: dark wet glass towers, graphite and white facades streaked with water, skybridges glistening, low clouds still wrapping the tops of the tallest towers.
+Details: cold fresh light with shafts of sun through the clouds, rich contrast, wet reflective rooftops and a reflective plaza edge along the river. Cinematic photorealistic establishing shot, dramatic but clean.
+
+=== 06-pastel-dawn
+Scene: a futuristic city at dawn, low fog lying on a wide river.
+Subject: pale limestone, white composite and soft rose-gold metal towers with flowing curved forms, a slim AI spire catching the first light.
+Details: pastel sky from lilac to pale pink near the horizon, soft diffused sunrise light on the tops of the towers while the base is still in cool shade, gentle haze. Dreamy but realistic architectural visualization, photorealistic.
+
+=== 07-aerial-endless
+Scene: aerial view from 700 meters altitude over an endless futuristic megacity stretching to the curved horizon.
+Subject: districts of supertall clusters, wide boulevards, elevated maglev lines, giant ring-shaped arcologies and stepped mega-blocks repeating in variety all the way to the horizon.
+Details: late morning neutral daylight, atmospheric perspective fading the distant districts to pale grey, sky clear pale blue. Photorealistic aerial drone photograph, massive scale.
+
+=== 08-drone-highways
+Scene: a futuristic drone-native AI city in bright daylight.
+Subject: tall towers with protruding landing decks and docking rings, layered sky lanes filled with hundreds of small delivery and passenger drones flying in organized streams between buildings, a central air-traffic control spire.
+Details: white, light grey and graphite architecture, clear glass, small orange safety markings on landing decks, crisp neutral daylight. Photorealistic sci-fi concept render, highly detailed, believable.
+
+=== 09-compute-district
+Scene: the compute district of a post-AI city, seen across a cooling lake in soft afternoon light.
+Subject: monumental data-center megastructures with sculpted white heat-exchange fins, black glass server halls, slender research towers, a gigantic central compute monolith with a thin white halo ring, solar-glass skins on roofs.
+Details: monochrome white, graphite and black glass palette with tiny cool-white status lights, calm water reflecting the forms. Minimalist futuristic architecture visualization, photorealistic.
+
+=== 10-eco-tech
+Scene: a futuristic eco-tech city skyline in clear morning light.
+Subject: timber-and-glass supertall towers, mass-timber terraces, white composite towers with wind-turbine crowns, a few towers with planted balconies, solar facades.
+Details: greenery limited to occasional tower balconies and a few rooftop parks, warm timber and clean white tones balanced by neutral glass, soft natural daylight. Contemporary architectural visualization, photorealistic.
+
+=== 11-parametric-white
+Scene: a futuristic city of flowing parametric architecture under bright sun with scattered white clouds.
+Subject: sweeping white towers with curved fluid forms in the style of Zaha Hadid Architects, twisting and tapering silhouettes, ribbon-like skybridges, a central spire with layered curved fins.
+Details: pure white, pearl and pale silver surfaces with soft gradient shading, clear glass bands, clean bright daylight. High-end architectural visualization, photorealistic CGI.
+
+=== 12-brutal-futurism
+Scene: a monumental futurist megacity under a heavy grey sky.
+Subject: colossal stepped concrete mega-structures, monolithic towers of raw board-formed concrete and dark smoked glass, deep recessed windows, massive bridges between towers, an enormous central tower with a crown of antenna masts.
+Details: overcast diffused light, charcoal, cement grey and dark bronze palette, subtle warm interior light in a few windows. Cinematic concept art in the style of Syd Mead and Denis Villeneuve films, photorealistic, awe-inspiring scale.
+
+=== 13-winter
+Scene: a futuristic city on a crisp winter afternoon after fresh snowfall.
+Subject: snow-covered rooftops and terraces on glass and white-panel towers, dark steel skybridges, steam rising from a few rooftop vents, a frozen edge along the river.
+Details: low clean winter sun, white snow against neutral grey and black glass, warm windows starting to glow, pale clear sky. Photorealistic cinematic architectural photograph.
+
+=== 14-ocean-port
+Scene: a futuristic coastal megacity seen from the open sea at midday.
+Subject: towers rising directly from the water on floating platforms, an offshore district linked to the mainland by long elegant maglev bridges, autonomous cargo ships and sail-like boats, a lighthouse-like AI tower at the harbor entrance.
+Details: deep clean sea color, white and silver towers, light sea breeze haze, bright neutral sunlight. Photorealistic sci-fi concept render, expansive and optimistic.
+
+=== 15-neon-rain-night
+Scene: a dense futuristic megacity at night in light rain.
+Subject: a canyon of towering skyscrapers with layered skybridges, streams of flying vehicles, glowing window grids.
+Details: restrained neon accents in cyan and magenta on a few building edges only, no readable signs or billboards, wet reflections, light volumetric fog, deep dark sky. Cinematic sci-fi film still in the spirit of Blade Runner 2049, photorealistic.
+
+=== 16-cloud-sea
+Scene: sunrise above a sea of clouds, only the upper halves of an enormous futuristic megacity rise above the cloud layer.
+Subject: dozens of supertall and megatall towers piercing the clouds, sky platforms and skybridges above the clouds, the AI spire tallest of all.
+Details: cool clear sky overhead, soft pink-white sunlight touching the tower tops, white cloud carpet below, crisp detail. Epic photorealistic matte painting.
+
+=== 17-telephoto-layers
+Scene: a futuristic megacity skyline photographed with a 300mm telephoto lens from far away in late afternoon.
+Subject: compressed stacked layers of towers, each layer a different district, overlapping silhouettes building up to a massive central cluster.
+Details: neutral soft afternoon light, gentle atmospheric haze separating the layers into graded tones of grey, white and steel blue, tiny drones for scale. Photorealistic landscape photograph, compressed perspective.
+
+=== 18-violet-twilight
+Scene: a tropical futuristic city skyline at twilight across a bay.
+Subject: elegant glass towers with sky gardens, a ring-shaped hotel on three towers, a lotus-shaped museum by the water, a light-tracing AI tower.
+Details: sky in deep violet to soft rose, buildings lit with white and warm-white architectural lighting, reflections on calm bay water. Inspired by Singapore Marina Bay at night, photorealistic cityscape photograph.
+
+=== 19-mega-arcology
+Scene: an extreme-future megacity of colossal arcologies in clear daylight.
+Subject: kilometer-wide arcology towers three kilometers tall with tiered terraces, clouds drifting at their mid-height, smaller supertall towers looking tiny below them, vast transit tubes connecting the giants.
+Details: white, silver and graphite materials, bright neutral daylight, strong atmospheric perspective for scale. Epic science-fiction film concept art, photorealistic CGI, overwhelming scale.
+
+=== 20-game-painterly
+Scene: a futuristic post-AI megacity skyline for a side-scrolling game background, bright clear afternoon.
+Subject: a rich layered skyline with varied futuristic towers, skybridges, one elevated maglev line, a central AI spire with halo rings, small drones.
+Details: high-end painterly game concept art, clean shapes, crisp edges, soft gradients, palette of white, light grey, steel, graphite and soft sky blue with small coral accents, balanced neutral lighting. Polished 2D digital painting, not photographic.
+
+=== 共用约束（每条提示词末尾都附加）
+
+Constraints:
+- Subject is ONLY the city skyline as a wide background plate: no foreground objects, no people, no characters, no text, no letters, no logos, no signage, no watermark, no UI.
+- The city itself forms the horizon: no mountains, no hills, no cliffs, no waterfalls.
+- Every tower is a distinct design (height, silhouette, roof, facade pattern); no repeated or copy-pasted buildings, no tiled patterns.
+- Neutral, natural white balance and true material colors: no overall yellow/orange cast and no overall blue cast; color comes from the light and materials described above.
+- Deep depth of field, everything sharp from near to far, no bokeh, no tilt-shift blur.
+- Wide 16:9 landscape composition, horizon roughly at the lower third, clear focal point.

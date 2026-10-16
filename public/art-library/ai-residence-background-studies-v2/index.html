@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AI 住宅背景 · 配色校准与 12 张构图草稿</title>
+<style>
+:root{color-scheme:light;--paper:#f1eee6;--ink:#253b32;--muted:#677168;--line:#d7d5ca;--panel:#faf9f4}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif}
+header{max-width:1900px;margin:auto;padding:36px 28px 20px}header>a{color:var(--muted);font-size:14px;text-decoration:none}h1{font-size:clamp(25px,3vw,39px);font-weight:650;letter-spacing:-.04em;margin:22px 0 10px}header p{max-width:850px;line-height:1.75;color:var(--muted);margin:6px 0}
+.palette{display:flex;flex-wrap:wrap;gap:18px;margin:22px 0}.palette span{display:flex;align-items:center;gap:7px;font-size:13px}.swatch{width:22px;height:22px;display:inline-block;border-radius:50%;border:1px solid #0001}
+nav{display:flex;flex-wrap:wrap;gap:7px;margin-top:22px}nav a{padding:7px 11px;border:1px solid var(--line);border-radius:7px;color:var(--ink);text-decoration:none;background:#ffffff77;font-size:13px}
+main{max-width:1900px;margin:auto;padding:0 28px 36px}.section-label{font-size:15px;font-weight:600;padding:14px 0;color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}article{background:var(--panel);border:1px solid var(--line);border-radius:11px;overflow:hidden;scroll-margin-top:20px}.art{display:block;background:#dfdfd7}.art img{display:block;width:100%;height:auto;aspect-ratio:16/9;object-fit:contain}.art:focus-visible,.open:focus-visible,nav a:focus-visible{outline:3px solid #6d8e62;outline-offset:3px}.caption{padding:17px 16px;display:flex;gap:12px;align-items:flex-start}.number{font-size:24px;line-height:1.15;font-variant-numeric:tabular-nums;color:#8a956f}.caption>div{flex:1}h2{font-size:16px;margin:0 0 7px;font-weight:600}.caption p{font-size:13px;line-height:1.6;color:var(--muted);margin:0}.open{font-size:12px;white-space:nowrap;color:#536d4e;text-decoration:none;padding-top:3px}
+footer{border-top:1px solid var(--line);padding:24px 28px;max-width:1900px;margin:auto;color:var(--muted);font-size:13px;line-height:1.8}footer a{color:#536d4e}
+@media(max-width:1200px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:700px){.grid{grid-template-columns:1fr}header,main,footer{padding-left:16px;padding-right:16px}.caption{padding:14px}}
+</style></head>
+<body><header><a href="/?mode=lab&demo=residence">← 返回 AI 住宅场景</a><h1>AI 住宅背景 · 提示词与配色校准</h1>
+<p>暖白建筑、自然绿植、浅石地形，少量香槟金科技细节。先检查整体构图和颜色，再选定方向逐层制作。</p>
+<p>本组只展示背景环境：天空、远山、城市、峡谷与交通；玩家、住宅内部及可走格子留在后续游戏层。</p>
+<div class="palette"><span><i class="swatch" style="background:#E8E1D1"></i>暖白陶瓷</span><span><i class="swatch" style="background:#899A75"></i>自然绿</span><span><i class="swatch" style="background:#BEB9AA"></i>浅石灰</span><span><i class="swatch" style="background:#B99B62"></i>香槟金</span></div>
+<nav aria-label="效果图编号"><a href="#concept-01">01</a><a href="#concept-02">02</a><a href="#concept-03">03</a><a href="#concept-04">04</a><a href="#concept-05">05</a><a href="#concept-06">06</a><a href="#concept-07">07</a><a href="#concept-08">08</a><a href="#concept-09">09</a><a href="#concept-10">10</a><a href="#concept-11">11</a><a href="#concept-12">12</a></nav></header>
+<main><div class="section-label">整批未通过 · 01–14 均保留为草稿记录 · 点击图片查看原图</div>
+<div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(min(100%,440px),1fr));margin-bottom:28px">
+<article id="concept-14"><a class="art" href="14-warm-palette-calibration.png" target="_blank" rel="noopener"><img src="14-warm-palette-calibration.png" alt="14 配色校准后的暖白生态未来主城" width="1672" height="941"></a><div class="caption"><span class="number">14</span><div><h2>配色校准 · 暖白生态主城</h2><p>保留原画的三维游戏质感；暖白建筑、灰绿玻璃、自然绿植、浅石地形。用户检查未通过，撤回整体方向通过标识。</p></div><a class="open" href="14-warm-palette-calibration.png" target="_blank" rel="noopener">原图 ↗</a></div></article>
+<article id="concept-13"><a class="art" href="13-reference-style-calibration.png" target="_blank" rel="noopener"><img src="13-reference-style-calibration.png" alt="13 原画风格校准但蓝色尚未修正的对比图" width="1672" height="941"></a><div class="caption"><span class="number">13</span><div><h2>原画风格校准 · 调色前对比</h2><p>游戏画风已改善，但仍继承参考中的蓝色玻璃和灯光；随后仅修改颜色，得到左侧 14。</p></div><a class="open" href="13-reference-style-calibration.png" target="_blank" rel="noopener">原图 ↗</a></div></article>
+</div><p style="color:var(--muted);line-height:1.7">下方 01–12 保留作构图草稿。自检发现旧提示词过早强调层级、左右布局和中心留白，导致画风偏写实、构图重复；本轮停止继续出图，等待检查校准方向。<a href="PROMPT-REVIEW.md" style="color:#536d4e">查看自检及提示词修正</a></p>
+<div class="section-label">01–09 · 原日间构图草稿 · 未通过最终画风自检</div><div class="grid"><article id="concept-01">
+<a class="art" href="01-pearl-valley-morning.png" target="_blank" rel="noopener" aria-label="查看 01 晨光 · 珍珠峡谷城 原图"><img src="01-pearl-valley-morning.png" alt="晨光 · 珍珠峡谷城完整背景效果图" width="1672" height="941" ></a>
+<div class="caption"><span class="number">01</span><div><h2>晨光 · 珍珠峡谷城</h2><p>晨光、暖白城市与开阔峡谷；园林感较强。</p></div><a class="open" href="01-pearl-valley-morning.png" target="_blank" rel="noopener">原图 ↗</a></div></article>
+<article id="concept-02">
+<a class="art" href="02-sky-garden-terraces.png" target="_blank" rel="noopener" aria-label="查看 02 空中花园 · 绿阶城 原图"><img src="02-sky-garden-terraces.png" alt="空中花园 · 绿阶城完整背景效果图" width="1672" height="941" ></a>
+<div class="caption"><span class="number">02</span><div><h2>空中花园 · 绿阶城</h2><p>层叠花园和温室，建筑较低，中心留白。</p></div><a class="open" href="02-sky-garden-terraces.png" target="_blank" rel="noopener">原图 ↗</a></div></article>
+<article id="concept-03">
+<a class="art" href="03-limestone-waterfall-canyon.png" target="_blank" rel="noopener" aria-label="查看 03 石灰岩峡谷 · 瀑布城 原图"><img src="03-limestone-waterfall-canyon.png" alt="石灰岩峡谷 · 瀑布城完整背景效果图" width="1672" height="941" ></a>
+<div class="caption"><span class="number">03</span><div><h2>石灰岩峡谷 · 瀑布城</h2><p>自然占比更高，重点比较崖岸、瀑布与桥。</p></div><a class="open" href="03-limestone-waterfall-canyon.png" target="_blank" rel="noopener">原图 ↗</a></div></article>
+<article id="concept-04">
+<a class="art" href="04-orbital-energy-district.png" target="_blank" rel="noopener" aria-label="查看 04 环形能源中枢 · 现代主城 原图"><img src="04-orbital-energy-district.png" alt="环形能源中枢 · 现代主城完整背景效果图" width="1672" height="941" loading="lazy"></a>
+<div class="caption"><span class="number">04</span><div><h2>环形能源中枢 · 现代主城</h2><p>现代能源主城，环塔、陶瓷楼群与峡谷结合。</p></div><a class="open" href="04-orbital-energy-district.png" target="_blank" rel="noopener">原图 ↗</a></div></article>
+<article id="concept-05">
+<a class="art" href="05-curved-transit-garden.png" target="_blank" rel="noopener" aria-label="查看 05 悬轨花园 · 流线交通城 原图"><img src="05-curved-transit-garden.png" alt="悬轨花园 · 流线交通城完整背景效果图" width="1672" height="941" loading="lazy"></a>
+<div class="caption"><span class="number">05</span><div><h2>悬轨花园 · 流线交通城</h2><p>流线悬轨和空中交通，重点比较桥与列车比例。</p></div><a class="open" href="05-curved-transit-garden.png" target="_blank" rel="noopener">原图 ↗</a></div></article>
+<article id="concept-06">
+<a class="art" href="06-jade-lake-city.png" target="_blank" rel="noopener" aria-label="查看 06 翡翠湖畔 · 生态城市 原图"><img src="06-jade-lake-city.png" alt="翡翠湖畔 · 生态城市完整背景效果图" width="1672" height="941" loading="lazy"></a>
+<div class="caption"><span class="number">06</span><div><h2>翡翠湖畔 · 生态城市</h2><p>开阔湖面、沿岸生态城，画面更安静。</p></div><a class="open" href="06-jade-lake-city.png" target="_blank" rel="noopener">原图 ↗</a></div></article>
+<article id="concept-07">
+<a class="art" href="07-terraced-solar-plateau.png" target="_blank" rel="noopener" aria-label="查看 07 暖石台地 · 太阳能城区 原图"><img src="07-terraced-solar-plateau.png" alt="暖石台地 · 太阳能城区完整背景效果图" width="1672" height="941" loading="lazy"></a>
+<div class="caption"><span class="number">07</span><div><h2>暖石台地 · 太阳能城区</h2><p>暖石台地、低层城区和太阳能设施。</p></div><a class="open" href="07-terraced-solar-plateau.png" target="_blank" rel="noopener">原图 ↗</a></div></article>
+<article id="concept-08">
+<a class="art" href="08-suspended-sky-neighborhood.png" target="_blank" rel="noopener" aria-label="查看 08 悬浮云廊 · 空中社区 原图"><img src="08-suspended-sky-neighborhood.png" alt="悬浮云廊 · 空中社区完整背景效果图" width="1672" height="941" loading="lazy"></a>
+<div class="caption"><span class="number">08</span><div><h2>悬浮云廊 · 空中社区</h2><p>悬浮社区、悬索结构和空中走廊。</p></div><a class="open" href="08-suspended-sky-neighborhood.png" target="_blank" rel="noopener">原图 ↗</a></div></article>
+<article id="concept-09">
+<a class="art" href="09-botanical-research-gardens.png" target="_blank" rel="noopener" aria-label="查看 09 智慧植物园 · 生态研究城 原图"><img src="09-botanical-research-gardens.png" alt="智慧植物园 · 生态研究城完整背景效果图" width="1672" height="941" loading="lazy"></a>
+<div class="caption"><span class="number">09</span><div><h2>智慧植物园 · 生态研究城</h2><p>植物研究城、叶片形遮阳棚和温室群。</p></div><a class="open" href="09-botanical-research-gardens.png" target="_blank" rel="noopener">原图 ↗</a></div></article></div>
+<div class="section-label" style="margin-top:22px">10–12 · 同一主城构图的黄昏、星夜、细雨</div><div class="grid"><article id="concept-10">
+<a class="art" href="10-orbital-city-sunset.png" target="_blank" rel="noopener" aria-label="查看 10 黄昏 · 暖金主城 原图"><img src="10-orbital-city-sunset.png" alt="黄昏 · 暖金主城完整背景效果图" width="1672" height="941" loading="lazy"></a>
+<div class="caption"><span class="number">10</span><div><h2>黄昏 · 暖金主城</h2><p>沿用 04 的构图，比较暖金黄昏。</p></div><a class="open" href="10-orbital-city-sunset.png" target="_blank" rel="noopener">原图 ↗</a></div></article>
+<article id="concept-11">
+<a class="art" href="11-orbital-city-starlight.png" target="_blank" rel="noopener" aria-label="查看 11 星夜 · 暖灯主城 原图"><img src="11-orbital-city-starlight.png" alt="星夜 · 暖灯主城完整背景效果图" width="1672" height="941" loading="lazy"></a>
+<div class="caption"><span class="number">11</span><div><h2>星夜 · 暖灯主城</h2><p>沿用 04 的构图，比较星空与暖色窗灯。</p></div><a class="open" href="11-orbital-city-starlight.png" target="_blank" rel="noopener">原图 ↗</a></div></article>
+<article id="concept-12">
+<a class="art" href="12-orbital-city-light-rain.png" target="_blank" rel="noopener" aria-label="查看 12 细雨 · 银白主城 原图"><img src="12-orbital-city-light-rain.png" alt="细雨 · 银白主城完整背景效果图" width="1672" height="941" loading="lazy"></a>
+<div class="caption"><span class="number">12</span><div><h2>细雨 · 银白主城</h2><p>沿用 04 的构图，比较细雨、湿润材质与远景雾。</p></div><a class="open" href="12-orbital-city-light-rain.png" target="_blank" rel="noopener">原图 ↗</a></div></article></div></main>
+<footer>检查后按“天空与云 → 远山 → 远城 → 主地标与楼群 → 峡谷与园景 → 桥轨与交通 → 水体及灯光”的顺序逐层制作，每层分别查看后再合成。<br>目前为整体方向效果图；各层资源将在方向选定后独立绘制。<a href="SOURCE.md">制作记录</a> · <a href="generation-prompts.json">绘制提示词</a></footer>
+</body></html>

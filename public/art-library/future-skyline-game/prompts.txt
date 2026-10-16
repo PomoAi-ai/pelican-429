@@ -1,0 +1,30 @@
+=== 01：This scene: riverside night of a dense financial district on a river bend, colorful but tasteful reflections.
+=== 02：This scene: dusk across water, a thin far skyline with one very tall needle-like AI tower in the middle, big calm sky.
+=== 03：This scene: sunset over a downtown with one supertall AI tower on the right, canals and low districts in front.
+=== 04：This scene: night panorama over an endless low dense city, one glowing lattice AI tower as warm accent.
+=== 05：This scene: night sea of city lights with a cluster of glass towers and one warm glowing AI tower.
+=== 06：This scene: blue-hour panorama over a vast low city, one small warm AI tower, dim sky.
+=== 07：This scene: night aerial view down a central boulevard toward one dark supertall AI tower.
+=== 08：This scene: cloudy night, one supertall AI tower lit with cool white light above a dense colorful cluster.
+=== 09：This scene: cloudy night, one supertall AI tower lit in red above a dense cluster.
+=== 10：This scene: bright sunny day across a harbor, white towers along the water, big white clouds; replace the mountains behind with more distant towers.
+=== 13：This scene: blue-hour waterfront skyline of a dense island city with mirror reflections on the water.
+=== 15：This scene: aerial dusk over a bay with an iconic three-tower sky-park hotel replaced by an original futuristic equivalent, round domes, financial district.
+=== 16：This scene: daytime aerial panorama of a bay, gardens and a dense financial cluster, soft clouds.
+=== 17：This scene: night waterfront financial cluster across a bay with colorful reflections.
+=== 19：This scene: calm hazy morning across a wide river, one tall tapered AI tower, long low residential band; no mountains.
+=== 20：This scene: bright day with clouds, one tall tapered AI tower over wide low residential districts.
+=== 21：This scene: night aerial of two rivers meeting, a peninsula of towers, lit bridges.
+=== 22：This scene: night aerial of a hilly dense city on rivers with lit bridges; flatten hills into city terraces.
+=== 23：This scene: dusk across a river, one slim twisted AI broadcasting tower on the left, a tower cluster on the right, pink clouds.
+=== 24：This scene: daytime aerial along a river axis, a slim AI tower at the end, a cluster of towers, light clouds.
+=== 25：This scene: blue-hour across a river, a slim pink-lit AI tower and a colorful lit cluster.
+
+=== 共用提示词（参考照片作为编辑输入图）
+Turn this reference photo into a background painting for our 2D side-scrolling game: an original futuristic post-AI city skyline.
+
+USE FROM THE PHOTO (reference only): the composition — horizon height, how much sky, the skyline as a long low band, the position and relative height of the landmark tower, the rhythm of tall and low clusters, the water or ground band, the time of day and the light colors of the photo. Keep that palette; do not push the colors toward yellow or toward blue.
+
+REDESIGN: every building becomes original near-future architecture — sleeker silhouettes, tapered and faceted towers, a few skybridges and sky platforms, thin light lines on edges, small rooftop drone pads, a few tiny drones with light trails. The landmark becomes an original AI tower with the same role and proportion in the frame (no recognizable real landmarks). No neon ads, no text, no logos, no people. Remove any mountains or hills: replace them with farther, paler city or open sky.
+
+GAME STYLE — not photorealistic: polished hand-painted game background art, simplified clean shapes, crisp readable silhouettes, smooth soft gradients instead of photo noise and texture, windows as simple tidy light patterns, gentle stylized reflections on water. Organize depth into three clear layers for parallax: near band (darker, more detail), middle band, far band (lighter, simpler, hazier). Slightly cleaner and more pleasant than the photo, like a premium 2D game backdrop. Everything sharp, no depth-of-field blur. 16:9 landscape.

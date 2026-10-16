@@ -1,0 +1,51 @@
+Edit this image into a pure background city plate.
+
+REMOVE COMPLETELY: the entire two-storey house in the middle (walls, rooms, roof, solar panels, navy tower, doors, furniture, characters, robots, platforms), all foreground terraces, planters, benches, lamps, trees, flowers, the walkway and the pool/water in the bottom foreground. Nothing in front of the city may remain.
+
+PAINT IN ITS PLACE: the continuous post-AI future city that was behind the house — the central tall white spire with halo rings, white towers with blue light strips, curved elevated bridges and viaducts, maglev trains on the long bridge, cliffs with waterfalls, terraced green gardens, a calm river/lake at the bottom, distant mountains, flying vehicles, blue sky with soft white clouds. Extend the city naturally across the whole frame, including the area the house used to cover, so the composition reads as one wide panoramic skyline.
+
+SHARPNESS: everything must be crisp and in focus, NO depth-of-field blur, NO bokeh, NO hazy soft focus. Clear readable architecture details at every distance, only very light atmospheric perspective for the farthest mountains.
+
+STYLE: keep the same bright daytime palette (pearl white, deep blue accents, soft gold, lush green, sky blue), the same polished stylized game-art rendering and the same camera angle and horizon height. No people, no text, no UI, no watermark.
+
+--- V2（去花草台、单条轨道、建筑去重复）---
+Redraw this as a clean, sharp background skyline plate of one original post-AI future city. Keep the bright daytime palette (pearl white, deep blue accents, small gold touches, sky blue), the polished stylized game-art rendering, the same eye-level camera and horizon height. No foreground objects, no people, no text, no UI.
+
+FIX THESE PROBLEMS:
+1. Far fewer plants: remove the stacked green garden terraces, flower ledges and bushes on every cliff and building. Greenery only as a few tree groups and some roof gardens, maybe 10-15% of the image. No waterfall cliffs stacked with planters.
+2. Only ONE elevated maglev line with ONE train in the whole image. Remove the second bridge and second train; keep any other bridges minimal.
+3. No repeated copy-paste buildings: every tower must have a different height, silhouette, footprint and roof — mix slim spires, wide stepped towers, twisted towers, cantilevered slabs, domed halls, low wide data halls, mid-rise residential blocks with balconies, a stadium/arena, a glass atrium, a bridge between two towers. Do not repeat the same domed white cylinder tower. Vary window patterns and accent colors (pearl white, warm grey, pale silver glass, a few deep-blue or pale-gold facades).
+4. Clear city structure: one landmark Compute Spire with halo rings as the focal point, a dense downtown cluster around it, mid-ground districts with streets and plazas readable, a calm river or lake at the bottom with clean embankments, distant mountains.
+
+Everything crisp and in focus, NO depth-of-field blur, NO bokeh, only light atmospheric fade on the farthest mountains. Varied, believable, designed city — not a tiled pattern.
+
+--- V3（无参考图纯文字出图，去蓝色，真实城市配色）---
+A clean, sharp background skyline plate of one original modern post-AI city, bright clear daytime, eye-level camera across a calm river, polished stylized game-art rendering. No foreground objects, no people, no text, no UI.
+
+COLOR — realistic modern city, NOT blue-themed:
+- Facades in natural, varied materials: warm off-white and light grey concrete, beige sandstone, pale travertine, terracotta and brick red, bronze and champagne metal panels, dark charcoal steel, glass in neutral grey, smoky bronze and pale green tints.
+- Glass reflects the sky naturally; blue appears only in the sky and water, not on the buildings.
+- Accent light is sparing and warm (soft white and amber). At most a few tiny cool indicator lights. No blue light strips, no blue trim bands, no glowing blue diamonds.
+- Overall palette: warm neutrals + muted earth tones + sky. Think of contemporary Singapore, Copenhagen, Shenzhen Qianhai, Hudson Yards in daylight.
+
+CITY:
+- One landmark AI Compute Spire as the focal point: slender silver-white and champagne tower with thin floating halo rings in soft white, not blue.
+- A dense downtown cluster around it; every building different in height, silhouette, footprint, roof and window pattern — slim towers, stepped towers, twisted tower, cantilevered slab, sky bridge between two towers, low wide data hall with a green roof, mid-rise residential blocks with balconies, a timber-and-glass cultural center, an arena. Never repeat the same tower.
+- Only ONE elevated maglev line with ONE train; train body warm white with a charcoal stripe.
+- Little greenery: a row of street trees on the embankment and a few roof gardens, about 10% of the image. No planter terraces, no waterfalls.
+- Calm river at the bottom with clean stone embankments, a few small boats, distant hazy mountains, a couple of small delivery drones.
+
+Everything crisp and in focus, NO depth-of-field blur, NO bokeh. Varied, believable, designed city — not a tiled pattern.
+
+--- V4（超大未来城市天际线，无远山；B 为金色午后光）---
+Breathtaking panoramic skyline of an enormous futuristic megacity of the post-AI era, wide cinematic background plate for a side-scrolling game. High-end stylized game concept art / polished digital matte painting illustration (not a photo), clean shapes, crisp detail, beautiful lighting.
+
+SCALE: the city fills the entire horizon from left edge to right edge with no gaps — layer after layer of buildings receding into the distance, thousands of towers. Dozens of supertall and megatall towers (500–1500 m) of dramatically different heights create a rich, rhythmic skyline. Vast megastructures: arch towers joined at the top, towers linked by multi-level sky bridges, cantilevered sky platforms and sky gardens high up, a giant ring-shaped arcology, stacked terraced mega-blocks, a colossal central AI Compute Spire as the tallest focal point with thin floating halo rings of soft white light.
+
+FUTURISTIC DESIGN: sleek aerodynamic and parametric forms — twisted, tapering, faceted, flowing curved facades, diagrid exoskeletons, vertical fins, sky lobbies, rooftop landing pads, a few flying vehicles in orderly lanes, one elevated maglev line with one train crossing the lower city. Every building unique; no repeated or copy-pasted towers.
+
+NO MOUNTAINS, no hills, no cliffs, no waterfalls on the horizon: the city itself is the horizon, fading into soft atmospheric haze far away. Clear open sky above.
+
+COLOR: NOT blue-themed. Warm pearl white, champagne gold, bronze, warm grey, sandstone, graphite and smoky glass facades, small touches of terracotta. Glass reflects warm sunlight. Light accents are warm white and amber; at most tiny cool highlights. Blue only in the sky.
+
+Very little greenery (a few sky gardens). Lower edge: a calm wide river reflecting the skyline with a clean embankment, no foreground objects. No people, no text, no logos, no UI. Everything sharp and in focus, no depth-of-field blur.
