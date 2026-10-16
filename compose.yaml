@@ -9,7 +9,7 @@ services:
     ports:
       - "127.0.0.1:5174:5174"
     volumes:
-      - .:/app:ro
+      - .:/app
       - type: volume
         source: node_modules
         target: /app/node_modules
