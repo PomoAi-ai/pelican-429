@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { injectAfter } from '../tile-material.ts';
+import { D1_EYELID_MATERIAL, D1_EYE_SOCKET_MATERIAL, isD1SphericalEyeSurface } from './d1-spherical-eyes.ts';
 
 export const D1_STUDIO_VERSIONS = [
   { id: 'v1', label: 'V1 · 柔光原版', description: '暖色皮肤与自然材质，第一版保留。' },
@@ -15,6 +16,8 @@ const VERSION_CODE = { v1: 0, v2: 1, v3: 2, v4: 3, v5: 4, v6: 5 } as const;
 type Surface = 'skin' | 'face' | 'hair' | 'cloth';
 const SURFACES: Readonly<Record<string, Surface>> = {
   Body: 'skin', 'Neck source-color transition': 'skin', model: 'face',
+  [D1_EYELID_MATERIAL]: 'skin',
+  [D1_EYE_SOCKET_MATERIAL]: 'skin',
   'model.001': 'hair', 'Golden hair roots': 'hair', 'D1 V3 dress': 'cloth',
   'D1 refined detail': 'cloth', 'D1 refined skin': 'cloth', 'D1 refined blue': 'cloth',
 };
@@ -262,6 +265,7 @@ export function applyD1StudioLook(root: THREE.Object3D) {
     }
     const original = node.material;
     const convert = (source: THREE.Material) => {
+      if (isD1SphericalEyeSurface(source)) return source;
       if (source.name.startsWith('D1.Covered.') || source.name.startsWith('Flight / ')) return source;
       if (source.name === 'D1 eye') {
         const eye = source as THREE.MeshToonMaterial;

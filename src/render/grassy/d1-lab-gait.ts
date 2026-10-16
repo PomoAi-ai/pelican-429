@@ -77,6 +77,7 @@ export function createD1LabGaits(rig: ReturnType<typeof createD1Rig>): { walk: T
     return node;
   };
   root.traverse(node => {
+    if (!(node instanceof THREE.Bone)) return;
     const matrix = rest.get(node.name)!.clone();
     if (node.parent instanceof THREE.Bone) matrix.premultiply(rest.get(node.parent.name)!.clone().invert());
     matrix.decompose(node.position, node.quaternion, node.scale);

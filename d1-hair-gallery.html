@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#eee9e1" />
+    <title>D1 · 全部头发预览</title>
+    <link rel="stylesheet" href="./src/ui/d1-hair-gallery.css" />
+  </head>
+  <body>
+    <header class="hair-header">
+      <div><p>PELICAN 429 / HAIR COLLECTION</p><h1>全部头发预览</h1></div>
+      <a href="./render-lab.html">打开渲染实验 ↗</a>
+    </header>
+    <nav class="hair-toolbar" aria-label="预览设置">
+      <div class="hair-control"><span>统一渲染</span><div id="hair-looks" class="hair-buttons" role="group" aria-label="渲染风格"></div></div>
+      <div class="hair-control"><span>统一视角</span><div id="hair-angles" class="hair-buttons" role="group" aria-label="查看角度">
+        <button type="button" data-angle="0" aria-pressed="true">正面</button>
+        <button type="button" data-angle="45" aria-pressed="false">45°</button>
+        <button type="button" data-angle="90" aria-pressed="false">侧面</button>
+        <button type="button" data-angle="180" aria-pressed="false">背面</button>
+      </div></div>
+      <p id="hair-status" role="status">正在读取头发目录…</p>
+    </nav>
+    <main id="hair-gallery" class="hair-grid" aria-label="全部头发"></main>
+    <script type="module" src="./src/app/d1-hair-gallery.ts"></script>
+  </body>
+</html>

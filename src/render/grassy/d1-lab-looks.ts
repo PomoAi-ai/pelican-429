@@ -7,9 +7,11 @@ import { createD1PaintedMaterial } from './d1-painted-material.ts';
 import { createD1LabHair } from './d1-lab-hair.ts';
 import { createD1AuthoredHair } from './d1-authored-hair.ts';
 import { createD1BlenderHair } from './d1-blender-hair.ts';
+import { installD1FiberRibbons } from './d1-fiber-ribbon.ts';
 import { d1EyeControl } from './d1-anime-material.ts';
 import { applyD1LabEyes } from './d1-lab-eyes.ts';
 import { studySurface, type StudySource } from './d1-study-surface.ts';
+import { D1_EYELID_MATERIAL, isD1SphericalEyeSurface } from './d1-spherical-eyes.ts';
 
 export const D1_LAB_VERSIONS = [
   { id: 'showcase', label: '展示场 · 原版材质', description: '链接中的游戏标准版与原版动漫材质；统一棚光，与展示场环境光照不同。' },
@@ -58,18 +60,18 @@ export function applyD1LabLooks(root: THREE.Object3D, hairStyle: 'showcase' | 'c
   })) : [];
   const legacy = applyD1StudioLook(root);
   const studioCastShadows = baseline.map(snapshot => snapshot.mesh.castShadow);
-  const eyes = applyD1LabEyes(root);
+  const eyes = root.userData.d1SphericalEyes ? null : applyD1LabEyes(root);
   const caches = { v7: new Map<THREE.Material, THREE.Material>(), v8: new Map<THREE.Material, THREE.Material>(), v9: new Map<THREE.Material, THREE.Material>(), v10: new Map<THREE.Material, THREE.Material>() };
   const bindings = sources.map(({ mesh, material }) => {
     const previous = mesh.material;
     const create = (version: StudyVersion) => {
       const convert = (source: THREE.Material, index: number): THREE.Material => {
-        if (source.name === 'D1 eye' || source.name.startsWith('D1.Covered.') || source.name.startsWith('Flight / ')) {
+        if (source.name === 'D1 eye' || isD1SphericalEyeSurface(source) || source.name.startsWith('D1.Covered.') || source.name.startsWith('Flight / ')) {
           return Array.isArray(previous) ? previous[index]! : previous;
         }
         let result = caches[version].get(source);
         if (!result) {
-          result = FACTORIES[version](source as StudySource, mesh.userData.characterPart === 'hair' && hair ? hair.geometry : mesh.geometry, studySurface(source));
+          result = FACTORIES[version](source as StudySource, mesh.userData.characterPart === 'hair' && hair ? hair.geometry : mesh.geometry, source.name === D1_EYELID_MATERIAL ? 'skin' : studySurface(source));
           caches[version].set(source, result);
         }
         return result;
@@ -78,6 +80,7 @@ export function applyD1LabLooks(root: THREE.Object3D, hairStyle: 'showcase' | 'c
     };
     return { mesh, previous, v7: create('v7'), v8: create('v8'), v9: create('v9'), v10: create('v10') };
   });
+  const fiberRibbons = installD1FiberRibbons(root);
   return {
     setVersion(version: D1LabVersion) {
       for (const [index, snapshot] of baseline.entries()) {
@@ -87,6 +90,7 @@ export function applyD1LabLooks(root: THREE.Object3D, hairStyle: 'showcase' | 'c
       }
       if (version === 'showcase') {
         for (const snapshot of baseline) snapshot.mesh.material = snapshot.material;
+        fiberRibbons.patchCurrentMaterials();
         return;
       }
       if (version === 'v7' || version === 'v8' || version === 'v9' || version === 'v10') {
@@ -99,10 +103,11 @@ export function applyD1LabLooks(root: THREE.Object3D, hairStyle: 'showcase' | 'c
         for (const binding of bindings) binding.mesh.material = binding.previous;
         legacy.setVersion(version);
       }
+      fiberRibbons.patchCurrentMaterials();
     },
     setAnimationVersion(version: 'original' | 'refined') {
       hair?.setMotionVersion(version);
-      eyes.setEnabled(version === 'refined');
+      eyes?.setEnabled(version === 'refined');
     },
     setHairMotion(enabled: boolean) { hair?.setMotionEnabled(enabled); },
     resetMotion() { hair?.reset(); },
@@ -113,9 +118,10 @@ export function applyD1LabLooks(root: THREE.Object3D, hairStyle: 'showcase' | 'c
       for (const eye of baselineEyes) eye(legacy.closure, baselineGaze);
     },
     dispose() {
+      fiberRibbons.dispose();
       for (const snapshot of baseline) snapshot.mesh.material = snapshot.original;
       for (const binding of bindings) binding.mesh.material = binding.previous;
-      eyes.dispose();
+      eyes?.dispose();
       for (const cache of Object.values(caches)) for (const material of cache.values()) material.dispose();
       legacy.dispose();
       hair?.dispose();

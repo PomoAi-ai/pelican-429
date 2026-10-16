@@ -5,6 +5,7 @@ import { D1_ACTIONS, D1_ANIMATED_MODELS, type D1AnimatedVariant, type D1Shading,
 import { createD1Material, createD1OutlineMaterial, d1EyeControl, prepareD1Model } from './d1-anime-material.ts';
 import { characterTextureTier, loadCharacterModel, type TextureTier } from '../character-model.ts';
 import { disposeModelResources } from '../model-resources.ts';
+import { installD1SphericalEyes } from './d1-spherical-eyes.ts';
 
 interface D1Asset {
   scene: THREE.Group;
@@ -73,10 +74,12 @@ export function loadD1Asset(variant: D1AnimatedVariant, tier: TextureTier = char
 }
 
 /** 游戏和展示场共享模型与动作；实例只拥有骨骼、混合器和场景材质。 */
-export function createD1Rig(variant: D1AnimatedVariant, shading: D1Shading, tier: TextureTier = characterTextureTier()) {
+export function createD1Rig(variant: D1AnimatedVariant, shading: D1Shading, tier: TextureTier = characterTextureTier(), sphericalEyeScene?: THREE.Object3D) {
   const asset = assets.get(`${variant}:${tier}`);
   if (!asset) throw new Error('D1 动画模型尚未加载；请先等待 loadD1Asset()');
   const model = clone(asset.scene) as THREE.Group;
+  const sphericalEyes = sphericalEyeScene ? installD1SphericalEyes(model, sphericalEyeScene) : null;
+  if (sphericalEyes) prepareD1Model(sphericalEyes.face);
   const materials = new Map<THREE.Material, THREE.Material>();
   const outlines = new Map<THREE.Material, THREE.Material>();
   const skeletons = new Set<THREE.Skeleton>();
@@ -112,6 +115,15 @@ export function createD1Rig(variant: D1AnimatedVariant, shading: D1Shading, tier
   let clock = 0;
   let nextBlink = between(BLINK_INTERVAL);
   let nextGaze = between(GAZE_INTERVAL);
+  let manualClosure: number | null = null;
+  let manualGaze: THREE.Vector2 | null = null;
+  let automaticClosure = 0;
+  const applyEyes = (): void => {
+    const closure = manualClosure ?? automaticClosure;
+    const direction = manualGaze ?? gaze;
+    for (const eye of eyes) eye(closure, direction);
+    sphericalEyes?.setPose(closure, direction);
+  };
   const updateEyes = (dt: number): void => {
     clock += dt;
     if (clock >= nextBlink + BLINK_TIME) nextBlink = clock + between(BLINK_INTERVAL);
@@ -121,11 +133,13 @@ export function createD1Rig(variant: D1AnimatedVariant, shading: D1Shading, tier
       nextGaze = clock + between(GAZE_INTERVAL);
     }
     if (!blinking) gaze.lerp(gazeTarget, 1 - Math.exp(-GAZE_RATE * dt));
-    const closure = blinking ? blinkClosure(clock - nextBlink) : 0;
-    for (const eye of eyes) eye(closure, gaze);
+    automaticClosure = blinking ? blinkClosure(clock - nextBlink) : 0;
+    applyEyes();
   };
+  applyEyes();
   const root = new THREE.Group();
   root.name = 'd1-animated';
+  root.userData.d1SphericalEyes = sphericalEyes !== null;
   root.add(model);
   const mixer = new THREE.AnimationMixer(model);
   const actions = {} as Record<D1Action, THREE.AnimationAction>;
@@ -136,6 +150,10 @@ export function createD1Rig(variant: D1AnimatedVariant, shading: D1Shading, tier
   }
   return {
     root, mixer, actions,
+    hasSphericalEyes: sphericalEyes !== null,
+    setEyeClosure(value: number | null) { manualClosure = value; applyEyes(); },
+    /** 球眼视线使用弧度：+x 朝角色左侧，+y 向上；null 恢复自然注视。 */
+    setEyeGaze(value: THREE.Vector2 | null) { manualGaze = value === null ? null : value.clone(); applyEyes(); },
     setHairVisible(visible: boolean) { for (const mesh of hair) mesh.visible = visible; },
     /** 推进动作与眨眼、注视。 */
     update(dt: number) { mixer.update(dt); updateEyes(dt); },
@@ -144,6 +162,7 @@ export function createD1Rig(variant: D1AnimatedVariant, shading: D1Shading, tier
       mixer.uncacheRoot(model);
       for (const material of [...materials.values(), ...outlines.values()]) material.dispose();
       for (const skeleton of skeletons) skeleton.dispose();
+      sphericalEyes?.dispose();
       root.removeFromParent();
       root.clear();
     },

@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import type { D1Shading } from '../../config/grassy.ts';
 import { injectAfter } from '../tile-material.ts';
+import { createD1SphericalEyeMaterial, D1_EYELID_MATERIAL, D1_EYE_SOCKET_MATERIAL, isD1SphericalEyeSurface } from './d1-spherical-eyes.ts';
 
 /** D1 动漫着色：柔和暖色明暗交界、皮肤透光散射带、视线补光与边缘光；头发用发丝方向各向异性高光；外壳描边；脸部法线向头部球面收拢以去掉硬阴影；
  * 眼睛是独立贴片：图集四格眨眼帧，虹膜在着色器里画，随注视与视角偏移。 */
@@ -12,6 +13,8 @@ const ROLE_BY_NAME: Readonly<Record<string, Role>> = {
   'Neck source-color transition': 'skin',
   'model': 'face',
   'D1 eye': 'eye',
+  [D1_EYELID_MATERIAL]: 'skin',
+  [D1_EYE_SOCKET_MATERIAL]: 'skin',
   'model.001': 'hair',
   'Golden hair roots': 'hair',
   'D1 V3 dress': 'cloth',
@@ -379,6 +382,7 @@ export function prepareD1Model(scene: THREE.Object3D): void {
 
 /** 每个 D1 实例的场景材质；未登记的材质名抛错，避免新资源静默走错着色。 */
 export function createD1Material(source: THREE.Material, geometry: THREE.BufferGeometry, shading: D1Shading): THREE.Material {
+  if (isD1SphericalEyeSurface(source)) return createD1SphericalEyeMaterial(source as THREE.MeshStandardMaterial);
   const role = roleOf(source);
   return role === 'pbr' ? source.clone() : toonMaterial(source as THREE.MeshStandardMaterial, role, geometry, true, shading);
 }
@@ -444,6 +448,7 @@ function toonMaterial(source: THREE.MeshStandardMaterial, role: Role, geometry: 
 /** 描边外壳材质：背面、沿平滑法线外扩，颜色为部件着色结果乘同色系深色系数；PBR 部件不描边（返回不可见材质，保持分组对应）。
  * 复用部件自己的动漫着色，受光法线固定朝向镜头：描边亮度跟随身体正面，地上不发黑、地下不比身体亮。 */
 export function createD1OutlineMaterial(source: THREE.Material, geometry: THREE.BufferGeometry, shading: D1Shading): THREE.Material {
+  if (isD1SphericalEyeSurface(source) || source.name === D1_EYELID_MATERIAL) return new THREE.MeshBasicMaterial({ visible: false });
   const role = roleOf(source);
   // 眼部贴片贴在脸上，脸的描边已包住它。
   if (role === 'pbr' || role === 'eye') return new THREE.MeshBasicMaterial({ visible: false });

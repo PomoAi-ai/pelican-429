@@ -183,12 +183,24 @@ def tube(path, width, thick, normals=None, profile=None, bend=0.):
 
 def lock_profile(u):
     """Lock width along its length: a narrow wedge at the root (locks meeting at the parting and crown do not stack
-    flat on each other), full from a third, then a short full point as in the concept, not a needle."""
-    return (.4 + .6 * math.sin(math.pi * min(u / .35, 1) / 2)) * (1 - max(0, (u - .72) / .28) ** 1.5) ** .6
+    flat on each other), full from a third, then a leaf-shaped point over the last 45% as in the concept: full
+    clumps that close to a point, neither blunt nor needles."""
+    return (.4 + .6 * math.sin(math.pi * min(u / .35, 1) / 2)) * (1 - max(0, (u - .55) / .45) ** 1.6) ** .8
 
 
-def lock(path, width, thick=.34):
+def lock(path, width, thick=.34, forks=(), sway=0.):
+    """`forks` ((shift, keep, scale), ...): narrower locks that run inside this one and part from it over the last half,
+    `shift` widths to the side, ending at `keep` of its length, so the end splits into two or three points as in the
+    concept. `sway` bends the end sideways (in widths), the curved tips of the fringe."""
+    tangent = np.gradient(path, axis=0)
+    side = np.cross(tangent, [outward(p) for p in path])
+    side /= np.linalg.norm(side, axis=1, keepdims=True)
+    u = np.linspace(0, 1, len(path))[:, None]
+    path = path + side * sway * width * u ** 2
     tube(path, width, width * thick, profile=lock_profile, bend=.08)
+    for shift, keep, scale in forks:
+        part = path + side * shift * width * np.clip((u - .45) / .55, 0, 1) ** 1.5
+        tube(resample(part[:round(len(part) * keep)], 30), width * scale, width * scale * thick, profile=lock_profile, bend=.08)
 
 
 # Braid line (polar angle by azimuth): from beside the parting high at the front, down the side of the head, ending
@@ -209,17 +221,19 @@ for side in (1, -1):
     # Back, lower tier (the hem row): locks roughly as wide as their spacing, each on its own layer (coincident surfaces
     # flicker); the under layer ends higher, filling the gaps the flare opens without its tips showing below the hem.
     for i, a in enumerate(np.linspace(BACK_FROM + 12, 176, 4)):
-        lock(lock_path(part(.3 + .7 * (a - BACK_FROM) / (180 - BACK_FROM)), (side * a, 100), .2 * i, z_end=.26, flare=spread(a, .26), curl=.02, hug=.15), .42, .45)
+        lock(lock_path(part(.3 + .7 * (a - BACK_FROM) / (180 - BACK_FROM)), (side * a, 100), .2 * i, z_end=.26, flare=spread(a, .26), curl=.02, hug=.15), .42, .45, forks=((.4 * (-1) ** i, .86, .65),))
     for i, a in enumerate(np.linspace(BACK_FROM + 4, 170, 4)):
         lock(lock_path(part(.32 + .68 * (a - BACK_FROM) / (180 - BACK_FROM) + jitter(.02)), (side * a + jitter(2), 100), 1.2 + .2 * i,
-                       z_end=.14 + jitter(.06), flare=spread(a, .34), curl=-.07 + jitter(.03), wave=jitter(.08), hug=.1), .4, .5)
+                       z_end=.14 + jitter(.06), flare=spread(a, .34), curl=-.07 + jitter(.03), wave=jitter(.08), hug=.1), .4, .5,
+             forks=((.45 * (-1) ** i, .84 + jitter(.05), .62),))
     # Back, upper tier: broad locks fanning from the crown that end mid-back over the hem row, tips turning in,
     # the concept's layered bob.
     for i, (a, z) in enumerate(((140, .62), (156, .54), (172, .66))):
-        lock(lock_path(part(.6 + .15 * i), (side * a, 98), 2.4 + .2 * i, z_end=z, flare=spread(a, .3), curl=.05, wave=jitter(.06), hug=.1), .52, .4)
+        lock(lock_path(part(.6 + .15 * i), (side * a, 98), 2.4 + .2 * i, z_end=z, flare=spread(a, .3), curl=.05, wave=jitter(.06), hug=.1), .52, .4,
+             forks=((.4, .84, .6),))
     # Behind the ear: from under the end of the braid down to the jaw, covering the skull between ear and back hair.
     for i, a in enumerate((122, 133)):
-        lock(lock_path((side * (a - 6), braid_t(a) + 2), (side * a, 104), 1 + .2 * i, z_end=.2 + jitter(.03), flare=.36, curl=-.1, wave=jitter(.05), hug=.2), .42, .45)
+        lock(lock_path((side * (a - 6), braid_t(a) + 2), (side * a, 104), 1 + .2 * i, z_end=.2 + jitter(.03), flare=.36, curl=-.1, wave=jitter(.05), hug=.2), .42, .45, forks=((-.45, .84, .62),))
     # Above the ear: from the parting down under the braid.
     for i, s in enumerate(np.linspace(.08, .36, 6)):
         a = 46 + 72 * (s - .08) / .28
@@ -230,18 +244,20 @@ for side in (1, -1):
     # Temple locks from the parting over the temple, between the fringe and the sidelocks, so no forehead shows there.
     for i, (a, t) in enumerate(((34, 86), (48, 92))):
         lock(lock_path(part(.03 + .03 * i), (side * a, t), 2.2 + .2 * i, lift=.02), .32)
-    # Sidelocks down to the jaw, tips turning out: a thin one framing the face, then flatter ones (lower layers) toward
-    # the ear, filling the temple in profile yet staying inside the ear from the front.
-    for a, z, w, layer in ((48, .3, .18, 1.6), (60, .34, .2, 1.), (72, .38, .2, .6)):
+    # Sidelocks down to the jaw, tips turning out: a thin one framing the face, then a flatter one (lower layer) toward
+    # the ear, filling the temple in profile; none lies over the ear, which the concept shows from the front.
+    for a, z, w, layer in ((46, .3, .18, 1.6), (54, .36, .18, 1.)):
         lock(lock_path((side * (a - 16), 48), (side * a, 98), layer, z_end=z, flare=.16, curl=-.03, wave=.03 * side, hug=1), w)
 # Fringe: the big sweep crosses the forehead from the parting toward the character's right temple; three locks fall
 # the other way, leaving a narrow triangle of forehead under the parting.
-for i, (s, a, t, w, lift) in enumerate(((.22, -52, 102, .4, .06), (.16, -32, 95, .34, .07), (.11, -14, 94, .3, .06), (.06, 2, 93, .26, .05))):
-    lock(lock_path(part(s), (a, t), 2.6 + .3 * i, lift=lift * 1.3), w * .85, .26)
+for i, (s, a, t, w, lift, sway) in enumerate(((.24, -56, 104, .34, .06, .5), (.2, -44, 99, .28, .07, .3), (.16, -32, 96, .3, .07, .4),
+                                              (.13, -21, 93, .26, .06, .2), (.1, -10, 95, .28, .06, .3), (.07, 0, 91, .24, .05, .1))):
+    lock(lock_path(part(s), (a, t), 2.6 + .25 * i, lift=lift * 1.3), w * .85, .3, sway=sway,
+         forks=((.45, .82, .6),) if i % 2 == 0 else ())
 # One long lock from the crown whorl crosses the centre of the back diagonally over the others, as in the concept.
 lock(lock_path((180, 30), (156, 98), 3.4, z_end=.5, flare=.2, curl=.06, hug=.1), .46, .4)
-for i, (s, a, t, w, lift) in enumerate(((.1, 42, 96, .28, .05), (.04, 56, 104, .3, .03))):
-    lock(lock_path(part(s), (a, t), 2.5 + .3 * i, lift=lift * 1.3), w * .85, .26)
+for i, (s, a, t, w, lift) in enumerate(((.1, 40, 95, .26, .05), (.06, 50, 100, .26, .04), (.03, 60, 106, .28, .03))):
+    lock(lock_path(part(s), (a, t), 2.5 + .25 * i, lift=lift * 1.3), w * .85, .3, sway=-.3)
 
 
 def braid(side):
@@ -265,15 +281,15 @@ def braid(side):
         binormal.append(b)
     normal, binormal = np.array(normal), np.array(binormal)
     length = np.linalg.norm(np.diff(centre, axis=0), axis=1).sum()
-    turns = length / .55
+    turns = length / .42
     taper = (.55 + .45 * np.clip((1 - along) / .35, 0, 1)) * np.clip(along / .25, .2, 1) ** .7
     for k in range(3):
         phase = 2 * math.pi * (turns * along + k / 3)
         # Strands converge at the start, where the braid gathers its first hair under the parting.
-        lateral = .125 * np.sin(phase) * taper * np.clip(along / .1, 0, 1)
+        lateral = .11 * np.sin(phase) * taper * np.clip(along / .1, 0, 1)
         height = .04 * np.sin(2 * phase) * np.clip(along / .1, 0, 1)
         strand = centre + binormal * lateral[:, None] + normal * height[:, None]
-        tube(strand, .3, .19, normals=normal, profile=lambda u: float(np.interp(u, along, taper)) * (1 - max(0, (u - .94) / .06) ** 2) ** .5)
+        tube(strand, .27, .17, normals=normal, profile=lambda u: float(np.interp(u, along, taper)) * (1 - max(0, (u - .94) / .06) ** 2) ** .5)
 
 
 braid(1)
@@ -341,12 +357,12 @@ cell = y.astype(int) * GRID + x.astype(int)
 cu, cv = np.clip(((x % 1) - PAD) / (1 - 2 * PAD), 0, 1), np.clip(((y % 1) - PAD) / (1 - 2 * PAD), 0, 1)
 around = np.cos(2 * math.pi * cu)
 outer = np.clip(np.sin(2 * math.pi * cu), 0, 1)
-freq, phase = rng.uniform(40, 70, (GRID * GRID, 6)), rng.uniform(0, 2 * math.pi, (GRID * GRID, 6))
+freq, phase = rng.uniform(8, 14, (GRID * GRID, 6)), rng.uniform(0, 2 * math.pi, (GRID * GRID, 6))
 strands = sum(np.sin(freq[cell, k] * cu * 2 * math.pi + phase[cell, k]) for k in range(6)) / 6
-shade = .6 + .28 * outer - .3 * np.abs(around) ** 3 + .1 * strands * outer - .25 * np.exp(-cv / .1) + .1 * cv
+shade = .6 + .28 * outer - .3 * np.abs(around) ** 3 + .16 * np.sign(strands) * np.abs(strands) ** .5 * outer - .25 * np.exp(-cv / .1) + .1 * cv
 scalp = y >= GRID - 1
 shade[scalp] = .5
-dark, mid, light = np.array([.84, .3, .06]), np.array([.93, .52, .22]), np.array([1, .70, .40])
+dark, mid, light = np.array([.84, .36, .14]), np.array([.94, .57, .29]), np.array([1, .77, .48])
 rgb = np.where(shade[..., None] < .6, dark + (mid - dark) * np.clip((shade[..., None] - .25) / .35, 0, 1), mid + (light - mid) * np.clip((shade[..., None] - .6) / .3, 0, 1))
 image = bpy.data.images.new('hair_basecolor', TEXTURE, TEXTURE)
 image.pixels.foreach_set(np.concatenate([rgb, np.ones((TEXTURE, TEXTURE, 1))], 2).astype(np.float32).ravel())

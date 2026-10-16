@@ -1334,11 +1334,11 @@
     {
       "source": "./characters/human/customization/d1-base-animated.glb",
       "output": "./characters/human/customization/d1-base-animated.ktx2-256.glb",
-      "sourceSha256": "58e5cfc49032ab1a4eccc1e84ebf5bf9d0dce0a88f5c4c045f443115b6577346",
-      "sourceBytes": 21309608,
-      "outputBytes": 2917712,
-      "sourceBufferBytes": 5966524,
-      "storedBufferBytes": 2695148,
+      "sourceSha256": "83e4b046e965e7a52167bfd676358be4b16b52926a851dd6f23ea80d89f847a6",
+      "sourceBytes": 22412260,
+      "outputBytes": 3204840,
+      "sourceBufferBytes": 6585708,
+      "storedBufferBytes": 2978958,
       "images": [
         {
           "name": "texture_diffuse_skin",
@@ -1381,8 +1381,8 @@
           "outputWidth": 256,
           "outputHeight": 256,
           "kind": "color",
-          "sourceBytes": 2327445,
-          "outputBytes": 12291,
+          "sourceBytes": 2810429,
+          "outputBytes": 15123,
           "sourceRgbaMipBytes": 22369620,
           "outputRgbaMipBytes": 349524
         },
@@ -1452,11 +1452,11 @@
     {
       "source": "./characters/human/customization/d1-base-game.glb",
       "output": "./characters/human/customization/d1-base-game.ktx2-256.glb",
-      "sourceSha256": "f9f531a570992242f963aa5b8ddde2c72247b14278911535834e00a444b15d1f",
-      "sourceBytes": 19101424,
-      "outputBytes": 1944976,
-      "sourceBufferBytes": 3758330,
-      "storedBufferBytes": 1722415,
+      "sourceSha256": "438f80d69163f36c4f4222830f5750af714c790ec20b8df5a37ebb2f39ecff52",
+      "sourceBytes": 19827444,
+      "outputBytes": 2068492,
+      "sourceBufferBytes": 4000878,
+      "storedBufferBytes": 1842616,
       "images": [
         {
           "name": "texture_diffuse_skin",
@@ -1499,8 +1499,8 @@
           "outputWidth": 256,
           "outputHeight": 256,
           "kind": "color",
-          "sourceBytes": 2327445,
-          "outputBytes": 12291,
+          "sourceBytes": 2810429,
+          "outputBytes": 15123,
           "sourceRgbaMipBytes": 22369620,
           "outputRgbaMipBytes": 349524
         },
@@ -1570,11 +1570,11 @@
     {
       "source": "./characters/human/customization/d1-base-light.glb",
       "output": "./characters/human/customization/d1-base-light.ktx2-256.glb",
-      "sourceSha256": "f839e2ef51fb13ff46aa20f05a702e786d161fc3fda1192b147479f8ab3d07ae",
-      "sourceBytes": 18364656,
-      "outputBytes": 1596624,
-      "sourceBufferBytes": 3021582,
-      "storedBufferBytes": 1374107,
+      "sourceSha256": "3a7aabd681061dc9173377ad60770885e041b689d5ef3fcf2c277bfeb2f4d72d",
+      "sourceBytes": 18984024,
+      "outputBytes": 1670620,
+      "sourceBufferBytes": 3157476,
+      "storedBufferBytes": 1444780,
       "images": [
         {
           "name": "texture_diffuse_skin",
@@ -1617,8 +1617,8 @@
           "outputWidth": 256,
           "outputHeight": 256,
           "kind": "color",
-          "sourceBytes": 2327445,
-          "outputBytes": 12291,
+          "sourceBytes": 2810429,
+          "outputBytes": 15123,
           "sourceRgbaMipBytes": 22369620,
           "outputRgbaMipBytes": 349524
         },
@@ -1688,11 +1688,11 @@
     {
       "source": "./characters/human/customization/d1-outfit-game.glb",
       "output": "./characters/human/customization/d1-outfit-game.ktx2-256.glb",
-      "sourceSha256": "869506d98d5966d8e023a5718e174d27cd2b60988743827eb53c94eeecf6fb62",
-      "sourceBytes": 39727620,
-      "outputBytes": 3238160,
-      "sourceBufferBytes": 5477370,
-      "storedBufferBytes": 2744065,
+      "sourceSha256": "38d335c8bde9b117f0a600d41014b8081b0f3eaf9c6c431700cf7f3e58d4198e",
+      "sourceBytes": 40453668,
+      "outputBytes": 3361780,
+      "sourceBufferBytes": 5719870,
+      "storedBufferBytes": 2864301,
       "images": [
         {
           "name": "texture_diffuse_skin",
@@ -1735,8 +1735,8 @@
           "outputWidth": 256,
           "outputHeight": 256,
           "kind": "color",
-          "sourceBytes": 2327445,
-          "outputBytes": 12291,
+          "sourceBytes": 2810429,
+          "outputBytes": 15123,
           "sourceRgbaMipBytes": 22369620,
           "outputRgbaMipBytes": 349524
         },
@@ -1883,11 +1883,11 @@
     {
       "source": "./characters/human/customization/d1-equipped-game.glb",
       "output": "./characters/human/customization/d1-equipped-game.ktx2-256.glb",
-      "sourceSha256": "e9528aa744be1a9657b696276951e553ae3b4d66928e97a2a657ba530e5fe78d",
-      "sourceBytes": 40355616,
-      "outputBytes": 3654632,
-      "sourceBufferBytes": 6087250,
-      "storedBufferBytes": 3132875,
+      "sourceSha256": "de86c840d016099d503e280675b862ccecc15f340ba8258c6b4ea5a209c50abd",
+      "sourceBytes": 41081656,
+      "outputBytes": 3778240,
+      "sourceBufferBytes": 6329750,
+      "storedBufferBytes": 3253111,
       "images": [
         {
           "name": "texture_diffuse_skin",
@@ -1930,8 +1930,8 @@
           "outputWidth": 256,
           "outputHeight": 256,
           "kind": "color",
-          "sourceBytes": 2327445,
-          "outputBytes": 12291,
+          "sourceBytes": 2810429,
+          "outputBytes": 15123,
           "sourceRgbaMipBytes": 22369620,
           "outputRgbaMipBytes": 349524
         },

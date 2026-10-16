@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { injectAfter } from '../tile-material.ts';
+import { D1_EYE_SOCKET_MATERIAL } from './d1-spherical-eyes.ts';
 
 export type StudySurface = 'skin' | 'face' | 'hair' | 'cloth';
 export type StudySource = THREE.MeshToonMaterial;
@@ -7,6 +8,7 @@ export type StudyShader = Parameters<THREE.Material['onBeforeCompile']>[0];
 
 const SURFACES: Readonly<Record<string, StudySurface>> = {
   Body: 'skin', 'Neck source-color transition': 'skin', model: 'face',
+  [D1_EYE_SOCKET_MATERIAL]: 'skin',
   'model.001': 'hair', 'Golden hair roots': 'hair', 'D1 V3 dress': 'cloth',
   'D1 refined detail': 'cloth', 'D1 refined skin': 'cloth', 'D1 refined blue': 'cloth',
 };

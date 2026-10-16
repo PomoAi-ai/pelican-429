@@ -1,0 +1,52 @@
+:root {
+  font-family: 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', system-ui, sans-serif;
+  color: #403b34;
+  background: #eee9e1;
+  color-scheme: light;
+  font-synthesis: none;
+  -webkit-font-smoothing: antialiased;
+}
+* { box-sizing: border-box; }
+body { margin: 0; }
+a { color: #715d40; text-decoration: none; }
+a:hover { text-decoration: underline; }
+button { font: inherit; cursor: pointer; }
+button:focus-visible, a:focus-visible { outline: 2px solid #715d40; outline-offset: 3px; }
+.hair-header { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 24px; border-bottom: 1px solid #41372b1c; }
+.hair-header p { margin: 0 0 6px; font-size: 10px; letter-spacing: .16em; color: #8c7f6f; }
+.hair-header h1 { margin: 0; font-size: 22px; font-weight: 500; }
+.hair-header a { font-size: 12px; }
+.hair-toolbar { position: sticky; top: 0; z-index: 2; padding: 14px 24px 10px; background: #eee9e1f5; border-bottom: 1px solid #41372b25; }
+.hair-control { display: flex; align-items: baseline; gap: 14px; margin-bottom: 9px; }
+.hair-control > span { flex-shrink: 0; font-size: 12px; color: #786b59; }
+.hair-buttons { display: flex; flex-wrap: wrap; gap: 6px; }
+.hair-buttons button { border: 1px solid #c6baa8; border-radius: 5px; padding: 7px 10px; background: #f8f5ef; color: #625746; font-size: 11px; }
+.hair-buttons button:hover { border-color: #715d40; }
+.hair-buttons button[aria-pressed='true'] { background: #715d40; border-color: #715d40; color: #fffaf0; }
+#hair-status { margin: 8px 0 0; font-size: 11px; color: #81735f; }
+#hair-status.hair-error { color: #a63422; }
+.hair-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; padding: 20px 24px 36px; }
+@media (min-width: 600px) { .hair-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 900px) { .hair-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (min-width: 1280px) { .hair-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+@media (min-width: 1600px) { .hair-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
+.hair-card { min-width: 0; border: 1px solid #76664d35; border-radius: 7px; overflow: hidden; background: #f7f4ee; }
+.hair-card h2 { margin: 0; padding: 12px; min-height: 50px; font-size: 12px; font-weight: 500; line-height: 1.6; }
+.hair-viewport { position: relative; height: clamp(360px, 30vw, 440px); background: #e4dfd6; }
+.hair-loading { position: absolute; inset: 0; display: grid; place-content: center; margin: 0; font-size: 12px; color: #81735f; }
+.hair-snapshot { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; background: #e4dfd6; }
+.hair-snapshot:not([src]) { display: none; }
+.hair-viewport iframe { position: relative; display: block; width: 100%; height: 100%; border: 0; opacity: 0; }
+.hair-viewport iframe[data-ready='true'] { opacity: 1; }
+.hair-card > a { display: block; padding: 9px 12px; font-size: 11px; }
+@media (max-width: 700px) {
+  .hair-header { padding: 16px 10px; }
+  .hair-header h1 { font-size: 18px; }
+  .hair-header a { font-size: 10px; }
+  .hair-toolbar { padding: 10px; }
+  .hair-control { gap: 8px; }
+  .hair-buttons button { padding: 6px 7px; font-size: 10px; }
+  .hair-grid { gap: 6px; padding: 10px 6px 24px; }
+  .hair-card h2 { font-size: 10px; padding: 7px; min-height: 65px; }
+  .hair-card > a { font-size: 10px; padding: 7px; }
+}

@@ -1920,11 +1920,11 @@
     {
       "source": "./characters/human/customization/d1-base-animated.glb",
       "output": "./characters/human/customization/d1-base-animated.ktx2-compact.glb",
-      "sourceSha256": "58e5cfc49032ab1a4eccc1e84ebf5bf9d0dce0a88f5c4c045f443115b6577346",
-      "sourceBytes": 21309608,
-      "outputBytes": 2511456,
-      "sourceBufferBytes": 5966524,
-      "storedBufferBytes": 1929035,
+      "sourceSha256": "83e4b046e965e7a52167bfd676358be4b16b52926a851dd6f23ea80d89f847a6",
+      "sourceBytes": 22412260,
+      "outputBytes": 2722760,
+      "sourceBufferBytes": 6585708,
+      "storedBufferBytes": 2130047,
       "images": [
         {
           "name": "texture_diffuse_skin",
@@ -1967,8 +1967,8 @@
           "outputWidth": 512,
           "outputHeight": 512,
           "kind": "color",
-          "sourceBytes": 2327445,
-          "outputBytes": 44366,
+          "sourceBytes": 2810429,
+          "outputBytes": 54165,
           "sourceRgbaMipBytes": 22369620,
           "outputRgbaMipBytes": 1398100
         },
@@ -2035,21 +2035,21 @@
         }
       ],
       "before": "./characters/human/customization/d1-base-animated.ktx2.glb",
-      "beforeBytes": 3273956,
-      "beforeSha256": "83f68912ebb85dc96e79ee87efd041211ecc94b5322a06b9ab0f75db4c982a1c",
+      "beforeBytes": 3568048,
+      "beforeSha256": "3a7869888fd5ed067d563bc49c1a1889a4ea7237ed38fdd32c81b745144348b5",
       "quantizedViews": 42,
       "bufferErrors": {
         "POSITION": {
           "maxAbsoluteError": 0.0000152587890625,
-          "values": 272415
+          "values": 302109
         },
         "NORMAL": {
           "maxAbsoluteError": 0.00000762939453125,
-          "values": 272415
+          "values": 302109
         },
         "TEXCOORD_0": {
           "maxAbsoluteError": 0.000003814697265625,
-          "values": 181610
+          "values": 201406
         },
         "WEIGHTS_0": {
           "maxAbsoluteError": 0.00000762939453125,
@@ -2072,11 +2072,11 @@
     {
       "source": "./characters/human/customization/d1-base-game.glb",
       "output": "./characters/human/customization/d1-base-game.ktx2-compact.glb",
-      "sourceSha256": "f9f531a570992242f963aa5b8ddde2c72247b14278911535834e00a444b15d1f",
-      "sourceBytes": 19101424,
-      "outputBytes": 1817296,
-      "sourceBufferBytes": 3758330,
-      "storedBufferBytes": 1234909,
+      "sourceSha256": "438f80d69163f36c4f4222830f5750af714c790ec20b8df5a37ebb2f39ecff52",
+      "sourceBytes": 19827444,
+      "outputBytes": 1912324,
+      "sourceBufferBytes": 4000878,
+      "storedBufferBytes": 1319638,
       "images": [
         {
           "name": "texture_diffuse_skin",
@@ -2119,8 +2119,8 @@
           "outputWidth": 512,
           "outputHeight": 512,
           "kind": "color",
-          "sourceBytes": 2327445,
-          "outputBytes": 44366,
+          "sourceBytes": 2810429,
+          "outputBytes": 54165,
           "sourceRgbaMipBytes": 22369620,
           "outputRgbaMipBytes": 1398100
         },
@@ -2187,21 +2187,21 @@
         }
       ],
       "before": "./characters/human/customization/d1-base-game.ktx2.glb",
-      "beforeBytes": 2301220,
-      "beforeSha256": "693c4e2b8419d4ddc4e7720bd170c947660b0a5f2220dac2a8a284a729ed2b0f",
+      "beforeBytes": 2431704,
+      "beforeSha256": "db05c9e824934065a3c6459006afb76cd785b5f1655a04d3f803a6a4cd9db4e5",
       "quantizedViews": 42,
       "bufferErrors": {
         "POSITION": {
           "maxAbsoluteError": 0.0000152587890625,
-          "values": 172365
+          "values": 184245
         },
         "NORMAL": {
           "maxAbsoluteError": 0.00000762939453125,
-          "values": 172365
+          "values": 184245
         },
         "TEXCOORD_0": {
           "maxAbsoluteError": 0.000003814697265625,
-          "values": 114910
+          "values": 122830
         },
         "WEIGHTS_0": {
           "maxAbsoluteError": 0.00000762939453125,
@@ -2224,11 +2224,11 @@
     {
       "source": "./characters/human/customization/d1-base-light.glb",
       "output": "./characters/human/customization/d1-base-light.ktx2-compact.glb",
-      "sourceSha256": "f839e2ef51fb13ff46aa20f05a702e786d161fc3fda1192b147479f8ab3d07ae",
-      "sourceBytes": 18364656,
-      "outputBytes": 1568948,
-      "sourceBufferBytes": 3021582,
-      "storedBufferBytes": 986589,
+      "sourceSha256": "3a7aabd681061dc9173377ad60770885e041b689d5ef3fcf2c277bfeb2f4d72d",
+      "sourceBytes": 18984024,
+      "outputBytes": 1629028,
+      "sourceBufferBytes": 3157476,
+      "storedBufferBytes": 1036381,
       "images": [
         {
           "name": "texture_diffuse_skin",
@@ -2271,8 +2271,8 @@
           "outputWidth": 512,
           "outputHeight": 512,
           "kind": "color",
-          "sourceBytes": 2327445,
-          "outputBytes": 44366,
+          "sourceBytes": 2810429,
+          "outputBytes": 54165,
           "sourceRgbaMipBytes": 22369620,
           "outputRgbaMipBytes": 1398100
         },
@@ -2339,21 +2339,21 @@
         }
       ],
       "before": "./characters/human/customization/d1-base-light.ktx2.glb",
-      "beforeBytes": 1952872,
-      "beforeSha256": "ea0cf9930a835d75759fb2bb108c16b3a497730f41180840425229491647df20",
+      "beforeBytes": 2033832,
+      "beforeSha256": "0c0a7f2bc52fe0b64209d713779b733cf43c7ced85d677e7f77d59f7e499d5d2",
       "quantizedViews": 42,
       "bufferErrors": {
         "POSITION": {
           "maxAbsoluteError": 0.0000152587890625,
-          "values": 139698
+          "values": 146328
         },
         "NORMAL": {
           "maxAbsoluteError": 0.00000762939453125,
-          "values": 139698
+          "values": 146328
         },
         "TEXCOORD_0": {
           "maxAbsoluteError": 0.000003814697265625,
-          "values": 93132
+          "values": 97552
         },
         "WEIGHTS_0": {
           "maxAbsoluteError": 0.00000762939453125,
@@ -2376,11 +2376,11 @@
     {
       "source": "./characters/human/customization/d1-outfit-game.glb",
       "output": "./characters/human/customization/d1-outfit-game.ktx2-compact.glb",
-      "sourceSha256": "869506d98d5966d8e023a5718e174d27cd2b60988743827eb53c94eeecf6fb62",
-      "sourceBytes": 39727620,
-      "outputBytes": 3349032,
-      "sourceBufferBytes": 5477370,
-      "storedBufferBytes": 1954466,
+      "sourceSha256": "38d335c8bde9b117f0a600d41014b8081b0f3eaf9c6c431700cf7f3e58d4198e",
+      "sourceBytes": 40453668,
+      "outputBytes": 3444028,
+      "sourceBufferBytes": 5719870,
+      "storedBufferBytes": 2039106,
       "images": [
         {
           "name": "texture_diffuse_skin",
@@ -2423,8 +2423,8 @@
           "outputWidth": 512,
           "outputHeight": 512,
           "kind": "color",
-          "sourceBytes": 2327445,
-          "outputBytes": 44366,
+          "sourceBytes": 2810429,
+          "outputBytes": 54165,
           "sourceRgbaMipBytes": 22369620,
           "outputRgbaMipBytes": 1398100
         },
@@ -2568,25 +2568,25 @@
         }
       ],
       "before": "./characters/human/customization/d1-outfit-game.ktx2.glb",
-      "beforeBytes": 4132960,
-      "beforeSha256": "3891269de15d9bead06c2d29f92b2b8b15acfa91bd04fa50509120c87409e0c6",
+      "beforeBytes": 4263548,
+      "beforeSha256": "53ef429f30787d7ef9f2330493e60e3a700146fc4ce04e37b8248b98fd0f1f1d",
       "quantizedViews": 92,
       "bufferErrors": {
         "POSITION": {
           "maxAbsoluteError": 0.0000152587890625,
-          "values": 255372
+          "values": 267249
         },
         "NORMAL": {
           "maxAbsoluteError": 0.00000762939453125,
-          "values": 255372
+          "values": 267249
         },
         "TEXCOORD_0": {
           "maxAbsoluteError": 0.000003814697265625,
-          "values": 170248
+          "values": 178166
         },
         "WEIGHTS_0": {
           "maxAbsoluteError": 0.00000762939453125,
-          "values": 152404
+          "values": 152400
         },
         "COLOR_0": {
           "maxAbsoluteError": 0.0000037550926208496094,
@@ -2605,11 +2605,11 @@
     {
       "source": "./characters/human/customization/d1-equipped-game.glb",
       "output": "./characters/human/customization/d1-equipped-game.ktx2-compact.glb",
-      "sourceSha256": "e9528aa744be1a9657b696276951e553ae3b4d66928e97a2a657ba530e5fe78d",
-      "sourceBytes": 40355616,
-      "outputBytes": 3657808,
-      "sourceBufferBytes": 6087250,
-      "storedBufferBytes": 2234422,
+      "sourceSha256": "de86c840d016099d503e280675b862ccecc15f340ba8258c6b4ea5a209c50abd",
+      "sourceBytes": 41081656,
+      "outputBytes": 3752792,
+      "sourceBufferBytes": 6329750,
+      "storedBufferBytes": 2319062,
       "images": [
         {
           "name": "texture_diffuse_skin",
@@ -2652,8 +2652,8 @@
           "outputWidth": 512,
           "outputHeight": 512,
           "kind": "color",
-          "sourceBytes": 2327445,
-          "outputBytes": 44366,
+          "sourceBytes": 2810429,
+          "outputBytes": 54165,
           "sourceRgbaMipBytes": 22369620,
           "outputRgbaMipBytes": 1398100
         },
@@ -2797,25 +2797,25 @@
         }
       ],
       "before": "./characters/human/customization/d1-equipped-game.ktx2.glb",
-      "beforeBytes": 4549432,
-      "beforeSha256": "ed8f22188269178763fd29efad1fc4eb175d45ec4416af0bd180e53146ce3663",
+      "beforeBytes": 4680008,
+      "beforeSha256": "7d74cdaa8ee674084ea2c84330eb5d5cfa03849d24a0f6a490f35833f525d7a8",
       "quantizedViews": 144,
       "bufferErrors": {
         "POSITION": {
           "maxAbsoluteError": 0.0000152587890625,
-          "values": 301062
+          "values": 312939
         },
         "NORMAL": {
           "maxAbsoluteError": 0.00000762939453125,
-          "values": 301062
+          "values": 312939
         },
         "TEXCOORD_0": {
           "maxAbsoluteError": 0.00000762939453125,
-          "values": 199530
+          "values": 207448
         },
         "WEIGHTS_0": {
           "maxAbsoluteError": 0.00000762939453125,
-          "values": 152404
+          "values": 152400
         },
         "COLOR_0": {
           "maxAbsoluteError": 0.0000037550926208496094,
