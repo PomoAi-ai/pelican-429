@@ -4,15 +4,16 @@ import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { createDaisyGeometry, createFernGeometry, createShrubGeometry, createWeedRoundGeometry } from './flora-geometry.ts';
 import { createParticleCloud } from './grassy/grassy-particles.ts';
 
-export type AiCityBuildingMaterial = 'ceramic' | 'alloy';
+export type AiCityBuildingMaterial = 'ceramic' | 'alloy' | 'ashlar';
 export type AiCityMaterial = AiCityBuildingMaterial | 'wall' | 'gold' | 'dark' | 'steel' | 'cyan' | 'warm' | 'glass' | 'soil';
 export type AiCityFixtureKind = 'trim-straight' | 'trim-corner' | 'trim-cap' | 'eave-light' | 'wall-light'
   | 'bollard-light' | 'energy-column' | 'planter' | 'railing';
 
-const FINISHES: Record<AiCityMaterial, THREE.MeshStandardMaterialParameters> = {
-  ceramic: { color: 0xeae8e4, roughness: .43, metalness: .04 },
-  alloy: { color: 0x345d96, roughness: .4, metalness: .2 },
-  wall: { color: 0xb9b6b0, roughness: .73, metalness: .02 },
+const FINISHES: Record<AiCityMaterial, THREE.MeshPhysicalMaterialParameters> = {
+  ceramic: { color: 0xe3e2df, roughness: .23, metalness: 0, clearcoat: .55, clearcoatRoughness: .16 },
+  ashlar: { color: 0xb5a48e, roughness: .39, metalness: 0, clearcoat: .16, clearcoatRoughness: .34 },
+  alloy: { color: 0x34516f, roughness: .25, metalness: .62, clearcoat: .65, clearcoatRoughness: .14 },
+  wall: { color: 0xe3e2df, roughness: .34, metalness: 0, clearcoat: .35, clearcoatRoughness: .23 },
   gold: { color: 0xb99b60, roughness: .36, metalness: .5 },
   dark: { color: 0x152535, roughness: .55, metalness: .25 },
   steel: { color: 0x8095a5, roughness: .3, metalness: .68 },
@@ -25,8 +26,47 @@ const FINISHES: Record<AiCityMaterial, THREE.MeshStandardMaterialParameters> = {
 
 /** 板壳、接缝和连接件由共享几何表达，浅色表面保持干净。 */
 export function createAiCityMaterial(kind: AiCityMaterial): THREE.MeshStandardMaterial {
-  const material = new THREE.MeshStandardMaterial(FINISHES[kind]);
+  const material = new THREE.MeshPhysicalMaterial(FINISHES[kind]);
   material.name = `ai-city-${kind}`;
+  if (kind === 'ceramic' || kind === 'wall' || kind === 'ashlar' || kind === 'alloy') {
+    material.onBeforeCompile = shader => {
+      shader.vertexShader = shader.vertexShader.replace('#include <common>', '#include <common>\nvarying vec3 finishPoint;')
+        .replace('#include <begin_vertex>', '#include <begin_vertex>\nvec4 finishLocal = vec4(position, 1.0);\n#ifdef USE_INSTANCING\nfinishLocal = instanceMatrix * finishLocal;\n#endif\nfinishPoint = (modelMatrix * finishLocal).xyz;');
+      shader.fragmentShader = shader.fragmentShader.replace('#include <common>', `#include <common>
+        varying vec3 finishPoint;
+        float finishHash(vec3 p) {
+          p = fract(p * 0.1031);
+          p += dot(p, p.yzx + 33.33);
+          return fract((p.x + p.y) * p.z);
+        }
+        float finishNoise(vec3 p) {
+          vec3 i = floor(p), f = fract(p);
+          f = f * f * (3.0 - 2.0 * f);
+          return mix(mix(mix(finishHash(i), finishHash(i + vec3(1,0,0)), f.x),
+                         mix(finishHash(i + vec3(0,1,0)), finishHash(i + vec3(1,1,0)), f.x), f.y),
+                     mix(mix(finishHash(i + vec3(0,0,1)), finishHash(i + vec3(1,0,1)), f.x),
+                         mix(finishHash(i + vec3(0,1,1)), finishHash(i + vec3(1,1,1)), f.x), f.y), f.z);
+        }`)
+        .replace('#include <color_fragment>', `#include <color_fragment>
+          float footprint = max(length(dFdx(finishPoint)), length(dFdy(finishPoint)));
+          float grain = sin(finishPoint.x * 151.0) * sin(finishPoint.y * 173.0 + finishPoint.z * 137.0)
+            * (1.0 - smoothstep(0.003, 0.025, footprint));
+          float cloud = finishNoise(finishPoint * 2.7) - 0.5;
+          float fleck = (finishNoise(finishPoint * 17.0) - 0.5) * (1.0 - smoothstep(.02, .08, footprint));
+          diffuseColor.rgb *= 1.0 + cloud * ${kind === 'ashlar' ? '.14' : kind === 'alloy' ? '.025' : '.07'} + fleck * .025 + grain * .012;`)
+        .replace('#include <roughnessmap_fragment>', `#include <roughnessmap_fragment>\nroughnessFactor = clamp(roughnessFactor + cloud * ${kind === 'alloy' ? '.05' : '.13'} + fleck * .025 + grain * .015, 0.0, 1.0);`)
+        .replace('#include <normal_fragment_maps>', `#include <normal_fragment_maps>
+          vec3 finishDx = dFdx(-vViewPosition), finishDy = dFdy(-vViewPosition);
+          vec3 finishR1 = cross(finishDy, normal), finishR2 = cross(normal, finishDx);
+          float finishDet = dot(finishDx, finishR1);
+          float finishHeight = cloud * ${kind === 'alloy' ? '.0004' : '.0015'} + fleck * .0003;
+          normal = normalize(abs(finishDet) * normal - sign(finishDet)
+            * (dFdx(finishHeight) * finishR1 + dFdy(finishHeight) * finishR2));
+          float finishTop = smoothstep(.7, .95, dot(normal, normalize(mat3(viewMatrix) * vec3(0, 1, 0))));
+          roughnessFactor *= mix(1.0, .72, finishTop);`);
+    };
+    material.customProgramCacheKey = () => `architectural-finish-${kind}`;
+  }
   return material;
 }
 

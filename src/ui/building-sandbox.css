@@ -1,0 +1,12 @@
+.building-sandbox{height:100%;min-height:0;display:flex;flex-direction:column;background:#101c22;color:#dce7eb}
+.building-toolbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px;border-bottom:1px solid #33464e}
+.building-toolbar label{display:flex;align-items:center;gap:5px}.building-toolbar button,.building-sandbox select{font:inherit;color:inherit;background:#20313a;border:1px solid #405762;border-radius:7px;padding:7px 10px;cursor:pointer}
+.building-sandbox button[aria-pressed=true]{background:#a9cd84;color:#18291d;border-color:#b8d894}
+.building-sandbox button:disabled{opacity:.4;cursor:default}.building-sandbox button:focus-visible,.building-sandbox select:focus-visible{outline:2px solid #c2dc87;outline-offset:2px}
+.building-layout{flex:1;min-height:0;display:grid;grid-template-columns:340px minmax(0,1fr)}
+.building-palette{padding:14px;overflow:auto;border-right:1px solid #34474e}.building-palette h2{font-size:17px;margin:0 0 12px}.building-palette label{display:grid;gap:6px;margin-bottom:12px}.building-palette label[hidden]{display:none}.building-palette p{font-size:12px;line-height:1.7;color:#acbec6}
+.building-canvas{min-width:0;min-height:0;position:relative;overflow:hidden}.building-canvas canvas{display:block;touch-action:none}.building-instructions,.building-feedback{position:absolute;z-index:2;pointer-events:none;margin:0;background:#14222bd9;border:1px solid #56717c66;border-radius:8px;padding:7px 10px;font-size:12px;line-height:1.5}.building-instructions{top:10px;left:12px;right:12px}.building-feedback{bottom:12px;left:12px;right:12px}.building-feedback[data-error=true]{color:#ffbdad}.building-sandbox footer{padding:7px 14px;font-size:12px;color:#96acb5;border-top:1px solid #34474e}
+@media(max-width:800px){.building-layout{grid-template-columns:280px minmax(0,1fr)}.building-palette{padding:9px}.building-toolbar{gap:5px}.building-toolbar button{padding:6px}.building-instructions{font-size:11px}}
+
+.building-toolbar > label,.building-toolbar > span{flex-shrink:0;white-space:nowrap}
+@media(max-width:700px){.building-layout{grid-template-columns:minmax(0,1fr);position:relative}.building-palette{position:absolute;inset:0 auto 0 0;width:min(280px,calc(100% - 48px));z-index:5;background:#142126;box-shadow:8px 0 24px #0005}}

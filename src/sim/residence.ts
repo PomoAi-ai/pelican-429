@@ -1,21 +1,25 @@
-import { TILE_SHAPE_DEFINITIONS } from '../config/definition-kit.ts';
+import { TILE_SHAPE_DEFINITIONS, type DefinitionDepthMode } from '../config/definition-kit.ts';
 import { getResidenceResource, RESIDENCE_SEGMENTS, RESIDENCE_SUN, RESIDENCE_WORLD, type ResidenceResource } from '../config/residence.ts';
+import { residenceTerrainId, residenceTerrainPlacement, residenceTerrainRuns } from './residence-terrain.ts';
 import { GRASSY_HEIGHT } from '../config/grassy.ts';
 import { TUNING } from '../config/tuning.ts';
 import { createBody, type Body } from '../physics/body.ts';
 import { definitionColliderSection, moveDefinitionBody, type DefinitionCollider, type DefinitionCollision, type DefinitionPlatform } from '../physics/definition-collision.ts';
 import { createSolarPanel, solarTrackingAngle } from '../physics/solar-panel.ts';
+import { definitionDepthConflict, type DefinitionDepthPlacement } from './definition-depth.ts';
 
 export interface ResidencePlacement {
   readonly id: number;
   readonly resourceId: string;
   readonly x: number;
   readonly y: number;
+  readonly depthMode?: DefinitionDepthMode;
   open?: boolean;
 }
 
 export interface ResidenceState {
   readonly placements: ResidencePlacement[];
+  readonly underground?: Set<number>;
   nextId: number;
   revision: number;
 }
@@ -45,7 +49,43 @@ function touchesBody(solid: DefinitionCollider, body: ResidenceBody): boolean {
   return section !== null && section[0] < body.x + body.halfWidth - EPS && section[1] > body.x - body.halfWidth + EPS;
 }
 
+/** 凸轮廓使用分离轴检查内部重叠，共边的小块和互补斜块可以拼接。 */
+function polygonsOverlap(a: DefinitionCollider, b: DefinitionCollider): boolean {
+  for (const polygon of [a, b]) for (let i = 0; i < polygon.points.length; i++) {
+    const [x, y] = polygon.points[i]!;
+    const [nextX, nextY] = polygon.points[(i + 1) % polygon.points.length]!;
+    const nx = y - nextY, ny = nextX - x;
+    const ap = a.points.map(([px, py]) => px * nx + py * ny);
+    const bp = b.points.map(([px, py]) => px * nx + py * ny);
+    if (Math.min(...ap) >= Math.max(...bp) - EPS || Math.min(...bp) >= Math.max(...ap) - EPS) return false;
+  }
+  return true;
+}
+
+function placementFootprints(placement: ResidencePlacement, resource: ResidenceResource): DefinitionCollider[] {
+  if (resource.kind === 'solid') return placementSolids(placement, resource);
+  if (resource.kind === 'platform') return [rectangle(placement.x + (resource.platformWidth === 'right' ? .5 : 0),
+    placement.y + .3, resource.platformWidth === 'full' ? 1 : .5, .2)];
+  return [rectangle(placement.x, placement.y, resource.width, resource.height)];
+}
+
+export function residencePlacementIntersectsArea(placement: ResidencePlacement, x: number, y: number, width: number, height: number): boolean {
+  const resource = getResidenceResource(placement.resourceId);
+  const area = rectangle(x, y, width, height);
+  return placementFootprints(placement, resource).some(solid => polygonsOverlap(solid, area));
+}
+
+export function residenceSolidsOverlap(a: ResidencePlacement, b: ResidencePlacement): boolean {
+  if (a.x + 1 <= b.x || b.x + 1 <= a.x || a.y + 1 <= b.y || b.y + 1 <= a.y) return false;
+  return placementSolids(a, getResidenceResource(a.resourceId)).some(first =>
+    placementSolids(b, getResidenceResource(b.resourceId)).some(second => polygonsOverlap(first, second)));
+}
+
 function occupies(a: ResidencePlacement, ar: ResidenceResource, b: ResidencePlacement, br: ResidenceResource): boolean {
+  if (ar.kind === 'solid' && br.kind === 'solid') return residenceSolidsOverlap(a, b);
+  if (ar.layer === br.layer && (ar.kind === 'platform' || br.kind === 'platform')) {
+    return placementFootprints(a, ar).some(first => placementFootprints(b, br).some(second => polygonsOverlap(first, second)));
+  }
   if (ar.layer === br.layer) return a.x < b.x + br.width - EPS && a.x + ar.width > b.x + EPS
     && a.y < b.y + br.height - EPS && a.y + ar.height > b.y + EPS;
   if (ar.kind === 'furniture' && (br.kind === 'solid' || br.kind === 'door')) return occupies(b, br, a, ar);
@@ -57,24 +97,55 @@ function occupies(a: ResidencePlacement, ar: ResidenceResource, b: ResidencePlac
   return false;
 }
 
+function depthPlacement(placement: ResidencePlacement, resource: ResidenceResource): DefinitionDepthPlacement | null {
+  const footprint = { x: placement.x, y: placement.y, width: resource.width, height: resource.height };
+  if (resource.kind === 'solid') return { ...footprint, kind: 'solid', depthMode: placement.depthMode ?? 'normal' };
+  if (resource.layer === 'wall') return { ...footprint, kind: 'wall' };
+  return null;
+}
+
 /** 平台坐标表示安装格下沿，顶面为 y + 0.5；实体保持整数世界格。 */
 export function checkResidencePlacement(state: ResidenceState, resourceId: string, x: number, y: number,
-  body: ResidenceBody | null): ResidenceResult {
+  body: ResidenceBody | null, depthMode: DefinitionDepthMode = 'normal'): ResidenceResult {
   const resource = getResidenceResource(resourceId);
+  if (depthMode === 'deep' && resource.kind !== 'solid') return { ok: false, message: '只有实体砖可以使用加深规格' };
   const step = resource.kind === 'solid' || resource.kind === 'door' || resource.kind === 'wall' || resource.kind === 'glazing' ? 1 : .5;
   if (!Number.isFinite(x) || !Number.isFinite(y) || x / step !== Math.round(x / step) || y / step !== Math.round(y / step)) {
     return { ok: false, message: step === 1 ? '此构件需要对齐整格' : '此构件需要对齐半格' };
   }
-  if (x < RESIDENCE_WORLD.minX || x + resource.width > RESIDENCE_WORLD.maxX || y < 1 || y + resource.height > RESIDENCE_WORLD.height) {
+  const bottom = state.underground ? RESIDENCE_WORLD.minY : RESIDENCE_WORLD.foundationTop;
+  if (x < RESIDENCE_WORLD.minX || x + resource.width > RESIDENCE_WORLD.maxX || y < bottom || y + resource.height > RESIDENCE_WORLD.height) {
     return { ok: false, message: '超出住宅建造范围' };
   }
-  const placement: ResidencePlacement = { id: state.nextId, resourceId, x, y, ...resource.kind === 'door' ? { open: false } : {} };
+  const placement: ResidencePlacement = { id: state.nextId, resourceId, x, y,
+    ...depthMode === 'deep' ? { depthMode } : {}, ...resource.kind === 'door' ? { open: false } : {} };
   const solids = placementSolids(placement, resource);
-  if (solids.length ? solids.some(solid => solid.points.some(([, py]) => py < RESIDENCE_WORLD.groundTop - EPS)) : y < RESIDENCE_WORLD.groundTop) {
-    return { ok: false, message: '不能建入固定地面' };
+  if (solids.length ? solids.some(solid => solid.points.some(([, py]) => py < bottom - EPS)) : y < bottom) {
+    return { ok: false, message: '不能建入不可编辑的基础底面' };
+  }
+  // 只查询候选构件覆盖的地下格，墙体也必须遵守加深格禁墙规则。
+  for (let cy = Math.max(Math.floor(y), RESIDENCE_WORLD.minY); cy < Math.min(y + resource.height, RESIDENCE_WORLD.foundationTop); cy++) {
+    for (let cx = Math.floor(x); cx < x + resource.width; cx++) {
+      const terrain = residenceTerrainPlacement(state, residenceTerrainId(cx, cy));
+      if (!terrain) continue;
+      if (resource.layer === 'wall') return { ok: false, message: '该格位已有加深格，先拆除加深格才能放置背景墙。' };
+      if (occupies(placement, resource, terrain, getResidenceResource(terrain.resourceId))) {
+        return { ok: false, message: '位置已被地下格子占用，请先挖除' };
+      }
+    }
   }
   if (state.placements.some(item => occupies(placement, resource, item, getResidenceResource(item.resourceId)))) {
     return { ok: false, message: '位置已被构件占用，请先拆除' };
+  }
+  const candidate = depthPlacement(placement, resource);
+  if (candidate && (candidate.kind === 'wall' || candidate.depthMode === 'deep')) {
+    const relevant = candidate.kind === 'wall' ? state.placements.filter(item => item.depthMode === 'deep') : state.placements;
+    const existing = relevant.flatMap(item => {
+      const entry = depthPlacement(item, getResidenceResource(item.resourceId));
+      return entry ? [entry] : [];
+    });
+    const conflict = definitionDepthConflict(candidate, existing);
+    if (conflict) return { ok: false, message: conflict };
   }
   // 太阳能实体由活动板面提供，建造时仍需为完整转动范围留出人物净空。
   const solar = resource.kind === 'furniture' && resource.furniture === 'solar';
@@ -86,17 +157,29 @@ export function checkResidencePlacement(state: ResidenceState, resourceId: strin
 }
 
 export function placeResidence(state: ResidenceState, resourceId: string, x: number, y: number,
-  body: ResidenceBody | null): ResidenceResult {
-  const result = checkResidencePlacement(state, resourceId, x, y, body);
+  body: ResidenceBody | null, depthMode: DefinitionDepthMode = 'normal'): ResidenceResult {
+  const result = checkResidencePlacement(state, resourceId, x, y, body, depthMode);
   if (!result.ok) return result;
   const resource = getResidenceResource(resourceId);
+  if (resourceId === 'ashlar-A' && depthMode === 'deep' && state.underground && y < RESIDENCE_WORLD.foundationTop) {
+    const id = residenceTerrainId(x, y);
+    state.underground.delete(-id - 1);
+    state.revision++;
+    return { ok: true, message: `已放置${resource.label}`, id };
+  }
   const id = state.nextId++;
-  state.placements.push({ id, resourceId, x, y, ...resource.kind === 'door' ? { open: false } : {} });
+  state.placements.push({ id, resourceId, x, y, ...depthMode === 'deep' ? { depthMode } : {}, ...resource.kind === 'door' ? { open: false } : {} });
   state.revision++;
   return { ok: true, message: `已放置${resource.label}`, id };
 }
 
 export function removeResidence(state: ResidenceState, id: number): ResidenceResult {
+  if (id < 0) {
+    if (!residenceTerrainPlacement(state, id)) return { ok: false, message: '该地下格子已不存在' };
+    state.underground!.add(-id - 1);
+    state.revision++;
+    return { ok: true, message: '已挖除米黄色方石块', id };
+  }
   const index = state.placements.findIndex(item => item.id === id);
   if (index === -1) return { ok: false, message: '该构件已不存在' };
   const resource = getResidenceResource(state.placements[index]!.resourceId);
@@ -134,9 +217,11 @@ export function updateResidenceDoors(state: ResidenceState, body: ResidenceBody)
 }
 
 export function buildResidenceCollision(state: ResidenceState): DefinitionCollision {
-  const { minX, maxX, width, height, groundTop } = RESIDENCE_WORLD;
-  const solids: DefinitionCollider[] = [rectangle(minX - 1, -4, width + 2, groundTop + 4),
-    rectangle(minX - 1, groundTop, 1, height), rectangle(maxX, groundTop, 1, height)];
+  const { minX, maxX, width, height, foundationTop } = RESIDENCE_WORLD;
+  const bottom = state.underground ? RESIDENCE_WORLD.minY : foundationTop;
+  const solids: DefinitionCollider[] = [rectangle(minX - 1, bottom - 4, width + 2, 4),
+    rectangle(minX - 1, bottom, 1, height - bottom), rectangle(maxX, bottom, 1, height - bottom),
+    ...residenceTerrainRuns(state).map(run => rectangle(run.x, run.y, run.width, 1))];
   const platforms: DefinitionPlatform[] = [];
   for (const placement of state.placements) {
     const resource = getResidenceResource(placement.resourceId);
@@ -189,7 +274,7 @@ export function findSafeResidenceSpawn(state: ResidenceState, preferredX?: numbe
     return body.onGround && !nearby.solids.some(solid => touchesBody(solid, body)) ? { x: body.x, y: body.y } : null;
   };
   for (const x of columns) {
-    const point = supported(x, groundTop, 0);
+    const point = supported(x, groundTop, groundTop - (state.underground ? RESIDENCE_WORLD.minY : RESIDENCE_WORLD.foundationTop));
     if (point) return point;
   }
   const maxFoot = height - GRASSY_HEIGHT;
@@ -202,10 +287,19 @@ export function findSafeResidenceSpawn(state: ResidenceState, preferredX?: numbe
   throw new Error('住宅没有安全入口：请保留至少一处有支撑、净高 3.1 格的站立空间。原存档不会被清空。');
 }
 
+/** 默认地表替代旧固定铺装；调用方保证原布局均位于旧地表上方。 */
+export function addResidenceGround(state: ResidenceState): void {
+  for (let x = RESIDENCE_WORLD.minX; x < RESIDENCE_WORLD.maxX; x++) {
+    state.placements.push({ id: state.nextId++, resourceId: 'ashlar-B', x, y: RESIDENCE_WORLD.foundationTop, depthMode: 'deep' });
+  }
+  state.revision++;
+}
+
 export function createResidence(): ResidenceState {
-  const state: ResidenceState = { placements: [], nextId: 1, revision: 0 };
-  const add = (resourceId: string, x: number, y: number): void => {
-    const result = placeResidence(state, resourceId, x, y, null);
+  const state: ResidenceState = { placements: [], underground: new Set(), nextId: 1, revision: 0 };
+  addResidenceGround(state);
+  const add = (resourceId: string, x: number, y: number, depthMode: DefinitionDepthMode = 'normal'): void => {
+    const result = placeResidence(state, resourceId, x, y, null, depthMode);
     if (!result.ok) throw new Error(`住宅初始布局 ${resourceId} (${x}, ${y})：${result.message}`);
   };
   for (let x = 50; x <= 68; x++) {
@@ -216,8 +310,8 @@ export function createResidence(): ResidenceState {
   const windows = [[53, 4], [63, 4], [53, 10], [63, 10]] as const;
   for (let y = 2; y < 13; y++) {
     if (y === 6 || y === 7 || y === 12) {
-      add('alloy-L', 50, y);
-      add('ceramic-K', 68, y);
+      add(y === 7 ? 'alloy-A' : 'alloy-L', 50, y);
+      add(y === 7 ? 'ceramic-A' : 'ceramic-K', 68, y);
     }
     for (let x = 51; x < 68; x++) {
       const opening = windows.some(([wx, wy]) => x >= wx && x < wx + 3 && y >= wy && y < wy + 2);
@@ -230,11 +324,9 @@ export function createResidence(): ResidenceState {
   }
   for (const [x, y] of windows) add('glazing-landscape', x, y);
   for (const y of [3.5, 5.5, 7.5]) for (const x of [58, 59]) add('platform-full', x, y);
-  // 两格长的入口半砖踏步与室内齐平；楼上门外有同高落脚台。
-  for (const x of [48, 49, 69, 70]) {
-    add('ceramic-C', x, 1);
-    add('platform-full', x, 7.5);
-  }
+  // 两格长的入口半砖踏步与室内齐平；楼上单格落脚台紧接补齐的门槛。
+  for (const x of [48, 49, 69, 70]) add('ceramic-C', x, 1);
+  for (const x of [49, 69]) add('platform-full', x, 7.5);
   add('bed', 52, 8); add('shelf', 65, 8); add('plant', 56, 8); add('plant', 67, 8);
   add('workstation', 64, 2); add('chair-right', 62.5, 2); add('plant', 67, 2);
   add('depot', 52, 2); add('battery', 54, 2); add('terminal-compute', 55.5, 2);
@@ -250,7 +342,7 @@ export function createResidence(): ResidenceState {
     add('trim-straight', x, 13);
   }
   // 园廊与服务庭院是实际可走的构件，远景装饰不承担碰撞。
-  for (let x = 28; x < 40; x++) add('ceramic-C', x, 1);
+  for (let x = 28; x < 40; x++) add('ceramic-C', x, 1, 'deep');
   for (const x of [28, 30, 36, 38]) add('planter', x, 2);
   add('table', 33, 2); add('chair-right', 31.5, 2); add('chair-left', 35, 2);
   for (const x of [25, 41, 76, 101, 116]) add('bollard-light', x, 1.5);
@@ -273,7 +365,7 @@ export function createResidence(): ResidenceState {
   // 主院区保持原坐标，两侧分段共用真实平台、休息处和能源设备。
   for (const { index, x } of RESIDENCE_SEGMENTS) {
     if (index === 0) continue;
-    for (let offset = 26; offset < 40; offset++) add('ceramic-C', x + offset, 1);
+    for (let offset = 26; offset < 40; offset++) add('ceramic-C', x + offset, 1, 'deep');
     add('table', x + 32, 2); add('chair-right', x + 30.5, 2); add('chair-left', x + 34.5, 2);
     add('chair', x + 37, 2); add('planter', x + 26, 2); add('planter', x + 38, 2);
     add('energy-column', x + 76, 1.5); add('battery', x + 78, 1.5);

@@ -108,7 +108,7 @@ export function createHomesteadApp(o: HomesteadAppOptions): HomesteadApp {
       time += frameDt;
       syncTrees();
       const player = getPlayer(world);
-      view.update(state, time, { x: player.body.x, y: player.body.y }, hud.commanding);
+      view.update(state, time, player.body, hud.commanding);
       hud.update();
       stage.renderer.toneMappingExposure = baseExposure * (NIGHT_EXPOSURE + (1 - NIGHT_EXPOSURE) * daylight(state.economy.second));
       sinceSave += frameDt;

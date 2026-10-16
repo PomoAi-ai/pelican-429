@@ -1,17 +1,18 @@
 import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import type { SolarDepth, SolarVariant } from '../config/building-kit.ts';
-import { createBuildingKit, type BuildingKitView } from './building-kit.ts';
+import { createBuildingKit } from './building-kit.ts';
 import { createAiCityMaterial, type AiCityMaterial } from './ai-city-architecture.ts';
 import { injectAfter } from './tile-material.ts';
 import { createWorkstationDisplay } from './workstation-display.ts';
+import { isPlayerNearWorkstation, type WorkstationPlayer } from './workstation-display-state.ts';
 
 export type FurnitureKind = 'bed' | 'pendant' | 'workstation' | 'depot' | 'dock' | 'battery'
   | 'terminal-compute' | 'terminal-robot' | 'solar' | 'table' | 'chair' | 'shelf' | 'plant';
 
 export interface FurnitureView {
   readonly root: THREE.Group;
-  update?: BuildingKitView['update'];
+  update?(time: number, solarAngle: number | undefined, player: WorkstationPlayer | null): void;
   dispose(): void;
 }
 
@@ -372,9 +373,9 @@ export function createDefinitionFurniture(kind: FurnitureKind,
     update = pendant(builder);
   } else if (kind === 'workstation') {
     display = workstation(builder);
-    update = time => {
+    update = (time, _solarAngle, player) => {
       display!.root.visible = glow.emissiveIntensity > .1;
-      display!.update(time);
+      display!.update(time, player !== null && isPlayerNearWorkstation(player, root.position));
     };
   } else if (kind === 'depot') {
     cabinet(2);

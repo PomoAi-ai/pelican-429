@@ -7,6 +7,7 @@ import { HOMESTEAD } from '../config/homestead.ts';
 import { BUILDING_KIT } from '../config/building-kit.ts';
 import { solarTrackingAngle } from '../physics/solar-panel.ts';
 import { createDefinitionFurniture, type FurnitureKind } from './definition-furniture.ts';
+import type { WorkstationPlayer } from './workstation-display-state.ts';
 import type { HomesteadBuild } from '../config/homestead.ts';
 import type { Drone, HomesteadState, Spot } from '../sim/homestead.ts';
 import type { TreeInstance } from '../world/level.ts';
@@ -16,7 +17,7 @@ export interface HomesteadGhost { readonly x: number; readonly y: number; readon
 
 export interface HomesteadView {
   /** focus 为玩家位置；commanding 时标出附近还没清场的区域。 */
-  update(state: HomesteadState, time: number, focus: { readonly x: number; readonly y: number }, commanding: boolean): void;
+  update(state: HomesteadState, time: number, focus: WorkstationPlayer, commanding: boolean): void;
   setGhost(ghost: HomesteadGhost | null): void;
   dispose(): void;
 }
@@ -235,7 +236,7 @@ export function createHomesteadView(scene: THREE.Scene, trees: readonly TreeInst
       battery!.position.y = 0.3 + battery!.scale.y / 2;
       const panelAngle = solarTrackingAngle(sun);
       // 全息显示与本帧供电状态同步，太阳能继续使用同一追光角度。
-      for (const item of furniture) item.update?.(time, panelAngle);
+      for (const item of furniture) item.update?.(time, panelAngle, focus);
 
       while (drones.length < state.drones.length) drones.push(createDroneParts());
       state.drones.forEach((drone, i) => {

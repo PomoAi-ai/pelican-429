@@ -1,9 +1,10 @@
 import * as THREE from 'three';
 import { createDefinitionLiquid } from '../render/definition-liquid.ts';
-import { DEFINITION_DEPTH, TILE_SHAPE_DEFINITIONS, WALL_DEFINITIONS } from '../config/definition-kit.ts';
+import { DEFINITION_DEPTH, TILE_SHAPE_JOINS, TILE_SHAPE_DEFINITIONS, WALL_DEFINITIONS } from '../config/definition-kit.ts';
 import { ROCK_TERRAIN_SCENES } from '../config/rock-terrain.ts';
 import { createDefinitionKit } from '../render/definition-kit.ts';
 import { createDefinitionFurniture, FURNITURE_STAND_TOP, type FurnitureOptions } from '../render/definition-furniture.ts';
+import type { WorkstationPlayer } from '../render/workstation-display-state.ts';
 import { FLORA_RULES, FLORA_SPECIES, createFloraGeometries, createFloraMeshes, createWindMaterial, type FloraInstance } from '../render/flora.ts';
 import { SHRUB_KINDS, SHRUB_RULES, createShrubAtlas, createShrubMaterial, createShrubMesh, type ShrubInstance } from '../render/flora-shrubs.ts';
 import { FLORA_LABELS, ROCK_LABELS, SHRUB_LABELS, TREE_LABELS } from '../render/resource-labels.ts';
@@ -21,6 +22,7 @@ import { generateTileTextures } from '../render/tile-textures.ts';
 import { createSolarPanel, solarTrackingAngle, type SolarPanelState } from '../physics/solar-panel.ts';
 import { caption } from '../render/npc/npc-effects.ts';
 import type { DefinitionCollider, DefinitionPlatform } from '../physics/definition-collision.ts';
+import { createDefinitionDepthTrial, type DefinitionDepthTrial } from './definition-depth-trial.ts';
 
 export interface SceneSection {
   id: string;
@@ -73,11 +75,6 @@ function walkAround(blockers: readonly Blocker[]): (x: number, y: number) => num
   };
 }
 
-const JOINS = [
-  ['A', 'A'], ['B', 'A'], ['F', 'G'], ['H', 'I'], ['D', 'A'], ['A', 'E'],
-  ['D', 'E'], ['E', 'D'], ['F', 'B', 'I'], ['J', 'J'], ['J', 'B'],
-] as const;
-
 function addShapeGallery({ kit, label }: SectionBuilder): void {
   TILE_SHAPE_DEFINITIONS.forEach((shape, index) => {
     const x = 2 + index % 11 * 3;
@@ -88,7 +85,7 @@ function addShapeGallery({ kit, label }: SectionBuilder): void {
 }
 
 function addJoinGallery({ kit, label }: SectionBuilder): void {
-  JOINS.forEach((shapes, index) => {
+  TILE_SHAPE_JOINS.forEach((shapes, index) => {
     const x = 2 + index % 6 * 4;
     const y = 2 + Math.floor(index / 6) * 4;
     shapes.forEach((id, offset) => kit.solid(id, x + offset, y));
@@ -257,10 +254,11 @@ export function createDefinitionSceneLayout(selectedId: string) {
   const sections: SceneSection[] = [];
   const disposers: Array<() => void> = [];
   const solarPanels: SolarPanelState[] = [];
-  const updates: Array<(time: number) => void> = [];
+  const updates: Array<(time: number, player: WorkstationPlayer | null) => void> = [];
   const groups = new Map<string, THREE.Group>();
   const solids: DefinitionCollider[] = [];
   const platforms: DefinitionPlatform[] = [];
+  let tileDepthTrial: DefinitionDepthTrial | null = null;
   let nextX = 0;
   function section(id: string, title: string, description: string, width: number, height: number,
     items: readonly string[], build: (builder: SectionBuilder) => void, playerX = 1, playerY = 0, ground = 0): void {
@@ -270,7 +268,7 @@ export function createDefinitionSceneLayout(selectedId: string) {
     const group = new THREE.Group();
     groups.set(id, group);
     root.add(group);
-    const kit = createDefinitionKit();
+    const kit = createDefinitionKit(id === 'tile-depth' ? { style: 'ai-city' } : {});
     kit.root.position.x = x;
     group.add(kit.root);
     disposers.push(() => kit.dispose());
@@ -301,8 +299,8 @@ export function createDefinitionSceneLayout(selectedId: string) {
         const panel = createSolarPanel(x + localX + .5, y, 0);
         solarPanels.push(panel);
         solids.push(panel.collider);
-        updates.push(time => view.update!(time, panel.angle));
-      } else if (view.update) updates.push(view.update);
+        updates.push(time => view.update!(time, panel.angle, null));
+      } else if (view.update) updates.push((time, player) => view.update!(time, undefined, player));
       return view.root;
     };
     if (playerY === 0) for (let tile = 0; tile < width; tile++) kit.solid('A', tile, -1);
@@ -521,10 +519,31 @@ export function createDefinitionSceneLayout(selectedId: string) {
     room.ceilings[room.ceilings.length - 1]! + 1,
     ['白色混凝土', '净宽9', '净洞3 + 一体门楣1', '2×2真窗口', '吊灯1×1', '满深家具', ...(room.floors.length === 2 ? ['2格通口', '挂墙单向平台'] : [])],
     builder => addDefinitionRoom(builder, room), -3, 1, 6);
+  section('tile-depth', '普通与加深格 · 深2 / 深3', '暖白陶瓷复用同一形状与材质。加深格前后各扩0.5，中心不变；同格禁背景墙，半砖同样按完整格位判断。', 16, 8,
+    ['普通深2：前后−1～+1', '加深深3：前后−1.5～+1.5', '两格拼接：仍是两个宽1的格子', '2×2四格组合：基础格网不变，不代表新增大石头',
+      '加深格与背景墙双向互斥；上方和相邻格允许', '右下试放区：放普通/加深格、放墙、拆除后重试'],
+    ({ kit, x, label }) => {
+      for (const offset of [1, 3]) { kit.wall('W0', offset, 5); kit.solid(offset === 1 ? 'A' : 'C', offset, 5); }
+      label('普通 A / C · 深2 · 可共墙', 2.5, 7, 4.7);
+      for (const offset of [6, 8]) kit.solid(offset === 6 ? 'A' : 'C', offset, 5, 'ceramic', 'deep');
+      label('加深 A / C · 深3 · 禁同格墙', 7.5, 7, 4.7);
+      for (const offset of [12, 13]) kit.solid('C', offset, 5, 'ceramic', 'deep');
+      label('两格拼接 · 宽1 + 宽1', 13, 7, 4.2);
+      for (const row of [1, 2]) for (const offset of [1, 2]) kit.solid('A', offset, row, 'ceramic', 'deep');
+      label('2×2组合 · 仍占四格', 2, 3.8, 4.2);
+      kit.solid('C', 6, 1);
+      kit.solid('C', 7, 1, 'ceramic', 'deep');
+      kit.wall('W0', 7, 2);
+      label('普通接加深 · 上方允许墙', 7, 3.8, 4.7);
+      tileDepthTrial = createDefinitionDepthTrial(x + 12, 1);
+      kit.root.parent!.add(tileDepthTrial.root);
+      disposers.push(tileDepthTrial.dispose);
+      label('试放区 · 操作右侧面板', 13, 3.8, 4.2);
+    }, .5);
   section('shapes', '全部 33 种实体轮廓', '整砖、四向半砖、四角四分之一砖、整坡、半坡、尖顶与高段的全部已画方向；统一深2。', 35, 13,
     TILE_SHAPE_DEFINITIONS.map(shape => `${shape.id} ${shape.label}`), addShapeGallery);
   section('joins', '全部 11 组明确拼接', '所有模块按整数格与同一Z前后沿拼合；连续坡、台阶与尖顶坡谷分别保留。', 26, 9,
-    JOINS.map(shapes => shapes.join(' + ')), addJoinGallery);
+    TILE_SHAPE_JOINS.map(shapes => shapes.join(' + ')), addJoinGallery);
   section('walls', '墙窗全形态 · 25 + 3', '完整墙、真开口、四角模块、四向半墙与斜墙、玻璃窗棂，以及圆窗、拱窗和破损。', 30, 18,
     WALL_DEFINITIONS.map(wall => `${wall.id} ${wall.label}`), addWallGallery);
   section('wall-assembly', '墙体完整装配与跨格开窗', '两面8×5墙：左边复现完整装配，右边为34个整墙格与一个3×2外围窗框，洞后不留墙。', 22, 9,
@@ -568,14 +587,19 @@ export function createDefinitionSceneLayout(selectedId: string) {
     section(scene.id, scene.title, scene.description, scene.width, scene.height, scene.items,
       ({ kit }) => kit.terrain(scene.cells, terrainTextures), scene.playerX, scene.playerY);
   }
+  const trialStart = solids.length;
+  const refreshDepthTrialCollision = (): void => {
+    if (tileDepthTrial) solids.splice(trialStart, solids.length - trialStart, ...tileDepthTrial.solids);
+  };
+  refreshDepthTrialCollision();
   return {
-    root, sections, collision: { solids, platforms }, solarPanels,
+    root, sections, collision: { solids, platforms }, solarPanels, tileDepthTrial, refreshDepthTrialCollision,
     setSunDirection(sun: { x: number; y: number }): void {
       const angle = solarTrackingAngle(sun);
       for (const panel of solarPanels) panel.sunAngle = angle;
     },
-    update(time: number): void {
-      for (const update of updates) update(time);
+    update(time: number, player: WorkstationPlayer | null): void {
+      for (const update of updates) update(time, player);
       if (selectedId === 'liquids') liquid.update(time);
       if (selectedId === 'depth-walk') {
         corridorLiquid.update(time);

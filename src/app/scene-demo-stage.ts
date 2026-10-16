@@ -13,6 +13,8 @@ import { createCharacterAppearanceStore } from './character-appearance.ts';
 import type { SceneSection } from './definition-scene-layout.ts';
 import { createPerspectiveControls } from './perspective-controls.ts';
 import type { SceneMountContext } from './scene-mount.ts';
+import { createPlayableDefinitionMinimap } from './perspective-minimap.ts';
+import { createSceneGameOverlays } from './scene-game-overlays.ts';
 
 export function createSceneDemoStage(context: SceneMountContext, tuning: Tuning = TUNING) {
   const page = document.createElement('section');
@@ -61,6 +63,11 @@ export function createSceneDemoStage(context: SceneMountContext, tuning: Tuning 
         { cameraMode: 'game', tuning, applyForce: weather.applyToBody, airWind: weather.airWind });
       context.onDispose(() => gameplay.dispose());
       gameplay.select(sections[0]!);
+      const minimap = createPlayableDefinitionMinimap(viewport, collision,
+        { minX: bounds.min.x, minY: bounds.min.y, maxX: bounds.max.x, maxY: bounds.max.y });
+      context.onDispose(() => minimap.dispose());
+      const overlays = createSceneGameOverlays(page.querySelector<HTMLElement>('.room-preview-toolbar')!, viewport, stage, minimap);
+      context.onDispose(() => overlays.dispose());
       page.querySelector('[data-reset-player]')!.addEventListener('click', () => gameplay.select(sections[0]!), { signal: context.signal });
       const lighting = createAiCityLighting(stage);
       lighting.setEnabled(true);
@@ -72,6 +79,7 @@ export function createSceneDemoStage(context: SceneMountContext, tuning: Tuning 
       context.onDispose(() => cancelAnimationFrame(frame));
       const label = page.querySelector<HTMLElement>('[data-sample-label]')!;
       const render = (dt: number, draw = true): void => {
+        if (draw) overlays.begin();
         time += dt;
         context.world.clock.update(dt);
         weather.setSettings(context.world.weatherConfig);
@@ -86,7 +94,7 @@ export function createSceneDemoStage(context: SceneMountContext, tuning: Tuning 
         const atmosphere = weather.update(time, dt, worldTime);
         lighting.setWorldTime(worldTime, atmosphere);
         lighting.update();
-        if (draw) stage.render();
+        if (draw) { minimap.update(gameplay.body.x, gameplay.body.y); overlays.render(); }
       };
       render(0, false);
       context.progress('准备着色器与首帧');

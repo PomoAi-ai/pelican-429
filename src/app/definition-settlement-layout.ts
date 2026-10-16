@@ -6,6 +6,7 @@ import { generateTileTextures } from '../render/tile-textures.ts';
 import type { DefinitionCollider, DefinitionPlatform } from '../physics/definition-collision.ts';
 import { createDefinitionKit, type DefinitionKit } from '../render/definition-kit.ts';
 import { createDefinitionFurniture, type FurnitureKind, type FurnitureOptions } from '../render/definition-furniture.ts';
+import type { WorkstationPlayer } from '../render/workstation-display-state.ts';
 import { addDefinitionRoom, DEFINITION_ROOMS, type SceneSection } from './definition-scene-layout.ts';
 import { createSolarPanel, solarTrackingAngle, type SolarPanelState } from '../physics/solar-panel.ts';
 import { createSettlementLandscape } from './settlement-landscape.ts';
@@ -163,7 +164,7 @@ function* settlementLayoutSteps() {
   const placements: Placement[] = [];
   const disposers: Array<() => void> = [];
   const solarPanels: SolarPanelState[] = [];
-  const updates: Array<(time: number) => void> = [];
+  const updates: Array<(time: number, player: WorkstationPlayer | null) => void> = [];
   const sources: Array<{ kit: DefinitionKit; x: number; y: number }> = [];
   function builder(offsetX = 0, offsetY = 0): TownBuilder {
     const source = createDefinitionKit();
@@ -206,8 +207,8 @@ function* settlementLayoutSteps() {
         if (kind === 'solar') {
           const panel = createSolarPanel(offsetX + x + .5, offsetY + y, 0);
           solarPanels.push(panel);
-          updates.push(time => view.update!(time, panel.angle));
-        } else if (view.update) updates.push(view.update);
+          updates.push(time => view.update!(time, panel.angle, null));
+        } else if (view.update) updates.push((time, player) => view.update!(time, undefined, player));
         record('家具', kind === 'solar' ? `${kind}-${options.solarVariant ?? 'level'}` : kind, x, y);
       },
     };
@@ -300,7 +301,7 @@ function* settlementLayoutSteps() {
       const angle = solarTrackingAngle(sun);
       for (const panel of solarPanels) panel.sunAngle = angle;
     },
-    update(time: number): void { for (const update of updates) update(time); liquid.update(time); landscape.update(time); },
+    update(time: number, player: WorkstationPlayer | null): void { for (const update of updates) update(time, player); liquid.update(time); landscape.update(time); },
     dispose(): void { for (const dispose of disposers.reverse()) dispose(); root.removeFromParent(); root.clear(); } };
   } finally {
     if (!complete) { for (const dispose of disposers.reverse()) dispose(); root.clear(); }

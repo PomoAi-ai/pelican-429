@@ -32,7 +32,7 @@ export function createPerspectiveControls(app: HTMLElement, stage: Stage, orbit:
   const projectileViews = createGrassyProjectileViews();
   const projectiles = createViewRegistry(stage.scene, { codexShot: projectileViews.factory, bugShot: projectileViews.factory });
   const follow = createCameraRig({ camera: stage.camera, tuning: options.tuning,
-    bounds: { ...world, minX: bounds.min.x, width: bounds.max.x - bounds.min.x + 1 },
+    bounds: { ...world, minX: bounds.min.x, minY: Math.min(0, bounds.min.y), width: bounds.max.x - bounds.min.x + 1 },
     viewport: () => stage.canvas.getBoundingClientRect() });
   const button = app.querySelector<HTMLButtonElement>('[data-play]')!;
   const cameraButton = app.querySelector<HTMLButtonElement>('[data-camera]')!;

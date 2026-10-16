@@ -18,6 +18,7 @@ import { createDefinitionInspection } from '../render/definition-inspection.ts';
 import { createPerspectiveMinimap } from './perspective-minimap.ts';
 import { yieldScene, waitSceneResource, type SceneMountContext } from './scene-mount.ts';
 import type { PerspectiveSceneEntry } from './scene-catalog.ts';
+import { bindDefinitionDepthTrial } from './definition-depth-trial.ts';
 
 type View = 'front' | 'angle' | 'top';
 type SceneVariant = 'room' | 'settlement' | 'depth';
@@ -92,7 +93,7 @@ function mountPreview(app: HTMLElement, sections: readonly SceneSection[], varia
           </details>
           <details class="room-preview-control-section">
             <summary>尺寸参考</summary>
-            <p class="room-preview-notes">1 格 = 1 世界单位<br>格子深 ${DEFINITION_DEPTH.tile}（泥土、岩层相同）· 前沿、后沿各 ${DEFINITION_DEPTH.reserve}<br>墙厚 ${DEFINITION_DEPTH.wall}，紧贴格子背面 · 平台深 ${DEFINITION_DEPTH.platform}，背后有墙挂到墙面<br>男玩家高 ${GRASSY_HEIGHT} 格</p>
+            <p class="room-preview-notes">1 格 = 1 世界单位<br>普通格深 ${DEFINITION_DEPTH.tile} · 前沿、后沿各 ${DEFINITION_DEPTH.reserve}<br>加深格深 ${DEFINITION_DEPTH.tile + DEFINITION_DEPTH.reserve * 2}，前后各扩半格，同格禁止背景墙<br>墙厚 ${DEFINITION_DEPTH.wall}，紧贴普通格背面 · 平台深 ${DEFINITION_DEPTH.platform}，背后有墙挂到墙面<br>男玩家高 ${GRASSY_HEIGHT} 格</p>
           </details>
           ${variant === 'depth' ? `<details class="room-preview-control-section" open><summary>场景图层 · 由近到远</summary><p>逐层关闭，查看遮挡关系；玩家地面始终保留。</p><div class="room-preview-depth-layers">${DEPTH_LAYERS.map((layer, index) => `<label title="${layer.description}"><input type="checkbox" data-depth-layer="${layer.id}" checked /><span>${index + 1} · ${layer.label}<small>${layer.id === 'sky' ? '按画面比例显示' : layer.id === 'clouds' ? '多层漂浮 · 可遮挡天体' : `${layer.distance > 0 ? '玩家前方' : '玩家后方'} ${Math.abs(layer.distance)} 格`}</small></span></label>`).join('')}<button type="button" data-depth-reset>显示全部图层</button></div></details>` : ''}
         </aside>
@@ -217,10 +218,21 @@ export async function mountScenePerspective(context: SceneMountContext, entry: P
     controls.maxPolarAngle = Math.PI * 0.78;
     let current = layout.sections.find(section => section.id === entry.sectionId)!;
     let framing = current;
-    let view: View = depth ? 'angle' : 'front';
+    let view: View = depth || entry.sectionId === 'tile-depth' ? 'angle' : 'front';
     let showingDepth = false;
     let rig: ReturnType<typeof createGrassyRig> | null = null;
     let gameplay: ReturnType<typeof createPerspectiveControls> | null = null;
+    if (rooms?.tileDepthTrial) {
+      const trialPanel = document.createElement('details');
+      trialPanel.className = 'room-preview-control-section';
+      trialPanel.open = true;
+      app.querySelector<HTMLElement>('#perspective-tools')!.prepend(trialPanel);
+      bindDefinitionDepthTrial(trialPanel, rooms.tileDepthTrial, () => {
+        rooms.refreshDepthTrialCollision();
+        gameplay?.select(current);
+      });
+      showTools();
+    }
     const inspection = createDefinitionInspection(layout.root);
     inspection.setTranslucent(variant !== 'depth');
     inspection.setLines(variant !== 'depth');
@@ -229,6 +241,9 @@ export async function mountScenePerspective(context: SceneMountContext, entry: P
     const viewAngles = (): readonly [number, number] => view === 'front' ? [0, 0] : view === 'top' ? [0, 78]
       : depth ? [6, 4] : [22, 24];
     const setView = (): void => {
+      if (entry.sectionId === 'tile-depth') layout.root.traverse(object => {
+        if (object instanceof THREE.Sprite) object.visible = view !== 'top';
+      });
       if (showingDepth) {
         const depthSize = new THREE.Vector3(60, 26, 84);
         const distance = Math.max(depthSize.length(), depthSize.length() / stage.camera.aspect)
@@ -457,7 +472,7 @@ export async function mountScenePerspective(context: SceneMountContext, entry: P
       }
       gameplay!.update(dt);
       minimap?.update(rig!.root.position.x, rig!.root.position.y);
-      solarLayout?.update(time);
+      solarLayout?.update(time, gameplay!.body);
       if (current.solarTrial) {
         const panel = current.solarTrial;
         solarLoad.value = `${panel.loaded ? '玩家压板' : '无人 · 恢复追光'} · 面板 ${THREE.MathUtils.radToDeg(panel.angle).toFixed(1)}° · 太阳目标 ${THREE.MathUtils.radToDeg(panel.sunAngle).toFixed(1)}°`;

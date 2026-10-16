@@ -58,6 +58,21 @@ describe('camera floor', () => {
     assert.throws(() => make(Number.NaN), /camera-rig/);
     assert.throws(() => make(100), /camera-rig/);
   });
+
+  test('跟随玩家进入负高度地下，视野在地下底部夹紧且能返回地面', () => {
+    const camera = new THREE.PerspectiveCamera(TUNING.camera.fov, 1, .5, 200);
+    const rig = createCameraRig({ camera, tuning: TUNING,
+      bounds: { width: 200, height: 100, minY: -63 },
+      viewport: () => ({ left: 0, top: 0, width: 900, height: 900 }) });
+    rig.snapTo(50, 1, 1);
+    for (let i = 0; i < 240; i++) rig.update(50, -35, 1, 1 / 60);
+    assert.ok(Math.abs(camera.position.y - (-35 + focusHeight(TUNING) + TUNING.camera.deadZone.y)) < .001);
+    assert.ok(rig.visibleRect().y < -35, 'underground player remains visible');
+    rig.snapTo(50, -63, 1);
+    assert.ok(Math.abs(rig.visibleRect().y + 63) < 1e-9, 'view stops at the underground boundary');
+    rig.snapTo(50, 1, 1);
+    assert.equal(camera.position.y, 1 + focusHeight(TUNING));
+  });
 });
 
 // ---------- HUD (f) ----------

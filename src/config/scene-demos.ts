@@ -9,7 +9,7 @@ export const SCENE_DEMOS: readonly ShowcaseDemo[] = [
         yaw: form === 'back' ? 155 : 35, pitch: form.startsWith('underside-') || form === 'mixed' ? -25 : 20 },
     })),
   },
-  { id: 'tiles', title: '01 · 瓦片与形状', description: '整格与半高度格优先展示；四种形状全部平铺，每张卡内八个自然样本。', cards:
+  { id: 'tiles', title: '01 · 瓦片与形状', description: '左侧选择材质，右侧展示全部正式形状与拼接；自然瓦片四种形状，建筑材质三十三种，支持天气、时间与自由镜头。', cards:
     [
       ...(['raised', 'single'] as const).flatMap((layout) => [0, 3].map((shapeIndex) => ({ layout, shapeIndex }))),
       ...[1, 2].flatMap((shapeIndex) => (['raised', 'single'] as const).map((layout) => ({ layout, shapeIndex }))),

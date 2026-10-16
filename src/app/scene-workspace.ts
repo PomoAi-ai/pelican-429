@@ -19,6 +19,8 @@ export function startSceneWorkspace(_reportError: (error: unknown) => void): voi
       <div class="scene-world-settings">${WORLD_CONTROLS}</div></header>
       <div class="scene-workspace-view"><div class="scene-mount"></div></div></main>`;
   app.replaceChildren(shell);
+  const main = shell.querySelector<HTMLElement>('.scene-workspace-main')!;
+  const worldToolbar = shell.querySelector<HTMLElement>('.scene-world-toolbar')!;
   const viewport = shell.querySelector<HTMLElement>('.scene-workspace-view')!;
   const mountRoot = shell.querySelector<HTMLElement>('.scene-mount')!;
   const directory = shell.querySelector('nav')!;
@@ -49,7 +51,11 @@ export function startSceneWorkspace(_reportError: (error: unknown) => void): voi
     document.title = `${entry.title} · ${entry.section === 'scenes' ? '场景' : '场景透视'}`;
   };
   const loader = createLatestSceneLoader<SceneEntry>({
-    start(entry) { selected = entry; refreshDirectory(entry); loading.show(entry.title); },
+    start(entry) {
+      // 公共控制跟随当前场景工具栏；切换前移出，避免旧场景释放时一并移除。
+      main.prepend(worldToolbar);
+      selected = entry; refreshDirectory(entry); loading.show(entry.title);
+    },
     async mount(request) {
       mountRoot.replaceChildren();
       mountRoot.dataset.kind = request.value.kind;
@@ -63,11 +69,19 @@ export function startSceneWorkspace(_reportError: (error: unknown) => void): voi
       const entry = request.value;
       context.progress('加载场景程序');
       switch (entry.kind) {
+        case 'sandbox': {
+          const { mountBuildingSandbox } = await waitSceneResource(import('./building-sandbox.ts'), request.signal);
+          request.signal.throwIfAborted(); await mountBuildingSandbox(context); break;
+        }
         case 'residence': {
           const { mountResidenceDemo } = await waitSceneResource(import('./residence-app.ts'), request.signal);
           request.signal.throwIfAborted(); await mountResidenceDemo(context); break;
         }
         case 'demo': {
+          if (entry.demoId === 'tiles') {
+            const { mountTileMaterialGallery } = await waitSceneResource(import('./tile-material-gallery.ts'), request.signal);
+            request.signal.throwIfAborted(); await mountTileMaterialGallery(context); break;
+          }
           const { mountSceneDemo } = await waitSceneResource(import('./scene-demo-app.ts'), request.signal);
           request.signal.throwIfAborted(); await mountSceneDemo(context, entry.demoId); break;
         }
@@ -85,7 +99,12 @@ export function startSceneWorkspace(_reportError: (error: unknown) => void): voi
         }
       }
     },
-    ready() { loading.hide(); },
+    ready() {
+      const toolbar = mountRoot.querySelector<HTMLElement>('.residence-toolbar, .room-preview-toolbar, .resource-inspection-toolbar')!;
+      toolbar.classList.add('scene-toolbar');
+      toolbar.prepend(worldToolbar);
+      loading.hide();
+    },
     error(error) { console.error(error); loading.error(error); },
   });
   const choose = (): void => {
@@ -109,9 +128,29 @@ export function startSceneWorkspace(_reportError: (error: unknown) => void): voi
     window.dispatchEvent(new PopStateEvent('popstate'));
   };
   document.addEventListener('click', open, { signal: events.signal });
+  shell.addEventListener('toggle', event => {
+    const panel = event.target;
+    if (!(panel instanceof HTMLDetailsElement) || !panel.open || !panel.closest('.scene-toolbar')) return;
+    for (const other of shell.querySelectorAll<HTMLDetailsElement>('.scene-toolbar details[open]')) {
+      if (other !== panel) other.open = false;
+    }
+  }, { capture: true, signal: events.signal });
+  document.addEventListener('pointerdown', event => {
+    for (const panel of shell.querySelectorAll<HTMLDetailsElement>('.scene-toolbar details[open]')) {
+      if (!panel.contains(event.target as Node)) panel.open = false;
+    }
+  }, { signal: events.signal });
   window.addEventListener('popstate', choose, { signal: events.signal });
   window.addEventListener('hashchange', choose, { signal: events.signal });
-  shell.addEventListener('keydown', event => { if (event.target !== renderer.domElement) event.stopPropagation(); }, { signal: events.signal });
+  shell.addEventListener('keydown', event => {
+    if (event.key === 'Escape') {
+      for (const panel of shell.querySelectorAll<HTMLDetailsElement>('.scene-toolbar details[open]')) {
+        panel.open = false;
+        panel.querySelector('summary')!.focus({ preventScroll: true });
+      }
+    }
+    if (event.target !== renderer.domElement) event.stopPropagation();
+  }, { signal: events.signal });
   let frame = 0;
   const tick = (): void => { controls.update(); frame = requestAnimationFrame(tick); };
   tick(); choose();

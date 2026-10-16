@@ -1,3 +1,6 @@
+import { createResourcePicker } from '../ui/resource-picker.ts';
+import { createResourceThumbnailRenderer } from '../render/resource-thumbnail.ts';
+import type { DefinitionDepthMode } from '../config/definition-kit.ts';
 import { createWorldClock, sampleWorldTime } from '../core/world-clock.ts';
 import { solarTrackingAngle } from '../physics/solar-panel.ts';
 import { bindWorldControls } from '../ui/world-controls.ts';
@@ -8,8 +11,12 @@ import { getResidenceResource, RESIDENCE_RESOURCES, RESIDENCE_SEGMENT_WIDTH, RES
 import { resolveSceneWeatherMode, resolveWindMode } from '../config/weather-rules.ts';
 import { buildResidenceCollision, checkResidencePlacement, createResidence, findSafeResidenceSpawn, placeResidence, removeResidence, updateResidenceDoors, type ResidenceResult } from '../sim/residence.ts';
 import { createStage, attachStage } from '../render/stage.ts';
-import { createResidenceView } from '../render/residence-view.ts';
+import { residenceTerrainPlacement } from '../sim/residence-terrain.ts';
+import { createResidenceTerrainView } from '../render/residence-terrain.ts';
+import { createResidenceView, residenceIntersectionId } from '../render/residence-view.ts';
 import { createAiCityEnvironment } from '../render/ai-city-environment.ts';
+import { buildResidenceLightField, sampleResidenceSky } from '../sim/residence-light.ts';
+import { createResidenceLighting } from '../render/residence-lighting.ts';
 import { createAiCityLighting } from '../render/ai-city-lighting.ts';
 import { createResidenceWeather } from '../render/residence-weather.ts';
 import { createGrassyRig, disposeGrassyAssets, loadGrassyAsset } from '../render/grassy/grassy-rig.ts';
@@ -22,6 +29,8 @@ import { loadResidence, saveResidence } from './residence-save.ts';
 import { TUNING } from '../config/tuning.ts';
 import { waitSceneResource, yieldScene, type SceneMountContext } from './scene-mount.ts';
 import type { SceneSection } from './definition-scene-layout.ts';
+import { createPlayableDefinitionMinimap } from './perspective-minimap.ts';
+import { createSceneGameOverlays } from './scene-game-overlays.ts';
 
 export function startResidence(mode: 'saved', onError: (error: unknown) => void): Promise<void> {
   return mountResidence(mode, onError);
@@ -37,8 +46,13 @@ async function mountResidence(mode: 'demo' | 'saved', onError: (error: unknown) 
   const needed = new Set([...example.placements, ...state.placements].map(item => item.resourceId));
   needed.add('ceramic-A');
   const spawn = findSafeResidenceSpawn(state);
-  const ui = createResidenceHud(RESIDENCE_RESOURCES.filter(resource => needed.has(resource.id)), mode, context?.root);
-  const select = ui.root.querySelector<HTMLSelectElement>('[data-resource]')!;
+  const resources = RESIDENCE_RESOURCES.filter(resource => needed.has(resource.id) || resource.kind === 'solid');
+  const ui = createResidenceHud(resources, mode, context?.root);
+  const select = createResourcePicker(resources, createResourceThumbnailRenderer);
+  ui.root.querySelector('[data-resource-picker]')!.append(select.root);
+  const depthSelect = ui.root.querySelector<HTMLSelectElement>('[data-depth-mode]')!;
+  let depthMode: DefinitionDepthMode = 'normal';
+  const placementDepth = (): DefinitionDepthMode => getResidenceResource(select.value).kind === 'solid' ? depthMode : 'normal';
   const travel = ui.root.querySelector<HTMLSelectElement>('[data-travel]')!;
   const tool = ui.root.querySelector<HTMLSelectElement>('[data-tool]')!;
   const buildButton = ui.root.querySelector<HTMLButtonElement>('[data-build]')!;
@@ -64,18 +78,28 @@ async function mountResidence(mode: 'demo' | 'saved', onError: (error: unknown) 
   stage.camera.far = RESIDENCE_WORLD.width * 8;
   stage.camera.updateProjectionMatrix();
   let view = createResidenceView(state);
+  const terrain = createResidenceTerrainView(state);
+  let lightField = buildResidenceLightField(state);
+  let lightRevision = state.revision;
+  const spatialLighting = createResidenceLighting(lightField);
+  const skyAt = (x: number, y: number): number => sampleResidenceSky(lightField, x, y);
+  spatialLighting.attach(view.root); spatialLighting.attach(terrain.root);
+  const minY = state.underground ? RESIDENCE_WORLD.minY : RESIDENCE_WORLD.foundationTop;
   const initialCollision = buildResidenceCollision(state);
   const collision = { solids: [...initialCollision.solids, ...view.solarPanels.map(panel => panel.collider)], platforms: [...initialCollision.platforms] };
+  const minimap = createPlayableDefinitionMinimap(ui.viewport, collision,
+    { minX: RESIDENCE_WORLD.minX, minY, maxX: RESIDENCE_WORLD.maxX, maxY: RESIDENCE_WORLD.height });
+  const overlays = createSceneGameOverlays(ui.root.querySelector<HTMLElement>('.residence-toolbar')!, ui.viewport, stage, minimap);
   const weather = createResidenceWeather(stage, () => collision.solids);
   const environment = createAiCityEnvironment({ homeCenter, wind: weather.wind });
-  stage.scene.add(environment.root, view.root);
+  stage.scene.add(environment.root, view.root, terrain.root);
   const solarPanels = [...view.solarPanels];
   const orbit = new OrbitControls(stage.camera, stage.canvas);
   orbit.enableDamping = true;
   orbit.minDistance = 8;
   orbit.maxDistance = RESIDENCE_WORLD.width * 6;
-  const section: SceneSection = { id: 'residence', title: 'AI住宅', description: '双层能量门住宅', x: RESIDENCE_WORLD.minX, y: 0,
-    width: RESIDENCE_WORLD.width, height: RESIDENCE_WORLD.height,
+  const section: SceneSection = { id: 'residence', title: 'AI住宅', description: '双层能量门住宅', x: RESIDENCE_WORLD.minX, y: minY,
+    width: RESIDENCE_WORLD.width, height: RESIDENCE_WORLD.height - minY,
     playerX: spawn.x, playerY: spawn.y, items: [], walkZ: (x, y) => view.walkZ(x, y) };
   let gameplay: ReturnType<typeof createPerspectiveControls> | null = null;
   let rig: ReturnType<typeof createGrassyRig> | null = null;
@@ -96,6 +120,8 @@ async function mountResidence(mode: 'demo' | 'saved', onError: (error: unknown) 
   let wholeWorld = false;
   let areaCenter = homeCenter;
   let areaWidth = mode === 'demo' ? 34 : 96;
+  let areaY = 7;
+  let areaHeight = 18;
   const viewAngles = { front: [0, 0], angle: [13, 9], top: [0, 78] } as const;
   let inspectionView: keyof typeof viewAngles = 'front';
   const markView = (preset: string | null): void => {
@@ -105,9 +131,9 @@ async function mountResidence(mode: 'demo' | 'saved', onError: (error: unknown) 
   const overview = (): void => {
     gameplay?.observe();
     syncEditingCamera();
-    const height = wholeWorld ? Math.max(32, (RESIDENCE_WORLD.width + 8) / stage.camera.aspect) * 1.2 : Math.max(18, areaWidth / stage.camera.aspect);
+    const height = wholeWorld ? Math.max(32, (RESIDENCE_WORLD.width + 8) / stage.camera.aspect) * 1.2 : Math.max(areaHeight, areaWidth / stage.camera.aspect);
     const distance = height / (2 * Math.tan(THREE.MathUtils.degToRad(stage.camera.fov) / 2));
-    orbit.target.set(wholeWorld ? (RESIDENCE_WORLD.minX + RESIDENCE_WORLD.maxX) / 2 : areaCenter, wholeWorld ? 10 : 7, 0);
+    orbit.target.set(wholeWorld ? (RESIDENCE_WORLD.minX + RESIDENCE_WORLD.maxX) / 2 : areaCenter, wholeWorld ? (RESIDENCE_WORLD.height + minY) / 2 : areaY, 0);
     const yaw = THREE.MathUtils.degToRad(viewAngles[inspectionView][0]);
     const pitch = THREE.MathUtils.degToRad(viewAngles[inspectionView][1]);
     stage.camera.position.set(orbit.target.x + distance * Math.sin(yaw) * Math.cos(pitch),
@@ -124,8 +150,8 @@ async function mountResidence(mode: 'demo' | 'saved', onError: (error: unknown) 
   stage.setSize(ui.viewport.clientWidth, ui.viewport.clientHeight);
   overview();
   const gridPoints: number[] = [];
-  for (let x = RESIDENCE_WORLD.minX; x <= RESIDENCE_WORLD.maxX; x++) gridPoints.push(x, 1.5, 1.08, x, RESIDENCE_WORLD.height, 1.08);
-  for (let y = 2; y <= RESIDENCE_WORLD.height; y++) gridPoints.push(RESIDENCE_WORLD.minX, y, 1.08, RESIDENCE_WORLD.maxX, y, 1.08);
+  for (let x = RESIDENCE_WORLD.minX; x <= RESIDENCE_WORLD.maxX; x++) gridPoints.push(x, minY, 1.52, x, RESIDENCE_WORLD.height, 1.52);
+  for (let y = minY; y <= RESIDENCE_WORLD.height; y++) gridPoints.push(RESIDENCE_WORLD.minX, y, 1.52, RESIDENCE_WORLD.maxX, y, 1.52);
   const gridGeometry = new THREE.BufferGeometry();
   gridGeometry.setAttribute('position', new THREE.Float32BufferAttribute(gridPoints, 3));
   const gridMaterial = new THREE.LineBasicMaterial({ color: 0x428dbe, transparent: true, opacity: .2, depthWrite: false });
@@ -137,8 +163,10 @@ async function mountResidence(mode: 'demo' | 'saved', onError: (error: unknown) 
     disposed = true;
     cancelAnimationFrame(frame);
     events.abort(); resize.disconnect(); gameplay?.dispose(); orbit.dispose();
-    ghost?.dispose(); view.dispose(); environment.dispose(); weather.dispose(); rig?.dispose();
-    gridGeometry.dispose(); gridMaterial.dispose(); lighting.dispose(); stage.dispose(); if (!context) disposeGrassyAssets(); ui.dispose();
+    overlays.dispose(); minimap.dispose();
+    spatialLighting.dispose();
+    ghost?.dispose(); view.dispose(); terrain.dispose(); environment.dispose(); weather.dispose(); rig?.dispose();
+    gridGeometry.dispose(); gridMaterial.dispose(); lighting.dispose(); stage.dispose(); if (!context) disposeGrassyAssets(); select.dispose(); ui.dispose();
   };
   if (context) context.onDispose(dispose);
   else window.addEventListener('pagehide', dispose, { once: true, signal: events.signal });
@@ -156,16 +184,18 @@ async function mountResidence(mode: 'demo' | 'saved', onError: (error: unknown) 
       saveStatus.dataset.error = 'true';
     }
   };
-  const updateCount = (): void => { ui.root.querySelector<HTMLElement>('[data-count]')!.textContent = `${state.placements.length} 个构件`; };
+  const updateCount = (): void => { ui.root.querySelector<HTMLElement>('[data-count]')!.textContent = `${state.placements.length} 个构件${state.underground ? ` · ${RESIDENCE_WORLD.width * (RESIDENCE_WORLD.foundationTop - minY) - state.underground.size} 个地下格` : ""}`; };
   const syncCollision = (): void => {
     const next = buildResidenceCollision(state);
     // 人物、骑行和弹体持有这些数组，不能替换数组引用。
     collision.solids.splice(0, collision.solids.length, ...next.solids, ...solarPanels.map(panel => panel.collider));
     collision.platforms.splice(0, collision.platforms.length, ...next.platforms);
+    minimap.refresh();
   };
   const rebuild = (): void => {
     view.dispose();
     view = createResidenceView(state);
+    spatialLighting.attach(view.root);
     stage.scene.add(view.root);
     solarPanels.splice(0, solarPanels.length, ...view.solarPanels);
     syncCollision(); updateCount(); save();
@@ -177,13 +207,20 @@ async function mountResidence(mode: 'demo' | 'saved', onError: (error: unknown) 
     actionStatus.textContent = message;
     actionStatus.dataset.error = String(error);
   };
-  const apply = (result: ResidenceResult): void => { feedback(result.message, !result.ok); if (result.ok) rebuild(); };
+  const apply = (result: ResidenceResult): void => {
+    feedback(result.message, !result.ok);
+    if (!result.ok) return;
+    if (result.id !== undefined && result.id < 0) {
+      terrain.refresh(result.id);
+      syncCollision(); updateCount(); save();
+    } else rebuild();
+  };
   const updateGhost = (): void => {
     if (!ghost) return;
     ghost.root.visible = editing && pointerInside && tool.value === 'place';
     ghost.root.position.set(position.x, position.y, .015);
     if (ghost.root.visible) {
-      const result = checkResidencePlacement(state, select.value, position.x, position.y, gameplay!.body);
+      const result = checkResidencePlacement(state, select.value, position.x, position.y, gameplay!.body, placementDepth());
       status.textContent = `${getResidenceResource(select.value).label} · ${position.x}, ${position.y} · ${result.message}`;
       status.dataset.error = String(!result.ok);
       ghost.root.traverse(object => {
@@ -196,9 +233,10 @@ async function mountResidence(mode: 'demo' | 'saved', onError: (error: unknown) 
   };
   const chooseResource = (): void => {
     const resource = getResidenceResource(select.value);
-    ui.root.querySelector<HTMLElement>('[data-resource-note]')!.textContent = `${resource.label} · 占位 ${resource.width} × ${resource.height} 格。拆除只选择与此构件相同的一层。`;
+    ui.root.querySelector<HTMLElement>('[data-depth-field]')!.hidden = resource.kind !== 'solid';
+    ui.root.querySelector<HTMLElement>('[data-resource-note]')!.textContent = `${resource.label} · 占位 ${resource.width} × ${resource.height} 格。${resource.kind === 'solid' ? placementDepth() === 'deep' ? '深3，同格不能放背景墙；一格一块，可连续拼接。' : '深2，可与背景墙共存。' : ''}拆除只选择与此构件相同的一层。`;
     ghost?.dispose();
-    ghost = createResidenceView({ placements: [{ id: 0, resourceId: resource.id, x: 0, y: 0, ...resource.kind === 'door' ? { open: false } : {} }], nextId: 1, revision: 0 }, { lighting: false });
+    ghost = createResidenceView({ placements: [{ id: 0, resourceId: resource.id, x: 0, y: 0, ...resource.kind === 'solid' ? { depthMode } : {}, ...resource.kind === 'door' ? { open: false } : {} }], nextId: 1, revision: 0 }, { lighting: false });
     ghost.root.traverse(object => {
       if (!(object instanceof THREE.Mesh)) return;
       object.castShadow = false;
@@ -257,12 +295,13 @@ async function mountResidence(mode: 'demo' | 'saved', onError: (error: unknown) 
     });
     rig.root.position.set(section.playerX, section.playerY, 0);
     animateGrassy(rig, 'idle', 0, 0, null);
+    spatialLighting.attach(rig.root, true);
     stage.scene.add(rig.root);
     await compileForStage(stage, rig.root);
     context?.signal.throwIfAborted();
     if (disposed) return;
     gameplay = createPerspectiveControls(ui.root, stage, orbit, rig, collision,
-      new THREE.Box3(new THREE.Vector3(RESIDENCE_WORLD.minX, 0, -1), new THREE.Vector3(RESIDENCE_WORLD.maxX, RESIDENCE_WORLD.height, 1)), section, [0, 0], solarPanels, false, { cameraMode: 'game', tuning: TUNING, applyForce: weather.applyToBody, airWind: weather.airWind });
+      new THREE.Box3(new THREE.Vector3(RESIDENCE_WORLD.minX, minY, -1.5), new THREE.Vector3(RESIDENCE_WORLD.maxX, RESIDENCE_WORLD.height, 1.5)), section, [0, 0], solarPanels, false, { cameraMode: 'game', tuning: TUNING, applyForce: weather.applyToBody, airWind: weather.airWind });
     gameplay.select(section);
     markView(null);
     environment.setCamera(stage.camera);
@@ -293,7 +332,8 @@ async function mountResidence(mode: 'demo' | 'saved', onError: (error: unknown) 
     if (!context) ui.root.querySelector<HTMLSelectElement>('[data-wind]')!.addEventListener('change', event => {
       weather.wind.setMode(resolveWindMode((event.target as HTMLSelectElement).value, 'breeze'));
     }, { signal: events.signal });
-    listen('[data-overview]', () => { travel.value = '0'; wholeWorld = false; areaCenter = homeCenter; areaWidth = 34; overview(); });
+    listen('[data-overview]', () => { travel.value = '0'; wholeWorld = false; areaCenter = homeCenter; areaWidth = 34; areaY = 7; areaHeight = 18; overview(); });
+    listen('[data-underground]', () => { wholeWorld = false; areaCenter = gameplay!.body.x; areaWidth = 80; areaY = (minY + RESIDENCE_WORLD.foundationTop) / 2; areaHeight = RESIDENCE_WORLD.foundationTop - minY + 8; overview(); });
     listen('[data-world]', () => { wholeWorld = true; overview(); });
     listen('[data-spawn]', () => {
       travel.value = '0';
@@ -316,20 +356,27 @@ async function mountResidence(mode: 'demo' | 'saved', onError: (error: unknown) 
     for (const layer of AI_CITY_LAYERS) ui.root.querySelector<HTMLInputElement>(`[data-city-layer="${layer.id}"]`)!.addEventListener('change', event => {
       environment.setLayerVisible(layer.id, (event.target as HTMLInputElement).checked);
     }, { signal: events.signal });
-    select.addEventListener('change', chooseResource, { signal: events.signal });
+    select.root.addEventListener('change', chooseResource, { signal: events.signal });
+    depthSelect.addEventListener('change', () => {
+      const value = depthSelect.value;
+      if (value !== 'normal' && value !== 'deep') throw new Error(`未知砖块深度规格：${value}`);
+      depthMode = value;
+      chooseResource();
+    }, { signal: events.signal });
     tool.addEventListener('change', updateGhost, { signal: events.signal });
     stage.canvas.addEventListener('pointermove', event => { pointerInside = true; if (editing && aim(event)) updateGhost(); }, { signal: events.signal });
     stage.canvas.addEventListener('pointerleave', () => { pointerInside = false; updateGhost(); }, { signal: events.signal });
     stage.canvas.addEventListener('pointerdown', event => {
       if (!editing || event.button !== 0 || !aim(event)) return;
-      if (tool.value === 'place') apply(placeResidence(state, select.value, position.x, position.y, gameplay!.body));
+      if (tool.value === 'place') apply(placeResidence(state, select.value, position.x, position.y, gameplay!.body, placementDepth()));
       else {
         const layer = getResidenceResource(select.value).layer;
-        const target = raycaster.intersectObject(view.root, true).find(item => {
-          const p = state.placements.find(p => p.id === item.object.userData.residenceId);
+        const target = raycaster.intersectObjects([view.root, terrain.root], true).find(item => {
+          const id = residenceIntersectionId(item);
+          const p = id === undefined ? undefined : id < 0 ? residenceTerrainPlacement(state, id) : state.placements.find(p => p.id === id);
           return p && getResidenceResource(p.resourceId).layer === layer;
         });
-        if (target) apply(removeResidence(state, target.object.userData.residenceId as number));
+        if (target) apply(removeResidence(state, residenceIntersectionId(target)!));
         else feedback('这里没有当前层的构件');
       }
     }, { signal: events.signal });
@@ -339,6 +386,7 @@ async function mountResidence(mode: 'demo' | 'saved', onError: (error: unknown) 
     const draw = (now: number): void => {
       if (disposed || context?.signal.aborted) return;
       try {
+        overlays.begin();
         const dt = previous === null ? 0 : Math.max(0, Math.min((now - previous) / 1000, .05));
         previous = now; time += dt;
         worldClock.update(dt); worldControls?.update();
@@ -348,12 +396,18 @@ async function mountResidence(mode: 'demo' | 'saved', onError: (error: unknown) 
         for (const panel of solarPanels) panel.sunAngle = solarAngle;
         if (gameplay!.playing && !editing && updateResidenceDoors(state, gameplay!.body)) syncCollision();
         gameplay!.update(dt); orbit.update();
+        if (lightRevision !== state.revision) {
+          lightField = buildResidenceLightField(state);
+          spatialLighting.update(lightField);
+          lightRevision = state.revision;
+        }
+        if (terrain.update(stage.camera)) spatialLighting.attach(terrain.root);
         const atmosphere = weather.update(time, dt, world);
         lighting.setWorldTime(world, atmosphere);
-        view.setLighting(stage.camera, world.night); view.update(time);
-        if (ghost?.root.visible) ghost.update(time);
+        view.setLighting(stage.camera, world.night, skyAt); view.update(time, gameplay!.body);
+        if (ghost?.root.visible) ghost.update(time, null);
         environment.setWeather(atmosphere); environment.setNightFactor(world.night); environment.setCamera(stage.camera); environment.update(time);
-        lighting.update(); stage.render();
+        lighting.update(); minimap.update(gameplay!.body.x, gameplay!.body.y); overlays.render();
         frame = requestAnimationFrame(draw);
       } catch (error) {
         if (firstFrame) throw error;

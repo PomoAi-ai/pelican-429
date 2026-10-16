@@ -6,7 +6,7 @@
 .scene-directory a { display: block; padding: 10px 12px; border: 1px solid transparent; border-radius: 7px; color: #c1d0d3; background: #19262c; text-decoration: none; }
 .scene-directory a:hover { background: #263940; }
 .scene-directory a[aria-current] { color: #c4e8a6; border-color: #668058; background: #293a2d; }
-.scene-workspace-main { display: grid; grid-template-rows: auto minmax(0, 1fr); min-width: 0; min-height: 0; }
+.scene-workspace-main { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
 .scene-world-toolbar { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; padding: 9px 14px; border-bottom: 1px solid #304047; background: #142126; z-index: 12; }
 .scene-world-toolbar > strong { margin-right: auto; }
 .scene-world-settings { display: flex; align-items: center; gap: 14px; }
@@ -17,13 +17,12 @@
 .scene-workspace .world-controls-panel { background: #17252a; border-color: #42565d; color: #e1e9e6; }
 .scene-workspace .world-controls > summary { color: #c4e8a6; }
 .scene-workspace-view, .scene-mount { position: relative; min-width: 0; min-height: 0; height: 100%; overflow: hidden; }
+.scene-workspace-view { flex: 1; height: auto; }
 .scene-loading { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; background: #101b22; z-index: 20; }
 .scene-loading > canvas { width: 100%; height: 160px; }
 .scene-loading-copy { text-align: center; margin: 20px; color: #d6e5e9; }
 .scene-loading h2 { font-size: 18px; margin: 0 0 10px; }
 .scene-loading p { min-height: 22px; }
-.scene-loading progress { display: block; margin: 18px auto; width: min(300px, 85%); height: 5px; accent-color: #b6dc9a; }
-.scene-loading progress[hidden] { display: none; }
 .scene-loading small { display: block; margin-top: 20px; color: #8ca3ad; }
 .scene-workspace .residence { position: absolute; inset: 0; --residence-ink: #dce6e8; --residence-muted: #92a8af; --residence-line: #304047; --residence-paper: #142126; background: #101a1e; }
 .scene-workspace .residence-toolbar { gap: 6px 12px; padding: 8px 12px; max-height: 150px; overflow-y: auto; }
@@ -35,7 +34,7 @@
 .scene-workspace .residence-actions { display: flex; padding: 0; border: 0; }
 .scene-workspace .residence-actions a { display: none; }
 .scene-workspace .residence-workspace { grid-template-columns: minmax(0, 1fr); }
-.scene-workspace .residence.is-building .residence-workspace { grid-template-columns: 230px minmax(0, 1fr); }
+.scene-workspace .residence.is-building .residence-workspace { grid-template-columns: 350px minmax(0, 1fr); }
 .scene-workspace .residence-stage { grid-column: auto; grid-row: auto; }
 .scene-workspace .residence-travel { display: inline-flex; margin-top: 0; }
 .scene-workspace .residence-save-status { display: none; }
@@ -66,3 +65,22 @@
 .scene-workspace .residence-travel select { max-width: 215px; }
 .scene-workspace .residence-toolbar { align-content: center; }
 .scene-workspace .world-controls-panel { left: auto; right: 0; width: min(330px, calc(100vw - 24px)); max-height: 72vh; overflow-y: auto; }
+.scene-workspace .scene-toolbar { position: relative; z-index: 12; display: flex; align-items: center; flex-wrap: nowrap; gap: 6px; height: 52px; min-height: 52px; max-height: 52px; padding: 6px 12px; overflow-x: auto; overflow-y: hidden; scrollbar-width: thin; background: #142126; }
+.scene-toolbar .scene-world-toolbar { display: contents; }
+.scene-toolbar [data-scene-title] { flex: none; order: -1; margin-right: 6px; white-space: nowrap; }
+.scene-toolbar .scene-world-settings { flex: none; order: 2; align-self: stretch; gap: 10px; padding-left: 8px; margin-left: auto; background: #142126; }
+.scene-workspace .scene-toolbar :is(button, select, summary, .residence-heading, .room-preview-status, .residence-travel, .resource-inspection-variant, .room-preview-group, .scene-game-overlay-tools) { flex-shrink: 0; white-space: nowrap; }
+.scene-workspace .scene-toolbar :is(button, select) { min-height: 32px; padding: 5px 7px; font-size: 12px; }
+.scene-workspace .scene-toolbar .residence-travel select { max-width: 180px; }
+.scene-workspace .scene-toolbar :is(.residence-heading, .room-preview-status) { margin: 0; font-size: 11px; }
+.scene-workspace .scene-toolbar .residence-actions { flex: none; gap: 6px; }
+.scene-workspace .scene-toolbar .scene-world-settings[hidden] { display: none; }
+.scene-workspace .scene-toolbar :is(.world-controls-panel, .scene-weather-panel, .city-layer-controls > div) { position: fixed; z-index: 40; top: calc(var(--dev-nav-height, 64px) + 58px); right: 12px; left: auto; margin: 0; max-height: calc(100dvh - var(--dev-nav-height, 64px) - 82px); overflow-y: auto; box-shadow: 0 12px 32px #0007; }
+.scene-workspace .scene-toolbar .city-layer-controls > div { width: min(280px, calc(100vw - 24px)); min-width: 0; padding: 12px; border: 1px solid #45616a; border-radius: 10px; background: #17252a; color: #dce6e8; }
+.scene-workspace .scene-toolbar .city-layer-controls label { white-space: nowrap; }
+
+@media(max-width:800px){.scene-workspace .residence.is-building .residence-workspace{grid-template-columns:280px minmax(0,1fr)}}
+@media(max-width:700px){
+  .scene-workspace .residence.is-building .residence-workspace{grid-template-columns:minmax(0,1fr);position:relative}
+  .scene-workspace .residence.is-building .residence-sidebar{position:absolute;inset:0 auto 0 0;width:min(280px,calc(100% - 48px));max-height:none;z-index:5;border-right:1px solid #405762;box-shadow:8px 0 24px #0005}
+}

@@ -18,11 +18,13 @@ export interface ResourceSceneEntry extends SceneEntryBase {
   readonly resourceId: string;
 }
 export type SceneEntry = PerspectiveSceneEntry | ResourceSceneEntry
+  | (SceneEntryBase & { readonly kind: 'sandbox' })
   | (SceneEntryBase & { readonly kind: 'residence' })
   | (SceneEntryBase & { readonly kind: 'demo'; readonly demoId: string })
   | (SceneEntryBase & { readonly kind: 'facility'; readonly sceneId: FacilitySceneId });
 
 const room = [
+  ['tile-depth', '普通与加深格 · 深2 / 深3'],
   ['depth-walk', '长廊全建筑展示'], ['room-full', '整砖单间'], ['room-half', '半砖单间'],
   ['room-classic', '整砖两层 · 13格'], ['room-slab-full', '层间组合A · 整砖'],
   ['room-slab-upper', '层间组合C · 上半砖'], ['room-slab-lower', '层间组合B + H'],
@@ -41,13 +43,14 @@ const settlement = [
 ] as const;
 const depth = [
   ['valley', '花园山谷'], ['lake', '湖畔松林'], ['coast', '海岸小镇'],
-  ['buildings', '层叠城镇'], ['ruins', '月夜遗迹'], ['cave', '晶石洞厅'],
+  ['buildings', '层叠城镇'], ['ruins', '月夜遗迹'], ['cave', '晶石洞厅'], ['skyline', 'AI 天际线'],
 ] as const;
 const perspectives = (variant: PerspectiveSceneEntry['variant'], entries: readonly (readonly [string, string])[], prefix = ''): PerspectiveSceneEntry[] =>
   entries.map(([sectionId, title]) => ({ id: `${variant}:${sectionId}`, title: `${prefix}${title}`,
     section: 'perspectives', kind: 'perspective', variant, sectionId, href: `./?mode=resources&scene=${variant}#${sectionId}` }));
 
 export const SCENE_ENTRIES: readonly SceneEntry[] = [
+  { id: 'sandbox', title: '自由搭建场', href: './?mode=lab&demo=sandbox', section: 'scenes', kind: 'sandbox' },
   { id: 'residence', title: 'AI 住宅', href: './?mode=lab&demo=residence', section: 'scenes', kind: 'residence' },
   ...SCENE_DEMOS.map(demo => ({ id: demo.id, title: demo.title.replace(/^\d+\s*·\s*/, ''),
     href: `./?mode=lab&demo=${demo.id}`, section: 'scenes' as const, kind: 'demo' as const, demoId: demo.id })),

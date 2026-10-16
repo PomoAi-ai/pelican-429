@@ -43,6 +43,7 @@ export function createResidenceHud(resources: readonly ResidenceResource[], mode
           <h2>场景位置</h2>
           <div class="residence-control-buttons">
             <button type="button" data-overview>看住宅</button>
+            <button type="button" data-underground>看地下 · 64 格</button>
             <button type="button" data-world>全场景 · ${RESIDENCE_WORLD.width.toLocaleString('en-US')} 格</button>
             <button type="button" data-spawn>回到门口</button>
           </div>
@@ -55,8 +56,12 @@ export function createResidenceHud(resources: readonly ResidenceResource[], mode
       <aside id="residence-resources" class="residence-sidebar" aria-label="建造资源与工具">
         <div class="residence-panel-heading"><h2>建造资源</h2><span>${resources.length} 种</span></div>
         <p class="residence-panel-intro">${mode === 'demo' ? '体验格子搭建，演示修改仅本次有效。' : '挑选构件，在格子上搭出自己的家。'}</p>
-        <label class="residence-field" for="residence-resource">选择资源
-          <select id="residence-resource" data-resource aria-describedby="residence-resource-note"></select>
+        <div data-resource-picker aria-describedby="residence-resource-note"></div>
+        <label class="residence-field" data-depth-field for="residence-depth">砖块深度
+          <select id="residence-depth" data-depth-mode>
+            <option value="normal">普通格 · 深 2</option>
+            <option value="deep">加深格 · 深 3（前后各扩 0.5）</option>
+          </select>
         </label>
         <p id="residence-resource-note" class="residence-resource-note" data-resource-note>选择资源，查看尺寸与摆放方式。</p>
         <label class="residence-field" for="residence-tool">建造工具
@@ -88,21 +93,6 @@ export function createResidenceHud(resources: readonly ResidenceResource[], mode
     root.classList.add('residence-demo');
     root.querySelector('.world-controls')!.remove();
     root.querySelector('[data-weather]')!.closest('section')!.remove();
-  }
-  const select = root.querySelector<HTMLSelectElement>('[data-resource]')!;
-  const groups = new Map<string, HTMLOptGroupElement>();
-  for (const resource of resources) {
-    let group = groups.get(resource.group);
-    if (!group) {
-      group = document.createElement('optgroup');
-      group.label = resource.group;
-      groups.set(resource.group, group);
-      select.append(group);
-    }
-    const option = document.createElement('option');
-    option.value = resource.id;
-    option.textContent = resource.label;
-    group.append(option);
   }
   parent.append(root);
   return { root, viewport: root.querySelector<HTMLElement>('.residence-viewport')!, dispose(): void { root.remove(); } };

@@ -1,5 +1,5 @@
 /**
- * 跟随相机：死区 + 朝向前瞻 + 指数平滑，夹紧在地图范围内（下边界可抬高到 bounds.minY，不展示深层地下）；
+ * 跟随相机：死区 + 朝向前瞻 + 指数平滑，夹紧在地图范围内（bounds.minY 可为负数以展示地下）；
  * 相机固定在 z=distance 平视 z=0 平面；开场取景（startIntro，见 camera-intro）期间按 introBlend 从取景（更远、对准渔屋）
  * 平滑过渡到跟随位置与常规距离。
  * 主光与其 target 跟随相机注视点，保持相对偏移（阴影相机始终覆盖可视区域）。
@@ -78,8 +78,8 @@ export function createCameraRig(options: CameraRigOptions): CameraRig {
   if (!(bounds.width > 0 && bounds.height > 0)) throw new Error(`camera-rig: invalid bounds ${bounds.width}×${bounds.height}`);
   const minX = bounds.minX ?? 0;
   const minY = bounds.minY ?? 0;
-  if (!(Number.isFinite(minY) && minY >= 0 && minY < bounds.height)) {
-    throw new Error(`camera-rig: invalid bounds.minY ${minY} (must be in [0, ${bounds.height}))`);
+  if (!(Number.isFinite(minY) && minY < bounds.height)) {
+    throw new Error(`camera-rig: invalid bounds.minY ${minY} (must be finite and below ${bounds.height})`);
   }
   const cfg = tuning.camera;
   if (!Number.isFinite(cfg.framingOffsetY)) throw new Error(`camera-rig: invalid camera.framingOffsetY ${cfg.framingOffsetY}`);

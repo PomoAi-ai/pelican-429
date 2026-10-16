@@ -1,8 +1,7 @@
 import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { createParticleCloud } from './grassy/grassy-particles.ts';
-
-type WorkstationDisplay = 'globe' | 'desktop' | 'holographic';
+import { createWorkstationDisplayState, type WorkstationDisplay } from './workstation-display-state.ts';
 
 function displayBuilder(root: THREE.Group) {
   const geometries = new Map<string, THREE.BufferGeometry>();
@@ -285,7 +284,7 @@ export function createWorkstationDisplay() {
   const updates = { globe: globeDisplay(builders.globe), desktop: desktopDisplay(builders.desktop), holographic: holographicDisplay(builders.holographic) };
   for (const key of ['globe', 'desktop', 'holographic'] as const) {
     groups[key].name = `workstation-display-${key}`;
-    groups[key].visible = key === 'desktop';
+    groups[key].visible = key === 'globe';
     content.add(groups[key]);
   }
   const projection = displayBuilder(root);
@@ -301,31 +300,22 @@ export function createWorkstationDisplay() {
   const waveMaterial = projection.ink(0xeee8df, .55);
   const wave = projection.part(waveMaterial, 1, 1, 1, 1, 1.15, 0, waveGeometry);
   wave.rotation.x = Math.PI / 2;
-  let active: WorkstationDisplay = 'desktop';
+  let active: WorkstationDisplay = 'globe';
   let target: WorkstationDisplay = active;
   let time = 0;
-  let cycleStarted: number | null = null;
   let changeStarted: number | null = null;
-  let rendered = false, wasVisible = false;
-  // 共用所有形态的实际渲染回调，换投影内容不会被误判为重新进入镜头。
-  root.traverse(object => {
-    if (object instanceof THREE.Mesh) object.onBeforeRender = () => { rendered = true; };
-  });
+  const state = createWorkstationDisplayState();
   const request = (next: WorkstationDisplay): void => {
     if (next === target) return;
     target = next;
     changeStarted = time;
   };
-  const cycle: readonly WorkstationDisplay[] = ['desktop', 'globe', 'holographic'];
   const ease = (fraction: number): number => fraction * fraction * (3 - 2 * fraction);
   return {
     root,
-    update(nextTime: number): void {
+    update(nextTime: number, near: boolean): void {
       time = nextTime;
-      if (cycleStarted === null || rendered && !wasVisible) cycleStarted = time;
-      wasVisible = rendered;
-      rendered = false;
-      request(cycle[Math.floor((time - cycleStarted) / 10) % cycle.length]!);
+      request(state.update(time, near));
       let reveal = 1;
       if (changeStarted !== null) {
         const elapsed = time - changeStarted;

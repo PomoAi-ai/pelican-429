@@ -38,6 +38,11 @@ export const TILE_SHAPE_DEFINITIONS: readonly TileShapeDefinition[] = [
     }))),
 ];
 
+export const TILE_SHAPE_JOINS = [
+  ['A', 'A'], ['B', 'A'], ['F', 'G'], ['H', 'I'], ['D', 'A'], ['A', 'E'],
+  ['D', 'E'], ['E', 'D'], ['F', 'B', 'I'], ['J', 'J'], ['J', 'B'],
+] as const;
+
 export const WALL_DEFINITIONS = [
   { id: 'W0', label: '完整墙格' },
   { id: 'W1', label: '镂空墙格' },
@@ -59,6 +64,12 @@ export const WALL_DEFINITIONS = [
 /** 定义深度：格子深2居中（定义坐标 +Z 朝后沿，格子 Z=[−1,+1]）；墙厚0.2紧贴格子背面、位于后沿；前沿、后沿各0.5在格子之外。
  * 平台深1以人物平面居中；背后有墙时向后挂到墙面（深1.5），两种前沿相同。 */
 export const DEFINITION_DEPTH = { tile: 2, wall: .2, reserve: .5, platform: 1 } as const;
+
+export type DefinitionDepthMode = 'normal' | 'deep';
+export const DEFINITION_TILE_DEPTH: Readonly<Record<DefinitionDepthMode, number>> = {
+  normal: DEFINITION_DEPTH.tile,
+  deep: DEFINITION_DEPTH.tile + DEFINITION_DEPTH.reserve * 2,
+};
 
 export type DefinitionPlatformWidth = 'full' | 'left' | 'right';
 export type DefinitionWindowKind = 'rectangle' | 'rounded' | 'bevel' | 'round' | 'arch' | 'broken';

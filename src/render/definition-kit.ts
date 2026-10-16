@@ -1,12 +1,16 @@
 import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
-import { DEFINITION_DEPTH, TILE_SHAPE_DEFINITIONS } from '../config/definition-kit.ts';
-import type { DefinitionPoint, DefinitionPlatformWidth, DefinitionWindowKind } from '../config/definition-kit.ts';
+import { DEFINITION_DEPTH, DEFINITION_TILE_DEPTH, TILE_SHAPE_DEFINITIONS } from '../config/definition-kit.ts';
+import type { DefinitionDepthMode, DefinitionPoint, DefinitionPlatformWidth, DefinitionWindowKind } from '../config/definition-kit.ts';
+import { createDefinitionDepthOccupancy, type DefinitionDepthPlacement } from '../sim/definition-depth.ts';
 import type { DefinitionCollider, DefinitionPlatform } from '../physics/definition-collision.ts';
 import type { RockTerrainCell } from '../config/rock-terrain.ts';
 import { createDefinitionTerrain } from './definition-terrain.ts';
+import { hash01 } from '../core/rng.ts';
+import type { ResidenceMaterial } from '../config/residence.ts';
+import { createNaturalBuildingMaterials } from './building-material.ts';
 import type { TileTextureData } from './tile-textures.ts';
-import { createAiCityMaterial, type AiCityBuildingMaterial } from './ai-city-architecture.ts';
+import { createAiCityMaterial } from './ai-city-architecture.ts';
 
 export interface DefinitionGridCell {
   x: number;
@@ -20,12 +24,12 @@ export interface DefinitionKit {
   readonly root: THREE.Group;
   readonly solids: DefinitionCollider[];
   readonly platforms: DefinitionPlatform[];
-  solid(shapeId: string, x: number, y: number, material?: AiCityBuildingMaterial): void;
+  solid(shapeId: string, x: number, y: number, material?: ResidenceMaterial, depthMode?: DefinitionDepthMode, span?: number): void;
   terrain(cells: readonly RockTerrainCell[], textures: TileTextureData): void;
   wall(id: string, x: number, y: number): void;
   window(width: number, height: number, x: number, y: number, kind: DefinitionWindowKind, glass?: boolean, mullion?: boolean): void;
   /** 背后有墙时挂到墙面（深1.5），否则以人物平面居中（深1）；墙要先于平台铺设。 */
-  platform(width: DefinitionPlatformWidth, top: number, x: number): void;
+  platform(width: DefinitionPlatformWidth, top: number, x: number, material?: 'ceramic' | 'alloy'): void;
   door(side: 'left' | 'right', x: number, y: number, openingHeight: 3 | 3.5): void;
   dispose(): void;
 }
@@ -117,23 +121,34 @@ export function createDefinitionKit({ style = 'definition' }: { style?: 'definit
   root.name = 'definition-kit';
   const grid: DefinitionGridCell[] = [];
   root.userData.definitionGrid = grid;
+  const occupancy = createDefinitionDepthOccupancy();
   const wallCells = new Set<string>();
   const floatingCells = new Set<string>();
-  const gridCells = (x: number, y: number, width: number, height: number,
-    z: number, depth: number, role: DefinitionGridCell['role']): void => {
+  const placeWall = (x: number, y: number, width: number, height: number): void => {
+    const candidate: DefinitionDepthPlacement = { kind: 'wall', x, y, width, height };
     for (let row = 0; row < height; row++) for (let column = 0; column < width; column++) {
-      grid.push({ x: x + column, y: y + row, z, depth, role });
-      if (role !== 'wall') continue;
       const cell = `${x + column},${y + row}`;
       // 平台形态在放置时按已铺的墙决定，事后补墙会留下一块仍然居中的平台。
       if (floatingCells.has(cell)) throw new Error(`墙必须先于平台铺设：${cell}`);
-      wallCells.add(cell);
+    }
+    const conflict = occupancy.place(candidate);
+    if (conflict) throw new Error(`背景墙 (${x}, ${y}, ${width}×${height})：${conflict}`);
+  };
+  const gridCells = (x: number, y: number, width: number, height: number,
+    z: number, depth: number, role: DefinitionGridCell['role']): void => {
+    if (role === 'wall') placeWall(x, y, width, height);
+    for (let row = 0; row < height; row++) for (let column = 0; column < width; column++) {
+      grid.push({ x: x + column, y: y + row, z, depth, role });
+      if (role === 'wall') wallCells.add(`${x + column},${y + row}`);
     }
   };
   const geometries = new Map<string, THREE.BufferGeometry>();
   const city = style === 'ai-city';
   const solidMaterial = city ? createAiCityMaterial('ceramic') : new THREE.MeshStandardMaterial({ color: 0xd6dfda, roughness: .8 });
   const alloyMaterial = createAiCityMaterial('alloy');
+  const ashlarMaterial = createAiCityMaterial('ashlar');
+  let natural: ReturnType<typeof createNaturalBuildingMaterials> | undefined;
+  const variations = new Map<string, THREE.MeshStandardMaterial>();
   const wallMaterial = city ? createAiCityMaterial('wall') : new THREE.MeshStandardMaterial({ color: 0x719a96, roughness: .85 });
   const frameMaterial = city ? createAiCityMaterial('alloy') : new THREE.MeshStandardMaterial({ color: 0x235373, roughness: .5, metalness: .25 });
   // 单向平台后绘制，用玩家轮廓遮罩让穿越中的角色保持可见。
@@ -143,7 +158,8 @@ export function createDefinitionKit({ style = 'definition' }: { style?: 'definit
   const brassMaterial = createAiCityMaterial('gold');
   const seamMaterial = createAiCityMaterial('dark');
   const signalMaterial = createAiCityMaterial('cyan');
-  const platformMaterials = [platformMaterial, platformTop, platformGlow];
+  const platformCeramic = createAiCityMaterial('ceramic');
+  const platformMaterials = [platformMaterial, platformTop, platformGlow, platformCeramic];
   const platformSurfaces = new Set<THREE.Material>(platformMaterials);
   for (const material of platformMaterials) Object.assign(material, { transparent: true, depthWrite: false,
     stencilWrite: true, stencilRef: 1, stencilFunc: THREE.NotEqualStencilFunc, stencilWriteMask: 0 });
@@ -151,7 +167,7 @@ export function createDefinitionKit({ style = 'definition' }: { style?: 'definit
   const glassMaterial = city ? createAiCityMaterial('glass') : new THREE.MeshStandardMaterial({ color: 0x8bd2e1, transparent: true, opacity: .27,
     roughness: .18, metalness: .15, depthWrite: false, side: THREE.DoubleSide });
   const materials = [solidMaterial, wallMaterial, frameMaterial, platformMaterial, doorMaterial, glassMaterial,
-    alloyMaterial, platformTop, platformGlow, brassMaterial, seamMaterial, signalMaterial];
+    alloyMaterial, ashlarMaterial, platformTop, platformGlow, platformCeramic, brassMaterial, seamMaterial, signalMaterial];
   const names = ['definition-solid', 'definition-wall', 'definition-frame', 'definition-platform', 'definition-door', 'definition-glass'];
   names.forEach((name, index) => { materials[index]!.name = name; });
 
@@ -216,17 +232,46 @@ export function createDefinitionKit({ style = 'definition' }: { style?: 'definit
     root,
     solids,
     platforms,
-    solid(shapeId, x, y, material = 'ceramic') {
-      gridCells(x, y, 1, 1, TILE_FRONT, DEFINITION_DEPTH.tile, 'solid');
+    solid(shapeId, x, y, material = 'ceramic', depthMode = 'normal', span = 1) {
+      if (depthMode === 'deep') {
+        const conflict = occupancy.place({ kind: 'solid', depthMode, x, y, width: span, height: 1 });
+        if (conflict) throw new Error(`实体格 (${x}, ${y}, ${shapeId})：${conflict}`);
+      }
+      const depth = DEFINITION_TILE_DEPTH[depthMode];
+      const front = -depth / 2;
+      gridCells(x, y, span, 1, front, depth, 'solid');
       const definition = TILE_SHAPE_DEFINITIONS.find(({ id }) => id === shapeId)!;
-      solids.push({ points: definition.points.map(([px, py]) => [x + px, y + py]) });
-      const surface = material === 'alloy' ? alloyMaterial : solidMaterial;
-      if (!city) {
-        extrude(`solid:${shapeId}`, shapePath(definition.points), DEFINITION_DEPTH.tile, surface, x, y, TILE_FRONT);
+      const points = definition.points.map(([px, py]): DefinitionPoint => [px * span, py]);
+      solids.push({ points: points.map(([px, py]) => [x + px, y + py]) });
+      const architectural = material === 'ceramic' || material === 'alloy' || material === 'ashlar';
+      let surface: THREE.MeshStandardMaterial;
+      if (!architectural) {
+        natural ??= createNaturalBuildingMaterials();
+        surface = natural.get(material);
+      } else {
+        const base = material === 'alloy' ? alloyMaterial : material === 'ashlar' ? ashlarMaterial : solidMaterial;
+        const variant = Math.floor(hash01(x * 2, y * 2, 91) * 8);
+        const key = `${material}:${variant}`;
+        surface = variations.get(key)!;
+        if (!surface) {
+          surface = base.clone();
+          surface.onBeforeCompile = base.onBeforeCompile;
+          surface.customProgramCacheKey = base.customProgramCacheKey;
+          surface.color.multiplyScalar(1 + (variant - 3.5) * (material === 'ashlar' ? .016 : .01));
+          surface.roughness += (variant - 3.5) * .012;
+          variations.set(key, surface);
+        }
+      }
+      if (!architectural || material === 'ashlar') {
+        extrude(`solid:${shapeId}:${depth}:${span}:${architectural}`, shapePath(points), depth, surface, x, y, front, material === 'ashlar' ? .025 : .008);
         return;
       }
-      extrude(`solid:${shapeId}`, shapePath(definition.points), DEFINITION_DEPTH.tile - .025,
-        surface, x, y, TILE_FRONT + .025, .035);
+      if (!city) {
+        extrude(`solid:${shapeId}:${depth}`, shapePath(definition.points), depth, surface, x, y, front);
+        return;
+      }
+      extrude(`solid:${shapeId}:${depth}`, shapePath(definition.points), depth - .025,
+        surface, x, y, front + .025, .035);
       const service = material === 'alloy' && (shapeId === 'K' || shapeId === 'L');
       const panel = shapePath(insetPolygon(definition.points, .045));
       const left = shapeId === 'L' ? .5 : 0;
@@ -234,14 +279,14 @@ export function createDefinitionKit({ style = 'definition' }: { style?: 'definit
         const slot = shapePath(rectangle(.07, .46).map(([px, py]) => [px + left + .215, py + .27]));
         panel.holes.push(slot);
       }
-      extrude(`solid-panel:${shapeId}:${service}`, panel, service ? .021 : .025,
-        surface, x, y, TILE_FRONT + (service ? .004 : 0), .005);
+      extrude(`solid-panel:${shapeId}:${service}:${depth}`, panel, service ? .021 : .025,
+        surface, x, y, front + (service ? .004 : 0), .005);
       if (service) {
-        box(seamMaterial, .072, .462, .008, x + left + .214, y + .269, TILE_FRONT + .018);
-        box(signalMaterial, .032, .34, .008, x + left + .234, y + .33, TILE_FRONT + .01);
+        box(seamMaterial, .072, .462, .008, x + left + .214, y + .269, front + .018);
+        box(signalMaterial, .032, .34, .008, x + left + .234, y + .33, front + .01);
         for (const cy of [.1, .875]) {
-          box(brassMaterial, .075, .025, .014, x + left + .075, y + cy, TILE_FRONT);
-          box(seamMaterial, .025, .018, .008, x + left + .372, y + cy + .003, TILE_FRONT);
+          box(brassMaterial, .075, .025, .014, x + left + .075, y + cy, front);
+          box(seamMaterial, .025, .018, .008, x + left + .372, y + cy + .003, front);
         }
       }
     },
@@ -282,7 +327,7 @@ export function createDefinitionKit({ style = 'definition' }: { style?: 'definit
       extrude(`wall:${id}`, shapePath(wallPolygons[id]!), DEFINITION_DEPTH.wall, wallMaterial, x, y, WALL_Z);
     },
     window,
-    platform(width, top, x) {
+    platform(width, top, x, material = 'alloy') {
       const w = width === 'full' ? 1 : .5;
       const left = x + (width === 'right' ? .5 : 0);
       const cell = `${Math.floor(left + w / 2)},${Math.ceil(top) - 1}`;
@@ -293,8 +338,8 @@ export function createDefinitionKit({ style = 'definition' }: { style?: 'definit
       gridCells(x, Math.ceil(top) - 1, 1, 1, front, depth, 'solid');
       platforms.push({ left, right: left + w, top });
       if (city) {
-        box(platformMaterial, w, .165, depth - .01, left, top - .2, front + .01);
-        box(platformTop, w - .025, .035, depth - .025, left + .0125, top - .035, front + .0125);
+        box(material === 'ceramic' ? platformCeramic : platformMaterial, w, .165, depth - .01, left, top - .2, front + .01);
+        box(material === 'ceramic' ? platformTop : platformMaterial, w - .025, .035, depth - .025, left + .0125, top - .035, front + .0125);
         box(platformGlow, w * .4, .027, .012, left + w * .3, top - .12, front);
       } else box(platformMaterial, w, .2, depth, left, top - .2, front);
     },
@@ -307,6 +352,8 @@ export function createDefinitionKit({ style = 'definition' }: { style?: 'definit
       box(doorMaterial, .5, 4 - openingHeight, DEFINITION_DEPTH.tile, left, y + openingHeight, TILE_FRONT);
     },
     dispose() {
+      natural?.dispose();
+      for (const material of variations.values()) material.dispose();
       for (const view of terrainViews) view.dispose();
       for (const geometry of geometries.values()) geometry.dispose();
       for (const material of materials) material.dispose();

@@ -23,12 +23,14 @@ import { createWorldViews } from '../render/world-views.ts';
 import { createSimWorld, getPlayer, stepSim } from '../sim/sim-world.ts';
 import { setPrecipIntensity, setPrecipMode, setTornado, setTornadoCount, setTornadoPower } from '../sim/environment.ts';
 import { createWeaponHud } from '../ui/weapon-hud.ts';
+import { createMinimap } from '../ui/minimap.ts';
 import { createFacilityLevel } from '../world/facility-level.ts';
 import { createFacilityPresentation, facilityGameTuning } from './facility-presentation.ts';
 import { createWorldLighting } from './lighting-wiring.ts';
 import { createSceneDemoStage } from './scene-demo-stage.ts';
 import { createEntityViews } from './scene-wiring.ts';
 import { waitSceneResource, yieldScene, type SceneMountContext } from './scene-mount.ts';
+import { createSceneGameOverlays } from './scene-game-overlays.ts';
 
 /** 四个机房复用正式关卡、模拟世界、实体视图与机房镜头。 */
 export async function mountFacilityDemo(context: SceneMountContext, sceneId: FacilitySceneId): Promise<void> {
@@ -81,6 +83,14 @@ export async function mountFacilityDemo(context: SceneMountContext, sceneId: Fac
   const camera = createCameraRig({ camera: stage.camera, tuning, bounds: { width: level.map.width, height: level.map.height },
     viewport: () => stage.canvas.getBoundingClientRect() });
   const player = () => getPlayer(world);
+  const viewport = page.querySelector<HTMLElement>('.room-preview-viewport')!;
+  const minimap = createMinimap({ parent: viewport, facilityChapter: sceneId === 'original' ? undefined : sceneId,
+    source: { tiles: level.map, fluid: world.fluid, trees: level.trees, structures: level.structures, deserts: level.deserts, islands: level.islands },
+    viewport: () => ({ width: viewport.clientWidth, height: viewport.clientHeight }),
+    keyTarget: window, pixelRatio: () => Math.min(2, window.devicePixelRatio) });
+  context.onDispose(() => minimap.dispose());
+  const overlays = createSceneGameOverlays(page.querySelector<HTMLElement>('.room-preview-toolbar')!, viewport, stage, minimap);
+  context.onDispose(() => overlays.dispose());
   camera.snapTo(player().body.x, player().body.y, player().facing);
   const tracker = createActionTracker();
   const binding = bindKeyboardMouse({ target: window, canvas: stage.canvas, doc: document, tracker, lookup: buildBindingLookup(DEFAULT_BINDINGS) });
@@ -169,6 +179,7 @@ export async function mountFacilityDemo(context: SceneMountContext, sceneId: Fac
     hud.update({ entities: world.entities, playerId: world.playerId, frameDt: dt,
       skillWaitTicks: [0, 1, 2, 3].map(index => getSkillWaitTicks(player(), index, TUNING, world.photon.cooldownTicks, world.photon.activeTicks)),
       photonCooldownTicks: world.photon.cooldownTicks, photonChargeTicks: world.photon.chargeTicks, photonActiveTicks: world.photon.activeTicks, transformUnlocked: true });
+    minimap.update({ player: { x: body.x, y: body.y, facing: player().facing }, dt });
   };
   update(0);
   context.progress('准备机房着色器与首帧');
@@ -178,9 +189,10 @@ export async function mountFacilityDemo(context: SceneMountContext, sceneId: Fac
   const draw = (now: number): void => {
     if (context.signal.aborted) return;
     try {
+      overlays.begin();
       update(Math.max(0, Math.min((now - previous) / 1000, .05)));
       previous = now;
-      stage.render();
+      overlays.render();
       frame = requestAnimationFrame(draw);
     } catch (error) { context.reportError(error); }
   };

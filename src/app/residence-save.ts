@@ -1,10 +1,12 @@
-import { getResidenceResource } from '../config/residence.ts';
-import { checkResidencePlacement, type ResidencePlacement, type ResidenceState } from '../sim/residence.ts';
+import { getResidenceResource, RESIDENCE_WORLD } from '../config/residence.ts';
+import { TILE_SHAPE_DEFINITIONS, type DefinitionDepthMode } from '../config/definition-kit.ts';
+import { addResidenceGround, checkResidencePlacement, type ResidencePlacement, type ResidenceState } from '../sim/residence.ts';
 
 export const RESIDENCE_SAVE_KEY = 'pelican-residence:v1';
 
 export function saveResidence(storage: Pick<Storage, 'setItem'>, state: ResidenceState): void {
-  storage.setItem(RESIDENCE_SAVE_KEY, JSON.stringify({ version: 1, nextId: state.nextId, revision: state.revision, placements: state.placements }));
+  storage.setItem(RESIDENCE_SAVE_KEY, JSON.stringify({ version: 2, nextId: state.nextId, revision: state.revision, placements: state.placements,
+    ...state.underground ? { underground: [...state.underground] } : {} }));
 }
 
 /** 独立住宅存档不改写旧家园数据；无效内容保留原值并向界面报告。 */
@@ -23,11 +25,22 @@ export function loadResidence(storage: Pick<Storage, 'getItem'>): ResidenceState
   const integer = (value: unknown, what: string, min: number): number =>
     typeof value === 'number' && Number.isSafeInteger(value) && value >= min ? value : invalid(what);
   const save = record(data, '格式');
-  if (save.version !== 1) invalid('版本');
+  if (save.version !== 1 && save.version !== 2) invalid('版本');
   const nextId = integer(save.nextId, 'nextId', 1);
   const revision = integer(save.revision, 'revision', 0);
   if (!Array.isArray(save.placements)) invalid('placements');
-  const state: ResidenceState = { placements: [], nextId, revision };
+  let underground: Set<number> | undefined;
+  if (save.underground !== undefined) {
+    if (!Array.isArray(save.underground)) invalid('地下挖掘记录');
+    underground = new Set();
+    const count = RESIDENCE_WORLD.width * (RESIDENCE_WORLD.foundationTop - RESIDENCE_WORLD.minY);
+    for (const value of save.underground as unknown[]) {
+      const cell = integer(value, '地下格子编号', 0);
+      if (cell >= count || underground.has(cell)) invalid('地下格子编号重复或越界');
+      underground.add(cell);
+    }
+  }
+  const state: ResidenceState = { placements: [], nextId, revision, ...underground ? { underground } : {} };
   const ids = new Set<number>();
   for (const [index, value] of (save.placements as unknown[]).entries()) {
     const item = record(value, `构件 ${index}`);
@@ -36,15 +49,26 @@ export function loadResidence(storage: Pick<Storage, 'getItem'>): ResidenceState
     if (typeof item.resourceId !== 'string') invalid(`构件 ${index} 的资源`);
     const resourceId = item.resourceId as string;
     const resource = getResidenceResource(resourceId);
+    if (item.depthMode !== undefined && (resource.kind !== 'solid' || item.depthMode !== 'normal' && item.depthMode !== 'deep')) {
+      invalid(`构件 ${index} 的深度规格`);
+    }
+    const depthMode = item.depthMode as DefinitionDepthMode | undefined;
     if (typeof item.x !== 'number' || typeof item.y !== 'number') invalid(`构件 ${index} 的坐标`);
     const x = item.x as number;
     const y = item.y as number;
     if (resource.kind === 'door' ? typeof item.open !== 'boolean' : item.open !== undefined) invalid(`构件 ${index} 的门状态`);
-    const check = checkResidencePlacement(state, resourceId, x, y, null);
+    if (save.version === 1) {
+      const bottom = resource.kind === 'solid'
+        ? y + Math.min(...TILE_SHAPE_DEFINITIONS.find(shape => shape.id === resource.shape)!.points.map(([, py]) => py)) : y;
+      if (bottom < RESIDENCE_WORLD.groundTop) invalid(`构件 ${index} 侵入旧固定地面`);
+    }
+    const check = checkResidencePlacement(state, resourceId, x, y, null, depthMode);
     if (!check.ok) invalid(`构件 ${index}：${check.message}`);
-    const placement: ResidencePlacement = { id, resourceId, x, y, ...resource.kind === 'door' ? { open: item.open as boolean } : {} };
+    const placement: ResidencePlacement = { id, resourceId, x, y,
+      ...depthMode !== undefined ? { depthMode } : {}, ...resource.kind === 'door' ? { open: item.open as boolean } : {} };
     state.placements.push(placement);
     ids.add(id);
   }
+  if (save.version === 1) addResidenceGround(state);
   return state;
 }
