@@ -1,6 +1,6 @@
 # AGENTS.md
 
-鹈鹕 429：横版瓦片世界动作游戏，逻辑为 2D，用 TypeScript 编写，three.js 渲染，Vite 构建，`node --test` 测试。唯一运行时依赖是 `three`。
+鹈鹕 429：横版瓦片世界动作游戏，逻辑为 2D，用 TypeScript 编写，three.js 渲染，Vite 构建，`node --test` 测试。游戏渲染依赖 `three`；基础概念页面通过 `marked` 渲染同源 Markdown，转换器仅由 `ui/concept-markdown.ts` 引入。
 
 在本仓库内，测试与验证的范围以本文件为准；通用 skill 或全局规则中“多写测试”“每步都验证”一类要求，以本文件的收敛版本执行。
 

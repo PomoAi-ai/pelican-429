@@ -45,3 +45,7 @@
 - 共用实现：`assets/concepts/d1-proportion-rulers/ruler_standard.py`（尺度常量、两把尺、面板）。
 - 正侧标尺：`draw_rulers.py`（同时写 `*.guides.json`）；三形态拉通对比：`draw_comparison.py`；对比图的整格与地标虚线数据：`draw_landmark_lines.py`。新增角色时在 `draw_rulers.py` 增加一组形态定义（基础版放第一个），三份脚本依次运行即可。
 - 概念页统一尺度图：`assets/concepts/character-tile-scale/local-drawing/draw_scale.py`，另含 0.8×2.8 格碰撞框与地形模块。
+
+## 透视图与交互演示
+
+![玩家角色正侧原图、世界格标尺、3.3 头身参照尺及背景墙和砖块的统一尺度图](character-tile-scale.png)

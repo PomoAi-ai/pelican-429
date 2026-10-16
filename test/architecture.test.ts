@@ -70,7 +70,7 @@ export function groupOf(rel: string): Group {
 }
 
 /** 去掉注释（保留字符串、模板字符串、正则字面量内容），换行保留以便报错定位。 */
-export function stripComments(src: string): string {
+export function stripComments(src: string, maskQuotedText = false): string {
   let out = '';
   let i = 0;
   let prevSignificant = '';
@@ -91,7 +91,8 @@ export function stripComments(src: string): string {
     if (c === '"' || c === "'" || c === '`') {
       let j = i + 1;
       while (j < src.length && src[j] !== c) j += src[j] === '\\' ? 2 : 1;
-      out += src.slice(i, j + 1);
+      // 文档路径和说明里的 window/self 不是运行时全局访问；模板保留以检查插值表达式。
+      out += maskQuotedText && c !== '`' ? src.slice(i, j + 1).replace(/[^\n]/g, ' ') : src.slice(i, j + 1);
       i = j + 1;
       prevSignificant = c;
       continue;
@@ -186,6 +187,9 @@ test('architecture: 扫描器能识别已知依赖（防止规则空转）', () 
     assert.ok(groups.has(g), `layer ${g} should have files`);
   }
   assert.equal(stripComments("const a = 1; // window\n/* document */ const b = '//x';"), "const a = 1; \n               const b = '//x';");
+  assert.doesNotMatch(stripComments('const label = "self-researched window";', true), /\b(self|window)\b/);
+  assert.match(stripComments('const label = "window"; window.location;', true), /window\.location/);
+  assert.match(stripComments('const label = `${window.location}`;', true), /window\.location/);
   assert.deepEqual(dynamicImportEdges(`const a = import('./app/game-app.ts'); const b = import("./app/story-app.ts");`, 'main.ts'), [
     { spec: './app/game-app.ts', target: 'app', typeOnly: false, resolved: path.join('app', 'game-app.ts') },
     { spec: './app/story-app.ts', target: 'app', typeOnly: false, resolved: path.join('app', 'story-app.ts') },
@@ -207,8 +211,9 @@ test('architecture: 相对导入均指向存在的文件且带扩展名', () => 
   assert.deepEqual(bad, []);
 });
 
-test('architecture: 只允许 three 这一个外部依赖', () => {
-  assert.deepEqual(violations(() => true, (e) => e.target !== 'external'), []);
+test('architecture: 外部依赖限于 three 与概念文档的 Markdown 转换器', () => {
+  assert.deepEqual(violations(() => true, (e, f) => e.target !== 'external'
+    || f.rel === 'ui/concept-markdown.ts' && e.spec === 'marked'), []);
 });
 
 test('architecture: core 无内部依赖', () => {
@@ -250,7 +255,7 @@ test('architecture: 纯逻辑代码（core/config/逻辑层/action-map）不使�
   assert.ok(pure.length >= 15, `expected the pure layers to be scanned, got ${pure.length} files`);
   const bad: string[] = [];
   for (const f of pure) {
-    for (const [name, re] of forbidden) if (re.test(f.code)) bad.push(`src/${f.rel} uses ${name}`);
+    for (const [name, re] of forbidden) if (re.test(stripComments(f.code, true))) bad.push(`src/${f.rel} uses ${name}`);
   }
   assert.deepEqual(bad, []);
 });
@@ -392,7 +397,8 @@ test('architecture: pelican-animator 纯组（animator/pose/skeleton/gait/ride-a
 const UI_RUNTIME_WORLD = ['world/tile-shapes.ts', 'world/fluid-map.ts'] as const;
 
 test('architecture: ui 不依赖 three/render/vendor/input/main，逻辑层只能 import type（world 纯常量模块白名单除外）', () => {
-  const allowed = (e: Edge): boolean =>
+  const allowed = (e: Edge, f: SourceFile): boolean =>
+    (f.rel === 'ui/concept-markdown.ts' && e.spec === 'marked') ||
     e.target === 'core' ||
     e.target === 'config' ||
     e.target === 'ui' ||

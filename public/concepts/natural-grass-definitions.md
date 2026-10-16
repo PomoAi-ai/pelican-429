@@ -47,5 +47,4 @@
 
 相关资料：[自然资源空间定义](natural-spatial-definitions.md)、[树木状态](natural-tree-definitions.md)、[花卉状态](natural-flower-definitions.md)。
 
-
 下垂变体另见[下垂植物六种形态透视与尺寸](natural-drooping-definitions.md)：草裙、苔须、藤帘、垂花、悬崖盆景和垂枝树按各自支点与最低点定义，不直接倒置本页直立形态。

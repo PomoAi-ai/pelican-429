@@ -57,9 +57,6 @@
 
 关联依据：[自然资源总览](natural-resource-definitions.md)、[深度定义](depth-definitions.md)、[家具定义](furniture-definitions.md)、[经济设定](economy.md)。绘图状态数据保存在 `assets/concepts/scene-depth-guide/natural-resource-states.json`。
 
-
-
 下垂变体另见[下垂植物六种形态透视与尺寸](natural-drooping-definitions.md)：草裙、苔须、藤帘、垂花、悬崖盆景和垂枝树按各自支点与最低点定义，不直接倒置本页直立形态。
-
 
 下垂变体的完整阶段透视已另列在[下垂植物定义](natural-drooping-definitions.md)，包括各阶段实际宽高深、最低Y与采后残留；不要套用本页直立株的高度范围。

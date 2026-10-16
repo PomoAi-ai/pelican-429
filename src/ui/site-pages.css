@@ -8,6 +8,13 @@
 .concepts-reading-guide[open] { flex-basis: 100%; }
 .concepts-page .help-layout { padding-top: 18px; gap: 24px; }
 .concepts-page .help-content { min-width: 0; }
+.concepts-markdown img { display: block; max-width: 100%; height: auto; margin: 18px 0; border-radius: 8px; }
+.concepts-markdown :is(h3, h4, h5, h6) { margin-top: 28px; scroll-margin-top: 24px; }
+.concepts-markdown :is(li, blockquote) { color: var(--home-muted); font-size: 14px; line-height: 1.85; }
+.concepts-markdown li + li { margin-top: 6px; }
+.concepts-markdown pre { overflow-x: auto; padding: 16px; background: var(--home-surface); border-radius: 8px; }
+.concepts-copy a, .concepts-reading-guide a { color: var(--home-accent); font-size: 13px; }
+.concepts-anchor { display: block; scroll-margin-top: 24px; }
 .concepts-figure { margin: 20px 0 0; overflow: hidden; border: 1px solid var(--home-line); border-radius: 10px; background: var(--home-surface); }
 .concepts-figure img { display: block; width: 100%; height: auto; }
 .concepts-figure figcaption { padding: 0 16px; }

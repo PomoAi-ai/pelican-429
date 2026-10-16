@@ -1,9 +1,19 @@
-import { defineConfig } from 'vite';
+import { defineConfig, type Plugin, type ViteDevServer } from 'vite';
 import { readFileSync, readdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { join, relative } from 'node:path';
 import { RELEASE_MODEL_PATHS } from './src/config/web-models.ts';
 import { NPCS } from './src/config/npc.ts';
+
+function configureMarkdownEncoding(server: Pick<ViteDevServer, 'middlewares'>) {
+  server.middlewares.use((req, res, next) => {
+    // 按 UTF-8 原文展示，避免浏览器猜错中文编码或将 Markdown 当成下载。
+    if (/^\/concepts\/[^?]+\.md(?:\?|$)/.test(req.url!)) {
+      res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+    }
+    next();
+  });
+}
 
 export default defineConfig(({ command, mode }) => ({
   base: './',
@@ -15,19 +25,25 @@ export default defineConfig(({ command, mode }) => ({
     ...(mode === 'full' ? { rolldownOptions: { input: {
       main: fileURLToPath(new URL('./index.html', import.meta.url)),
       renderLab: fileURLToPath(new URL('./render-lab.html', import.meta.url)),
+      hairGallery: fileURLToPath(new URL('./d1-hair-gallery.html', import.meta.url)),
     } } } : {}),
   },
-  plugins: command === 'build' && mode !== 'full' ? [{
+  plugins: [{
+    name: 'markdown-utf8',
+    configureServer: configureMarkdownEncoding,
+    configurePreviewServer: configureMarkdownEncoding,
+  }, ...command === 'build' && mode !== 'full' ? [{
     name: 'release-assets',
     generateBundle() {
       const publicDir = fileURLToPath(new URL('./public/', import.meta.url));
       const files = [
-        'app.webmanifest', 'icons/pelican-192.png', 'icons/pelican-512.png',
+        'app.webmanifest', 'icons/pelican-192.png', 'icons/pelican-512.png', 'llms.txt',
         ...RELEASE_MODEL_PATHS,
         ...Object.values(NPCS).flatMap(npc => npc.forms.map(form => form.image)),
         'characters/luma/portrait.jpg', 'contact/x-avatar.jpg', 'ui/hud-icons.webp',
+        'scenes/ai-city-background-v1/skyline.png', 'scenes/ai-city-background-v1/canyon.png',
       ];
-      for (const directory of ['resources/home', 'resources/free-world']) {
+      for (const directory of ['resources/home', 'resources/free-world', 'concepts']) {
         for (const entry of readdirSync(join(publicDir, directory), { recursive: true, withFileTypes: true })) {
           if (entry.isFile()) files.push(relative(publicDir, join(entry.parentPath, entry.name)));
         }
@@ -40,5 +56,5 @@ export default defineConfig(({ command, mode }) => ({
         this.emitFile({ type: 'asset', fileName: file.replace(/^\.\//, '').replaceAll('\\', '/'), source });
       }
     },
-  }] : [],
+  } satisfies Plugin] : []],
 }));

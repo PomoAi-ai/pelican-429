@@ -6,7 +6,7 @@ ROOT=Path(__file__).resolve().parents[3]
 OUT=ROOT/'public/concepts'
 FONT='/System/Library/Fonts/STHeiti Medium.ttc'
 BG='#F5F3EE'; INK='#23394A'; BLUE='#326BB0'; GREEN='#54866B'; ORANGE='#B76D32'; CYAN='#279AA4'; GRAY='#AEBEC8'
-im=Image.new('RGB',(2400,2500),BG); d=ImageDraw.Draw(im)
+im=Image.new('RGB',(2400,3700),BG); d=ImageDraw.Draw(im)
 OFFSET=0
 def text(x,y,t,size=28,color=INK):
     y+=OFFSET
@@ -105,5 +105,33 @@ assert -1.5 <= -1.2 < -1 and math.isclose(-1-(-1.2),.2)
 for z in (-1.5,-1.2,-1,0,1,1.5):
     assert math.isclose(math.dist(p(0,0,z),p(1,0,z)),math.dist(p(0,0,z),p(0,1,z)))
 assert math.dist(p(0,0,-1.5),p(1,0,-1.5)) < math.dist(p(0,0,1.5),p(1,0,1.5))
+OFFSET=0
+panel((50,2520,2350,3650))
+text(85,2550,'D  加深规格｜普通深 2 → 前后各扩 0.5 → 加深深 3',38,BLUE)
+text(85,2620,'同一基础形状、同一暖白陶瓷材质；加深是规格属性。XY 占格与人物 Z=0 平面不变。',28)
+# Both panels use the same perspective and scale; only depth changes.
+for cx,depth,label in [(560,2,'普通格：深 2，可与背景墙共存'),(1500,3,'加深格：深 3，覆盖格位禁止背景墙')]:
+    project=lambda x,y,z,cx=cx:(cx+1600*(x-1.5)/(8-z),2820-1600*(y-1.3)/(8-z))
+    prism(project,poly,-depth/2,depth/2,BLUE)
+    if depth == 2:
+        prism(project,poly,-1.2,-1,GREEN)
+    else:
+        for z in (-1,1):
+            pts=[project(x,y,z) for x,y in poly]
+            for a,b in zip(pts,pts[1:]+pts[:1]):dash(a,b,ORANGE)
+    text(cx-330,2690,label,28,BLUE)
+    text(cx-330,3180,'Z=[−1,+1]' if depth==2 else 'Z=[−1.5,+1.5]；橙虚线为原深2边界',26)
+text(1820,2760,'后扩 0.5',29,ORANGE)
+text(1820,2830,'原深 2',29,BLUE)
+text(1820,2900,'前扩 0.5',29,ORANGE)
+text(1820,2990,'合计深 3',32,BLUE)
+text(85,3260,'放置规则',31,BLUE)
+for yy,label in [
+    (3320,'① 已有加深格不能放墙；已有墙不能放加深格。失败保留原构件，不自动拆墙。'),
+    (3380,'② 半砖、斜坡按所属完整格位禁墙；相邻格和上方格仍可放墙。'),
+    (3440,'③ 两格宽 = 两个宽1格拼接；2×2组合仍占四格。多格任一处冲突，整件拒绝。'),
+    (3500,'④ 深3已占用前后预留区，不能继续默认叠放原预留区装饰；不增加前后建造排。'),
+    (3560,'验证入口：场景透视 → 普通与加深格；住宅建造可选深2 / 深3，并随独立存档保存。'),
+]:text(85,yy,label,27)
 im.save(OUT/'building-depth.png')
 print('Updated depth: tile depth 2 + front/back reserve 0.5 outside; wall 0.2 on back reserve.')

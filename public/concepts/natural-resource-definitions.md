@@ -83,3 +83,29 @@
 待定：新增物种对本页样例尺寸的扩展、自然分布与间距、生长时间与环境条件、树木再生方式、盆景维护玩法、矿种与单格储量、树干及盆体碰撞、采集产物。尺寸与交互定稿后再接入运行时；本轮不为这些未定项设默认数值。
 
 依据：docs/depth-definitions.md、docs/furniture-definitions.md、docs/economy.md。旧“植物与远景”图记录当前实现的Z范围，本节使用新的深度设计口径，两者不能混作已经统一的游戏参数。
+
+## 透视图与交互演示
+
+![六类自然资源的实体透视与同镜头线框：草丛、花卉、灌木、盆景、树木和矿脉，附宽高深、Z范围与各卡1格标尺；小物按卡片放大，尺寸为草案。](natural-resources-perspective.png)
+
+![植物根部、深2格子及前沿/后沿的等比例YZ剖面；墙厚0.2位于后沿，枝叶可伸出但根部必须承托。右侧区分植物生长状态与有限矿脉开采状态。](natural-resources-depth.png)
+
+[先看：青苔、前沿、树木占格与矿脉岩层透视 →](../?mode=concepts#natural-space)
+
+[地被与草丛](../?mode=concepts#natural-grass)
+
+[花卉与草本](../?mode=concepts#natural-flower)
+
+[灌木与野果丛](../?mode=concepts#natural-shrub)
+
+[盆景与盆栽](../?mode=concepts#natural-bonsai)
+
+[树木](../?mode=concepts#natural-tree)
+
+[藤蔓与贴面植物](../?mode=concepts#natural-vine)
+
+[下垂植物](../?mode=concepts#natural-drooping)
+
+[岩土地形组合](../?mode=concepts#natural-rock)
+
+[矿脉](../?mode=concepts#natural-ore)

@@ -27,6 +27,8 @@
 
 图片：/concepts/room-reference-perspective.png
 
+<a id="building-house-half" class="concepts-anchor"></a>
+
 ## 半砖房间对照版
 
 另提供半砖版本，保留上面的整砖原版。地板与屋顶改用宽1×高0.5×深2的半砖，侧墙仍用整砖。
@@ -39,6 +41,8 @@
 - 这是概念对照图，不代表游戏内已实现半砖房屋。
 
 图片：/concepts/room-half-brick-perspective.png
+
+<a id="building-house-two-storey" class="concepts-anchor"></a>
 
 ## 两层房屋透视
 
@@ -54,6 +58,8 @@
 
 图片：/concepts/room-two-storey-perspective.png
 
+<a id="building-house-half-two-storey" class="concepts-anchor"></a>
+
 ## 两层半砖房间（旧草案，未定稿）
 
 此图曾把二层墙格原点下移0.5，未保持统一世界方格，不能作为建造定稿。最新组合比较见下节。
@@ -66,6 +72,8 @@
 - 保留2格宽层间通口，平台顶面在Y=2、4、5.5，最后一级与二层地面齐平；通行仅为概念，未验证游戏跳跃。
 
 图片：/concepts/room-half-brick-two-storey.png
+
+<a id="building-floor-combinations" class="concepts-anchor"></a>
 
 ## 半砖层间组合透视（统一世界方格）
 
@@ -97,3 +105,15 @@
 吊灯整体宽1×高1，含底座、吊杆、灯罩，顶部贴实际天花板表面。②一层天花板Y=5.5，灯底Y=4.5；①③灯底Y=4；三图二层灯底Y=10。物件贴实际支撑面，与地形和背景墙的逻辑格原点是不同概念。床按楼板实际顶面落脚，不把半格高度误当成不支持放置。
 
 本轮确认的是组合设计与几何示例。形态资料库列有29种轮廓及各自优先级；H原先为选做，本例选用不代表其他选做形态全部升级必做。当前src/world/tile-shapes.ts运行时仍仅有FULL、SLOPE_R、SLOPE_L、HALF四种基础轮廓，不把设计支持写成代码已全部实现。此图未改变游戏建造、碰撞与支撑判定；层间通口和平台另见对应概念图。
+
+## 透视图与交互演示
+
+![本轮只定义单个房间：沿用示例外轮廓总高7格，即底板1、室内净高5、顶板1；本次横向加宽3格，室内净宽由6变9。格子深2，正面敞开观察，墙位于格子之外的后沿，厚0.2，紧贴格子背面。](room-reference-perspective.png)
+
+![半砖房间透视与方格：地板和屋顶各高0.5、深2，室内9×5，总高6；背景墙保持完整格子，含门、墙窗和吊灯。](room-half-brick-perspective.png)
+
+![两层房屋透视与方格：每层9×5，总高13，楼板留2格宽通口，平台顶高2、4、6；玩家角色外观3.1格，附同平面标尺与0.8×2.8碰撞框。](room-two-storey-perspective.png)
+
+![两层半砖透视及方格：左右半宽墙、三道半高板、板端1/4砖收齐、实体深2、总高11.5，每层吊灯整体1×1。](room-half-brick-two-storey.png)
+
+![三种完整两层房间透视：整砖A楼板、上半砖C楼板、下半砖B与缓坡H接门口；含墙窗、一格吊灯、家具，以及同尺寸的局部线框透视。](floor-half-brick-combinations.png)

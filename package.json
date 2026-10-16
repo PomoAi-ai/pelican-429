@@ -3,7 +3,9 @@
   "version": "0.1.1",
   "private": true,
   "type": "module",
-  "engines": { "node": ">=22.18.0" },
+  "engines": {
+    "node": ">=22.18.0"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -16,9 +18,14 @@
     "assets:scene": "node scripts/build-scene-assets.ts",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit -p .",
-    "test": "node --test \"test/**/*.test.ts\""
+    "test": "node --test \"test/**/*.test.ts\"",
+    "docs:resources": "node scripts/build-material-library.ts",
+    "predev": "npm run docs:resources",
+    "prebuild": "npm run docs:resources",
+    "prebuild:full": "npm run docs:resources"
   },
   "dependencies": {
+    "marked": "^18.1.1",
     "three": "0.180.0"
   },
   "devDependencies": {

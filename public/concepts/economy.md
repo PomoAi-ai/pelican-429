@@ -4,6 +4,8 @@
 
 本文是经济与生存系统的唯一设计文档，后续讨论的结论直接改在这里。所有数字都是示例，以试玩调整为准。尚未定论的地方标注「待选」，并汇总在文末。
 
+<a id="system-0" class="concepts-anchor"></a>
+
 ## 0. 设计原则
 
 - 玩家不亲手采集和建造，所有劳动由机器人完成，劳动占用算力。
@@ -13,6 +15,8 @@
 - 算力单位 P（PFLOPS 的简称，沿用「xxP 算力」的说法）。换算：1P 闲置 1 游戏小时 = 1M Token，由 Tibo 每天天亮结算；睡觉跳过的时段按 70%。
 - 单机游戏，最多弱联网。经济全部在本地计算和结算，不依赖联网；世界观里的「网络」「市场」都是游戏内设定。
 - 退出游戏后不产出，世界暂停。
+
+<a id="system-1" class="concepts-anchor"></a>
 
 ## 1. 起点：初始化
 
@@ -28,6 +32,8 @@ Tibo 在主线中先作为首领登场，被击败后修复，成为向导。家
 
 玩家角色由玩家自行命名，默认名 Grassy，有人形与鹈鹕两种形态。家园概念版本只开放人形，变身以后加入。
 
+<a id="system-2" class="concepts-anchor"></a>
+
 ## 2. 时间与日历
 
 - 1 游戏小时 = 1 现实分钟，1 天 = 24 分钟。
@@ -42,6 +48,8 @@ Tibo 在主线中先作为首领登场，被击败后修复，成为向导。家
 | 春、秋 | 6:00–18:00 | 12 小时 |
 | 夏 | 5:00–20:00 | 9 小时 |
 | 冬 | 7:00–17:00 | 14 小时 |
+
+<a id="system-3" class="concepts-anchor"></a>
 
 ## 3. 气候
 
@@ -72,6 +80,8 @@ demo 已有风力分档（`src/config/weather-rules.ts`）和雨雪三档强度�
 
 - 天气由世界种子和日期决定，同一存档的天气固定，可以预报。
 - 普通天气提前 1 天预报，极端天气提前 2 天预警。
+
+<a id="system-4" class="concepts-anchor"></a>
 
 ## 4. 电力
 
@@ -105,6 +115,8 @@ demo 已有风力分档（`src/config/weather-rules.ts`）和雨雪三档强度�
 - 电不够用时按玩家设定的优先级断电，默认：护盾充能 > 算力设备 > 机器人充电 > 大招充能 > 工坊 > NPC 房屋 > 照明。护盾排第一，保证大招充能永远不会挤占护盾。
 - NPC 的房子断电后，该 NPC 暂停营业。
 
+<a id="system-5" class="concepts-anchor"></a>
+
 ## 5. 算力
 
 | | 基础算力 | 设备算力 |
@@ -128,6 +140,8 @@ demo 已有风力分档（`src/config/weather-rules.ts`）和雨雪三档强度�
 - **核心取舍**：多出来的算力，是分给机器人加速，还是留着闲置换 Token。
 - **算力不够**：拿不到最低算力的机器人按优先级暂停，头顶显示 429。
 - **闲置算力**：游戏运行时，没被占用的算力按游戏时间累积，用于替周边避难所处理计算请求（游戏内设定，本地结算），每天天亮由 Tibo 按 1P × 1 游戏小时 = 1M 结算成 Token。
+
+<a id="system-6" class="concepts-anchor"></a>
 
 ## 6. 机器人与伙伴
 
@@ -184,6 +198,8 @@ demo 中已有的角色（`src/config/luma.ts`、`src/render/luma/`）：一团�
 - 不占算力，不计入机器人数量。
 - 能力靠经历成长；Token 只能买外观。
 
+<a id="system-7" class="concepts-anchor"></a>
+
 ## 7. 材料
 
 | 档次 | 材料 | 主要来源 |
@@ -197,6 +213,8 @@ demo 中已有的角色（`src/config/luma.ts`、`src/render/luma/`）：一团�
 - 树木会自然重新生长，矿点和废墟有限。
 - 仓库有容量上限。
 
+<a id="system-8" class="concepts-anchor"></a>
+
 ## 8. 食物
 
 - 没有饥饿值，食物只提供增益。同时最多生效 2 种，每种持续数个游戏小时。
@@ -209,6 +227,8 @@ demo 中已有的角色（`src/config/luma.ts`、`src/render/luma/`）：一团�
 - **系统联系**：
   - 季节：冬天热汤给寒冷抗性，夏天冷饮给高温抗性。
   - 污染：污染区域的野外食物品质下降，增益变弱。
+
+<a id="system-9" class="concepts-anchor"></a>
 
 ## 9. 战斗、血量与防御
 
@@ -258,6 +278,8 @@ demo 中已有的角色（`src/config/luma.ts`、`src/render/luma/`）：一团�
 - 普通受击无敌帧不免疫环境伤害；服务器超载的无敌可以免疫，但不会停止耗氧计时。
 - 防护保持简单：装上对应的防护插件就完全免疫，不做数值抗性，见第 10 节。
 
+<a id="system-10" class="concepts-anchor"></a>
+
 ## 10. 装备与强化
 
 | 栏位 | 设定 | 提供 |
@@ -295,6 +317,8 @@ demo 中已有的角色（`src/config/luma.ts`、`src/render/luma/`）：一团�
 | 呼吸插件 | 水下不耗氧，不会溺水 | 前期，装备工程师出售 |
 | 冷却液防护插件 | 免疫冷却液伤害，同时包含呼吸插件的效果 | 中期 |
 
+<a id="system-11" class="concepts-anchor"></a>
+
 ## 11. Token
 
 ### 收入
@@ -315,6 +339,8 @@ demo 中已有的角色（`src/config/luma.ts`、`src/render/luma/`）：一团�
 
 持续支出用于消耗后期多余的 Token，防止 Token 失去意义。
 
+<a id="system-12" class="concepts-anchor"></a>
+
 ## 12. 怪物与清场
 
 | 区域等级 | 普通怪生命 | 攻击 | 玩家参考配置 |
@@ -334,6 +360,8 @@ demo 中已有的角色（`src/config/luma.ts`、`src/render/luma/`）：一团�
 - **清场**：怪物盘踞的区域机器人进不去，玩家清完后对机器人开放。清过的区域永久安全，不会重新刷怪。
 - **基地**：概念版本中基地不会被攻击。
 
+<a id="system-13" class="concepts-anchor"></a>
+
 ## 13. 污染与核电风险
 
 - **三种污染**：空气（燃料发电机、火电站）、水（工业和冷却排水）、辐射（核电站、核废料）。
@@ -348,6 +376,8 @@ demo 中已有的角色（`src/config/luma.ts`、`src/render/luma/`）：一团�
   - 运行产生核废料，需要专用储存库；储存库满了，核电站停机。
   - 冷却不足或拖欠维护费时先触发警报；玩家仍不处理才会熔毁，留下长期辐射区，可以治理。
   - 事故只来自玩家疏忽，不做随机惩罚。
+
+<a id="system-14" class="concepts-anchor"></a>
 
 ## 14. NPC 与城镇
 
@@ -376,6 +406,8 @@ demo 中已有的角色（`src/config/luma.ts`、`src/render/luma/`）：一团�
 - **居民**：有通电的空房子就会搬进来。人类和 AI 都有；收购玩家多余的产出；偶尔提出小请求，奖励 Token 或组件。
 - **制作量**：居民共用几套基础模型，通过颜色、配饰、发型区分。
 
+<a id="system-15" class="concepts-anchor"></a>
+
 ## 15. 节奏
 
 ### 一天
@@ -401,6 +433,8 @@ demo 中已有的角色（`src/config/luma.ts`、`src/render/luma/`）：一团�
   - 把机器人升到 Lv2：用组件和 Token，能拆废墟、采石头。
   - 买算力组件：直接提高算力，但要想好多出来的算力做什么。
 
+<a id="system-16" class="concepts-anchor"></a>
+
 ## 16. 开发顺序
 
 | 阶段 | 内容 |
@@ -413,6 +447,8 @@ demo 中已有的角色（`src/config/luma.ts`、`src/render/luma/`）：一团�
 | 6 | 固态电池组、超导储能环、奇点电池 |
 
 每个阶段完成后游戏都可以玩，后一阶段要影响的对象在前面已经存在。概念版本只做阶段 1，先验证核心循环。
+
+<a id="system-17" class="concepts-anchor"></a>
 
 ## 17. 概念版本（阶段 1）
 
@@ -508,6 +544,8 @@ demo 中已有的角色（`src/config/luma.ts`、`src/render/luma/`）：一团�
 - 机器人在常见地形中不会卡死。
 - 经济逻辑放在逻辑层，保持确定性；`npm run typecheck`、`npm test`、`npm run build` 通过。
 
+<a id="system-18" class="concepts-anchor"></a>
+
 ## 18. 本版不做
 
 - 鹈鹕形态
@@ -515,6 +553,8 @@ demo 中已有的角色（`src/config/luma.ts`、`src/render/luma/`）：一团�
 - 情报员、黑市商人、高级机器人工程师，以及 15 人以上的城镇
 - 更高等级机器人、专精机器人本体
 - 算力设备散热
+
+<a id="system-19" class="concepts-anchor"></a>
 
 ## 19. 待选
 

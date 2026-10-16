@@ -1,0 +1,58 @@
+# 鹈鹕 429 · 基础概念与建造资源
+
+> 横版瓦片世界，二维玩法与三维表现。以下 Markdown 是基础概念网页的同一份正文。
+
+先读资源分类与命名、材料与构件库，再读相关专项规则。区分已确认标准、当前实现、设计草案与历史资料；图片不等于玩法已实现。资料中的游戏交互入口可在同一站点打开。
+
+## 资源基础
+
+- [基础术语表](concepts/core-glossary.md)
+- [资源分类与命名](concepts/resource-classification.md)
+- [材料与构件库](concepts/material-library.md)
+- [坐标与尺度约定](concepts/core-coordinates.md)
+
+## 基础设定
+
+- [世界设定与适用范围](concepts/world-overview.md)
+- [角色标尺标准](concepts/character-ruler-standard.md)
+- [玩家角色、伙伴与人物比例](concepts/character-proportions.md)
+- [场景由哪些部分组成](concepts/scene-composition.md)
+- [地形瓦片与组合](concepts/terrain-combinations.md)
+- [自然区域与算力设施](concepts/world-regions.md)
+- [原图与设定资料来源](concepts/artwork-sources.md)
+
+## 场景与建筑
+
+- [深度定义与线框透视说明](concepts/depth-definitions.md)
+- [液体定义与水体透视](concepts/liquid-definitions.md)
+- [液体透视展示](concepts/liquid-display-definitions.md)
+- [建筑与格子定义 · 新规则](concepts/building-overview.md)
+- [背景墙形态与窗口定义](concepts/wall-window-definitions.md)
+- [格子形态与支持范围定义](concepts/tile-shape-definitions.md)
+- [03 格子互相结合方式](concepts/tile-connections.md)
+- [平台定义](concepts/platform-definitions.md)
+- [单间房屋布置说明](concepts/room-layout-definitions.md)
+- [门组件与深蓝合金能量门](concepts/door-definitions.md)
+- [当前家具与设施定义](concepts/furniture-definitions.md)
+
+## 历史资料
+
+- [旧实现与历史图对照](concepts/building-legacy.md)
+
+## 自然资源
+
+- [植物、生长物与矿脉定义](concepts/natural-resource-definitions.md)
+- [自然资源：附着位置、前沿、树木占格与矿脉剖面](concepts/natural-spatial-definitions.md)
+- [地被与草丛：整格覆盖与逐状态透视](concepts/natural-grass-definitions.md)
+- [花卉与草本：各阶段独立定义与透视图](concepts/natural-flower-definitions.md)
+- [灌木与野果丛：各阶段独立定义与透视图](concepts/natural-shrub-definitions.md)
+- [盆景与盆栽：各阶段独立定义与透视图](concepts/natural-bonsai-definitions.md)
+- [树木：物种、冠团平台、空间与生长定义](concepts/natural-tree-definitions.md)
+- [藤蔓与贴面植物：正面、背面和绕边透视](concepts/natural-vine-definitions.md)
+- [下垂植物：草裙、苔须、垂藤、垂花、悬崖盆景与垂枝树](concepts/natural-drooping-definitions.md)
+- [岩土地形组合与岩石占格定义](concepts/natural-rock-definitions.md)
+- [矿脉：各阶段独立定义与透视图](concepts/natural-ore-definitions.md)
+
+## 系统设定
+
+- [经济与生存系统设计](concepts/economy.md)
