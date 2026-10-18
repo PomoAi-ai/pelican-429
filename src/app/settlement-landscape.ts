@@ -4,7 +4,7 @@ import { createDefinitionKit } from '../render/definition-kit.ts';
 import { createTreeView } from '../render/tree-view.ts';
 import { planTree } from '../world/trees.ts';
 import type { TreeKind } from '../world/level.ts';
-import type { DepthLayerId } from './definition-depth-layout.ts';
+import type { DepthLayerId } from '../config/depth-layers.ts';
 import { buildDepthScenery, type DepthTheme } from './depth-scenery.ts';
 import { createDepthLandscapeDetails } from './depth-landscape-details.ts';
 

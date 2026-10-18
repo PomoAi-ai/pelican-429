@@ -310,8 +310,8 @@ export function createResidence(): ResidenceState {
   const windows = [[53, 4], [63, 4], [53, 10], [63, 10]] as const;
   for (let y = 2; y < 13; y++) {
     if (y === 6 || y === 7 || y === 12) {
-      add(y === 7 ? 'alloy-A' : 'alloy-L', 50, y);
-      add(y === 7 ? 'ceramic-A' : 'ceramic-K', 68, y);
+      add('alloy-L', 50, y);
+      add('ceramic-K', 68, y);
     }
     for (let x = 51; x < 68; x++) {
       const opening = windows.some(([wx, wy]) => x >= wx && x < wx + 3 && y >= wy && y < wy + 2);
@@ -327,6 +327,9 @@ export function createResidence(): ResidenceState {
   // 两格长的入口半砖踏步与室内齐平；楼上单格落脚台紧接补齐的门槛。
   for (const x of [48, 49, 69, 70]) add('ceramic-C', x, 1);
   for (const x of [49, 69]) add('platform-full', x, 7.5);
+  // 门口同格以半宽立柱接外侧半宽平台，平台顶面与室内楼板齐平。
+  add('platform-left', 50, 7.5);
+  add('platform-right', 68, 7.5);
   add('bed', 52, 8); add('shelf', 65, 8); add('plant', 56, 8); add('plant', 67, 8);
   add('workstation', 64, 2); add('chair-right', 62.5, 2); add('plant', 67, 2);
   add('depot', 52, 2); add('battery', 54, 2); add('terminal-compute', 55.5, 2);

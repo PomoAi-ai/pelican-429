@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { createBody } from '../src/physics/body.ts';
-import { moveDefinitionBody, standingOnDefinitionPlatform, type DefinitionCollider, type DefinitionCollision } from '../src/physics/definition-collision.ts';
+import { definitionGroundAt, moveDefinitionBody, standingOnDefinitionPlatform, type DefinitionCollider, type DefinitionCollision } from '../src/physics/definition-collision.ts';
 import { tileDefinitionCollision } from '../src/physics/tile-definition-collision.ts';
 import { createTileMap } from '../src/world/tile-map.ts';
 import { DEFAULT_TILES, TILE_STONE, TILE_PLATFORM } from '../src/world/tile-types.ts';
@@ -12,6 +12,23 @@ const rectangle = (left: number, bottom: number, right: number, top: number): De
 });
 const world = (...solids: DefinitionCollider[]): DefinitionCollision => ({ solids, platforms: [] });
 const close = (actual: number, expected: number): void => assert.ok(Math.abs(actual - expected) < 0.001, `${actual} ≠ ${expected}`);
+
+test('叠放台阶只暴露最上层承托面，不选择埋在阶块里的旧地面或平台', () => {
+  const geometry = { ...world(rectangle(0, -1, 8, 0), rectangle(2, 0, 7, 0.5), rectangle(3, 0.5, 6, 1)),
+    platforms: [{ left: 0, right: 8, top: 0.1 }] };
+  close(definitionGroundAt(geometry, 4, 0)!, 1);
+  close(definitionGroundAt(geometry, 2.5, 0)!, 0.5);
+  close(definitionGroundAt(geometry, 1, 0)!, 0);
+  assert.equal(definitionGroundAt(geometry, 4, -3), null);
+});
+
+test('分离的楼板和单向平台仍按参考高度选择，不把有空气间隙的下层地面当作掩埋', () => {
+  const geometry = { ...world(rectangle(0, -1, 8, 0), rectangle(0, 2, 8, 2.5)),
+    platforms: [{ left: 0, right: 8, top: 1 }] };
+  close(definitionGroundAt(geometry, 4, 0)!, 0);
+  close(definitionGroundAt(geometry, 4, 1)!, 1);
+  close(definitionGroundAt(geometry, 4, 2)!, 2.5);
+});
 
 test('瓦片样本接入游玩场地后，平移保留半砖、斜坡与单向平台落脚高度', () => {
   const map = createTileMap(6, 5, DEFAULT_TILES);

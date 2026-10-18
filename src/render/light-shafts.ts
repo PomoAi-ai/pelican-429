@@ -147,6 +147,8 @@ export interface LightShafts {
   /** 当前显示的光束数。 */
   readonly active: number;
   setEnabled(enabled: boolean): void;
+  /** 强度倍数（相对配置值），昼夜驱动按日照写入。 */
+  setStrength(k: number): void;
   /** 砍倒的树：去掉它的光束（该处可能改由天空光束补上）。 */
   removeTree(id: number): void;
   update(view: Readonly<Rect>, time: number): void;
@@ -204,6 +206,9 @@ export function createLightShafts(input: LightShaftsInput): LightShafts {
     setEnabled(on) {
       enabled = on;
       mesh.visible = on;
+    },
+    setStrength(k) {
+      material.uniforms.uIntensity!.value = cfg.intensity * k;
     },
     removeTree(id) {
       trees = trees.filter((t) => t.id !== id);

@@ -1,10 +1,10 @@
-/** 家园概念版本装配：设施与无人机视图、界面、昼夜曝光、砍树同步与存档。 */
-import { TUNING } from '../config/tuning.ts';
+/** 家园概念版本装配：设施与无人机视图、界面、砍树同步与存档。 */
 import { HOMESTEAD } from '../config/homestead.ts';
 import { BUILDING_KIT } from '../config/building-kit.ts';
 import type { Vec2 } from '../core/math.ts';
 import type { ActionTracker } from '../input/action-map.ts';
 import type { CameraRig } from '../render/camera-rig.ts';
+import type { UtilityDroneFleet } from '../render/utility-drone.ts';
 import { createHomesteadView } from '../render/homestead-view.ts';
 import type { Stage } from '../render/stage.ts';
 import { canSleep, captureHomestead, cancelArea, checkDepot, checkSolar, markArea, placeDepot, placeSolar, purchase, sleepHomestead } from '../sim/homestead.ts';
@@ -17,11 +17,10 @@ import { saveHomestead } from './homestead-save.ts';
 
 /** 定时存档间隔（现实秒）；页面隐藏与离开时另外立即保存。 */
 const SAVE_SECONDS = 20;
-/** 夜里曝光降到白天的这个比例；天亮、天黑各用 2 游戏小时过渡。 */
-const NIGHT_EXPOSURE = 0.38;
 
 export interface HomesteadAppOptions {
   readonly world: SimWorld;
+  readonly droneFleet: UtilityDroneFleet;
   readonly stage: Stage;
   /** 砍倒一棵树后通知各个视图（树、光照、小地图、光柱）同步移除。 */
   readonly removeTree: (id: number) => void;
@@ -34,25 +33,15 @@ export interface HomesteadAppOptions {
 
 export interface HomesteadApp {
   readonly open: boolean;
+  command(tool: 'chop' | 'dig' | 'build'): void;
   update(frameDt: number): void;
   persist(): void;
-}
-
-const smooth = (t: number): number => {
-  const x = Math.min(1, Math.max(0, t));
-  return x * x * (3 - 2 * x);
-};
-
-function daylight(second: number): number {
-  const hour = second / 3600;
-  const { dawnHour, duskHour } = HOMESTEAD.clock;
-  return Math.min(smooth((hour - dawnHour + 1) / 2), smooth((duskHour + 1 - hour) / 2));
 }
 
 export function createHomesteadApp(o: HomesteadAppOptions): HomesteadApp {
   const { world, stage, cameraRig, tracker, canvas } = o;
   const state = world.homestead!;
-  const view = createHomesteadView(stage.scene, world.level.trees);
+  const view = createHomesteadView(stage.scene, world.level.trees, o.droneFleet);
   o.disposers.push(() => view.dispose());
   let removedTrees = 0;
   const syncTrees = (): void => {
@@ -73,7 +62,7 @@ export function createHomesteadApp(o: HomesteadAppOptions): HomesteadApp {
       const at = cameraRig.screenToWorld(clientX, clientY, point);
       return at === null ? null : { x: at.x, y: at.y };
     },
-    onMark: area => markArea(world, area),
+    onMark: (area, kind) => markArea(world, area, kind),
     onCancel: area => cancelArea(world, area),
     onPlaceDepot: x => placeDepot(world, x),
     onPlaceSolar: area => placeSolar(world, area),
@@ -98,19 +87,17 @@ export function createHomesteadApp(o: HomesteadAppOptions): HomesteadApp {
     onClose: () => { tracker.releaseAll(); canvas.focus(); },
   });
   o.disposers.push(() => hud.dispose());
-  const baseExposure = TUNING.render.exposure;
-  o.disposers.push(() => { stage.renderer.toneMappingExposure = baseExposure; });
   let time = 0;
   let sinceSave = 0;
   return {
     get open() { return hud.open; },
+    command: tool => hud.command(tool),
     update(frameDt) {
       time += frameDt;
       syncTrees();
       const player = getPlayer(world);
       view.update(state, time, player.body, hud.commanding);
       hud.update();
-      stage.renderer.toneMappingExposure = baseExposure * (NIGHT_EXPOSURE + (1 - NIGHT_EXPOSURE) * daylight(state.economy.second));
       sinceSave += frameDt;
       if (sinceSave >= SAVE_SECONDS) {
         sinceSave = 0;

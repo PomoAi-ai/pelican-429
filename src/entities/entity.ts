@@ -26,6 +26,7 @@ import { createHumanCombat } from './human-combat.ts';
 import type { HumanCombatData } from './human-combat.ts';
 import type { WandererData } from './wanderer.ts';
 import type { TeleportState } from './teleport.ts';
+import type { FlyingRoadsterData } from './flying-roadster.ts';
 
 export type { Health, Team } from '../combat/combat-system.ts';
 export type { DismountCause } from '../core/game-events.ts';
@@ -34,7 +35,7 @@ export type { Mouthful, WeaponState } from './pelican-weapons.ts';
 export type { ShooterData } from './enemy-shooter.ts';
 
 /** 投射物实体的 kind 即其 ProjectileKind（orb/waterShot/fishShot/enemyShot，见 core/weapon-ids）。 */
-export type EntityKind = 'pelican' | 'trainingDummy' | 'healthPack' | EnemyKind | NpcKind | 'orb' | 'waterShot' | 'fishShot' | 'enemyShot' | 'photonBug' | 'photonWheel' | 'codexShot' | 'bugShot' | 'droneBomb' | 'droneThermite';
+export type EntityKind = 'pelican' | 'trainingDummy' | 'healthPack' | EnemyKind | NpcKind | 'orb' | 'waterShot' | 'fishShot' | 'enemyShot' | 'photonBug' | 'photonWheel' | 'codexShot' | 'bugShot' | 'droneBomb' | 'droneThermite' | 'flyingRoadster';
 
 /** 鹈鹕表现状态（渲染层 animator 依赖该字面量集合，勿随意改名）。 */
 export type PelicanState = 'idle' | 'run' | 'jump' | 'fall' | 'attack' | 'fly' | 'glide' | 'swim';
@@ -191,6 +192,7 @@ export interface Entity extends Combatant {
   enemy?: EnemyData;
   boss?: BossData;
   npc?: WandererData;
+  flyingRoadster?: FlyingRoadsterData;
   teleport?: TeleportState;
   healthPack?: { readonly healAmount: number };
   projectile?: ProjectileData;

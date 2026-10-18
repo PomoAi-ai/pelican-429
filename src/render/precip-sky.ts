@@ -2,7 +2,8 @@
  * 降水天色（任务 022）：按控制器视觉向量调舞台 —— 主光/补光/边缘光/环境光变暗、阴影变淡、天空渐变重绘为阴天灰/雪天冷白、
  * 调色降饱和/偏冷、weather-fx 云更多更灰、远景雾幕（1 个半透明平面，z = VEIL_Z，盖住远山/云/远景剪影，世界几何在其前方不受影响）、
  * 大雨闪电（全屏提亮 = 光照与天色瞬时提亮；远处闪电形状 = 1 个加色折线带网格，只在闪光期间可见，形状按闪电编号确定性生成，画在云前）。
- * 基础值在创建时记录，每帧按 precipSkyLook（纯函数，可测）重设，降水为 none 时恢复原值。
+ * 基础值缺省在创建时记录；调用方可传入 targets.base 每帧改写（昼夜驱动），降水层仍是唯一写灯光的一方。
+ * 每帧按 precipSkyLook（纯函数，可测）重设，降水为 none 时恢复原值；dispose 恢复创建时的灯光。
  */
 import * as THREE from 'three';
 import { mulberry32 } from '../core/rng.ts';
@@ -88,9 +89,22 @@ export function precipSkyLook(v: PrecipVisual, flash: number): PrecipSkyLook {
   };
 }
 
+/** 降水层乘天气之前的基础灯光；sky 为天空亮度，压暗雾幕与雨雪粒子。 */
+export interface PrecipSkyBase {
+  key: number;
+  readonly keyColor: THREE.Color;
+  hemi: number;
+  readonly hemiSky: THREE.Color;
+  rim: number;
+  env: number;
+  sky: number;
+}
+
 export interface PrecipSkyTargets {
   readonly scene: THREE.Scene;
   readonly region?: { readonly tint: THREE.Color; readonly light: number };
+  /** 调用方持有并每帧改写的基础灯光（缺省用创建时快照）。 */
+  readonly base?: PrecipSkyBase;
   readonly keyLight: THREE.DirectionalLight;
   readonly hemiLight: THREE.HemisphereLight;
   readonly rimLight: THREE.DirectionalLight;
@@ -167,7 +181,10 @@ export function createPrecipSky(targets: PrecipSkyTargets, seed: number): Precip
     shadow: keyLight.shadow.intensity,
     saturation: targets.grade?.uSaturation.value ?? 1,
     tint: targets.grade?.uTint.value.clone() ?? null,
+    sky: 1,
   };
+  // 调用方传入时每帧读取；创建时快照仍保留，供 dispose 恢复原灯光。
+  const lit: PrecipSkyBase = targets.base ?? base;
   const root = new THREE.Group();
   root.name = 'precip-sky';
 
@@ -259,16 +276,16 @@ export function createPrecipSky(targets: PrecipSkyTargets, seed: number): Precip
     update(fr) {
       if (disposed) throw new Error('precip-sky: update after dispose');
       const l = precipSkyLook(fr.visual, fr.lightning.flash);
-      look = l;
+      look = { ...l, particle: l.particle * lit.sky };
       const region = targets.region;
       const light = region?.light ?? 1;
-      keyLight.intensity = base.key * l.key * light;
-      keyLight.color.copy(base.keyColor).lerp(PALETTE.cool, 0.5 * l.cloudAmount);
-      hemiLight.intensity = base.hemi * l.hemi * light;
-      hemiLight.color.copy(base.hemiSky).lerp(PALETTE.coolSky, l.cool);
+      keyLight.intensity = lit.key * l.key * light;
+      keyLight.color.copy(lit.keyColor).lerp(PALETTE.cool, 0.5 * l.cloudAmount);
+      hemiLight.intensity = lit.hemi * l.hemi * light;
+      hemiLight.color.copy(lit.hemiSky).lerp(PALETTE.coolSky, l.cool);
       if (region) { keyLight.color.multiply(region.tint); hemiLight.color.multiply(region.tint); }
-      rimLight.intensity = base.rim * l.rim * light;
-      scene.environmentIntensity = base.env * l.env * light;
+      rimLight.intensity = lit.rim * l.rim * light;
+      scene.environmentIntensity = lit.env * l.env * light;
       keyLight.shadow.intensity = base.shadow * l.shadow;
       const g = targets.grade;
       if (g) {
@@ -286,7 +303,7 @@ export function createPrecipSky(targets: PrecipSkyTargets, seed: number): Precip
       veil.position.set(cam.x, cam.y, VEIL_Z);
       veil.scale.set(vh * fr.camera.aspect + 4, vh, 1);
       veilU.uAlpha.value = l.fog;
-      veilU.uColor.value.copy(l.fogColor);
+      veilU.uColor.value.copy(l.fogColor).multiplyScalar(lit.sky);
       if (region) veilU.uColor.value.multiply(region.tint);
       // 闪电形状：闪光期间可见。
       const ln = fr.lightning;

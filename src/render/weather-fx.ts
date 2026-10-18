@@ -43,6 +43,8 @@ export interface WeatherFx {
   readonly overcast: number;
   /** 设置云量 amount（额外云朵数、不透明度）与灰度 gray（云色变灰程度），均 [0,1]；非法即抛。 */
   setOvercast(amount: number, gray: number): void;
+  /** 昼夜天光色：云色在下一次 setOvercast 时乘上，风线颜色立即设置。 */
+  setSkyLight(color: THREE.Color): void;
   /** 关闭 = 隐藏并清空粒子（FPS 对比用）。 */
   setEnabled(on: boolean): void;
   /** view 为相机可视矩形（已外扩）；dt 秒；ground(x) 为视觉地面高度。 */
@@ -408,6 +410,8 @@ function createDebrisLayer(p: WeatherTuning['particles'], wind: WindController, 
 
 interface CloudLayer {
   readonly mesh: THREE.InstancedMesh;
+  /** 天光色，setOvercast 时乘到云色上；降水层每帧都会调用 setOvercast。 */
+  readonly light: THREE.Color;
   update(view: Readonly<Rect>): void;
   /** amount/gray 已由调用方校验。 */
   setOvercast(amount: number, gray: number): void;
@@ -469,9 +473,11 @@ function createCloudLayer(weather: WeatherTuning, wind: WindController, D: numbe
   const cloudU = cloudMat.uniforms as { uTop: THREE.IUniform<THREE.Color>; uBottom: THREE.IUniform<THREE.Color>; uSky: THREE.IUniform<THREE.Color>; uOpacity: THREE.IUniform<number> };
   const cloudBase = { top: cloudU.uTop.value.clone(), bottom: cloudU.uBottom.value.clone(), sky: cloudU.uSky.value.clone(), opacity: cloudU.uOpacity.value };
   const obj = new THREE.Object3D();
+  const light = new THREE.Color(1, 1, 1);
 
   return {
     mesh: clouds,
+    light,
     update(view) {
       const camX = view.x + view.w / 2;
       const camY = view.y + view.h / 2;
@@ -493,9 +499,9 @@ function createCloudLayer(weather: WeatherTuning, wind: WindController, D: numbe
     },
     setOvercast(amount, gray) {
       clouds.count = cloudCount + Math.round(extraClouds * amount);
-      cloudU.uTop.value.copy(cloudBase.top).lerp(OVERCAST_COLORS.top, gray);
-      cloudU.uBottom.value.copy(cloudBase.bottom).lerp(OVERCAST_COLORS.bottom, gray);
-      cloudU.uSky.value.copy(cloudBase.sky).lerp(OVERCAST_COLORS.sky, gray);
+      cloudU.uTop.value.copy(cloudBase.top).lerp(OVERCAST_COLORS.top, gray).multiply(light);
+      cloudU.uBottom.value.copy(cloudBase.bottom).lerp(OVERCAST_COLORS.bottom, gray).multiply(light);
+      cloudU.uSky.value.copy(cloudBase.sky).lerp(OVERCAST_COLORS.sky, gray).multiply(light);
       cloudU.uOpacity.value = cloudBase.opacity + (1 - cloudBase.opacity) * amount;
     },
   };
@@ -551,6 +557,11 @@ export function createWeatherFx(options: WeatherFxOptions): WeatherFx {
       if (!(Number.isFinite(gray) && gray >= 0 && gray <= 1)) throw new Error(`weather-fx: overcast gray must be in [0,1], got ${gray}`);
       overcast = amount;
       cloudLayer.setOvercast(amount, gray);
+    },
+    setSkyLight(color) {
+      // 只改 uniform，不动着色器源码，避免重编译。
+      cloudLayer.light.copy(color);
+      (lines.material as THREE.ShaderMaterial).uniforms.uColor!.value.copy(color);
     },
     setEnabled(on) {
       enabled = on;

@@ -10,7 +10,7 @@ export function clearHomesteadSave(storage: Pick<Storage, 'removeItem'>, seed: n
 }
 
 export function saveHomestead(storage: Pick<Storage, 'setItem'>, seed: number, snapshot: HomesteadSnapshot): void {
-  storage.setItem(key(seed), JSON.stringify({ version: 2, ...snapshot }));
+  storage.setItem(key(seed), JSON.stringify({ version: 3, ...snapshot }));
 }
 
 /** localStorage 是外部输入：校验一次，之后模拟层按快照类型恢复。 */
@@ -31,10 +31,11 @@ export function loadHomesteadSave(storage: Pick<Storage, 'getItem'>, seed: numbe
   const list = (v: unknown, what: string): unknown[] => Array.isArray(v) ? v : invalid(what);
 
   const save = record(data, '格式');
-  if (save.version !== 2) invalid('版本');
+  if (save.version !== 3) invalid('版本');
   const e = record(save.economy, 'economy');
   int(e.day, 'economy.day', 1);
   int(e.second, 'economy.second', 0, 24 * 3600 - 1);
+  int(e.startDay, 'economy.startDay', 1, e.day as number);
   int(e.panels, 'economy.panels', 0, 256);
   int(e.batteries, 'economy.batteries', 0, 256);
   num(e.stored, 'economy.stored', 0, (e.batteries as number) * HOMESTEAD.power.batteryCapacity);

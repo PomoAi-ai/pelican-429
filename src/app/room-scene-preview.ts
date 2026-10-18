@@ -1,3 +1,4 @@
+import { loadUtilityDroneFleet } from '../render/utility-drone.ts';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GRASSY_HEIGHT } from '../config/grassy.ts';
@@ -10,7 +11,8 @@ import { compileForStage, warmUpStage } from '../render/warm-up.ts';
 import { createDefinitionSceneLayout, type SceneSection } from './definition-scene-layout.ts';
 import { loadDefinitionSettlementLayout } from './definition-settlement-layout.ts';
 import { groundMaterial, type DepthTheme } from './depth-scenery.ts';
-import { createDefinitionDepthLayout, createDepthEnvironment, DEPTH_LAYERS, DEPTH_STOPS, type DepthLayerId, type DepthLayering } from './definition-depth-layout.ts';
+import { createDefinitionDepthLayout, createDepthEnvironment, DEPTH_STOPS, type DepthLayering } from './definition-depth-layout.ts';
+import { DEPTH_LAYERS, type DepthLayerId } from '../config/depth-layers.ts';
 import { createCelestialSky, type SkyPhase } from '../render/celestial-sky.ts';
 import { createPerspectiveControls } from './perspective-controls.ts';
 import { createCharacterAppearanceStore } from './character-appearance.ts';
@@ -422,22 +424,16 @@ export async function mountScenePerspective(context: SceneMountContext, entry: P
     await warmUpStage(stage, [], signal);
     signal.throwIfAborted();
     rig = createGrassyRig('game', undefined, createCharacterAppearanceStore(window.localStorage).current());
-    // 标记角色的实际像素轮廓，只让单向平台与检查线避让，不关闭实体墙的深度测试。
-    rig.root.traverse(object => {
-      if (!(object instanceof THREE.Mesh)) return;
-      for (const material of Array.isArray(object.material) ? object.material : [object.material]) {
-        material.stencilWrite = true;
-        material.stencilRef = 1;
-        material.stencilZPass = THREE.ReplaceStencilOp;
-      }
-    });
     disposers.push(() => rig!.dispose());
     rig.root.position.set(current.playerX, current.playerY, 0);
     animateGrassy(rig, 'idle', 0, 0, null);
     stage.scene.add(rig.root);
     await compileForStage(stage, rig.root);
     signal.throwIfAborted();
-    gameplay = createPerspectiveControls(app, stage, controls, rig, layout.collision, bounds, current, viewAngles(), solarLayout ? solarLayout.solarPanels : []);
+    const droneFleet = await loadUtilityDroneFleet(stage.scene);
+    if (signal.aborted) { droneFleet.dispose(); signal.throwIfAborted(); }
+    gameplay = createPerspectiveControls(app, stage, droneFleet, controls, rig, layout.collision, bounds, current, viewAngles(), solarLayout ? solarLayout.solarPanels : [], true,
+      { cameraMode: 'inspection', tuning: TUNING, world: context.world });
     disposers.push(() => gameplay!.dispose());
     gameplay.select(current);
     const minimap = settlement ? createPerspectiveMinimap(app.querySelector<HTMLElement>('.room-preview-viewport')!, layout.collision,
@@ -446,7 +442,7 @@ export async function mountScenePerspective(context: SceneMountContext, entry: P
         select(layout.sections.find(section => x >= section.x && x < section.x + section.width) ?? current);
         gameplay!.select({ ...current, playerX: x, playerY: y });
       }) : null;
-    if (minimap) disposers.push(() => minimap.dispose());
+    if (minimap) { disposers.push(() => minimap.dispose()); gameplay.hud.attachMap(minimap.root); }
     if (playView) playView.disabled = false;
     gameplay.observe(); setView();
     let previous: number | null = null;

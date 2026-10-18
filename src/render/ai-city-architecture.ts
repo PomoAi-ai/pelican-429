@@ -10,10 +10,12 @@ export type AiCityFixtureKind = 'trim-straight' | 'trim-corner' | 'trim-cap' | '
   | 'bollard-light' | 'energy-column' | 'planter' | 'railing';
 
 const FINISHES: Record<AiCityMaterial, THREE.MeshPhysicalMaterialParameters> = {
-  ceramic: { color: 0xe3e2df, roughness: .23, metalness: 0, clearcoat: .55, clearcoatRoughness: .16 },
-  ashlar: { color: 0xb5a48e, roughness: .39, metalness: 0, clearcoat: .16, clearcoatRoughness: .34 },
-  alloy: { color: 0x34516f, roughness: .25, metalness: .62, clearcoat: .65, clearcoatRoughness: .14 },
-  wall: { color: 0xe3e2df, roughness: .34, metalness: 0, clearcoat: .35, clearcoatRoughness: .23 },
+  // 白岩板是象牙缎面瓷，清漆薄而柔；墙板比外框暗一档、更哑，室内与外框才分得出层次。
+  ceramic: { color: 0xefe8e0, roughness: .3, metalness: 0, clearcoat: .35, clearcoatRoughness: .2 },
+  ashlar: { color: 0xd9c3a6, roughness: .52, metalness: 0, clearcoat: .08, clearcoatRoughness: .4 },
+  // 钴蓝烤漆：金属度过高会吃掉漫反射、整块发黑，色相靠底漆、光泽靠清漆。
+  alloy: { color: 0x3558a6, roughness: .34, metalness: .2, clearcoat: .75, clearcoatRoughness: .1 },
+  wall: { color: 0xd6cdca, roughness: .52, metalness: 0, clearcoat: .12, clearcoatRoughness: .35 },
   gold: { color: 0xb99b60, roughness: .36, metalness: .5 },
   dark: { color: 0x152535, roughness: .55, metalness: .25 },
   steel: { color: 0x8095a5, roughness: .3, metalness: .68 },
@@ -24,16 +26,27 @@ const FINISHES: Record<AiCityMaterial, THREE.MeshPhysicalMaterialParameters> = {
   soil: { color: 0x514d3b, roughness: .98 },
 };
 
+/**
+ * 逐块变化的幅度：明度、冷暖、粗糙度。真实砖石每块烧成、切割批次不同，相邻块之间看得出差别；
+ * 同一块内只有低频云纹与一道轻微的明暗渐变。
+ */
+const BLOCK_VARIATION: Record<'ceramic' | 'wall' | 'ashlar' | 'alloy', readonly [number, number, number]> = {
+  ceramic: [.14, .05, .12], wall: [.13, .05, .14], ashlar: [.22, .07, .16], alloy: [.08, .03, .08],
+};
+
 /** 板壳、接缝和连接件由共享几何表达，浅色表面保持干净。 */
 export function createAiCityMaterial(kind: AiCityMaterial): THREE.MeshStandardMaterial {
   const material = new THREE.MeshPhysicalMaterial(FINISHES[kind]);
   material.name = `ai-city-${kind}`;
   if (kind === 'ceramic' || kind === 'wall' || kind === 'ashlar' || kind === 'alloy') {
+    const [tone, warmth, roughness] = BLOCK_VARIATION[kind];
     material.onBeforeCompile = shader => {
-      shader.vertexShader = shader.vertexShader.replace('#include <common>', '#include <common>\nvarying vec3 finishPoint;')
-        .replace('#include <begin_vertex>', '#include <begin_vertex>\nvec4 finishLocal = vec4(position, 1.0);\n#ifdef USE_INSTANCING\nfinishLocal = instanceMatrix * finishLocal;\n#endif\nfinishPoint = (modelMatrix * finishLocal).xyz;');
+      shader.vertexShader = shader.vertexShader.replace('#include <common>', '#include <common>\nvarying vec3 finishPoint;\nvarying vec2 finishCell;\nvarying vec2 finishOrigin;')
+        .replace('#include <begin_vertex>', '#include <begin_vertex>\nfinishCell = position.xy;\nvec4 finishLocal = vec4(position, 1.0);\nvec4 finishBase = vec4(0, 0, 0, 1);\n#ifdef USE_INSTANCING\nfinishLocal = instanceMatrix * finishLocal;\nfinishBase = instanceMatrix * finishBase;\n#endif\nfinishPoint = (modelMatrix * finishLocal).xyz;\nfinishOrigin = (modelMatrix * finishBase).xy;');
       shader.fragmentShader = shader.fragmentShader.replace('#include <common>', `#include <common>
         varying vec3 finishPoint;
+        varying vec2 finishCell;
+        varying vec2 finishOrigin;
         float finishHash(vec3 p) {
           p = fract(p * 0.1031);
           p += dot(p, p.yzx + 33.33);
@@ -48,13 +61,28 @@ export function createAiCityMaterial(kind: AiCityMaterial): THREE.MeshStandardMa
                          mix(finishHash(i + vec3(0,1,1)), finishHash(i + vec3(1,1,1)), f.x), f.y), f.z);
         }`)
         .replace('#include <color_fragment>', `#include <color_fragment>
+          // 每块构件一个网格，原点即这块砖的身份；按 1/4 格取整，避开浮点抖动。
+          vec3 finishTile = vec3(floor(finishOrigin * 4.0 + .5), 0.0);
+          vec4 finishSeed = vec4(finishHash(finishTile + 11.0), finishHash(finishTile + 37.0),
+            finishHash(finishTile + 71.0), finishHash(finishTile + 97.0)) - .5;
+          vec3 finishPhase = finishSeed.xyz * 31.0;
           float footprint = max(length(dFdx(finishPoint)), length(dFdy(finishPoint)));
           float grain = sin(finishPoint.x * 151.0) * sin(finishPoint.y * 173.0 + finishPoint.z * 137.0)
             * (1.0 - smoothstep(0.003, 0.025, footprint));
-          float cloud = finishNoise(finishPoint * 2.7) - 0.5;
-          float fleck = (finishNoise(finishPoint * 17.0) - 0.5) * (1.0 - smoothstep(.02, .08, footprint));
-          diffuseColor.rgb *= 1.0 + cloud * ${kind === 'ashlar' ? '.14' : kind === 'alloy' ? '.025' : '.07'} + fleck * .025 + grain * .012;`)
-        .replace('#include <roughnessmap_fragment>', `#include <roughnessmap_fragment>\nroughnessFactor = clamp(roughnessFactor + cloud * ${kind === 'alloy' ? '.05' : '.13'} + fleck * .025 + grain * .015, 0.0, 1.0);`)
+          float cloud = finishNoise(finishPoint * 2.7 + finishPhase) - 0.5;
+          float fleck = (finishNoise(finishPoint * 17.0 + finishPhase) - 0.5) * (1.0 - smoothstep(.02, .08, footprint));
+          float finishAngle = finishSeed.y * 6.2832;
+          float finishShade = clamp(dot(finishCell - .5, vec2(cos(finishAngle), sin(finishAngle))), -.7, .7);
+          diffuseColor.rgb *= (1.0 + finishSeed.x * ${tone} + finishShade * .05 + cloud * ${kind === 'ashlar' ? '.14' : kind === 'alloy' ? '.025' : '.07'}
+            + fleck * .025 + grain * .012) * vec3(1.0 + finishSeed.z * ${warmth}, 1.0, 1.0 - finishSeed.z * ${warmth});
+          ${kind === 'wall' ? `
+          // 墙板几何按格贴合、没有真实缝隙；局部坐标以格为单位，在格边画出灰缝与缝边的接触暗角。
+          vec2 cellEdge = min(fract(finishCell), 1.0 - fract(finishCell));
+          float edgeDistance = min(cellEdge.x, cellEdge.y);
+          float edgeWidth = fwidth(edgeDistance);
+          float grout = 1.0 - smoothstep(.008, .008 + edgeWidth * 1.5, edgeDistance);
+          diffuseColor.rgb *= mix(1.0 - .1 * (1.0 - smoothstep(0.0, .07, edgeDistance)), .65, grout);` : ''}`)
+        .replace('#include <roughnessmap_fragment>', `#include <roughnessmap_fragment>\nroughnessFactor = clamp(roughnessFactor + finishSeed.w * ${roughness} + cloud * ${kind === 'alloy' ? '.05' : '.13'} + fleck * .025 + grain * .015${kind === 'wall' ? ' + grout * .4' : ''}, 0.0, 1.0);`)
         .replace('#include <normal_fragment_maps>', `#include <normal_fragment_maps>
           vec3 finishDx = dFdx(-vViewPosition), finishDy = dFdy(-vViewPosition);
           vec3 finishR1 = cross(finishDy, normal), finishR2 = cross(normal, finishDx);

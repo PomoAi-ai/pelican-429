@@ -44,7 +44,7 @@ export function createCharacterAssets(parent: HTMLElement, actor: ShowcaseActor,
     element('span', header, 'sc-assets-description', '原始图片待补充 · 下方可查看实时模型');
     return;
   }
-  const base = isEnemyKind(actor) ? `${ENEMY_MODEL_DIRS[actor]}/` : `./characters/${actor}/`;
+  const base = actor === 'flyingRoadster' ? './models/white-vtol/' : isEnemyKind(actor) ? `${ENEMY_MODEL_DIRS[actor]}/` : `./characters/${actor}/`;
   const source = element('a', header, '', '资源来源');
   source.href = historical ? `${base}history/README.md` : `${base}SOURCE.md`;
   source.target = '_blank'; source.rel = 'noopener';

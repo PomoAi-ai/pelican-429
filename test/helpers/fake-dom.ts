@@ -23,11 +23,19 @@ export class FakeClassList {
   }
 }
 
+type FakeStyle = Record<string, string> & { setProperty(prop: string, value: string): void };
+// setProperty 收 CSS 属性名（background-image），按驼峰存，断言照常读 style.width / style.backgroundImage。
+const fakeStyle = (): FakeStyle => Object.create({
+  setProperty(this: Record<string, string>, prop: string, value: string): void {
+    this[prop.replace(/-([a-z])/g, (_, c: string) => c.toUpperCase())] = value;
+  },
+}) as FakeStyle;
+
 export class FakeElement {
   className = '';
   textContent: string | null = '';
   hidden = false;
-  readonly style: Record<string, string> = {};
+  readonly style = fakeStyle();
   readonly children: FakeElement[] = [];
   parent: FakeElement | null = null;
   readonly classList = new FakeClassList(this);

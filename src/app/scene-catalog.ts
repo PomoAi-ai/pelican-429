@@ -18,8 +18,11 @@ export interface ResourceSceneEntry extends SceneEntryBase {
   readonly resourceId: string;
 }
 export type SceneEntry = PerspectiveSceneEntry | ResourceSceneEntry
+  // 自由世界是整页游戏，内嵌进工作区以保留左侧目录。
+  | (SceneEntryBase & { readonly kind: 'game' })
   | (SceneEntryBase & { readonly kind: 'sandbox' })
-  | (SceneEntryBase & { readonly kind: 'residence' })
+  | (SceneEntryBase & { readonly kind: 'transit' })
+  | (SceneEntryBase & { readonly kind: 'residence'; readonly variant: 'original' | 'harbor' })
   | (SceneEntryBase & { readonly kind: 'demo'; readonly demoId: string })
   | (SceneEntryBase & { readonly kind: 'facility'; readonly sceneId: FacilitySceneId });
 
@@ -51,7 +54,10 @@ const perspectives = (variant: PerspectiveSceneEntry['variant'], entries: readon
 
 export const SCENE_ENTRIES: readonly SceneEntry[] = [
   { id: 'sandbox', title: '自由搭建场', href: './?mode=lab&demo=sandbox', section: 'scenes', kind: 'sandbox' },
-  { id: 'residence', title: 'AI 住宅', href: './?mode=lab&demo=residence', section: 'scenes', kind: 'residence' },
+  { id: 'free-world', title: '自由世界', href: './?mode=lab&demo=free-world', section: 'scenes', kind: 'game' },
+  { id: 'transit', title: '星舰交通中心', href: './?mode=lab&demo=transit', section: 'scenes', kind: 'transit' },
+  { id: 'residence', title: 'AI 住宅', href: './?mode=lab&demo=residence', section: 'scenes', kind: 'residence', variant: 'original' },
+  { id: 'residence-2', title: 'AI 住宅 2', href: './?mode=lab&demo=residence-2', section: 'scenes', kind: 'residence', variant: 'harbor' },
   ...SCENE_DEMOS.map(demo => ({ id: demo.id, title: demo.title.replace(/^\d+\s*·\s*/, ''),
     href: `./?mode=lab&demo=${demo.id}`, section: 'scenes' as const, kind: 'demo' as const, demoId: demo.id })),
   ...FACILITY_SCENE_IDS.map(sceneId => ({ id: `facility:${sceneId}`, title: FACILITY_SCENES[sceneId].name,

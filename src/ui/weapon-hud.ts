@@ -157,6 +157,21 @@ export function createWeaponHud(root: HTMLElement, options: WeaponHudOptions): W
   const setAttr = (node: HTMLElement, name: string, value: string): void => {
     if (node.getAttribute(name) !== value) node.setAttribute(name, value);
   };
+  // 比对上次写入的原值；读回 style 会被规范化（50.0% → 50%），永远不相等。
+  const written = new WeakMap<HTMLElement, Map<string, string>>();
+  const setStyle = (node: HTMLElement, prop: string, value: string): void => {
+    let last = written.get(node);
+    if (!last) written.set(node, last = new Map());
+    if (last.get(prop) === value) return;
+    last.set(prop, value);
+    node.style.setProperty(prop, value);
+  };
+  const setHidden = (node: HTMLElement, hidden: boolean): void => {
+    if (node.hidden !== hidden) node.hidden = hidden;
+  };
+  const setDisabled = (node: HTMLButtonElement, disabled: boolean): void => {
+    if (node.disabled !== disabled) node.disabled = disabled;
+  };
   return {
     consumeSkill() { const cast = pending; pending = null; return cast; },
     resetInput,
@@ -182,7 +197,7 @@ export function createWeaponHud(root: HTMLElement, options: WeaponHudOptions): W
       humanForm = human;
       swallowing = w.gulpTicks > 0;
       const transforming = p.transformTicks >= 0;
-      switchCharacter.disabled = transforming || player.health!.hp <= 0;
+      setDisabled(switchCharacter, transforming || player.health!.hp <= 0);
       if (switchCharacter.disabled) resetInput();
       // 剧情锁定仍接收点击以说明解锁条件，真正的变身限制由模拟层统一处理。
       setAttr(switchCharacter, 'aria-disabled', String(!frame.transformUnlocked || switchCharacter.disabled));
@@ -196,13 +211,13 @@ export function createWeaponHud(root: HTMLElement, options: WeaponHudOptions): W
       setAttr(portrait, 'data-icon', human ? 'human' : 'pelican');
       setText(name, human ? 'GRASSY' : en ? 'PELICAN' : '鹈鹕');
       setText(healthLabel, `${player.health!.hp.toFixed(2)} / ${player.health!.maxHp.toFixed(2)}`);
-      healthFill.style.width = `${Math.max(0, player.health!.hp / player.health!.maxHp * 100)}%`;
+      setStyle(healthFill, 'width', `${Math.max(0, player.health!.hp / player.health!.maxHp * 100).toFixed(1)}%`);
       setText(detail, human ? en ? 'Melee strike' : '近战挥击'
         : en ? `Water · ${Math.floor(w.water / W.water.cost)} shots` : `水量 ${Math.floor(w.water / W.water.cost)} 发`);
       setText(form, transforming ? p.transformFrom === 'human' ? en ? 'Feathers growing…' : '羽毛生长 · 身体换形'
         : en ? 'Feathers retracting…' : '羽毛收退 · 身体换形'
         : human ? en ? 'Grassy · F → Pelican' : 'Grassy · F 变为鹈鹕' : en ? 'Pelican · F → Grassy' : '鹈鹕 · F 变为主角');
-      fill.style.width = `${human ? 100 : (w.water / W.water.capacity * 100).toFixed(1)}%`;
+      setStyle(fill, 'width', `${human ? 100 : (w.water / W.water.capacity * 100).toFixed(1)}%`);
       panel.classList.toggle('hud-weapon-low', !human && w.water < W.water.cost);
       const active = [p.shotTicks >= 0 && w.shotWeapon === 'fish', w.dashTicks > 0,
         w.gulpTicks > 0 || p.shotTicks >= 0 && w.shotWeapon === 'swallow', frame.photonChargeTicks > 0 || frame.photonActiveTicks > 0];
@@ -213,8 +228,9 @@ export function createWeaponHud(root: HTMLElement, options: WeaponHudOptions): W
         const cooldown = humanEquipment ? p.humanCombat.cooldowns[i]! : i < 3 ? w.cooldowns[i]! : frame.photonCooldownTicks;
         // 吞弹期间可再次按技能吐出，不能把此时的起手冷却当成禁用。
         const cooldownTicks = !human && i === 2 && w.gulpTicks > 0 ? 0 : cooldown;
-        view.cooldownRing.hidden = cooldownTicks === 0;
-        view.cooldownRing.style.backgroundImage = `conic-gradient(from -90deg, #e5c789b3 ${Math.max(0, 1 - cooldownTicks / skill.cooldown) * 360}deg, #e5c7891a 0)`;
+        setHidden(view.cooldownRing, cooldownTicks === 0);
+        // 取整到 1°：冷却环每度才重绘一次，就绪隐藏时不写。
+        if (cooldownTicks > 0) setStyle(view.cooldownRing, 'background-image', `conic-gradient(from -90deg, var(--hud-led) ${Math.round(Math.max(0, 1 - cooldownTicks / skill.cooldown) * 360)}deg, var(--hud-line) 0deg)`);
         const isActive = humanEquipment ? p.humanCombat.action === humanSkill.action : active[i]!;
         setAttr(view.artwork, 'data-icon', humanEquipment ? ['codex', 'bug', 'server'][i]! : ['fish', 'dash', 'swallow', 'photon'][i]!);
         const disabled = transforming || p.ride.mode !== 'off' && (humanEquipment || i === 1 || i === 2);
@@ -228,23 +244,23 @@ export function createWeaponHud(root: HTMLElement, options: WeaponHudOptions): W
         setText(view.key, i === 0 && en ? 'RMB' : skill.key);
         setText(view.label, en ? skill.en : skill.name);
         setText(view.state, state);
-        view.state.hidden = cooldown === 0 && !disabled && !isActive;
+        setHidden(view.state, cooldown === 0 && !disabled && !isActive);
         view.slot.classList.toggle('hud-weapon-active', isActive);
         view.slot.classList.toggle('hud-weapon-ready', cooldown === 0 && !disabled);
         view.slot.classList.toggle('hud-weapon-disabled', disabled);
-        view.slot.disabled = disabled || player.health!.hp <= 0;
+        setDisabled(view.slot, disabled || player.health!.hp <= 0);
         if (view.slot.disabled) {
           view.touch.reset();
           if (pending?.action === SKILL_ACTIONS[i]) pending = null;
         }
         setAttr(view.slot, 'aria-label', `${en ? skill.en : skill.name} · ${state}`);
         setAttr(view.slot, 'title', `${en ? skill.en : skill.name} · ${state}${!human && i === 1 ? en ? ' · Invincible while dashing; ends when the dash stops' : ' · 突进期间无敌，停止后立即解除' : ''}`);
-        view.progress.style.width = `${(100 * (1 - cooldown / skill.cooldown)).toFixed(1)}%`;
+        setStyle(view.progress, 'width', `${(100 * (1 - cooldown / skill.cooldown)).toFixed(1)}%`);
       });
       const aiming = skills.find(view => view.touch.direction !== null);
-      aimPreview.hidden = aiming === undefined;
-      aimStatus.hidden = aiming === undefined;
-      buttonStatus.hidden = aiming === undefined;
+      setHidden(aimPreview, aiming === undefined);
+      setHidden(aimStatus, aiming === undefined);
+      setHidden(buttonStatus, aiming === undefined);
       if (aiming) {
         const waitTicks = frame.skillWaitTicks[skills.indexOf(aiming)]!;
         const cooling = waitTicks > 0;
@@ -260,8 +276,8 @@ export function createWeaponHud(root: HTMLElement, options: WeaponHudOptions): W
         const start = options.project(x, y);
         const direction = aiming.touch.direction!;
         const end = options.project(x + direction.x, y + direction.y);
-        aimPreview.hidden = start === null || end === null;
-        aimStatus.hidden = aimPreview.hidden;
+        setHidden(aimPreview, start === null || end === null);
+        setHidden(aimStatus, start === null || end === null);
         if (start && end) {
           aimPreview.style.left = `${start.x}px`;
           aimPreview.style.top = `${start.y}px`;

@@ -25,6 +25,9 @@ function enemyImages(kind: EnemyKind): readonly CharacterAsset[] {
 export const CHARACTER_ASSETS: Readonly<Record<ShowcaseActor, readonly CharacterAsset[]>> = {
   d1: [],
   ruler: [],
+  flyingRoadster: [
+    { group: '模型多视图', label: '白色飞行车 · 实际模型预览', path: './models/white-vtol/preview.png', thumbnail: './models/white-vtol/preview.png' },
+  ],
   sam: [
     ...[['front', '正面'], ['back', '背面'], ['left', '左侧'], ['right', '右侧']].flatMap(([view, label]) => [
       { group: '四方向参考', label: `Sam · 怪物形态 · ${label}`, path: `./characters/sam/reference-${view}.png`, thumbnail: `./characters/sam/reference-${view}.png` },

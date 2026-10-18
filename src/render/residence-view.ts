@@ -6,7 +6,6 @@ import { createDefinitionKit } from './definition-kit.ts';
 import { createDefinitionFurniture } from './definition-furniture.ts';
 import type { WorkstationPlayer } from './workstation-display-state.ts';
 import { createAiCityDoor, createAiCityFixture } from './ai-city-architecture.ts';
-import { createFacilityLighting, type FacilityLamp } from './facility-lighting.ts';
 
 /** 合缝和实例化只改变绘制，命中仍返回玩家点击的那一个逻辑构件。 */
 export function residenceIntersectionId(hit: THREE.Intersection): number | undefined {
@@ -24,63 +23,58 @@ interface WalkObstacle {
   readonly standTop: number | null;
 }
 
-/** 一份住宅状态装配共享资源；渲染节点上的编号让交互直接指向存档构件。 */
-export function createResidenceView(state: ResidenceState, { lighting = true }: { lighting?: boolean } = {}) {
-  const root = new THREE.Group();
-  root.name = 'ai-city-residence';
-  root.scale.z = -1;
+type ViewUpdate = (time: number, player: WorkstationPlayer | null) => void;
+
+/** 门、家具与设施各自是独立对象，可以逐件增删并保留自身动画状态。 */
+interface ResidencePart {
+  readonly key: string;
+  readonly root: THREE.Object3D;
+  readonly update?: ViewUpdate;
+  readonly obstacle?: WalkObstacle;
+  readonly panel?: SolarPanelState;
+  readonly dispose: () => void;
+}
+
+const KIT_KINDS = new Set<ResidenceResource['kind']>(['solid', 'wall', 'glazing', 'platform']);
+
+/** 对象引用之外再比对决定外观的字段，原地改写资源或位置的同一对象也按替换处理。 */
+const placementKey = (p: ResidencePlacement): string => `${p.resourceId}:${p.x}:${p.y}:${p.depthMode ?? 'normal'}`;
+
+const tag = (object: THREE.Object3D, id: number): void => {
+  object.traverse(node => { node.userData.residenceId = id; });
+};
+
+/** 合缝配对、方石实例化和平台挂墙都依赖整组 kit 构件，因此这一组只能整体重建。 */
+function createResidenceKit(items: ReadonlyArray<{ placement: ResidencePlacement; resource: ResidenceResource }>) {
   const kit = createDefinitionKit({ style: 'ai-city' });
-  root.add(kit.root);
-  const disposers: Array<() => void> = [() => kit.dispose()];
-  const updates: Array<(time: number, player: WorkstationPlayer | null) => void> = [];
-  const solarPanels: SolarPanelState[] = [];
-  const obstacles: WalkObstacle[] = [];
-  const placements = state.placements.map(placement => ({ placement, resource: getResidenceResource(placement.resourceId) }));
-  const tag = (object: THREE.Object3D, id: number): void => {
-    object.traverse(node => { node.userData.residenceId = id; });
-  };
+  const instanced: THREE.InstancedMesh[] = [];
   const addKit = (placement: ResidencePlacement, draw: () => void): void => {
     const count = kit.root.children.length;
     draw();
     for (const child of kit.root.children.slice(count)) tag(child, placement.id);
   };
-  const addObject = (placement: ResidencePlacement, object: THREE.Object3D, z = 0): void => {
-    object.position.set(placement.x, placement.y, z);
-    tag(object, placement.id);
-    root.add(object);
-  };
   // 平台深度依墙体决定，先完成整面背景，再装配所有实体和平台。
-  for (const { placement: p, resource: r } of placements) {
+  for (const { placement: p, resource: r } of items) {
     if (r.kind === 'wall') addKit(p, () => kit.wall(r.wallId, p.x, p.y));
     else if (r.kind === 'glazing') addKit(p, () => kit.window(r.width, r.height, p.x, p.y, 'rounded', true));
   }
   const paired = new Set<number>();
-  const solidByCell = new Map(placements.filter(item => item.resource.kind === 'solid')
+  const solidByCell = new Map(items.filter(item => item.resource.kind === 'solid')
     .map(item => [`${item.placement.x}:${item.placement.y}:${item.placement.resourceId}:${item.placement.depthMode ?? 'normal'}`, item.placement]));
-  for (const { placement: p, resource: r } of placements) {
-    if (r.kind === 'solid') {
-      if (paired.has(p.id)) continue;
-      if (r.material === 'ashlar' && ['A', 'B', 'C'].includes(r.shape) && p.x % 2 !== 0
-        && solidByCell.has(`${p.x - 1}:${p.y}:${p.resourceId}:${p.depthMode ?? 'normal'}`)) continue;
-      const mate = r.material === 'ashlar' && ['A', 'B', 'C'].includes(r.shape) && p.x % 2 === 0
-        ? solidByCell.get(`${p.x + 1}:${p.y}:${p.resourceId}:${p.depthMode ?? 'normal'}`) : undefined;
-      const count = kit.root.children.length;
-      addKit(p, () => kit.solid(r.shape, p.x, p.y, r.material, p.depthMode, mate ? 2 : 1));
-      if (mate) {
-        paired.add(mate.id);
-        for (const child of kit.root.children.slice(count)) {
-          child.userData.residencePairIds = [p.id, mate.id];
-          child.userData.residencePairX = p.x;
-        }
+  for (const { placement: p, resource: r } of items) {
+    if (r.kind !== 'solid' || paired.has(p.id)) continue;
+    if (r.material === 'ashlar' && ['A', 'B', 'C'].includes(r.shape) && p.x % 2 !== 0
+      && solidByCell.has(`${p.x - 1}:${p.y}:${p.resourceId}:${p.depthMode ?? 'normal'}`)) continue;
+    const mate = r.material === 'ashlar' && ['A', 'B', 'C'].includes(r.shape) && p.x % 2 === 0
+      ? solidByCell.get(`${p.x + 1}:${p.y}:${p.resourceId}:${p.depthMode ?? 'normal'}`) : undefined;
+    const count = kit.root.children.length;
+    addKit(p, () => kit.solid(r.shape, p.x, p.y, r.material, p.depthMode, mate ? 2 : 1));
+    if (mate) {
+      paired.add(mate.id);
+      for (const child of kit.root.children.slice(count)) {
+        child.userData.residencePairIds = [p.id, mate.id];
+        child.userData.residencePairX = p.x;
       }
-    }
-    else if (r.kind === 'door') {
-      const view = createAiCityDoor(r.side);
-      addObject(p, view.root);
-      if (r.side === 'left') view.root.position.x += .5;
-      view.setOpen(p.open!);
-      updates.push(time => { view.setOpen(p.open!); view.update(time); });
-      disposers.push(view.dispose);
     }
   }
   // 方石地表按区段实例化，保留逐实例构件编号用于逐格选取与拆除。
@@ -105,59 +99,111 @@ export function createResidenceView(state: ResidenceState, { lighting = true }: 
     });
     instances.computeBoundingSphere();
     kit.root.add(instances);
-    disposers.push(() => instances.dispose());
+    instanced.push(instances);
   }
-  for (const { placement: p, resource: r } of placements) {
+  for (const { placement: p, resource: r } of items) {
     if (r.kind === 'platform') addKit(p, () => kit.platform(r.platformWidth, p.y + .5, p.x, r.material));
   }
-  const obstacle = (p: ResidencePlacement, r: ResidenceResource, centerZ: number, frontZ: number, standTop: number | null): void => {
-    obstacles.push({ x: p.x, y: p.y, width: r.width, height: r.height, centerZ, frontZ, standTop });
+  return {
+    root: kit.root,
+    dispose(): void {
+      for (const instances of instanced) instances.dispose();
+      kit.dispose();
+      kit.root.removeFromParent();
+    },
   };
-  for (const { placement: p, resource: r } of placements) {
-    if (r.kind === 'furniture') {
-      const view = createDefinitionFurniture(r.furniture, { solarDepth: 2, ...r.chairFacing ? { chairFacing: r.chairFacing } : {} });
-      view.root.scale.z = -1;
-      addObject(p, view.root, r.furniture === 'solar' || r.furniture === 'pendant' ? 0 : .5);
-      if (r.furniture === 'solar') {
-        const panel = createSolarPanel(p.x + .5, p.y, solarTrackingAngle(RESIDENCE_SUN));
-        solarPanels.push(panel);
-        view.update!(0, panel.angle, null);
-        updates.push(time => view.update!(time, panel.angle, null));
-      } else {
-        if (view.update) updates.push((time, player) => view.update!(time, undefined, player));
-        if (r.furniture !== 'pendant') obstacle(p, r, -.5, 0, r.standTop);
-      }
-      disposers.push(view.dispose);
-    } else if (r.kind === 'fixture') {
-      const view = createAiCityFixture(r.fixture);
-      const rearMounted = r.fixture === 'planter' || r.fixture === 'energy-column';
-      // 深2地台前半留给通行，花槽和设备柱与家具一样靠后摆放。
-      addObject(p, view.root, rearMounted ? .5 : 0);
-      updates.push(view.update);
-      disposers.push(view.dispose);
-      // 花槽工厂已复用正式花草几何，避免叠加第二套植物。
-      if (rearMounted) obstacle(p, r, -.5, 0, null);
-      else if (r.fixture === 'bollard-light') obstacle(p, r, 0, .25, null);
+}
+
+function createResidencePart(p: ResidencePlacement, r: ResidenceResource, key: string): ResidencePart {
+  const place = (object: THREE.Object3D, z = 0): void => {
+    object.position.set(p.x, p.y, z);
+    tag(object, p.id);
+  };
+  const obstacle = (centerZ: number, frontZ: number, standTop: number | null): WalkObstacle =>
+    ({ x: p.x, y: p.y, width: r.width, height: r.height, centerZ, frontZ, standTop });
+  if (r.kind === 'door') {
+    const view = createAiCityDoor(r.side);
+    place(view.root);
+    if (r.side === 'left') view.root.position.x += .5;
+    view.setOpen(p.open!);
+    return { key, root: view.root, update: time => { view.setOpen(p.open!); view.update(time); }, dispose: view.dispose };
+  }
+  if (r.kind === 'furniture') {
+    const view = createDefinitionFurniture(r.furniture, { solarDepth: 2, ...r.chairFacing ? { chairFacing: r.chairFacing } : {} });
+    view.root.scale.z = -1;
+    place(view.root, r.furniture === 'solar' || r.furniture === 'pendant' ? 0 : .5);
+    if (r.furniture === 'solar') {
+      const panel = createSolarPanel(p.x + .5, p.y, solarTrackingAngle(RESIDENCE_SUN));
+      view.update!(0, panel.angle, null);
+      return { key, root: view.root, panel, update: time => view.update!(time, panel.angle, null), dispose: view.dispose };
     }
+    return { key, root: view.root, dispose: view.dispose,
+      ...view.update ? { update: (time: number, player: WorkstationPlayer | null) => view.update!(time, undefined, player) } : {},
+      ...r.furniture !== 'pendant' ? { obstacle: obstacle(-.5, 0, r.standTop) } : {} };
   }
-  const lamps: Array<FacilityLamp & { readonly power: number; readonly signal: boolean }> = [];
-  if (lighting) for (const p of state.placements) {
-    const lamp = p.resourceId === 'pendant' ? { x: .5, y: .06, z: 0, power: 36, distance: 8, signal: false }
-      : p.resourceId === 'eave-light' ? { x: .5, y: -.1, z: 0, power: 24, distance: 7, signal: false }
-      : p.resourceId === 'wall-light' ? { x: .25, y: .5, z: .64, power: 14, distance: 6, signal: true }
-      : p.resourceId === 'bollard-light' ? { x: .25, y: .77, z: 0, power: 1.6, distance: 3.8, signal: false }
-      : null;
-    if (lamp) lamps.push({ position: new THREE.Vector3(p.x + lamp.x, p.y + lamp.y, lamp.z),
-      color: new THREE.Color(lamp.signal ? 0x79cfff : p.resourceId === 'bollard-light' ? 0xffead4 : 0xffdfb7), intensity: lamp.power * .12,
-      power: lamp.power, distance: lamp.distance, signal: lamp.signal });
-  }
-  const localLighting = createFacilityLighting(root, lamps.filter(lamp => !lamp.signal), lamps.filter(lamp => lamp.signal));
-  disposers.push(localLighting.dispose);
-  const viewRay = new THREE.Ray();
-  const facadePlane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
-  const worldFocus = new THREE.Vector3();
-  const lightFocus = new THREE.Vector3();
-  let animationTime = 0;
+  if (r.kind !== 'fixture') throw new Error(`residence view: ${r.id} is not a standalone part`);
+  const view = createAiCityFixture(r.fixture);
+  const rearMounted = r.fixture === 'planter' || r.fixture === 'energy-column';
+  // 深2地台前半留给通行，花槽和设备柱与家具一样靠后摆放。
+  place(view.root, rearMounted ? .5 : 0);
+  // 花槽工厂已复用正式花草几何，避免叠加第二套植物。
+  return { key, root: view.root, update: view.update, dispose: view.dispose,
+    ...rearMounted ? { obstacle: obstacle(-.5, 0, null) } : r.fixture === 'bollard-light' ? { obstacle: obstacle(0, .25, null) } : {} };
+}
+
+/** 一份住宅状态装配共享资源；渲染节点上的编号让交互直接指向存档构件。 */
+export function createResidenceView(state: ResidenceState) {
+  const root = new THREE.Group();
+  root.name = 'ai-city-residence';
+  root.scale.z = -1;
+  let kit: ReturnType<typeof createResidenceKit> | undefined;
+  let kitKeys = new Map<ResidencePlacement, string>();
+  let parts = new Map<ResidencePlacement, ResidencePart>();
+  let updates: ViewUpdate[] = [];
+  let obstacles: WalkObstacle[] = [];
+  // 应用与透视操控持有这一数组的引用，增删时原地修改。
+  const solarPanels: SolarPanelState[] = [];
+  /** 按构件对象引用比对上次装配：独立构件逐件增删，kit 构件有变化时只整体重建 kit。门开关只改 open，不进入这里。 */
+  const sync = (): void => {
+    const nextKitKeys = new Map<ResidencePlacement, string>();
+    const kitItems: Array<{ placement: ResidencePlacement; resource: ResidenceResource }> = [];
+    const nextParts = new Map<ResidencePlacement, ResidencePart>();
+    for (const placement of state.placements) {
+      const resource = getResidenceResource(placement.resourceId);
+      const key = placementKey(placement);
+      if (KIT_KINDS.has(resource.kind)) {
+        nextKitKeys.set(placement, key);
+        kitItems.push({ placement, resource });
+        continue;
+      }
+      const kept = parts.get(placement);
+      if (kept?.key === key) {
+        nextParts.set(placement, kept);
+        continue;
+      }
+      const part = createResidencePart(placement, resource, key);
+      root.add(part.root);
+      nextParts.set(placement, part);
+    }
+    for (const [placement, part] of parts) if (nextParts.get(placement) !== part) {
+      part.root.removeFromParent();
+      part.dispose();
+    }
+    parts = nextParts;
+    const kitChanged = kit === undefined || nextKitKeys.size !== kitKeys.size
+      || [...nextKitKeys].some(([placement, key]) => kitKeys.get(placement) !== key);
+    if (kitChanged) {
+      kit?.dispose();
+      kit = createResidenceKit(kitItems);
+      root.add(kit.root);
+      kitKeys = nextKitKeys;
+    }
+    const list = [...parts.values()];
+    updates = list.flatMap(part => part.update ? [part.update] : []);
+    obstacles = list.flatMap(part => part.obstacle ? [part.obstacle] : []);
+    solarPanels.splice(0, solarPanels.length, ...list.flatMap(part => part.panel ? [part.panel] : []));
+  };
+  sync();
   return {
     root,
     solarPanels,
@@ -174,22 +220,13 @@ export function createResidenceView(state: ResidenceState, { lighting = true }: 
       }
       return z;
     },
-    setLighting(camera: THREE.Camera, night: number, skyAt: (x: number, y: number) => number): void {
-      camera.getWorldPosition(viewRay.origin);
-      camera.getWorldDirection(viewRay.direction);
-      root.getWorldPosition(worldFocus);
-      facadePlane.constant = -worldFocus.z;
-      // 自由镜头恰好侧视墙面时保留原焦点，防止平行射线把灯源选择推到远处。
-      if (viewRay.intersectPlane(facadePlane, worldFocus)) lightFocus.copy(root.worldToLocal(worldFocus));
-      for (const lamp of lamps) lamp.intensity = lamp.power * (1 - .88 * (1 - night) * skyAt(lamp.position.x, lamp.position.y));
-      localLighting.update(lightFocus, animationTime);
-    },
+    sync,
     update(time: number, player: WorkstationPlayer | null): void {
-      animationTime = time;
       for (const update of updates) update(time, player);
     },
     dispose(): void {
-      for (const dispose of disposers.reverse()) dispose();
+      for (const part of parts.values()) part.dispose();
+      kit?.dispose();
       root.removeFromParent();
       root.clear();
     },

@@ -1,13 +1,15 @@
 import * as THREE from 'three';
 import type { ResidenceMaterial } from '../config/residence.ts';
-import { generateTileTextures, tileLayerIndex, TILE_TEXTURE_PERIOD } from './tile-textures.ts';
+import { generateTileTextures, tileLayerIndex, TILE_TEXTURE_PERIOD, type TileTextureData } from './tile-textures.ts';
 
 export type NaturalBuildingMaterial = Exclude<ResidenceMaterial, 'ceramic' | 'alloy' | 'ashlar'>;
 const layers = { grass: 'dirt', dirt: 'dirt', stone: 'stone', sand: 'sand', sandstone: 'sandstone', timber: 'planks' } as const;
 
+let textureData: TileTextureData | undefined;
+
 /** 建造轮廓直接采样游戏地形的纹理，所有形状和加深格共用同一份表面。 */
 export function createNaturalBuildingMaterials() {
-  const data = generateTileTextures(256);
+  const data = textureData ??= generateTileTextures(256);
   const textures = new Map<string, THREE.DataTexture>();
   const materials = new Map<NaturalBuildingMaterial, THREE.MeshStandardMaterial>();
   const texture = (layer: string): THREE.DataTexture => {

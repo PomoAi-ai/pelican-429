@@ -177,6 +177,12 @@ async function boot(): Promise<void> {
   } else if (mode === 'intro') {
     const { startIntro } = await import('./app/intro-app.ts');
     await startIntro(bootError);
+  } else if (mode === 'game' && params.get('level') === 'transit') {
+    const { startTransit } = await import('./app/transit-app.ts');
+    await startTransit(bootError);
+  } else if (mode === 'game' && params.get('level') === 'harbor') {
+    const { startResidence } = await import('./app/residence-app.ts');
+    await startResidence('saved', bootError, 'harbor');
   } else if (mode === 'homestead' && params.get('scene') === 'residence') {
     const { startResidence } = await import('./app/residence-app.ts');
     await startResidence('saved', bootError);

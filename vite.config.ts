@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { join, relative } from 'node:path';
 import { RELEASE_MODEL_PATHS } from './src/config/web-models.ts';
 import { NPCS } from './src/config/npc.ts';
+import { HARBOR_PAINTED_FILES, HARBOR_PAINTED_PATH, HARBOR_LAKE_FILES, HARBOR_LAKE_PATH } from './src/config/harbor-painted.ts';
 
 function configureMarkdownEncoding(server: Pick<ViteDevServer, 'middlewares'>) {
   server.middlewares.use((req, res, next) => {
@@ -39,11 +40,15 @@ export default defineConfig(({ command, mode }) => ({
       const files = [
         'app.webmanifest', 'icons/pelican-192.png', 'icons/pelican-512.png', 'llms.txt',
         ...RELEASE_MODEL_PATHS,
+        'models/white-vtol/preview.png', 'models/white-vtol/SOURCE.md',
         ...Object.values(NPCS).flatMap(npc => npc.forms.map(form => form.image)),
         'characters/luma/portrait.jpg', 'contact/x-avatar.jpg', 'ui/hud-icons.webp',
         'scenes/ai-city-background-v1/skyline.png', 'scenes/ai-city-background-v1/canyon.png',
+        'scenes/ai-skyline-depth-v1/sky.jpg',
+        ...HARBOR_PAINTED_FILES.map(file => `${HARBOR_PAINTED_PATH}/${file}`),
+        ...HARBOR_LAKE_FILES.map(file => `${HARBOR_LAKE_PATH}/${file}`),
       ];
-      for (const directory of ['resources/home', 'resources/free-world', 'concepts']) {
+      for (const directory of ['resources/home', 'resources/free-world', 'concepts', 'ui/hud']) {
         for (const entry of readdirSync(join(publicDir, directory), { recursive: true, withFileTypes: true })) {
           if (entry.isFile()) files.push(relative(publicDir, join(entry.parentPath, entry.name)));
         }

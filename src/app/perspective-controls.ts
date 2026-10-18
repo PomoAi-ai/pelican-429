@@ -1,3 +1,5 @@
+import type { UtilityDroneFleet } from '../render/utility-drone.ts';
+import { protectPlayer } from '../render/player-occlusion.ts';
 import * as THREE from 'three';
 import type { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { DEFAULT_BINDINGS, buildBindingLookup, type GameAction } from '../config/keybindings.ts';
@@ -5,32 +7,38 @@ import { TUNING, type Tuning } from '../config/tuning.ts';
 import { createFixedStepper } from '../core/fixed-step.ts';
 import { damp } from '../core/math.ts';
 import { getSkillWaitTicks } from '../entities/skill-wait.ts';
+import type { Entity } from '../entities/entity.ts';
 import { createActionTracker } from '../input/action-map.ts';
 import { bindKeyboardMouse, type KeyboardMouseBinding } from '../input/keyboard-mouse.ts';
 import type { Body } from '../physics/body.ts';
-import type { DefinitionCollision } from '../physics/definition-collision.ts';
+import { definitionGroundAt, type DefinitionCollision } from '../physics/definition-collision.ts';
 import type { SolarPanelState } from '../physics/solar-panel.ts';
 import { createCameraRig } from '../render/camera-rig.ts';
 import { DEFAULT_PELICAN_ANIM_TUNING } from '../render/pelican/pelican-animator.ts';
 import { createGrassyPlayerAnimator } from '../render/grassy/grassy-player-animator.ts';
 import { createGrassyProjectileViews } from '../render/grassy/grassy-projectile-view.ts';
+import { createFlyingRoadsterView } from '../render/flying-roadster-view.ts';
 import { createViewRegistry } from '../render/view-registry.ts';
 import type { GrassyRig } from '../render/grassy/grassy-rig.ts';
 import type { Stage } from '../render/stage.ts';
+import { createGameHud, type GameHudWorld } from '../ui/game-hud.ts';
+import type { WorldToScreen } from '../ui/hud.ts';
 import { createWeaponHud } from '../ui/weapon-hud.ts';
 import type { SceneSection } from './definition-scene-layout.ts';
 import { createPerspectivePlayer } from './perspective-player.ts';
 
-export function createPerspectiveControls(app: HTMLElement, stage: Stage, orbit: OrbitControls,
+export function createPerspectiveControls(app: HTMLElement, stage: Stage, droneFleet: UtilityDroneFleet, orbit: OrbitControls,
   rig: GrassyRig, collision: DefinitionCollision, bounds: THREE.Box3, initial: SceneSection, viewAngles: readonly [number, number], solarPanels: readonly SolarPanelState[], unlimitedFlight = true,
-  options: { cameraMode: 'game' | 'inspection'; tuning: Tuning; applyForce?: (body: Body, dt: number) => void; airWind?: (body: Body) => number } = { cameraMode: 'inspection', tuning: TUNING }) {
+  options: { cameraMode: 'game' | 'inspection'; tuning: Tuning; applyForce?: (body: Body, dt: number) => void; airWind?: (body: Body) => number; carriers?: readonly Entity[]; world?: GameHudWorld } = { cameraMode: 'inspection', tuning: TUNING }) {
   const world = { width: Math.ceil(bounds.max.x + 1), height: Math.ceil(bounds.max.y + 8) };
+  protectPlayer(rig.root);
   const player = createPerspectivePlayer(collision, { x: initial.playerX, y: initial.playerY }, world, solarPanels, unlimitedFlight, options);
   const stepper = createFixedStepper(TUNING.sim);
   const tracker = createActionTracker();
   const lookup = buildBindingLookup(DEFAULT_BINDINGS);
   const projectileViews = createGrassyProjectileViews();
-  const projectiles = createViewRegistry(stage.scene, { codexShot: projectileViews.factory, bugShot: projectileViews.factory });
+  const carriers = options.carriers ?? [];
+  const projectiles = createViewRegistry(stage.scene, { codexShot: projectileViews.factory, bugShot: projectileViews.factory, flyingRoadster: createFlyingRoadsterView });
   const follow = createCameraRig({ camera: stage.camera, tuning: options.tuning,
     bounds: { ...world, minX: bounds.min.x, minY: Math.min(0, bounds.min.y), width: bounds.max.x - bounds.min.x + 1 },
     viewport: () => stage.canvas.getBoundingClientRect() });
@@ -54,16 +62,29 @@ export function createPerspectiveControls(app: HTMLElement, stage: Stage, orbit:
     stage.canvas.focus({ preventScroll: true });
   };
   const projected = new THREE.Vector3();
+  // HUD 每帧要投影多次；尺寸缓存下来，避免在样式刚写完时读布局触发强制重排。
+  let canvasSize = { width: stage.canvas.clientWidth, height: stage.canvas.clientHeight };
+  const resize = new ResizeObserver(([entry]) => { canvasSize = entry!.contentRect; });
+  resize.observe(stage.canvas);
+  const project: WorldToScreen = (x, y) => {
+    projected.set(x, y, 0).project(stage.camera);
+    if (projected.z < -1 || projected.z > 1) return null;
+    return { x: (projected.x + 1) * canvasSize.width / 2, y: (1 - projected.y) * canvasSize.height / 2 };
+  };
   const weaponHud = createWeaponHud(hudRoot, {
     weapons: TUNING.weapons,
-    project(x, y) {
-      projected.set(x, y, 0).project(stage.camera);
-      if (projected.z < -1 || projected.z > 1) return null;
-      const rect = stage.canvas.getBoundingClientRect();
-      return { x: (projected.x + 1) * rect.width / 2, y: (1 - projected.y) * rect.height / 2 };
-    },
+    project,
     onTransform: () => castSkill('transform'),
     onSkill: castSkill,
+  });
+  const hud = createGameHud(hudRoot, {
+    updateDrone: (index, x, y, dt, talking, flying, groundAngle, groundHeight) => {
+      const depth = current.walkZ ? current.walkZ(x, !flying && groundHeight !== null ? groundHeight : y - 0.34) : 0;
+      droneFleet.updateFollower(index, x, y, dt, talking, flying, groundAngle, groundHeight, depth);
+    },
+    groundAt: (x, y) => definitionGroundAt(collision, x, y),
+    canvas: stage.canvas, project, world: options.world,
+    blocked: () => !playing,
   });
   const updateHud = (frameDt: number): void => weaponHud.update({
     entities: [player.entity], playerId: player.entity.id, frameDt,
@@ -77,13 +98,13 @@ export function createPerspectiveControls(app: HTMLElement, stage: Stage, orbit:
   const aim = (): void => {
     if (options.cameraMode === 'game') {
       orbit.target.set(stage.camera.position.x, stage.camera.position.y, 0);
-      return;
+    } else {
+      orbit.target.set(follow.focus.x, follow.focus.y, 0);
     }
     const camera = stage.camera;
     const distance = options.tuning.camera.distance;
     const yaw = THREE.MathUtils.degToRad(angles[0]);
     const pitch = THREE.MathUtils.degToRad(angles[1]);
-    orbit.target.set(follow.focus.x, follow.focus.y, 0);
     camera.position.set(orbit.target.x + distance * Math.sin(yaw) * Math.cos(pitch),
       orbit.target.y + distance * Math.sin(pitch), distance * Math.cos(yaw) * Math.cos(pitch));
     camera.lookAt(orbit.target);
@@ -145,6 +166,7 @@ export function createPerspectiveControls(app: HTMLElement, stage: Stage, orbit:
   app.addEventListener('keydown', stopKey);
 
   return {
+    hud,
     get body() { return player.entity.body; },
     get playing(): boolean { return playing; },
     get following(): boolean { return following; },
@@ -156,7 +178,7 @@ export function createPerspectiveControls(app: HTMLElement, stage: Stage, orbit:
       player.teleport(section.playerX, section.playerY);
       rig.root.position.set(section.playerX, section.playerY, section.walkZ ? section.walkZ(section.playerX, section.playerY) : 0);
       rig.root.rotation.y = player.entity.facing * Math.PI / 2;
-      projectiles.sync(player.projectiles, 0, 0);
+      projectiles.sync([...carriers, ...player.projectiles], 0, 0);
       animator.reset(player.entity);
       animator.update(player.entity, 0, 0);
       updateHud(0);
@@ -189,19 +211,24 @@ export function createPerspectiveControls(app: HTMLElement, stage: Stage, orbit:
         rig.root.rotation.y = damp(rig.root.rotation.y, entity.facing * Math.PI / 2, DEFAULT_PELICAN_ANIM_TUNING.yawRate, dt);
       }
       animator.update(entity, alpha, dt);
-      projectiles.sync(player.projectiles, alpha, dt);
+      projectiles.sync([...carriers, ...player.projectiles], alpha, dt);
       weaponHud.handleEvents(player.events.drain());
-      updateHud(dt);
+      // 相机先就位再投影 HUD，跟随物不落后一帧。
       if (following) { follow.update(x, y, entity.facing, dt); aim(); }
+      updateHud(dt);
+      hud.update(entity, dt);
     },
     dispose(): void {
       binding?.dispose(); tracker.releaseAll();
+      resize.disconnect();
       button.removeEventListener('click', toggle);
       cameraButton.removeEventListener('click', toggleCamera);
       orbit.removeEventListener('start', adjustCamera);
       for (const skill of skillButtons) skill.removeEventListener('click', releaseSkill);
       projectiles.dispose(); projectileViews.dispose();
       weaponHud.dispose();
+      hud.dispose();
+      droneFleet.dispose();
       app.removeEventListener('keydown', stopKey);
     },
   };

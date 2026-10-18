@@ -1,9 +1,9 @@
 import type { DefinitionKit } from '../render/definition-kit.ts';
 import type { RockTerrainCell } from '../config/rock-terrain.ts';
 import { generateTileTextures } from '../render/tile-textures.ts';
-import type { DepthLayerId } from './definition-depth-layout.ts';
+import type { DepthLayerId } from '../config/depth-layers.ts';
 
-export type DepthTheme = 'valley' | 'lake' | 'coast' | 'buildings' | 'ruins' | 'cave';
+export type DepthTheme = 'valley' | 'lake' | 'coast' | 'buildings' | 'ruins' | 'cave' | 'skyline';
 
 export const terrainTextures = generateTileTextures(128);
 
@@ -75,21 +75,22 @@ function bridge(kit: DefinitionKit, left: number, base: number, width: number, t
   }
 }
 
-/** 近景与景深方案的玩法地面共用同一种材质。 */
-export function groundMaterial(theme: DepthTheme): 'dirt' | 'stone' {
-  return theme === 'valley' || theme === 'lake' ? 'dirt' : 'stone';
+/** 近景与景深方案的玩法地面共用同一种材质；null 为城市用的定义色建筑砖，不铺岩土贴图。 */
+export function groundMaterial(theme: DepthTheme): 'dirt' | 'stone' | null {
+  return theme === 'valley' || theme === 'lake' ? 'dirt' : theme === 'skyline' ? null : 'stone';
 }
 
 function foreground(kit: DefinitionKit, theme: DepthTheme): void {
   const cells: RockTerrainCell[] = [];
   const material = groundMaterial(theme);
   for (const [left, width] of [[2, 8], [18, 12], [36, 10]] as const) {
+    if (!material) { blocks(kit, left, -1, width, 2); continue; }
     for (let x = left; x < left + width; x++) for (let y = -1; y < 1; y++) {
       cells.push({ x, y, shape: 'A', layers: [{ shape: 'A', material, ore: false }] });
     }
   }
-  kit.terrain(cells, terrainTextures);
-  if (theme === 'buildings' || theme === 'ruins' || theme === 'coast') {
+  if (cells.length) kit.terrain(cells, terrainTextures);
+  if (theme === 'buildings' || theme === 'ruins' || theme === 'coast' || theme === 'skyline') {
     for (const x of [2, 18, 45]) { kit.solid('B', x, 1); kit.solid('K', x + 1, 1); }
   }
   if (theme === 'cave') {
@@ -224,6 +225,18 @@ function cave(kit: DefinitionKit, layer: DepthLayerId): void {
   }
 }
 
+/** 滨水步道两段台地夹出开阔水面；背景格子二是一条贴近水面的细长磁悬浮桥，桥墩稀疏，不挡后方楼群。 */
+function skyline(kit: DefinitionKit, layer: DepthLayerId): void {
+  if (layer === 'background-near') {
+    blocks(kit, -6, -3, 12, 4); kit.solid('E', 6, 0);
+    kit.solid('D', 37, 0); blocks(kit, 38, -3, 16, 4);
+    for (const x of [-4, -2, 0, 2, 4, 39, 41, 43, 45, 47]) kit.platform('full', 2, x);
+  } else if (layer === 'background-far') {
+    for (let x = -32; x < 84; x += 16) blocks(kit, x, -3, 1, 4);
+    for (let x = -36; x < 88; x++) kit.solid('B', x, 1);
+  }
+}
+
 /** 层深、材质与装饰由宿主统一装配；这里仅使用共享定义构件搭建完整景观。 */
 export function buildDepthScenery(kit: DefinitionKit, theme: DepthTheme, layer: DepthLayerId): void {
   if (layer === 'foreground') { foreground(kit, theme); return; }
@@ -232,5 +245,6 @@ export function buildDepthScenery(kit: DefinitionKit, theme: DepthTheme, layer: 
   else if (theme === 'coast') coast(kit, layer);
   else if (theme === 'buildings') town(kit, layer);
   else if (theme === 'ruins') ruins(kit, layer);
+  else if (theme === 'skyline') skyline(kit, layer);
   else cave(kit, layer);
 }

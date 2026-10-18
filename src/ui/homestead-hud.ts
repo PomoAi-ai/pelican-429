@@ -2,10 +2,11 @@
  * 家园概念版本界面：顶部资源条、无人机状态、光子引导、指挥模式（Tab）、商店终端、睡觉与 Tibo 天亮结算。
  * 指挥模式下用一层透明遮罩接住鼠标，左键点选或拖框，不会触发普攻。
  */
-import { HOMESTEAD, isDaytime } from '../config/homestead.ts';
+import { HOMESTEAD } from '../config/homestead.ts';
 import type { ComputeMode, HomesteadBuild, HomesteadPurchase } from '../config/homestead.ts';
+import { calendarOf, isDaytime, MOON_PHASE_NAMES, moonPhase, SEASON_NAMES } from '../core/calendar.ts';
 import type { Rect, Vec2 } from '../core/math.ts';
-import type { BuildResult, Drone, DroneStatus, HomesteadState, MarkBlock, PurchaseResult } from '../sim/homestead.ts';
+import type { BuildResult, HarvestKind, Drone, DroneStatus, HomesteadState, MarkBlock, PurchaseResult } from '../sim/homestead.ts';
 import { npcModel } from '../config/npc.ts';
 
 export type HomesteadTerminal = 'compute' | 'robot';
@@ -15,7 +16,7 @@ export interface HomesteadHudOptions {
   readonly terminal: () => HomesteadTerminal | null;
   readonly canSleep: () => boolean;
   readonly toWorld: (clientX: number, clientY: number) => Vec2 | null;
-  readonly onMark: (area: Rect) => number;
+  readonly onMark: (area: Rect, kind: HarvestKind) => number;
   readonly onCancel: (area: Rect) => number;
   readonly onPlaceDepot: (x: number) => BuildResult;
   readonly onPlaceSolar: (area: Rect) => { readonly placed: number; readonly reason: Exclude<BuildResult, 'ok'> | null };
@@ -30,11 +31,12 @@ export interface HomesteadHudOptions {
 export interface HomesteadHud {
   readonly open: boolean;
   readonly commanding: boolean;
+  command(tool: 'chop' | 'dig' | 'build'): void;
   update(): void;
   dispose(): void;
 }
 
-type Tool = 'mark' | 'cancel' | HomesteadBuild;
+type Tool = 'mark' | 'chop' | 'dig' | 'cancel' | HomesteadBuild;
 
 const STATUS_TEXT: Readonly<Record<DroneStatus, string>> = {
   docked: '待命', charging: '充电中', flying: '飞往目标', working: '作业中', returning: '返回卸货',
@@ -95,7 +97,7 @@ export function createHomesteadHud(parent: HTMLElement, options: HomesteadHudOpt
   commandToggle.type = 'button';
   const tools = element('div', 'hs-tools', command);
   const toolButtons = new Map<Tool, HTMLButtonElement>();
-  for (const [tool, label] of [['mark', '标记采集'], ['cancel', '取消标记/施工'],
+  for (const [tool, label] of [['mark', '自动采集'], ['chop', '砍树'], ['dig', '挖掘'], ['cancel', '取消标记/施工'],
     ['solar', `太阳能板（每格 木 ${HOMESTEAD.builds.solar.wood}）`], ['depot', `仓库扩容（木 ${HOMESTEAD.builds.depot.wood} 石 ${HOMESTEAD.builds.depot.stone}）`]] as const) {
     const button = element('button', 'hs-tool', tools, label);
     button.type = 'button';
@@ -162,10 +164,12 @@ export function createHomesteadHud(parent: HTMLElement, options: HomesteadHudOpt
     tool = next;
     for (const [key, button] of toolButtons) button.classList.toggle('hs-tool-on', key === next);
     hint.textContent = next === 'mark' ? '左键点树或拖框圈地：框里有树就砍树，否则挖地块。红色区域还有敌人，清场后无人机才会进去'
+      : next === 'chop' ? '左键点树或拖框：只砍树，不挖地块'
+      : next === 'dig' ? '左键点选或拖框：只挖自然地块；树根与设施地基受保护，石头需要 Lv2'
       : next === 'cancel' ? '左键点选或拖框，取消框里的标记和施工轮廓（退还材料）'
       : next === 'solar' ? `左键点一个空格子，或拖框一次铺满；板要放在实心格子上面，每格发电 ${HOMESTEAD.power.solarPerPanel}`
       : '移动鼠标选位置，左键放下轮廓；材料当场扣除';
-    if (next === 'mark' || next === 'cancel') options.onPreview(null, { x: 0, y: 0 });
+    if (next !== 'solar' && next !== 'depot') options.onPreview(null, { x: 0, y: 0 });
   };
   const openDialog = (dialog: HTMLDialogElement): void => {
     options.onOpen();
@@ -238,8 +242,8 @@ export function createHomesteadHud(parent: HTMLElement, options: HomesteadHudOpt
     }
     // 单击也给半格的余量，方便点中细小的树干。
     const picked = { x: rect.x - 0.25, y: rect.y - 0.25, w: rect.w + 0.5, h: rect.h + 0.5 };
-    if (tool === 'mark') {
-      const added = options.onMark(picked);
+    if (tool === 'mark' || tool === 'chop' || tool === 'dig') {
+      const added = options.onMark(picked, tool === 'mark' ? 'auto' : tool);
       say(added > 0 ? `新增 ${added} 个标记` : '框里没有可以采集的东西（小灌木只是装饰；设施脚下和小屋旁的地块受保护）');
     } else say(options.onCancel(picked) > 0 ? '已取消' : '框里没有标记或施工');
   });
@@ -284,11 +288,17 @@ export function createHomesteadHud(parent: HTMLElement, options: HomesteadHudOpt
   return {
     get open() { return shop.open || settle.open; },
     get commanding() { return commanding; },
+    command(next) {
+      options.onOpen();
+      setTool(next === 'build' ? 'solar' : next);
+      setCommanding(true);
+    },
     update() {
       const state = options.state();
       const e = state.economy;
       const used = e.robots.reduce((sum, r) => sum + r.compute, 0);
-      time.textContent = `第 ${e.day} 天 ${clock(e.second)} ${isDaytime(e.second) ? '白天' : '夜晚'}`;
+      const date = calendarOf(e.day);
+      time.textContent = `第 ${e.day - e.startDay + 1} 天 · ${SEASON_NAMES[date.season]!}季第 ${date.dayOfSeason} 天 ${clock(e.second)} ${isDaytime(e) ? '白天' : '夜晚'} · ${MOON_PHASE_NAMES[moonPhase(e)]!}`;
       const supply = e.solar + (e.stored > 0 ? e.batteries * HOMESTEAD.power.batteryOutput : 0);
       power.textContent = `电 可供 ${supply} / 在用 ${e.powerUsed.toFixed(1)} · 储能 ${e.stored.toFixed(1)}/${e.batteries * HOMESTEAD.power.batteryCapacity}`;
       compute.textContent = `算力 ${used}/${e.computeTotal}P`;

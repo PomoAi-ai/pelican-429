@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { createSimWorld, getPlayer, NEUTRAL_INPUT, stepSim } from '../src/sim/sim-world.ts';
 import type { SimWorld } from '../src/sim/sim-world.ts';
 import { cancelArea, captureHomestead, checkSolar, initializeHomestead, markArea, placeSolar, purchase, sleepHomestead, stepHomesteadWorld } from '../src/sim/homestead.ts';
+import { DAY_SECONDS, sunriseSecond } from '../src/core/calendar.ts';
 import { GAME_HOUR } from '../src/sim/homestead-economy.ts';
 import { HOMESTEAD } from '../src/config/homestead.ts';
 import { loadHomesteadSave, saveHomestead } from '../src/app/homestead-save.ts';
@@ -32,9 +33,12 @@ function homestead(options: { enemy?: boolean; cell?: (tx: number, ty: number) =
     level: { ...level, trees: [tree(1, 45, 4, 8), tree(2, 70, 8, 12)], enemies: options.enemy ? [{ kind: 'lineHound', x: 50.5, y: 4 }] : [] },
     playerForm: 'human',
   });
-  initializeHomestead(world);
+  initializeHomestead(world, START);
   return world;
 }
+
+// 春季第 1 天 15:00：日出 6:00、日落 18:30。
+const START = { day: 1, second: 15 * GAME_HOUR };
 
 const run = (world: SimWorld, seconds: number, until: () => boolean): void => {
   for (let i = 0; i < seconds && !until(); i++) stepHomesteadWorld(world, 1);
@@ -43,7 +47,7 @@ const run = (world: SimWorld, seconds: number, until: () => boolean): void => {
 test('工程无人机砍完一棵树：木材入库，树枝砖被清掉', () => {
   const world = homestead();
   const state = world.homestead!;
-  assert.equal(markArea(world, { x: 44, y: 5, w: 2, h: 2 }), 1);
+  assert.equal(markArea(world, { x: 44, y: 5, w: 2, h: 2 }, 'auto'), 1);
   run(world, 4 * GAME_HOUR, () => state.felled.length > 0 && state.drones[0]!.phase === 'docked');
   assert.deepEqual(state.felled, [1]);
   assert.equal(state.wood, 10 + 6);
@@ -51,10 +55,24 @@ test('工程无人机砍完一棵树：木材入库，树枝砖被清掉', () =>
   assert.equal(state.marks.length, 0);
 });
 
+test('明确砍树不挖地，明确挖掘不会被树冠抢占', () => {
+  const world = homestead();
+  const state = world.homestead!;
+  assert.equal(markArea(world, { x: 36, y: 3, w: 0, h: 0 }, 'chop'), 0);
+  assert.equal(markArea(world, { x: 44, y: 3, w: 0, h: 3 }, 'dig'), 1);
+  assert.equal(state.marks[0]!.kind, 'tile');
+  run(world, 2 * GAME_HOUR, () => world.map.get(44, 3) === TILE_AIR);
+  assert.equal(world.map.get(44, 3), TILE_AIR);
+  assert.deepEqual(state.felled, []);
+  assert.equal(markArea(world, { x: 44, y: 5, w: 2, h: 2 }, 'chop'), 1);
+  run(world, 4 * GAME_HOUR, () => state.felled.length > 0);
+  assert.deepEqual(state.felled, [1]);
+});
+
 test('Lv1 飞不上超过 2 格的悬崖并标明原因，升到 Lv2 后能过去', () => {
   const world = homestead();
   const state = world.homestead!;
-  markArea(world, { x: 69, y: 9, w: 2, h: 2 });
+  markArea(world, { x: 69, y: 9, w: 2, h: 2 }, 'auto');
   run(world, 60, () => false);
   assert.equal(state.marks[0]!.blocked, 'cliff');
   assert.equal(state.drones[0]!.phase, 'docked');
@@ -68,7 +86,7 @@ test('Lv1 飞不上超过 2 格的悬崖并标明原因，升到 Lv2 后能过�
 test('敌人盘踞的区域不派无人机，清场后才开工', () => {
   const world = homestead({ enemy: true });
   const state = world.homestead!;
-  markArea(world, { x: 44, y: 5, w: 2, h: 2 });
+  markArea(world, { x: 44, y: 5, w: 2, h: 2 }, 'auto');
   run(world, 60, () => false);
   assert.equal(state.marks[0]!.blocked, 'zone');
   world.entities.find(e => e.enemy)!.health!.hp = 0;
@@ -107,24 +125,25 @@ test('家园模式的大招放出后清空电量，用富余电力充满才能�
 test('在家睡到天亮：跳过时段的闲置收益按七成结算，醒来回满生命', () => {
   const world = homestead();
   const state = world.homestead!;
-  state.economy.second = 18 * GAME_HOUR;
+  state.economy.second = 20 * GAME_HOUR;
   state.economy.mode = 'tokens';
   getPlayer(world).health!.hp = 10;
   sleepHomestead(world);
-  assert.deepEqual([state.economy.day, state.economy.second], [2, 6 * GAME_HOUR]);
+  assert.deepEqual([state.economy.day, state.economy.second], [2, sunriseSecond(2)]);
   // 停在坞里的机器人不占算力，夜里光子的 2P 全部闲置。
-  assert.ok(Math.abs(state.economy.tokens - (30 + 2 * 12 * 0.7 + 30)) < 1e-9);
+  const night = (DAY_SECONDS - 20 * GAME_HOUR + sunriseSecond(2)) / GAME_HOUR;
+  assert.ok(Math.abs(state.economy.tokens - (30 + 2 * night * 0.7 + 30)) < 1e-9);
   assert.equal(getPlayer(world).health!.hp, getPlayer(world).health!.maxHp);
 });
 
 test('读档后已清场区域的敌人不再出现，砍掉的树不会长回来', () => {
   const world = homestead({ enemy: true });
   world.entities.find(e => e.enemy)!.health!.hp = 0;
-  markArea(world, { x: 44, y: 5, w: 2, h: 2 });
+  markArea(world, { x: 44, y: 5, w: 2, h: 2 }, 'auto');
   run(world, 4 * GAME_HOUR, () => world.homestead!.felled.length > 0 && world.homestead!.drones[0]!.phase === 'docked');
   const snapshot = captureHomestead(world.homestead!);
   const restored = createSimWorld({ level: { ...homestead({ enemy: true }).level }, playerForm: 'human' });
-  initializeHomestead(restored, snapshot);
+  initializeHomestead(restored, START, snapshot);
   assert.equal(restored.entities.some(e => e.enemy), false);
   assert.equal(restored.map.get(45, 8), TILE_AIR);
   assert.equal(restored.homestead!.wood, 16);
@@ -133,8 +152,8 @@ test('读档后已清场区域的敌人不再出现，砍掉的树不会长回�
 test('睡觉时无人机照常砍树：打折只放慢速度，木材按整块入库一块不少', () => {
   const world = homestead();
   const state = world.homestead!;
-  markArea(world, { x: 44, y: 5, w: 2, h: 2 });
-  state.economy.second = 18 * GAME_HOUR;
+  markArea(world, { x: 44, y: 5, w: 2, h: 2 }, 'auto');
+  state.economy.second = 20 * GAME_HOUR;
   sleepHomestead(world);
   assert.deepEqual(state.felled, [1]);
   assert.equal(state.wood, 16);
@@ -143,14 +162,14 @@ test('睡觉时无人机照常砍树：打折只放慢速度，木材按整块�
 test('读档恢复砍到一半的树、无人机带的货和标记，不会刷出木材', () => {
   const world = homestead();
   const state = world.homestead!;
-  markArea(world, { x: 44, y: 5, w: 2, h: 2 });
+  markArea(world, { x: 44, y: 5, w: 2, h: 2 }, 'auto');
   // 埋在地下挖不到的地块，标记会一直留着。
-  markArea(world, { x: 36, y: 2, w: 0.5, h: 0.5 });
+  markArea(world, { x: 36, y: 2, w: 0.5, h: 0.5 }, 'auto');
   run(world, 4 * GAME_HOUR, () => state.drones[0]!.cargoWood === 3);
   const store = new Map<string, string>();
   saveHomestead({ setItem: (k, v) => void store.set(k, v) }, 7, captureHomestead(state));
   const restored = createSimWorld({ level: homestead().level, playerForm: 'human' });
-  initializeHomestead(restored, loadHomesteadSave({ getItem: k => store.get(k) ?? null }, 7, restored.level));
+  initializeHomestead(restored, START, loadHomesteadSave({ getItem: k => store.get(k) ?? null }, 7, restored.level));
   const again = restored.homestead!;
   assert.equal(again.treeWood.get(1), 3);
   assert.equal(again.drones[0]!.cargoWood, 3);
@@ -167,8 +186,8 @@ function twoRobots(): SimWorld {
   state.economy.tokens = 100;
   assert.equal(purchase(world, 'robot'), 'ok');
   assert.equal(purchase(world, 'lv2'), 'ok');
-  markArea(world, { x: 44, y: 5, w: 2, h: 2 });
-  markArea(world, { x: 36, y: 3, w: 0.5, h: 0.5 });
+  markArea(world, { x: 44, y: 5, w: 2, h: 2 }, 'auto');
+  markArea(world, { x: 36, y: 3, w: 0.5, h: 0.5 }, 'auto');
   return world;
 }
 
@@ -197,7 +216,7 @@ test('野外分不到算力的无人机仍会按低电量回坞', () => {
 test('返航路线被新砌的墙挡住时无人机直接回坞卸货', () => {
   const world = homestead();
   const state = world.homestead!;
-  markArea(world, { x: 44, y: 5, w: 2, h: 2 });
+  markArea(world, { x: 44, y: 5, w: 2, h: 2 }, 'auto');
   run(world, GAME_HOUR, () => state.drones[0]!.phase === 'working');
   for (let ty = 4; ty < 14; ty++) world.map.set(35, ty, TILE_STONE);
   run(world, 2 * GAME_HOUR, () => state.drones[0]!.phase === 'docked');
@@ -208,7 +227,7 @@ test('返航路线被新砌的墙挡住时无人机直接回坞卸货', () => {
 test('同一列向下挖两格：挖完上面一格接着挖下面一格，不先回坞', () => {
   const world = homestead();
   const state = world.homestead!;
-  assert.equal(markArea(world, { x: 36, y: 2, w: 0.5, h: 1.5 }), 2);
+  assert.equal(markArea(world, { x: 36, y: 2, w: 0.5, h: 1.5 }, 'auto'), 2);
   run(world, GAME_HOUR, () => state.drones[0]!.phase !== 'docked');
   run(world, 2 * GAME_HOUR, () => state.drones[0]!.phase === 'docked');
   assert.equal(state.marks.length, 0);
@@ -217,7 +236,7 @@ test('同一列向下挖两格：挖完上面一格接着挖下面一格，不�
 
 test('树根下那格不能标记挖掉', () => {
   const world = homestead();
-  assert.equal(markArea(world, { x: 45.1, y: 3.1, w: 0.3, h: 0.3 }), 0);
+  assert.equal(markArea(world, { x: 45.1, y: 3.1, w: 0.3, h: 0.3 }, 'auto'), 0);
 });
 
 test('设施跳过水面、斜坡和石柱底下的空洞，放在等高的实心平地上', () => {

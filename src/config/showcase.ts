@@ -11,7 +11,7 @@ import { NPCS, NPC_ACTIONS } from './npc.ts';
 import type { NpcKind, NpcForm } from './npc.ts';
 
 export type ShowcaseEnvironment = 'surface' | 'underground';
-export type ShowcaseActor = 'pelican' | 'human' | 'd1' | 'luma' | 'dummy' | 'fish' | 'ruler' | NpcKind | EnemyKind;
+export type ShowcaseActor = 'pelican' | 'human' | 'd1' | 'luma' | 'dummy' | 'fish' | 'ruler' | 'flyingRoadster' | NpcKind | EnemyKind;
 
 export const MODEL_SHOWCASE_VIEWS = {
   threeQuarter: { label: '三分之四', yaw: Math.PI / 4 },
@@ -63,6 +63,7 @@ export const SHOWCASE_ACTORS: ReadonlyArray<{ id: ShowcaseActor; name: string; i
   { id: 'dummy', name: '训练假人', image: './showcase/dummy.jpg', description: '受击、射击与漂浮', defaultEntry: 'dummy.idle' },
   ...ENEMY_KINDS.map((id) => ({ id, name: ENEMY_RULES[id].name, image: `./resources/home/${ENEMY_MODEL_DIRS[id].split('/').at(-1)}.webp`, description: ENEMY_RULES[id].skills.map((skill) => skill.name).join(' · '), defaultEntry: `${id}.idle` })),
   { id: 'fish', name: '鱼类', image: './showcase/fish.jpg', description: '七种鱼的外形、游动与扑腾', defaultEntry: 'fish.species.minnow' },
+  { id: 'flyingRoadster', name: '白色飞行车', image: './models/white-vtol/preview.png', description: '三轮固定底盘 · 可转向尾喷 · 起飞、前进、地面滚动与座舱面罩开合', defaultEntry: 'flyingRoadster.idle' },
   { id: 'ruler', name: '标尺', image: './concepts/character-tile-scale.png', description: '橙色格子尺与紫色 3.3 头身参照尺 · 1 格 = 1 世界单位，拖到角色旁对比尺寸', defaultEntry: 'ruler.standard' },
 ];
 
@@ -70,6 +71,13 @@ const entries = (actor: ShowcaseActor, group: string, rows: ReadonlyArray<readon
   rows.map(([action, label, description, seconds]) => ({ id: `${actor}.${action}`, actor, action, label, group, description, seconds }));
 
 export const SHOWCASE_ENTRIES: readonly ShowcaseEntry[] = [
+  ...entries('flyingRoadster', '载具动作', [
+    ['idle', '静止检查', '三轮着地，检查白色车漆、金属、玻璃与灯带', 5],
+    ['takeoff', '垂直起飞', '底部升力喷口启动，整块尾喷向下，三轮保持外露', 5],
+    ['cruise', '空中前进', '整块尾喷转向后方，查看前进离子尾流', 6],
+    ['roll', '地面滚动', '三轮随地面行驶速度旋转，喷流关闭', 6],
+    ['canopy', '面罩打开', '停车后打开玻璃座舱面罩，查看座舱内部', 5],
+  ]),
   ...D1_ACTIONS.map(action => ({ ...action, id: `d1.${action.id}`, actor: 'd1' as const, action: action.id, group: '基础动作', d1Animation: action.id })),
   { id: 'd1.bare-head', actor: 'd1', action: 'idle', label: '头部检查 · 隐藏头发', description: '隐藏独立发型，查看新脸型、眼睑与鼻唇曲面。', seconds: 3.2, loop: true, group: '模型检查', d1Animation: 'idle', d1HairVisible: false },
   ...D1_MODELS.map((model) => ({ id: `d1.${model.id.replace('d1-rodin-', '')}`, actor: 'd1' as const, action: model.id, label: model.label, description: model.description, seconds: 0, group: '模型检查', staticModel: model.id })),
@@ -218,6 +226,9 @@ export const CHARACTER_CATALOG: ShowcaseCatalog = {
   mode: 'showcase', title: '角色展示场', subjects: SHOWCASE_ACTORS, entries: currentEntries,
   maxCards: MAX_SHOWCASE_CARDS,
   demos: [{
+    id: 'white-vtol', title: '白色飞行车 · 动作与材质', description: '同一游戏模型的静止、起飞、前进、三轮滚动与面罩开启；支持慢放、暂停、俯仰和格子标尺。',
+    cards: [{ entryId: 'flyingRoadster.idle' }, { entryId: 'ruler.standard' }],
+  }, {
     id: 'grassy-modular', title: 'Grassy · 分件基础版', description: '独立头部、头发、身体、贴身 T 恤与短裤，在游戏场景中检查比例和材质；静态模型，尚未绑定骨骼。',
     cards: [{ entryId: 'human.grassy-modular-static' }],
   }, {

@@ -1,30 +1,31 @@
 .homestead-hud { position: fixed; inset: 0; pointer-events: none; z-index: 14; color: #eef6ee; font: 13px/1.5 system-ui, sans-serif; }
 .homestead-hud :is(button, a.hs-action) { pointer-events: auto; cursor: pointer; touch-action: manipulation; font: 600 13px/1.4 system-ui, sans-serif; }
-.hs-bar { position: absolute; top: max(10px, env(safe-area-inset-top)); left: 50%; transform: translateX(-50%); display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px 14px; max-width: calc(100vw - 420px); padding: 7px 14px; border: 1px solid #9fd8b04d; border-radius: 14px; background: #0d1d1ad9; box-shadow: 0 8px 26px #0006; backdrop-filter: blur(10px); pointer-events: auto; }
+.hs-bar { position: absolute; top: max(10px, env(safe-area-inset-top)); left: 50%; transform: translateX(-50%); display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px 14px; max-width: calc(100vw - 420px); padding: 5px 14px; border: 1px solid var(--hud-edge); border-radius: 8px; background: var(--hud-skin); color: var(--hud-ink); font-size: 13px; text-shadow: var(--hud-text-shadow); pointer-events: auto; }
 .hs-time { color: #ffe39a; font-weight: 600; }
 .hs-tokens { color: #9fe0ff; }
-.hs-mode { padding: 3px 12px; border: 1px solid #8fd6a6; border-radius: 99px; background: #1f3d31; color: #e8fbe9; }
-.hs-mode:hover { background: #2c5442; }
-.hs-drones { position: absolute; top: 74px; left: max(14px, env(safe-area-inset-left)); display: grid; gap: 4px; max-width: 340px; }
-.hs-drone, .hs-marks { padding: 4px 10px; border-left: 3px solid #5fb8ff; border-radius: 6px; background: #0d1d1acc; }
-.hs-drone-flying, .hs-drone-working, .hs-drone-returning { border-color: #5cff8a; }
-.hs-drone-charging { border-color: #ffd25a; }
-.hs-drone-stalled, .hs-drone-retreat, .hs-drone-blocked { border-color: #ff5a5a; color: #ffd2d2; }
-.hs-marks { border-color: #c8d6cf; color: #d7e3dd; }
-.hs-photon { position: absolute; left: max(14px, env(safe-area-inset-left)); bottom: 132px; display: flex; gap: 10px; align-items: baseline; max-width: min(460px, calc(100vw - 28px)); padding: 9px 14px; border: 1px solid #ffe7a666; border-radius: 14px; background: linear-gradient(110deg, #2b2410e6, #0d1d1ae6); box-shadow: 0 0 22px #ffd96a26; }
+.hs-mode { padding: 2px 10px; border: 0; border-radius: 99px; background: #ffffff1f; color: #fff; }
+.hs-mode:hover { background: #ffffff33; }
+.hs-drones { position: absolute; top: calc(var(--dev-nav-height, 0px) + 240px); left: max(14px, env(safe-area-inset-left)); display: grid; gap: 4px; max-width: 340px; }
+/* 家园叠层与游戏 HUD 同一种底板：半透明深底、细边、圆角，不抢画面。无人机在 HUD 里只显示图标，这里的文字状态不再重复。 */
+.hs-drone { display: none; }
+.hs-marks { padding: 4px 10px; border: 1px solid var(--hud-edge); border-radius: 8px; background: var(--hud-skin); color: var(--hud-ink); font-size: 12px; text-shadow: var(--hud-text-shadow); }
+.hs-photon { position: absolute; left: max(14px, env(safe-area-inset-left)); bottom: 190px; display: flex; gap: 10px; align-items: baseline; max-width: min(460px, calc(100vw - 28px)); padding: 8px 14px; border: 1px solid var(--hud-edge); border-radius: 8px; background: var(--hud-skin); color: var(--hud-ink); font-size: 13px; text-shadow: var(--hud-text-shadow); }
 .hs-photon strong { color: #ffe39a; white-space: nowrap; }
 .hs-command { position: absolute; left: 50%; bottom: max(18px, env(safe-area-inset-bottom)); transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 8px; }
-.hs-command-toggle { padding: 8px 18px; border: 1px solid #9fd8ff; border-radius: 12px; background: #11283acc; color: #e9f6ff; }
-.hs-commanding .hs-command-toggle { background: #1f4f74; box-shadow: 0 0 18px #5fe6ff55; }
-.hs-tools { display: none; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px; max-width: min(760px, calc(100vw - 28px)); padding: 7px 10px; border-radius: 12px; background: #0d1d1ae6; pointer-events: auto; }
+.hs-command-toggle { padding: 6px 16px; border: 1px solid var(--hud-edge); border-radius: 999px; background: var(--hud-skin); color: var(--hud-ink); font-size: 13px; }
+.hs-command-toggle:hover { border-color: #ffffff4d; }
+.hs-commanding .hs-command-toggle { border-color: #8eeaff; background: #45d2f233; color: #fff; }
+.hs-tools { display: none; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px; max-width: min(760px, calc(100vw - 28px)); padding: 6px 8px; border: 1px solid var(--hud-edge); border-radius: 12px; background: var(--hud-skin); pointer-events: auto; }
 .hs-commanding .hs-tools { display: flex; }
-.hs-tool { padding: 5px 12px; border: 1px solid #a9c8bb80; border-radius: 9px; background: #ffffff0a; color: #e2efe8; }
-.hs-tool-on { border-color: #5fe6ff; background: #1f4f74; color: #fff; }
-.hs-hint { flex-basis: 100%; text-align: center; color: #b9cfc6; font-size: 12px; }
+.hs-tool { padding: 5px 12px; border: 0; border-radius: 999px; background: transparent; color: var(--hud-muted); }
+.hs-tool:hover { color: #fff; }
+.hs-tool-on { background: #ffffff26; color: #fff; }
+.hs-hint { flex-basis: 100%; text-align: center; color: var(--hud-muted); font-size: 12px; }
 .hs-actions { position: absolute; right: max(14px, env(safe-area-inset-right)); bottom: 132px; display: grid; gap: 8px; justify-items: end; }
-.hs-action { padding: 8px 16px; border: 1px solid #b4e6a5; border-radius: 12px; background: #203e2bdd; color: #f3fbef; box-shadow: 0 6px 18px #0006; text-decoration: none; }
+.hs-action { padding: 6px 16px; border: 1px solid var(--hud-edge); border-radius: 999px; background: var(--hud-skin); color: var(--hud-ink); font-size: 13px; text-decoration: none; }
+.hs-action:hover { border-color: #ffffff4d; }
 .hs-action[hidden] { display: none; }
-.hs-toast { position: absolute; left: 50%; bottom: 128px; transform: translateX(-50%); padding: 6px 14px; border-radius: 10px; background: #0d1d1aee; opacity: 0; transition: opacity .2s; }
+.hs-toast { position: absolute; left: 50%; bottom: 128px; transform: translateX(-50%); padding: 6px 14px; border: 1px solid var(--hud-edge); border-radius: 999px; background: var(--hud-skin); opacity: 0; transition: opacity .2s; }
 .hs-toast-on { opacity: 1; }
 .hs-overlay { position: fixed; inset: 0; z-index: 13; display: none; cursor: crosshair; touch-action: none; }
 .hs-overlay-on { display: block; }

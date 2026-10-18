@@ -46,9 +46,9 @@
 .residence-build-status[data-error='true'] { background: #fff0e7; border-color: #ecc0a4; color: #924d2c; }
 .residence-summary { display: flex; align-items: center; justify-content: space-between; margin-top: 22px; padding-top: 15px; border-top: 1px solid var(--residence-line); color: var(--residence-muted); font-size: 12px; }
 .residence-summary strong { color: var(--residence-ink); font-size: 18px; font-variant-numeric: tabular-nums; }
-.residence-save-status { position: absolute; z-index: 2; right: 14px; top: 14px; max-width: min(400px, calc(100% - 28px)); margin: 0; padding: 6px 10px; border: 1px solid #ffffff80; border-radius: 7px; background: #faf8f1df; color: #466b6b; font-size: 11px; line-height: 1.7; overflow-wrap: anywhere; pointer-events: none; }
+.residence-save-status { position: absolute; z-index: 2; right: 14px; top: auto; bottom: 56px; max-width: min(400px, calc(100% - 28px)); margin: 0; padding: 6px 10px; border: 1px solid #ffffff80; border-radius: 7px; background: #faf8f1df; color: #466b6b; font-size: 11px; line-height: 1.7; overflow-wrap: anywhere; pointer-events: none; }
 .residence-save-status[data-error='true'] { color: #924d2c; background: #fff0e7; border-color: #ecc0a4; }
-.residence-action-status { position: absolute; z-index: 2; left: 14px; bottom: 110px; max-width: min(360px, calc(100% - 28px)); margin: 0; padding: 9px 12px; border: 1px solid #c8dedc; border-radius: 8px; background: #faf8f1ed; color: #285e61; font-size: 12px; line-height: 1.7; overflow-wrap: anywhere; pointer-events: none; }
+.residence-action-status { position: absolute; z-index: 2; left: 24px; bottom: 172px; max-width: min(360px, calc(100% - 28px)); margin: 0; padding: 9px 12px; border: 1px solid #c8dedc; border-radius: 8px; background: #faf8f1ed; color: #285e61; font-size: 12px; line-height: 1.7; overflow-wrap: anywhere; pointer-events: none; }
 .residence-action-status:empty { display: none; }
 .residence-action-status[data-error='true'] { background: #fff0e7ed; border-color: #ecc0a4; color: #924d2c; }
 .residence-help { margin-top: 20px; color: var(--residence-muted); font-size: 12px; }
@@ -59,8 +59,8 @@
 .residence-viewport { position: absolute; inset: 0; }
 .residence-viewport canvas { display: block; touch-action: none; }
 .residence .room-preview-hud { --dev-nav-height: 0px; position: absolute; inset: 0; pointer-events: none; }
-.residence .room-preview-hud .hud-character-switch, .residence .room-preview-hud .hud-weapon-slot[data-slot='4'] { display: none; }
-.residence .room-preview-hint { position: absolute; right: 14px; bottom: 14px; max-width: min(590px, calc(100% - 28px)); margin: 0; padding: 8px 12px; border: 1px solid #ffffff80; border-radius: 7px; background: #faf8f1df; color: #355266; box-shadow: 0 2px 10px #17364d0c; font-size: 11px; line-height: 1.7; pointer-events: none; }
+.residence .room-preview-hud .hud-character-switch { display: none; }
+.residence .room-preview-hint { position: absolute; right: 14px; bottom: 14px; max-width: min(460px, calc(100% - 560px)); margin: 0; padding: 8px 12px; border: 1px solid #ffffff80; border-radius: 7px; background: #faf8f1df; color: #355266; box-shadow: 0 2px 10px #17364d0c; font-size: 11px; line-height: 1.7; pointer-events: none; }
 .residence.is-building .room-preview-hud { visibility: hidden; }
 .residence-control-group { min-width: 0; }
 .residence-control-group h2 { margin: 0 0 7px; font-size: 12px; font-weight: 600; }
@@ -80,8 +80,8 @@
 .residence-demo .residence-actions { display: grid; padding: 16px 14px; border-bottom: 1px solid var(--residence-line); }
 .residence-demo .residence-actions > :is(button, a) { min-width: 0; font-size: 12px; white-space: normal; text-align: center; }
 .residence-demo .residence-door-note { order: 1; }
-.residence-demo :is(button, select), .residence-demo .residence-actions a { border-color: var(--sc-line); background: #213037; color: var(--sc-text); }
-.residence-demo :is(button, .residence-actions a):hover { background: #30444b; border-color: #637b80; }
+.residence-demo :is(button, select):not(.room-preview-hud *), .residence-demo .residence-actions a { border-color: var(--sc-line); background: #213037; color: var(--sc-text); }
+.residence-demo :is(button, .residence-actions a):hover:not(.room-preview-hud *) { background: #30444b; border-color: #637b80; }
 .residence-demo .residence-primary { background: var(--sc-accent); border-color: var(--sc-accent); color: #17201b; }
 .residence-demo .residence-primary:hover { background: #c9edb2; border-color: #c9edb2; }
 .residence-demo :is([data-build], [data-residence-view], [data-play-view])[aria-pressed='true'] { color: var(--sc-accent); border-color: #779963; background: #293c2e; }
@@ -115,6 +115,9 @@
   .residence-sidebar { padding: 14px; }
   .residence-demo .residence-workspace, .residence-demo.is-building .residence-workspace { grid-template-columns: 200px minmax(0, 1fr); }
 }
+@media (max-width: 900px) {
+  .residence .room-preview-hint { display: none; }
+}
 @media (max-width: 700px) {
   .residence-demo .residence-workspace, .residence-demo.is-building .residence-workspace { grid-template-columns: 180px minmax(0, 1fr); }
   .residence-demo .residence-camera { padding-left: 9px; padding-right: 9px; }
@@ -141,9 +144,8 @@
   .residence-field select { font-size: 16px; min-height: 44px; padding: 8px; }
   .residence-resource-note { grid-column: 1 / -1; min-height: 0; margin: 0; font-size: 11px; }
   .residence-build-status { grid-column: 1 / -1; min-height: 0; margin: 0; padding: 8px 10px; }
-  .residence-save-status { right: 8px; top: 8px; max-width: calc(100% - 16px); font-size: 10px; }
-  .residence-action-status { left: 8px; bottom: 100px; max-width: calc(100% - 16px); font-size: 11px; }
-  .residence .room-preview-hint { right: 8px; bottom: 8px; max-width: calc(100% - 16px); padding: 5px 8px; font-size: 10px; }
+  .residence-save-status { right: 8px; bottom: 8px; max-width: calc(100% - 16px); font-size: 10px; }
+  .residence-action-status { left: 8px; max-width: calc(100% - 16px); font-size: 11px; }
   .residence-demo.is-building .residence-workspace { grid-template-rows: minmax(0, 1fr); }
   .residence-demo.is-building .residence-sidebar { display: block; max-height: none; }
   .residence-demo .residence-sidebar .residence-field { margin-top: 14px; }

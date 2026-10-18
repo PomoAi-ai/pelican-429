@@ -4,6 +4,7 @@
  */
 import { lerp } from '../core/math.ts';
 import type { FreeWorldBackgroundView } from '../render/free-world-background.ts';
+import type { FreeWorldDaylight } from '../render/free-world-daylight.ts';
 import { getPlayer } from '../sim/sim-world.ts';
 import type { CameraRig } from '../render/camera-rig.ts';
 import type { FacilitySceneId } from '../config/facility-scenes.ts';
@@ -33,27 +34,30 @@ export function facilityWeather(sceneId: FacilitySceneId) {
   };
 }
 
-export function createWorldPrecip(stage: Stage, level: LevelData, worldViews: WorldViews, background: FreeWorldBackgroundView | null): PrecipView {
+export function createWorldPrecip(stage: Stage, level: LevelData, worldViews: WorldViews, background: FreeWorldBackgroundView | null, daylight: FreeWorldDaylight | null): PrecipView {
   return createPrecipView({
     scene: stage.scene,
     level,
     camera: stage.camera,
-    sky: { region: background?.environment, scene: stage.scene, keyLight: stage.keyLight, hemiLight: stage.hemiLight, rimLight: stage.rimLight, grade: stage.postFx.grade, clouds: worldViews.weather.fx },
+    sky: { region: background?.environment, base: daylight?.base, scene: stage.scene, keyLight: stage.keyLight, hemiLight: stage.hemiLight, rimLight: stage.rimLight, grade: stage.postFx.grade, clouds: worldViews.weather.fx },
     surfaces: () => precipSurfaceRoots(worldViews),
     windSway: (x) => worldViews.weather.wind.sway(x),
   });
 }
 
-export function createEnvironmentViews(stage: Stage, level: LevelData, world: SimWorld, worldViews: WorldViews, cameraRig: CameraRig, disposers: Array<() => void>, background: FreeWorldBackgroundView | null): EnvironmentViews {
-  const precipView = createWorldPrecip(stage, level, worldViews, background);
+export function createEnvironmentViews(stage: Stage, level: LevelData, world: SimWorld, worldViews: WorldViews, cameraRig: CameraRig, disposers: Array<() => void>, background: FreeWorldBackgroundView | null, daylight: FreeWorldDaylight | null): EnvironmentViews {
+  const precipView = createWorldPrecip(stage, level, worldViews, background, daylight);
   disposers.push(() => precipView.dispose());
   const update = (time: number, dt: number, alpha: number): void => {
     const player = getPlayer(world);
     background?.update(lerp(player.body.prevX, player.body.x, alpha), lerp(player.body.prevY, player.body.y, alpha), dt);
     const view = cameraRig.visibleRect(2);
     worldViews.update(view, time, dt, alpha);
+    // 昼夜先写基础灯光，降水层再乘天气与区域；日月星要用本帧云量，放在降水之后。
+    daylight?.update();
     precipView.update(view, time, dt, world.env.precip, world.env);
     if (background) background.setWeather(.55 + .45 * precipView.sky.look!.key);
+    daylight?.updateSky(precipView.sky.look!.cloudAmount);
   };
   return { precipView, update };
 }

@@ -1,7 +1,8 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { BUILDING_SCENE_TUNING } from '../config/ai-city-look.ts';
-import { sampleWorldTime, type WorldTime } from '../core/world-clock.ts';
+import { resolveQuality } from '../config/lighting-rules.ts';
+import { sampleWorldTime, type WorldTime } from '../core/calendar.ts';
 import type { DefinitionCollider } from '../physics/definition-collision.ts';
 import { createAiCityLighting } from '../render/ai-city-lighting.ts';
 import { createResidenceWeather } from '../render/residence-weather.ts';
@@ -13,7 +14,14 @@ export type BuildingFieldView = 'front' | 'angle' | 'top';
 /** 无玩家展示与编辑共用同一套天空、天气和自由镜头。 */
 export function createBuildingFieldStage(context: SceneMountContext, viewport: HTMLElement,
   solids: () => readonly DefinitionCollider[], bounds: { minX: number; width: number }) {
-  const stage = attachStage(viewport, context.renderer, BUILDING_SCENE_TUNING, { quality: 'high', antialias: 'smaa' });
+  const quality = resolveQuality(new URLSearchParams(location.search).get('quality'), BUILDING_SCENE_TUNING.render.lighting.quality);
+  if (quality === 'low') {
+    // 渲染器由工作台各页面共用，离开时还原像素比；须在挂舞台前设置，后期缓冲按此尺寸分配。
+    const pixelRatio = context.renderer.getPixelRatio();
+    context.renderer.setPixelRatio(1);
+    context.onDispose(() => context.renderer.setPixelRatio(pixelRatio));
+  }
+  const stage = attachStage(viewport, context.renderer, BUILDING_SCENE_TUNING, { quality, antialias: 'smaa' });
   context.onDispose(() => stage.dispose());
   stage.canvas.setAttribute('aria-label', '建筑自由场地');
   stage.camera.far = 1800;
@@ -48,7 +56,7 @@ export function createBuildingFieldStage(context: SceneMountContext, viewport: H
   };
   setView('angle');
   return {
-    stage, orbit, setView,
+    stage, orbit, setView, quality, lighting,
     onFrame(update: (time: number, dt: number, world: WorldTime) => void): void {
       cancelAnimationFrame(frame);
       previous = performance.now();
@@ -57,9 +65,8 @@ export function createBuildingFieldStage(context: SceneMountContext, viewport: H
         try {
           const dt = Math.min(.05, Math.max(0, (now - previous) / 1000));
           previous = now; elapsed += dt;
-          context.world.clock.update(dt);
           orbit.update();
-          const world = sampleWorldTime(context.world.clock.hour);
+          const world = sampleWorldTime(context.world.time);
           weather.setSettings(context.world.weatherConfig);
           weather.setWeather(context.world.weather);
           lighting.setWorldTime(world, weather.update(elapsed, dt, world));

@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { loadResidence, RESIDENCE_SAVE_KEY, saveResidence } from '../src/app/residence-save.ts';
+import { loadResidence, RESIDENCE_HARBOR_SAVE_KEY, RESIDENCE_SAVE_KEY, saveResidence } from '../src/app/residence-save.ts';
 import { createBody } from '../src/physics/body.ts';
 import { moveDefinitionBody } from '../src/physics/definition-collision.ts';
-import { buildResidenceLightField, sampleResidenceSky } from '../src/sim/residence-light.ts';
+import { createResidenceLight, type ResidenceLightField } from '../src/sim/residence-light.ts';
 import { residenceTerrainId, residenceTerrainPlacement } from '../src/sim/residence-terrain.ts';
 import { RESIDENCE_WORLD } from '../src/config/residence.ts';
 import { buildResidenceCollision, checkResidencePlacement, createResidence, findSafeResidenceSpawn, placeResidence, removeResidence, toggleResidenceDoor, updateResidenceDoors,
@@ -80,6 +80,26 @@ test('加深规格保存后仍约束建造，旧普通砖存档保留构件并�
   const upgraded = loadResidence(store)!;
   assert.deepEqual(upgraded.placements.filter(item => item.resourceId !== 'ashlar-B'), legacy.placements);
   assert.equal(upgraded.placements.filter(item => item.resourceId === 'ashlar-B').length, RESIDENCE_WORLD.width);
+});
+
+test('住宅与住宅二区独立保存，交替建造不会覆盖另一张地图', () => {
+  const store = storage();
+  const original = empty();
+  const harbor = empty();
+  placeResidence(original, 'ceramic-C', 8, 3, null);
+  placeResidence(harbor, 'wall', 12, 4, null);
+  saveResidence(store, original);
+  saveResidence(store, harbor, RESIDENCE_HARBOR_SAVE_KEY);
+  assert.deepEqual(loadResidence(store), original);
+  assert.deepEqual(loadResidence(store, RESIDENCE_HARBOR_SAVE_KEY), harbor);
+
+  placeResidence(harbor, 'wall', 13, 4, null);
+  saveResidence(store, harbor, RESIDENCE_HARBOR_SAVE_KEY);
+  assert.deepEqual(loadResidence(store), original);
+  placeResidence(original, 'ceramic-C', 9, 3, null);
+  saveResidence(store, original);
+  assert.deepEqual(loadResidence(store, RESIDENCE_HARBOR_SAVE_KEY), harbor);
+  assert.deepEqual(loadResidence(store), original);
 });
 
 test('非法存档深度和墙窗冲突明确拒绝并保留原始存储', () => {
@@ -605,50 +625,256 @@ test('地下原砖回填恢复默认格，保存后仍能按同一格拆除且�
   assert.deepEqual(loadResidence(store), loaded);
 });
 
+const lightCell = (field: ResidenceLightField, x: number, y: number): number =>
+  Math.floor((y - field.minY) / field.cellSize) * field.width + Math.floor((x - field.minX) / field.cellSize);
+const skyAt = (field: ResidenceLightField, x: number, y: number): number => field.sky[lightCell(field, x, y)]! / 255;
+const lampAt = (field: ResidenceLightField, x: number, y: number): number => {
+  const index = lightCell(field, x, y) * 3;
+  return field.lamp[index]! + field.lamp[index + 1]! + field.lamp[index + 2]!;
+};
+/** 按着色器的 e/(1-e) 解码回线性辐照度，便于比较透过比例。 */
+const lampIrradiance = (field: ResidenceLightField, x: number, y: number): number => {
+  const index = lightCell(field, x, y) * 3;
+  let sum = 0;
+  for (let k = 0; k < 3; k++) {
+    const e = (field.lamp[index + k]! / 255) ** 2;
+    sum += e / (1 - e);
+  }
+  return sum;
+};
+const farBody = { x: 10, y: 2, height: 3, halfWidth: .3 };
+const allOk = (results: readonly { readonly ok: boolean }[]): void => assert.deepEqual(results.map(result => result.ok), results.map(() => true));
+
 // 若把剖面当作天空、只按深度压暗，封闭洞穴和挖通后的结果就会相同。
 test('地下自然光只沿挖通的空气进入，转弯衰减，封口后消失', () => {
   const state: ResidenceState = { ...empty(), underground: new Set() };
   for (let x = 0; x < 5; x++) removeResidence(state, residenceTerrainId(x, -3));
-  let field = buildResidenceLightField(state);
-  assert.equal(sampleResidenceSky(field, .25, -2.75), 0);
+  const light = createResidenceLight(state);
+  assert.equal(skyAt(light, .25, -2.75), 0);
   for (let y = -2; y <= 0; y++) removeResidence(state, residenceTerrainId(0, y));
-  field = buildResidenceLightField(state);
-  const shaft = sampleResidenceSky(field, .25, -2.75);
-  const bend = sampleResidenceSky(field, 3.25, -2.75);
-  assert.ok(shaft > .5);
+  light.sync();
+  const shaft = skyAt(light, .25, -2.75);
+  const bend = skyAt(light, 3.25, -2.75);
+  assert.ok(shaft > .3);
   assert.ok(bend > 0 && bend < shaft);
-  assert.equal(sampleResidenceSky(field, 1.25, -1.75), 0);
   assert.equal(placeResidence(state, 'ashlar-A', 0, 0, null, 'deep').ok, true);
-  field = buildResidenceLightField(state);
-  assert.equal(sampleResidenceSky(field, .25, -2.75), 0);
+  light.sync();
+  // 1 格封口下透出的微光沿竖井向下渐弱，到横洞只剩不足三成，转弯处接近为零。
+  for (let x = .25; x < 5; x += .5) for (let y = -2.75; y < -2; y += .5) assert.ok(skyAt(light, x, y) < .3, `${x}, ${y}`);
+  assert.ok(skyAt(light, 3.25, -2.75) < .1);
 });
 
-test('遮光保持半砖与四分砖轮廓，薄平台和关闭能量门不会漏过采样', () => {
+test('露天地表下方实心的天空光随深度递减，3 格内归零', () => {
+  const light = createResidenceLight({ ...empty(), underground: new Set() });
+  const column = [.75, .25, -.25, -.75, -1.25, -1.75, -2.25].map(y => skyAt(light, .25, y));
+  for (let i = 1; i < column.length; i++) assert.ok(column[i]! < column[i - 1]! || column[i] === 0, column.join(', '));
+  assert.ok(column[0]! > column[1]! && column[1]! > 0, column.join(', '));
+  assert.equal(column.at(-1), 0, column.join(', '));
+});
+
+test('遮光保持半砖与四分砖轮廓，薄平台不漏过采样，关闭的能量门半透明', () => {
   const state = empty();
   placeResidence(state, 'ceramic-C', 0, 2, null);
   placeResidence(state, 'ceramic-M', 1, 2, null);
   placeResidence(state, 'platform-full', 3, 2, null);
   const door = placeResidence(state, 'door-left', 5, 2, null);
-  let field = buildResidenceLightField(state);
-  const blocked = (x: number, y: number): number => field.occupied[Math.floor((y - field.minY) / field.cellSize) * field.width
-    + Math.floor((x - field.minX) / field.cellSize)]!;
+  const field = createResidenceLight(state);
+  const blocked = (x: number, y: number): number => field.opacity[lightCell(field, x, y)]!;
   assert.equal(blocked(.25, 2.25), 0);
-  assert.equal(blocked(.25, 2.75), 1);
-  assert.equal(blocked(1.25, 2.25), 1);
+  assert.equal(blocked(.25, 2.75), 2);
+  assert.equal(blocked(1.25, 2.25), 2);
   assert.equal(blocked(1.75, 2.25), 0);
   assert.equal(blocked(1.25, 2.75), 0);
-  assert.equal(blocked(3.25, 2.25), 1);
+  assert.equal(blocked(3.25, 2.25), 2);
   assert.equal(blocked(5.75, 3.25), 1);
-  assert.equal(toggleResidenceDoor(state, door.id!, { x: 10, y: 2, height: 3, halfWidth: .3 }).ok, true);
-  field = buildResidenceLightField(state);
+  assert.equal(blocked(5.75, 5.75), 2);
+  assert.equal(toggleResidenceDoor(state, door.id!, farBody).ok, true);
+  field.sync();
   assert.equal(blocked(5.75, 3.25), 0);
-  assert.equal(blocked(5.75, 5.75), 1);
+  assert.equal(blocked(5.75, 5.75), 2);
+});
+
+// 2D 剖面没有朝向玩家的一面：室内天光只能经窗、门进来，离窗越远越暗，而不是整间屋一样亮。
+test('封闭房间的天光由窗向内渐暗，关闭的能量门透过约一半', () => {
+  const room = (left: 'door-left' | 'ceramic-A', glazing: boolean): ResidenceState => {
+    const state = empty();
+    allOk([
+      ...Array.from({ length: 13 }, (_, i) => placeResidence(state, 'ceramic-A', i, 7, null)),
+      ...Array.from({ length: 13 }, (_, i) => placeResidence(state, 'ceramic-A', i, 1, null)),
+      ...Array.from({ length: 5 }, (_, i) => placeResidence(state, 'ceramic-A', 12, 2 + i, null)),
+      // 背景墙让房间成为室内，天光只能经窗、门进来；窗占的格子不铺墙。
+      ...Array.from({ length: 55 }, (_, i) => [1 + i % 11, 2 + Math.floor(i / 11)] as const)
+        .filter(([x, y]) => !(glazing && x >= 2 && x <= 3 && y >= 4 && y <= 5))
+        .map(([x, y]) => placeResidence(state, 'wall', x, y, null)),
+      ...left === 'door-left' ? [placeResidence(state, 'door-left', 0, 2, null), placeResidence(state, 'ceramic-A', 0, 6, null)]
+        : Array.from({ length: 5 }, (_, i) => placeResidence(state, 'ceramic-A', 0, 2 + i, null)),
+      ...glazing ? [placeResidence(state, 'glazing', 2, 4, null)] : [],
+    ]);
+    return state;
+  };
+  const lit = createResidenceLight(room('ceramic-A', true));
+  const atWindow = skyAt(lit, 3.25, 4.25), near = skyAt(lit, 5.25, 4.25), far = skyAt(lit, 10.25, 5.75);
+  assert.ok(atWindow > .7 && near < atWindow && far < near * .5, `${atWindow} / ${near} / ${far}`);
+  const state = room('door-left', false);
+  const light = createResidenceLight(state);
+  const closed = skyAt(light, 1.25, 3.25);
+  const door = state.placements.find(item => item.resourceId === 'door-left')!;
+  assert.equal(toggleResidenceDoor(state, door.id, farBody).ok, true);
+  light.sync();
+  const open = skyAt(light, 1.25, 3.25);
+  assert.ok(closed > open * .3 && closed < open * .6, `${closed} / ${open}`);
+});
+
+// 若仍按列扫描找屋顶，屋顶下无墙的格子会变暗；若墙不按形状光栅化，半墙未覆盖的一半也会失去阳光。
+test('泰拉瑞亚规则：屋顶下无背景墙的格子照到阳光，背景墙按形状挡住阳光来源', () => {
+  const state = empty();
+  allOk([
+    ...Array.from({ length: 5 }, (_, i) => placeResidence(state, 'ceramic-A', i, 6, null)),
+    placeResidence(state, 'wall', 10, 3, null),
+    placeResidence(state, 'wall-W5', 12, 3, null),
+  ]);
+  const field = createResidenceLight(state);
+  assert.equal(skyAt(field, 2.25, 4.25), 1);
+  assert.ok(skyAt(field, 10.5, 3.5) < 1);
+  assert.equal(skyAt(field, 12.75, 3.5), 1);
+  assert.ok(skyAt(field, 12.25, 3.5) < 1);
 });
 
 test('地下安装窗户不会生成室外天空光', () => {
   const state: ResidenceState = { ...empty(), underground: new Set() };
   for (let x = 0; x < 2; x++) for (let y = -4; y < -2; y++) removeResidence(state, residenceTerrainId(x, y));
   assert.equal(placeResidence(state, 'glazing', 0, -4, null).ok, true);
-  const field = buildResidenceLightField(state);
-  assert.equal(sampleResidenceSky(field, .25, -3.75), 0);
+  const field = createResidenceLight(state);
+  assert.equal(skyAt(field, .25, -3.75), 0);
+});
+
+// 脏区漏算窗口、灯缓存未失效或累加顺序变化，都会让编辑后的光场与重新加载时不同。
+test('固定编辑序列逐步增量同步后，遮挡、天空光与灯光场和全量构建逐格一致', () => {
+  const state = createResidence();
+  const light = createResidenceLight(state);
+  const find = (resourceId: string, x: number, y: number): number =>
+    state.placements.find(item => item.resourceId === resourceId && item.x === x && item.y === y)!.id;
+  const door = find('door-left', 50, 2);
+  const box: Array<[string, number, number]> = [['ceramic-C', -330, 1], ['ceramic-C', -325, 1]];
+  for (let y = 2; y < 6; y++) box.push(['ceramic-A', -330, y], ['ceramic-A', -325, y]);
+  for (let x = -330; x <= -325; x++) box.push(['ceramic-A', x, 6]);
+  const steps: Array<[string, () => Array<{ readonly ok: boolean }>]> = [
+    ['挖开地表', () => [removeResidence(state, find('ashlar-B', 20, 1))]],
+    ['挖竖井与横洞', () => [[20, 0], [20, -1], [21, -1], [22, -1], [23, -1]].map(([x, y]) => removeResidence(state, residenceTerrainId(x!, y!)))],
+    ['洞内放灯', () => [placeResidence(state, 'pendant', 22, -1, null)]],
+    ['回填井口', () => [placeResidence(state, 'ashlar-A', 20, 0, null, 'deep')]],
+    ['开门', () => [toggleResidenceDoor(state, door, farBody)]],
+    ['拆室内吊灯', () => [removeResidence(state, find('pendant', 53, 6.5))]],
+    ['砌封闭盒', () => box.map(([id, x, y]) => placeResidence(state, id, x, y, null))],
+    ['盒内放窗与灯', () => [placeResidence(state, 'glazing', -328, 3, null), placeResidence(state, 'bollard-light', -327, 1.5, null)]],
+    ['拆盒顶', () => [removeResidence(state, find('ceramic-A', -328, 6))]],
+    ['补回盒顶', () => [placeResidence(state, 'ceramic-A', -328, 6, null)]],
+    ['关门', () => [toggleResidenceDoor(state, door, farBody)]],
+  ];
+  for (const [name, edit] of steps) {
+    allOk(edit());
+    assert.notDeepEqual(light.sync(), [], name);
+    const full = createResidenceLight(state);
+    assert.deepEqual(light.opacity, full.opacity, name);
+    assert.deepEqual(light.sky, full.sky, name);
+    assert.deepEqual(light.lamp, full.lamp, name);
+    assert.deepEqual(light.lamps.map(lamp => lamp.placement.id), full.lamps.map(lamp => lamp.placement.id), name);
+  }
+});
+
+test('拆掉唯一的灯后灯光场全为零；1 格封口下透出微光，3 格厚封口后洞内天空光归零', () => {
+  const state: ResidenceState = { ...empty(), underground: new Set() };
+  for (let y = -3; y <= 0; y++) removeResidence(state, residenceTerrainId(0, y));
+  for (let x = 1; x < 5; x++) removeResidence(state, residenceTerrainId(x, -3));
+  const pendant = placeResidence(state, 'pendant', 3, -3, null);
+  assert.equal(pendant.ok, true);
+  const light = createResidenceLight(state);
+  assert.ok(lampAt(light, 3.75, -2.75) > 0);
+  assert.ok(skyAt(light, 4.25, -2.75) > 0);
+  assert.equal(removeResidence(state, pendant.id!).ok, true);
+  light.sync();
+  assert.equal(light.lamp.findIndex(value => value !== 0), -1);
+  assert.equal(placeResidence(state, 'ashlar-A', 0, 0, null, 'deep').ok, true);
+  light.sync();
+  const underPlug = skyAt(light, .25, -.25);
+  assert.ok(underPlug > 0 && underPlug < .3, `${underPlug}`);
+  allOk([-1, -2].map(y => placeResidence(state, 'ashlar-A', 0, y, null, 'deep')));
+  light.sync();
+  for (let x = .25; x < 5; x += .5) for (let y = -2.75; y < -2; y += .5) assert.equal(skyAt(light, x, y), 0, `${x}, ${y}`);
+});
+
+test('灯光绕过拐角时弱于同距离直射，3 格厚隔断另一侧超出绕行半径时没有灯光', () => {
+  const state: ResidenceState = { ...empty(), underground: new Set() };
+  assert.equal(placeResidence(state, 'pendant', 0, 3, null).ok, true);
+  const wall = (y0: number, y1: number) => allOk([3, 4, 5].flatMap(x =>
+    Array.from({ length: y1 - y0 }, (_, i) => placeResidence(state, 'ceramic-A', x, y0 + i, null))));
+  wall(1, 4);
+  const light = createResidenceLight(state);
+  const around = lampAt(light, 6.25, 3.25);
+  const open = lampAt(light, -5.25, 3.25);
+  assert.ok(around > 0 && around < open, `${around} / ${open}`);
+  wall(4, 13);
+  light.sync();
+  assert.equal(lampAt(light, 6.25, 3.25), 0);
+  assert.equal(lampAt(light, -5.25, 3.25), open);
+});
+
+test('1 格薄墙另一侧透出的灯光显著弱于无墙同距离', () => {
+  const state: ResidenceState = { ...empty(), underground: new Set() };
+  assert.equal(placeResidence(state, 'pendant', 0, 3, null).ok, true);
+  const light = createResidenceLight(state);
+  const open = lampIrradiance(light, 4.25, 3.25);
+  allOk(Array.from({ length: 12 }, (_, i) => placeResidence(state, 'ceramic-A', 3, 1 + i, null)));
+  light.sync();
+  const thin = lampIrradiance(light, 4.25, 3.25);
+  assert.ok(thin > 0 && thin < open * .3, `${thin} / ${open}`);
+});
+
+test('只以斜角相接的两个地下空洞之间不斜穿，灯光只按实心衰减透过拐角', () => {
+  const state: ResidenceState = { ...empty(), underground: new Set() };
+  removeResidence(state, residenceTerrainId(0, -3));
+  removeResidence(state, residenceTerrainId(1, -2));
+  assert.equal(placeResidence(state, 'pendant', 0, -3, null).ok, true);
+  const light = createResidenceLight(state);
+  const corner = lampIrradiance(light, 1.25, -1.75);
+  removeResidence(state, residenceTerrainId(1, -3));
+  light.sync();
+  const dug = lampIrradiance(light, 1.25, -1.75);
+  assert.ok(corner > 0 && corner < dug * .8, `${corner} / ${dug}`);
+});
+
+test('不同半径的灯各按自身半径照明，重叠处亮度叠加', () => {
+  const state: ResidenceState = { ...empty(), underground: new Set() };
+  const bollard = placeResidence(state, 'bollard-light', 0, 1, null);
+  const pendant = placeResidence(state, 'pendant', 5, 1, null);
+  const light = createResidenceLight(state);
+  assert.equal(lampAt(light, -4.75, 1.75), 0);
+  assert.ok(lampAt(light, 9.75, 1.25) > 0);
+  assert.ok(lampAt(light, 13.25, 1.25) > 0);
+  assert.equal(lampAt(light, 14.25, 1.25), 0);
+  const both = lampAt(light, 3.25, 1.75);
+  assert.equal(removeResidence(state, pendant.id!).ok, true);
+  light.sync();
+  const bollardOnly = lampAt(light, 3.25, 1.75);
+  assert.equal(placeResidence(state, 'pendant', 5, 1, null).ok, true);
+  assert.equal(removeResidence(state, bollard.id!).ok, true);
+  light.sync();
+  const pendantOnly = lampAt(light, 3.25, 1.75);
+  assert.ok(bollardOnly > 0 && pendantOnly > 0 && both > Math.max(bollardOnly, pendantOnly), `${both} / ${bollardOnly} / ${pendantOnly}`);
+});
+
+test('开关能量门后只重传门两侧有限范围，未变化时不返回矩形', () => {
+  const state = createResidence();
+  const light = createResidenceLight(state);
+  const door = state.placements.find(item => item.resourceId === 'door-left' && item.x === 50 && item.y === 2)!;
+  for (let i = 0; i < 2; i++) {
+    assert.equal(toggleResidenceDoor(state, door.id, farBody).ok, true);
+    const rects = light.sync();
+    assert.notEqual(rects.length, 0);
+    for (const rect of rects) {
+      const left = light.minX + rect.x0 * light.cellSize, right = light.minX + rect.x1 * light.cellSize;
+      assert.ok(left >= 38 && right <= 63, `${left}–${right}`);
+    }
+  }
+  assert.deepEqual(light.sync(), []);
 });

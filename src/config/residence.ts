@@ -73,6 +73,25 @@ export const RESIDENCE_RESOURCES: readonly ResidenceResource[] = [
     layer: 'furniture', kind: 'furniture', furniture: 'chair', standTop: 1, chairFacing })),
 ];
 
+/** 灯具光源相对构件左下角的位置；intensity、radius 即渲染端点光（decay 2）的强度与截止距离，光场按同一衰减计算。 */
+export interface ResidenceLight {
+  readonly color: number;
+  readonly intensity: number;
+  readonly radius: number;
+  readonly offset: { readonly x: number; readonly y: number; readonly z: number };
+}
+
+export const RESIDENCE_LIGHTS: Readonly<Partial<Record<string, ResidenceLight>>> = {
+  pendant: { color: 0xffdfb7, intensity: 36, radius: 8, offset: { x: .5, y: .06, z: 0 } },
+  'eave-light': { color: 0xffdfb7, intensity: 24, radius: 7, offset: { x: .5, y: -.1, z: 0 } },
+  // 贴墙安装（距后墙 .36）：原强度 14 时 1 格处约 4.2、2 格处约 .59，青光盖满整段墙；
+  // 降到 5 后 1 格约 1.9、2 格约 .32，夜里仍读得出壁灯，又不压过吊灯的暖色。
+  'wall-light': { color: 0x79cfff, intensity: 5, radius: 6, offset: { x: .25, y: .5, z: .64 } },
+  // 地下庭院常靠它照明：平方反比下 2 格处约为地下底光（≈.12）的 2.5 倍、3 格处约一半；
+  // 半径 3.8 时 3 格已落在距离窗口末端（只剩约 27%），只加强度无法读出，故一并放宽半径。
+  'bollard-light': { color: 0xffead4, intensity: 4, radius: 4.5, offset: { x: .25, y: .77, z: 0 } },
+};
+
 const WORLD_MIN_X = -1152;
 const WORLD_MAX_X = 1280;
 export const RESIDENCE_WORLD = { minX: WORLD_MIN_X, maxX: WORLD_MAX_X, width: WORLD_MAX_X - WORLD_MIN_X,

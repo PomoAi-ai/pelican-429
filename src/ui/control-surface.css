@@ -53,36 +53,40 @@ body[data-controls=mobile] #app canvas { touch-action: none; }
 .control-nav a[aria-current=page] { color: #191b20; background: var(--control-gold); }
 .control-nav a:focus-visible { outline: 2px solid var(--control-gold); outline-offset: 2px; }
 .control-nav .control-nav-close { margin-left: auto; border: 1px solid #f2dcb32e; border-radius: 8px; background: #ffffff08; color: var(--control-muted); padding: 8px 12px; font-size: 12px; }
-.control-keyboard { position: absolute; left: 24px; bottom: 108px; display: flex; gap: 13px; color: #e4dfd4; font-size: 10px; text-shadow: 0 1px 4px #000; }
+.control-keyboard { position: absolute; left: 24px; bottom: 132px; display: flex; gap: 13px; color: #e4dfd4; font-size: 10px; text-shadow: 0 1px 4px #000; }
 .control-keyboard > span { display: flex; align-items: center; gap: 5px; }
 .control-keyboard kbd { border: 1px solid #e7dfc75c; border-radius: 3px; padding: 3px 5px; background: #14192280; font: 9px ui-monospace, monospace; color: #fff0d0; }
 :is(body[data-controls], .room-preview-hud) .hud-weapon { position: absolute; inset: 0; width: 100%; height: 100%; min-width: 0; padding: 0; background: none; pointer-events: none; }
-:is(body[data-controls], .room-preview-hud) .hud-weapon-main { position: absolute; left: 24px; top: calc(var(--dev-nav-height) + 20px); width: 250px; gap: 12px; align-items: start; }
-:is(body[data-controls], .room-preview-hud) .hud-weapon-icon { position: relative; flex: none; width: 58px; height: 58px; border: 2px solid #e8d4aa; border-radius: 50%; background-color: #20262c; box-shadow: 0 2px 8px #0007, inset 0 0 0 3px #302f2f; color: transparent; }
-:is(body[data-controls], .room-preview-hud) .hud-weapon-info { gap: 5px; padding-top: 2px; }
-:is(body[data-controls], .room-preview-hud) .hud-weapon-name { font-size: 10px; letter-spacing: 1.5px; color: #fff0d4; text-shadow: 0 1px 4px #000; }
-:is(body[data-controls], .room-preview-hud) .hud-player-health { position: relative; }
-:is(body[data-controls], .room-preview-hud) .hud-player-health-label { position: absolute; z-index: 1; right: 5px; top: 0; color: #ffefd7; font: 8px/12px ui-monospace, monospace; text-shadow: 0 1px 2px #000; }
-:is(body[data-controls], .room-preview-hud) .hud-player-health-track { height: 12px; background: #191a22c9; border: 1px solid #edd3ac99; border-radius: 4px; overflow: hidden; box-shadow: 0 1px 4px #0005; }
-:is(body[data-controls], .room-preview-hud) .hud-player-health-fill { height: 100%; background: linear-gradient(#ec685c, #b4363f); }
-:is(body[data-controls], .room-preview-hud) .hud-weapon-track { height: 4px; margin-top: 15px; border: 1px solid #d1e5eb65; background: #18232ed9; }
-:is(body[data-controls], .room-preview-hud) .hud-weapon-fill { background: #65bedb; }
-:is(body[data-controls], .room-preview-hud) .hud-weapon-detail { font-size: 9px; color: #e1ece9; text-shadow: 0 1px 4px #000; }
-:is(body[data-controls], .room-preview-hud) .hud-weapon-main .hud-weapon-detail:last-child { display: none; }
-body[data-controls] .hud-status { top: calc(var(--dev-nav-height) + 55px); left: 94px; width: 180px; min-width: 0; padding: 0; background: none; }
+/* 人物卡由 game-hud 的左列取代。 */
+:is(body[data-controls], .room-preview-hud) .hud-weapon-main { display: none; }
+body[data-controls] .hud-status { top: calc(var(--dev-nav-height) + 200px); left: 20px; width: 140px; min-width: 0; padding: 0; background: none; }
 body[data-controls] .hud-flight-label, body[data-controls] .hud-orb { display: none; }
-body[data-controls] .hud-flight-track { height: 7px; border: 1px solid #c5e3e397; border-radius: 3px; background: #161b27cc; }
-body[data-controls] .hud-flight-fill { background: linear-gradient(#8dd8ef, #449fc4); }
+body[data-controls] .hud-flight-track { height: 4px; border: 0; border-radius: 2px; background: #ffffff1f; }
+body[data-controls] .hud-flight-fill { background: var(--hud-cyan); }
 body[data-controls] .hud-oxygen { position: absolute; top: 50px; left: 0; right: 0; }
 body[data-controls] .hud-character-switch[aria-disabled="true"] { opacity: .6; }
-:is(body[data-controls], .room-preview-hud) .hud-weapon-slots { position: absolute; left: 162px; bottom: 34px; display: flex; gap: 12px; transform: none; }
-:is(body[data-controls], .room-preview-hud) .hud-weapon-slot { position: relative; width: 52px; height: 52px; min-width: 0; min-height: 0; display: block; padding: 0; border: 2px solid #e4d0a7; border-radius: 50%; background: #1b202ae8; box-shadow: 0 2px 8px #0007, inset 0 0 0 3px #443e37; color: #fff3d8; pointer-events: auto; overflow: visible; }
-:is(body[data-controls], .room-preview-hud) .hud-weapon-key, .control-primary-key { position: absolute; top: calc(100% + 7px); left: -8px; right: -8px; text-align: center; color: #eee1c5; font: 10px ui-monospace, monospace; text-shadow: 0 1px 4px #000; white-space: nowrap; }
+:is(body[data-controls], .room-preview-hud) .hud-weapon-slots { position: absolute; left: 24px; bottom: 20px; display: flex; align-items: flex-end; gap: 14px; transform: none; }
+/* 技能栏不加底框；抬高给按键字留位置。 */
+:is(body[data-controls=desktop], .room-preview-hud) .hud-weapon-slots { bottom: 40px; gap: 12px; align-items: center; }
+:is(body[data-controls], .room-preview-hud) .hud-weapon-slot { position: relative; flex: none; width: 56px; height: 56px; min-width: 0; min-height: 0; display: block; padding: 0; border: 1px solid #ffffff40; border-radius: 50%; background: #0a1220b8; box-shadow: none; color: var(--hud-pearl); pointer-events: auto; overflow: visible; transition: filter .1s; }
+/* 大招格：LED 环表示就绪，冷却时由 weapon-hud 的真实冷却环画进度。 */
+:is(body[data-controls=desktop], .room-preview-hud) .hud-weapon-slot[data-slot='4'] { width: 68px; height: 68px; margin-left: 4px; box-shadow: 0 0 0 2px var(--hud-led); }
+:is(body[data-controls=desktop], .room-preview-hud) .hud-weapon-slot[data-slot='4']:not(.hud-weapon-ready) { box-shadow: none; }
+:is(body[data-controls=desktop], .room-preview-hud) .hud-weapon-slot[data-slot='4'] .hud-skill-cooldown-ring:not([hidden]) { display: block; inset: -3px; border-width: 2px; }
+:is(body[data-controls], .room-preview-hud) .hud-weapon-key, .control-primary-key { position: absolute; top: calc(100% + 4px); left: 50%; transform: translateX(-50%); color: #fff; font: 600 11px var(--hud-num-font); text-shadow: 0 1px 2px #000, 0 0 4px #000; white-space: nowrap; }
+:is(body[data-controls=desktop], .room-preview-hud) .hud-weapon-slot[data-slot='4'] .hud-weapon-key { top: calc(100% + 6px); }
 :is(body[data-controls], .room-preview-hud) .hud-skill-name, :is(body[data-controls], .room-preview-hud) .hud-skill-track { display: none; }
-:is(body[data-controls], .room-preview-hud) .hud-skill-state { position: absolute; inset: 0; display: grid; place-items: center; font: bold 11px ui-monospace, monospace; color: #fff; text-shadow: 0 1px 4px #000; border-radius: inherit; background: #0d111a65; z-index: 2; }
+:is(body[data-controls], .room-preview-hud) .hud-skill-state { position: absolute; inset: 0; display: grid; place-items: center; font: 600 13px var(--hud-num-font); color: #fff; text-shadow: 0 1px 3px #13233fe6; border-radius: inherit; background: #13233f73; z-index: 2; }
 :is(body[data-controls], .room-preview-hud) .hud-skill-state[hidden], :is(body[data-controls], .room-preview-hud) .hud-weapon-ready .hud-skill-state { display: none; }
-:is(body[data-controls], .room-preview-hud) .hud-weapon-slot:hover:not(:disabled), :is(body[data-controls], .room-preview-hud) .hud-weapon-slot.hud-weapon-active { border-color: #ffe8ad; box-shadow: 0 0 13px #ffc86c60; }
-:is(body[data-controls], .room-preview-hud) .hud-weapon-slot:disabled { opacity: .45; }
+:is(body[data-controls], .room-preview-hud) .hud-weapon-slot:hover:not(:disabled), :is(body[data-controls], .room-preview-hud) .hud-weapon-slot.hud-weapon-active { filter: brightness(1.2); }
+:is(body[data-controls], .room-preview-hud) .hud-weapon-slot:disabled { filter: grayscale(1) opacity(.6); }
+/* 砸击与人形技能、光子爆裂用渲染图标：放大裁掉自带的金银外环，只留中间图案；鹈鹕形态技能仍用精灵图。 */
+:is(body[data-controls], .room-preview-hud) .hud-weapon-slot .hud-skill-icon:is([data-icon=smash], [data-icon=codex], [data-icon=bug], [data-icon=server], [data-icon=photon]) { inset: 2px; background: var(--skill-art) center / 142% no-repeat; }
+:is(body[data-controls], .room-preview-hud) .hud-weapon-slot .hud-skill-icon[data-icon=smash] { --skill-art: url('/ui/hud/skill-0.png'); }
+:is(body[data-controls], .room-preview-hud) .hud-weapon-slot .hud-skill-icon[data-icon=codex] { --skill-art: url('/ui/hud/skill-1.png'); }
+:is(body[data-controls], .room-preview-hud) .hud-weapon-slot .hud-skill-icon[data-icon=bug] { --skill-art: url('/ui/hud/skill-2.png'); }
+:is(body[data-controls], .room-preview-hud) .hud-weapon-slot .hud-skill-icon[data-icon=server] { --skill-art: url('/ui/hud/skill-3.png'); }
+:is(body[data-controls], .room-preview-hud) .hud-weapon-slot .hud-skill-icon[data-icon=photon] { --skill-art: url('/ui/hud/skill-4.png'); }
 .hud-skill-icon { background-image: url('/ui/hud-icons.webp'); background-size: 400% 300%; background-repeat: no-repeat; }
 .hud-skill-icon { position: absolute; inset: 4px; border-radius: 50%; pointer-events: none; }
 [data-icon=water] { background-position: 0 0; }
@@ -98,7 +102,7 @@ body[data-controls] .hud-character-switch[aria-disabled="true"] { opacity: .6; }
 [data-icon=pelican] { background-position: 66.6667% 100%; }
 [data-icon=human] { background-position: 100% 100%; }
 body:has(.hud-weapon[data-player-form=human]) .control-attack .hud-skill-icon { background-position: 33.3333% 50%; }
-body[data-controls] .hud-hints { top: calc(var(--dev-nav-height) + 130px); left: 24px; right: auto; bottom: auto; max-height: calc(100dvh - var(--dev-nav-height) - 260px); overflow: auto; pointer-events: auto; background: #151a24f0; border: 1px solid #e5d7b84d; font-size: 11px; }
+body[data-controls] .hud-hints { top: calc(var(--dev-nav-height) + 300px); right: 24px; left: auto; bottom: auto; max-height: calc(100dvh - var(--dev-nav-height) - 430px); overflow: auto; pointer-events: auto; background: #151a24f0; border: 1px solid #e5d7b84d; font-size: 11px; }
 body[data-controls] .hud-hints-hidden { pointer-events: none; }
 :is(body[data-controls], .room-preview-hud) .hud-weapon-toast { left: 50%; top: calc(var(--dev-nav-height) + 105px); font-size: 15px; }
 .control-touch { display: contents; }
@@ -108,6 +112,7 @@ body[data-controls] .hud-hints-hidden { pointer-events: none; }
 .control-pad { position: absolute; padding: 0; border: 2px solid #ead6ad; border-radius: 50%; color: #f6ebd6; background: #1b202ae8; pointer-events: auto; box-shadow: 0 2px 8px #0007, inset 0 0 0 3px #443e37; }
 .control-pad:active { border-color: #fff0bc; box-shadow: 0 0 18px #ffcf7977; }
 .control-attack { left: 96px; bottom: 34px; width: 54px; height: 54px; }
+body[data-controls=desktop] .control-attack { display: none; }
 body[data-controls=mobile] .control-keyboard, body[data-controls=mobile] .control-primary-key { display: none !important; }
 body[data-controls=mobile] .control-move { display: block; position: absolute; left: 28px; bottom: 26px; width: 128px; height: 128px; transform: scale(var(--touch-scale)); transform-origin: bottom left; }
 .control-stick { position: relative; display: block; width: 128px; height: 128px; padding: 0; border: 2px solid #e5d8ba77; border-radius: 50%; color: #fff; background: #171c2940; touch-action: none; pointer-events: auto; box-shadow: inset 0 0 0 7px #19212b30, 0 2px 8px #0002; }
@@ -126,9 +131,6 @@ body[data-controls=mobile] .hud-weapon-slot[data-slot='2'] { right: calc(24px + 
 body[data-controls=mobile] .hud-weapon-slot[data-slot='3'] { right: calc(24px + 83px * var(--touch-scale)); bottom: calc(24px + 170px * var(--touch-scale)); }
 body[data-controls=mobile] .hud-weapon-slot[data-slot='4'] { right: calc(24px + 13px * var(--touch-scale)); }
 body[data-controls=mobile] .hud-weapon-key, body[data-controls=mobile] .hud-character-key { display: none; }
-body[data-controls=mobile] .hud-weapon-main { left: 20px; top: calc(var(--dev-nav-height) + 16px); width: 230px; }
-body[data-controls=mobile] .hud-weapon-icon { width: 50px; height: 50px; }
-body[data-controls=mobile] .hud-status { left: 84px; top: calc(var(--dev-nav-height) + 51px); width: 166px; }
 body[data-controls=mobile] .hud-hint { display: none; }
 body[data-controls=mobile] .hud-touch-help { display: block; max-width: 280px; line-height: 1.8; }
 
@@ -142,12 +144,12 @@ body[data-controls=mobile] .hud-weapon-slot:active:not(:disabled) { scale: .88; 
 .control-stick.control-pressed { border-color: #ffe5ac; background: #242b3a88; box-shadow: 0 0 0 5px #ffe2a522, 0 0 24px #ffdc8c30; }
 .control-stick.control-pressed .control-stick-thumb { background: radial-gradient(circle at 35% 25%, #fff3d4, #bd945c); border-color: #fff5da; box-shadow: 0 0 0 5px #ffdd8740, 0 3px 16px #0008; }
 
-body[data-controls] .hud-character-switch { position: absolute; left: 24px; top: auto; bottom: 34px; width: 60px; height: 60px; padding: 0; border: 2px solid #e5c789; border-radius: 50%; color: #fff1d5; background: #1b202ae8; pointer-events: auto; box-shadow: 0 2px 8px #0007, inset 0 0 0 3px #443e37; }
+body[data-controls] .hud-character-switch { position: absolute; left: 354px; top: calc(var(--dev-nav-height) + 20px); bottom: auto; width: 60px; height: 60px; padding: 0; border: 2px solid #e5c789; border-radius: 50%; color: #fff1d5; background: #1b202ae8; pointer-events: auto; box-shadow: 0 2px 8px #0007, inset 0 0 0 3px #443e37; }
 body[data-controls] .hud-character-icon { position: absolute; inset: 4px; width: auto; height: auto; }
 .hud-character-arrow { position: absolute; right: -3px; bottom: -1px; padding: 0 3px; border-radius: 8px; background: #1b202a; color: #ffe5ac; font-size: 17px; line-height: 19px; }
 body[data-controls] .hud-character-key { position: absolute; top: calc(100% + 7px); left: 0; right: 0; text-align: center; font: 10px ui-monospace, monospace; text-shadow: 0 1px 4px #000; }
 body[data-controls] .hud-character-label { display: none; }
-body[data-controls=mobile] .hud-character-switch { left: auto; right: calc(24px + 221px * var(--touch-scale)); bottom: calc(24px + 143px * var(--touch-scale)); width: 50px; height: 50px; transform: scale(var(--touch-scale)); transform-origin: bottom right; }
+body[data-controls=mobile] .hud-character-switch { left: auto; top: auto; right: calc(24px + 221px * var(--touch-scale)); bottom: calc(24px + 143px * var(--touch-scale)); width: 50px; height: 50px; transform: scale(var(--touch-scale)); transform-origin: bottom right; }
 body[data-controls=mobile] .hud-character-switch:active:not(:disabled) { scale: .88; filter: brightness(1.35); box-shadow: 0 0 0 5px #ffd77e55; }
 body[data-controls=mobile] .hud-weapon-slot.control-pressed,
 body[data-controls=mobile] .hud-character-switch.control-pressed { scale: .88; filter: brightness(1.35); box-shadow: 0 0 0 5px #ffd77e55; }

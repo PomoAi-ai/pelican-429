@@ -8,10 +8,11 @@ import { HUMAN_BODY_HEIGHT } from '../src/config/player-form.ts';
 import { HUMAN_CODEX_SHOT, HUMAN_SKILLS } from '../src/config/human-combat.ts';
 import { TUNING } from '../src/config/tuning.ts';
 import { createPelicanEntity } from '../src/entities/entity.ts';
+import { createFlyingRoadster } from '../src/entities/flying-roadster.ts';
 import { NEUTRAL_INPUT, resolvePelicanState, updatePelican } from '../src/entities/pelican-controller.ts';
 import { createActionTracker } from '../src/input/action-map.ts';
 import { savePrev } from '../src/physics/body.ts';
-import { definitionColliderSection } from '../src/physics/definition-collision.ts';
+import { definitionColliderSection, type DefinitionCollider } from '../src/physics/definition-collision.ts';
 import { createSolarPanel, solarTrackingAngle } from '../src/physics/solar-panel.ts';
 import { COLLISION_EPS, moveAndCollide } from '../src/physics/tile-collision.ts';
 import { createTileMap } from '../src/world/tile-map.ts';
@@ -381,4 +382,89 @@ test('环境外力在同一物理步内抬升角色，仍由实体屋顶阻挡',
   assert.ok(Math.abs(preview.entity.body.y - (1 + 12 * TUNING.sim.step)) < 1e-6);
   for (let tick = 0; tick < 60; tick++) preview.step(NEUTRAL_INPUT);
   assert.ok(Math.abs(preview.entity.body.y + preview.entity.body.height - 5) < 1e-6);
+});
+
+function roadsterPreview(obstacles: readonly DefinitionCollider[] = []) {
+  const car = createFlyingRoadster(100, { x: 10.5, y: 1.2 }, TUNING);
+  const preview = createPerspectivePlayer({
+    solids: [{ points: [[0, 0], [64, 0], [64, 1], [0, 1]] }, ...obstacles], platforms: [],
+  }, { x: 10.5, y: 7 }, { width: 64, height: 20 }, [], false, { carriers: [car] });
+  return { car, preview };
+}
+
+test('车辆和真实技能弹共享注册表时实体编号互不重复', () => {
+  const carriers = [2, 8].map(id => createFlyingRoadster(id, { x: 20 + id, y: 4 }, TUNING));
+  const preview = createPerspectivePlayer({ solids: [], platforms: [{ left: 0, right: 80, top: 1 }] },
+    { x: 4, y: 1 }, { width: 80, height: 30 }, [], false, { carriers });
+  preview.step({ ...NEUTRAL_INPUT, skillPressed: 1 });
+  for (let tick = 0; tick <= HUMAN_SKILLS.codex_attack.ticks; tick++) preview.step(NEUTRAL_INPUT);
+  assert.equal(preview.projectiles.length, HUMAN_SKILLS.codex_attack.count);
+  const ids = [preview.entity.id, ...carriers.map(carrier => carrier.id), ...preview.projectiles.map(shot => shot.id)];
+  assert.equal(new Set(ids).size, ids.length);
+});
+
+test('真实轮廓场景中落到飞行车顶后持续随车往返升降', () => {
+  const { car, preview } = roadsterPreview();
+  for (let tick = 0; tick < 90; tick++) preview.step(NEUTRAL_INPUT);
+  const player = preview.entity;
+  assert.equal(player.solid!.supportId, car.id);
+  const offset = player.body.x - car.body.x;
+  let farthest = car.body.x;
+  for (let tick = 0; tick < 2000; tick++) {
+    preview.step(NEUTRAL_INPUT);
+    farthest = Math.max(farthest, car.body.x);
+    assert.equal(player.solid!.supportId, car.id, `tick ${tick} 持续承托`);
+    assert.equal(player.body.onGround, true);
+    assert.ok(Math.abs(player.body.y - car.body.y - car.body.height) < 1e-6, `tick ${tick} 脚底贴顶`);
+    assert.ok(Math.abs(player.body.x - car.body.x - offset) < 1e-6, `tick ${tick} 相对位置稳定`);
+  }
+  assert.ok(farthest > 35 && car.body.x < 13, '经过远端并返回');
+});
+
+test('飞行车上起跳立刻停止随动，下穿后不会被车顶吸回', () => {
+  for (const drop of [false, true]) {
+    const { car, preview } = roadsterPreview();
+    for (let tick = 0; tick < 300; tick++) preview.step(NEUTRAL_INPUT);
+    const player = preview.entity;
+    const offset = player.body.x - car.body.x;
+    preview.step({ ...NEUTRAL_INPUT, jumpPressed: true, jumpHeld: true, downHeld: drop });
+    assert.equal(player.solid!.supportId, null);
+    assert.equal(player.body.onGround, false);
+    assert.ok(drop ? player.body.y < car.body.y + car.body.height : player.body.y > car.body.y + car.body.height);
+    for (let tick = 0; tick < 8; tick++) {
+      preview.step({ ...NEUTRAL_INPUT, jumpHeld: !drop, downHeld: drop });
+      assert.equal(player.solid!.supportId, null);
+    }
+    assert.ok(Math.abs(player.body.x - car.body.x - offset) > .05, '离开后不继承车辆位移');
+    if (drop) {
+      for (let tick = 0; tick < 180; tick++) {
+        preview.step(NEUTRAL_INPUT);
+        assert.equal(player.solid!.supportId, null);
+      }
+      assert.equal(player.body.y, 1);
+    }
+  }
+});
+
+test('飞行车承托位移受到真实薄墙和低天花板阻挡', () => {
+  for (const ceiling of [false, true]) {
+    const shape: DefinitionCollider = ceiling
+      ? { points: [[0, 6.2], [64, 6.2], [64, 6.3], [0, 6.3]] }
+      : { points: [[13, 1], [13.01, 1], [13.01, 12], [13, 12]] };
+    const { car, preview } = roadsterPreview([shape]);
+    // 出生先置于车顶，避免测试中的低顶与空中出生重叠。
+    preview.teleport(car.body.x, car.body.y + car.body.height);
+    let supported = false;
+    let released = false;
+    for (let tick = 0; tick < 800; tick++) {
+      preview.step(NEUTRAL_INPUT);
+      const player = preview.entity;
+      supported ||= player.solid!.supportId === car.id;
+      released ||= supported && player.solid!.supportId === null;
+      if (ceiling) assert.ok(player.body.y + player.body.height <= 6.2 + 1e-6, `tick ${tick} 不穿天花板`);
+      else assert.ok(player.body.x + player.body.halfWidth <= 13 + 1e-6, `tick ${tick} 不穿薄墙`);
+    }
+    assert.equal(supported, true);
+    assert.equal(released, true, '车辆越过阻挡后玩家脱离');
+  }
 });

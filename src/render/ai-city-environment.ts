@@ -2,20 +2,17 @@ import * as THREE from 'three';
 import { mulberry32 } from '../core/rng.ts';
 import { RESIDENCE_WORLD, RESIDENCE_SEGMENT_WIDTH as SEGMENT_WIDTH } from '../config/residence.ts';
 import { AI_CITY_LAYERS, type AiCityLayerId } from '../config/ai-city-look.ts';
-import { DEFAULT_WEATHER } from '../config/weather-rules.ts';
 import { planTree } from '../world/trees.ts';
-import type { WindController } from '../world/wind.ts';
 import type { TreeKind } from '../world/level.ts';
 import { buildTreeGeometry } from './tree-geometry.ts';
 import { createTreeMaterials } from './tree-material.ts';
 import { createAiCityBatches, type AiCityBatches } from './ai-city-batches.ts';
-import { aiCityRailPoint, createAiCityTraffic } from './ai-city-traffic.ts';
-import { loadAiCityBackdrop, type AiCityBackdrop } from './ai-city-backdrop.ts';
+import { AI_CITY_RAILS, createAiCityTraffic } from './ai-city-traffic.ts';
+import { AI_CITY_BACKDROP_FILES, loadAiCityBackdrop, type AiCityBackdrop } from './ai-city-backdrop.ts';
 import { shadowReceiverBounds } from './shadow-fit.ts';
 import { createFloraGeometries, createFloraMeshes, createWindMaterial, type FloraInstance } from './flora.ts';
 import { createShrubAtlas, createShrubMaterial, createShrubMesh, SHRUB_KINDS, type ShrubInstance } from './flora-shrubs.ts';
 import { built, createLilyPadGeometry, createLilyFlowerGeometry } from './aquatic-geometry.ts';
-import { createWeatherFx } from './weather-fx.ts';
 import type { PrecipSkyLook } from './precip-sky.ts';
 import { createTileMap } from '../world/tile-map.ts';
 import { DEFAULT_TILES } from '../world/tile-types.ts';
@@ -134,128 +131,18 @@ type TreePlacement = { x: number; y: number; z: number; height: number; kind: Tr
 type WaterPlacement = { x: number; y: number; z: number; w: number; h: number; depth: number };
 interface SegmentPlan { beds: GardenBed[]; trees: TreePlacement[]; waters: WaterPlacement[] }
 
-function addTower(city: AiCityBatches, x: number, base: number, z: number, height: number, width: number,
-  style: number, distant = false): void {
+// 近轨贴着水面跨过整段，远轨高架横穿近城楼群腰部，两层列车在画面上下错开；列车由交通层沿同一高度行驶。
+// z 为所在层的原始层距，分段平移后与 AI_CITY_RAILS 的世界深度重合。
+function addRail(city: AiCityBatches, rail: { y: number; scale: number }, z: number, pier: number): void {
   const { put } = city;
-  const shell = distant ? 'far' : 'city';
-  const glass = distant ? 'farGlass' : 'cityGlass';
-  const depth = width * .8;
-  // 玻璃是塔身主体；细结构肋、退台和冠部决定轮廓，避免堆出整块亮白墙。
-  for (let tier = 0; tier < 3; tier++) {
-    const w = width * (1 - tier * .17);
-    const y = base + height * (tier + .5) / 3;
-    const offset = style === 1 ? tier * width * .13 : 0;
-    put('panel', glass, x + offset, y, z, w, height / 3, depth);
-    for (const side of [-1, 1]) put('panel', shell, x + offset + side * w / 2, y, z + depth * .42,
-      .2, height / 3 + .08, depth * .24);
-    put('box', shell, x + offset, base + height * (tier + 1) / 3, z, w + .35, .25, depth + .3);
-    for (let floor = 1; floor < height / 3; floor += 2.8) {
-      put('panel', shell, x + offset, base + height * tier / 3 + floor, z + depth * .51, w, .07, .1);
-      for (let column = 0; column < 3; column++) {
-        if ((column + tier + Math.round(floor) + style) % 3 === 0) continue;
-        put('panel', 'window', x + offset + (column - 1) * w * .3,
-          base + height * tier / 3 + floor + .65, z + depth * .515, w * .15, .55, .035);
-      }
-    }
-    if (!distant) for (const u of [-.25, .25]) put('panel', 'farGlass', x + offset + u * w, y,
-      z + depth * .515, .09, height / 3 - .3, .05);
+  const { y, scale: k } = rail;
+  // 深色梁身配一道灯带，在黄昏楼群脚下读作轨道而不是一道白栏杆。
+  put('box', 'blue', 64, y, z, SEGMENT_WIDTH + .2, .34 * k, .8 * k);
+  put('box', 'ivory', 64, y + .19 * k, z, SEGMENT_WIDTH + .2, .05 * k, .86 * k);
+  put('panel', 'light', 64, y - .05 * k, z + .41 * k, SEGMENT_WIDTH + .2, .05 * k, .02);
+  for (let x = pier / 2; x < SEGMENT_WIDTH; x += pier) {
+    put('taper', 'blue', x, (y - .17 * k) / 2, z, .55 * k, y - .17 * k, .55 * k);
   }
-  if (style === 0) {
-    put('dome', shell, x, base + height + .15, z, width * .42, width * .65, depth * .47);
-    put('panel', glass, x, base + height + width * .25, z + depth * .48, width * .16, width * .5, .08);
-  } else {
-    put('taper', shell, x + width * .25, base + height + 1.4, z, width * .22, 2.8, depth * .25);
-  }
-  put('cylinder', distant ? 'farGlass' : 'gold', x, base + height + 3, z, .045, 3, .045);
-  put('box', shell, x, base + .6, z, width * 1.6, 1.2, depth * 1.4);
-}
-
-function addArchitecture(city: AiCityBatches, plan: SegmentPlan, index: number): void {
-  const { put } = city;
-  const pavilions = index % 2 ? [{ x: 18, w: 24, y: 2.6 }, { x: 101, w: 28, y: 4.2 }]
-    : [{ x: 20, w: 27, y: 3.2 }, { x: 101, w: 25, y: 2.6 }];
-  for (const p of pavilions) {
-    const z = -16;
-    put('box', 'stone', p.x, p.y - 1.5, z, p.w + 3, 3, 7);
-    put('box', 'blue', p.x, p.y + .12, z, p.w, .24, 6.5);
-    for (let bay = -2; bay <= 2; bay++) {
-      const x = p.x + bay * p.w / 5;
-      put('panel', 'glass', x, p.y + 2, z - .7, p.w / 5 - .35, 3.5, .18);
-      put('box', 'ivory', x - p.w / 10, p.y + 2, z + .15, .27, 3.7, 2.8);
-      put('panel', 'gold', x - p.w / 10 + .14, p.y + 2.5, z + 1.59, .06, 1.6, .04);
-      put('panel', 'blue', x, p.y + .7, z + 1.65, p.w / 5 - .55, .13, .14);
-      put('panel', 'window', x, p.y + 3.25, z - .58, p.w / 5 - .85, .2, .035);
-    }
-    put('box', 'ivory', p.x, p.y + 3.95, z, p.w + 1.6, .42, 7);
-    put('box', 'soil', p.x, p.y + 4.18, z, p.w - .4, .08, 5.8);
-    for (const offset of [-.32, 0, .32]) plan.beds.push({ x: p.x + offset * p.w - 2,
-      y: p.y + 4.23, z: z + .6, width: 4, depth: 1.6 });
-    for (const side of [-1, 1]) plan.trees.push({ x: p.x + side * p.w * .32, y: p.y + 4.23,
-      z: z - .5, height: 4 + (side + 1) * .4, kind: side < 0 ? 'broad' : 'oak' });
-    for (let step = 0; step < 4; step++) put('panel', 'paving', p.x + p.w / 2 + .6 + step * .6,
-      p.y - .25 - step * .7, z + .6, 1.2, .3, 4.8);
-  }
-  // 独立半穹顶温室有真正的底座、入口和白色弧肋。
-  const x = index % 2 ? 69 : 43;
-  put('cylinder', 'stone', x, .5, -20, 8.2, 2, 5.3);
-  put('dome', 'glass', x, 1.6, -20, 8, 5, 5);
-  for (let k = 0; k < 5; k++) {
-    const a = k * Math.PI / 4;
-    city.curve(Array.from({ length: 13 }, (_, i) => {
-      const t = i * Math.PI / 12;
-      return new THREE.Vector3(x + Math.cos(t) * 8 * Math.cos(a), 1.6 + Math.sin(t) * 5.04,
-        -20 + Math.cos(t) * 5 * Math.sin(a));
-    }), .1, 'ivory');
-  }
-  put('box', 'ivory', x, 1.4, -14.6, 3.2, 2.8, 1.6);
-  put('panel', 'blue', x, 1.25, -13.74, 2.2, 2.5, .08);
-  plan.waters.push({ x: 0, y: -1.2, z: -12, w: SEGMENT_WIDTH, h: 1, depth: 3.5 });
-}
-
-function addCanyon(city: AiCityBatches, plan: SegmentPlan, index: number): void {
-  const { put } = city;
-  // 绘制岩壁位于轨道后方；前沿水幕和桥梁仍使用会运动、受光的游戏资源。
-  const cliffs = [{ y: 4.5, fall: 29 }, { y: 7.5, fall: 84 }];
-  for (const cliff of cliffs) {
-    const { y } = cliff;
-    const fallX = cliff.fall;
-    plan.waters.push({ x: fallX - 5, y: y - 1, z: -33.5, w: 9, h: 1, depth: 2.6 });
-    plan.waters.push({ x: fallX, y: y - 9, z: -28.2, w: 3, h: 9, depth: .9 });
-    for (const side of [-1, 1]) put('rock', 'stone', fallX + 1.5 + side * 2.1, y - 3.8,
-      -28.4, .65, 4.6, .9, 0, side * .2, side * .09);
-  }
-  plan.waters.push({ x: 20, y: -5.4, z: -33, w: 83, h: 1, depth: 4.5 });
-  const points = Array.from({ length: 17 }, (_, i) => {
-    const point = aiCityRailPoint(index * SEGMENT_WIDTH - 8 + i * 9);
-    point.x -= index * SEGMENT_WIDTH; return point;
-  });
-  city.curve(points, .25, 'ivory');
-  city.curve(points.map(p => p.clone().add(new THREE.Vector3(0, -.34, 0))), .18, 'blue');
-  city.curve(points.map(p => p.clone().add(new THREE.Vector3(0, .25, .45))), .055, 'gold');
-  for (const [x, y, span] of [[42, 6.5, 31], [81, 7, 30]] as const) {
-    city.curve(Array.from({ length: 17 }, (_, i) => new THREE.Vector3(x + (i / 16 - .5) * span,
-      -4.5 + Math.sin(i / 16 * Math.PI) * (y + 3.8), -33)), .4, 'ivory');
-    for (const side of [-1, 1]) put('taper', 'stone', x + side * span / 2, -1.7, -33, .85, 6, 1.1);
-    for (const u of [-.3, 0, .3]) {
-      const lower = -4.5 + Math.cos(u * Math.PI) * (y + 3.8);
-      put('panel', 'ivory', x + u * span, (lower + y) / 2, -33, .14, y - lower + .2, .14);
-    }
-  }
-}
-
-function addDistantLandscape(city: AiCityBatches, index: number): void {
-  const rng = mulberry32(0xf4a9 + index);
-  const profile = (base: number, peak: number): Array<[number, number]> => [
-    [-15, -22], ...Array.from({ length: 15 }, (_, i): [number, number] =>
-      [-15 + i * 11.3, base + rng() * peak + (i % 3 === 1 ? 7 : 0)]), [144, -22],
-  ];
-  city.landform(profile(8, 14), -150 - THREE.MathUtils.euclideanModulo(index, 3) * .8, 5, 'ridge');
-  city.landform(profile(-1, 12), -137 - THREE.MathUtils.euclideanModulo(index, 3) * .6, 9, 'mountain');
-  for (const [x, h, w] of [[6, 19, 3.7], [21, 27, 3], [38, 15, 3.8], [95, 24, 3.5], [109, 16, 4]] as const) {
-    addTower(city, x, -3, -132, h, w, THREE.MathUtils.euclideanModulo(index, 2), true);
-  }
-  city.curve([new THREE.Vector3(-10, 1, -131), new THREE.Vector3(30, 3.7, -131),
-    new THREE.Vector3(78, 2, -131), new THREE.Vector3(140, 4, -131)], .25, 'far');
 }
 
 function addGardens(city: AiCityBatches, plan: SegmentPlan, index: number, homeCenter: number): void {
@@ -341,7 +228,7 @@ function createSegmentWater(city: AiCityBatches, p: WaterPlacement) {
 }
 
 function createEnvironmentSegment(layer: SegmentLayer, index: number, homeCenter: number, detail: boolean,
-  wind: WindController, backdrop: AiCityBackdrop) {
+  backdrop: AiCityBackdrop) {
   const city = createAiCityBatches();
   city.root.name = `ai-city-${layer}-segment-${index}`;
   city.root.position.x = index * SEGMENT_WIDTH;
@@ -351,14 +238,13 @@ function createEnvironmentSegment(layer: SegmentLayer, index: number, homeCenter
   switch (layer) {
     case 'ground': addGround(plan); break;
     case 'garden': addGardens(city, plan, index, homeCenter - index * SEGMENT_WIDTH); break;
-    case 'architecture': addArchitecture(city, plan, index); break;
-    case 'canyon': city.root.add(backdrop.create('canyon')); addCanyon(city, plan, index); break;
-    case 'city': city.root.add(backdrop.create('city')); break;
-    case 'distance': addDistantLandscape(city, index); break;
+    case 'architecture': addRail(city, AI_CITY_RAILS.near, -16, 16); city.root.add(backdrop.create('water', index)); break;
+    case 'canyon': addRail(city, AI_CITY_RAILS.far, -35, 24); city.root.add(backdrop.create('canyon', index)); break;
+    case 'city': city.root.add(backdrop.create('city', index)); break;
+    case 'distance': city.root.add(backdrop.create('distance', index)); break;
   }
   const animated: Array<{ update(time: number): void; dispose(): void }> = [];
   const nightResponders: Array<{ setNightFactor(night: number): void }> = [city];
-  const weatherResponders: Array<{ setWeather(weather: PrecipSkyLook): void }> = [];
   if (detail && plan.beds.length) {
     const greenery = createAiCityGreenery(plan.beds);
     city.root.add(greenery.root); animated.push(greenery);
@@ -373,36 +259,9 @@ function createEnvironmentSegment(layer: SegmentLayer, index: number, homeCenter
   }
   const waters = plan.waters.map(p => createSegmentWater(city, p));
   animated.push(...waters); nightResponders.push(...waters);
-  if (layer === 'distance') {
-    const weather = { ...DEFAULT_WEATHER, seed: DEFAULT_WEATHER.seed + index,
-      particles: { ...DEFAULT_WEATHER.particles, lineMax: 0, lineRate: 0, debrisMax: 0, debrisRate: 0 },
-      clouds: { count: 8, speed: .4, zNear: -136, zFar: -158 } };
-    const clouds = createWeatherFx({ scene: city.root, weather, wind, cameraDistance: 40 });
-    const material = clouds.meshes.clouds.material as THREE.ShaderMaterial;
-    material.uniforms.uOpacity!.value = .68;
-    const cloudColors = [
-      { uniform: material.uniforms.uTop! as THREE.IUniform<THREE.Color>, night: new THREE.Color('#203352') },
-      { uniform: material.uniforms.uBottom! as THREE.IUniform<THREE.Color>, night: new THREE.Color('#101b31') },
-      { uniform: material.uniforms.uSky! as THREE.IUniform<THREE.Color>, night: new THREE.Color('#152542') },
-    ].map(color => ({ ...color, day: color.uniform.value.clone() }));
-    weatherResponders.push({ setWeather(look): void {
-      clouds.setOvercast(look.cloudAmount, look.cloudGray);
-      for (const color of cloudColors) color.day.copy(color.uniform.value);
-    } });
-    nightResponders.push({ setNightFactor(night): void {
-      for (const color of cloudColors) color.uniform.value.copy(color.day).lerp(color.night, night);
-      material.uniforms.uOpacity!.value = .68 - night * .3;
-    } });
-    // 固定世界云层，分段内环绕；不跟着镜头竖直浮动。
-    animated.push({ update(time): void {
-      clouds.update({ x: 35, y: 0, w: 28, h: 20 }, 0, () => 0);
-    }, dispose(): void { clouds.dispose(); } });
-  }
   city.flush();
   return { root: city.root, detail, setNightFactor(night: number): void {
     for (const item of nightResponders) item.setNightFactor(night);
-  }, setWeather(weather: PrecipSkyLook): void {
-    for (const item of weatherResponders) item.setWeather(weather);
   }, update(time: number): void {
     for (const item of animated) item.update(time);
   }, dispose(): void {
@@ -412,7 +271,7 @@ function createEnvironmentSegment(layer: SegmentLayer, index: number, homeCenter
 }
 
 /** 分层和分段只管理表现，不向玩法注册台地；同一资源工厂服务目录与住宅游戏。 */
-export function createAiCityEnvironment({ homeCenter, wind }: { homeCenter: number; wind: WindController }) {
+export function createAiCityEnvironment({ homeCenter }: { homeCenter: number }) {
   const root = new THREE.Group();
   root.name = 'ai-city-environment';
   const layers = Object.fromEntries(AI_CITY_LAYERS.map(layer => {
@@ -462,9 +321,8 @@ export function createAiCityEnvironment({ homeCenter, wind }: { homeCenter: numb
   };
   const buildNext = (): void => {
     const job = pending.shift()!;
-    const view = createEnvironmentSegment(job.layer, job.index, homeCenter, job.detail, wind, backdrop!);
+    const view = createEnvironmentSegment(job.layer, job.index, homeCenter, job.detail, backdrop!);
     (job.layer === 'ground' ? ground : layers[job.layer]).add(view.root);
-    if (weather) view.setWeather(weather);
     view.setNightFactor(nightFactor); view.update(time);
     segments.set(`${job.layer}:${job.index}`, { ...job, view });
   };
@@ -474,11 +332,11 @@ export function createAiCityEnvironment({ homeCenter, wind }: { homeCenter: numb
     async prepare(signal: AbortSignal, onProgress: (progress: { completed: number; total: number }) => void): Promise<void> {
       signal.throwIfAborted();
       let completed = 0;
-      const total = pending.length + 2;
+      const total = pending.length + AI_CITY_BACKDROP_FILES;
       onProgress({ completed, total });
       const loaded = await loadAiCityBackdrop(signal, () => {
         completed++; onProgress({ completed, total });
-      });
+      }, homeCenter);
       if (disposed || signal.aborted) {
         loaded.dispose();
         signal.throwIfAborted();
@@ -488,7 +346,7 @@ export function createAiCityEnvironment({ homeCenter, wind }: { homeCenter: numb
       if (weather) backdrop.setWeather(weather);
       backdrop.setNightFactor(nightFactor);
       traffic = createAiCityTraffic(homeCenter); root.add(traffic.root); traffic.setNightFactor(nightFactor);
-      traffic.trains.visible = layers.canyon.visible; traffic.drones.visible = layers.architecture.visible;
+      traffic.near.visible = layers.architecture.visible; traffic.far.visible = layers.canyon.visible;
       while (pending.length) {
         // 将几何装配分散到浏览器任务，让加载谱线和场景目录持续响应。
         await new Promise<void>(resolve => setTimeout(resolve, 0));
@@ -503,7 +361,6 @@ export function createAiCityEnvironment({ homeCenter, wind }: { homeCenter: numb
     setWeather(look: PrecipSkyLook): void {
       weather = look;
       backdrop?.setWeather(look);
-      for (const segment of segments.values()) segment.view.setWeather(look);
     },
     setNightFactor(night: number): void {
       nightFactor = night;
@@ -513,8 +370,8 @@ export function createAiCityEnvironment({ homeCenter, wind }: { homeCenter: numb
     },
     setLayerVisible(id: AiCityLayerId, visible: boolean): void {
       layers[id].visible = visible;
-      if (traffic && id === 'canyon') traffic.trains.visible = visible;
-      if (traffic && id === 'architecture') traffic.drones.visible = visible;
+      if (traffic && id === 'architecture') traffic.near.visible = visible;
+      if (traffic && id === 'canyon') traffic.far.visible = visible;
     },
     setVisibleRange,
     setCamera(camera: THREE.PerspectiveCamera): void {

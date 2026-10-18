@@ -90,6 +90,8 @@ export interface Minimap {
   setZoom(zoom: number): void;
   readonly bigMapView: BigMapView | null;
   readonly raster: MinimapRaster;
+  /** 小窗根元素，HUD 往里插地图顶栏。 */
+  readonly element: HTMLElement;
   dispose(): void;
 }
 
@@ -172,19 +174,21 @@ function drawDummy(ctx: CanvasRenderingContext2D, x: number, y: number, size: nu
   ctx.stroke();
 }
 
-/** 小窗：圆角容器 + 画布 + “M 地图”角标，挂到 parent。 */
-function buildMiniWindow(parent: HTMLElement, cssW: number, cssH: number): { mini: HTMLDivElement; miniCanvas: HTMLCanvasElement; label: HTMLDivElement } {
+/** 小窗：hud-map 外框 + 画布 + “M 地图”角标，挂到 parent。外框皮肤与顶栏留白由 CSS 提供。 */
+function buildMiniWindow(parent: HTMLElement, cssW: number, cssH: number): { mini: HTMLDivElement; view: HTMLDivElement; miniCanvas: HTMLCanvasElement; label: HTMLDivElement } {
   const mini = document.createElement('div');
-  mini.className = 'minimap';
+  mini.className = 'minimap hud-map';
   setStyle(mini, {
-    position: 'fixed', top: '12px', right: '12px', width: `${cssW}px`, height: `${cssH}px`, borderRadius: '4px',
-    overflow: 'hidden', border: '0', outline: '1px solid rgba(235, 225, 201, 0.5)', background: 'rgba(22, 24, 28, 0.65)',
-    boxShadow: '0 3px 14px rgba(0, 0, 0, 0.25)', zIndex: '4', pointerEvents: 'auto', userSelect: 'none',
+    position: 'fixed', top: '12px', right: '12px', width: `${cssW}px`, height: `${cssH}px`,
+    overflow: 'hidden', zIndex: '4', pointerEvents: 'auto', userSelect: 'none',
   });
+  // 角标按画布定位，不受外框顶栏留白影响。
+  const view = document.createElement('div');
+  setStyle(view, { position: 'relative' });
   const miniCanvas = document.createElement('canvas');
   miniCanvas.className = 'minimap-canvas';
   setStyle(miniCanvas, { display: 'block', width: `${cssW}px`, height: `${cssH}px`, opacity: '0.92' });
-  mini.append(miniCanvas);
+  view.append(miniCanvas);
   const label = document.createElement('div');
   label.className = 'minimap-label';
   label.textContent = 'M 地图';
@@ -192,9 +196,10 @@ function buildMiniWindow(parent: HTMLElement, cssW: number, cssH: number): { min
     position: 'absolute', left: '6px', bottom: '3px', font: '10px/1.4 system-ui, sans-serif', color: 'rgba(243, 239, 228, 0.85)',
     textShadow: '0 0 2px #000', pointerEvents: 'none',
   });
-  mini.append(label);
+  view.append(label);
+  mini.append(view);
   parent.append(mini);
-  return { mini, miniCanvas, label };
+  return { mini, view, miniCanvas, label };
 }
 
 /** 大地图全屏遮罩（初始隐藏）：画布 + 顶部操作提示，挂到 parent。 */
@@ -309,13 +314,13 @@ export function createMinimap(options: MinimapOptions): Minimap {
   if (chapter !== undefined) drawFacilityMapBase(baseCtx, source, chapter, P);
   const unsubscribe = source.tiles.onChange((tx, ty) => raster.markTile(tx, ty));
   // 小窗。
-  const { mini, miniCanvas, label } = buildMiniWindow(parent, cssW, cssH);
+  const { mini, view, miniCanvas, label } = buildMiniWindow(parent, cssW, cssH);
+  const title = document.createElement('div');
   if (chapter !== undefined) {
     mini.className += ' minimap-facility';
-    const title = document.createElement('div');
     title.textContent = `${FACILITY_SCENES[chapter].number} · ${getLanguage() === 'en' ? 'Scene map' : '场景地图'}`;
     setStyle(title, { position: 'absolute', top: '5px', left: '8px', font: '10px/1.4 system-ui, sans-serif', color: '#b6e4da', pointerEvents: 'none' });
-    mini.append(title);
+    view.append(title);
     label.textContent = getLanguage() === 'en' ? '◇ Gate   ◆ Exit   M Expand' : '◇ 门禁   ◆ 出口   M 展开';
   }
   const miniCtx = context2d(miniCanvas, 'minimap');
@@ -345,7 +350,7 @@ export function createMinimap(options: MinimapOptions): Minimap {
   };
   const unsubscribeLanguage = onLanguageChange(() => {
     label.textContent = chapter === undefined ? getLanguage() === 'en' ? 'M Map' : 'M 地图' : getLanguage() === 'en' ? '◇ Gate   ◆ Exit   M Expand' : '◇ 门禁   ◆ 出口   M 展开';
-    if (chapter !== undefined) mini.querySelector<HTMLElement>('div:not(.minimap-label)')!.textContent = `${FACILITY_SCENES[chapter].number} · ${getLanguage() === 'en' ? 'Scene map' : '场景地图'}`;
+    if (chapter !== undefined) title.textContent = `${FACILITY_SCENES[chapter].number} · ${getLanguage() === 'en' ? 'Scene map' : '场景地图'}`;
     resetHint();
   });
   const setOpen = (open: boolean): void => {
@@ -510,6 +515,7 @@ export function createMinimap(options: MinimapOptions): Minimap {
       return bigView;
     },
     raster,
+    element: mini,
     dispose() {
       if (disposed) return;
       disposed = true;

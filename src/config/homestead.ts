@@ -29,7 +29,6 @@ interface BuildRule {
  * 长度为格；1 个模拟 tick = 1 游戏秒（1 游戏小时 = 60 现实秒）。
  */
 export interface HomesteadRules {
-  readonly clock: { readonly dawnHour: number; readonly duskHour: number; readonly startHour: number };
   readonly power: {
     readonly solarPerPanel: number;
     readonly batteryCapacity: number;
@@ -75,7 +74,6 @@ export interface HomesteadRules {
 }
 
 export const HOMESTEAD: HomesteadRules = {
-  clock: { dawnHour: 6, duskHour: 18, startHour: 15 },
   power: { solarPerPanel: 1, batteryCapacity: 10, batteryOutput: 1, workstationDraw: 2, robotChargeDraw: 1, ultimateEnergy: 1 },
   compute: { photon: 2, workstation: 4, gpu: 2 },
   robots: {
@@ -96,15 +94,7 @@ export const HOMESTEAD: HomesteadRules = {
   night: { damage: 1.5, speed: 1.25 },
 };
 
-/** second 为当天已过的游戏秒。 */
-export const isDaytime = (second: number): boolean => second >= HOMESTEAD.clock.dawnHour * 3600 && second < HOMESTEAD.clock.duskHour * 3600;
-
 export function validateHomesteadRules(r: HomesteadRules): void {
-  const { dawnHour, duskHour, startHour } = r.clock;
-  intRange('homestead.clock.dawnHour', dawnHour, 0, 23);
-  intRange('homestead.clock.duskHour', duskHour, 0, 23);
-  if (duskHour <= dawnHour) fail('homestead.clock.duskHour', 'must be > dawnHour', duskHour);
-  intRange('homestead.clock.startHour', startHour, 0, 23);
   for (const [key, value] of Object.entries(r.power)) positive(`homestead.power.${key}`, value);
   for (const [key, value] of Object.entries(r.compute)) positive(`homestead.compute.${key}`, value);
   for (const [level, rule] of Object.entries(r.robots)) {

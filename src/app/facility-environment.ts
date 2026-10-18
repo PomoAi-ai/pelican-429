@@ -46,7 +46,7 @@ export async function createFacilityEnvironment(stage: Stage, sceneId: FacilityS
     });
     disposers.push(() => worldViews.dispose());
     worldViews.weather.setEnabled(false);
-    const precip = createWorldPrecip(stage, level, worldViews, null);
+    const precip = createWorldPrecip(stage, level, worldViews, null, null);
     disposers.push(() => precip.dispose());
     const rig = createPelicanRig({ scale: TUNING.render.pelicanScale });
     disposers.push(() => rig.dispose());

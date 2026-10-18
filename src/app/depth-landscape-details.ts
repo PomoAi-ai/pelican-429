@@ -18,7 +18,7 @@ import { CAVE_DECOR_KINDS, createCaveDecorParts, createCaveDecorMaterial, create
 import type { CaveDecorItem, CaveDecorKind } from '../render/cave-decor-view.ts';
 import { createWaterView } from '../render/water-view.ts';
 import type { DepthTheme } from './depth-scenery.ts';
-import type { DepthLayerId } from './definition-depth-layout.ts';
+import type { DepthLayerId } from '../config/depth-layers.ts';
 
 interface DetailPlan {
   flowers: FloraInstance[];
@@ -71,7 +71,7 @@ export function createDepthLandscapeDetails(theme: DepthTheme, layers: ReadonlyM
   } else if (theme === 'ruins') {
     for (const [left, right] of [[2.3, 9.7], [18.3, 21], [37, 45]]) flowers('foreground', left!, right!, 1, ['fern', 'mushroom', 'clover']);
     for (const x of [5, 20, 40]) rock('foreground', 'boulderA', x, 1, 1.3, 1.7);
-  } else {
+  } else if (theme === 'cave') {
     for (const [x, kind] of [[5, 'crystalCyan0'], [9, 'mushroom0'], [20, 'crystalPurple1'], [28, 'mushroom2'],
       [38, 'crystalCyan1'], [44, 'crystalPurple0']] as const) crystal('foreground', kind, x, 1, .8);
   }
@@ -96,7 +96,7 @@ export function createDepthLandscapeDetails(theme: DepthTheme, layers: ReadonlyM
     rock('background-far', 'strataB', 4, 1, 2.7, 1.8); rock('background-far', 'outcrop', 42, 2, 3, 1.6);
     crystal('background-near', 'crystalCyan1', 34.5, 1, 1.6); crystal('background-far', 'crystalCyan0', 42, 2, 1.8);
     crystal('background-near', 'moss0', 12, 1, 1.8);
-  } else {
+  } else if (theme === 'cave') {
     for (const [layer, x, y, kind, size] of [
       ['background-near', 8, 2, 'crystalCyan0', 2.4], ['background-near', 8.8, 2, 'crystalCyan1', 1.5],
       ['background-near', 38, 2, 'crystalPurple1', 2.6], ['background-near', 39, 2, 'mushroom1', 1.2],

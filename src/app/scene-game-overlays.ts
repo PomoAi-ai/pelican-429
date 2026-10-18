@@ -19,7 +19,7 @@ export function createSceneGameOverlays(toolbar: HTMLElement, viewport: HTMLElem
   const perfButton = tools.querySelector<HTMLButtonElement>('[data-scene-perf]')!;
   const perf = createPerfPanel(viewport, window, new URLSearchParams(location.search).has('debug'), import.meta.env.VITE_APP_VERSION);
   const panel = viewport.querySelector<HTMLElement>('.perf-panel')!;
-  Object.assign(panel.style, { position: 'absolute', left: '12px', top: '112px', transform: 'none', background: '#10191ecc' });
+  Object.assign(panel.style, { position: 'absolute', right: '12px', top: '206px', left: 'auto', transform: 'none', background: '#10191ecc' });
   for (const element of viewport.querySelectorAll<HTMLElement>('.minimap, .minimap-big')) {
     Object.assign(element.style, { position: 'absolute', transform: 'none' });
   }

@@ -392,7 +392,11 @@ export class FacilityKit {
     this.flush();
     const kit = this;
     const signals = kit.signalRoutes.length ? createFacilitySignals(kit.root, kit.signalRoutes) : null;
-    const lighting = createFacilityLighting(kit.root, kit.lamps, signals === null ? [] : signals.lamps);
+    const signalLamps = signals === null ? [] : signals.lamps;
+    const lighting = createFacilityLighting(kit.root, [
+      { sources: kit.lamps, slots: Math.min(kit.lamps.length, 4) },
+      { sources: signalLamps, slots: Math.min(signalLamps.length, 2) },
+    ]);
     const bubbles = kit.coolantTanks.length ? new THREE.InstancedMesh(kit.geometries[5], kit.coolantGlow, kit.coolantTanks.length * 6) : null;
     const flows = kit.coolantFlows.length ? new THREE.InstancedMesh(kit.geometries[1], kit.coolantGlow, kit.coolantFlows.length * 3) : null;
     for (const mesh of [bubbles, flows]) if (mesh) {

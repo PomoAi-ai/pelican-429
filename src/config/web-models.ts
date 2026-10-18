@@ -1,5 +1,6 @@
 import { CUSTOMIZATION_MODELS } from './character-customization-assets.ts';
 import { GRASSY_CUSTOMIZATION_MODELS } from './grassy.ts';
+import { FLYING_ROADSTER_MODEL } from './flying-roadster.ts';
 
 /** 原始模型及无损版本保留供近景对照；默认游戏资源同时压缩贴图与模型数据。 */
 export const WEB_MODEL_SOURCES: readonly string[] = [
@@ -51,6 +52,8 @@ export const HAIR_MODEL_PATHS = {
 
 /** 构建与 CI 按需拉取共用同一份正式模型清单。 */
 export const RELEASE_MODEL_PATHS: readonly string[] = [
+  FLYING_ROADSTER_MODEL,
+  './robots/utility-drone/model.glb',
   ...WEB_MODEL_SOURCES.map(source => compactModelPath(source, 512)),
   ...GRASSY_CUSTOMIZATION_MODELS.map(model => model.path),
   ...Object.values(HAIR_MODEL_PATHS),

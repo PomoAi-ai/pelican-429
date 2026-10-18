@@ -31,14 +31,17 @@ export function createPerspectiveMinimap(host: HTMLElement, collision: Definitio
   const width = world.maxX - world.minX;
   const height = world.maxY - world.minY;
   const root = document.createElement('div');
-  root.className = 'room-preview-minimap';
+  root.className = 'room-preview-minimap hud-map';
   root.title = '点击小地图传送';
-  root.style.aspectRatio = `${width} / ${height}`;
+  // 标记与点击按画布区域换算，不受外框顶栏留白影响。
+  const view = document.createElement('div');
+  Object.assign(view.style, { position: 'relative', aspectRatio: `${width} / ${height}` });
   const canvas = document.createElement('canvas');
   canvas.width = Math.ceil(width * TILE_PX);
   canvas.height = Math.ceil(height * TILE_PX);
   const marker = document.createElement('i');
-  root.append(canvas, marker);
+  view.append(canvas, marker);
+  root.append(view);
   host.append(root);
 
   drawCollisionMap(canvas, collision, world);
@@ -52,20 +55,27 @@ export function createPerspectiveMinimap(host: HTMLElement, collision: Definitio
     return free.length > 0 ? Math.max(...free) : y;
   };
   const onClick = (event: MouseEvent): void => {
-    const rect = root.getBoundingClientRect();
+    const rect = view.getBoundingClientRect();
     const x = world.minX + (event.clientX - rect.left) / rect.width * width;
     const y = world.maxY - (event.clientY - rect.top) / rect.height * height;
     onTeleport(x, landing(x, y));
   };
-  root.addEventListener('click', onClick);
+  view.addEventListener('click', onClick);
+  let markerLeft = '', markerTop = '';
 
   return {
+    root,
     update(x: number, y: number): void {
-      marker.style.left = `${(x - world.minX) / width * 100}%`;
-      marker.style.top = `${(world.maxY - y) / height * 100}%`;
+      // 每帧调用：位置没变不写样式。
+      const left = `${((x - world.minX) / width * 100).toFixed(2)}%`;
+      const top = `${((world.maxY - y) / height * 100).toFixed(2)}%`;
+      if (left === markerLeft && top === markerTop) return;
+      markerLeft = left; markerTop = top;
+      marker.style.left = left;
+      marker.style.top = top;
     },
     dispose(): void {
-      root.removeEventListener('click', onClick);
+      view.removeEventListener('click', onClick);
       root.remove();
     },
   };
@@ -79,9 +89,9 @@ export function createPlayableDefinitionMinimap(host: HTMLElement, collision: De
   const base = document.createElement('canvas');
   base.width = Math.ceil(width * TILE_PX); base.height = Math.ceil(height * TILE_PX);
   const root = document.createElement('div');
-  root.className = 'scene-definition-map';
+  root.className = 'scene-definition-map hud-map';
   Object.assign(root.style, { position: 'absolute', top: '12px', right: '12px', width: 'min(280px, 38%)', height: '140px',
-    border: '1px solid #d5e4ca88', borderRadius: '6px', background: '#10191ecc', overflow: 'hidden', zIndex: '4', pointerEvents: 'auto' });
+    overflow: 'hidden', zIndex: '4', pointerEvents: 'auto' });
   const canvas = document.createElement('canvas');
   Object.assign(canvas.style, { width: '100%', height: '100%', display: 'block' });
   const label = document.createElement('span');
@@ -97,8 +107,10 @@ export function createPlayableDefinitionMinimap(host: HTMLElement, collision: De
   let drag: { x: number; y: number } | null = null;
   let position = { x: world.minX, y: world.minY };
   const limits = () => ({ worldW: width, worldH: height, screenW: host.clientWidth, screenH: host.clientHeight });
+  // 尺寸由 ResizeObserver 缓存，重画时不读布局。
+  let size = { width: canvas.clientWidth, height: canvas.clientHeight };
   const redraw = (): void => {
-    const w = root.clientWidth; const h = root.clientHeight;
+    const w = size.width; const h = size.height;
     const dpr = Math.min(2, window.devicePixelRatio);
     const pixelW = Math.round(w * dpr); const pixelH = Math.round(h * dpr);
     if (canvas.width !== pixelW || canvas.height !== pixelH) { canvas.width = pixelW; canvas.height = pixelH; }
@@ -111,13 +123,17 @@ export function createPlayableDefinitionMinimap(host: HTMLElement, collision: De
     const marker = worldToView(rect, scale, position.x - world.minX, position.y - world.minY);
     ctx.fillStyle = '#ff866a'; ctx.strokeStyle = '#10191e'; ctx.lineWidth = 2;
     ctx.beginPath(); ctx.arc(marker.x, marker.y, 4, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-    label.textContent = `${bigView ? '拖动平移 · 滚轮缩放 · M / Esc 关闭' : 'M 地图'} · ${position.x.toFixed(1)}, ${position.y.toFixed(1)}`;
+    const text = `${bigView ? '拖动平移 · 滚轮缩放 · M / Esc 关闭' : 'M 地图'} · ${position.x.toFixed(1)}, ${position.y.toFixed(1)}`;
+    if (label.textContent !== text) label.textContent = text;
   };
+  const resize = new ResizeObserver(([entry]) => { size = entry!.contentRect; redraw(); });
+  resize.observe(canvas);
   const setOpen = (open: boolean): void => {
     const mapLimits = limits();
     bigView = open ? clampBigMap({ centerX: position.x - world.minX, centerY: position.y - world.minY,
       scale: Math.max(bigMapFitScale(mapLimits), 4) }, mapLimits) : null;
     drag = null;
+    root.classList.toggle('is-open', open);
     Object.assign(root.style, { inset: open ? '0' : '12px 12px auto auto', width: open ? 'auto' : 'min(280px, 38%)',
       height: open ? 'auto' : '140px', zIndex: open ? '6' : '4', cursor: open ? 'grab' : 'pointer' });
     close.hidden = !open; fit.hidden = !open; redraw();
@@ -144,10 +160,15 @@ export function createPlayableDefinitionMinimap(host: HTMLElement, collision: De
   }, { passive: false, signal: events.signal });
   drawCollisionMap(base, collision, world);
   return {
+    root,
     get bigMapOpen(): boolean { return bigView !== null; },
     toggleBigMap(open?: boolean): void { setOpen(open ?? bigView === null); },
-    update(x: number, y: number): void { position = { x, y }; redraw(); },
-    refresh(): void { drawCollisionMap(base, collision, world); },
-    dispose(): void { events.abort(); root.remove(); },
+    update(x: number, y: number): void {
+      // 每帧调用：玩家没动就不重画整张地图。
+      if (x === position.x && y === position.y) return;
+      position = { x, y }; redraw();
+    },
+    refresh(): void { drawCollisionMap(base, collision, world); redraw(); },
+    dispose(): void { events.abort(); resize.disconnect(); root.remove(); },
   };
 }

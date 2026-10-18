@@ -49,6 +49,7 @@ export function createResidenceHud(resources: readonly ResidenceResource[], mode
           </div>
           <label class="residence-travel">前往 <select data-travel aria-label="前往院区分段">${RESIDENCE_SEGMENTS.map(segment => `<option value="${segment.index}"${segment.index === 0 ? ' selected' : ''}>${segment.label}</option>`).join('')}</select></label>
           <details class="city-layer-controls"><summary>背景分层</summary><div>${AI_CITY_LAYERS.map(layer => `<label><input type="checkbox" data-city-layer="${layer.id}" checked>${layer.label}</label>`).join('')}</div></details>
+          <label><input type="checkbox" data-reflections checked>地面反射</label>
         </section>
       </div>
     </header>

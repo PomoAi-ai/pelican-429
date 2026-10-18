@@ -21,7 +21,7 @@ export function createModelCameraControls(parent: HTMLElement, viewport: HTMLEle
   const reset = document.createElement('button'); reset.type = 'button'; reset.textContent = '视角复位'; parent.append(reset);
   const apply = (yaw: number, pitch: number): void => model.setModelView(card,
     Math.atan2(Math.sin(yaw), Math.cos(yaw)), Math.max(-Math.PI / 4, Math.min(Math.PI / 3, pitch)));
-  const restore = (): void => apply(MODEL_SHOWCASE_VIEWS.threeQuarter.yaw, 0);
+  const restore = (): void => apply(model.entry(card.entryId).actor === 'flyingRoadster' ? Math.PI / 2 : MODEL_SHOWCASE_VIEWS.threeQuarter.yaw, 0);
   select.addEventListener('change', () => {
     const view = Object.entries(MODEL_SHOWCASE_VIEWS).find(([id]) => id === select.value);
     if (!view) throw new Error(`未知的模型视角：${select.value}`);
@@ -42,12 +42,20 @@ export function createModelCameraControls(parent: HTMLElement, viewport: HTMLEle
     turn.setAttribute('aria-label', '转向');
     turn.addEventListener('input', () => apply(turn.valueAsNumber * Math.PI / 180, card.modelPitch));
     parent.insertBefore(turn, reset);
+    const pitchLabel = document.createElement('label'); pitchLabel.className = 'sc-control'; pitchLabel.textContent = '俯仰';
+    const pitch = document.createElement('input');
+    pitch.type = 'range'; pitch.className = 'sc-model-turn'; pitch.min = '-45'; pitch.max = '60'; pitch.step = '1';
+    pitch.setAttribute('aria-label', '模型俯仰');
+    pitch.addEventListener('input', () => apply(card.modelYaw, pitch.valueAsNumber * Math.PI / 180));
+    pitchLabel.append(pitch); parent.insertBefore(pitchLabel, reset);
     reset.textContent = '↺'; reset.title = '视角复位'; reset.setAttribute('aria-label', '视角复位');
     return {
       refresh() {
         refreshPreset();
         turn.value = String(Math.round(card.modelYaw * 180 / Math.PI));
         turn.setAttribute('aria-valuetext', `${turn.value}°`); turn.title = `${turn.value}°`;
+        pitch.value = String(Math.round(card.modelPitch * 180 / Math.PI));
+        pitch.setAttribute('aria-valuetext', `${pitch.value}°`); pitch.title = `${pitch.value}°`;
       },
       dispose() { parent.remove(); },
     };

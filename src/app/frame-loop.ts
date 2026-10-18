@@ -24,6 +24,7 @@ import type { WorldViews } from '../render/world-views.ts';
 import { getPlayer, stepSim } from '../sim/sim-world.ts';
 import type { SimWorld } from '../sim/sim-world.ts';
 import type { ControlSurface } from '../ui/control-surface.ts';
+import type { GameHud } from '../ui/game-hud.ts';
 import type { Hud } from '../ui/hud.ts';
 import type { Minimap } from '../ui/minimap.ts';
 import type { PerfPanel } from '../ui/perf-panel.ts';
@@ -59,6 +60,7 @@ export interface FrameLoopDeps {
   readonly lighting: WorldLighting;
   readonly hud: Hud;
   readonly weaponHud: WeaponHud;
+  readonly gameHud: GameHud;
   readonly minimap: Minimap;
   readonly settings: SettingsController;
   readonly settingsPanel: SettingsPanel;
@@ -185,6 +187,7 @@ export function createFrameLoop(d: FrameLoopDeps): FrameLoop {
       playerId: world.playerId,
     });
     weaponHud.update({ skillWaitTicks: [0, 1, 2, 3].map(index => getSkillWaitTicks(pl, index, TUNING, world.photon.cooldownTicks, world.photon.chargeTicks)), entities: world.entities, playerId: world.playerId, frameDt, photonCooldownTicks: world.photon.cooldownTicks, photonChargeTicks: world.photon.chargeTicks, photonActiveTicks: world.photon.activeTicks, transformUnlocked: mainlineTransformUnlocked(world) });
+    d.gameHud.update(pl, frameDt);
     minimap.update({
       player: { x: lerp(pl.body.prevX, pl.body.x, alpha), y: lerp(pl.body.prevY, pl.body.y, alpha) + pl.body.height / 2, facing: pl.facing },
       dummies: world.entities.filter((e) => e.kind === 'trainingDummy' && !e.removed).map((e) => ({ x: e.body.x, y: e.body.y + e.body.height / 2 })),

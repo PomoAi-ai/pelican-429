@@ -1,0 +1,150 @@
+/* 游戏 HUD：统一半透明深色底板、细边、少装饰，不抢画面。--hud-skin 也给小地图外框共用；
+   不用 backdrop-filter，免得每帧对画布做模糊。 */
+:root {
+  --hud-cobalt: #1D4A8F;
+  --hud-cobalt-hi: #2B67C2;
+  --hud-led: #45D2F2;
+  --hud-gold: #E0A940;
+  --hud-line: #ffffff33;
+  --hud-ink: #EEF3FA;
+  --hud-muted: #9AABC2;
+  --hud-pearl: #F2F6FC;
+  --hud-blue: #5CA8FF;
+  --hud-cyan: #5CC8FF;
+  --hud-warn: #FF8A5C;
+  --hud-ok: #6EE7A8;
+  --hud-skin: #0a1220b8;
+  --hud-edge: #ffffff1f;
+  --hud-shadow: 0 2px 8px #00000059;
+  --hud-text-shadow: 0 1px 2px #000000b3;
+  --hud-font: 'Noto Sans SC', 'PingFang SC', system-ui, sans-serif;
+  --hud-num-font: 'Chakra Petch', 'DIN Alternate', 'Bahnschrift', ui-monospace, monospace;
+}
+
+.hud-panel, .hud-map { border: 1px solid var(--hud-edge); border-radius: 8px; background: var(--hud-skin); box-shadow: var(--hud-shadow); color: var(--hud-ink); font-family: var(--hud-font); text-shadow: var(--hud-text-shadow); }
+.hud-panel { position: relative; box-sizing: border-box; pointer-events: auto; }
+.hud-panel button { font: inherit; color: inherit; cursor: pointer; text-shadow: inherit; }
+.hud-muted { color: var(--hud-muted); }
+.hud-warn { color: var(--hud-warn); }
+.hud-ok { color: var(--hud-ok); }
+.hud-num { font-family: var(--hud-num-font); font-weight: 600; font-variant-numeric: tabular-nums; }
+.hud-key { display: inline-flex; align-items: center; justify-content: center; min-width: 20px; height: 20px; padding: 0 5px; border: 1px solid #ffffff40; border-radius: 4px; background: #ffffff14; color: #fff; font: 600 11px var(--hud-num-font); text-shadow: none; white-space: nowrap; }
+.hud-inset { background: #ffffff0a; border-radius: 6px; }
+.hud-gauge { display: block; flex: 1 1 auto; height: 6px; border-radius: 3px; background: #ffffff1f; overflow: hidden; }
+.hud-gauge-thin { height: 4px; }
+.hud-gauge > i { display: block; height: 100%; border-radius: inherit; background: var(--hud-cyan); }
+.hud-gauge > i.hud-hp { background: #FF6B57; }
+
+/* 左列：人物 → 资源 → 无人机 */
+/* contain：左列内的数字变化只在列内重排，不波及整个 HUD。 */
+.hud-column { position: absolute; left: 20px; top: calc(var(--dev-nav-height, 0px) + 16px); z-index: 3; width: 280px; display: flex; flex-direction: column; align-items: flex-start; gap: 8px; pointer-events: none; contain: layout style; }
+.hud-player { width: 100%; display: flex; align-items: center; gap: 12px; padding: 10px 14px 10px 10px; }
+.hud-player-portrait { position: relative; flex: none; width: 52px; height: 52px; border-radius: 50%; overflow: hidden; background: #ffffff0f; box-shadow: inset 0 0 0 1px #ffffff40; }
+.hud-player-portrait img { display: block; width: 100%; height: 100%; object-fit: contain; }
+.hud-player-portrait .hud-skill-icon { inset: 0; display: none; }
+.hud-player[data-form=pelican] .hud-player-portrait img { display: none; }
+.hud-player[data-form=pelican] .hud-player-portrait .hud-skill-icon { display: block; }
+.hud-player-info { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 5px; }
+.hud-player-title { display: flex; align-items: baseline; gap: 8px; }
+.hud-player-title b { font-size: 15px; color: #fff; }
+.hud-player-title span { font-size: 11px; }
+.hud-meter { display: flex; align-items: center; gap: 8px; }
+.hud-meter > span:first-child { width: 26px; font-size: 11px; }
+.hud-meter > .hud-num { width: 52px; font-size: 12px; text-align: right; }
+.hud-resources { display: flex; align-items: center; padding: 0 4px; }
+.hud-seg { display: flex; align-items: center; gap: 6px; height: 30px; padding: 0 8px; white-space: nowrap; }
+.hud-seg svg { width: 16px; height: 16px; stroke: #8ecbff; }
+.hud-seg:first-child svg { stroke: #ffc857; }
+.hud-seg:last-child svg { stroke: var(--hud-gold); }
+.hud-seg .hud-num { font-size: 13px; }
+.hud-power { flex: none; width: 44px; }
+.hud-power > i { background: #ffc857; }
+/* 无人机：只放两台无人机图标，圆形，同坐一块胶囊底板；点图标照常打开对话。 */
+.hud-drones { width: auto; display: flex; padding: 4px; border-radius: 999px; }
+.hud-drones-head, .hud-drones-foot { display: none; }
+.hud-drones-list { display: flex; gap: 4px; padding: 0; background: none; }
+.hud-drone-row { width: 44px; height: 44px; padding: 0; border: 1px solid #ffffff26; border-radius: 50%; background: #ffffff0f url('/ui/hud/drone.png') center / 34px no-repeat; font-size: 0; cursor: pointer; }
+.hud-drone-row[hidden] { display: none; }
+.hud-drone-row > * { display: none; }
+.hud-drone-row:hover, .hud-drone-row:focus-visible { border-color: #8eeaff; background-color: #45d2f226; outline: none; }
+
+/* 小地图外框：顶栏放天气 · 日期 · 时钟 */
+.hud-map { box-sizing: content-box; padding: 26px 3px 3px; }
+.hud-map-header { position: absolute; z-index: 2; left: 3px; right: 3px; top: 3px; height: 22px; display: flex; align-items: center; gap: 6px; padding: 0 8px; color: var(--hud-muted); font: 12px var(--hud-font); white-space: nowrap; pointer-events: none; }
+.hud-map-header svg { width: 14px; height: 14px; }
+.hud-map-clock { margin-left: auto; font-size: 14px; color: #fff; }
+.hud-map.is-open .hud-map-header { display: none; }
+/* 大地图铺满宿主：去掉外框留白，画布尺寸与 limits() 用的宿主尺寸一致。 */
+.hud-map.is-open { padding: 0; border: 0; border-radius: 0; background: #10191ecc; box-shadow: none; }
+
+/* 场景里的无人机与对话气泡 */
+/* 跟随物（无人机、气泡、标记）由 JS 只写 transform，独立合成层移动，不重排不重绘。按钮本身 0×0，命中区就是图片。 */
+.hud-drone { position: absolute; left: 0; top: 0; z-index: 2; width: 0; height: 0; padding: 0; border: 0; background: none; cursor: pointer; pointer-events: auto; will-change: transform; }
+.hud-drone[hidden] { display: none; }
+.hud-drone-hit { position: absolute; left: 0; top: 0; display: block; width: 72px; height: 48px; transform: translate(-50%, -50%); border-radius: 50%; }
+.hud-drone:hover .hud-drone-hit, .hud-drone:focus-visible .hud-drone-hit, .hud-drone.talking .hud-drone-hit { outline: 2px solid #7ee8f5; box-shadow: 0 0 12px #7ee8f577; }
+.hud-drone:focus-visible { outline: none; }
+.hud-bubble { position: absolute; left: 0; top: 0; z-index: 5; will-change: transform; width: 260px; display: flex; flex-direction: column; gap: 2px; padding: 10px 8px 8px; border-radius: 10px; background: #0a1220e6; }
+.hud-bubble[hidden] { display: none; }
+.hud-bubble::after { content: ''; position: absolute; left: var(--tail, 50%); bottom: -6px; width: 12px; height: 12px; margin-left: -6px; background: #0a1220; transform: rotate(45deg); }
+.hud-bubble.below::after { bottom: auto; top: -6px; }
+.hud-bubble-head { display: flex; align-items: baseline; gap: 8px; padding: 0 6px; }
+.hud-bubble-head b { font-size: 13px; }
+.hud-bubble-head span { font-size: 11px; }
+.hud-bubble p { margin: 4px 6px 6px; font-size: 14px; line-height: 1.55; }
+.hud-bubble button { display: flex; align-items: center; gap: 10px; min-height: 36px; padding: 0 8px; border: 0; border-radius: 6px; background: transparent; font-size: 14px; text-align: left; }
+.hud-bubble button .hud-muted { font-size: 11px; }
+.hud-bubble button:hover, .hud-bubble button:focus-visible { background: #ffffff1a; outline: none; }
+
+/* 指派：顶部横幅与格子标记 */
+.hud-banner { position: absolute; z-index: 4; left: 50%; top: calc(var(--dev-nav-height, 0px) + 150px); transform: translateX(-50%); display: flex; align-items: center; gap: 8px; padding: 5px 6px 5px 16px; border: 1px solid var(--hud-edge); border-radius: 999px; background: var(--hud-skin); color: var(--hud-ink); font: 13px var(--hud-font); text-shadow: var(--hud-text-shadow); white-space: nowrap; pointer-events: none; }
+.hud-banner[hidden] { display: none; }
+.hud-banner button { min-height: 26px; margin-left: 4px; padding: 0 12px; border: 0; border-radius: 999px; background: #ffffff26; color: #fff; font: 600 12px var(--hud-font); cursor: pointer; pointer-events: auto; }
+.hud-banner button:hover { background: #ffffff40; }
+[data-hud-tool] { cursor: crosshair; }
+.hud-marks { position: absolute; inset: 0; z-index: 1; overflow: hidden; pointer-events: none; }
+.hud-mark { position: absolute; left: 0; top: 0; will-change: transform; contain: layout style; box-sizing: border-box; border: 2px dashed var(--hud-gold); background: #e0a94029; }
+.hud-mark[data-kind=build] { border-color: var(--hud-led); background: #45d2f224; }
+.hud-mark[hidden] { display: none; }
+.hud-mark span { position: absolute; left: -2px; top: -20px; padding: 0 6px; border-radius: 4px; background: #0a1220cc; color: var(--hud-gold); font: 600 11px/18px var(--hud-font); white-space: nowrap; }
+.hud-mark[data-kind=build] span { color: #8eeaff; }
+
+/* 物品面板 */
+.hud-inventory { position: absolute; inset: 0; z-index: 8; background: #000000a6; pointer-events: auto; }
+.hud-inventory[hidden] { display: none; }
+.hud-inventory-panel { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(1200px, calc(100% - 48px)); height: min(680px, calc(100% - 48px)); display: flex; flex-direction: column; gap: 12px; padding: 18px 22px; border-radius: 12px; background: #0b1424f2; }
+.hud-inventory-head { display: flex; justify-content: space-between; gap: 12px; }
+.hud-inventory-title { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 14px; }
+.hud-inventory-title b { font-size: 20px; color: #fff; }
+.hud-inventory-title .hud-muted { font-size: 12px; }
+.hud-big { font-size: 18px; }
+.hud-capacity { flex: none; }
+.hud-panel .hud-icon-btn { flex: none; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border: 0; border-radius: 50%; background: #ffffff14; color: #fff; }
+.hud-panel .hud-icon-btn:hover { background: #ffffff2e; }
+.hud-inventory-tabs { display: flex; flex-wrap: wrap; gap: 4px; }
+.hud-tab { padding: 6px 14px; border: 0; border-radius: 999px; background: transparent; color: var(--hud-muted); font-size: 13px; }
+.hud-tab:hover { color: #fff; }
+.hud-tab[aria-pressed=true] { background: #ffffff1f; color: #fff; }
+.hud-inventory-body { flex: 1 1 auto; min-height: 0; display: flex; align-items: stretch; gap: 20px; }
+.hud-inventory-grid { flex: 1 1 0; min-height: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(88px, 1fr)); align-content: start; gap: 8px; overflow: auto; }
+.hud-cell { position: relative; height: 88px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; border: 1px solid #ffffff1a; border-radius: 8px; background: #ffffff0a; color: var(--hud-ink); font-size: 12px; }
+.hud-cell:hover:not(:disabled) { border-color: #ffffff40; }
+.hud-cell[aria-pressed=true] { border-color: #8eeaff; background: #45d2f21a; }
+.hud-cell-empty, .hud-cell:disabled { background: #ffffff05; border-color: #ffffff0f; cursor: default; }
+.hud-cell-icon { width: 44px; height: 44px; object-fit: contain; }
+.hud-cell-count { position: absolute; right: 6px; bottom: 4px; font-size: 13px; color: #fff; }
+.hud-inventory-side { flex: 0 0 280px; display: flex; flex-direction: column; gap: 10px; padding-left: 20px; border-left: 1px solid #ffffff14; font-size: 13px; line-height: 1.6; overflow: auto; }
+.hud-inventory-detail { display: flex; flex-direction: column; gap: 10px; }
+.hud-inventory-detail[hidden] { display: none; }
+.hud-inventory-detail b { font-size: 17px; color: #fff; }
+.hud-inventory-swatch { flex: none; height: 88px; display: flex; align-items: center; justify-content: center; }
+.hud-inventory-swatch img { width: 72px; height: 72px; object-fit: contain; }
+.hud-trash-put { min-height: 36px; margin-top: 6px; border: 1px solid #ff8a5c80; border-radius: 999px; background: transparent; }
+.hud-panel .hud-trash-put { color: var(--hud-warn); }
+.hud-panel .hud-trash-put:hover { background: #ff8a5c26; }
+.hud-trash { display: flex; flex-direction: column; gap: 6px; margin-top: auto; padding-top: 10px; border-top: 1px solid #ffffff14; }
+.hud-trash b { font-size: 13px; }
+.hud-trash > .hud-muted { font-size: 11px; line-height: 1.5; }
+
+/* 砸击格只给键鼠：手机用左下攻击键 */
+body[data-controls=mobile] .hud-weapon-slot[data-slot='0'] { display: none; }

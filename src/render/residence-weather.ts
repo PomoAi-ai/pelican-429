@@ -4,7 +4,7 @@ import { RESIDENCE_WORLD } from '../config/residence.ts';
 import type { SceneWeatherSettings } from '../config/scene-weather.ts';
 import { TUNING } from '../config/tuning.ts';
 import { DEFAULT_WEATHER, type SceneWeatherMode } from '../config/weather-rules.ts';
-import type { WorldTime } from '../core/world-clock.ts';
+import type { WorldTime } from '../core/calendar.ts';
 import { definitionColliderSection, type DefinitionCollider } from '../physics/definition-collision.ts';
 import type { Body } from '../physics/body.ts';
 import { createTornado, stepTornado, tornadoForce, TORNADO_RULES, type TornadoState } from '../world/tornado.ts';

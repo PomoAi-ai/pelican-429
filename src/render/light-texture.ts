@@ -505,6 +505,7 @@ export function createWorldLight(input: WorldLightInput): WorldLight {
       if (disposed) throw new Error('light-texture: update after dispose');
       let dyn = 0;
       const lights = uniforms.uDynLights.value;
+      const localFills: THREE.PointLight[] = [];
       scene.traverse((node) => {
         const mesh = node as THREE.Mesh;
         if (mesh.isMesh) {
@@ -516,11 +517,19 @@ export function createWorldLight(input: WorldLightInput): WorldLight {
       scene.traverseVisible((node) => {
         const pl = node as THREE.PointLight;
         if (pl.isPointLight && pl.intensity > 0 && dyn < lights.length) {
+          if (pl.userData.localFill === true) { localFills.push(pl); return; }
           pl.getWorldPosition(tmp);
           (lights[dyn] as THREE.Vector4).set(tmp.x, tmp.y, cfg.dynamicRadius, 1);
           dyn++;
         }
       });
+      // 移动微光只抬亮短距离暗部，且不抢占已有光球的光照槽。
+      for (const light of localFills) {
+        if (dyn === lights.length) break;
+        light.getWorldPosition(tmp);
+        lights[dyn]!.set(tmp.x, tmp.y, light.distance, Math.min(light.intensity * 0.25, 1));
+        dyn++;
+      }
       uniforms.uDynCount.value = dyn;
       if (frame % cfg.fluidScanFrames === 0 && fluidRevision !== fluid.revision) {
         fluidRevision = fluid.revision;

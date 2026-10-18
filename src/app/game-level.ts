@@ -13,10 +13,15 @@ import { FACILITY_CHAPTERS, parseFacilityChapter } from '../config/facility-scen
 import type { FacilityChapterId } from '../config/facility-scenes.ts';
 import { createFacilityLevel } from '../world/facility-level.ts';
 import { createBossArenaLevel } from '../world/boss-arena.ts';
+import { createHarborLevel } from '../world/harbor-level.ts';
 
 /** 网址是游戏关卡的输入边界；组合关卡与展示卡调用同一个世界工厂。 */
 export function loadGameLevel(params: URLSearchParams): { level: LevelData; ground: Int16Array; compositions: readonly WorldComposition[]; chapter: FacilityChapterId | null } {
   const name = params.get('level');
+  if (name === 'harbor') {
+    const level = createHarborLevel();
+    return { level, ground: levelGroundColumns(level), compositions: [], chapter: null };
+  }
   if (name === 'boss-arena') {
     const level = createBossArenaLevel();
     return { level, ground: levelGroundColumns(level), compositions: [], chapter: null };
@@ -31,7 +36,7 @@ export function loadGameLevel(params: URLSearchParams): { level: LevelData; grou
     const level = parseLevel(TEST_LEVEL.rows, TEST_LEVEL.legend);
     return { level, ground: levelGroundColumns(level), compositions: [], chapter: null };
   }
-  if (name !== null && name !== 'composition' && name !== 'facility') throw new Error(`未知游戏关卡：${name}（支持 test、composition、facility、boss-arena）`);
+  if (name !== null && name !== 'composition' && name !== 'facility') throw new Error(`未知游戏关卡：${name}（支持 test、composition、facility、boss-arena、harbor）`);
   const rawSeed = params.get('seed');
   const seed = rawSeed === null ? TUNING.worldgen.seed : parseSeed(rawSeed);
   if (name === 'composition') {

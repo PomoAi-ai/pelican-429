@@ -39,6 +39,20 @@ export function definitionColliderSection(shape: DefinitionCollider, axis: 0 | 1
   return min === Infinity ? null : [min, max];
 }
 
+/** 只选择暴露在空气中的落脚面，叠放阶块底下的旧地面不能承托跟随物。 */
+export function definitionGroundAt(geometry: DefinitionCollision, x: number, referenceY: number, maxDistance = 2.5): number | null {
+  const sections = geometry.solids.map(solid => definitionColliderSection(solid, 0, x, x)).filter(section => section !== null);
+  let nearest: number | null = null;
+  const accept = (top: number): void => {
+    if (Math.abs(top - referenceY) > maxDistance) return;
+    if (sections.some(([bottom, ceiling]) => bottom <= top + EPS && ceiling > top + EPS)) return;
+    if (nearest === null || Math.abs(top - referenceY) < Math.abs(nearest - referenceY)) nearest = top;
+  };
+  for (const section of sections) accept(section[1]);
+  for (const platform of geometry.platforms) if (x >= platform.left && x <= platform.right) accept(platform.top);
+  return nearest;
+}
+
 function horizontalLimit(b: Body, geometry: DefinitionCollision, target: number, y: number): number {
   let limit = target;
   for (const solid of geometry.solids) {

@@ -1,7 +1,8 @@
+import { loadUtilityDroneFleet } from '../render/utility-drone.ts';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { TUNING, type Tuning } from '../config/tuning.ts';
-import { sampleWorldTime } from '../core/world-clock.ts';
+import { sampleWorldTime } from '../core/calendar.ts';
 import type { DefinitionCollision } from '../physics/definition-collision.ts';
 import { createAiCityLighting } from '../render/ai-city-lighting.ts';
 import { createGrassyRig } from '../render/grassy/grassy-rig.ts';
@@ -59,13 +60,16 @@ export function createSceneDemoStage(context: SceneMountContext, tuning: Tuning 
       const weather = createResidenceWeather(stage, () => collision.solids,
         { minX: Math.floor(bounds.min.x), width: Math.ceil(bounds.max.x - bounds.min.x), precipColumns });
       context.onDispose(() => weather.dispose());
-      const gameplay = createPerspectiveControls(page, stage, orbit, rig, collision, bounds, sections[0]!, [0, 0], [], false,
-        { cameraMode: 'game', tuning, applyForce: weather.applyToBody, airWind: weather.airWind });
+      const droneFleet = await loadUtilityDroneFleet(stage.scene);
+      if (context.signal.aborted) { droneFleet.dispose(); context.signal.throwIfAborted(); }
+      const gameplay = createPerspectiveControls(page, stage, droneFleet, orbit, rig, collision, bounds, sections[0]!, [0, 0], [], false,
+        { cameraMode: 'game', tuning, applyForce: weather.applyToBody, airWind: weather.airWind, world: context.world });
       context.onDispose(() => gameplay.dispose());
       gameplay.select(sections[0]!);
       const minimap = createPlayableDefinitionMinimap(viewport, collision,
         { minX: bounds.min.x, minY: bounds.min.y, maxX: bounds.max.x, maxY: bounds.max.y });
       context.onDispose(() => minimap.dispose());
+      gameplay.hud.attachMap(minimap.root);
       const overlays = createSceneGameOverlays(page.querySelector<HTMLElement>('.room-preview-toolbar')!, viewport, stage, minimap);
       context.onDispose(() => overlays.dispose());
       page.querySelector('[data-reset-player]')!.addEventListener('click', () => gameplay.select(sections[0]!), { signal: context.signal });
@@ -81,7 +85,6 @@ export function createSceneDemoStage(context: SceneMountContext, tuning: Tuning 
       const render = (dt: number, draw = true): void => {
         if (draw) overlays.begin();
         time += dt;
-        context.world.clock.update(dt);
         weather.setSettings(context.world.weatherConfig);
         gameplay.update(dt);
         orbit.update();
@@ -89,7 +92,7 @@ export function createSceneDemoStage(context: SceneMountContext, tuning: Tuning 
         if (view) update(time, dt, view);
         const index = sections.findIndex(section => gameplay.body.x >= section.x - section.width / 2 && gameplay.body.x <= section.x + section.width / 2);
         if (index !== sectionIndex) { sectionIndex = index; label.textContent = index < 0 ? '' : sections[index]!.title; }
-        const worldTime = sampleWorldTime(context.world.clock.hour);
+        const worldTime = sampleWorldTime(context.world.time);
         weather.setWeather(context.world.weather);
         const atmosphere = weather.update(time, dt, worldTime);
         lighting.setWorldTime(worldTime, atmosphere);

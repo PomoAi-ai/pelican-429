@@ -3,15 +3,16 @@ import { TILE_SHAPE_DEFINITIONS, type DefinitionDepthMode } from '../config/defi
 import { addResidenceGround, checkResidencePlacement, type ResidencePlacement, type ResidenceState } from '../sim/residence.ts';
 
 export const RESIDENCE_SAVE_KEY = 'pelican-residence:v1';
+export const RESIDENCE_HARBOR_SAVE_KEY = 'pelican-residence-harbor:v1';
 
-export function saveResidence(storage: Pick<Storage, 'setItem'>, state: ResidenceState): void {
-  storage.setItem(RESIDENCE_SAVE_KEY, JSON.stringify({ version: 2, nextId: state.nextId, revision: state.revision, placements: state.placements,
+export function saveResidence(storage: Pick<Storage, 'setItem'>, state: ResidenceState, key = RESIDENCE_SAVE_KEY): void {
+  storage.setItem(key, JSON.stringify({ version: 2, nextId: state.nextId, revision: state.revision, placements: state.placements,
     ...state.underground ? { underground: [...state.underground] } : {} }));
 }
 
 /** 独立住宅存档不改写旧家园数据；无效内容保留原值并向界面报告。 */
-export function loadResidence(storage: Pick<Storage, 'getItem'>): ResidenceState | undefined {
-  const raw = storage.getItem(RESIDENCE_SAVE_KEY);
+export function loadResidence(storage: Pick<Storage, 'getItem'>, key = RESIDENCE_SAVE_KEY): ResidenceState | undefined {
+  const raw = storage.getItem(key);
   if (raw === null) return undefined;
   let data: unknown;
   try { data = JSON.parse(raw); }

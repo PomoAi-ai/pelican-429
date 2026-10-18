@@ -96,8 +96,8 @@ function stubRenderer(): THREE.WebGLRenderer {
 
 describe('post-fx', () => {
   test('planPasses：high 全开；low 只留阴影与调色', () => {
-    assert.deepEqual(planPasses('high'), { ao: true, bloom: true, shafts: true, grade: true, shadows: true });
-    assert.deepEqual(planPasses('low'), { ao: false, bloom: false, shafts: false, grade: true, shadows: true });
+    assert.deepEqual(planPasses('high'), { ao: true, bloom: true, shafts: true, ssr: true, grade: true, shadows: true });
+    assert.deepEqual(planPasses('low'), { ao: false, bloom: false, shafts: false, ssr: false, grade: true, shadows: true });
     assert.throws(() => planPasses('mid' as never), /quality/);
   });
 

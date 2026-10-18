@@ -27,7 +27,10 @@ export function createFreeWorldBackground(stage: Stage, level: LevelData, ground
   let failure: unknown;
   let blended: BackgroundWeights | null = null;
   let activeTheme: FreeWorldBackground | null = null;
-  const environment = { tint: new THREE.Color(), light: 1 };
+  // sky：露天系数，主题露天值乘深度门控；昼夜驱动据此避免洞穴随户外变暗。
+  const environment = { tint: new THREE.Color(), light: 1, sky: 1 };
+  // 昼夜色由调用方写入，只作用于露天主题；默认白色时与无昼夜一致。
+  const paint = new THREE.Color(1, 1, 1);
   const colors = Object.fromEntries(Object.entries(FREE_WORLD_BACKGROUNDS).map(([id, value]) => [id, new THREE.Color(value.tint)])) as Record<FreeWorldBackground, THREE.Color>;
 
   const ensure = (theme: FreeWorldBackground): Promise<void> => {
@@ -84,9 +87,10 @@ export function createFreeWorldBackground(stage: Stage, level: LevelData, ground
   const prepare = async (x: number, y: number): Promise<void> => { await Promise.all([...nearby(x, y)].map(ensure)); };
   return {
     environment,
+    paint,
     prepare,
     setWeather(brightness: number) {
-      for (const mesh of layers.values()) mesh.material.color.setScalar(brightness);
+      for (const [theme, mesh] of layers) mesh.material.color.setRGB(1, 1, 1).lerp(paint, FREE_WORLD_BACKGROUNDS[theme].sky).multiplyScalar(brightness);
     },
     update(x: number, y: number, dt: number) {
       if (failure !== undefined) throw failure;
@@ -117,13 +121,18 @@ export function createFreeWorldBackground(stage: Stage, level: LevelData, ground
       sum = Object.values(weights).reduce((total, weight) => total + weight, 0);
       environment.tint.setRGB(0, 0, 0);
       environment.light = 0;
+      environment.sky = 0;
       for (const theme of Object.keys(weights) as FreeWorldBackground[]) {
         const weight = weights[theme] / sum;
         environment.tint.r += colors[theme].r * weight;
         environment.tint.g += colors[theme].g * weight;
         environment.tint.b += colors[theme].b * weight;
         environment.light += FREE_WORLD_BACKGROUNDS[theme].light * weight;
+        environment.sky += FREE_WORLD_BACKGROUNDS[theme].sky * weight;
       }
+      const surface = ground[Math.max(0, Math.min(ground.length - 1, Math.floor(x)))]!;
+      // ponytail: 全屏单一露天系数，洞口约 8 格过渡；需要逐像素时给光照图加天空光通道。
+      environment.sky *= THREE.MathUtils.smoothstep(y - surface, -12, -4);
       let cumulative = 0;
       let order = -20;
       for (const [theme, mesh] of layers) {
@@ -143,7 +152,7 @@ export function createFreeWorldBackground(stage: Stage, level: LevelData, ground
         const width = theme === 'fortress' ? viewWidth : height * aspect;
         mesh.scale.set(width, height, 1);
         mesh.position.x = stage.camera.position.x - Math.sin(x / 160) * (width - viewWidth) * .3;
-        mesh.position.y = stage.camera.position.y - Math.tanh((y - ground[Math.max(0, Math.min(ground.length - 1, Math.floor(x)))]!) / 60) * (height - viewHeight) * .3;
+        mesh.position.y = stage.camera.position.y - Math.tanh((y - surface) / 60) * (height - viewHeight) * .3;
       }
       if (fortress && fortressPlacement && weights.fortress > 0) {
         stage.renderer.getDrawingBufferSize(bufferSize);

@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#51568c" />
+    <link rel="stylesheet" href="/src/ui/harbor-perspective.css" />
+    <title>潮汐之城 · 透视漫游</title>
+  </head>
+  <body>
+    <main id="harbor-app">
+      <div id="harbor-stage"></div>
+      <header class="harbor-heading">
+        <p>独立场景 / PERSPECTIVE STUDY</p>
+        <h1>潮汐之城</h1>
+        <span>沿着水岸，走进城市的层次</span>
+      </header>
+      <nav class="harbor-toolbar" aria-label="场景观察控制">
+        <div class="harbor-presets" role="group" aria-label="观察位置">
+          <button type="button" data-view="city" aria-pressed="true">城中漫游</button>
+          <button type="button" data-view="waterfront" aria-pressed="false">滨水全景</button>
+          <button type="button" data-view="oblique" aria-pressed="false">层距斜视</button>
+        </div>
+        <div class="harbor-actions">
+          <a href="/?mode=game&amp;level=harbor">进入新版横版场景</a>
+          <button type="button" id="harbor-pause" aria-pressed="false">暂停全部动画</button>
+          <button type="button" id="harbor-reset">重置镜头</button>
+        </div>
+      </nav>
+      <div class="harbor-movement" role="group" aria-label="沿水岸移动">
+        <button type="button" data-move="-1" aria-label="按住向左移动">←</button>
+        <p>拖动环视 · 滚轮远近<br /><span>A / D 或方向键沿岸移动</span></p>
+        <button type="button" data-move="1" aria-label="按住向右移动">→</button>
+      </div>
+      <p id="harbor-status" role="status" aria-live="polite">正在点亮城市……</p>
+    </main>
+    <script type="module" src="/src/app/harbor-perspective.ts"></script>
+  </body>
+</html>

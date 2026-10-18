@@ -14,7 +14,7 @@ import type { BossArenaState } from './boss-arena.ts';
  * hitstop 期间只推进计时（tick、hitstopTicks）并缓冲玩家输入，跳过控制器、物理、液体与小鱼，并令 prev=cur（渲染不插值抖动）。
  */
 import { ENEMY_RULES } from '../config/enemy-rules.ts';
-import { HOMESTEAD, isDaytime } from '../config/homestead.ts';
+import { HOMESTEAD } from '../config/homestead.ts';
 import { cancelBossSkill, setBossDifficulty, updateBoss } from '../entities/boss.ts';
 import { mainlineTransformUnlocked, restoreMainlinePlayer, stepMainline, stepMainlineReveal } from './mainline.ts';
 import type { MainlineState } from './mainline.ts';
@@ -26,6 +26,7 @@ import { cancelPlayerTransform, stepPlayerTransform } from './player-transform.t
 import { stepPlayerTeleport } from './player-teleport.ts';
 import { teleportLocksMovement } from '../entities/teleport.ts';
 import type { Tuning } from '../config/tuning.ts';
+import { isDaytime } from '../core/calendar.ts';
 import { EventQueue } from '../core/events.ts';
 import { hash01, hashU32 } from '../core/rng.ts';
 import type { SimEvent } from '../core/game-events.ts';
@@ -58,6 +59,7 @@ import { NEUTRAL_INPUT, bufferPelicanInput, resolvePelicanState, updatePelican }
 import type { PelicanInput } from '../entities/pelican-controller.ts';
 import { consumeRideEvents, resolvePelicanRide, solidExtents } from '../entities/pelican-ride.ts';
 import { tickDummyReset, updateDummy } from '../entities/training-dummy.ts';
+import { updateFlyingRoadster } from '../entities/flying-roadster.ts';
 import { applyWetMarks, collectProjectileRequests, resolveWeaponInteractions, spawnProjectiles, steerHumanProjectiles, updateShooters, wetMarks } from './weapon-system.ts';
 import { createEnvironment, entityExposed, stepEnvironment } from './environment.ts';
 import { stepPlayerBreath } from './player-breath.ts';
@@ -302,7 +304,7 @@ function resolveDroneStomp(world: SimWorld): void {
 
 /** 家园模式的夜晚：野外敌人更凶。主线和普通自由世界没有 homestead，不受影响。 */
 function homesteadNight(world: SimWorld): boolean {
-  return world.homestead !== undefined && !isDaytime(world.homestead.economy.second);
+  return world.homestead !== undefined && !isDaytime(world.homestead.economy);
 }
 
 function resolveCombat(world: SimWorld): void {
@@ -593,7 +595,8 @@ export function stepSim(world: SimWorld, input: InputFrame): void {
 
   for (const e of entities) {
     if (e.removed) continue;
-    if (e.projectile) {
+    if (e.flyingRoadster) updateFlyingRoadster(e, dt);
+    else if (e.projectile) {
       if (e.team === 'enemy' && enemyTouchesSafeZone(e.body, world.level)) e.removed = true;
       else {
         stepProjectile(e, map, dt, world.events, fluid);

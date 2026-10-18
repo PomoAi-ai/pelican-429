@@ -4,7 +4,7 @@ import { RESIDENCE_RESOURCES, RESIDENCE_WORLD, getResidenceResource } from '../c
 import { TILE_SHAPE_DEFINITIONS, type DefinitionDepthMode } from '../config/definition-kit.ts';
 import { eraseBuildingBrush, buildingBrushLine, paintBuilding, checkBuildingPaint } from '../sim/building-brush.ts';
 import { buildResidenceCollision, removeResidence, type ResidenceState } from '../sim/residence.ts';
-import { buildResidenceLightField, sampleResidenceSky } from '../sim/residence-light.ts';
+import { createResidenceLight } from '../sim/residence-light.ts';
 import { createResidenceLighting } from '../render/residence-lighting.ts';
 import { createResidenceView, residenceIntersectionId } from '../render/residence-view.ts';
 import { createDefinitionKit } from '../render/definition-kit.ts';
@@ -28,9 +28,8 @@ function createPanel(): HTMLElement {
     <button type="button" data-view="front">正视</button><button type="button" data-view="angle">斜视</button><button type="button" data-view="top">俯视</button>
     <button type="button" data-zoom="0.8" aria-label="放大场地">放大 ＋</button><button type="button" data-zoom="1.25" aria-label="缩小场地">缩小 −</button><button type="button" data-home>回到场地</button><span data-count></span></div>
     <div class="building-layout"><aside class="building-palette">
-    <h2>格子与建筑</h2><div data-resource-picker></div>
+    <h2>材质与形状</h2><div data-resource-picker></div>
     <label data-depth-label>砖块深度<select data-depth aria-label="砖块深度"><option value="normal">普通 · 深 2 格</option><option value="deep">加深 · 深 3 格</option></select></label>
-    <p data-resource-note></p>
     </aside><div class="building-canvas"><p class="building-instructions">普通模式 · 鼠标点击不修改场地 · 右键拖动平移 · 中键旋转 · 滚轮缩放</p>
     <p class="building-feedback" role="status" data-status>选择构件后点击格子铺设</p></div></div>
     <footer>64 × 36 格 · 基底高 1.5 格，先用上半砖 C 找平至 2 格 · 本页切换保留，刷新后清空；不会改动住宅存档。</footer>`;
@@ -61,13 +60,12 @@ export async function mountBuildingSandbox(context: SceneMountContext): Promise<
   const grid = new THREE.LineSegments(new THREE.BufferGeometry().setAttribute('position', new THREE.Float32BufferAttribute(gridVertices, 3)),
     new THREE.LineBasicMaterial({ color: '#6b8e9e', transparent: true, opacity: .22, depthWrite: false }));
   stage.scene.add(grid); context.onDispose(() => { grid.geometry.dispose(); grid.material.dispose(); });
-  let view = createResidenceView(state);
-  let lightField = buildResidenceLightField(state);
-  const spatialLighting = createResidenceLighting(lightField);
-  const skyAt = (x: number, y: number): number => sampleResidenceSky(lightField, x, y);
+  const view = createResidenceView(state);
+  const light = createResidenceLight(state);
+  const spatialLighting = createResidenceLighting(light, { slots: field.quality === 'low' ? 2 : 4 });
   spatialLighting.attach(floor.root); spatialLighting.attach(view.root);
   context.onDispose(() => spatialLighting.dispose());
-  stage.scene.add(view.root); context.onDispose(() => view.dispose());
+  stage.scene.add(view.root, spatialLighting.root); context.onDispose(() => view.dispose());
   let ghost: ReturnType<typeof createResidenceView>;
   context.onDispose(() => ghost.dispose());
   const status = page.querySelector<HTMLElement>('[data-status]')!;
@@ -90,10 +88,9 @@ export async function mountBuildingSandbox(context: SceneMountContext): Promise<
   const report = (message: string, error = false): void => { status.textContent = message; status.dataset.error = String(error); };
   const count = (): void => { page.querySelector('[data-count]')!.textContent = `${state.placements.length} 个构件`; };
   const rebuild = (): void => {
-    view.dispose(); view = createResidenceView(state);
-    lightField = buildResidenceLightField(state);
-    spatialLighting.update(lightField); spatialLighting.attach(view.root);
-    stage.scene.add(view.root);
+    view.sync();
+    // 重建的 kit 带来新材质，需要重新接入光场。
+    spatialLighting.update(stage.renderer, light.sync()); spatialLighting.attach(view.root);
     collision = sceneCollision(); count();
   };
   const valid = () => position.x >= bounds.minX && position.x + selected.width <= bounds.minX + bounds.width;
@@ -149,9 +146,8 @@ export async function mountBuildingSandbox(context: SceneMountContext): Promise<
   const choose = (id: string): void => {
     selected = getResidenceResource(id);
     page.querySelector<HTMLElement>('[data-depth-label]')!.hidden = selected.kind !== 'solid';
-    page.querySelector('[data-resource-note]')!.textContent = `${selected.label} · 占位 ${selected.width} × ${selected.height} 格。${selected.kind === 'solid' ? depthMode() === 'deep' ? '深 3 格：前后各加深 0.5，同格不可放背景墙。' : '深 2 格：允许背景墙。' : '按标准占位整体铺设与清理。'}`;
     ghost?.dispose();
-    ghost = createResidenceView({ placements: [{ id: 0, resourceId: id, x: 0, y: 0, depthMode: depthMode(), open: false }], nextId: 1, revision: 0 }, { lighting: false });
+    ghost = createResidenceView({ placements: [{ id: 0, resourceId: id, x: 0, y: 0, depthMode: depthMode(), open: false }], nextId: 1, revision: 0 });
     ghost.root.traverse(node => {
       if (!(node instanceof THREE.Mesh)) return;
       node.castShadow = false;
@@ -240,5 +236,5 @@ export async function mountBuildingSandbox(context: SceneMountContext): Promise<
   context.progress('准备自由搭建场');
   await warmUpStage(stage, [], context.signal);
   context.signal.throwIfAborted();
-  field.onFrame((time, _dt, world) => { view.setLighting(stage.camera, world.night, skyAt); view.update(time, null); if (ghost.root.visible) ghost.update(time, null); });
+  field.onFrame((time, _dt, world) => { spatialLighting.setFrame(stage.camera, world.night, time, field.lighting.skyTint); view.update(time, null); if (ghost.root.visible) ghost.update(time, null); });
 }

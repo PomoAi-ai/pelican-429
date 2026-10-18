@@ -17,6 +17,7 @@ import { createEnemyViewFactory } from '../render/enemy-view.ts';
 import { createWandererView } from '../render/npc/wanderer-view.ts';
 import { createBossView } from '../render/npc/boss-view.ts';
 import { createHealthPackView } from '../render/health-pack-view.ts';
+import { createFlyingRoadsterView } from '../render/flying-roadster-view.ts';
 import { createOrbFx } from '../render/orb-fx.ts';
 import { createOrbViews } from '../render/orb-view.ts';
 import type { PelicanRig } from '../render/pelican/pelican-rig.ts';
@@ -80,6 +81,7 @@ export function createEntityViews(stage: { scene: THREE.Object3D }, level: Level
     sam: entity => entity.npc ? createWandererView(entity) : takeBossView(entity),
     tibo: entity => entity.npc ? createWandererView(entity) : takeBossView(entity),
     healthPack: createHealthPackView,
+    flyingRoadster: createFlyingRoadsterView,
     orb: orbs.factory,
     ...projectiles.factories,
     codexShot: grassyProjectiles.factory, bugShot: grassyProjectiles.factory,

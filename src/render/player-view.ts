@@ -11,6 +11,7 @@ import { createPlayerTransformation } from './player-transform.ts';
 import type { EntityViewFactory } from './view-registry.ts';
 import { createTeleportEffect } from './teleport-effect.ts';
 import { caption } from './npc/npc-effects.ts';
+import { protectPlayer } from './player-occlusion.ts';
 
 /** Both forms use their production rigs and share the pelican view's terrain and platform placement. */
 export function createPlayerViewFactory(options: PelicanViewOptions & { grassyVariant?: GrassyAnimatedVariant; grassyGait?: 'run' | 'sprint'; appearance?: () => CharacterAppearance; modelView?: () => { yaw: number; pitch: number } }): EntityViewFactory {
@@ -21,6 +22,8 @@ export function createPlayerViewFactory(options: PelicanViewOptions & { grassyVa
     const animateDeath = createGrassyDeath(human);
     human.effects.setProjectilePreview(false);
     const bird = createBird(entity);
+    protectPlayer(human.root);
+    protectPlayer(bird.object);
     const facingYaw = bird.object.getObjectByName('pelican-yaw')!;
     const transformation = createPlayerTransformation(human.root, bird.object);
     const root = new THREE.Group();
@@ -41,7 +44,7 @@ export function createPlayerViewFactory(options: PelicanViewOptions & { grassyVa
       object: root,
       sync(e, alpha, frameDt): void {
         const nextAppearance = options.appearance ? options.appearance() : appearance;
-        if (nextAppearance !== appearance) { human.applyAppearance(nextAppearance); appearance = nextAppearance; }
+        if (nextAppearance !== appearance) { human.applyAppearance(nextAppearance); protectPlayer(human.root); appearance = nextAppearance; }
         transformation.restore();
         const dead = e.health!.hp <= 0;
         bird.sync(e, alpha, dead ? 0 : frameDt);

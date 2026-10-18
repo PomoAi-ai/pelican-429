@@ -6,12 +6,13 @@ import { TUNING, jumpVelocity, validateTuning } from '../src/config/tuning.ts';
 import type { ContactDamageTuning, SolidTuning, Tuning } from '../src/config/tuning.ts';
 import type { DismountEvent, HitEvent, SimEvent } from '../src/core/game-events.ts';
 import type { Entity } from '../src/entities/entity.ts';
+import { createFlyingRoadster } from '../src/entities/flying-roadster.ts';
 import { createBody } from '../src/physics/body.ts';
 import { createSolid, resolveSolids, solidsCollide } from '../src/physics/entity-collision.ts';
 import type { SolidAgent } from '../src/physics/entity-collision.ts';
 import { displaceBody } from '../src/physics/tile-collision.ts';
 import { LEVEL_LEGEND, parseLevel } from '../src/world/test-level.ts';
-import { createSimWorld, getPlayer, stepSim, NEUTRAL_INPUT } from '../src/sim/sim-world.ts';
+import { addEntity, createSimWorld, getPlayer, stepSim, NEUTRAL_INPUT } from '../src/sim/sim-world.ts';
 import type { InputFrame, SimWorld } from '../src/sim/sim-world.ts';
 
 const P = TUNING.player;
@@ -310,6 +311,92 @@ describe('站在假人头上', () => {
     step(w2, { jumpPressed: true, jumpHeld: true, moveX: 1, runHeld: true });
     steps(w2, 120, { moveX: 1, runHeld: true, jumpHeld: false }, (w) => assertNoOverlap(w, '低空'));
     assert.ok(p2.body.x < dummy(w2).body.x, '没有穿过');
+  });
+});
+
+describe('飞行跑车承载玩家', () => {
+  function flightWorld(above: boolean): { w: SimWorld; car: Entity; player: Entity } {
+    const w = createSimWorld({
+      level: parseLevel(level(64, 20, [{ x: above ? 10 : 7, y: above ? 7 : 1, ch: 'P' }]), LEVEL_LEGEND),
+      playerForm: 'human',
+    });
+    const car = addEntity(w, id => createFlyingRoadster(id, { x: 10.5, y: 1.2 }, w.tuning));
+    return { w, car, player: getPlayer(w) };
+  }
+
+  test('从空中落到车顶，往返升降时保持脚底贴顶与相对位置', () => {
+    const { w, car, player } = flightWorld(true);
+    steps(w, 90);
+    assert.equal(player.solid!.supportId, car.id);
+    const offset = player.body.x - car.body.x;
+    const startX = car.body.x;
+    let farthest = startX;
+    for (let i = 0; i < 2000; i++) {
+      step(w);
+      farthest = Math.max(farthest, car.body.x);
+      assert.equal(player.solid!.supportId, car.id, `tick ${w.tick} 仍在车顶`);
+      assert.equal(player.body.onGround, true);
+      assert.ok(Math.abs(player.body.y - car.body.y - car.body.height) < 1e-6, `tick ${w.tick} 脚底贴顶`);
+      assert.ok(Math.abs(player.body.x - car.body.x - offset) < 1e-6, `tick ${w.tick} 随车移动`);
+    }
+    assert.ok(farthest > startX + 25, '跑车飞到远端');
+    assert.ok(car.body.x < startX + 3, '跑车完成返回');
+  });
+
+  test('正常从地面起跳可登车，主动跳离后不再被携带', () => {
+    const { w, car, player } = flightWorld(false);
+    settle(w);
+    step(w, { jumpPressed: true, jumpHeld: true, moveX: 1, runHeld: true });
+    let landed = false;
+    for (let i = 0; i < 110 && !landed; i++) {
+      // 窄车顶需要提前松开方向键，留出空中惯性的制动距离。
+      step(w, { jumpHeld: i < 18, moveX: player.body.x < car.body.x - 1.5 ? 1 : 0, runHeld: true });
+      landed = player.solid!.supportId === car.id;
+    }
+    assert.ok(landed, '从地面跳到车顶');
+    steps(w, 120);
+    const offset = player.body.x - car.body.x;
+    step(w, { jumpPressed: true, jumpHeld: true });
+    assert.equal(player.solid!.supportId, null);
+    assert.equal(player.body.onGround, false);
+    assert.ok(player.body.y > car.body.y + car.body.height);
+    steps(w, 8, { jumpHeld: true });
+    assert.ok(Math.abs(player.body.x - car.body.x - offset) > 0.05, '跳离后不再继承车辆位移');
+  });
+
+  test('朝左巡航时带着乘客离开起点，转向后返回原处', () => {
+    const w = world(level(64, 20, [{ x: 50, y: 7, ch: 'P' }]));
+    const player = getPlayer(w);
+    const car = addEntity(w, id => createFlyingRoadster(id, { x: 50.5, y: 1.2 }, w.tuning, -1));
+    assert.equal(Number(car.facing), -1);
+    steps(w, 90);
+    const offset = player.body.x - car.body.x;
+    let farthest = car.body.x;
+    let returned = false;
+    for (let i = 0; i < 2000; i++) {
+      step(w);
+      farthest = Math.min(farthest, car.body.x);
+      returned ||= car.facing === 1 && car.body.vx > 0;
+      assert.equal(player.solid!.supportId, car.id);
+      assert.ok(Math.abs(player.body.y - car.body.y - car.body.height) < 1e-6);
+      assert.ok(Math.abs(player.body.x - car.body.x - offset) < 1e-6);
+    }
+    assert.ok(farthest < 25, '驶向起点左侧远端');
+    assert.equal(returned, true);
+    assert.ok(car.body.x > 48, '返回起点附近');
+  });
+
+  test('停帧冻结车辆与乘客，恢复后不按世界 tick 跳到新位置', () => {
+    const { w, car, player } = flightWorld(true);
+    steps(w, 300);
+    const before = { x: car.body.x, y: car.body.y, elapsed: car.flyingRoadster!.elapsed, px: player.body.x, py: player.body.y };
+    w.hitstopTicks = 30;
+    steps(w, 30);
+    assert.deepEqual({ x: car.body.x, y: car.body.y, elapsed: car.flyingRoadster!.elapsed, px: player.body.x, py: player.body.y }, before);
+    step(w);
+    assert.ok(Math.abs(car.body.x - before.x) < 0.06, '恢复时只前进一个固定步长');
+    assert.equal(player.solid!.supportId, car.id);
+    assert.ok(Math.abs(player.body.y - car.body.y - car.body.height) < 1e-6);
   });
 });
 

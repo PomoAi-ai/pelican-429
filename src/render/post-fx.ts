@@ -12,6 +12,8 @@
  *   OutputPass 与调色合并为一个直写画布的 pass（不再写第二个 MSAA 目标）；数学与原链路一致：
  *   原 bloom 以 AdditiveBlending(SRC_ALPHA, ONE) 叠到 HDR 上 → 这里 c += bloom.rgb·bloom.a，再色调映射。
  * - 画质：planPasses(quality) 决定启用的 pass；low 只保留 Render → Grade（阴影由 stage 负责，始终开启）。
+ * - 地面反射（lighting.ssr）：不新增通道，Grade 在色调映射前读场景深度 + AO 预处理法线做视空间步进，只对朝上像素混入；
+ *   依附 AO（low 随 AO 关闭），setReflections 运行时开关。
  * - 构造不触碰 GL（可在 node 下测试结构与 dispose）；setQuality 只切 pass.enabled，不重建资源。
  * - setAntialias（设置面板，运行时切换）：改场景目标采样数并释放其 GPU 缓冲（下次渲染按新采样数重建，对象与深度纹理引用不变），
  *   增删末尾的 SMAA 通道、改 Grade 是否交换；读写缓冲复位为 场景目标 / 显示缓冲。
@@ -32,6 +34,8 @@ export interface PassPlan {
   readonly ao: boolean;
   readonly bloom: boolean;
   readonly shafts: boolean;
+  /** 屏幕空间地面反射（读 AO 预处理法线，与 AO 同开关）。 */
+  readonly ssr: boolean;
   /** 色彩分级与阴影在任何画质下都开启。 */
   readonly grade: true;
   readonly shadows: true;
@@ -39,8 +43,8 @@ export interface PassPlan {
 
 /** 画质 → 启用的效果。low：关 AO/光束/bloom，仅保留阴影与调色。 */
 export function planPasses(quality: LightingQuality): PassPlan {
-  if (quality === 'high') return { ao: true, bloom: true, shafts: true, grade: true, shadows: true };
-  if (quality === 'low') return { ao: false, bloom: false, shafts: false, grade: true, shadows: true };
+  if (quality === 'high') return { ao: true, bloom: true, shafts: true, ssr: true, grade: true, shadows: true };
+  if (quality === 'low') return { ao: false, bloom: false, shafts: false, ssr: false, grade: true, shadows: true };
   throw new Error(`post-fx: unknown quality '${String(quality)}'`);
 }
 
@@ -54,6 +58,18 @@ export interface GradeUniforms {
   readonly tAO: THREE.IUniform<THREE.Texture | null>;
   /** 0 = 不乘 AO（画质 low 或 AO 关闭）。 */
   readonly uAoIntensity: THREE.IUniform<number>;
+  /** 场景深度纹理与 AO 预处理法线（视空间，×.5+.5，AO 分辨率）。 */
+  readonly tDepth: THREE.IUniform<THREE.Texture | null>;
+  readonly tNormal: THREE.IUniform<THREE.Texture | null>;
+  /** 反射强度；0 = 不步进（画质 low、配置关闭或界面关闭）。 */
+  readonly uSsr: THREE.IUniform<number>;
+  readonly uSsrMaxDistance: THREE.IUniform<number>;
+  readonly uSsrThickness: THREE.IUniform<number>;
+  /** 相机投影矩阵及其逆（引用相机自身矩阵）。 */
+  readonly uProjection: THREE.IUniform<THREE.Matrix4>;
+  readonly uInverseProjection: THREE.IUniform<THREE.Matrix4>;
+  /** 视空间世界上方向，判定朝上像素。 */
+  readonly uViewUp: THREE.IUniform<THREE.Vector3>;
   readonly uTint: THREE.IUniform<THREE.Color>;
   readonly uContrast: THREE.IUniform<number>;
   readonly uSaturation: THREE.IUniform<number>;
@@ -66,7 +82,7 @@ export interface GradeUniforms {
 }
 
 /**
- * 输出 + 色彩分级（一次全屏）：HDR 场景 + bloom → 色调映射 → sRGB（OutputShader 同式，defines 由 OutputPass 维护）
+ * 输出 + 色彩分级（一次全屏）：HDR 场景（+ 地面反射）+ bloom → 色调映射 → sRGB（OutputShader 同式，defines 由 OutputPass 维护）
  * → 显示空间：乘 AO → 白平衡 tint → 饱和度 → 对比度 → 暗角。
  */
 export const GRADE_FRAGMENT = /* glsl */ `
@@ -76,6 +92,14 @@ export const GRADE_FRAGMENT = /* glsl */ `
   uniform float uBloom;
   uniform sampler2D tAO;
   uniform float uAoIntensity;
+  uniform highp sampler2D tDepth;
+  uniform sampler2D tNormal;
+  uniform float uSsr;
+  uniform float uSsrMaxDistance;
+  uniform float uSsrThickness;
+  uniform mat4 uProjection;
+  uniform mat4 uInverseProjection;
+  uniform vec3 uViewUp;
   uniform vec3 uTint;
   uniform float uContrast;
   uniform float uSaturation;
@@ -87,6 +111,52 @@ export const GRADE_FRAGMENT = /* glsl */ `
   #include <tonemapping_pars_fragment>
   #include <colorspace_pars_fragment>
   varying vec2 vUv;
+  const int SSR_STEPS = 24;
+  const int SSR_REFINE = 4;
+  vec3 ssrView( vec2 uv ) {
+    vec4 p = uInverseProjection * vec4( vec3( uv, texture2D( tDepth, uv ).x ) * 2.0 - 1.0, 1.0 );
+    return p.xyz / p.w;
+  }
+  vec2 ssrScreen( vec3 p ) {
+    vec4 c = uProjection * vec4( p, 1.0 );
+    return c.xy / c.w * 0.5 + 0.5;
+  }
+  // 视空间等步长步进，命中后二分细化；只取朝上表面，按菲涅耳、屏幕边缘与步进距离渐隐。
+  vec4 ssrSample( vec2 uv ) {
+    // 半分辨率法线在剪影边缘可能取到天空纹素（a 通道存深度，天空为 1，法线为零向量），一并排除。
+    vec4 normalSample = texture2D( tNormal, uv );
+    if ( texture2D( tDepth, uv ).x >= 1.0 || normalSample.a >= 1.0 ) return vec4( 0.0 );
+    vec3 n = normalize( normalSample.xyz * 2.0 - 1.0 );
+    float facing = smoothstep( 0.9, 0.98, dot( n, uViewUp ) );
+    if ( facing <= 0.0 ) return vec4( 0.0 );
+    vec3 p = ssrView( uv );
+    vec3 v = normalize( p );
+    vec3 r = reflect( v, n );
+    if ( r.z > 0.0 ) return vec4( 0.0 );
+    float stepLength = uSsrMaxDistance / float( SSR_STEPS );
+    vec3 a = p;
+    for ( int i = 1; i <= SSR_STEPS; i++ ) {
+      vec3 b = p + r * ( stepLength * float( i ) );
+      vec2 q = ssrScreen( b );
+      if ( any( lessThan( q, vec2( 0.0 ) ) ) || any( greaterThan( q, vec2( 1.0 ) ) ) ) return vec4( 0.0 );
+      float delta = ssrView( q ).z - b.z;
+      if ( delta > 0.0 && delta < uSsrThickness ) {
+        for ( int j = 0; j < SSR_REFINE; j++ ) {
+          vec3 m = ( a + b ) * 0.5;
+          if ( ssrView( ssrScreen( m ) ).z - m.z > 0.0 ) b = m;
+          else a = m;
+        }
+        q = ssrScreen( b );
+        vec2 edge = min( q, 1.0 - q );
+        float fade = smoothstep( 0.0, 0.08, min( edge.x, edge.y ) ) * ( 1.0 - float( i ) / float( SSR_STEPS ) );
+        // 地砖是带釉层的光面，侧视俯角下物理菲涅耳只有约 .1，倒影几乎看不见；底值取 .25 保留釉面镜感。
+        float fresnel = 0.25 + 0.75 * pow( 1.0 - clamp( dot( -v, n ), 0.0, 1.0 ), 5.0 );
+        return vec4( texture2D( tDiffuse, q ).rgb, uSsr * fresnel * fade * facing );
+      }
+      a = b;
+    }
+    return vec4( 0.0 );
+  }
   void main() {
     vec2 sceneUv = vUv;
     if ( uGravityLens.z > 0.0 ) {
@@ -108,6 +178,11 @@ export const GRADE_FRAGMENT = /* glsl */ `
       sceneUv = clamp( vUv + ( bent - offset ) / aspect * edgeFade, uHalfTexel, 1.0 - uHalfTexel );
     }
     vec4 src = texture2D( tDiffuse, sceneUv );
+    // 只改颜色：alpha 携带羽毛的负值标记，后面算 AO 权重要用。
+    if ( uSsr > 0.0 ) {
+      vec4 reflection = ssrSample( sceneUv );
+      src.rgb = mix( src.rgb, reflection.rgb, reflection.a );
+    }
     if ( uBloom > 0.0 ) {
       vec4 b = texture2D( tBloom, sceneUv );
       src.rgb += b.rgb * b.a;
@@ -157,6 +232,14 @@ class GradeOutputPass extends OutputPass {
       uBloom: { value: 0 },
       tAO: { value: null },
       uAoIntensity: { value: 0 },
+      tDepth: { value: null },
+      tNormal: { value: null },
+      uSsr: { value: 0 },
+      uSsrMaxDistance: { value: 1 },
+      uSsrThickness: { value: 1 },
+      uProjection: { value: new THREE.Matrix4() },
+      uInverseProjection: { value: new THREE.Matrix4() },
+      uViewUp: { value: new THREE.Vector3(0, 1, 0) },
       uTint: { value: new THREE.Color(1, 1, 1) },
       uContrast: { value: 1 },
       uSaturation: { value: 1 },
@@ -377,6 +460,8 @@ export interface PostFx {
   /** 当前启用的 pass 名（调试/测试用）。 */
   enabledPasses(): string[];
   setQuality(quality: LightingQuality): void;
+  /** 界面开关地面反射（仍受画质与 lighting.ssr.enabled 约束）。 */
+  setReflections(on: boolean): void;
   /** 运行时切换抗锯齿（同值不重建；非法即抛）。 */
   setAntialias(mode: AntialiasMode): void;
   /** CSS 像素尺寸 + 像素比。 */
@@ -445,6 +530,18 @@ export function createPostFx(input: PostFxInput): PostFx {
   gu.uVignetteStart.value = g.vignetteStart;
   gu.tAO.value = ao.gtaoMap;
   gu.tBloom.value = bloom.bloomTexture;
+  gu.tDepth.value = sceneTarget.depthTexture;
+  gu.tNormal.value = ao.prepassTarget.texture;
+  gu.uSsrMaxDistance.value = lighting.ssr.maxDistance;
+  gu.uSsrThickness.value = lighting.ssr.thickness;
+  gu.uProjection.value = camera.projectionMatrix;
+  gu.uInverseProjection.value = camera.projectionMatrixInverse;
+  let reflections = true;
+  const updateViewUp = (): void => {
+    if (gu.uSsr.value <= 0) return;
+    camera.updateWorldMatrix(true, false);
+    gu.uViewUp.value.set(0, 1, 0).transformDirection(camera.matrixWorldInverse);
+  };
 
   let gravityLens: Parameters<PostFx['setGravityLens']>[0] = null;
   const lensCenter = new THREE.Vector3();
@@ -486,7 +583,8 @@ export function createPostFx(input: PostFxInput): PostFx {
     bloom.enabled = plan.bloom;
     gu.uBloom.value = plan.bloom ? 1 : 0;
     grade.enabled = plan.grade;
-    // 深度只有 AO 读：AO 关时 MSAA resolve 不再拷深度（smaa 模式无 resolve，不影响）。
+    gu.uSsr.value = plan.ssr && lighting.ssr.enabled && reflections ? lighting.ssr.strength : 0;
+    // 深度只有 AO 与反射读，反射依附 AO：AO 关时 MSAA resolve 不再拷深度（smaa 模式无 resolve，不影响）。
     sceneTarget.resolveDepthBuffer = plan.ao;
   };
   apply();
@@ -508,6 +606,10 @@ export function createPostFx(input: PostFxInput): PostFx {
     setQuality(q) {
       planPasses(q);
       quality = q;
+      apply();
+    },
+    setReflections(on) {
+      reflections = on;
       apply();
     },
     setAntialias(mode) {
@@ -549,11 +651,13 @@ export function createPostFx(input: PostFxInput): PostFx {
     render(deltaTime) {
       if (disposed) throw new Error('post-fx: render after dispose');
       updateGravityLens();
+      updateViewUp();
       composer.renderToScreen = true;
       composer.render(deltaTime);
     },
     renderTexture() {
       updateGravityLens();
+      updateViewUp();
       composer.renderToScreen = false;
       // 保持深度与 HDR 场景目标固定，避免后期读取上一张预览的缓冲。
       composer.readBuffer = sceneTarget;

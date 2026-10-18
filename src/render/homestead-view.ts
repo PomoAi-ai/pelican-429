@@ -1,10 +1,11 @@
 /**
  * 家园概念版本的设施、无人机、标记与施工轮廓。设施先用程序化几何体占位（与渔屋、机房一样由代码搭建），
- * 无人机等 GLB 到位后替换。
+ * 无人机复用游戏中的 GLB 和软臂动画。
  */
 import * as THREE from 'three';
 import { HOMESTEAD } from '../config/homestead.ts';
 import { BUILDING_KIT } from '../config/building-kit.ts';
+import { sampleWorldTime } from '../core/calendar.ts';
 import { solarTrackingAngle } from '../physics/solar-panel.ts';
 import { createDefinitionFurniture, type FurnitureKind } from './definition-furniture.ts';
 import type { WorkstationPlayer } from './workstation-display-state.ts';
@@ -12,6 +13,7 @@ import type { HomesteadBuild } from '../config/homestead.ts';
 import type { Drone, HomesteadState, Spot } from '../sim/homestead.ts';
 import type { TreeInstance } from '../world/level.ts';
 import { caption } from './npc/npc-effects.ts';
+import type { UtilityDroneFleet, UtilityDroneRig } from './utility-drone.ts';
 
 export interface HomesteadGhost { readonly x: number; readonly y: number; readonly width: number; readonly height: number; readonly valid: boolean }
 
@@ -34,18 +36,15 @@ const STATUS_COLOR: Readonly<Record<Drone['status'], number>> = {
 
 interface DroneParts {
   readonly root: THREE.Group;
-  readonly light: THREE.MeshBasicMaterial;
-  readonly blades: THREE.Mesh[];
+  readonly rig: UtilityDroneRig;
   readonly cargo: THREE.Mesh;
-  readonly drill: THREE.Mesh;
-  readonly laser: THREE.Mesh;
   /** 停摆时头顶的 429 牌。 */
   readonly stall: THREE.Sprite;
   /** 编号牌挂在 root 上，摆到当前目标上方，方便对照 HUD 里的编号。 */
   readonly tag: THREE.Sprite;
 }
 
-export function createHomesteadView(scene: THREE.Scene, trees: readonly TreeInstance[]): HomesteadView {
+export function createHomesteadView(scene: THREE.Scene, trees: readonly TreeInstance[], fleet: UtilityDroneFleet): HomesteadView {
   const root = new THREE.Group();
   root.name = 'homestead';
   scene.add(root);
@@ -58,10 +57,6 @@ export function createHomesteadView(scene: THREE.Scene, trees: readonly TreeInst
     return m;
   };
   const box = geo(new THREE.BoxGeometry(1, 1, 1));
-  const ring = geo(new THREE.TorusGeometry(0.2, 0.045, 6, 18));
-  const blade = geo(new THREE.BoxGeometry(0.34, 0.02, 0.05));
-  const lamp = geo(new THREE.SphereGeometry(0.08, 10, 8));
-  const cone = geo(new THREE.ConeGeometry(0.12, 0.32, 10));
   const gem = geo(new THREE.OctahedronGeometry(0.28));
   const outlineOf = (w: number, h: number, d: number): THREE.EdgesGeometry => {
     const source = new THREE.BoxGeometry(w, h, d);
@@ -72,15 +67,11 @@ export function createHomesteadView(scene: THREE.Scene, trees: readonly TreeInst
   const edges = outlineOf(1, 1, 0.3);
   const tileEdges = outlineOf(0.96, 0.96, 0.4);
 
-  const metal = standard(0x4a5560, 0, 0.5, 0.6);
-  const dark = standard(0x22282e, 0, 0.7, 0.3);
-  const amber = standard(0xe39a3b, 0, 0.45, 0.35);
   const cargoMaterial = standard(0x8a6a44);
-  const laserMaterial = new THREE.MeshBasicMaterial({ color: 0xff5a3a, transparent: true, opacity: 0.85 });
   const ghostMaterial = new THREE.MeshBasicMaterial({ color: 0x5cff8a, transparent: true, opacity: 0.25, depthWrite: false });
   const siteMaterial = new THREE.MeshBasicMaterial({ color: 0x9fd8ff, transparent: true, opacity: 0.22, depthWrite: false });
   const progressMaterial = new THREE.MeshBasicMaterial({ color: 0x5cff8a });
-  materials.push(laserMaterial, ghostMaterial, siteMaterial, progressMaterial);
+  materials.push(ghostMaterial, siteMaterial, progressMaterial);
   const markColors = { pending: 0xffffff, assigned: 0x5fe6ff, blocked: 0xff5a5a } as const;
   const markLines = Object.fromEntries(Object.entries(markColors).map(([key, color]) => [key, new THREE.LineBasicMaterial({ color })])) as Record<keyof typeof markColors, THREE.LineBasicMaterial>;
   const markGems = Object.fromEntries(Object.entries(markColors).map(([key, color]) => [key, new THREE.MeshBasicMaterial({ color })])) as Record<keyof typeof markColors, THREE.MeshBasicMaterial>;
@@ -128,39 +119,16 @@ export function createHomesteadView(scene: THREE.Scene, trees: readonly TreeInst
 
   const drones: DroneParts[] = [];
   const createDroneParts = (): DroneParts => {
-    const g = new THREE.Group();
+    const rig = fleet.create();
+    const g = rig.root;
     root.add(g);
-    part(g, amber, 0.7, 0.26, 0.42, 0, 0);
-    part(g, dark, 0.4, 0.08, 0.3, 0, -0.17);
-    const blades: THREE.Mesh[] = [];
-    for (const dx of [-0.42, 0.42]) {
-      const r = new THREE.Mesh(ring, metal);
-      r.rotation.x = Math.PI / 2;
-      r.position.set(dx, 0.08, 0);
-      g.add(r);
-      const b = new THREE.Mesh(blade, dark);
-      b.position.set(dx, 0.08, 0);
-      g.add(b);
-      blades.push(b);
-    }
-    const lightMaterial = new THREE.MeshBasicMaterial({ color: STATUS_COLOR.docked });
-    materials.push(lightMaterial);
-    const light = new THREE.Mesh(lamp, lightMaterial);
-    light.position.set(0, 0.2, 0);
-    g.add(light);
     const cargo = part(g, cargoMaterial, 0.28, 0.24, 0.28, 0, -0.38);
-    const drill = new THREE.Mesh(cone, metal);
-    drill.rotation.z = Math.PI;
-    drill.position.set(0.34, -0.2, 0);
-    g.add(drill);
-    const laser = new THREE.Mesh(box, laserMaterial);
-    g.add(laser);
     const stall = caption('429', '#ff5a5a', 1.1);
     stall.position.set(0, 0.75, 0);
     g.add(stall);
     const tag = caption(String(drones.length + 1), '#5fe6ff', 0.7, true);
     root.add(tag);
-    return { root: g, light: lightMaterial, blades, cargo, drill, laser, stall, tag };
+    return { root: g, rig, cargo, stall, tag };
   };
 
   /** 每帧复用同一批对象：用到的显示，多出来的隐藏，避免每帧新建 Mesh。 */
@@ -197,6 +165,9 @@ export function createHomesteadView(scene: THREE.Scene, trees: readonly TreeInst
   root.add(hostile);
   let hostileKey = '';
 
+  const target = new THREE.Vector3();
+  const treesById = new Map(trees.map(tree => [tree.id, tree]));
+  let previousTime = 0;
   return {
     update(state, time, focus, commanding) {
       hostile.visible = commanding;
@@ -224,36 +195,36 @@ export function createHomesteadView(scene: THREE.Scene, trees: readonly TreeInst
         buildFacilities(state);
         builtKey = key;
       }
-      const { dawnHour, duskHour } = HOMESTEAD.clock;
-      const hour = state.economy.second / 3600;
-      const daylight = hour > dawnHour && hour < duskHour;
-      const sunAngle = (hour - dawnHour) / (duskHour - dawnHour) * Math.PI;
-      const sun = { x: -Math.cos(sunAngle), y: daylight ? Math.sin(sunAngle) : 0 };
       const e = state.economy;
       screen!.emissiveIntensity = e.workstationOn ? 1.4 : 0.05;
       const level = e.stored / (e.batteries * HOMESTEAD.power.batteryCapacity);
       battery!.scale.y = Math.max(0.02, level * 1.4);
       battery!.position.y = 0.3 + battery!.scale.y / 2;
-      const panelAngle = solarTrackingAngle(sun);
+      const panelAngle = solarTrackingAngle(sampleWorldTime(e).sunDirection);
       // 全息显示与本帧供电状态同步，太阳能继续使用同一追光角度。
       for (const item of furniture) item.update?.(time, panelAngle, focus);
 
+      const dt = time - previousTime;
+      previousTime = time;
       while (drones.length < state.drones.length) drones.push(createDroneParts());
       state.drones.forEach((drone, i) => {
         const parts = drones[i]!;
-        parts.root.position.set(drone.x, drone.y, DRONE_Z);
-        parts.root.rotation.z = Math.sin(time * 2.1 + i) * 0.05;
-        parts.light.color.setHex(STATUS_COLOR[drone.status]);
-        for (const b of parts.blades) b.rotation.y = drone.phase === 'docked' ? 0 : time * 40;
-        parts.cargo.visible = drone.cargoWood + drone.cargoStone > 0;
-        parts.drill.visible = drone.robot.level === 2;
         const working = drone.status === 'working' && drone.task !== null;
-        parts.laser.visible = working;
-        if (working) {
-          const length = 0.9;
-          parts.laser.scale.set(0.04, length, 0.04);
-          parts.laser.position.set(0.25, -0.15 - length / 2, 0);
+        const job = drone.task;
+        let tool: 'gripper' | 'cutter' = 'gripper';
+        if (working && job !== null) {
+          if (job.kind === 'site') target.set(job.site.x + HOMESTEAD.builds[job.site.kind].width / 2, job.site.y + 0.5, DRONE_Z);
+          else if (job.mark.kind === 'tile') {
+            target.set(job.mark.tx + 0.5, job.mark.ty + 0.8, DRONE_Z);
+            tool = 'cutter';
+          } else {
+            const tree = treesById.get(job.mark.treeId)!;
+            target.set(tree.x + 0.5, tree.baseY + 0.6, DRONE_Z);
+            tool = 'cutter';
+          }
         }
+        parts.rig.update(drone.x, drone.y, dt, { flying: drone.phase !== 'docked', groundAngle: 0, groundHeight: null, color: STATUS_COLOR[drone.status], tool, target: working ? target : null });
+        parts.cargo.visible = drone.cargoWood + drone.cargoStone > 0;
         parts.stall.visible = drone.status === 'stalled';
         const task = drone.task;
         parts.tag.visible = task !== null;

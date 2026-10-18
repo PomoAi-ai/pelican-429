@@ -114,6 +114,16 @@ export interface LightingTuning {
     /** 相对画布的分辨率比例 (0,1]。 */
     readonly resolutionScale: number;
   };
+  /** 屏幕空间地面反射：Grade 内沿视空间步进，只对朝上像素生效；依附 AO（读其预处理法线）。 */
+  readonly ssr: {
+    readonly enabled: boolean;
+    /** 反射混合强度 [0,1]（再乘菲涅耳与边缘渐隐）。 */
+    readonly strength: number;
+    /** 最长步进距离（世界单位）。 */
+    readonly maxDistance: number;
+    /** 命中判定的深度厚度（世界单位）。 */
+    readonly thickness: number;
+  };
   /** 色彩分级（色调映射之后，显示空间）。 */
   readonly grade: {
     /** 白平衡乘子（暖调：r>1, b<1）。 */
@@ -184,6 +194,7 @@ export const DEFAULT_LIGHTING: LightingTuning = {
   haze: { color: '#b4cfe8', near: 35, far: 90, max: 0.38, lowBoost: 0.12 },
   ao: { radius: 0.9, distanceExponent: 1.4, thickness: 1.2, scale: 1, samples: 6, denoiseSamples: 4, intensity: 0.85, resolutionScale: 0.5 },
   bloom: { strength: 0.16, radius: 0.35, threshold: 1.6, resolutionScale: 0.5 },
+  ssr: { enabled: false, strength: 0.35, maxDistance: 6, thickness: 0.5 },
   grade: { tint: '#fffaf2', contrast: 1.05, saturation: 1.06, vignette: 0.14, vignetteStart: 0.6 },
   shafts: {
     color: '#ffe6b0',
@@ -293,6 +304,11 @@ export function validateLightingTuning(l: LightingTuning, path: string): void {
   num(`${path}.bloom.radius`, l.bloom.radius, 0, 1);
   num(`${path}.bloom.threshold`, l.bloom.threshold, 0, 20);
   num(`${path}.bloom.resolutionScale`, l.bloom.resolutionScale, 0, 1, true);
+
+  if (typeof l.ssr.enabled !== 'boolean') fail(`${path}.ssr.enabled`, 'must be a boolean', l.ssr.enabled);
+  num(`${path}.ssr.strength`, l.ssr.strength, 0, 1);
+  num(`${path}.ssr.maxDistance`, l.ssr.maxDistance, 0, 100, true);
+  num(`${path}.ssr.thickness`, l.ssr.thickness, 0, 10, true);
 
   const g = l.grade;
   color(`${path}.grade.tint`, g.tint);

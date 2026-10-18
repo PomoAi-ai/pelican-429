@@ -1,5 +1,7 @@
-import { HOMESTEAD, isDaytime } from '../config/homestead.ts';
+import { HOMESTEAD } from '../config/homestead.ts';
 import type { ComputeMode, RobotLevel } from '../config/homestead.ts';
+import { DAY_SECONDS, isDaytime, sunriseSecond, sunsetSecond } from '../core/calendar.ts';
+import type { GameTime } from '../core/calendar.ts';
 
 export interface HomesteadRobot {
   level: RobotLevel;
@@ -14,6 +16,8 @@ export interface HomesteadRobot {
 
 export interface Homestead {
   day: number;
+  /** 开局那天的绝对天数，HUD 据此显示第几天。 */
+  readonly startDay: number;
   /** 当天已过的游戏秒；1 游戏秒 = 1 个模拟 tick，用整数避免昼夜边界的浮点误差。 */
   second: number;
   panels: number;
@@ -38,17 +42,14 @@ export interface Homestead {
   computeTotal: number;
 }
 
-const { clock: CLOCK, power: POWER, compute: COMPUTE, robots: ROBOTS, economy: ECONOMY, drone: DRONE } = HOMESTEAD;
+const { power: POWER, compute: COMPUTE, robots: ROBOTS, economy: ECONOMY, drone: DRONE } = HOMESTEAD;
 export const GAME_HOUR = 3600;
-const DAWN = CLOCK.dawnHour * GAME_HOUR;
-const DUSK = CLOCK.duskHour * GAME_HOUR;
-const DAY = 24 * GAME_HOUR;
 
 export const createRobot = (level: RobotLevel): HomesteadRobot => ({ level, active: false, charging: false, battery: 1, compute: 0 });
 
-export function createHomestead(): Homestead {
+export function createHomestead(start: Readonly<GameTime>): Homestead {
   return {
-    day: 1, second: CLOCK.startHour * GAME_HOUR,
+    day: start.day, second: start.second, startDay: start.day,
     panels: HOMESTEAD.start.panels, batteries: HOMESTEAD.start.batteries,
     stored: HOMESTEAD.start.batteries * POWER.batteryCapacity,
     gpu: false, workstationOn: false, mode: 'production',
@@ -58,12 +59,10 @@ export function createHomestead(): Homestead {
   };
 }
 
-export const secondsUntilDawn = (second: number): number => (DAWN - second + DAY) % DAY;
-
 /** 一段时间内昼夜与设施不变，供电、算力和收益可以整段计算。 */
 function runSegment(h: Homestead, seconds: number, yieldFactor: number): void {
   const hours = seconds / GAME_HOUR;
-  const solar = isDaytime(h.second) ? h.panels * POWER.solarPerPanel : 0;
+  const solar = isDaytime(h) ? h.panels * POWER.solarPerPanel : 0;
   const battery = Math.min(h.batteries * POWER.batteryOutput, h.stored / hours);
   let available = solar + battery;
   // 排在前面但满足不了的用电方直接跳过，把电让给后面的。
@@ -104,20 +103,23 @@ function runSegment(h: Homestead, seconds: number, yieldFactor: number): void {
   h.pending += idle * hours * ECONOMY.tokensPerComputeHour * yieldFactor;
 }
 
-/** 按游戏秒推进；在天亮、天黑和午夜处切段，到达天亮时结算。yieldFactor 只用于睡觉打折。 */
+/** 按游戏秒推进；在当天日出、日落和午夜处切段，到达日出时结算。yieldFactor 只用于睡觉打折。 */
 export function stepHomestead(h: Homestead, seconds: number, yieldFactor = 1): void {
   let left = seconds;
   while (left > 0) {
-    const boundary = h.second < DAWN ? DAWN : h.second < DUSK ? DUSK : DAY;
+    // 日出日落随日期变化，每段都按当天重算。
+    const rise = sunriseSecond(h.day);
+    const set = sunsetSecond(h.day);
+    const boundary = h.second < rise ? rise : h.second < set ? set : DAY_SECONDS;
     const segment = Math.min(left, boundary - h.second);
     runSegment(h, segment, yieldFactor);
     left -= segment;
     h.second += segment;
-    if (h.second === DAY) {
+    if (h.second === DAY_SECONDS) {
       h.second = 0;
       h.day++;
     }
-    if (h.second === DAWN) {
+    if (h.second === sunriseSecond(h.day)) {
       const subsidy = h.subsidyPaid ? 0 : ECONOMY.firstDawnSubsidy;
       h.lastSettlement = { day: h.day, amount: h.pending, subsidy };
       h.tokens += h.pending + subsidy;

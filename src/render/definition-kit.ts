@@ -1,12 +1,11 @@
 import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
-import { DEFINITION_DEPTH, DEFINITION_TILE_DEPTH, TILE_SHAPE_DEFINITIONS } from '../config/definition-kit.ts';
+import { DEFINITION_DEPTH, DEFINITION_TILE_DEPTH, TILE_SHAPE_DEFINITIONS, WALL_POLYGONS } from '../config/definition-kit.ts';
 import type { DefinitionDepthMode, DefinitionPoint, DefinitionPlatformWidth, DefinitionWindowKind } from '../config/definition-kit.ts';
 import { createDefinitionDepthOccupancy, type DefinitionDepthPlacement } from '../sim/definition-depth.ts';
 import type { DefinitionCollider, DefinitionPlatform } from '../physics/definition-collision.ts';
 import type { RockTerrainCell } from '../config/rock-terrain.ts';
 import { createDefinitionTerrain } from './definition-terrain.ts';
-import { hash01 } from '../core/rng.ts';
 import type { ResidenceMaterial } from '../config/residence.ts';
 import { createNaturalBuildingMaterials } from './building-material.ts';
 import type { TileTextureData } from './tile-textures.ts';
@@ -97,18 +96,6 @@ function windowOpening(width: number, height: number, kind: DefinitionWindowKind
   return path;
 }
 
-const wallPolygons: Readonly<Record<string, readonly DefinitionPoint[]>> = {
-  W0: rectangle(1, 1),
-  W3: [[0, .5], [1, .5], [1, 1], [0, 1]],
-  W4: rectangle(1, .5),
-  W5: rectangle(.5, 1),
-  W6: [[.5, 0], [1, 0], [1, 1], [.5, 1]],
-  'W7-1': [[0, 0], [1, 0], [0, 1]],
-  'W7-2': [[0, 0], [1, 0], [1, 1]],
-  'W7-3': [[0, 0], [1, 1], [0, 1]],
-  'W7-4': [[1, 0], [1, 1], [0, 1]],
-};
-
 // 定义坐标 +Z 指向后沿；装配层决定观察方向。格子占 [TILE_FRONT, WALL_Z]，墙从格子背面向后沿延伸。
 const TILE_FRONT = -DEFINITION_DEPTH.tile / 2;
 const WALL_Z = DEFINITION_DEPTH.tile / 2;
@@ -148,7 +135,6 @@ export function createDefinitionKit({ style = 'definition' }: { style?: 'definit
   const alloyMaterial = createAiCityMaterial('alloy');
   const ashlarMaterial = createAiCityMaterial('ashlar');
   let natural: ReturnType<typeof createNaturalBuildingMaterials> | undefined;
-  const variations = new Map<string, THREE.MeshStandardMaterial>();
   const wallMaterial = city ? createAiCityMaterial('wall') : new THREE.MeshStandardMaterial({ color: 0x719a96, roughness: .85 });
   const frameMaterial = city ? createAiCityMaterial('alloy') : new THREE.MeshStandardMaterial({ color: 0x235373, roughness: .5, metalness: .25 });
   // 单向平台后绘制，用玩家轮廓遮罩让穿越中的角色保持可见。
@@ -240,37 +226,25 @@ export function createDefinitionKit({ style = 'definition' }: { style?: 'definit
       const depth = DEFINITION_TILE_DEPTH[depthMode];
       const front = -depth / 2;
       gridCells(x, y, span, 1, front, depth, 'solid');
+      // 墙立在格子背面之后；网格只占到 WALL_Z，模型向后延伸过墙厚，否则地板与墙两道倒角之间的槽
+      // 会从墙底下透见远处背景，在交界处画出一条亮线。
+      const body = Math.max(depth, WALL_Z + DEFINITION_DEPTH.wall - front);
       const definition = TILE_SHAPE_DEFINITIONS.find(({ id }) => id === shapeId)!;
       const points = definition.points.map(([px, py]): DefinitionPoint => [px * span, py]);
       solids.push({ points: points.map(([px, py]) => [x + px, y + py]) });
       const architectural = material === 'ceramic' || material === 'alloy' || material === 'ashlar';
-      let surface: THREE.MeshStandardMaterial;
-      if (!architectural) {
-        natural ??= createNaturalBuildingMaterials();
-        surface = natural.get(material);
-      } else {
-        const base = material === 'alloy' ? alloyMaterial : material === 'ashlar' ? ashlarMaterial : solidMaterial;
-        const variant = Math.floor(hash01(x * 2, y * 2, 91) * 8);
-        const key = `${material}:${variant}`;
-        surface = variations.get(key)!;
-        if (!surface) {
-          surface = base.clone();
-          surface.onBeforeCompile = base.onBeforeCompile;
-          surface.customProgramCacheKey = base.customProgramCacheKey;
-          surface.color.multiplyScalar(1 + (variant - 3.5) * (material === 'ashlar' ? .016 : .01));
-          surface.roughness += (variant - 3.5) * .012;
-          variations.set(key, surface);
-        }
-      }
+      // 逐块色差、粗糙度与纹理相位由材质按构件原点生成，同材共用一份材质。
+      const surface = !architectural ? (natural ??= createNaturalBuildingMaterials()).get(material)
+        : material === 'alloy' ? alloyMaterial : material === 'ashlar' ? ashlarMaterial : solidMaterial;
       if (!architectural || material === 'ashlar') {
-        extrude(`solid:${shapeId}:${depth}:${span}:${architectural}`, shapePath(points), depth, surface, x, y, front, material === 'ashlar' ? .025 : .008);
+        extrude(`solid:${shapeId}:${body}:${span}:${architectural}`, shapePath(points), body, surface, x, y, front, material === 'ashlar' ? .025 : .008);
         return;
       }
       if (!city) {
-        extrude(`solid:${shapeId}:${depth}`, shapePath(definition.points), depth, surface, x, y, front);
+        extrude(`solid:${shapeId}:${body}`, shapePath(definition.points), body, surface, x, y, front);
         return;
       }
-      extrude(`solid:${shapeId}:${depth}`, shapePath(definition.points), depth - .025,
+      extrude(`solid:${shapeId}:${body}`, shapePath(definition.points), body - .025,
         surface, x, y, front + .025, .035);
       const service = material === 'alloy' && (shapeId === 'K' || shapeId === 'L');
       const panel = shapePath(insetPolygon(definition.points, .045));
@@ -324,7 +298,7 @@ export function createDefinitionKit({ style = 'definition' }: { style?: 'definit
           [corner.endsWith('R') ? 1 - px : px, corner.startsWith('T') ? 1 - py : py]);
         return extrude(`wall:${id}`, shapePath(transformed), DEFINITION_DEPTH.wall, city ? wallMaterial : frameMaterial, x, y, WALL_Z);
       }
-      extrude(`wall:${id}`, shapePath(wallPolygons[id]!), DEFINITION_DEPTH.wall, wallMaterial, x, y, WALL_Z);
+      extrude(`wall:${id}`, shapePath(WALL_POLYGONS[id]!), DEFINITION_DEPTH.wall, wallMaterial, x, y, WALL_Z);
     },
     window,
     platform(width, top, x, material = 'alloy') {
@@ -353,7 +327,6 @@ export function createDefinitionKit({ style = 'definition' }: { style?: 'definit
     },
     dispose() {
       natural?.dispose();
-      for (const material of variations.values()) material.dispose();
       for (const view of terrainViews) view.dispose();
       for (const geometry of geometries.values()) geometry.dispose();
       for (const material of materials) material.dispose();

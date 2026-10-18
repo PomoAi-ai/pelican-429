@@ -1,3 +1,5 @@
+import { loadUtilityDroneFleet } from '../render/utility-drone.ts';
+import { terrainHeightAt } from '../physics/tile-collision.ts';
 /**
  * 组合根：校验配置 → 加载层 → 构建渲染（舞台/瓦片/鹈鹕 rig）→ 模拟世界 → 视图/HUD/输入 → rAF 固定步长循环。
  * 任何初始化或循环异常都会停止循环并显示错误层（fail-fast，不静默）。
@@ -5,6 +7,7 @@
  */
 import { TUNING, validateTuning } from '../config/tuning.ts';
 import { DEFAULT_BINDINGS, buildBindingLookup, validateBindings } from '../config/keybindings.ts';
+import { timeFromReal } from '../core/calendar.ts';
 import { createFixedStepper } from '../core/fixed-step.ts';
 import { createFrameProfiler } from '../core/frame-profiler.ts';
 import { beginBlackholeArrival, createSimWorld, getPlayer, setDummyShooting, setMobileBossDifficulty, setPrecipIntensity, setPrecipMode, setTornado, setTornadoPower, setTornadoCount } from '../sim/sim-world.ts';
@@ -22,6 +25,9 @@ import { createCharacterAppearanceStore } from './character-appearance.ts';
 import { openSavedCharacterEditor } from './open-character-editor.ts';
 import { loadEnemyAsset, disposeEnemyAssets } from '../render/enemy-rig.ts';
 import { createFreeWorldBackground } from '../render/free-world-background.ts';
+import { createFlyingRoadster } from '../entities/flying-roadster.ts';
+import { loadFlyingRoadsterAsset, disposeFlyingRoadsterAsset } from '../render/flying-roadster-view.ts';
+import { createFreeWorldDaylight, type FreeWorldDaylight } from '../render/free-world-daylight.ts';
 import { loadInteriorBackgroundTexture, loadInteriorBackgroundTextures } from '../render/free-world-interior-textures.ts';
 import { createWorldViews } from '../render/world-views.ts';
 import { warmUpStage } from '../render/warm-up.ts';
@@ -30,6 +36,7 @@ import { createControlSurface } from '../ui/control-surface.ts';
 import { gameHost, replaceGameLocation } from '../ui/mobile-game-viewport.ts';
 import { createWeaponHud } from '../ui/weapon-hud.ts';
 import { createMinimap } from '../ui/minimap.ts';
+import { createGameHud } from '../ui/game-hud.ts';
 import { createPerfPanel } from '../ui/perf-panel.ts';
 import { createWorldCompositionNavigation } from '../ui/world-composition-navigation.ts';
 import { loadGameLevel } from './game-level.ts';
@@ -64,6 +71,8 @@ import { FREE_WORLD_SIZES, parseFreeWorldSize } from '../config/free-world.ts';
 import { initializeHomestead } from '../sim/homestead.ts';
 import { clearHomesteadSave, loadHomesteadSave } from './homestead-save.ts';
 import { createHomesteadApp } from './homestead-app.ts';
+import { createSceneLoading } from './scene-loading.ts';
+import { createHarborPresentation } from './harbor-presentation.ts';
 
 function requireElement<T extends HTMLElement>(id: string): T {
   const node = document.getElementById(id);
@@ -78,6 +87,8 @@ let stopped = false;
 let rafId = 0;
 let cleanup: (() => void) | null = null;
 let persistBeforeExit: (() => void) | null = null;
+/** 启动加载画面；首帧出现后置空，之后的运行时错误走 #error。 */
+let startupLoading: ReturnType<typeof createSceneLoading> | null = null;
 
 function showError(err: unknown): void {
   stopped = true;
@@ -89,11 +100,15 @@ function showError(err: unknown): void {
   }
   cleanup = null;
   console.error(err);
-  const text = err instanceof Error ? `${err.name}: ${err.message}\n\n${err.stack ?? ''}` : String(err);
-  const box = document.getElementById('error');
-  const msg = document.getElementById('error-message');
-  if (msg) msg.textContent = text;
-  if (box) box.hidden = false;
+  // 启动失败留在加载画面上显示中断并提供“重新加载”。
+  if (startupLoading) startupLoading.error(err);
+  else {
+    const text = err instanceof Error ? `${err.name}: ${err.message}\n\n${err.stack ?? ''}` : String(err);
+    const box = document.getElementById('error');
+    const msg = document.getElementById('error-message');
+    if (msg) msg.textContent = text;
+    if (box) box.hidden = false;
+  }
   const loading = document.getElementById('loading');
   if (loading) loading.hidden = true;
 }
@@ -111,7 +126,13 @@ async function start(story: StorySave | undefined, newStory: boolean, onReady?: 
   const app = requireElement<HTMLDivElement>('app');
   const hudRoot = requireElement<HTMLDivElement>('hud');
   const loading = requireElement<HTMLDivElement>('loading');
-  loading.hidden = onReady !== undefined;
+  // 有序章时由序章画面遮挡；否则用场景加载画面替换静态启动屏。
+  if (onReady === undefined) {
+    startupLoading = createSceneLoading(document.body, () => location.reload());
+    startupLoading.show('鹈鹕 429', 'PELICAN 429', 4);
+    startupLoading.progress('生成世界');
+  }
+  loading.hidden = true;
   // 等两帧，让加载层或序章保留画面先绘制，再做同步构建。
   await nextFrame();
   await nextFrame();
@@ -120,6 +141,7 @@ async function start(story: StorySave | undefined, newStory: boolean, onReady?: 
   const { level, ground, compositions, chapter } = loadGameLevel(params);
   performance.mark('game:level-ready');
   const bossArena = params.get('level') === 'boss-arena';
+  const harbor = params.get('level') === 'harbor';
   const freeWorld = story?.destination === 'free' || (!story && (params.get('level') === null || (params.get('level') === 'facility' && params.get('free') === '1')));
   // 家园概念版本建在自由世界地形上，但不使用自由世界的工具条和网址改写。
   const homesteadMode = !story && params.get('mode') === 'homestead';
@@ -140,6 +162,7 @@ async function start(story: StorySave | undefined, newStory: boolean, onReady?: 
       : freeWorld ? en ? `Free world · ${FREE_WORLD_SIZES[size].labelEn} · Pelican 429` : `自由世界 · ${FREE_WORLD_SIZES[size].label} · 鹈鹕 429`
       : chapter !== null ? en ? `${FACILITY_EN[chapter].name} · Free exploration` : `${FACILITY_SCENES[chapter].name} · 自由预览`
       : bossArena ? en ? 'Boss arena · Pelican 429' : 'Boss 场 · 鹈鹕 429'
+      : harbor ? en ? 'Tidal city · Pelican 429' : '潮汐之城 · 鹈鹕 429'
       : en ? 'Test level · Pelican 429' : '测试关卡 · 鹈鹕 429';
   };
   const inspect = params.get('inspect');
@@ -151,7 +174,7 @@ async function start(story: StorySave | undefined, newStory: boolean, onReady?: 
   const startup = loadStartupSettings(params, freeWorld ? 'auto' : undefined);
   const appearance = createCharacterAppearanceStore(window.localStorage);
   // 机房预览采用场景环境，不继承沙盒的天气和训练假人设置。
-  const sceneSettings = bossArena ? {
+  const sceneSettings = bossArena || harbor ? {
     ...startup.loaded.settings, wind: 'calm' as const, precip: 'manual' as const, rain: 'none' as const, snow: 'none' as const,
     tornado: false, tileGrid: false, mapTeleport: false, dummyShoot: false, minimapVisible: false,
   } : chapter === null ? startup.loaded.settings : {
@@ -163,6 +186,7 @@ async function start(story: StorySave | undefined, newStory: boolean, onReady?: 
     tileGrid: gm && sceneSettings.tileGrid, dummyShoot: gm && sceneSettings.dummyShoot,
   } : sceneSettings;
   const world = createSimWorld({ level: startLevel, freeWorldWeather: freeWorld ? { level, ground } : undefined, playerForm: 'human', tuning: TUNING, weather: { ...TUNING.render.weather, direction: initial.windDirection === 'right' ? 1 : -1 }, windMode: initial.wind });
+  if (harbor) world.entities.push(createFlyingRoadster(world.nextId++, { x: level.spawn.x + 5, y: level.spawn.y + .8 }, world.tuning));
   if (bossArena) initializeBossArena(world);
   if (freeWorld) {
     if (destination && region !== 'wilds') {
@@ -172,7 +196,10 @@ async function start(story: StorySave | undefined, newStory: boolean, onReady?: 
     initializeFreeWorldNpcs(world, seed);
     if (homesteadMode) {
       if (params.get('reset') === '1') clearHomesteadSave(window.localStorage, seed);
-      initializeHomestead(world, loadHomesteadSave(window.localStorage, seed, level));
+      // 新游戏取真实日期与时刻开局，之后按游戏时间运转；读档沿用存档时间。
+      const now = new Date();
+      initializeHomestead(world, timeFromReal(now.getFullYear(), now.getMonth() + 1, now.getDate(), now.getHours(), now.getMinutes()),
+        loadHomesteadSave(window.localStorage, seed, level));
     }
   }
   if (story?.destination === 'fortress') {
@@ -199,12 +226,17 @@ async function start(story: StorySave | undefined, newStory: boolean, onReady?: 
   };
   disposers.push(disposeGrassyAssets);
   disposers.push(disposeEnemyAssets);
+  if (harbor) disposers.push(disposeFlyingRoadsterAsset);
   disposers.push(disposePreloadedFortressTextures);
   if (world.mainline || freeWorld || bossArena) disposers.push(disposeNpcAssets);
-  const modelsReady = Promise.all([loadGrassyAsset('game'), ...[...new Set(world.entities.flatMap((entity) => entity.enemy ? [entity.enemy.kind] : []))].map(kind => loadEnemyAsset(kind)),
+  const models: Promise<unknown>[] = [loadGrassyAsset('game'), ...[...new Set(world.entities.flatMap((entity) => entity.enemy ? [entity.enemy.kind] : []))].map(kind => loadEnemyAsset(kind)),
     ...(freeWorld ? [loadNpcAsset('sam', 'human'), loadNpcAsset('tibo', 'human')] : world.mainline || bossArena ? [loadNpcAsset('tibo', 'monster'), loadNpcAsset('sam', 'monster')] : []),
     ...(world.mainline ? [loadNpcAsset('sam', 'human')] : []),
-    ...(bossArena ? [loadNpcAsset('sam', 'human'), loadNpcAsset('tibo', 'human')] : [])]);
+    ...(bossArena ? [loadNpcAsset('sam', 'human'), loadNpcAsset('tibo', 'human')] : []),
+    ...(harbor ? [loadFlyingRoadsterAsset()] : [])];
+  let modelsLoaded = 0;
+  startupLoading?.progress('加载角色与贴图', 0, models.length);
+  const modelsReady = Promise.all(models.map(model => model.then(() => startupLoading?.progress('加载角色与贴图', ++modelsLoaded, models.length))));
   const observedModels = Promise.allSettled([modelsReady]);
   const interiors = freeWorld ? await loadInteriorBackgroundTextures(stage.renderer) : null;
   if (stopped) { interiors?.dispose(); return; }
@@ -232,6 +264,7 @@ async function start(story: StorySave | undefined, newStory: boolean, onReady?: 
       if (level.facilities) await modelsReady;
       if (stopped) return null;
       return level.facilities ? createFreeWorldFacilities(stage, level.facilities, interiors!)
+        : harbor ? createHarborPresentation(stage, level)
         : chapter === null ? null : createFacilityPresentation(stage, chapter);
     }).then(facility => {
       if (facility !== null) {
@@ -252,16 +285,19 @@ async function start(story: StorySave | undefined, newStory: boolean, onReady?: 
   await nextFrame();
   if (stopped) return;
   // 远山按“厚实心”地表取均值（悬空平台不抬高）；021：有顶洞穴格（网络 + 入口有顶段）当实心，洞穴列地表仍是洞顶之上的真实地表，浮空岛与地面隔空气不算地表。
-  if (chapter === null && !freeWorld) stage.addBackdrop({ width: level.map.width, height: level.map.height, surface: ground });
+  if (chapter === null && !freeWorld && !harbor) stage.addBackdrop({ width: level.map.width, height: level.map.height, surface: ground });
 
   // 地形视图（瓦片/花草、树、水面、水草、渔屋、小鱼、花瓣；树在鹈鹕后方，根贴视觉地面轮廓）；相机就位后按可视范围首帧加载。
   // 风吹天气与水体色板取自设置（见上）。
   const waterPaletteName = initial.water;
-  const worldViews = createWorldViews({ islandBackdrop: !freeWorld, caveBackground, scene: stage.scene, level, fish: world.fish, ground, weather: world.env.wind.rules, wind: world.env.wind, tornadoes: () => world.env.tornadoes, cameraDistance: tuning.camera.distance, pelican: () => getPlayer(world).body, actors: () => world.entities, waterPalette: waterPaletteName, felledTrees: world.homestead?.felled,
+  startupLoading?.progress('装配场景');
+  const worldViews = createWorldViews({ islandBackdrop: !freeWorld && !harbor, caveBackground, scene: stage.scene, level, fish: world.fish, ground, weather: world.env.wind.rules, wind: world.env.wind, tornadoes: () => world.env.tornadoes, cameraDistance: tuning.camera.distance, pelican: () => getPlayer(world).body, actors: () => world.entities, waterPalette: waterPaletteName, felledTrees: world.homestead?.felled,
     terrainTextureSize: new URLSearchParams(location.search).get('textures') === 'original' ? 512 : 256 });
   // 区域图片已包含远处云层，避免旧卡通云片覆盖真实背景；风与降水仍照常更新。
   if (freeWorld) worldViews.weather.fx.meshes.clouds.visible = false;
-  if (chapter !== null) worldViews.weather.setEnabled(false);
+  if (chapter !== null || harbor) worldViews.weather.setEnabled(false);
+  // 独立河岸的石材立面与平台由同一场景资源绘制，碰撞继续读取原瓦片。
+  if (harbor) worldViews.tiles.root.visible = false;
   disposers.push(() => worldViews.dispose());
   await nextFrame();
   if (stopped) return;
@@ -295,8 +331,15 @@ async function start(story: StorySave | undefined, newStory: boolean, onReady?: 
     const player = getPlayer(world);
     cameraRig.snapTo(player.body.x, player.body.y, player.facing);
   }
+  // 家园昼夜：日月星在预热前加入场景，随首帧一起编译上传。
+  let daylight: FreeWorldDaylight | null = null;
+  if (world.homestead) {
+    if (!background) throw new Error('game-app: homestead daylight requires the free-world background');
+    daylight = createFreeWorldDaylight({ stage, background, shafts, clouds: worldViews.weather.fx, clock: world.homestead.economy });
+    disposers.push(daylight.dispose);
+  }
   // 022 降水视图（雨雪粒子/天色/湿润积雪）：与世界视图同帧同节奏更新。
-  const env = createEnvironmentViews(stage, level, world, worldViews, cameraRig, disposers, background);
+  const env = createEnvironmentViews(stage, level, world, worldViews, cameraRig, disposers, background, daylight);
   env.update(0, 0, 0);
   shafts.update(cameraRig.visibleRect(2), 0);
 
@@ -307,12 +350,14 @@ async function start(story: StorySave | undefined, newStory: boolean, onReady?: 
   worldLight.update(stage.scene, 0);
   // 已有 Boss 在场时它的点光源已计入，后登场者的材质按同样的灯光数编译，无需再单独显示。
   const lightGroups = [...facility?.root.children.filter(child => !child.visible) ?? [], ...(world.mainline?.bossId === null ? bossGroups : [])];
+  startupLoading?.progress('准备着色器与首帧');
   await warmUpStage(stage, lightGroups);
   if (stopped) return;
   stage.render();
   performance.mark('game:first-frame');
   performance.measure('game:startup', 'game:startup-start', 'game:first-frame');
-  loading.hidden = true;
+  startupLoading?.hide();
+  startupLoading = null;
   await onReady?.();
   if (stopped) return;
 
@@ -478,7 +523,19 @@ async function start(story: StorySave | undefined, newStory: boolean, onReady?: 
     });
     disposers.push(() => toolbar.dispose());
   }
-  const loop = createFrameLoop({ world, level, stage, cameraRig, tracker, controls, input, stepper, pour, entityViews, luma, worldViews, env, shafts, lighting, hud, weaponHud, minimap, settings, settingsPanel, perfPanel, prof, facility, chapterHud, audio });
+  const droneFleet = await loadUtilityDroneFleet(stage.scene);
+  if (stopped) { droneFleet.dispose(); return; }
+  disposers.push(() => droneFleet.dispose());
+  const gameHud = createGameHud(hudRoot, {
+    updateDrone: droneFleet.updateFollower,
+    groundAt: (x, y) => terrainHeightAt(world.map, x, y + 0.3, 2.8, true) ?? terrainHeightAt(world.map, x, y + 2.5, 2.2, true),
+    workOrders: world.homestead ? { state: world.homestead, command: tool => homestead!.command(tool) } : undefined,
+    canvas, project, world: world.homestead ? { time: world.homestead.economy } : undefined, tabOpensDrone: !world.homestead,
+    blocked: () => settings.open || minimap.bigMapOpen || world.respawnTicks > 0,
+  });
+  gameHud.attachMap(minimap.element);
+  disposers.push(() => gameHud.dispose());
+  const loop = createFrameLoop({ world, level, stage, cameraRig, tracker, controls, input, stepper, pour, entityViews, luma, worldViews, env, shafts, lighting, hud, weaponHud, gameHud, minimap, settings, settingsPanel, perfPanel, prof, facility, chapterHud, audio });
   const arenaHud = bossArena ? createBossArenaHud(document.body, world, kind => {
     tracker.releaseAll();
     summonArenaBoss(world, kind);
@@ -500,7 +557,7 @@ async function start(story: StorySave | undefined, newStory: boolean, onReady?: 
     minimap.raster.removeTree(id);
     shafts.removeTree(id);
   };
-  const homestead = world.homestead ? createHomesteadApp({ world, stage, removeTree, cameraRig, tracker, canvas, seed, disposers }) : null;
+  const homestead = world.homestead ? createHomesteadApp({ world, stage, droneFleet, removeTree, cameraRig, tracker, canvas, seed, disposers }) : null;
 
   let savedCheckpoint = world.mainline ? mainlineCheckpoint(world) : null;
   let savedTick = world.tick;

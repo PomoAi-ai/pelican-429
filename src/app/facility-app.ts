@@ -1,3 +1,4 @@
+import { loadUtilityDroneFleet } from '../render/utility-drone.ts';
 import * as THREE from 'three';
 import { DEFAULT_BINDINGS, buildBindingLookup, type GameAction } from '../config/keybindings.ts';
 import { FACILITY_SCENES, type FacilitySceneId } from '../config/facility-scenes.ts';
@@ -5,11 +6,12 @@ import { DEFAULT_PRECIP } from '../config/precip-rules.ts';
 import { TUNING } from '../config/tuning.ts';
 import { DEFAULT_WATER_PALETTE } from '../config/water-palettes.ts';
 import { createFixedStepper } from '../core/fixed-step.ts';
-import { sampleWorldTime } from '../core/world-clock.ts';
+import { sampleWorldTime } from '../core/calendar.ts';
 import { getSkillWaitTicks } from '../entities/skill-wait.ts';
 import { createActionTracker } from '../input/action-map.ts';
 import { bindKeyboardMouse } from '../input/keyboard-mouse.ts';
 import { tileDefinitionCollision } from '../physics/tile-definition-collision.ts';
+import { terrainHeightAt } from '../physics/tile-collision.ts';
 import { createAiCityLighting } from '../render/ai-city-lighting.ts';
 import { createCameraRig } from '../render/camera-rig.ts';
 import { loadEnemyAsset } from '../render/enemy-rig.ts';
@@ -22,6 +24,8 @@ import { warmUpStage } from '../render/warm-up.ts';
 import { createWorldViews } from '../render/world-views.ts';
 import { createSimWorld, getPlayer, stepSim } from '../sim/sim-world.ts';
 import { setPrecipIntensity, setPrecipMode, setTornado, setTornadoCount, setTornadoPower } from '../sim/environment.ts';
+import { createGameHud } from '../ui/game-hud.ts';
+import type { WorldToScreen } from '../ui/hud.ts';
 import { createWeaponHud } from '../ui/weapon-hud.ts';
 import { createMinimap } from '../ui/minimap.ts';
 import { createFacilityLevel } from '../world/facility-level.ts';
@@ -97,15 +101,31 @@ export async function mountFacilityDemo(context: SceneMountContext, sceneId: Fac
   context.onDispose(() => { binding.dispose(); tracker.releaseAll(); });
   const cast = (action: GameAction): void => { tracker.press(action, 'keyboard', 'skill-button'); tracker.release(action, 'skill-button'); };
   const projected = new THREE.Vector3();
-  const hud = createWeaponHud(page.querySelector('.room-preview-hud')!, { weapons: TUNING.weapons,
-    project(x, y) {
-      projected.set(x, y, 0).project(stage.camera);
-      const rect = stage.canvas.getBoundingClientRect();
-      return projected.z < -1 || projected.z > 1 ? null : { x: (projected.x + 1) * rect.width / 2, y: (1 - projected.y) * rect.height / 2 };
-    }, onTransform: () => cast('transform'), onSkill: cast });
+  // HUD 每帧要投影多次；尺寸缓存下来，避免读布局触发强制重排。
+  let canvasSize = { width: stage.canvas.clientWidth, height: stage.canvas.clientHeight };
+  const resize = new ResizeObserver(([entry]) => { canvasSize = entry!.contentRect; });
+  resize.observe(stage.canvas);
+  context.onDispose(() => resize.disconnect());
+  const project: WorldToScreen = (x, y) => {
+    projected.set(x, y, 0).project(stage.camera);
+    return projected.z < -1 || projected.z > 1 ? null : { x: (projected.x + 1) * canvasSize.width / 2, y: (1 - projected.y) * canvasSize.height / 2 };
+  };
+  const hudRoot = page.querySelector<HTMLElement>('.room-preview-hud')!;
+  const hud = createWeaponHud(hudRoot, { weapons: TUNING.weapons, project, onTransform: () => cast('transform'), onSkill: cast });
   context.onDispose(() => hud.dispose());
   let playing = true;
   let following = true;
+  const droneFleet = await loadUtilityDroneFleet(stage.scene);
+  if (context.signal.aborted) { droneFleet.dispose(); context.signal.throwIfAborted(); }
+  context.onDispose(() => droneFleet.dispose());
+  const gameHud = createGameHud(hudRoot, {
+    updateDrone: droneFleet.updateFollower,
+    groundAt: (x, y) => terrainHeightAt(world.map, x, y + 0.3, 2.8, true) ?? terrainHeightAt(world.map, x, y + 2.5, 2.2, true),
+    canvas: stage.canvas, project, world: context.world,
+    blocked: () => !playing,
+  });
+  gameHud.attachMap(minimap.element);
+  context.onDispose(() => gameHud.dispose());
   const play = page.querySelector<HTMLButtonElement>('[data-play]')!;
   const cameraButton = page.querySelector<HTMLButtonElement>('[data-camera]')!;
   const syncControls = (): void => {
@@ -140,7 +160,6 @@ export async function mountFacilityDemo(context: SceneMountContext, sceneId: Fac
   let tornadoEnabled = false;
   context.onDispose(() => cancelAnimationFrame(frame));
   const update = (dt: number): void => {
-    context.world.clock.update(dt);
     const settings = context.world.weatherConfig;
     if (world.env.wind.mode !== settings.wind) world.env.wind.setMode(settings.wind);
     world.env.wind.setPower(settings.windPower);
@@ -171,7 +190,7 @@ export async function mountFacilityDemo(context: SceneMountContext, sceneId: Fac
     entities.orbs.update(world.entities, alpha); entities.orbFx.update(dt); entities.projectileFx.update(world.entities, alpha, dt);
     lighting.updateAura(player(), alpha, dt); lighting.worldLight.update(stage.scene, lightFrame++);
     facility.update(time);
-    const worldTime = sampleWorldTime(context.world.clock.hour);
+    const worldTime = sampleWorldTime(context.world.time);
     weather.setWeather(context.world.weather);
     weather.setSettings(settings);
     const atmosphere = weather.update(time, simulationDt, worldTime, world.env);
@@ -179,6 +198,7 @@ export async function mountFacilityDemo(context: SceneMountContext, sceneId: Fac
     hud.update({ entities: world.entities, playerId: world.playerId, frameDt: dt,
       skillWaitTicks: [0, 1, 2, 3].map(index => getSkillWaitTicks(player(), index, TUNING, world.photon.cooldownTicks, world.photon.activeTicks)),
       photonCooldownTicks: world.photon.cooldownTicks, photonChargeTicks: world.photon.chargeTicks, photonActiveTicks: world.photon.activeTicks, transformUnlocked: true });
+    gameHud.update(player(), dt);
     minimap.update({ player: { x: body.x, y: body.y, facing: player().facing }, dt });
   };
   update(0);

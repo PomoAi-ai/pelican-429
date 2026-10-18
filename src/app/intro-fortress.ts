@@ -42,7 +42,7 @@ export async function createIntroFortress() {
     const lighting = createWorldLight({ map: level.map, fluid: level.fluid, trees: level.trees, lighting: tuning.render.lighting });
     disposers.push(() => lighting.dispose());
     let frame = 0;
-    const precip = createWorldPrecip(view, level, worldViews, null);
+    const precip = createWorldPrecip(view, level, worldViews, null, null);
     disposers.push(() => precip.dispose());
     const target = { rain: weather.rain, snow: weather.snow };
     // 初次揭示世界时已有雨雪；后续环境时间只随播放推进，拖动不倒退控制器。

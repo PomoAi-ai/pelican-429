@@ -1,10 +1,12 @@
-import { HOMESTEAD, isDaytime } from '../config/homestead.ts';
+import { HOMESTEAD } from '../config/homestead.ts';
 import type { ComputeMode, HomesteadBuild, HomesteadPurchase, RobotLevel } from '../config/homestead.ts';
+import { isDaytime, secondsUntilSunrise } from '../core/calendar.ts';
+import type { GameTime } from '../core/calendar.ts';
 import type { Rect } from '../core/math.ts';
 import type { TreeInstance } from '../world/level.ts';
 import { SHAPE_FULL } from '../world/tile-shapes.ts';
 import { TILE_AIR, TILE_BRANCH, TILE_DIRT, TILE_GRASS, TILE_SAND, TILE_STONE } from '../world/tile-types.ts';
-import { createHomestead, createRobot, GAME_HOUR, secondsUntilDawn, stepHomestead } from './homestead-economy.ts';
+import { createHomestead, createRobot, GAME_HOUR, stepHomestead } from './homestead-economy.ts';
 import type { Homestead, HomesteadRobot } from './homestead-economy.ts';
 import { droneRoute, surfaceBelow } from './homestead-terrain.ts';
 import type { RouteBlock } from './homestead-terrain.ts';
@@ -88,7 +90,7 @@ export interface HomesteadState {
 
 export interface HomesteadSnapshot {
   readonly economy: {
-    readonly day: number; readonly second: number; readonly panels: number; readonly batteries: number; readonly stored: number;
+    readonly day: number; readonly second: number; readonly startDay: number; readonly panels: number; readonly batteries: number; readonly stored: number;
     readonly gpu: boolean; readonly mode: ComputeMode; readonly tokens: number; readonly pending: number; readonly subsidyPaid: boolean; readonly ultimate: number;
   };
   readonly robots: readonly { readonly level: RobotLevel; readonly battery: number; readonly cargoWood: number; readonly cargoStone: number }[];
@@ -170,10 +172,11 @@ function addSite(state: HomesteadState, kind: HomesteadBuild, x: number, y: numb
   state.sites.push({ id: state.nextId++, kind, x, y, progress, blocked: null });
 }
 
-export function initializeHomestead(world: SimWorld, saved?: HomesteadSnapshot): void {
+/** start 只用于新开局；读档沿用存档里的时间。 */
+export function initializeHomestead(world: SimWorld, start: Readonly<GameTime>, saved?: HomesteadSnapshot): void {
   const occupied = new Set(liveEnemies(world).map(e => zoneOf(e.body.x)));
   const state: HomesteadState = {
-    economy: createHomestead(), drones: [], marks: [], sites: [], facilities: layoutFacilities(world),
+    economy: createHomestead(start), drones: [], marks: [], sites: [], facilities: layoutFacilities(world),
     wood: HOMESTEAD.start.wood, stone: 0, capacity: STORAGE.capacity, felled: [], mined: [],
     hostile: occupied, treeWood: new Map(),
     milestones: { marked: false, unloaded: false, built: false, night: false, settled: false }, nextId: 1,
@@ -208,7 +211,7 @@ export function initializeHomestead(world: SimWorld, saved?: HomesteadSnapshot):
 export function captureHomestead(state: HomesteadState): HomesteadSnapshot {
   const e = state.economy;
   return {
-    economy: { day: e.day, second: e.second, panels: e.panels, batteries: e.batteries, stored: e.stored, gpu: e.gpu, mode: e.mode,
+    economy: { day: e.day, second: e.second, startDay: e.startDay, panels: e.panels, batteries: e.batteries, stored: e.stored, gpu: e.gpu, mode: e.mode,
       tokens: e.tokens, pending: e.pending, subsidyPaid: e.subsidyPaid, ultimate: e.ultimate },
     robots: state.drones.map(d => ({ level: d.robot.level, battery: d.robot.battery, cargoWood: d.cargoWood, cargoStone: d.cargoStone })),
     wood: state.wood, stone: state.stone, capacity: state.capacity,
@@ -465,10 +468,10 @@ export function stepHomesteadWorld(world: SimWorld, seconds: number, yieldFactor
   const state = world.homestead!;
   const occupied = new Set(liveEnemies(world).map(e => zoneOf(e.body.x)));
   for (const zone of [...state.hostile]) if (!occupied.has(zone)) state.hostile.delete(zone);
-  const wasDay = isDaytime(state.economy.second);
+  const wasDay = isDaytime(state.economy);
   const settled = state.economy.lastSettlement;
   stepHomestead(state.economy, seconds, yieldFactor);
-  if (wasDay && !isDaytime(state.economy.second)) state.milestones.night = true;
+  if (wasDay && !isDaytime(state.economy)) state.milestones.night = true;
   if (state.economy.lastSettlement !== settled) state.milestones.settled = true;
   for (const drone of state.drones) stepDrone(world, state, drone, seconds, yieldFactor);
 }
@@ -477,14 +480,14 @@ export function canSleep(world: SimWorld): boolean {
   const state = world.homestead!;
   const player = world.entities.find(e => e.id === world.playerId)!;
   const { x0, x1 } = state.facilities.home;
-  return !isDaytime(state.economy.second) && player.body.x >= x0 - 1.5 && player.body.x <= x1 + 2.5;
+  return !isDaytime(state.economy) && player.body.x >= x0 - 1.5 && player.body.x <= x1 + 2.5;
 }
 
 /** 睡到天亮：跳过的时段按粗步长和七成收益估算，醒来回满生命。 */
 export function sleepHomestead(world: SimWorld): void {
   const state = world.homestead!;
   const step = ECONOMY.sleepStepMinutes * 60;
-  for (let left = secondsUntilDawn(state.economy.second); left > 0; left -= step) stepHomesteadWorld(world, Math.min(step, left), ECONOMY.sleepYield);
+  for (let left = secondsUntilSunrise(state.economy); left > 0; left -= step) stepHomesteadWorld(world, Math.min(step, left), ECONOMY.sleepYield);
   for (const drone of state.drones) {
     drone.prevX = drone.x;
     drone.prevY = drone.y;
@@ -510,21 +513,23 @@ const protectedTile = (state: HomesteadState, tx: number, ty: number): boolean =
     || panelCells(state).some(c => c.x === tx && c.y - 1 === ty);
 };
 
-/** 框选标记：框里有树就只标树，否则标自然地块；返回新增的标记数。 */
-export function markArea(world: SimWorld, area: Rect): number {
+export type HarvestKind = 'auto' | 'chop' | 'dig';
+
+/** auto 优先标树；明确选择时只标对应资源，返回新增标记数。 */
+export function markArea(world: SimWorld, area: Rect, kind: HarvestKind): number {
   const state = world.homestead!;
   const before = state.marks.length;
   const felled = new Set(state.felled);
   const marked = new Set(state.marks.flatMap(m => m.kind === 'tree' ? [m.treeId] : []));
   const standing = world.level.trees.filter(t => !felled.has(t.id));
-  const trees = standing.filter(t => t.x + 1 + t.canopyHalfWidth > area.x && t.x - t.canopyHalfWidth < area.x + area.w
+  const trees = standing.filter(t => kind !== 'dig' && t.x + 1 + t.canopyHalfWidth > area.x && t.x - t.canopyHalfWidth < area.x + area.w
     && t.baseY + t.trunkHeight + t.canopyHeight > area.y && t.baseY < area.y + area.h);
   for (const tree of trees) {
     if (marked.has(tree.id)) continue;
     state.marks.push({ id: state.nextId++, kind: 'tree', treeId: tree.id, blocked: null });
     if (!state.treeWood.has(tree.id)) state.treeWood.set(tree.id, WORK.treeWood);
   }
-  if (trees.length === 0) {
+  if (kind !== 'chop' && trees.length === 0) {
     const tiles = new Set(state.marks.flatMap(m => m.kind === 'tile' ? [`${m.tx},${m.ty}`] : []));
     // 树根下那格托着整棵树，挖掉会留下悬空的树。
     for (const t of standing) tiles.add(`${t.x},${t.baseY - 1}`);

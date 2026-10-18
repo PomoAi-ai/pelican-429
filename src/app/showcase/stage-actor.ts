@@ -31,6 +31,8 @@ import { createEntityViews } from '../scene-wiring.ts';
 import { createShowcaseScenario } from './catalog.ts';
 import { createShowcaseRunner } from './runner.ts';
 import { createLumaProjectilePreview } from './luma-projectile-preview.ts';
+import { loadFlyingRoadsterAsset } from '../../render/flying-roadster-view.ts';
+import { createFlyingRoadsterActor } from './flying-roadster-actor.ts';
 
 export interface StageActor {
   readonly root: THREE.Group;
@@ -51,6 +53,10 @@ export interface StageActor {
 export async function createStageActor(card: ShowcaseCard, isCurrent: () => boolean): Promise<StageActor | null> {
   const entry = showcaseEntry(card.entryId);
   if (entry.actor === 'ruler') return createRulerActor();
+  if (entry.actor === 'flyingRoadster') {
+    await loadFlyingRoadsterAsset();
+    return isCurrent() ? createFlyingRoadsterActor(card, entry) : null;
+  }
   if (entry.d1Animation) {
     await loadD1Asset(card.d1Variant);
     if (!isCurrent()) return null;

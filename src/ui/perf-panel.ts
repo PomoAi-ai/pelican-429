@@ -37,8 +37,8 @@ export function createPerfPanel(parent: HTMLElement, keyTarget: Window, debug: b
   let expanded = false;
   Object.assign(el.style, {
     position: 'fixed',
-    left: '24px',
-    top: '88px',
+    right: '24px',
+    top: '320px',
     margin: '0',
     padding: '6px 10px',
     borderRadius: '6px',

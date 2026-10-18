@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { TUNING } from '../config/tuning.ts';
+import { CHARACTER_STAGE_LOOK, characterStageSunDirection, characterStageFraming } from '../config/character-stage-look.ts';
 import type { ShowcaseCard } from '../config/showcase.ts';
 import { createStage } from '../render/stage.ts';
 import { createCelestialSky } from '../render/celestial-sky.ts';
@@ -9,6 +10,7 @@ import { disposeGrassyStaticAssets } from '../render/grassy/grassy-static.ts';
 import { disposeD1Assets } from '../render/grassy/d1-rig.ts';
 import { disposeEnemyAssets } from '../render/enemy-rig.ts';
 import { disposeNpcAssets } from '../render/npc/npc-rig.ts';
+import { disposeFlyingRoadsterAsset } from '../render/flying-roadster-view.ts';
 import { DUMMY_HEALTH_LAYER } from '../render/entity-views.ts';
 import { createCharacterStagePanel } from '../ui/character-stage-panel.ts';
 import type { ShowcaseModel } from '../ui/showcase-model.ts';
@@ -30,7 +32,7 @@ export function startCharacterStage(parent: HTMLElement, model: ShowcaseModel, r
     if (enabled) actor.reset();
     await actor.setSoundEnabled(enabled);
   }, view);
-  const stage = createStage(panel.viewport, TUNING, { quality: 'low', antialias: 'msaa' });
+  const stage = createStage(panel.viewport, TUNING, CHARACTER_STAGE_LOOK.stage);
   stage.camera.layers.enable(DUMMY_HEALTH_LAYER);
   stage.camera.near = .05;
   stage.camera.far = 1000;
@@ -133,6 +135,7 @@ export function startCharacterStage(parent: HTMLElement, model: ShowcaseModel, r
     panel.resetCamera.removeEventListener('click', resetCamera);
     stage.dispose(); panel.dispose();
     disposeGrassyAssets(); disposeGrassyStaticAssets(); disposeD1Assets(); disposeEnemyAssets(); disposeNpcAssets();
+    disposeFlyingRoadsterAsset();
     window.removeEventListener('error', onError);
     window.removeEventListener('unhandledrejection', onRejection);
     window.removeEventListener('pagehide', dispose);
@@ -217,8 +220,7 @@ export function startCharacterStage(parent: HTMLElement, model: ShowcaseModel, r
           const centerX = actors.size ? (left + right) / 2 : width / 2;
           pivot.position.x = centerX;
           content.position.x = -centerX;
-          const centerY = height * 0.45;
-          const viewHeight = Math.max(height * 1.5, (width + 3) / stage.camera.aspect);
+          const { centerY, viewHeight } = characterStageFraming(height, width, stage.camera.aspect);
           baseDistance = viewHeight / (2 * Math.tan(THREE.MathUtils.degToRad(stage.camera.fov) / 2));
           stage.camera.position.set(centerX, centerY, baseDistance / panel.zoom);
           stage.camera.lookAt(centerX, centerY, 0);
@@ -234,16 +236,12 @@ export function startCharacterStage(parent: HTMLElement, model: ShowcaseModel, r
         if (environment !== panel.environment) {
           environment = panel.environment;
           const underground = environment === 'underground';
-          stage.scene.background = new THREE.Color(underground ? '#172b3b' : '#b8ccc4');
+          stage.scene.background = new THREE.Color(underground ? '#172b3b' : CHARACTER_STAGE_LOOK.surfaceBackground);
           stage.hemiLight.intensity = TUNING.render.hemi * (underground ? 0.65 : 1);
           sky.root.visible = !underground;
           stage.keyLight.intensity = underground ? 0 : sunIntensity;
         }
-        const sunAngle = panel.sunPosition * Math.PI / 2;
-        // 窄窗口为太阳光晕预留边距，避免滑杆端点把天体推到画面外。
-        const skyHalfHeight = Math.tan(THREE.MathUtils.degToRad(stage.camera.fov) / 2);
-        const sunSpan = Math.max(0, Math.min(.26, skyHalfHeight * (stage.camera.aspect - .2)));
-        const sunDirection = { x: sunSpan * Math.sin(sunAngle), y: .19 + .01 * Math.cos(sunAngle), z: -1 };
+        const sunDirection = characterStageSunDirection(stage.camera.fov, stage.camera.aspect, panel.sunPosition);
         sky.setSunDirection(sunDirection);
         stage.setSunDirection(sunDirection);
         for (const card of model.cards) {

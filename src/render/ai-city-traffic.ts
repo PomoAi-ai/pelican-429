@@ -3,8 +3,6 @@ import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { RESIDENCE_WORLD, RESIDENCE_SEGMENT_WIDTH } from '../config/residence.ts';
 import { AI_CITY_LAYERS } from '../config/ai-city-look.ts';
 
-const canyonDepth = AI_CITY_LAYERS.find(layer => layer.id === 'canyon')!.depth;
-
 /** 轨道与列车采样同一条世界曲线，跨园区分段时位置和切线连续。 */
 export function aiCityRailPoint(x: number): THREE.Vector3 {
   return new THREE.Vector3(x, 7.2 + Math.sin(x * Math.PI / 128) * .7, -34 + Math.sin(x * Math.PI / 128) * 2);
@@ -87,64 +85,73 @@ export function createVehicleTemplates(materials: Record<VehicleMaterial, THREE.
   } };
 }
 
+const layerDepth = (id: 'architecture' | 'canyon'): number => AI_CITY_LAYERS.find(layer => layer.id === id)!.depth;
+
+/** 近轨在近水层、远轨在近城层；y 为轨道梁中心，z 为世界深度。环境轨道梁与交通层共用。 */
+export const AI_CITY_RAILS = {
+  near: { y: 2.3, z: layerDepth('architecture'), scale: 1 },
+  far: { y: 6, z: layerDepth('canyon'), scale: .7 },
+} as const;
+
+// 近处无人机在近轨上方穿行，远处一群缩小后浮在主城前方，形成两层空中交通。
+const FLYERS = {
+  near: { scale: 1, y: [9, 15], z: [-22, -27], speed: 1.4 },
+  far: { scale: .55, y: [13, 24], z: [-55, -82], speed: .8 },
+} as const;
+
 export function createAiCityTraffic(homeCenter: number) {
   const root = new THREE.Group(); root.name = 'ai-city-traffic';
-  const trainLayer = new THREE.Group(), droneLayer = new THREE.Group();
-  root.add(trainLayer, droneLayer);
+  const near = new THREE.Group(), far = new THREE.Group();
+  near.name = 'ai-city-traffic-near'; far.name = 'ai-city-traffic-far';
+  root.add(near, far);
   const hullMaterial = new THREE.MeshStandardMaterial({ color: 0xeeeae0, metalness: .2, roughness: .38 });
   const glassMaterial = new THREE.MeshStandardMaterial({ color: 0x174d73, emissive: 0x238cbd, emissiveIntensity: .23,
     metalness: .25, roughness: .23 });
   const lightMaterial = new THREE.MeshBasicMaterial({ color: 0x92edff, toneMapped: false });
   const templates = createVehicleTemplates({ hull: hullMaterial, glass: glassMaterial, light: lightMaterial });
-  const trains = new Map<number, THREE.Group>();
-  const drones = new Map<number, THREE.Group>();
   const minX = RESIDENCE_WORLD.minX - RESIDENCE_SEGMENT_WIDTH * 2;
   const span = RESIDENCE_WORLD.width + RESIDENCE_SEGMENT_WIDTH * 4;
-  const trainCount = Math.ceil(span / 196);
-  const droneCount = Math.ceil(span / 112);
-  const tangent = new THREE.Vector3(), axis = new THREE.Vector3(1, 0, 0);
-  return { root, trains: trainLayer, drones: droneLayer,
+  const vehicles: Array<{ object: THREE.Object3D; offset: number; speed: number; place(x: number, time: number): void }> = [];
+  for (const depth of ['near', 'far'] as const) {
+    const group = depth === 'near' ? near : far;
+    const rail = AI_CITY_RAILS[depth];
+    const trainCount = Math.ceil(span / (depth === 'near' ? 90 : 60));
+    for (let i = 0; i < trainCount; i++) {
+      const direction = i % 2 ? -1 : 1;
+      const train = templates.train.clone(); train.name = `ai-city-maglev-${depth}-${i}`;
+      train.scale.setScalar(rail.scale); if (direction < 0) train.rotation.y = Math.PI;
+      group.add(train);
+      vehicles.push({ object: train, offset: homeCenter + 28 + i * span / trainCount, speed: (depth === 'near' ? 3.2 : 2) * direction,
+        place(x): void { train.position.set(x, rail.y + .76 * rail.scale, rail.z); } });
+    }
+    const look = FLYERS[depth];
+    const droneCount = Math.ceil(span / (depth === 'near' ? 70 : 40));
+    for (let i = 0; i < droneCount; i++) {
+      const direction = i % 2 ? -1 : 1;
+      const kind = i % 3, u = (i * .618) % 1;
+      const drone = templates.flyers[kind]!.clone(); drone.name = `ai-city-flyer-${depth}-${i}`;
+      drone.scale.setScalar(look.scale); group.add(drone);
+      const y = look.y[0] + (look.y[1] - look.y[0]) * u, z = look.z[0] + (look.z[1] - look.z[0]) * ((u * 3.7) % 1);
+      vehicles.push({ object: drone, offset: homeCenter - 18 + i * span / droneCount, speed: look.speed * (1 + kind * .25) * direction,
+        place(x, time): void {
+          drone.position.set(x, y + Math.sin(time * .65 + i) * .24, z);
+          drone.rotation.set(Math.sin(time * .42 + i) * .025, direction < 0 ? Math.PI : 0, Math.sin(time * .5 + i) * .025 - direction * .025);
+        } });
+    }
+  }
+  return { root, near, far,
     update(time: number, range: { x: number; w: number }): void {
       const first = range.x - 160, last = range.x + range.w + 160;
-      for (let i = 0; i < trainCount; i++) {
-        const direction = i % 2 ? -1 : 1;
-        const x = minX + THREE.MathUtils.euclideanModulo(homeCenter + 28 - minX + i * span / trainCount + time * 1.7 * direction, span);
-        const visible = x >= first && x <= last;
-        let train = trains.get(i);
-        if (!train && visible) {
-          train = templates.train.clone(); train.name = `ai-city-maglev-${i}`;
-          trainLayer.add(train); trains.set(i, train);
-        }
-        if (!train) continue;
-        train.visible = visible;
-        if (!visible) continue;
-        train.position.copy(aiCityRailPoint(x)); train.position.y += .87; train.position.z += canyonDepth + 35;
-        tangent.copy(aiCityRailPoint(x + .1)).sub(aiCityRailPoint(x - .1)).normalize();
-        train.quaternion.setFromUnitVectors(axis, tangent);
-        if (direction < 0) train.rotateY(Math.PI);
-      }
-      for (let i = 0; i < droneCount; i++) {
-        const direction = i % 2 ? -1 : 1;
-        const kind = i % 3;
-        const x = minX + THREE.MathUtils.euclideanModulo(homeCenter - 18 - minX + i * span / droneCount + time * (1 + kind * .25) * direction, span);
-        const visible = x >= first && x <= last;
-        let drone = drones.get(i);
-        if (!drone && visible) {
-          drone = templates.flyers[kind]!.clone(); drone.name = `ai-city-civilian-flyer-${i}`;
-          drones.set(i, drone); droneLayer.add(drone);
-        }
-        if (!drone) continue;
-        drone.visible = visible;
-        if (!visible) continue;
-        drone.position.set(x, 12.5 + kind * 3.7 + Math.sin(time * .65 + i) * .24, -26 - kind * 10);
-        drone.rotation.set(Math.sin(time * .42 + i) * .025, direction < 0 ? Math.PI : 0,
-          Math.sin(time * .5 + i) * .025 - direction * .025);
+      for (const vehicle of vehicles) {
+        const x = minX + THREE.MathUtils.euclideanModulo(vehicle.offset - minX + time * vehicle.speed, span);
+        vehicle.object.visible = x >= first && x <= last;
+        if (vehicle.object.visible) vehicle.place(x, time);
       }
     },
     setNightFactor(night: number): void { glassMaterial.emissiveIntensity = .23 + night * .85; },
     dispose(): void {
       templates.dispose(); hullMaterial.dispose(); glassMaterial.dispose(); lightMaterial.dispose();
-      root.removeFromParent(); trainLayer.clear(); droneLayer.clear(); root.clear(); trains.clear(); drones.clear();
+      root.removeFromParent(); near.clear(); far.clear(); root.clear();
     },
   };
 }

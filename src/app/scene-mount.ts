@@ -1,10 +1,10 @@
 import type * as THREE from 'three';
 import type { SceneWeatherSettings } from '../config/scene-weather.ts';
-import type { WorldClock } from '../core/world-clock.ts';
+import type { GameTime } from '../core/calendar.ts';
 import type { SceneWeatherMode } from '../config/weather-rules.ts';
 
 export interface SceneWorld {
-  readonly clock: WorldClock;
+  readonly time: Readonly<GameTime>;
   weather: SceneWeatherMode;
   readonly weatherConfig: SceneWeatherSettings;
 }
