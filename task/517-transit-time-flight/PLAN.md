@@ -1,6 +1,6 @@
 # PLAN -- 化光后的时空跟随飞行
 
-## Status: validating
+## Status: done
 ## Task: 517
 ## Related: 511
 ## Baseline Commit: c292d188
@@ -39,4 +39,11 @@
 | npm run typecheck | yes | pass |
 | npm test | yes | pass，2004/2004，约 50.81 秒 |
 | npm run build | yes | pass，现有大于 500 kB 的 chunk 提示保留 |
-| 浏览器完整发射、时空通道、抵达；截图/动态记录 | yes | no |
+| 浏览器完整发射、时空通道、抵达；截图/动态记录 | yes | pass；1280×720，真实登船/选目的地，travel 从 T+0.1 到 T+4.5 后进入算力大教堂，无控制台 error/warn |
+
+## Review and Evidence
+- 独立子代理复核通过：导航仅在穿越完成后发生一次，途中锁定目的地，人物与舰体继续隐藏；屏幕近深度覆盖保证不受背景 AO/SSR 污染，模型原有 dispose 统一释放新几何与材质。
+- 实机观察到白光退入青蓝通道，随后变为紫色与暖金色，中心光核保持可跟随，末端柔白后抵达。新增 travel 记录为 45 帧，采集时间跨度约 4.46 秒。
+- [化光至抵达的实际录屏](evidence/light-flight.webp)，由浏览器截图按采集时间组装；[青蓝段](evidence/blue-passage.png)、[紫色段](evidence/time-corridor.png)、[暖金段](evidence/gold-passage.png)、[抵达](evidence/arrival.png)。`evidence/frames.json` 保存完整发射采集序列元数据。
+- 检查日志保存在 `evidence/typecheck.log`、`evidence/test.log`、`evidence/build.log`。
+- reduced-motion 降速与关闭摆动经代码复核，未切换系统设置实测。未做手机性能与实际音响试听；未提交推送。
