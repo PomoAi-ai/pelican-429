@@ -10,7 +10,7 @@ import { configureCharacterTextures, disposeCharacterTextures, loadCharacterMode
 import { createEnemyRig, disposeEnemyAssets, loadEnemyAsset } from '../src/render/enemy-rig.ts';
 import { createFacilityPresentation, disposePreloadedFortressTextures, preloadFortressTextures } from '../src/app/facility-presentation.ts';
 import type { Stage } from '../src/render/stage.ts';
-import { createD1Rig, disposeD1Assets, loadD1Asset } from '../src/render/grassy/d1-rig.ts';
+import { createD1Rig, disposeD1Asset, disposeD1Assets, loadD1Asset } from '../src/render/grassy/d1-rig.ts';
 import { CUSTOMIZATION_MODELS } from '../src/config/character-customization-assets.ts';
 import { disposeCustomizationAssets, loadCustomizationAssets } from '../src/render/grassy/grassy-appearance.ts';
 
@@ -270,11 +270,15 @@ test('D1 三档与贴图缓存独立，复制实例不串用模型或头发开�
   const rigs: ReturnType<typeof createD1Rig>[] = [];
   t.after(() => { for (const rig of rigs) rig.dispose(); disposeD1Assets(); disposeCharacterTextures(); });
   const requested: string[] = [];
+  const gates = new Map<string, Promise<void>>();
+  const disposed: string[] = [];
   t.mock.method(GLTFLoader.prototype, 'loadAsync', async function (this: GLTFLoader, path: string) {
     requested.push(path);
+    const gate = gates.get(path);
     const gltf = await new GLTFLoader().parseAsync(JSON.stringify({ asset: { version: '2.0' }, scene: 0, scenes: [{}] }), '');
     gltf.scene.name = path;
     const geometry = new BoxGeometry(1, 3.1, 1).translate(0, 1.55, 0);
+    geometry.addEventListener('dispose', () => disposed.push(path));
     const count = geometry.getAttribute('position').count;
     geometry.setAttribute('skinIndex', new Uint16BufferAttribute(new Uint16Array(count * 4), 4));
     const weights = new Float32Array(count * 4);
@@ -285,6 +289,7 @@ test('D1 三档与贴图缓存独立，复制实例不串用模型或头发开�
     const bone = new Bone(); mesh.add(bone); mesh.bind(new Skeleton([bone]));
     gltf.scene.add(mesh);
     gltf.animations = ['idle', 'walk', 'run', 'jump'].map(name => new AnimationClip(name, 1, [new NumberKeyframeTrack('.position[x]', [0, 1], [0, 1])]));
+    await gate;
     return gltf;
   });
   await Promise.all([
@@ -305,4 +310,33 @@ test('D1 三档与贴图缓存独立，复制实例不串用模型或头发开�
   rigs[0]!.setHairVisible(false);
   assert.equal(rigs[0]!.root.getObjectByName('Hair')!.visible, false);
   assert.equal(copy.root.getObjectByName('Hair')!.visible, true, '另一个角色的头发不能跟随隐藏');
+
+  const sourceA = requested[0]!;
+  const sourceB = './characters/human/render-lab/hair-b.glb';
+  await Promise.all([loadD1Asset('game', 'web', sourceA), loadD1Asset('game', 'web', sourceB)]);
+  const explicitA = createD1Rig('game', 'anime', 'web', undefined, sourceA); rigs.push(explicitA);
+  const explicitB = createD1Rig('game', 'anime', 'web', undefined, sourceB); rigs.push(explicitB);
+  assert.equal(explicitA.root.children[0]!.name, sourceA, '显式源路径不再按 web 档位改写');
+  assert.equal(explicitB.root.children[0]!.name, sourceB, '同档位的多个源模型可并存');
+  explicitA.dispose(); rigs.splice(rigs.indexOf(explicitA), 1);
+  disposeD1Asset('game', 'web', sourceA);
+  assert.throws(() => createD1Rig('game', 'anime', 'web', undefined, sourceA), /尚未加载/);
+  const retained = createD1Rig('game', 'anime', 'web', undefined, sourceB); rigs.push(retained);
+  assert.equal(retained.root.children[0]!.name, sourceB, '释放一个模型不影响其他模型');
+
+  const retiredPath = './characters/human/render-lab/retired-hair.glb';
+  const oldGate = deferred<void>();
+  gates.set(retiredPath, oldGate.promise);
+  const old = loadD1Asset('game', 'web', retiredPath);
+  disposeD1Asset('game', 'web', retiredPath);
+  const currentGate = deferred<void>();
+  gates.set(retiredPath, currentGate.promise);
+  const current = loadD1Asset('game', 'web', retiredPath);
+  oldGate.resolve(); await old;
+  assert.throws(() => createD1Rig('game', 'anime', 'web', undefined, retiredPath), /尚未加载/, '旧请求成功不能恢复已释放的资源');
+  assert.equal(disposed.filter(path => path === retiredPath).length, 1, '退出期间完成的模型应释放');
+  assert.equal(loadD1Asset('game', 'web', retiredPath), current, '旧请求不能替换新请求的缓存');
+  currentGate.resolve(); await current;
+  const restored = createD1Rig('game', 'anime', 'web', undefined, retiredPath); rigs.push(restored);
+  assert.equal(restored.root.children[0]!.name, retiredPath);
 });

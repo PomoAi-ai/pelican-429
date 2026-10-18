@@ -5,55 +5,36 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#eee9e1" />
     <title>D1 · 独立渲染实验</title>
-    <script>if (new URLSearchParams(location.search).get('embed') === '1') document.documentElement.classList.add('lab-embedded');</script>
     <link rel="stylesheet" href="./src/ui/d1-render-lab.css" />
   </head>
   <body>
+    <nav class="d1-preview-nav" aria-label="D1 预览页面">
+      <a href="./render-lab.html" data-preview="lab" aria-current="page">渲染实验</a>
+      <a href="./d1-hair-gallery.html" data-preview="gallery">全部头发预览</a>
+      <a href="./render-lab.html?hair=showcase&amp;framing=head&amp;angle=0&amp;projection=orthographic" data-preview="head">头部对比预览</a>
+    </nav>
     <header class="lab-header">
       <div class="lab-brand"><span class="lab-mark" aria-hidden="true">D1</span><div><p>PELICAN 429 / RENDER STUDY</p><h1>独立渲染实验</h1></div></div>
-      <a href="./d1-hair-gallery.html">全部头发 · 三列总览 ↗</a>
       <a id="lab-showcase-link" href="./?mode=showcase&amp;stageActor=d1.idle,1,1,0.7854,0,1,1,outfit,1&amp;textures=web-1k" target="_blank" rel="noopener">打开当前展示场 <span aria-hidden="true">↗</span></a>
     </header>
 <fieldset id="lab-hair-controls" class="lab-hair-picker" disabled aria-describedby="lab-hair-version-hint"><legend>模型 / 头发版本</legend><div class="lab-hair-buttons" role="group" aria-label="模型 / 头发版本">
         <button type="button" data-hair="showcase" aria-pressed="false">展示场 · 白色基础服游戏标准版</button>
-        <button type="button" data-hair="classic" aria-pressed="false">旧版头发（保留）</button>
-        <button type="button" data-hair="rodin" aria-pressed="false">Rodin · 初始版（保留）</button>
-        <button type="button" data-hair="rodin-fit" aria-pressed="false">Rodin · 补束贴合版（保留）</button>
         <button type="button" data-hair="rodin-contour" aria-pressed="false">Rodin · 自然收拢版（保留）</button>
-        <button type="button" data-hair="authored" aria-pressed="false">逐束重建 · 早期版（保留）</button>
-        <button type="button" data-hair="sculpted" aria-pressed="false">圆润短发（保留）</button>
-        <button type="button" data-hair="blender-bob" aria-pressed="false">Blender · 整体短发〔保留〕</button>
-        <button type="button" data-hair="blender-ear" aria-pressed="false">Blender · 露耳版〔保留〕</button>
-        <button type="button" data-hair="blender-crown" aria-pressed="false">Blender · 冠发分层版〔保留〕</button>
-        <button type="button" data-hair="blender" aria-pressed="false">Blender · 重新建模〔旧版保留〕</button>
-        <button type="button" data-hair="blender-rooted" aria-pressed="false">Blender · 发根重建</button>
         <button type="button" data-hair="blender-redrawn" aria-pressed="false">Blender · 刘海与短卷重绘〔阶段稿〕</button>
-        <button type="button" data-hair="blender-swept" aria-pressed="false">Blender · 偏分与短卷补层〔阶段稿〕</button>
-        <button type="button" data-hair="blender-volumes" aria-pressed="false">Blender · 贴皮体积与衔接〔阶段稿〕</button>
-        <button type="button" data-hair="blender-curves" aria-pressed="false">Blender · 流线刘海与原画采色〔阶段稿〕</button>
         <button type="button" data-hair="blender-flow" aria-pressed="false">Blender · 短发收束与沿束配色〔阶段稿〕</button>
-        <button type="button" data-hair="blender-layered" aria-pressed="false">Blender · 连续刘海与错层短发〔阶段稿〕</button>
-        <button type="button" data-hair="blender-fine" aria-pressed="false">Blender · 冠发收薄与刘海校色〔阶段稿〕</button>
-        <button type="button" data-hair="blender-profile" aria-pressed="false">Blender · 侧面刘海贴合〔阶段稿〕</button>
-        <button type="button" data-hair="blender-scalp" aria-pressed="false">Blender · 耳上头皮衔接〔阶段稿〕</button>
         <button type="button" data-hair="blender-plait" aria-pressed="false">Blender · 编辫逐瓣重塑〔阶段稿〕</button>
-        <button type="button" data-hair="blender-arc" aria-pressed="false">Blender · 贴根刘海与暗部校正〔阶段稿〕</button>
-        <button type="button" data-hair="blender-clumps" aria-pressed="false">Blender · 短发收团与连续发色〔阶段稿〕</button>
-        <button type="button" data-hair="blender-rear" aria-pressed="false">Blender · 后发顺头重塑〔阶段稿〕</button>
-        <button type="button" data-hair="blender-parting" aria-pressed="false">Blender · 贴头冠发与刘海衔接〔阶段稿〕</button>
-        <button type="button" data-hair="blender-inner" aria-pressed="false">Blender · 内刘海贴额与细分叉〔阶段稿〕</button>
-        <button type="button" data-hair="blender-return" aria-pressed="false">Blender · 刘海薄缘与贴头衔接〔阶段稿〕</button>
-        <button type="button" data-hair="blender-bob-fit" aria-pressed="false">Blender · 短卷连续与内层贴合〔阶段稿〕</button>
-        <button type="button" data-hair="blender-temple-root" aria-pressed="false">Blender · 鬓发贴根与动画修复〔阶段稿〕</button>
         <button type="button" data-hair="blender-eye-surface" aria-pressed="false">Blender · 眼周连续与眨眼修复〔阶段稿〕</button>
-        <button type="button" data-hair="blender-smooth-color" aria-pressed="false">Blender · 连续发色试验〔保留对照〕</button>
-        <button type="button" data-hair="blender-native-flow" aria-pressed="false">Blender · 原生发束贴根与校色〔阶段稿〕</button>
         <button type="button" data-hair="blender-hair-contact" aria-pressed="false">Blender · 冠发衔接与后脑补缝〔阶段稿〕</button>
         <button type="button" data-hair="blender-d12" aria-pressed="false">Blender · D12 细发丝与内刘海衔接〔阶段稿〕</button>
-        <button type="button" data-hair="blender-crown-sweep" aria-pressed="false">Blender · 冠发顺流与贴根〔阶段稿〕</button>
-        <button type="button" data-hair="blender-remake" aria-pressed="false">Gemini4 · 雕刻重制版</button>
+        <button type="button" data-hair="game-detailed" aria-pressed="false">游戏正式版 · 精细检查（当前资源）</button>
+        <button type="button" data-hair="blender-scalp-fit" aria-pressed="false">Blender · 原画发束与头皮贴合〔新款〕</button>
+        <button type="button" data-hair="rodin-smooth-extracted" aria-pressed="false">Rodin · 整头拆分平滑发束〔阶段稿〕</button>
+        <button type="button" data-hair="rodin-ear-aligned" aria-pressed="false">Rodin · 整头配准〔修正版〕</button>
+        <button type="button" data-hair="rodin-source-remake" aria-pressed="false">Rodin · 原始整头重新拆分〔新款〕</button>
+        <button type="button" data-hair="rodin-snug-fit" aria-pressed="false">Rodin · 原始头发贴合头皮〔新款〕</button>
+        <button type="button" data-hair="rodin-raw-head" aria-pressed="false">Rodin · 原始整头未修改〔对照〕</button>
 </div>
-<p id="lab-hair-version-hint" class="lab-version-description">新头发在 Blender 中按发束制作，重点检查正面、侧面和头皮贴合。各阶段发型均保留，切换保留当前视角。</p>
+<p id="lab-hair-version-hint" class="lab-version-description">新头发在 Blender 中按发束制作，重点检查正面、侧面和头皮贴合。保留所选八款发型，并加入游戏正式精细版对照；切换保留当前视角。</p>
 </fieldset>
     <main class="lab-layout">
       <section class="lab-stage" data-view-mode="all" aria-label="D1 实时渲染预览">
@@ -68,14 +49,29 @@
         <div class="lab-intro"><p class="lab-eyebrow">LOOK DEVELOPMENT</p><h2>保留每一版的美感</h2><p>全部渲染版本同时展示，点击任一版本放大查看。镜头、光照、动作和眨眼同步。</p></div>
         <fieldset id="lab-controls" disabled>
           <section class="lab-control-section">
-            <h3><span>01</span>配色与观察</h3>
+            <h3><span>01</span>眼球注视</h3>
+            <label class="lab-version-select" for="lab-eye-version">眼睛版本<select id="lab-eye-version" aria-describedby="lab-eye-hint"><option value="patch">原眼片（保留对照）</option><option value="sphere">球形眼球 · 可转动视线</option></select></label>
+            <p id="lab-eye-hint" class="lab-control-hint">31、34、35、39、40、41、42、43、44 支持球眼；39、40、41、42、43、44 默认启用。可切换原眼片对照。</p>
+            <fieldset id="lab-gaze-controls" hidden disabled>
+              <legend class="lab-eyebrow">控制注视方向</legend>
+              <label class="lab-version-select" for="lab-gaze-mode">注视方式<select id="lab-gaze-mode"><option value="manual">手动方向</option><option value="pointer">跟随鼠标</option><option value="auto">自然扫视</option></select></label>
+              <div class="lab-gaze-grid" role="group" aria-label="注视方向，按正面画面的左右"><button type="button" data-gaze-yaw="-15" data-gaze-pitch="10" aria-label="注视左上" aria-pressed="false">↖</button><button type="button" data-gaze-yaw="0" data-gaze-pitch="10" aria-label="注视向上" aria-pressed="false">↑</button><button type="button" data-gaze-yaw="15" data-gaze-pitch="10" aria-label="注视右上" aria-pressed="false">↗</button><button type="button" data-gaze-yaw="-15" data-gaze-pitch="0" aria-label="注视向左" aria-pressed="false">←</button><button id="lab-gaze-center" type="button" data-gaze-yaw="0" data-gaze-pitch="0" aria-label="注视正视前方" aria-pressed="false">正视</button><button type="button" data-gaze-yaw="15" data-gaze-pitch="0" aria-label="注视向右" aria-pressed="false">→</button><button type="button" data-gaze-yaw="-15" data-gaze-pitch="-10" aria-label="注视左下" aria-pressed="false">↙</button><button type="button" data-gaze-yaw="0" data-gaze-pitch="-10" aria-label="注视向下" aria-pressed="false">↓</button><button type="button" data-gaze-yaw="15" data-gaze-pitch="-10" aria-label="注视右下" aria-pressed="false">↘</button></div>
+              <label class="lab-range-label" for="lab-gaze-yaw">左右视线 <output id="lab-gaze-yaw-value" for="lab-gaze-yaw">0°</output></label>
+              <input id="lab-gaze-yaw" type="range" min="-18" max="18" step="1" value="0" />
+              <label class="lab-range-label" for="lab-gaze-pitch">上下视线 <output id="lab-gaze-pitch-value" for="lab-gaze-pitch">0°</output></label>
+              <input id="lab-gaze-pitch" type="range" min="-12" max="12" step="1" value="0" />
+              <p class="lab-control-hint">左右按正面画面计算，旋转镜头后仍按头部方向。跟随鼠标时，在角色画面内移动；拖动仍旋转镜头。所有渲染同步，暂停动作也能控制视线。</p>
+            </fieldset>
+          </section>
+          <section class="lab-control-section">
+            <h3><span>02</span>配色与观察</h3>
             <label class="lab-version-select" for="lab-projection">比较镜头<select id="lab-projection" aria-describedby="lab-projection-hint"><option value="perspective">近景透视 · 原镜头</option><option value="orthographic">等比例 · 原画对照</option></select></label>
             <p id="lab-projection-hint" class="lab-control-hint">等比例镜头避免前额和刘海因离镜头近而放大，便于检查正面与侧面轮廓。</p>
             <div class="lab-segment" role="group" aria-label="取景范围"><button type="button" data-framing="body" aria-pressed="true">全身</button><button type="button" data-framing="head" aria-pressed="false">头部特写</button></div>
             <div class="lab-angles" role="group" aria-label="观察角度"><button type="button" data-angle="-90" aria-pressed="false">左侧</button><button type="button" data-angle="-45" aria-pressed="false">左45°</button><button type="button" data-angle="0" aria-pressed="false">正面</button><button type="button" data-angle="45" aria-pressed="true">右45°</button><button type="button" data-angle="90" aria-pressed="false">右侧</button><button type="button" data-angle="180" aria-pressed="false">背面</button></div>
           </section>
           <section class="lab-control-section">
-            <h3><span>02</span>动作研究</h3>
+            <h3><span>03</span>动作研究</h3>
             <div class="lab-action-row"><label class="lab-action-select" for="lab-action">动作<select id="lab-action"></select></label><label class="lab-action-select" for="lab-speed">播放速度<select id="lab-speed"><option value="0.25">0.25× · 慢放</option><option value="0.5">0.5× · 慢放</option><option value="1" selected>1× · 正常</option><option value="1.5">1.5× · 加速</option></select></label></div>
             <label class="lab-action-select lab-gait-select" for="lab-gait">步态版本<select id="lab-gait" aria-describedby="lab-gait-hint"><option value="original" selected>原动作（保留）</option><option value="smooth">顺滑步态（实验）</option></select></label>
             <p id="lab-gait-hint" class="lab-control-hint">仅走路、跑步；切换保留当前进度。</p>
@@ -85,29 +81,18 @@
             <p id="lab-motion-hint" class="lab-control-hint">拖动进度暂停定位。逐帧步长 1/30 秒；暂停时自动眨眼一同停止。</p>
           </section>
           <section class="lab-control-section">
-            <h3><span>03</span>眨眼与头发</h3>
-            <label class="lab-version-select" for="lab-eye-version">眼睛版本<select id="lab-eye-version" aria-describedby="lab-eye-hint"><option value="patch">原眼片（保留对照）</option><option value="sphere">球形眼球 · 可转动视线</option></select></label>
-            <p id="lab-eye-hint" class="lab-control-hint">球眼适用于眼周修复版及之后支持球眼的模型，包括 D12、冠发顺流与雕刻重制版；切回原眼片可查看更早版本。</p>
+            <h3><span>04</span>眨眼与头发</h3>
             <label class="lab-version-select" for="lab-animation-version">模型动画<select id="lab-animation-version"><option value="refined" selected>修正版</option><option value="original">原版（保留）</option></select></label>
             <p class="lab-control-hint lab-animation-hint">全部渲染版本共用所选动画，可切换方式对照。</p>
             <label class="lab-toggle" for="lab-auto-blink"><span>自动眨眼</span><input id="lab-auto-blink" type="checkbox" checked /></label>
             <label class="lab-range-label" for="lab-closure">眼睑闭合 <output id="lab-closure-value" for="lab-closure">自动</output></label>
             <input id="lab-closure" type="range" min="0" max="1" step="0.01" value="0" disabled />
             <div class="lab-range-ends"><span>睁开</span><span>闭合</span></div>
-            <fieldset id="lab-gaze-controls" hidden disabled style="border:0;padding:0;margin:16px 0">
-              <legend>眼球视线</legend>
-              <label class="lab-toggle" for="lab-auto-gaze"><span>自动注视</span><input id="lab-auto-gaze" type="checkbox" /></label>
-              <label class="lab-range-label" for="lab-gaze-yaw">左右视线 <output id="lab-gaze-yaw-value" for="lab-gaze-yaw">0°</output></label>
-              <input id="lab-gaze-yaw" type="range" min="-25" max="25" step="1" value="0" />
-              <label class="lab-range-label" for="lab-gaze-pitch">上下视线 <output id="lab-gaze-pitch-value" for="lab-gaze-pitch">0°</output></label>
-              <input id="lab-gaze-pitch" type="range" min="-15" max="15" step="1" value="0" />
-              <button id="lab-gaze-center" type="button">正视前方</button>
-            </fieldset>
             <label class="lab-toggle lab-hair-toggle" for="lab-hair-motion"><span>头发惯性</span><input id="lab-hair-motion" type="checkbox" checked aria-describedby="lab-hair-hint" /></label>
             <p id="lab-hair-hint" class="lab-control-hint">修正版在全部渲染中启用发梢惯性；原版保留之前的动画。</p>
           </section>
           <section class="lab-control-section">
-            <h3><span>04</span>灯光</h3>
+            <h3><span>05</span>灯光</h3>
             <label class="lab-range-label" for="lab-light-angle">主光方位 <output id="lab-light-angle-value" for="lab-light-angle">−35°</output></label>
             <input id="lab-light-angle" type="range" min="-180" max="180" step="1" value="-35" />
             <label class="lab-range-label" for="lab-light-power">主光强度 <output id="lab-light-power-value" for="lab-light-power">3.0</output></label>

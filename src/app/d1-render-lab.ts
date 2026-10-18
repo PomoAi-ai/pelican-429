@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { HAIR_ASSETS, HAIR_NUMBERS, isBlenderHair, readHairStyle, type HairStyle } from './d1-lab-hair-catalog.ts';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { D1_ACTIONS, D1_ANIMATED_MODELS, type D1AnimatedVariant } from '../config/grassy.ts';
 import { D1_ARTWORK } from '../config/showcase.ts';
@@ -6,63 +7,22 @@ import { createD1Rig, disposeD1Assets, loadD1Asset } from '../render/grassy/d1-r
 import { applyD1LabLooks, D1_LAB_VERSIONS, type D1LabVersion } from '../render/grassy/d1-lab-looks.ts';
 import { createD1LabMotion } from '../render/grassy/d1-lab-motion.ts';
 import { createD1LabGaits } from '../render/grassy/d1-lab-gait.ts';
-import { fitD1LabHair } from '../render/grassy/d1-lab-hair-fit.ts';
 import { contourD1LabHair } from '../render/grassy/d1-lab-hair-contour.ts';
 import { characterModelPath, loadCharacterModel } from '../render/character-model.ts';
 import { disposeModelResources } from '../render/model-resources.ts';
 
 type PreviewCard = { version: D1LabVersion; element: HTMLElement; button: HTMLButtonElement; viewport: HTMLElement };
 type Projection = 'perspective' | 'orthographic';
-export type D1GalleryMessage = { type: 'd1-gallery-ready' } | { type: 'd1-gallery-error' } | { type: 'd1-gallery-preview'; image: string } | {
-  type: 'd1-gallery-camera'; position: number[]; target: number[]; zoom: number;
-};
-const SPHERICAL_EYE_MODELS = ['blender-eye-surface', 'blender-smooth-color', 'blender-native-flow', 'blender-hair-contact', 'blender-d12', 'blender-remake', 'blender-crown-sweep'];
-type BlenderHairStyle = 'blender' | 'blender-bob' | 'blender-ear' | 'blender-crown' | 'blender-rooted' | 'blender-redrawn' | 'blender-swept' | 'blender-volumes' | 'blender-curves' | 'blender-flow' | 'blender-layered' | 'blender-fine' | 'blender-profile' | 'blender-scalp' | 'blender-plait' | 'blender-arc' | 'blender-clumps' | 'blender-rear' | 'blender-parting' | 'blender-inner' | 'blender-return' | 'blender-bob-fit' | 'blender-temple-root' | 'blender-eye-surface' | 'blender-smooth-color' | 'blender-native-flow' | 'blender-hair-contact' | 'blender-d12' | 'blender-remake' | 'blender-crown-sweep';
-type HairStyle = 'showcase' | 'classic' | 'rodin' | 'rodin-fit' | 'rodin-contour' | 'authored' | 'sculpted' | BlenderHairStyle;
+const SPHERICAL_EYE_MODELS = ['blender-eye-surface', 'blender-hair-contact', 'blender-d12', 'blender-scalp-fit', 'rodin-smooth-extracted', 'rodin-ear-aligned', 'rodin-source-remake', 'rodin-snug-fit', 'rodin-raw-head'];
+const DEFAULT_SPHERICAL_EYE_MODELS = ['blender-scalp-fit', 'rodin-smooth-extracted', 'rodin-ear-aligned', 'rodin-source-remake', 'rodin-snug-fit', 'rodin-raw-head'];
 
-const HAIR_ASSETS = {
-  showcase: './characters/human/render-lab/d1-base-showcase.web-1k.glb',
-  classic: './characters/human/render-lab/d1-outfit-baseline.web-1k.glb',
-  rodin: './characters/human/render-lab/d1-outfit-rodin-hair.web-1k.glb',
-  blender: './characters/human/render-lab/d1-outfit-blender-hair.glb',
-  'blender-bob': './characters/human/render-lab/d1-outfit-blender-bob.glb',
-  'blender-ear': './characters/human/render-lab/d1-outfit-blender-ear.glb',
-  'blender-crown': './characters/human/render-lab/d1-outfit-blender-crown.glb',
-  'blender-rooted': './characters/human/render-lab/d1-outfit-blender-rooted.glb',
-  'blender-redrawn': './characters/human/render-lab/d1-outfit-blender-redrawn-v1.glb',
-  'blender-swept': './characters/human/render-lab/d1-outfit-blender-swept-v1.glb',
-  'blender-volumes': './characters/human/render-lab/d1-outfit-blender-volumes-v1.glb',
-  'blender-curves': './characters/human/render-lab/d1-outfit-blender-curves-v1.glb',
-  'blender-flow': './characters/human/render-lab/d1-outfit-blender-flow-v1.glb',
-  'blender-layered': './characters/human/render-lab/d1-outfit-blender-layered-v1.glb',
-  'blender-fine': './characters/human/render-lab/d1-outfit-blender-fine-v1.glb',
-  'blender-profile': './characters/human/render-lab/d1-outfit-blender-profile-v1.glb',
-  'blender-scalp': './characters/human/render-lab/d1-outfit-blender-scalp-v1.glb',
-  'blender-plait': './characters/human/render-lab/d1-outfit-blender-plait-v1.glb',
-  'blender-arc': './characters/human/render-lab/d1-outfit-blender-arc-v1.glb',
-  'blender-clumps': './characters/human/render-lab/d1-outfit-blender-clumps-v1.glb',
-  'blender-rear': './characters/human/render-lab/d1-outfit-blender-rear-v1.glb',
-  'blender-parting': './characters/human/render-lab/d1-outfit-blender-parting-v1.glb',
-  'blender-inner': './characters/human/render-lab/d1-outfit-blender-inner-v2.glb',
-  'blender-return': './characters/human/render-lab/d1-outfit-blender-return-v1.glb',
-  'blender-bob-fit': './characters/human/render-lab/d1-outfit-blender-bob-fit-v1.glb',
-  'blender-temple-root': './characters/human/render-lab/d1-outfit-blender-temple-root-v1.glb',
-  'blender-eye-surface': './characters/human/render-lab/d1-outfit-blender-eye-surface-v1.glb',
-  'blender-smooth-color': './characters/human/render-lab/d1-outfit-blender-smooth-color-v1.glb',
-  'blender-native-flow': './characters/human/render-lab/d1-outfit-blender-native-flow-v1.glb',
-  'blender-hair-contact': './characters/human/render-lab/d1-outfit-blender-hair-contact-v1.glb',
-  'blender-d12': './characters/human/render-lab/d1-outfit-blender-d12-v1.glb',
-  'blender-remake': './characters/human/render-lab/d1-outfit-remake-hair-preview-v1.glb',
-  'blender-crown-sweep': './characters/human/render-lab/d1-outfit-blender-crown-sweep-v1.glb',
-};
-
-function isBlenderHair(value: string): value is BlenderHairStyle {
-  return value === 'blender' || value === 'blender-bob' || value === 'blender-ear' || value === 'blender-crown' || value === 'blender-rooted' || value === 'blender-redrawn' || value === 'blender-swept' || value === 'blender-volumes' || value === 'blender-curves' || value === 'blender-flow' || value === 'blender-layered' || value === 'blender-fine' || value === 'blender-profile' || value === 'blender-scalp' || value === 'blender-plait' || value === 'blender-arc' || value === 'blender-clumps' || value === 'blender-rear' || value === 'blender-parting' || value === 'blender-inner' || value === 'blender-return' || value === 'blender-bob-fit' || value === 'blender-temple-root' || value === 'blender-eye-surface' || value === 'blender-smooth-color' || value === 'blender-native-flow' || value === 'blender-hair-contact' || value === 'blender-d12' || value === 'blender-remake' || value === 'blender-crown-sweep';
-}
-
-function readHairStyle(value: string): HairStyle {
-  if (value !== 'showcase' && value !== 'classic' && value !== 'rodin' && value !== 'rodin-fit' && value !== 'rodin-contour' && value !== 'authored' && value !== 'sculpted' && !isBlenderHair(value)) throw new Error(`未知头发版本：${value}`);
-  return value;
+function syncPreviewNavigation(): void {
+  const params = new URLSearchParams(location.search);
+  const current = params.get('framing') === 'head' && params.get('projection') === 'orthographic' ? 'head' : 'lab';
+  for (const link of document.querySelectorAll<HTMLAnchorElement>('.d1-preview-nav a')) {
+    if (link.dataset.preview === current) link.setAttribute('aria-current', 'page');
+    else link.removeAttribute('aria-current');
+  }
 }
 
 function readVersion(value: string, cards: PreviewCard[]): D1LabVersion {
@@ -71,10 +31,10 @@ function readVersion(value: string, cards: PreviewCard[]): D1LabVersion {
   return version.version;
 }
 
-function createPreviewCards(includeShowcase: boolean): PreviewCard[] {
+function createPreviewCards(): PreviewCard[] {
   const gallery = document.querySelector<HTMLElement>('#lab-gallery')!;
   gallery.replaceChildren();
-  const versions = D1_LAB_VERSIONS.filter(version => includeShowcase || version.id !== 'showcase');
+  const versions = D1_LAB_VERSIONS;
   gallery.setAttribute('aria-label', `${versions.length} 套渲染版本`);
   document.querySelector<HTMLButtonElement>('#lab-show-all')!.textContent = `← 返回全部 ${versions.length} 版`;
   return versions.map(version => {
@@ -94,9 +54,9 @@ function createPreviewCards(includeShowcase: boolean): PreviewCard[] {
   });
 }
 
-function createStudio(host: HTMLElement, cards: PreviewCard[], projection: Projection, embedded: boolean) {
+function createStudio(host: HTMLElement, cards: PreviewCard[], projection: Projection) {
   const renderer = new THREE.WebGLRenderer({ antialias: true });
-  renderer.setPixelRatio(Math.min(devicePixelRatio, embedded ? 1 : 2));
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
   renderer.toneMapping = THREE.NeutralToneMapping;
   renderer.toneMappingExposure = 1;
   renderer.shadowMap.enabled = true;
@@ -140,8 +100,6 @@ function createStudio(host: HTMLElement, cards: PreviewCard[], projection: Proje
   scene.add(ground);
 
   let views: Array<{ version: D1LabVersion; x: number; y: number; width: number; height: number }> = [];
-  let needsRender = true;
-  controls.addEventListener('change', () => { needsRender = true; });
   let viewAspect = 1;
   let frameHeight = 4.3;
   let frameWidth = 2.1;
@@ -172,7 +130,6 @@ function createStudio(host: HTMLElement, cards: PreviewCard[], projection: Proje
     updateProjection(aspect);
     controls.rotateSpeed = host.clientHeight / views[0]!.height;
     renderer.setSize(host.clientWidth, host.clientHeight);
-    needsRender = true;
   };
   const resize = new ResizeObserver(resizeViewport);
   resize.observe(host);
@@ -185,7 +142,6 @@ function createStudio(host: HTMLElement, cards: PreviewCard[], projection: Proje
   return {
     renderer, scene, camera, controls, key, setLightAngle,
     resize: resizeViewport,
-    needsRender: () => needsRender,
     frame(head: boolean, angle: number) {
       frameHeight = head ? (projection === 'orthographic' ? 1.5 : 1.55) : 4.3;
       frameWidth = head ? frameHeight : 2.1;
@@ -198,7 +154,6 @@ function createStudio(host: HTMLElement, cards: PreviewCard[], projection: Proje
       controls.update();
     },
     render(look: ReturnType<typeof applyD1LabLooks>) {
-      needsRender = false;
       renderer.setScissorTest(false);
       renderer.clear();
       renderer.setScissorTest(true);
@@ -226,7 +181,6 @@ function createStudio(host: HTMLElement, cards: PreviewCard[], projection: Proje
       fill.dispose();
       ground.geometry.dispose();
       ground.material.dispose();
-      if (embedded) renderer.forceContextLoss();
       renderer.dispose();
       renderer.domElement.remove();
     },
@@ -292,8 +246,12 @@ function bindGallery(studio: ReturnType<typeof createStudio>, cards: PreviewCard
 
 function bindHairControl(hairStyle: HairStyle, signal: AbortSignal): void {
   const buttons = document.querySelectorAll<HTMLButtonElement>('[data-hair]');
-  for (const button of buttons) button.setAttribute('aria-pressed', String(button.dataset.hair === hairStyle));
-  if (hairStyle === 'showcase') {
+  for (const button of buttons) {
+    const hair = readHairStyle(button.dataset.hair!);
+    button.setAttribute('aria-pressed', String(hair === hairStyle));
+    button.textContent = `${String(HAIR_NUMBERS[hair]).padStart(2, '0')} · ${button.textContent}`;
+  }
+  if (hairStyle === 'showcase' || hairStyle === 'game-detailed') {
     document.querySelector<HTMLElement>('#lab-hair-version-hint')!.textContent = '已单独保留这次链接中的白色基础服游戏标准版、完整头发和原动作；原材质基准与全部实验渲染使用统一棚光。';
     document.querySelector<HTMLElement>('#lab-hair-hint')!.textContent = '此项保留展示场头发，随原骨骼动作，不叠加实验发梢变形。';
     document.querySelector<HTMLInputElement>('#lab-hair-motion')!.checked = false;
@@ -304,17 +262,19 @@ function bindHairControl(hairStyle: HairStyle, signal: AbortSignal): void {
     document.querySelector<HTMLElement>('.lab-definition dl > div:last-child dd')!.textContent = '本次展示场完整发型已单独保留，原材质基准与全部渲染统一比较；顶部链接打开当前展示场，会随正式模型更新。';
     const link = document.querySelector<HTMLAnchorElement>('#lab-showcase-link')!;
     link.href = './?mode=showcase&stageActor=d1.idle,1,0,1.5708,0,1,1,game,1&stageZoom=3.5&stageAngle=0&stageEnvironment=surface&textures=web-1k';
+    if (hairStyle === 'game-detailed') {
+      link.href = './?mode=showcase&stageActor=d1.idle,1,0,1.5708,0,1,1,detailed,1&stageZoom=3.5&stageEnvironment=surface&textures=web-1k';
+      document.querySelector<HTMLElement>('#lab-hair-version-hint')!.textContent = '游戏当前精细检查版，直接复用正式模型、完整头发和原生眼睛着色；与01历史游戏标准版对照。';
+    }
     link.textContent = '查看当前展示场 ↗';
   }
-  if (hairStyle === 'authored' || hairStyle === 'sculpted' || isBlenderHair(hairStyle)) {
+  if (isBlenderHair(hairStyle)) {
     const animation = document.querySelector<HTMLSelectElement>('#lab-animation-version')!;
     animation.options[0]!.text = '逐束动态';
     animation.options[1]!.text = '刚性跟随对照';
-    document.querySelector<HTMLElement>('#lab-hair-hint')!.textContent = isBlenderHair(hairStyle)
-      ? '发根与编辫固定，发梢随头部运动弯曲；可关闭惯性检查贴合。'
-      : '各束独立摆动，发根保持连接；可关闭惯性查看静态轮廓。';
+    document.querySelector<HTMLElement>('#lab-hair-hint')!.textContent = '发根与编辫固定，发梢随头部运动弯曲；可关闭惯性检查贴合。';
   }
-  if (hairStyle === 'blender-d12' || hairStyle === 'blender-crown-sweep' || hairStyle === 'blender-remake') {
+  if (hairStyle === 'blender-d12') {
     const hairMotion = document.querySelector<HTMLInputElement>('#lab-hair-motion')!;
     hairMotion.checked = false;
     hairMotion.disabled = true;
@@ -325,18 +285,12 @@ function bindHairControl(hairStyle: HairStyle, signal: AbortSignal): void {
     document.querySelector<HTMLElement>('#lab-hair-hint')!.textContent = '保留 D12 发型与原骨架动作，逐束惯性待适配。';
     document.querySelector<HTMLElement>('.lab-definition dl > div:last-child dd')!.textContent = 'D12 使用当前 Blender 发型的真实发丝与编辫，随原骨架动作；逐束惯性待适配。各阶段造型均可切换对比。';
   }
-  if (hairStyle === 'blender-remake') {
-    document.querySelector<HTMLElement>('#lab-hair-version-hint')!.textContent = 'D14 细发丝全维重制版（38,720 根真实发丝 + 双编辫）：消除旧版帽子感、后脑触角、发旋露皮与耳下鼓包，可与 D12 和旧版切换对照。';
-  }
-  if (hairStyle === 'blender-crown-sweep') {
-    document.querySelector<HTMLElement>('#lab-hair-version-hint')!.textContent = '冠发顺流阶段稿：调整三组冠发的出根方向与内层衔接，保留 D12 供正侧面对照。局部弧线更顺，整体原画轮廓仍待调整。';
-  }
   for (const button of buttons) button.addEventListener('click', () => {
     const selected = readHairStyle(button.dataset.hair!);
     if (selected === hairStyle) return;
     const url = new URL(location.href);
     url.searchParams.set('hair', selected);
-    if (selected !== 'showcase' && url.searchParams.get('version') === 'showcase') url.searchParams.delete('version');
+    if (!SPHERICAL_EYE_MODELS.includes(selected)) url.searchParams.set('eyes', 'patch');
     location.assign(url.href);
   }, { signal });
 }
@@ -390,23 +344,69 @@ function bindMotionControls(motion: ReturnType<typeof createD1LabMotion>, signal
   return sync;
 }
 
+function bindGazeControls(canvas: HTMLCanvasElement, rig: ReturnType<typeof createD1Rig>, signal: AbortSignal): void {
+  const controls = document.querySelector<HTMLFieldSetElement>('#lab-gaze-controls')!;
+  controls.hidden = controls.disabled = !rig.hasSphericalEyes;
+  if (!rig.hasSphericalEyes) return;
+  const mode = document.querySelector<HTMLSelectElement>('#lab-gaze-mode')!;
+  const yaw = document.querySelector<HTMLInputElement>('#lab-gaze-yaw')!;
+  const pitch = document.querySelector<HTMLInputElement>('#lab-gaze-pitch')!;
+  const yawValue = document.querySelector<HTMLOutputElement>('#lab-gaze-yaw-value')!;
+  const pitchValue = document.querySelector<HTMLOutputElement>('#lab-gaze-pitch-value')!;
+  const buttons = document.querySelectorAll<HTMLButtonElement>('[data-gaze-yaw]');
+  const sync = (): void => {
+    yaw.disabled = pitch.disabled = mode.value !== 'manual';
+    const automatic = mode.value === 'auto';
+    yawValue.value = automatic ? '自动' : `${yaw.value}°`;
+    pitchValue.value = automatic ? '自动' : `${pitch.value}°`;
+    for (const button of buttons) button.setAttribute('aria-pressed', String(mode.value === 'manual' && Number(button.dataset.gazeYaw) === yaw.valueAsNumber && Number(button.dataset.gazePitch) === pitch.valueAsNumber));
+    rig.setEyeGaze(automatic ? null : new THREE.Vector2(THREE.MathUtils.degToRad(yaw.valueAsNumber), THREE.MathUtils.degToRad(pitch.valueAsNumber)));
+  };
+  mode.addEventListener('change', sync, { signal });
+  yaw.addEventListener('input', sync, { signal });
+  pitch.addEventListener('input', sync, { signal });
+  for (const button of buttons) button.addEventListener('click', () => {
+    mode.value = 'manual';
+    yaw.value = button.dataset.gazeYaw!;
+    pitch.value = button.dataset.gazePitch!;
+    sync();
+  }, { signal });
+  const viewports = [...document.querySelectorAll<HTMLElement>('.lab-card-viewport')];
+  canvas.addEventListener('pointermove', event => {
+    if (mode.value !== 'pointer' || event.buttons !== 0) return;
+    const rect = viewports.map(viewport => viewport.getBoundingClientRect()).find(rect => event.clientX >= rect.left && event.clientX <= rect.right && event.clientY >= rect.top && event.clientY <= rect.bottom);
+    if (!rect) return;
+    // shortcut: 鼠标映射头部局部角度；需要侧视下精确追踪空间物体时再接世界坐标目标。
+    yaw.value = String(Math.round(THREE.MathUtils.clamp((event.clientX - rect.left) / rect.width * 2 - 1, -1, 1) * Number(yaw.max)));
+    pitch.value = String(Math.round(THREE.MathUtils.clamp(1 - (event.clientY - rect.top) / rect.height * 2, -1, 1) * Number(pitch.max)));
+    sync();
+  }, { signal });
+  canvas.addEventListener('pointerleave', () => {
+    if (mode.value !== 'pointer') return;
+    yaw.value = pitch.value = '0';
+    sync();
+  }, { signal });
+  sync();
+}
+
 function bindControls(studio: ReturnType<typeof createStudio>, motion: ReturnType<typeof createD1LabMotion>, look: ReturnType<typeof applyD1LabLooks>, rig: ReturnType<typeof createD1Rig>, variant: D1AnimatedVariant, signal: AbortSignal): () => void {
   const params = new URLSearchParams(location.search);
   const framing = params.get('framing') ?? 'body';
   if (framing !== 'body' && framing !== 'head') throw new Error(`未知取景范围：${framing}`);
   let head = framing === 'head';
   let angle = Number(params.get('angle') ?? '45');
-  if (![-90, -45, 0, 45, 90, 180].includes(angle)) throw new Error(`未知观察角度：${angle}`);
+  if (!Number.isFinite(angle)) throw new Error(`观察角度需要有限数值：${params.get('angle')}`);
   const frame = (): void => {
     studio.frame(head, angle);
     const url = new URL(location.href);
     url.searchParams.set('framing', head ? 'head' : 'body');
     url.searchParams.set('angle', String(angle));
     history.replaceState(null, '', url);
+    syncPreviewNavigation();
   };
   const referenceImage = document.querySelector<HTMLImageElement>('#lab-reference-image')!;
   const referenceLink = document.querySelector<HTMLAnchorElement>('#lab-reference-link')!;
-  const referenceLabel = variant === 'game' ? '基础版 · 白色基础服' : '外服 · 细腿定稿';
+  const referenceLabel = variant === 'game' || variant === 'detailed' ? '基础版 · 白色基础服' : '外服 · 细腿定稿';
   referenceImage.src = D1_ARTWORK[variant];
   referenceImage.alt = `D1 ${referenceLabel}原画，包含正面、侧面与背面多视图`;
   referenceLink.href = D1_ARTWORK[variant];
@@ -442,27 +442,7 @@ function bindControls(studio: ReturnType<typeof createStudio>, motion: ReturnTyp
   automatic.addEventListener('change', changeClosure, { signal });
   closure.addEventListener('input', changeClosure, { signal });
   changeClosure();
-  const gazeControls = document.querySelector<HTMLFieldSetElement>('#lab-gaze-controls')!;
-  gazeControls.hidden = !rig.hasSphericalEyes;
-  gazeControls.disabled = !rig.hasSphericalEyes;
-  const autoGaze = document.querySelector<HTMLInputElement>('#lab-auto-gaze')!;
-  const yaw = document.querySelector<HTMLInputElement>('#lab-gaze-yaw')!;
-  const pitch = document.querySelector<HTMLInputElement>('#lab-gaze-pitch')!;
-  const changeGaze = (): void => {
-    yaw.disabled = pitch.disabled = autoGaze.checked;
-    document.querySelector<HTMLOutputElement>('#lab-gaze-yaw-value')!.value = autoGaze.checked ? '自动' : `${yaw.value}°`;
-    document.querySelector<HTMLOutputElement>('#lab-gaze-pitch-value')!.value = autoGaze.checked ? '自动' : `${pitch.value}°`;
-    rig.setEyeGaze(autoGaze.checked ? null : new THREE.Vector2(THREE.MathUtils.degToRad(yaw.valueAsNumber), THREE.MathUtils.degToRad(pitch.valueAsNumber)));
-  };
-  autoGaze.addEventListener('change', changeGaze, { signal });
-  yaw.addEventListener('input', changeGaze, { signal });
-  pitch.addEventListener('input', changeGaze, { signal });
-  document.querySelector<HTMLButtonElement>('#lab-gaze-center')!.addEventListener('click', () => {
-    autoGaze.checked = false;
-    yaw.value = pitch.value = '0';
-    changeGaze();
-  }, { signal });
-  if (rig.hasSphericalEyes) changeGaze();
+  bindGazeControls(studio.renderer.domElement, rig, signal);
   const animation = document.querySelector<HTMLSelectElement>('#lab-animation-version')!;
   const animationVersion = params.get('animation') ?? 'refined';
   if (animationVersion !== 'original' && animationVersion !== 'refined') throw new Error(`未知模型动画版本：${animationVersion}`);
@@ -496,23 +476,24 @@ function bindControls(studio: ReturnType<typeof createStudio>, motion: ReturnTyp
 }
 
 async function start(): Promise<void> {
+  syncPreviewNavigation();
   const params = new URLSearchParams(location.search);
-  const embedded = document.documentElement.classList.contains('lab-embedded');
   const projection = params.get('projection') ?? 'perspective';
   if (projection !== 'perspective' && projection !== 'orthographic') throw new Error(`未知镜头方式：${projection}`);
-  const hairStyle = readHairStyle(params.get('hair') ?? 'blender');
-  const eyeStyle = params.get('eyes') ?? 'patch';
+  const hairStyle = readHairStyle(params.get('hair') ?? 'showcase');
+  const eyeStyle = params.get('eyes') ?? (DEFAULT_SPHERICAL_EYE_MODELS.includes(hairStyle) ? 'sphere' : 'patch');
   if (eyeStyle !== 'patch' && eyeStyle !== 'sphere') throw new Error(`未知眼睛版本：${eyeStyle}`);
   if (eyeStyle === 'sphere' && !SPHERICAL_EYE_MODELS.includes(hairStyle)) throw new Error('球形眼睛需要眼周修复版或之后的模型；请先切换模型版本');
-  const hairFamily = hairStyle === 'classic' ? 'classic' : isBlenderHair(hairStyle) ? 'blender' : 'rodin';
-  const variant = hairStyle === 'showcase' ? 'game' : 'outfit';
-  const cards = createPreviewCards(hairStyle === 'showcase');
+  const hairFamily = isBlenderHair(hairStyle) ? 'blender' : 'rodin';
+  const nativeHair = hairStyle === 'showcase' || hairStyle === 'game-detailed';
+  const variant = hairStyle === 'showcase' ? 'game' : hairStyle === 'game-detailed' ? 'detailed' : 'outfit';
+  const cards = createPreviewCards();
   const status = document.querySelector<HTMLElement>('#lab-status')!;
-  const studio = createStudio(document.querySelector<HTMLElement>('#lab-canvas')!, cards, projection, embedded);
+  const studio = createStudio(document.querySelector<HTMLElement>('#lab-canvas')!, cards, projection);
   const events = new AbortController();
   let rig: ReturnType<typeof createD1Rig> | null = null;
   let look: ReturnType<typeof applyD1LabLooks> | null = null;
-  let fit: ReturnType<typeof fitD1LabHair> | null = null;
+  let fit: ReturnType<typeof contourD1LabHair> | null = null;
   let motion: ReturnType<typeof createD1LabMotion> | null = null;
   let eyeAsset: THREE.Object3D | null = null;
   let disposed = false;
@@ -549,26 +530,24 @@ async function start(): Promise<void> {
       location.assign(url.href);
     }, { signal: events.signal });
     if (eyeStyle === 'sphere') {
-      for (const button of document.querySelectorAll<HTMLButtonElement>('[data-hair]')) button.disabled = !SPHERICAL_EYE_MODELS.includes(button.dataset.hair!);
-      const loaded = await loadCharacterModel('./characters/human/render-lab/d1-spherical-eyes-v2.glb', 'original');
+      const loaded = await loadCharacterModel('./characters/human/render-lab/d1-spherical-eyes-v3.glb', 'original');
       if (disposed) { disposeModelResources(loaded.scene); return; }
       eyeAsset = loaded.scene;
     }
     // 独立文档只替换这一项资源，继续复用游戏的模型加载、尺寸与骨骼装配。
-    const hairAsset = hairStyle === 'showcase' ? HAIR_ASSETS.showcase : isBlenderHair(hairStyle) ? HAIR_ASSETS[hairStyle] : HAIR_ASSETS[hairFamily];
+    const hairAsset = HAIR_ASSETS[hairStyle];
     const modelPath = characterModelPath(D1_ANIMATED_MODELS.find(model => model.id === variant)!.path, 'web-1k');
     THREE.DefaultLoadingManager.setURLModifier(url => url === modelPath ? hairAsset : url);
     await loadD1Asset(variant, 'web-1k');
     if (disposed) return;
     const actor = createD1Rig(variant, 'anime', 'web-1k', eyeAsset ?? undefined);
     rig = actor;
-    if (hairStyle === 'rodin-fit') fit = fitD1LabHair(actor.root);
     if (hairStyle === 'rodin-contour') fit = contourD1LabHair(actor.root);
-    const material = applyD1LabLooks(actor.root, hairStyle === 'showcase' || hairStyle === 'authored' || hairStyle === 'sculpted' ? hairStyle : hairFamily);
+    const material = applyD1LabLooks(actor.root, nativeHair ? 'showcase' : hairFamily);
     look = material;
     studio.scene.add(actor.root);
     // 基础版赤脚，不能使用从外服版鞋底生成的实验步态。
-    motion = createD1LabMotion(actor, () => material.resetMotion(), hairStyle === 'showcase' ? null : createD1LabGaits(actor));
+    motion = createD1LabMotion(actor, () => material.resetMotion(), nativeHair ? null : createD1LabGaits(actor));
     bindGallery(studio, cards, events.signal);
     const syncMotion = bindControls(studio, motion, material, actor, variant, events.signal);
     await studio.renderer.compileAsync(studio.scene, studio.camera);
@@ -576,53 +555,8 @@ async function start(): Promise<void> {
     document.querySelector<HTMLFieldSetElement>('#lab-controls')!.disabled = false;
     document.querySelector<HTMLFieldSetElement>('#lab-hair-controls')!.disabled = false;
     status.hidden = true;
-    let savePreview: (() => void) | null = null;
-    if (embedded) {
-      studio.controls.enableDamping = false;
-      let receiving = false;
-      let previewTimer: ReturnType<typeof setTimeout>;
-      savePreview = (): void => {
-        clearTimeout(previewTimer);
-        previewTimer = setTimeout(() => {
-          studio.render(material);
-          window.parent.postMessage({ type: 'd1-gallery-preview', image: studio.renderer.domElement.toDataURL('image/webp', .85) } satisfies D1GalleryMessage, location.origin);
-        }, 120);
-      };
-      events.signal.addEventListener('abort', () => clearTimeout(previewTimer), { once: true });
-      studio.controls.addEventListener('change', () => {
-        savePreview!();
-        if (receiving) return;
-        const message: D1GalleryMessage = {
-          type: 'd1-gallery-camera', position: studio.camera.position.toArray(),
-          target: studio.controls.target.toArray(), zoom: studio.camera.zoom,
-        };
-        window.parent.postMessage(message, location.origin);
-      });
-      window.addEventListener('message', (event: MessageEvent<D1GalleryMessage>) => {
-        if (event.origin !== location.origin || event.source !== window.parent || event.data.type !== 'd1-gallery-camera') return;
-        receiving = true;
-        studio.camera.position.fromArray(event.data.position);
-        studio.controls.target.fromArray(event.data.target);
-        studio.camera.zoom = event.data.zoom;
-        studio.camera.updateProjectionMatrix();
-        studio.controls.update();
-        receiving = false;
-        studio.render(material);
-      }, { signal: events.signal });
-      studio.render(material);
-      savePreview();
-      window.parent.postMessage({ type: 'd1-gallery-ready' } satisfies D1GalleryMessage, location.origin);
-    }
     let previous = performance.now();
     studio.renderer.setAnimationLoop(now => {
-      if (embedded) {
-        const changed = studio.controls.update();
-        if (changed || studio.needsRender()) {
-          studio.render(material);
-          savePreview!();
-        }
-        return;
-      }
       const dt = Math.min((now - previous) / 1000, .05);
       previous = now;
       const actualDt = motion!.update(dt);
@@ -643,5 +577,4 @@ void start().catch(error => {
   status.dataset.error = '';
   status.setAttribute('role', 'alert');
   status.textContent = `渲染实验加载失败\n${error instanceof Error ? error.message : String(error)}`;
-  if (document.documentElement.classList.contains('lab-embedded')) window.parent.postMessage({ type: 'd1-gallery-error' } satisfies D1GalleryMessage, location.origin);
 });

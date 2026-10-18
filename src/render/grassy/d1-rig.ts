@@ -3,7 +3,7 @@ import type { GLTF } from 'three/addons/loaders/GLTFLoader.js';
 import { clone } from 'three/addons/utils/SkeletonUtils.js';
 import { D1_ACTIONS, D1_ANIMATED_MODELS, type D1AnimatedVariant, type D1Shading, GRASSY_HEIGHT, type D1Action } from '../../config/grassy.ts';
 import { createD1Material, createD1OutlineMaterial, d1EyeControl, prepareD1Model } from './d1-anime-material.ts';
-import { characterTextureTier, loadCharacterModel, type TextureTier } from '../character-model.ts';
+import { characterModelPath, characterTextureTier, loadCharacterModel, type TextureTier } from '../character-model.ts';
 import { disposeModelResources } from '../model-resources.ts';
 import { installD1SphericalEyes } from './d1-spherical-eyes.ts';
 
@@ -12,8 +12,12 @@ interface D1Asset {
   clips: Record<D1Action, THREE.AnimationClip>;
 }
 
-type D1AssetKey = `${D1AnimatedVariant}:${TextureTier}`;
+type D1AssetKey = `${D1AnimatedVariant}:${TextureTier}:${string}`;
 const assets = new Map<D1AssetKey, D1Asset>();
+function assetKey(variant: D1AnimatedVariant, tier: TextureTier, sourcePath?: string): D1AssetKey {
+  const path = sourcePath ?? characterModelPath(D1_ANIMATED_MODELS.find(model => model.id === variant)!.path, tier);
+  return `${variant}:${tier}:${path}`;
+}
 // 眨眼：间隔随机 2–6 秒；真实眨眼合得快、睁得慢，闭合度按 合 0.08 s → 停 0.03 s → 睁 0.14 s 缓动。
 // 注视每 1–4 秒换一个小偏移（虹膜半径为单位），按指数趋近而非瞬移；眨眼期间注视不动，免得闭眼时虹膜在缝里滑动。
 const BLINK_INTERVAL = [2, 6] as const;
@@ -28,7 +32,6 @@ const smooth = (t: number) => t * t * (3 - 2 * t);
 const blinkClosure = (t: number) => t < BLINK_CLOSE ? smooth(t / BLINK_CLOSE) : t < BLINK_CLOSE + BLINK_HOLD ? 1 : 1 - smooth(Math.min(1, (t - BLINK_CLOSE - BLINK_HOLD) / BLINK_OPEN));
 const between = ([min, max]: readonly [number, number]) => min + Math.random() * (max - min);
 const loading = new Map<D1AssetKey, Promise<void>>();
-let generation = 0;
 
 function readAsset(gltf: GLTF): D1Asset {
   const { scene, animations } = gltf;
@@ -58,14 +61,13 @@ function readAsset(gltf: GLTF): D1Asset {
   }
 }
 
-export function loadD1Asset(variant: D1AnimatedVariant, tier: TextureTier = characterTextureTier()): Promise<void> {
-  const key: D1AssetKey = `${variant}:${tier}`;
+export function loadD1Asset(variant: D1AnimatedVariant, tier: TextureTier = characterTextureTier(), sourcePath?: string): Promise<void> {
+  const key = assetKey(variant, tier, sourcePath);
   let pending = loading.get(key);
   if (!pending) {
-    const { path } = D1_ANIMATED_MODELS.find(model => model.id === variant)!;
-    const requestedGeneration = generation;
-    pending = loadCharacterModel(path, tier).then(gltf => {
-      if (requestedGeneration !== generation) { disposeModelResources(gltf.scene); return; }
+    const path = sourcePath ?? D1_ANIMATED_MODELS.find(model => model.id === variant)!.path;
+    pending = loadCharacterModel(path, sourcePath === undefined ? tier : 'original').then(gltf => {
+      if (loading.get(key) !== pending) { disposeModelResources(gltf.scene); return; }
       assets.set(key, readAsset(gltf));
     }).catch(error => { if (loading.get(key) === pending) loading.delete(key); throw error; });
     loading.set(key, pending);
@@ -74,8 +76,8 @@ export function loadD1Asset(variant: D1AnimatedVariant, tier: TextureTier = char
 }
 
 /** 游戏和展示场共享模型与动作；实例只拥有骨骼、混合器和场景材质。 */
-export function createD1Rig(variant: D1AnimatedVariant, shading: D1Shading, tier: TextureTier = characterTextureTier(), sphericalEyeScene?: THREE.Object3D) {
-  const asset = assets.get(`${variant}:${tier}`);
+export function createD1Rig(variant: D1AnimatedVariant, shading: D1Shading, tier: TextureTier = characterTextureTier(), sphericalEyeScene?: THREE.Object3D, sourcePath?: string) {
+  const asset = assets.get(assetKey(variant, tier, sourcePath));
   if (!asset) throw new Error('D1 动画模型尚未加载；请先等待 loadD1Asset()');
   const model = clone(asset.scene) as THREE.Group;
   const sphericalEyes = sphericalEyeScene ? installD1SphericalEyes(model, sphericalEyeScene) : null;
@@ -170,8 +172,15 @@ export function createD1Rig(variant: D1AnimatedVariant, shading: D1Shading, tier
 }
 
 /** 先释放实例，再释放缓存；已退出场景的在途加载不会重新填充缓存。 */
+export function disposeD1Asset(variant: D1AnimatedVariant, tier: TextureTier, sourcePath: string): void {
+  const key = assetKey(variant, tier, sourcePath);
+  const asset = assets.get(key);
+  if (asset) disposeModelResources(asset.scene);
+  assets.delete(key);
+  loading.delete(key);
+}
+
 export function disposeD1Assets(): void {
-  generation++;
   for (const asset of assets.values()) disposeModelResources(asset.scene);
   assets.clear();
   loading.clear();

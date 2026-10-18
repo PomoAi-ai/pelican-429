@@ -1,3 +1,5 @@
+@import './d1-preview-nav.css';
+
 :root {
   font-family: 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', system-ui, sans-serif;
   color: #403b34;
@@ -48,7 +50,7 @@ button:disabled, input:disabled, select:disabled { cursor: default; opacity: .45
 .lab-status { position: absolute; inset: 0; display: grid; place-content: center; padding: 30px; font-size: 13px; white-space: pre-wrap; text-align: center; background: #e4dfd6eb; }
 .lab-status[hidden] { display: none; }
 .lab-status[data-error] { color: #9a402c; }
-.lab-panel { position: sticky; top: 0; max-height: 100dvh; padding: 30px 26px 24px; overflow-y: auto; background: #f7f4ee; border-left: 1px solid #41372b12; }
+.lab-panel { position: sticky; top: var(--d1-preview-nav-height); max-height: calc(100dvh - var(--d1-preview-nav-height)); padding: 30px 26px 24px; overflow-y: auto; background: #f7f4ee; border-left: 1px solid #41372b12; }
 .lab-eyebrow { font-size: 9px; letter-spacing: .2em; color: #9a8c7b; margin: 0 0 11px; }
 .lab-intro h2 { margin: 0 0 12px; font-size: 23px; font-weight: 500; letter-spacing: .06em; }
 .lab-intro > p:last-child { font-size: 12px; line-height: 1.9; color: #8a7d6e; margin: 0 0 24px; }
@@ -114,9 +116,8 @@ input[type='range'] { display: block; width: 100%; height: 18px; accent-color: v
 .lab-hair-buttons button:hover { border-color: #a99576; }
 .lab-hair-buttons button[aria-pressed='true'] { color: #fff; background: #715d40; border-color: #715d40; }
 .lab-hair-picker .lab-version-description { margin: 10px 0 0; }
-.lab-embedded .lab-header, .lab-embedded .lab-hair-picker, .lab-embedded .lab-panel,
-.lab-embedded .lab-stage-toolbar, .lab-embedded .lab-stage-help, .lab-embedded .lab-stage-note { display: none; }
-.lab-embedded .lab-layout { display: block; min-height: 0; }
-.lab-embedded .lab-stage[data-view-mode='focus'] { height: 100dvh; min-height: 0; }
-.lab-embedded .lab-stage[data-view-mode='focus'] .lab-gallery { inset: 0; }
 @media (max-width: 550px) { .lab-hair-picker { padding: 14px 16px; }.lab-hair-buttons { gap: 6px; }.lab-hair-buttons button { font-size: 10px; padding: 8px; } }
+
+.lab-gaze-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; margin-top: 12px; }
+.lab-gaze-grid button { min-height: 32px; border: 1px solid #d9d0c3; border-radius: 4px; background: #f9f7f1; font-size: 13px; }
+.lab-gaze-grid button[aria-pressed='true'] { background: #e9e2d6; border-color: #a99576; }

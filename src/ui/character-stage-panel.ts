@@ -1,3 +1,4 @@
+import { CHARACTER_STAGE_LOOK } from '../config/character-stage-look.ts';
 import { D1_ARTWORK, type ShowcaseCard } from '../config/showcase.ts';
 import { ART_LIBRARY_GROUPS, type ArtLibraryEntry, type ArtLibraryImage } from '../config/art-library.ts';
 import type { ShowcaseModel } from './showcase-model.ts';
@@ -191,6 +192,12 @@ export function createCharacterStagePanel(parent: HTMLElement, model: ShowcaseMo
   button(controls, '▶ 播放', () => model.all({ playing: true }));
   button(controls, 'Ⅱ 暂停', () => model.all({ playing: false }));
   button(controls, '↺ 重播', () => model.reset());
+  const rulerToggle = button(controls, '格子标尺', () => {
+    const shown = model.cards.some(card => model.entry(card.entryId).actor === 'ruler');
+    model.selectActor('ruler', !shown);
+    applyEnvironment();
+  });
+  rulerToggle.title = '显示或隐藏格子标尺，1 格 = 1 世界单位';
   const environmentLabel = element('label', controls, 'sc-control', '环境');
   const environment = element('select', environmentLabel, ''); environment.setAttribute('aria-label', '场景环境');
   for (const [value, label] of [['surface', '地上'], ['underground', '地下']] as const) {
@@ -199,7 +206,7 @@ export function createCharacterStagePanel(parent: HTMLElement, model: ShowcaseMo
   environment.value = view.environment;
   const sunLabel = element('label', controls, 'sc-stage-zoom', '太阳');
   const sun = element('input', sunLabel, '');
-  sun.type = 'range'; sun.min = '-1'; sun.max = '1'; sun.step = '0.01'; sun.value = '-0.5'; sun.setAttribute('aria-label', '太阳位置');
+  sun.type = 'range'; sun.min = '-1'; sun.max = '1'; sun.step = '0.01'; sun.value = String(CHARACTER_STAGE_LOOK.sunPosition); sun.setAttribute('aria-label', '太阳位置');
   const sunPosition = element('output', sunLabel, '');
   const updateSunPosition = (): void => {
     const position = Number(sun.value);
@@ -295,6 +302,9 @@ export function createCharacterStagePanel(parent: HTMLElement, model: ShowcaseMo
     }
     selectActor(selectedId);
     refreshDirectory();
+    const hasRuler = model.cards.some(card => model.entry(card.entryId).actor === 'ruler');
+    rulerToggle.setAttribute('aria-pressed', String(hasRuler));
+    rulerToggle.disabled = model.full && !hasRuler;
     count.textContent = `${model.cards.length} / ${model.catalog.maxCards}`;
     empty.hidden = model.cards.length !== 0;
   };

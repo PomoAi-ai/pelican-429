@@ -8,12 +8,20 @@
     <link rel="stylesheet" href="./src/ui/d1-hair-gallery.css" />
   </head>
   <body>
+    <nav class="d1-preview-nav" aria-label="D1 预览页面">
+      <a href="./render-lab.html" data-preview="lab">渲染实验</a>
+      <a href="./d1-hair-gallery.html" data-preview="gallery" aria-current="page">全部头发预览</a>
+      <a href="./render-lab.html?hair=showcase&amp;framing=head&amp;angle=0&amp;projection=orthographic" data-preview="head">头部对比预览</a>
+    </nav>
     <header class="hair-header">
       <div><p>PELICAN 429 / HAIR COLLECTION</p><h1>全部头发预览</h1></div>
-      <a href="./render-lab.html">打开渲染实验 ↗</a>
     </header>
     <nav class="hair-toolbar" aria-label="预览设置">
       <div class="hair-control"><span>统一渲染</span><div id="hair-looks" class="hair-buttons" role="group" aria-label="渲染风格"></div></div>
+      <div class="hair-control"><span>光照环境</span><div id="hair-environments" class="hair-buttons" role="group" aria-label="光照环境">
+        <button type="button" data-environment="game" aria-pressed="true">游戏日光 · 展示场同款</button>
+        <button type="button" data-environment="studio" aria-pressed="false">检查棚光</button>
+      </div></div>
       <div class="hair-control"><span>统一视角</span><div id="hair-angles" class="hair-buttons" role="group" aria-label="查看角度">
         <button type="button" data-angle="0" aria-pressed="true">正面</button>
         <button type="button" data-angle="45" aria-pressed="false">45°</button>

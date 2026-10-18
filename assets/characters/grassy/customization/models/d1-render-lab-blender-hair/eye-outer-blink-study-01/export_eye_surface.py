@@ -9,7 +9,7 @@ HERE=Path(__file__).resolve().parent;BASE=HERE.parent
 ROOT=next(p for p in HERE.parents if (p/'package.json').is_file())
 sys.path.insert(0,str(BASE))
 from publish_hair import read_glb
-SOURCE=ROOT/'public/characters/human/render-lab/d1-outfit-blender-temple-root-v1.glb'
+SOURCE=BASE/'_shared-inputs/head-body-container.glb'
 BLEND=HERE/'draft-02-corrected/Eye-Surface-Verified.blend'
 OUT=HERE/'export'
 TARGET=OUT/'d1-outfit-blender-eye-surface-v1.glb'

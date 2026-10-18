@@ -5,7 +5,6 @@ import { createD1FiberMaterial } from './d1-fiber-material.ts';
 import { createD1GouacheMaterial } from './d1-gouache-material.ts';
 import { createD1PaintedMaterial } from './d1-painted-material.ts';
 import { createD1LabHair } from './d1-lab-hair.ts';
-import { createD1AuthoredHair } from './d1-authored-hair.ts';
 import { createD1BlenderHair } from './d1-blender-hair.ts';
 import { installD1FiberRibbons } from './d1-fiber-ribbon.ts';
 import { d1EyeControl } from './d1-anime-material.ts';
@@ -14,7 +13,7 @@ import { studySurface, type StudySource } from './d1-study-surface.ts';
 import { D1_EYELID_MATERIAL, isD1SphericalEyeSurface } from './d1-spherical-eyes.ts';
 
 export const D1_LAB_VERSIONS = [
-  { id: 'showcase', label: '展示场 · 原版材质', description: '链接中的游戏标准版与原版动漫材质；统一棚光，与展示场环境光照不同。' },
+  { id: 'showcase', label: '游戏 · 动漫柔光', description: '复用游戏正式动漫柔光材质与原生眼睛处理；最终明暗由所选光照环境决定。' },
   ...D1_STUDIO_VERSIONS,
   { id: 'v7', label: 'V7 · 发流动画', description: '独立分层着色、随发流移动的高光带，修整发际线。' },
   { id: 'v8', label: 'V8 · 丝绸光泽', description: '双层方向性发丝高光、皮肤柔散射与布料绒光。' },
@@ -26,11 +25,9 @@ type StudyVersion = Exclude<D1LabVersion, D1StudioVersion | 'showcase'>;
 const FACTORIES = { v7: createD1InkMaterial, v8: createD1FiberMaterial, v9: createD1GouacheMaterial, v10: createD1PaintedMaterial } as const;
 
 /** 旧版的材质、几何和着色程序保留；新家族独立拥有自己的材质实例。 */
-export function applyD1LabLooks(root: THREE.Object3D, hairStyle: 'showcase' | 'classic' | 'rodin' | 'authored' | 'sculpted' | 'blender') {
+export function applyD1LabLooks(root: THREE.Object3D, hairStyle: 'showcase' | 'rodin' | 'blender') {
   // 正式头发有两个图元，完整保留原网格，不进入只处理单网格的实验适配。
-  const hair = hairStyle === 'showcase' ? null : hairStyle === 'blender' ? createD1BlenderHair(root) : hairStyle === 'authored' || hairStyle === 'sculpted'
-    ? createD1AuthoredHair(root, hairStyle === 'sculpted' ? 'sculpted' : 'early')
-    : createD1LabHair(root, hairStyle);
+  const hair = hairStyle === 'showcase' ? null : hairStyle === 'blender' ? createD1BlenderHair(root) : createD1LabHair(root);
   const sources: Array<{ mesh: THREE.Mesh; material: THREE.Material | THREE.Material[] }> = [];
   const outlines: THREE.Mesh[] = [];
   root.traverse(node => {
@@ -54,10 +51,10 @@ export function applyD1LabLooks(root: THREE.Object3D, hairStyle: 'showcase' | 'c
     }
     return material;
   };
-  const baseline = hairStyle === 'showcase' ? [...sources.map(({ mesh }) => mesh), ...outlines].map(mesh => ({
+  const baseline = [...sources.map(({ mesh }) => mesh), ...outlines].map(mesh => ({
     mesh, original: mesh.material, visible: mesh.visible, castShadow: mesh.castShadow,
     material: Array.isArray(mesh.material) ? mesh.material.map(cloneBaselineMaterial) : cloneBaselineMaterial(mesh.material),
-  })) : [];
+  }));
   const legacy = applyD1StudioLook(root);
   const studioCastShadows = baseline.map(snapshot => snapshot.mesh.castShadow);
   const eyes = root.userData.d1SphericalEyes ? null : applyD1LabEyes(root);
@@ -89,6 +86,7 @@ export function applyD1LabLooks(root: THREE.Object3D, hairStyle: 'showcase' | 'c
         snapshot.mesh.castShadow = version === 'showcase' ? snapshot.castShadow : studioCastShadows[index]!;
       }
       if (version === 'showcase') {
+        hair?.setEnabled(false);
         for (const snapshot of baseline) snapshot.mesh.material = snapshot.material;
         fiberRibbons.patchCurrentMaterials();
         return;

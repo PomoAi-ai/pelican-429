@@ -252,10 +252,10 @@ export interface StageOptions {
 }
 
 /** 一个页面只拥有一个 WebGL 上下文；多个预览舞台共用它。 */
-export function createStageRenderer(tuning: Tuning): THREE.WebGLRenderer {
+export function createStageRenderer(tuning: Tuning, options: Pick<THREE.WebGLRendererParameters, 'alpha' | 'antialias'> = {}): THREE.WebGLRenderer {
   const r = tuning.render;
   const l = r.lighting;
-  const renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: 'high-performance' });
+  const renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: 'high-performance', ...options });
   // 着色器错误检查让每个程序首次使用时同步读取编译日志；GPU 进程忙时每次往返上百毫秒，新建渲染器（切换透视标签）累计可达十秒。
   // 只在 ?debug 下开启；关闭时着色器出错仍有浏览器的 WebGL 警告。
   renderer.debug.checkShaderErrors = new URLSearchParams(location.search).has('debug');

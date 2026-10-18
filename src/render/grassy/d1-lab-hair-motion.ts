@@ -11,20 +11,13 @@ const AXES = ['x', 'y', 'z'] as const;
 const TRAVEL = new THREE.Vector3(0.024, 0.015, 0.024);
 
 /** 自由发梢分区连续混合；额前、辫子和耳廓下的发根始终固定。 */
-export function createD1LabHairMotionGeometry(source: THREE.BufferGeometry, style: 'classic' | 'rodin', center: THREE.Vector3) {
+export function createD1LabHairMotionGeometry(source: THREE.BufferGeometry, center: THREE.Vector3) {
   const geometry = source.clone();
   const position = geometry.getAttribute('position');
-  const uv = geometry.getAttribute('uv');
   const offsets = Array.from({ length: REGIONS.length * AXES.length }, () => new Float32Array(position.count * 3));
   for (let i = 0; i < position.count; i++) {
     const x = position.getX(i) - center.x, y = position.getY(i), z = position.getZ(i) - center.z;
     let flexibility = 1 - THREE.MathUtils.smoothstep(y, 2.04, 2.3);
-    if (style === 'classic') {
-      const atlasY = (1 - uv.getY(i)) * 10;
-      const cell = Math.floor(atlasY) * 10 + Math.floor(uv.getX(i) * 10);
-      const progress = (atlasY % 1 - 0.04) / 0.92;
-      flexibility *= uv.getY(i) >= 0.1 && cell < 77 ? THREE.MathUtils.smoothstep(progress, 0.5, 0.96) : 0;
-    }
     const earRoot = THREE.MathUtils.smoothstep(y, 2.18, 2.26)
       * THREE.MathUtils.smoothstep(Math.abs(x), 0.24, 0.32)
       * THREE.MathUtils.smoothstep(z, -0.3, -0.2)

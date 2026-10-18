@@ -20,15 +20,19 @@ export function createD1SphericalEyeMaterial(source: THREE.MeshStandardMaterial)
     shader.fragmentShader = injectAfter(shader.fragmentShader, 'common', 'varying vec3 vD1SphereDirection;', material.name);
     shader.fragmentShader = injectAfter(shader.fragmentShader, 'color_fragment', `
       vec3 eyeDirection = normalize( vD1SphereDirection );
-      vec2 irisUv = eyeDirection.xy / 0.5;
+      vec2 irisUv = eyeDirection.xy / vec2( 0.49, 0.62 );
       float irisRadius = length( irisUv );
       float irisEdge = fwidth( irisRadius );
-      vec3 irisColor = mix( vec3( 0.02, 0.62, 0.86 ), vec3( 0.006, 0.04, 0.62 ), smoothstep( -0.8, 0.45, irisUv.y ) );
-      irisColor *= 1.0 + 0.12 * sin( atan( irisUv.y, irisUv.x ) * 47.0 ) * smoothstep( 0.45, 0.6, irisRadius ) * ( 1.0 - smoothstep( 0.7, 0.8, irisRadius ) );
-      irisColor = mix( irisColor, vec3( 0.0005, 0.005, 0.023 ), smoothstep( 0.78, 0.98, irisRadius ) );
-      irisColor = mix( irisColor, vec3( 0.0002, 0.0005, 0.003 ), 1.0 - smoothstep( 0.5 - irisEdge, 0.5 + irisEdge, irisRadius ) );
-      irisColor = mix( irisColor, vec3( 1.0 ), 1.0 - smoothstep( 0.27 - irisEdge, 0.27 + irisEdge, length( irisUv - vec2( -0.34, 0.36 ) ) ) );
-      irisColor = mix( irisColor, vec3( 1.0 ), 1.0 - smoothstep( 0.12 - irisEdge, 0.12 + irisEdge, length( irisUv - vec2( 0.36, -0.3 ) ) ) );
+      vec3 irisColor = mix( vec3( 0.001, 0.72, 0.90 ), vec3( 0.003, 0.08, 0.25 ), smoothstep( -0.65, 0.45, irisUv.y ) );
+      irisColor = mix( irisColor, vec3( 0.001, 0.006, 0.035 ), smoothstep( -0.15, 0.55, irisUv.y ) );
+      irisColor *= 1.0 + 0.07 * sin( atan( irisUv.y, irisUv.x ) * 47.0 ) * smoothstep( 0.5, 0.65, irisRadius ) * ( 1.0 - smoothstep( 0.8, 0.95, irisRadius ) );
+      irisColor = mix( irisColor, vec3( 0.0005, 0.003, 0.016 ), smoothstep( 0.86, 1.0, irisRadius ) );
+      float pupilRadius = length( irisUv / vec2( 0.43, 0.45 ) );
+      float pupilEdge = fwidth( pupilRadius );
+      irisColor = mix( irisColor, vec3( 0.0002, 0.0005, 0.003 ), 1.0 - smoothstep( 1.0 - pupilEdge, 1.0 + pupilEdge, pupilRadius ) );
+      irisColor = mix( irisColor, vec3( 1.0 ), 1.0 - smoothstep( 0.115 - irisEdge, 0.115 + irisEdge, length( irisUv - vec2( -0.5, 0.48 ) ) ) );
+      irisColor = mix( irisColor, vec3( 0.93, 0.97, 1.0 ), 1.0 - smoothstep( 0.085 - irisEdge, 0.085 + irisEdge, length( irisUv - vec2( 0.48, 0.53 ) ) ) );
+      irisColor = mix( irisColor, vec3( 0.68, 1.0, 1.0 ), 1.0 - smoothstep( 0.035 - irisEdge, 0.035 + irisEdge, length( irisUv - vec2( 0.48, -0.53 ) ) ) );
       float iris = ( 1.0 - smoothstep( 1.0 - irisEdge, 1.0 + irisEdge, irisRadius ) ) * step( 0.0, eyeDirection.z );
       diffuseColor.rgb = mix( diffuseColor.rgb, irisColor, iris );
     `, material.name);
@@ -107,16 +111,29 @@ export function installD1SphericalEyes(model: THREE.Object3D, asset: THREE.Objec
     attachment.add(mesh);
     return mesh;
   });
-  const balls = meshes.slice(0, 2).map(mesh => ({ mesh, rest: mesh.quaternion.clone() }));
+  const balls = meshes.slice(0, 2).map(mesh => ({ mesh, rest: mesh.quaternion.clone(), neutralDirection: new THREE.Vector3() }));
   const lids = meshes.slice(2).map(mesh => ({ mesh, indices: blinkNames.map(name => mesh.morphTargetDictionary![name]!) }));
+  const center = balls.reduce((sum, ball) => sum.add(ball.mesh.position), new THREE.Vector3()).multiplyScalar(1 / balls.length);
+  const forward = new THREE.Vector3(0, 0, 1);
+  const neutral = balls.reduce((sum, ball) => sum.add(forward.clone().applyQuaternion(ball.rest)), new THREE.Vector3()).normalize();
+  const neutralTarget = neutral.clone().multiplyScalar(2).add(center);
+  for (const ball of balls) ball.neutralDirection.subVectors(neutralTarget, ball.mesh.position).normalize();
+  const target = new THREE.Vector3();
+  const direction = new THREE.Vector3();
   const rotation = new THREE.Quaternion();
   const angles = new THREE.Euler(0, 0, 0, 'YXZ');
   return {
     face,
     setPose(closure: number, gaze: THREE.Vector2) {
       rotation.setFromEuler(angles.set(-gaze.y, gaze.x, 0, 'YXZ'));
-      for (const ball of balls) ball.mesh.quaternion.copy(ball.rest).multiply(rotation);
-      const frame = closure * 4;
+      // 共同目标只驱动相对中立姿态的变化，保留作者为倾斜眼窝校准的眼轴。
+      target.copy(neutral).applyQuaternion(rotation).multiplyScalar(2).add(center);
+      for (const ball of balls) {
+        direction.subVectors(target, ball.mesh.position).normalize();
+        ball.mesh.quaternion.setFromUnitVectors(ball.neutralDirection, direction).multiply(ball.rest);
+      }
+      // 只借用现有闭合形态轻微跟随下视；全闭形态始终保持原样。
+      const frame = (closure + (1 - closure) * Math.max(0, -gaze.y) * .25) * 4;
       const lower = Math.min(3, Math.floor(frame));
       const blend = frame - lower;
       for (const lid of lids) {
