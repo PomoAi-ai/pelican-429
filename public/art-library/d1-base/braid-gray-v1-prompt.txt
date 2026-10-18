@@ -1,0 +1,13 @@
+# 发辫灰度素模参考图 V1
+生成：gpt-image-2.5-sunburst，images.edit，quality high，input_fidelity high；每个视图一次调用。
+
+## 两股扭辫（d1-base-braid-gray-twist-*-v1.png）
+Input: ../reference/{front,left,right,back}.png, one call per view, model gpt-image-2.5-sunburst, quality high, input_fidelity high, 1024x1024.
+Superseded attempt with a three-strand plait prompt: plait3-v1/.
+
+Convert this anime character head into a neutral grey clay sculpture render seen from exactly the same camera. Fully desaturated: matte mid-grey material everywhere (hair, skin, eyes, clothing), no color at all, no painted highlights, no specular shine, no outlines or linework. Show form only through lighting: one soft key light from slightly above and to the left of the camera, soft fill, and strong ambient occlusion in every crevice. Keep the exact silhouette, proportions, head position, scale and hair shape of the input. Hair is sculpted as distinct rounded clumps separated by dark grooves. Each side braid is a TWO-STRAND TWIST, not a three-strand plait: exactly two thick rounded strands of hair wound around each other like a rope, so the braid reads as a single row of evenly sized, slanted, spiral segments, all slanting the same way, with a deep dark seam spiralling between the two strands. The twist lies close to the scalp and follows exactly the same path as in the input. Eyes and ears are sculpted shapes, not painted. Pure white background, no shadow on the background, no text.
+
+## 对照：三股辫提示词（d1-base-braid-gray-compare-v1.png 上排）
+Input: ../reference/{front,left,right,back}.png, one call per view, model gpt-image-2.5-sunburst, quality high, input_fidelity high, 1024x1024.
+
+Convert this anime character head into a neutral grey clay sculpture render seen from exactly the same camera. Fully desaturated: matte mid-grey material everywhere (hair, skin, eyes, clothing), no color at all, no painted highlights, no specular shine, no outlines or linework. Show form only through lighting: one soft key light from slightly above and to the left of the camera, soft fill, and strong ambient occlusion in every crevice. Keep the exact silhouette, proportions, head position, scale and hair shape of the input. Hair is sculpted as distinct rounded clumps separated by dark grooves. Each braid is a clean three-strand plait: a single row of evenly sized, rounded, raised lobes that interlock in a regular alternating pattern, with a dark recess between every lobe, following exactly the same path as in the input. Eyes and ears are sculpted shapes, not painted. Pure white background, no shadow on the background, no text.

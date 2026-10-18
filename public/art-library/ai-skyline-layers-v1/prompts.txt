@@ -1,0 +1,71 @@
+=== landmark
+Using the art style, palette and lighting of this game background (dusk, slender silver-blue futuristic towers with warm window lights, soft lavender-blue and pink tones, painted 2D game art), draw ONLY the central landmark: the tall needle-like AI tower with its thin glowing halo rings near the upper third, as ONE isolated building asset.
+Full building visible from its base to the tip, centered, straight front elevation view, no perspective tilt. Fully transparent background: no sky, no water, no ground, no reflection, no other buildings, no shadow, no text. Clean crisp edges for cutting out as a game sprite.
+
+=== near-a
+Using the art style, palette and lighting of this game background (dusk, slender silver-blue futuristic towers with warm window lights, soft lavender-blue and pink tones, clean painted 2D game art), draw a sprite sheet of isolated building assets.
+Draw 4 near-distance futuristic towers with rich detail: (1) twin slender towers joined at the top by a sky bridge, (2) a tall faceted tower with a cantilevered sky platform near the top, (3) a tapering tower with a mushroom-shaped drone landing deck on top, (4) a mid-height stepped tower with vertical light lines. Silver-blue glass and pale metal, warm window lights, thin warm light lines on edges.
+Layout: the buildings stand side by side in one row, each completely separate with a clear fully transparent gap of at least 60 pixels between them, no overlapping. Every building is fully visible from its flat base to its tip, and all bases sit on the same line at the very bottom edge of the image. Straight front elevation, no perspective tilt. Fully transparent background: no sky, no water, no ground, no reflections, no shadows, no glow or bloom outside the building outline, no text. Crisp clean edges for cutting out as game sprites. Every building is a different design.
+
+=== near-b
+Using the art style, palette and lighting of this game background (dusk, slender silver-blue futuristic towers with warm window lights, soft lavender-blue and pink tones, clean painted 2D game art), draw a sprite sheet of isolated building assets.
+Draw 4 more near-distance futuristic towers with rich detail: (1) a tall angular blade-shaped tower, (2) a tower with a ring-shaped crown, (3) a pair of leaning towers forming an A shape, (4) a wide low futuristic hall with a curved roof and a short antenna tower beside it. Silver-blue glass and pale metal, warm window lights.
+Layout: the buildings stand side by side in one row, each completely separate with a clear fully transparent gap of at least 60 pixels between them, no overlapping. Every building is fully visible from its flat base to its tip, and all bases sit on the same line at the very bottom edge of the image. Straight front elevation, no perspective tilt. Fully transparent background: no sky, no water, no ground, no reflections, no shadows, no glow or bloom outside the building outline, no text. Crisp clean edges for cutting out as game sprites. Every building is a different design.
+
+=== mid-a
+Using the art style, palette and lighting of this game background (dusk, slender silver-blue futuristic towers with warm window lights, soft lavender-blue and pink tones, clean painted 2D game art), draw a sprite sheet of isolated building assets.
+Draw 7 mid-distance futuristic towers, simpler shapes and less detail, slightly lighter and hazier lavender-blue, few small warm lights: varied heights and silhouettes (needle spire, flat-top slab, stepped tower, twin towers with skybridge, tower with saucer top, tapered tower, cylindrical tower).
+Layout: the buildings stand side by side in one row, each completely separate with a clear fully transparent gap of at least 60 pixels between them, no overlapping. Every building is fully visible from its flat base to its tip, and all bases sit on the same line at the very bottom edge of the image. Straight front elevation, no perspective tilt. Fully transparent background: no sky, no water, no ground, no reflections, no shadows, no glow or bloom outside the building outline, no text. Crisp clean edges for cutting out as game sprites. Every building is a different design.
+
+=== far
+Using the art style, palette and lighting of this game background (dusk, slender silver-blue futuristic towers with warm window lights, soft lavender-blue and pink tones, clean painted 2D game art), draw a sprite sheet of isolated building assets.
+Instead of separate buildings, draw ONE long continuous far-distance city skyline silhouette strip: hundreds of slim futuristic towers of varied heights packed tightly, very simple shapes, pale hazy lavender-blue with soft pink tint, almost no detail, tiny sparse warm lights. The strip fills the full image width, its bottom edge is a straight line at the very bottom of the image, tallest towers reach about 70% of the image height. Fully transparent background above and between the tower tops: no sky, no water, no ground, no reflection, no glow, no text. Straight front elevation.
+
+=== sky
+Match EXACTLY the art style, palette and lighting of this game background: soft dusk, painterly clean 2D game art, slender silver-blue futuristic towers with tiny warm window lights, lavender-blue to pink atmosphere.
+Repaint this image keeping ONLY the sky: remove every building, the bridge, the shore, the water, the drones. Extend the sky down to the bottom of the frame: deep periwinkle blue at the top, soft lavender in the middle, warm peach-pink glow near the lower third where the horizon was, then slightly lavender again at the very bottom. Keep the soft painterly streaky clouds with pink sunset edges like the original. No sun disk, no buildings, no text. Full opaque image.
+
+=== far-b
+Match EXACTLY the art style, palette and lighting of this game background: soft dusk, painterly clean 2D game art, slender silver-blue futuristic towers with tiny warm window lights, lavender-blue to pink atmosphere.
+Draw ONE long continuous very-far city skyline silhouette strip, a different arrangement from usual: a dense packed band of hundreds of slim futuristic towers, mostly low and medium heights with a few taller spires and two twin towers with a skybridge, tallest reaching about 55% of the image height, very simple flat shapes, very pale hazy lavender-pink, almost no detail, a few tiny warm dots. No single dominant central tower.
+Fully transparent background above the buildings and in every gap: no sky, no water, no ground, no reflection, no glow, no text. Straight front elevation. The strip fills the full image width; its bottom edge is a straight line at the very bottom of the image.
+
+=== mid-strip
+Match EXACTLY the art style, palette and lighting of this game background: soft dusk, painterly clean 2D game art, slender silver-blue futuristic towers with tiny warm window lights, lavender-blue to pink atmosphere.
+Draw ONE long continuous mid-distance city skyline strip: a dense band of many futuristic towers of strongly varied heights packed together and overlapping, simple shapes with light detail, soft lavender-blue with pink haze, small warm window lights, a few skybridges and saucer-topped towers, low podium buildings along the base. Tallest towers reach about 75% of the image height. No single dominant central tower.
+Fully transparent background above the buildings and in every gap: no sky, no water, no ground, no reflection, no glow, no text. Straight front elevation. The strip fills the full image width; its bottom edge is a straight line at the very bottom of the image.
+
+=== near-c
+Match EXACTLY the art style, palette and lighting of this game background: soft dusk, painterly clean 2D game art, slender silver-blue futuristic towers with tiny warm window lights, lavender-blue to pink atmosphere.
+Draw a sprite sheet of 6 LOW and MEDIUM futuristic buildings for the base of the skyline: a waterfront podium with a curved glass roof, a low terraced block with a small rooftop garden, a medium slab tower with horizontal light bands, a domed transit station, a medium stepped residential tower, a low wide hall with a slim antenna. Silver-blue and pale metal, warm window lights.
+Layout: the buildings stand side by side in one row, each completely separate with a clear fully transparent gap of at least 60 pixels between them, no overlapping. Every building fully visible from flat base to top; all bases on the same line at the very bottom edge. Straight front elevation. Fully transparent background: no sky, no water, no ground, no reflections, no shadows, no glow outside the outline, no text. Every building different.
+
+=== near-d
+Match EXACTLY the art style, palette and lighting of this game background: soft dusk, painterly clean 2D game art, slender silver-blue futuristic towers with tiny warm window lights, lavender-blue to pink atmosphere.
+Draw a sprite sheet of 7 SLENDER futuristic towers of different heights: pencil-thin needle tower, tall tapering tower with fins, twisted slim tower, slim tower with small saucer top, a thin blade tower with a cut-off top, a slim cylinder with ring bands, a narrow tower with a crown of antennas. Silver-blue glass and pale metal, warm window lights.
+Layout: the buildings stand side by side in one row, each completely separate with a clear fully transparent gap of at least 60 pixels between them, no overlapping. Every building fully visible from flat base to top; all bases on the same line at the very bottom edge. Straight front elevation. Fully transparent background: no sky, no water, no ground, no reflections, no shadows, no glow outside the outline, no text. Every building different.
+
+=== sky
+Match EXACTLY the art style, palette and lighting of this game background: soft dusk, painterly clean 2D game art, slender silver-blue futuristic towers with tiny warm window lights, lavender-blue to pink atmosphere.
+Repaint this image keeping ONLY the sky: remove every building, the bridge, the shore, the water, the drones. Extend the sky down to the bottom of the frame: deep periwinkle blue at the top, soft lavender in the middle, warm peach-pink glow near the lower third where the horizon was, then slightly lavender again at the very bottom. Keep the soft painterly streaky clouds with pink sunset edges like the original. No sun disk, no buildings, no text. Full opaque image.
+
+=== far-b
+Match EXACTLY the art style, palette and lighting of this game background: soft dusk, painterly clean 2D game art, slender silver-blue futuristic towers with tiny warm window lights, lavender-blue to pink atmosphere.
+Draw ONE long continuous very-far city skyline silhouette strip, a different arrangement from usual: a dense packed band of hundreds of slim futuristic towers, mostly low and medium heights with a few taller spires and two twin towers with a skybridge, tallest reaching about 55% of the image height, very simple flat shapes, very pale hazy lavender-pink, almost no detail, a few tiny warm dots. No single dominant central tower.
+Fully transparent background above the buildings and in every gap: no sky, no water, no ground, no reflection, no glow, no text. Straight front elevation. The strip fills the full image width; its bottom edge is a straight line at the very bottom of the image.
+
+=== mid-strip
+Match EXACTLY the art style, palette and lighting of this game background: soft dusk, painterly clean 2D game art, slender silver-blue futuristic towers with tiny warm window lights, lavender-blue to pink atmosphere.
+Draw ONE long continuous mid-distance city skyline strip: a dense band of many futuristic towers of strongly varied heights packed together and overlapping, simple shapes with light detail, soft lavender-blue with pink haze, small warm window lights, a few skybridges and saucer-topped towers, low podium buildings along the base. Tallest towers reach about 75% of the image height. No single dominant central tower.
+Fully transparent background above the buildings and in every gap: no sky, no water, no ground, no reflection, no glow, no text. Straight front elevation. The strip fills the full image width; its bottom edge is a straight line at the very bottom of the image.
+
+=== near-c
+Match EXACTLY the art style, palette and lighting of this game background: soft dusk, painterly clean 2D game art, slender silver-blue futuristic towers with tiny warm window lights, lavender-blue to pink atmosphere.
+Draw a sprite sheet of 6 LOW and MEDIUM futuristic buildings for the base of the skyline: a waterfront podium with a curved glass roof, a low terraced block with a small rooftop garden, a medium slab tower with horizontal light bands, a domed transit station, a medium stepped residential tower, a low wide hall with a slim antenna. Silver-blue and pale metal, warm window lights.
+Layout: the buildings stand side by side in one row, each completely separate with a clear fully transparent gap of at least 60 pixels between them, no overlapping. Every building fully visible from flat base to top; all bases on the same line at the very bottom edge. Straight front elevation. Fully transparent background: no sky, no water, no ground, no reflections, no shadows, no glow outside the outline, no text. Every building different.
+
+=== near-d
+Match EXACTLY the art style, palette and lighting of this game background: soft dusk, painterly clean 2D game art, slender silver-blue futuristic towers with tiny warm window lights, lavender-blue to pink atmosphere.
+Draw a sprite sheet of 7 SLENDER futuristic towers of different heights: pencil-thin needle tower, tall tapering tower with fins, twisted slim tower, slim tower with small saucer top, a thin blade tower with a cut-off top, a slim cylinder with ring bands, a narrow tower with a crown of antennas. Silver-blue glass and pale metal, warm window lights.
+Layout: the buildings stand side by side in one row, each completely separate with a clear fully transparent gap of at least 60 pixels between them, no overlapping. Every building fully visible from flat base to top; all bases on the same line at the very bottom edge. Straight front elevation. Fully transparent background: no sky, no water, no ground, no reflections, no shadows, no glow outside the outline, no text. Every building different.
+

@@ -1288,6 +1288,48 @@
       "source": "assets/characters/grassy/customization/concepts/classics-7/c04-game-v2-ruler.png",
       "path": "./art-library/classics-7/c04-game-v2-ruler.png",
       "sha256": "a2086bab77920c3368a4bd2bb5e8dfce3e72081d34fa3be5cc601520ba3fd77a"
+    },
+    {
+      "entry": "white-fixed-wheel-vtol",
+      "label": "正面",
+      "source": "assets/concepts/white-fixed-wheel-vtol-four-views/front.png",
+      "path": "./art-library/white-fixed-wheel-vtol-four-views/front.png",
+      "sha256": "42977eb6a22a324e75ac23e87bd48a74486738ea8ae95ebd6163e6e483d34a02"
+    },
+    {
+      "entry": "white-fixed-wheel-vtol",
+      "label": "侧面 · 建模尺寸主参考",
+      "source": "assets/concepts/white-fixed-wheel-vtol-four-views/side.png",
+      "path": "./art-library/white-fixed-wheel-vtol-four-views/side.png",
+      "sha256": "9cd467dc5ce437052a5fc4f905074a9af3dfa578608909540c21b0c84583a4b4"
+    },
+    {
+      "entry": "white-fixed-wheel-vtol",
+      "label": "背面",
+      "source": "assets/concepts/white-fixed-wheel-vtol-four-views/rear.png",
+      "path": "./art-library/white-fixed-wheel-vtol-four-views/rear.png",
+      "sha256": "582a4a32d71506e82ed94b7587589c615b1b510364c648e9988e3464fba77d54"
+    },
+    {
+      "entry": "white-fixed-wheel-vtol",
+      "label": "俯视",
+      "source": "assets/concepts/white-fixed-wheel-vtol-four-views/top.png",
+      "path": "./art-library/white-fixed-wheel-vtol-four-views/top.png",
+      "sha256": "cf0795abff55a9734a14f1116fb1db75c2574d9b920af55d3a997df7f03767c9"
+    },
+    {
+      "entry": "white-fixed-wheel-vtol",
+      "label": "原始设计说明",
+      "source": "assets/concepts/white-fixed-wheel-vtol-four-views/README.md",
+      "path": "./art-library/white-fixed-wheel-vtol-four-views/README.md",
+      "sha256": "989aa5d6a3e72610c0b489d7535ec6a5f0dc68f32324f2d6d45437c189ed2bb0"
+    },
+    {
+      "entry": "white-fixed-wheel-vtol",
+      "label": "原始提示词",
+      "source": "assets/concepts/white-fixed-wheel-vtol-four-views/prompts.json",
+      "path": "./art-library/white-fixed-wheel-vtol-four-views/prompts.json",
+      "sha256": "8d1ed1f88565a244ba98ff467f359c8c471bae07c2d473c19528b7dd0fe7ace2"
     }
   ]
 }
