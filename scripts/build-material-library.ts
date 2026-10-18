@@ -1,8 +1,9 @@
 import { writeFileSync } from 'node:fs';
 import { Box3, Vector3 } from 'three';
-import { RESIDENCE_RESOURCES, type ResidenceResource } from '../src/config/residence.ts';
+import { RESIDENCE_LIGHTS, RESIDENCE_RESOURCES, RESIDENCE_WORLD, type ResidenceResource } from '../src/config/residence.ts';
 import { TILE_SHAPE_DEFINITIONS } from '../src/config/definition-kit.ts';
 import { createAiCityFixture } from '../src/render/ai-city-architecture.ts';
+import { TILE_TEXTURE_PERIOD } from '../src/render/tile-textures.ts';
 
 const fixtureDepths = new Map(RESIDENCE_RESOURCES.filter(r => r.kind === 'fixture').map(r => {
   const view = createAiCityFixture(r.fixture);
@@ -24,21 +25,93 @@ function rules(r: ResidenceResource): [string, string] {
       : r.fixture === 'planter' ? '整件摆放与拆除；包络包含叶片；不新增实体承托' : '整件摆放与拆除；装饰不新增实体承托'];
   }
 }
+function lighting(r: ResidenceResource): string {
+  const light = RESIDENCE_LIGHTS[r.id];
+  return light ? `；照明半径 ${light.radius} 格，灯色 #${light.color.toString(16).padStart(6, '0')}` : '';
+}
 const table = (headers: string[], data: string[][]): string => [headers, headers.map(() => '---'), ...data]
   .map(row => `| ${row.map(value => value.replaceAll('|', '\\|')).join(' | ')} |`).join('\n');
-const sections = [...Map.groupBy(RESIDENCE_RESOURCES, r => r.group)].map(([name, resources]) =>
-  `## ${name}\n\n${table(['名称', '内部 ID', '占位宽×高', '深度（格）', '规则'], resources.map(r => [r.label, r.id, `${r.width}×${r.height}`, ...rules(r)]))}`);
-const shapes = table(['形状', '名称', '实际宽×高'], TILE_SHAPE_DEFINITIONS.map(s => {
-  const xs = s.points.map(p => p[0]), ys = s.points.map(p => p[1]);
-  return [s.id, s.label, `${Math.max(...xs) - Math.min(...xs)}×${Math.max(...ys) - Math.min(...ys)}`];
-}));
+function category(r: ResidenceResource): string {
+  switch (r.kind) {
+    case 'solid': return '块';
+    case 'wall': return '墙';
+    case 'glazing': return '窗';
+    case 'door': return '门';
+    case 'platform': return '平台';
+    case 'furniture':
+    case 'fixture': return r.group === '蓝白合金家具' ? '家具' : r.group;
+  }
+}
+const shapeFamilies = [
+  ['整砖', ['A']], ['半砖', ['B', 'C', 'K', 'L']], ['四分之一砖', ['M', 'N', 'O', 'P']],
+  ['整格坡', ['D', 'E', 'D-U', 'E-U']], ['缓坡低段', ['F', 'I']],
+  ['缓坡高段', ['G', 'H']], ['双斜尖顶', ['J']],
+] as const;
+const shapeById = new Map(TILE_SHAPE_DEFINITIONS.map(shape => [shape.id, shape]));
+function shapeTable(variants: ResidenceResource[]): string {
+  const solids = variants.filter(r => r.kind === 'solid');
+  if (solids.length === 0) return table(['形态', '登记占位（宽×高，格）'], variants.map(r =>
+    [r.label.split(' · ').slice(1).join(' · ') || '标准', `${r.width}×${r.height}`]));
+  return table(['形态', '支持方向 / 旋转', '实际宽×高（格）'], shapeFamilies.flatMap(([family, ids]) => {
+    const shapes = solids.filter(r => (ids as readonly string[]).includes(r.shape.replace(/-(90|180|270)$/, '')))
+      .map(r => shapeById.get(r.shape)!);
+    if (shapes.length === 0) return [];
+    const directions = [...Map.groupBy(shapes, shape => shape.id.replace(/-(90|180|270)$/, ''))].map(([base, members]) => {
+      const direction = shapeById.get(base)!.label.replace(family, '');
+      const angles = members.map(shape => shape.id.match(/-(90|180|270)$/)?.[1] ?? '0');
+      return { direction, rotations: `${angles.join('°、')}°` };
+    });
+    const orientations = [...Map.groupBy(directions, direction => direction.rotations)].map(([rotations, members]) => {
+      const names = members.map(member => member.direction).filter(Boolean).join('、');
+      return rotations === '0°' ? names || '标准' : `${names}${names ? '；' : ''}${rotations}`;
+    });
+    const sizes = [...new Set(shapes.map(shape => {
+      const xs = shape.points.map(p => p[0]), ys = shape.points.map(p => p[1]);
+      return `${Math.max(...xs) - Math.min(...xs)}×${Math.max(...ys) - Math.min(...ys)}`;
+    }))];
+    return [[family, orientations.join('；'), sizes.join(' / ')]];
+  }));
+}
+function media(r: ResidenceResource, label: string): string {
+  const figure = (file: string, caption: string, texture = false): string =>
+    `<figure${texture ? ' class="material-texture"' : ''}><img src="material-previews/${file}.png" alt="${label}：${caption}" width="${texture ? 180 : 240}" height="180"><figcaption>${caption}</figcaption></figure>`;
+  const images = [figure(r.id, '游戏构件预览')];
+  let description = '材质由模型组合，预览直接来自游戏构件。';
+  if (r.kind === 'wall' || r.kind === 'solid' && ['ceramic', 'alloy', 'ashlar'].includes(r.material)) {
+    images.push(figure(`${r.id}-surface`, '程序材质表面 · 渲染快照'));
+    description = '表面由程序材质生成，没有独立图片贴图；上图展示实际纹理与光泽。';
+  } else if (r.kind === 'solid') {
+    const textureLayers: Record<string, readonly string[]> = {
+      grass: ['grassTop', 'dirt'], dirt: ['dirt'], stone: ['stone'], sand: ['sand'], sandstone: ['sandstone'], timber: ['planks'],
+    };
+    textureLayers[r.material]!.forEach(layer => images.push(figure(`texture-${layer}`,
+      r.material === 'grass' ? `${layer === 'grassTop' ? '顶部' : '侧面'}色彩图 · 程序生成` : '色彩图 · 程序生成', true)));
+    description = `以上色彩图直接导出自游戏纹理，一张覆盖 ${TILE_TEXTURE_PERIOD}×${TILE_TEXTURE_PERIOD} 格，非单格截图；光照与阴影在场景中实时计算。`;
+  }
+  return `<div class="material-resource-media">\n${images.join('\n')}\n</div>\n\n${description}`;
+}
+const sections = [...Map.groupBy(RESIDENCE_RESOURCES, category)].map(([name, resources]) => {
+  const legacyAnchor = name === '墙' ? '<span id="墙与通行"></span>\n\n'
+    : name === '家具' ? '<span id="蓝白合金家具"></span>\n\n' : '';
+  const entries = [...Map.groupBy(resources, r => r.label.split(' · ')[0]!)].map(([label, variants]) => {
+    const r = variants[0]!;
+    const [depth, rule] = rules(r);
+    return `### ${label}\n\n${media(r, label)}\n\n${shapeTable(variants)}\n\n**深度：**${depth} 格。${rule}${lighting(r)}。`;
+  });
+  return `${legacyAnchor}## ${name}\n\n${entries.join('\n\n')}`;
+});
 writeFileSync(new URL('../public/concepts/material-library.md', import.meta.url), `# 材料与构件库
 
-本表从共享游戏资源配置自动生成。维护源：src/config/residence.ts、src/config/definition-kit.ts；附属构件的模型深度直接测量 src/render/ai-city-architecture.ts 共享工厂。更新后运行 npm run docs:resources，不手改此表。
+按“类别 → 资源”查阅外观、贴图和支持形态。当前登记 ${new Set(RESIDENCE_RESOURCES.map(r => r.label.split(' · ')[0])).size} 种资源、${RESIDENCE_RESOURCES.length} 个可选形态；形态变化不重复计为新材料。
 
-当前登记 ${RESIDENCE_RESOURCES.length} 个可选形态，不代表相同数量的材料。全砖、半砖、坡面、平台宽度都是变化，不重复计为材料。
+图片来自共享游戏工厂：构件图展示整体外观，自然材料附实际色彩图，程序建筑材质附表面渲染快照。点击图片可查看原图；实际光泽随场景光照变化。
 
-状态：资源已注册并接入资料页面、自由搭建场和住宅共享资源。格子组合、加深互斥、平台承托与逐块编辑已进行专项行为验证；尺寸列区分注册占位、已确认标准深度和工厂模型包络，不把标准占位误称为精确几何包围盒。Markdown 正文通过 HTTP 提供，网页读取同一文件转换展示，LLM 索引见 [llms.txt](../llms.txt)。未制作的坐卧动画和后续装饰规则单独列出。
+<details>
+<summary>资料来源与更新</summary>
+
+正文由 src/config/residence.ts、src/config/definition-kit.ts 生成；附属构件包络来自 src/render/ai-city-architecture.ts。修改资源后运行 npm run docs:resources，不直接编辑生成正文。材质或模型改变时，在 Vite 浏览器环境调用 scripts/export-material-previews.ts 的 exportMaterialPreviews()，重新导出 material-previews 图片快照。网页与 HTTP Markdown 使用同一份图文，LLM 索引见 [llms.txt](../llms.txt)。
+
+</details>
 
 ## 查看入口
 
@@ -47,7 +120,7 @@ writeFileSync(new URL('../public/concepts/material-library.md', import.meta.url)
 - [材料与形状](/?mode=lab&demo=tiles)
 - [AI 住宅](/?mode=lab&demo=residence)
 
-所有表中条目来自住宅与自由搭建场共用的资源注册表，允许选择、铺设和移除。占位表示锚点范围；小块的实际轮廓见形状表，不表示每个小块填满父格。
+所有条目均可在住宅与自由搭建场选择、铺设和移除。登记占位表示锚点范围；小块按实际轮廓占格，不会填满整个父格。
 
 ## 通用约定
 
@@ -61,7 +134,7 @@ ${sections.join('\n\n')}
 
 ## 实体形状
 
-${shapes}
+各材料表中仅列当前支持的形态。精确轮廓、旋转方向和组合规则见[格子形态与支持范围定义](tile-shape-definitions.md)，普通 / 加深的前后范围见[深度定义](depth-definitions.md)。
 
 ## 环境与特殊瓦片
 
@@ -82,6 +155,9 @@ ${shapes}
 - 住宅地台使用可编辑方石，平台承托随实际宽度和顶面变化；自由搭建目录包含全部已登记资源。
 - 暖白岩板、方石和合金使用共享材质，细微纹理固定在世界坐标，反光与阴影随实际光照变化；不把单张静态参考图当成所有天气下的固定颜色。
 - 收边依附、拆支撑后的装饰处理，以及坡面和加深格收边的开放范围暂未强制，按用户要求留待后续决定。
+- 自然光只经天空、挖通的开口、门与地上窗进入。窗代表后墙开口；低于基础顶面（y=${RESIDENCE_WORLD.foundationTop}）的地下窗背后是地质实体，不产生天空光。地上密闭空间不按高度获得天光。
+- 灯具照明有半径上限，沿空气绕拐角传播并随路径长度变暗；灯光与天空漫射光渗入实心构件后迅速衰减，约 2～3 格归零，1 格薄墙另一侧透出微光，2 格以上另一侧基本全黑；太阳直射仍被实心完全遮挡；每盏灯都照亮周围，与镜头位置无关。能量门、全息、能源柱只自发光，不照亮周围。
+- 精细高光只由镜头附近少量灯提供：高画质 4 盏，低画质 2 盏。
 - 家具坐卧动画尚未制作；拆平台时家具支撑依赖的级联处理尚未接入，跨格支撑与物品返还规则待定。
 
 尺寸登记、规则实现与动画制作分别记录，不把已完成的资源接入误写成“整体尚未制作”，也不把这些后续能力标记为已实现。

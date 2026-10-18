@@ -20,16 +20,16 @@ export const CONCEPT_DOCUMENTS: readonly ConceptDocument[] = [
     "file": "resource-classification.md"
   },
   {
-    "id": "material-library",
-    "title": "材料与构件库",
-    "group": "资源基础",
-    "file": "material-library.md"
-  },
-  {
     "id": "core-coordinates",
     "title": "坐标与尺度约定",
     "group": "资源基础",
     "file": "core-coordinates.md"
+  },
+  {
+    "id": "material-library",
+    "title": "材料与构件库",
+    "group": "材料与构件库",
+    "file": "material-library.md"
   },
   {
     "id": "concept-overview",
@@ -54,6 +54,12 @@ export const CONCEPT_DOCUMENTS: readonly ConceptDocument[] = [
     "title": "场景由哪些部分组成",
     "group": "基础设定",
     "file": "scene-composition.md"
+  },
+  {
+    "id": "concept-time",
+    "title": "时间、历法与日月",
+    "group": "基础设定",
+    "file": "world-time.md"
   },
   {
     "id": "concept-tiles",
@@ -216,5 +222,11 @@ export const CONCEPT_DOCUMENTS: readonly ConceptDocument[] = [
     "title": "经济与生存系统设计",
     "group": "系统设定",
     "file": "economy.md"
+  },
+  {
+    "id": "concept-ui",
+    "title": "界面与操作",
+    "group": "系统设定",
+    "file": "ui-controls.md"
   }
 ];

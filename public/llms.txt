@@ -56,3 +56,4 @@
 ## 系统设定
 
 - [经济与生存系统设计](concepts/economy.md)
+- [界面与操作](concepts/ui-controls.md)

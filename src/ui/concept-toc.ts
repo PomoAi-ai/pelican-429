@@ -5,9 +5,10 @@ export function addConceptToc(page: HTMLElement, scroller: HTMLElement): () => v
   const search = toc.querySelector<HTMLInputElement>('.concepts-toc-search')!;
   const groups = [...toc.querySelectorAll<HTMLDetailsElement>('.concepts-nav-group')];
   const entries = [...toc.querySelectorAll<HTMLAnchorElement>('.concepts-nav-group a[href^="#"]')].map(link => {
-    const target = page.querySelector<HTMLElement>(link.hash);
+    const target = document.getElementById(decodeURIComponent(link.hash.slice(1)));
     if (!target) throw new Error(`概念目录指向不存在的章节：${link.hash}`);
-    return { link, target, group: link.closest<HTMLDetailsElement>('details')! };
+    return { link, target, group: link.closest<HTMLDetailsElement>('.concepts-nav-group')!,
+      category: link.closest<HTMLDetailsElement>('.concepts-nav-category') };
   });
   let active: (typeof entries)[number] | null = null;
   let frame = 0;
@@ -23,7 +24,7 @@ export function addConceptToc(page: HTMLElement, scroller: HTMLElement): () => v
   };
   const spy = (): void => {
     frame = 0;
-    const line = scroller.getBoundingClientRect().top + 96;
+    const line = scroller.getBoundingClientRect().top + 40;
     // 章节按文档顺序排列；取最后一个已越过阅读线的章节。折叠内容里的锚点高度为 0，自然跳过。
     let next = entries[0]!;
     for (const entry of entries) {
@@ -34,8 +35,11 @@ export function addConceptToc(page: HTMLElement, scroller: HTMLElement): () => v
     active?.link.removeAttribute('aria-current');
     active = next;
     next.link.setAttribute('aria-current', 'location');
-    if (!search.value) next.group.open = true;
-    reveal(next.link);
+    if (!search.value) {
+      next.group.open = true;
+      if (next.category) next.category.open = true;
+    }
+    if (next.link.getBoundingClientRect().height > 0) reveal(next.link);
   };
   const onScroll = (): void => { if (!frame) frame = requestAnimationFrame(spy); };
 
@@ -45,23 +49,46 @@ export function addConceptToc(page: HTMLElement, scroller: HTMLElement): () => v
     for (const group of groups) {
       if (query) group.removeAttribute('name');
       else group.setAttribute('name', 'concepts-toc');
-      let matches = 0;
+      const groupMatches = group.querySelector('summary')!.textContent.toLowerCase().includes(query);
       for (const link of group.querySelectorAll('a')) {
-        link.hidden = query !== '' && !link.textContent!.toLowerCase().includes(query);
-        if (!link.hidden) matches += 1;
+        const category = link.closest('.concepts-nav-category');
+        const categoryMatches = category !== null && category.querySelector('summary')!.textContent.toLowerCase().includes(query);
+        link.hidden = query !== '' && !groupMatches && !categoryMatches && !link.textContent.toLowerCase().includes(query);
       }
-      group.hidden = matches === 0;
-      group.open = query ? matches > 0 : group === active?.group;
+      for (const category of group.querySelectorAll<HTMLDetailsElement>('.concepts-nav-category')) {
+        category.hidden = !category.querySelector('a:not([hidden])');
+        // 命中具体材料时保留它的类别，避免搜索结果失去所属关系。
+        category.querySelector<HTMLAnchorElement>('summary a')!.hidden = category.hidden;
+        category.open = query ? !category.hidden : category === active?.category;
+      }
+      group.hidden = !groupMatches && !group.querySelector('a:not([hidden])');
+      const titleLink = group.querySelector<HTMLAnchorElement>(':scope > summary a');
+      if (titleLink) titleLink.hidden = group.hidden;
+      group.open = query ? !group.hidden : group === active?.group;
     }
+    if (!query && active) reveal(active.link);
   });
   toggle.addEventListener('click', () => setDrawer(!toc.classList.contains('concepts-toc-open')));
   toc.addEventListener('click', event => {
-    if (event.target instanceof Element && event.target.closest('a')) setDrawer(false);
+    if (!(event.target instanceof Element)) return;
+    const link = event.target.closest<HTMLAnchorElement>('a');
+    if (!link) return;
+    const entry = entries.find(item => item.link === link)!;
+    entry.group.open = true;
+    if (entry.category) entry.category.open = true;
+    if (!link.closest('summary')) setDrawer(false);
   });
+  const onHash = (): void => {
+    const target = document.getElementById(decodeURIComponent(location.hash.slice(1)));
+    if (target && page.contains(target)) target.scrollIntoView();
+    onScroll();
+  };
   scroller.addEventListener('scroll', onScroll, { passive: true });
-  spy();
+  window.addEventListener('hashchange', onHash);
+  onHash();
   return () => {
     cancelAnimationFrame(frame);
     scroller.removeEventListener('scroll', onScroll);
+    window.removeEventListener('hashchange', onHash);
   };
 }

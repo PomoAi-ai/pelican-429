@@ -23,6 +23,10 @@ export function renderConceptMarkdown(entry: ConceptDocument, markdown: string):
   section.id = entry.id;
   section.dataset.document = entry.file;
   section.innerHTML = marked.parse(markdown, { async: false, gfm: true });
+  // 材料库旧章节转成显式别名后，仍沿用原来生成的文档前缀。
+  if (entry.id === 'material-library') {
+    for (const anchor of section.querySelectorAll<HTMLElement>('span[id]')) anchor.id = `${entry.id}--${anchor.id}`;
+  }
   const headingCounts = new Map<string, number>();
   for (const heading of section.querySelectorAll('h1, h2, h3, h4, h5, h6')) {
     const replacement = document.createElement(`h${Math.min(6, Number(heading.tagName[1]) + 1)}`);
@@ -34,8 +38,8 @@ export function renderConceptMarkdown(entry: ConceptDocument, markdown: string):
     heading.replaceWith(replacement);
   }
   const source = conceptUrl(`concepts/${entry.file}`);
-  for (const element of section.querySelectorAll<HTMLAnchorElement | HTMLImageElement>('a[href], img[src]')) {
-    const attribute = element instanceof HTMLImageElement ? 'src' : 'href';
+  for (const element of section.querySelectorAll<HTMLAnchorElement | HTMLImageElement | HTMLIFrameElement>('a[href], img[src], iframe[src]')) {
+    const attribute = element instanceof HTMLAnchorElement ? 'href' : 'src';
     const original = element.getAttribute(attribute)!;
     const url = original.startsWith('/concepts/') || original.startsWith('/?')
       ? conceptUrl(original.slice(1)) : new URL(original, source);

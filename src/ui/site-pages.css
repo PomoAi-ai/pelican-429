@@ -6,9 +6,14 @@
 .concepts-reading-guide { flex: 1; min-width: 150px; font-size: 12px; color: var(--home-muted); }
 .concepts-reading-guide summary { width: fit-content; cursor: pointer; padding: 6px 0; }
 .concepts-reading-guide[open] { flex-basis: 100%; }
-.concepts-page .help-layout { padding-top: 18px; gap: 24px; }
+.concepts-page .help-layout { padding-top: 18px; gap: 24px; grid-template-columns: 240px minmax(0, 1fr); }
 .concepts-page .help-content { min-width: 0; }
 .concepts-markdown img { display: block; max-width: 100%; height: auto; margin: 18px 0; border-radius: 8px; }
+.material-resource-media { display: flex; flex-wrap: wrap; gap: 16px; margin: 16px 0; }
+.material-resource-media figure { flex: 0 1 240px; min-width: 0; margin: 0; padding: 12px; border: 1px solid var(--home-line); border-radius: 10px; background: var(--home-surface); }
+.material-resource-media figure a { display: block; }
+.concepts-markdown .material-resource-media img { width: 100%; height: 180px; object-fit: contain; margin: 0; background: #26353e; }
+.material-resource-media figcaption { margin-top: 8px; color: var(--home-muted); font-size: 12px; line-height: 1.6; }
 .concepts-markdown :is(h3, h4, h5, h6) { margin-top: 28px; scroll-margin-top: 24px; }
 .concepts-markdown :is(li, blockquote) { color: var(--home-muted); font-size: 14px; line-height: 1.85; }
 .concepts-markdown li + li { margin-top: 6px; }
@@ -28,10 +33,18 @@
 .concepts-note { padding: 16px 20px; border-left: 3px solid var(--home-accent); background: var(--home-surface); }
 .concepts-originals { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
 .concepts-page .help-index { max-height: calc(100dvh - 64px); overflow-y: auto; overscroll-behavior: contain; }
-/* 目录三级：分组标题加粗并用横线隔开，条目带编号，子条目缩进挂在竖线上。 */
+/* 材料库目录：库 → 构件类别 → 具体资源；尺寸和形状留在正文。 */
 .concepts-nav-group { border-top: 1px solid var(--home-line); }
 .concepts-nav-group > summary { padding: 10px 4px; cursor: pointer; color: var(--home-fg); font-size: 14px; font-weight: 600; }
 .concepts-nav-group[open] > summary { color: var(--home-accent); }
+.concepts-nav-category { margin-left: 12px; }
+.concepts-nav-category > summary { padding: 2px 0; cursor: pointer; color: var(--home-dim); }
+#dev-index .concepts-page .help-index summary a { display: inline-flex; padding: 2px 6px; vertical-align: middle; }
+.concepts-nav-group > summary > a > span { font-size: 14px; font-weight: 600; }
+.concepts-nav-group[open] > summary > a > span,
+.concepts-nav-category:has([aria-current]) > summary > a > span { color: var(--home-accent); }
+.concepts-page .help-index a:focus-visible,
+.concepts-page .help-index summary:focus-visible { outline: 2px solid var(--home-accent); outline-offset: 1px; }
 .concepts-nav-sub { margin: 0 0 6px 18px; padding-left: 6px; border-left: 1px solid var(--home-line); }
 .concepts-nav-sub:has([aria-current]) { border-left-color: var(--home-accent); }
 #dev-index .concepts-page .help-index .concepts-nav-sub a { min-height: 26px; }
@@ -39,11 +52,12 @@
 #dev-index .concepts-page .help-index a { min-height: 32px; gap: 8px; padding: 2px 8px; }
 #dev-index .concepts-page .help-index a[aria-current] { color: var(--home-accent); background: var(--home-surface-2); box-shadow: inset 2px 0 var(--home-accent); }
 .concepts-page .help-index a[aria-current] span { color: var(--home-accent); }
-.concepts-page .help-index [hidden] { display: none; }
+#dev-index .concepts-page .help-index [hidden] { display: none; }
 .concepts-toc-search { box-sizing: border-box; width: 100%; height: 34px; margin: 0 0 6px; padding: 0 10px; border: 1px solid var(--home-line); border-radius: 6px; background: var(--home-surface); color: var(--home-fg); font: 13px system-ui, sans-serif; }
 .concepts-toc-search:focus-visible { outline: 2px solid var(--home-accent); outline-offset: 1px; }
 .concepts-toc-toggle { display: none; }
 .concepts-page code { overflow-wrap: anywhere; font-size: 12px; }
+.concepts-markdown :is(h2, h3, h4, span[id]) { scroll-margin-top: 24px; }
 .concepts-system-document { min-width: 0; scroll-margin-top: 32px; }
 .concepts-copy { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; margin: 0 0 12px; }
 .concepts-copy button { min-height: 32px; padding: 4px 10px; border: 1px solid var(--home-line); border-radius: 6px; background: var(--home-surface); color: var(--home-accent); font: 13px/1.5 system-ui, sans-serif; cursor: pointer; }
@@ -132,7 +146,7 @@
   .help-controls-grid { gap: 20px; }
 }
 @media (min-width: 641px) and (max-width: 1000px) {
-  .concepts-page .help-layout { grid-template-columns: 150px minmax(0, 1fr); gap: 24px; }
+  .concepts-page .help-layout { grid-template-columns: 200px minmax(0, 1fr); gap: 24px; }
   .concepts-page .help-index { position: sticky; display: grid; max-height: calc(100dvh - 64px); overflow-y: auto; }
   .concepts-page .help-index p { display: block; }
   .concepts-nav-group[open] { display: block; }
@@ -140,6 +154,7 @@
 }
 @media (max-width: 640px) {
   .help-page.concepts-page { padding: 12px; }
+  .concepts-page .help-layout { grid-template-columns: minmax(0, 1fr); }
   /* 窄屏目录改为左侧抽屉，由右下角按钮打开，选中条目后收起。 */
   .concepts-page .help-index { position: fixed; z-index: 5; top: var(--dev-nav-height); bottom: 0; left: 0; align-self: stretch; display: none; width: min(320px, 86vw); max-height: none; padding: 16px 12px; overflow-y: auto; background: var(--home-surface); box-shadow: 12px 0 40px #000a; }
   .concepts-page .help-index.concepts-toc-open { display: block; }
