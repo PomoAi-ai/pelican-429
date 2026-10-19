@@ -363,6 +363,19 @@ export const ART_LIBRARY_GROUPS: readonly ArtLibraryGroup[] = [
   {
     id: 'companions', label: ['伙伴与作业机器人', 'Companions and utility robots'], entries: [
       {
+        id: 'utility-drone-v29', title: ['跟随无人机 · V29 定稿', 'Utility drone · V29 final'], status: 'confirmed',
+        description: ['游戏跟随与家园作业无人机定稿：奶油白亮面车身、深蓝底盘与腰带、青色灯带、四个块状越野胎外露大轮（轮上方独立挡泥板，飞行时收进侧舱）、粗 ∩ 形提手、深蓝球形颈关节、软杯双筒大眼；腹部单圈大能量喷射口（直径约机身宽 75%），飞行时向下柔和青色能量场。眼睛以 V26 软杯眼为准。',
+          'Final companion and homestead utility drone: glossy cream body, navy chassis and belt, cyan light strips, four exposed knobby wheels under separate fenders (stowed into side pods in flight), a thick handle, a navy ball neck joint and soft-cup binocular eyes; one large belly energy jet (about 75% of body width) with a soft cyan field below in flight. Eyes follow the V26 soft-cup study.'],
+        evidence: ['V12–V29 迭代中用户逐步确认：四轮可飞、参考《机器人总动员》气质、肚子下单圈能量喷射口，“稍大”“大一些”后定为 V29，随后要求“开始制作替换游戏里面那个”。眼睛在 V26 单独定稿（c 软杯）。原件见 assets/concepts/follow-drone-final-v29 与 follow-drone-eyes-v26。',
+          'Confirmed through the V12–V29 iterations, ending with the request to replace the in-game drone with V29. Eyes were settled separately as V26 soft cups. Originals live in assets/concepts/follow-drone-final-v29 and follow-drone-eyes-v26.'],
+        images: [
+          { label: ['V29 定稿 · 多视图', 'V29 final · views'], path: './art-library/utility-drone/v29-views.png' },
+          { label: ['V29 定稿 · 游戏场景比例', 'V29 final · in-game scale'], path: './art-library/utility-drone/v29-scene.png' },
+          { label: ['V26 眼睛定稿 · 软杯眼', 'V26 eyes · soft cups'], path: './art-library/utility-drone/v26-eyes-soft-cups.png' },
+        ],
+        files: [{ label: ['来源与版本状态', 'Provenance and version status'], path: './art-library/utility-drone/SOURCE.md' }],
+      },
+      {
         id: 'utility-drone-variants', title: ['跟随无人机 · A/B/C 科幻方向', 'Utility drone · A/B/C concepts'], status: 'candidate',
         description: ['三套原画均对比地面滚动与中央单喷口飞行：A 磁悬浮能量环、B 精密探测器、C 仿生流线体。共用银色不锈钢、外置大轮与开放能量核心。',
           'Three concepts compare rolling and single-central-jet flight: A orbital energy ring, B precision surveyor, and C biomimetic streamlined body.'],

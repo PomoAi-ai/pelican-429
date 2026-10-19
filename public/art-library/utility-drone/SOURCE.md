@@ -1,6 +1,18 @@
 # 跟随作业无人机原画来源
 
-收录日期：2026-10-18。以下六张为本次设计迭代保存的 AI 概念原画，逐文件原样复制，未重新生成、裁切或改画。
+收录日期：2026-10-18。以下为设计迭代保存的 AI 概念原画，逐文件原样复制，未重新生成、裁切或改画。
+
+## 定稿（V29，游戏模型依据）
+
+| 资料库文件 | 制作原件 | 状态 |
+|---|---|---|
+| v29-views.png | assets/concepts/follow-drone-final-v29/views.png | 定稿多视图 |
+| v29-scene.png | assets/concepts/follow-drone-final-v29/scene.png | 定稿游戏场景比例 |
+| v26-eyes-soft-cups.png | assets/concepts/follow-drone-eyes-v26/c-soft-cups.png | 眼睛定稿（软杯） |
+
+用户在 V29 后要求“开始制作替换游戏里面那个”。设计依据见原件目录 DIRECTION.md。
+
+## 历史探索（V7–V10）
 
 | 资料库文件 | 制作原件 | 状态 |
 |---|---|---|
@@ -15,4 +27,4 @@
 
 用户要求继续制作并加入游戏；游戏制作采用 A 能量结构与 C 流线外壳的组合。这不等于三张候选原画均已单独确认，也不代表历史稿中被修改的细节继续有效。
 
-assets/concepts/follow-drone-modeling-v11/compact.png、extended.png 是 Blender 模型渲染，game-*.png 是游戏截图，本次不作为概念原画收录。游戏模型另见 public/robots/utility-drone/model.glb 及同目录 SOURCE.md。
+assets/concepts/follow-drone-modeling-v11/compact.png、extended.png 是 Blender 模型渲染，game-*.png 是游戏截图，本次不作为概念原画收录。V11 GLB 已停用；游戏模型现为程序化建模，见 src/render/utility-drone.ts 与 public/robots/utility-drone/SOURCE.md。
