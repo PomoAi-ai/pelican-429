@@ -9,6 +9,8 @@ import { BLOCK_BACK_Z, BLOCK_FRONT_Z } from './tile-geometry.ts';
 import { FORTRESS_BLACKHOLE, FORTRESS_CHASM, FORTRESS_PLATEAU } from '../config/facility-structure.ts';
 import { createFortressCoolant } from './facility-coolant.ts';
 import { createFortressBlackhole } from './facility-blackhole.ts';
+import { FACILITY_CHAPTERS } from '../config/facility-scenes.ts';
+import { LANDING_POD, landingPodPlan } from '../config/transit.ts';
 
 /** Old stonework gives way to reinforced decks on the same standing surfaces. */
 export function createFortressApproach(k: FacilityKit) {
@@ -74,7 +76,7 @@ export function createFortressApproach(k: FacilityKit) {
   for (const x of [3.5, 8.2, 13.4]) foliage('hang2', x, FORTRESS_PLATEAU.top - 0.15, BLOCK_FRONT_Z + 0.04, 0.72);
 
   // Masonry, then metal-capped stone, then concrete: the material transition follows the route.
-  for (const [left, right, height] of [[29, 33, 7], [41, 47, 3.2], [49, 53, 1.8]] as const) {
+  for (const [left, right, height] of [[29, 33, 7], [41, 47, 3.2]] as const) {
     const rows = Math.ceil(height / 1.3);
     const count = Math.ceil((right - left) / 1.9);
     for (let row = 0; row < rows; row++) {
@@ -86,13 +88,11 @@ export function createFortressApproach(k: FacilityKit) {
     }
     for (let x = left + 0.5; x < right; x += 1.8) foliage('mat1', x, 20 + rows * 1.25, -3.45, left < 48 ? 0.8 : 0.4);
   }
-  for (const [x, height] of [[30.6, 11], [50.5, 4.3]] as const) {
+  for (const [x, height] of [[30.6, 11]] as const) {
     for (let y = 20.6; y < 20 + height; y += 1.2) rock(x, y, -3.2, 1.8, 1.14, 1.5);
     rock(x, 20 + height, -3.2, 2.2, 0.5, 1.9);
     foliage('hang2', x - 0.65, 20 + height, -2.36, x < 32 ? 0.85 : 0.45);
   }
-  k.box(51, 22.52, -4.1, 4.2, 0.14, 1.25, edge);
-  k.box(50.98, 22.15, -2.33, 0.16, 3.5, 0.16, graphite);
   for (const [left, right] of [[73, 77], [81, 86]] as const) {
     const x = (left + right) / 2;
     k.box(x, 20.9, -3.4, right - left, 1.8, 1, concrete);
@@ -102,7 +102,7 @@ export function createFortressApproach(k: FacilityKit) {
   }
   const beacon = k.material(0xc6b189, 0.1, 0xb5a07c);
   beacon.emissiveIntensity = 0.95;
-  for (const x of [50.5, 72.5, 85]) {
+  for (const x of [72.5, 85]) {
     if (x > FORTRESS_CHASM.right) {
       k.box(x, 22.3, -3.2, 1.7, 4.6, 1.6, concrete);
       k.box(x, 22.45, -2.34, 1.15, 3.55, 0.14, graphite);
@@ -112,6 +112,16 @@ export function createFortressApproach(k: FacilityKit) {
     k.box(x + 0.45, 22.2, -2.22, 0.08, 2.8, 0.1, seamLight);
     k.light(x, 24.3, -1.8, 0xd8e6e1, 80, 13);
   }
+
+  // The arrival pod lands behind the play plane at the spawn, so its stretch of wall gives way to a lit pad.
+  const pod = landingPodPlan(FACILITY_CHAPTERS.fortress.spawn, LANDING_POD.altitude.fortress, false);
+  k.tube([pod.x, pod.ground, LANDING_POD.z], [pod.x, pod.ground + 0.05, LANDING_POD.z], 3, graphite);
+  k.tube([pod.x, pod.ground, LANDING_POD.z], [pod.x, pod.ground + 0.08, LANDING_POD.z], 2.55, concrete);
+  for (let i = 0; i < 12; i++) {
+    const a = i / 12 * Math.PI * 2;
+    k.box(pod.x + Math.sin(a) * 2.78, pod.ground + 0.07, LANDING_POD.z + Math.cos(a) * 2.78, 0.26, 0.05, 0.26, seamLight);
+  }
+  k.light(pod.x, 24.3, -1.8, 0xd8e6e1, 80, 13);
 
   const deck = (left: number, right: number, y: number): void => {
     const x = (left + right) / 2;

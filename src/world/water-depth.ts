@@ -38,10 +38,11 @@ export function decodeWaterDepth(out: Uint8Array, width: number, tx: number, ty:
 }
 
 /**
- * 全量计算到 out（长度 = width*height*2：[深度编码, 湖床渐隐] 交错）。
+ * 计算到 out（长度 = width*height*2：[深度编码, 湖床渐隐] 交错），只写 [x0, x1] 列（缺省全图）。
  * stride 参数允许直接写进更宽的打包缓冲（如 RGBA 光照纹理的 B/A 通道）：out[(i*stride) + offset]、out[(i*stride) + offset + 1]。
+ * 每列独立，岸壁只看左右紧邻列的水面：窗口两侧各多算一列即可与全量结果一致。
  */
-export function computeWaterDepth(input: WaterDepthInput, out: Uint8Array, stride = 2, offset = 0): void {
+export function computeWaterDepth(input: WaterDepthInput, out: Uint8Array, stride = 2, offset = 0, x0 = 0, x1 = input.width - 1): void {
   const { width, height, water, isSolid, threshold } = input;
   if (!(Number.isInteger(width) && width > 0 && Number.isInteger(height) && height > 0)) throw new Error(`water-depth: invalid size ${width}×${height}`);
   if (water.length !== width * height) throw new Error(`water-depth: water length ${water.length} does not match ${width}×${height}`);
@@ -49,28 +50,33 @@ export function computeWaterDepth(input: WaterDepthInput, out: Uint8Array, strid
   if (!(Number.isInteger(stride) && stride >= 2 && Number.isInteger(offset) && offset >= 0 && offset + 2 <= stride)) throw new Error(`water-depth: invalid stride ${stride} / offset ${offset}`);
   if (out.length !== width * height * stride) throw new Error(`water-depth: out length ${out.length} does not match ${width}×${height}×${stride}`);
 
-  const n = width * height;
+  const wx0 = Math.max(0, x0 - 1);
+  const wx1 = Math.min(width - 1, x1 + 1);
+  const ww = wx1 - wx0 + 1;
+  // 窗口内局部下标 li = ty*ww + (tx-wx0)；全图下标 i = ty*width + tx。
+  const n = ww * height;
   const depth = new Float32Array(n).fill(WATER_DEPTH_MIN);
   const bed = new Float32Array(n);
   /** 水格所在水体的水面 y（非水格 NaN），供岸壁扩展。 */
   const surface = new Float32Array(n).fill(Number.NaN);
   const wet = (i: number, tx: number, ty: number): boolean => (water[i] as number) >= threshold && !isSolid(tx, ty);
 
-  for (let tx = 0; tx < width; tx++) {
+  for (let tx = wx0; tx <= wx1; tx++) {
     let surf = Number.NaN;
     let lowest = -1;
     let prevWet = false;
     for (let ty = height - 1; ty >= 0; ty--) {
       const i = ty * width + tx;
+      const li = ty * ww + tx - wx0;
       if (wet(i, tx, ty)) {
         if (!prevWet) {
           surf = ty + Math.min(1, (water[i] as number) / 255);
-          const above = i + width;
+          const above = li + ww;
           if (ty + 1 < height && !isSolid(tx, ty + 1)) depth[above] = Math.max(depth[above] as number, surf - (ty + 1.5));
         }
-        depth[i] = surf - (ty + 0.5);
-        bed[i] = 1;
-        surface[i] = surf;
+        depth[li] = surf - (ty + 0.5);
+        bed[li] = 1;
+        surface[li] = surf;
         lowest = ty;
         prevWet = true;
         continue;
@@ -79,8 +85,8 @@ export function computeWaterDepth(input: WaterDepthInput, out: Uint8Array, strid
       if (isSolid(tx, ty)) {
         if (!Number.isNaN(surf)) {
           const k = lowest - ty;
-          depth[i] = surf - (ty + 0.5);
-          bed[i] = k === 1 ? BED_EDGE : 0;
+          depth[li] = surf - (ty + 0.5);
+          bed[li] = k === 1 ? BED_EDGE : 0;
         }
       } else {
         surf = Number.NaN;
@@ -90,20 +96,24 @@ export function computeWaterDepth(input: WaterDepthInput, out: Uint8Array, strid
 
   // 岸壁：与水格同一行左右紧邻、本身未被染色的实心格。
   for (let ty = 0; ty < height; ty++) {
-    for (let tx = 0; tx < width; tx++) {
-      const i = ty * width + tx;
-      if (bed[i] !== 0 || !isSolid(tx, ty)) continue;
+    for (let tx = x0; tx <= x1; tx++) {
+      const li = ty * ww + tx - wx0;
+      if (bed[li] !== 0 || !isSolid(tx, ty)) continue;
       let s = Number.NaN;
-      if (tx > 0 && !Number.isNaN(surface[i - 1] as number)) s = surface[i - 1] as number;
-      if (tx < width - 1 && !Number.isNaN(surface[i + 1] as number)) s = Number.isNaN(s) ? (surface[i + 1] as number) : Math.max(s, surface[i + 1] as number);
+      if (tx > 0 && !Number.isNaN(surface[li - 1] as number)) s = surface[li - 1] as number;
+      if (tx < width - 1 && !Number.isNaN(surface[li + 1] as number)) s = Number.isNaN(s) ? (surface[li + 1] as number) : Math.max(s, surface[li + 1] as number);
       if (Number.isNaN(s)) continue;
-      depth[i] = s - (ty + 0.5);
-      bed[i] = BED_EDGE;
+      depth[li] = s - (ty + 0.5);
+      bed[li] = BED_EDGE;
     }
   }
 
-  for (let i = 0; i < n; i++) {
-    out[i * stride + offset] = encodeWaterDepth(depth[i] as number);
-    out[i * stride + offset + 1] = Math.round((bed[i] as number) * 255);
+  for (let ty = 0; ty < height; ty++) {
+    for (let tx = x0; tx <= x1; tx++) {
+      const li = ty * ww + tx - wx0;
+      const o = (ty * width + tx) * stride + offset;
+      out[o] = encodeWaterDepth(depth[li] as number);
+      out[o + 1] = Math.round((bed[li] as number) * 255);
+    }
   }
 }

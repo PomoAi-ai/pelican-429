@@ -97,15 +97,15 @@ function createGardenTrees(placements: readonly { x: number; y: number; z: numbe
   } };
 }
 
-function createGardenLilies(width: number) {
+function createGardenLilies(width: number, clearing: AiCityClearing | null) {
   const root = new THREE.Group();
   const time = { value: 0 };
   const material = createWindMaterial(time, { amplitude: .025, windScale: .2 });
   const geometries = [built(createLilyPadGeometry), built(createLilyFlowerGeometry)];
-  const count = Math.ceil(width / 3);
-  const meshes = geometries.map(geometry => new THREE.InstancedMesh(geometry, material, count));
   const rng = mulberry32(0x1717);
-  const positions = Array.from({ length: count }, () => ({ x: rng() * width, z: 2 + rng(), scale: 1.3 + rng() * .8, yaw: rng() * 6.28 }));
+  const positions = Array.from({ length: Math.ceil(width / 3) }, () => ({ x: rng() * width, z: 2 + rng(), scale: 1.3 + rng() * .8, yaw: rng() * 6.28 }))
+    .filter(p => !cleared(clearing, p.x, p.x + .3));
+  const meshes = geometries.map(geometry => new THREE.InstancedMesh(geometry, material, positions.length));
   const transform = new THREE.Object3D();
   for (const mesh of meshes) { mesh.receiveShadow = true; root.add(mesh); }
   return { root, update(seconds: number): void {
@@ -127,6 +127,10 @@ function createGardenLilies(width: number) {
 }
 
 type SegmentLayer = AiCityLayerId | 'ground';
+export interface AiCityClearing { readonly minX: number; readonly maxX: number }
+/** 空地不与分段对齐，按物体的段内 x 区间过滤而不是整段丢弃。 */
+const cleared = (clearing: AiCityClearing | null, left: number, right: number): boolean =>
+  clearing !== null && left < clearing.maxX && right > clearing.minX;
 type TreePlacement = { x: number; y: number; z: number; height: number; kind: TreeKind };
 type WaterPlacement = { x: number; y: number; z: number; w: number; h: number; depth: number };
 interface SegmentPlan { beds: GardenBed[]; trees: TreePlacement[]; waters: WaterPlacement[] }
@@ -187,16 +191,39 @@ function addGardens(city: AiCityBatches, plan: SegmentPlan, index: number, homeC
     put('box', 'gold', x, groundTop + 2.15, -1.9, .32, .72, .32);
     put('panel', 'light', x, groundTop + 2.15, -1.72, .19, .56, .03);
   }
-  for (const x of [homeHere ? homeCenter - 22 : 28, homeHere ? homeCenter + 23 : 91]) {
-    if (x < 5 || x > SEGMENT_WIDTH - 5) continue;
+}
+
+// 前景格子：玩家前方的水带、圆花坛与局部格子台。顶面不高于落脚线，只压住画面下缘，不挡角色。
+function addGround(city: AiCityBatches, plan: SegmentPlan, homeCenter: number, clearing: AiCityClearing | null): void {
+  const { put } = city;
+  // 水带按整格切开，只保留空地两侧。
+  const clamp = (x: number): number => THREE.MathUtils.clamp(x, 0, SEGMENT_WIDTH);
+  const gapLeft = clearing ? clamp(Math.floor(clearing.minX)) : SEGMENT_WIDTH;
+  const gapRight = clearing ? clamp(Math.ceil(clearing.maxX)) : SEGMENT_WIDTH;
+  for (const [x, w] of [[0, gapLeft], [gapRight, SEGMENT_WIDTH - gapRight]] as const) {
+    if (w > 0) plan.waters.push({ x, y: -.2, z: 3.2, w, h: 1, depth: 1.4 });
+  }
+  const homeHere = homeCenter >= 0 && homeCenter <= SEGMENT_WIDTH;
+  const planters = [homeHere ? homeCenter - 22 : 28, homeHere ? homeCenter + 23 : 91]
+    .filter(x => x >= 5 && x <= SEGMENT_WIDTH - 5 && !cleared(clearing, x - 4.6, x + 4.6));
+  for (const x of planters) {
     put('cylinder', 'stone', x, .2, 4.5, 4.6, 1.1, 2.1);
     put('cylinder', 'soil', x, .8, 4.5, 4.4, .12, 1.95);
     plan.beds.push({ x: x - 3.5, y: .87, z: 3.4, width: 7, depth: 1.6 });
   }
-}
-
-function addGround(plan: SegmentPlan): void {
-  plan.waters.push({ x: 0, y: -.2, z: 3.2, w: SEGMENT_WIDTH, h: 1, depth: 1.4 });
+  // 每列从水下 y=−0.5 起砌整格，2 为满高（顶面即落脚线），1.5 为顶上半砖；成簇出现、彼此留出水面。
+  const clusters = [{ x: 9, columns: [1.5, 2, 2] }, { x: 58, columns: [2, 1.5] }, { x: 108, columns: [1.5, 2, 2, 1.5] }];
+  for (const cluster of clusters) {
+    const center = cluster.x + cluster.columns.length / 2;
+    if ((homeHere && Math.abs(center - homeCenter) < 18) || planters.some(x => Math.abs(x - center) < 8)
+      || cleared(clearing, cluster.x, cluster.x + cluster.columns.length)) continue;
+    for (const [i, height] of cluster.columns.entries()) {
+      const x = cluster.x + i + .5;
+      put('box', 'stone', x, 0, 3.9, .97, .97, 1.9);
+      put('box', 'ivory', x, .5 + (height - 1) / 2, 3.9, .97, height - 1 - .03, 1.9);
+      put('panel', 'paving', x, height - .5 + .01, 3.9, .95, .03, 1.85);
+    }
+  }
 }
 
 function createSegmentWater(city: AiCityBatches, p: WaterPlacement) {
@@ -228,20 +255,25 @@ function createSegmentWater(city: AiCityBatches, p: WaterPlacement) {
 }
 
 function createEnvironmentSegment(layer: SegmentLayer, index: number, homeCenter: number, detail: boolean,
-  backdrop: AiCityBackdrop) {
+  backdrop: AiCityBackdrop | null, clearing: AiCityClearing | null) {
   const city = createAiCityBatches();
   city.root.name = `ai-city-${layer}-segment-${index}`;
   city.root.position.x = index * SEGMENT_WIDTH;
   const originalDepth = { garden: -7, architecture: -16, canyon: -35, city: -70, distance: -140 };
   if (layer !== 'ground') city.root.position.z = AI_CITY_LAYERS.find(value => value.id === layer)!.depth - originalDepth[layer];
   const plan: SegmentPlan = { beds: [], trees: [], waters: [] };
+  const local = clearing && { minX: clearing.minX - index * SEGMENT_WIDTH, maxX: clearing.maxX - index * SEGMENT_WIDTH };
   switch (layer) {
-    case 'ground': addGround(plan); break;
+    case 'ground': addGround(city, plan, homeCenter - index * SEGMENT_WIDTH, local); break;
     case 'garden': addGardens(city, plan, index, homeCenter - index * SEGMENT_WIDTH); break;
-    case 'architecture': addRail(city, AI_CITY_RAILS.near, -16, 16); city.root.add(backdrop.create('water', index)); break;
-    case 'canyon': addRail(city, AI_CITY_RAILS.far, -35, 24); city.root.add(backdrop.create('canyon', index)); break;
-    case 'city': city.root.add(backdrop.create('city', index)); break;
-    case 'distance': city.root.add(backdrop.create('distance', index)); break;
+    // 只有前景场景（住宅2）没有绘制背景：湖面由宿主原画提供，这一层只留近轨。
+    case 'architecture':
+      addRail(city, AI_CITY_RAILS.near, -16, 16);
+      if (backdrop) city.root.add(backdrop.create('water', index));
+      break;
+    case 'canyon': addRail(city, AI_CITY_RAILS.far, -35, 24); city.root.add(backdrop!.create('canyon', index)); break;
+    case 'city': city.root.add(backdrop!.create('city', index)); break;
+    case 'distance': city.root.add(backdrop!.create('distance', index)); break;
   }
   const animated: Array<{ update(time: number): void; dispose(): void }> = [];
   const nightResponders: Array<{ setNightFactor(night: number): void }> = [city];
@@ -254,7 +286,7 @@ function createEnvironmentSegment(layer: SegmentLayer, index: number, homeCenter
     city.root.add(trees.root); animated.push(trees);
   }
   if (layer === 'ground' && detail) {
-    const lilies = createGardenLilies(SEGMENT_WIDTH);
+    const lilies = createGardenLilies(SEGMENT_WIDTH, local);
     city.root.add(lilies.root); animated.push(lilies);
   }
   const waters = plan.waters.map(p => createSegmentWater(city, p));
@@ -270,8 +302,13 @@ function createEnvironmentSegment(layer: SegmentLayer, index: number, homeCenter
   } };
 }
 
-/** 分层和分段只管理表现，不向玩法注册台地；同一资源工厂服务目录与住宅游戏。 */
-export function createAiCityEnvironment({ homeCenter }: { homeCenter: number }) {
+/**
+ * 分层和分段只管理表现，不向玩法注册台地；同一资源工厂服务目录与住宅游戏。
+ * foreground 只建前景格子与背景格子二的近轨和近处交通，供自带湖景原画的住宅2复用。
+ * clearing 为世界 x 区间 [minX, maxX)，其中不建前景格子，留给自带街面的设施；背景层照常。
+ */
+export function createAiCityEnvironment({ homeCenter, scenery, clearing = null }:
+  { homeCenter: number; scenery: 'full' | 'foreground'; clearing?: AiCityClearing | null }) {
   const root = new THREE.Group();
   root.name = 'ai-city-environment';
   const layers = Object.fromEntries(AI_CITY_LAYERS.map(layer => {
@@ -296,7 +333,8 @@ export function createAiCityEnvironment({ homeCenter }: { homeCenter: number }) 
   const sync = (): void => {
     const detail = range.w < 190;
     const wanted = new Set<string>();
-    const spans = [{ id: 'ground' as const, depth: 0 }, ...AI_CITY_LAYERS].map(layer => {
+    const built = scenery === 'full' ? AI_CITY_LAYERS : AI_CITY_LAYERS.filter(layer => layer.id === 'architecture');
+    const spans = [{ id: 'ground' as const, depth: 0 }, ...built].map(layer => {
       const padding = 14 + Math.abs(layer.depth) * 1.25;
       const horizon = layer.id === 'city' || layer.id === 'distance';
       return { ...layer, first: Math.max(firstSegment - (horizon ? 1 : 0), Math.floor((range.x - padding) / SEGMENT_WIDTH)),
@@ -321,7 +359,7 @@ export function createAiCityEnvironment({ homeCenter }: { homeCenter: number }) 
   };
   const buildNext = (): void => {
     const job = pending.shift()!;
-    const view = createEnvironmentSegment(job.layer, job.index, homeCenter, job.detail, backdrop!);
+    const view = createEnvironmentSegment(job.layer, job.index, homeCenter, job.detail, backdrop, clearing);
     (job.layer === 'ground' ? ground : layers[job.layer]).add(view.root);
     view.setNightFactor(nightFactor); view.update(time);
     segments.set(`${job.layer}:${job.index}`, { ...job, view });
@@ -332,20 +370,24 @@ export function createAiCityEnvironment({ homeCenter }: { homeCenter: number }) 
     async prepare(signal: AbortSignal, onProgress: (progress: { completed: number; total: number }) => void): Promise<void> {
       signal.throwIfAborted();
       let completed = 0;
-      const total = pending.length + AI_CITY_BACKDROP_FILES;
+      const total = pending.length + (scenery === 'full' ? AI_CITY_BACKDROP_FILES : 0);
       onProgress({ completed, total });
-      const loaded = await loadAiCityBackdrop(signal, () => {
-        completed++; onProgress({ completed, total });
-      }, homeCenter);
-      if (disposed || signal.aborted) {
-        loaded.dispose();
-        signal.throwIfAborted();
-        throw new DOMException('城市环境已经释放', 'AbortError');
+      if (scenery === 'full') {
+        const loaded = await loadAiCityBackdrop(signal, () => {
+          completed++; onProgress({ completed, total });
+        }, homeCenter);
+        if (disposed || signal.aborted) {
+          loaded.dispose();
+          signal.throwIfAborted();
+          throw new DOMException('城市环境已经释放', 'AbortError');
+        }
+        backdrop = loaded;
+        if (weather) backdrop.setWeather(weather);
+        backdrop.setNightFactor(nightFactor);
       }
-      backdrop = loaded;
-      if (weather) backdrop.setWeather(weather);
-      backdrop.setNightFactor(nightFactor);
-      traffic = createAiCityTraffic(homeCenter); root.add(traffic.root); traffic.setNightFactor(nightFactor);
+      // 住宅2只留近轨列车，天上不放飞行车。
+      traffic = createAiCityTraffic(homeCenter, scenery === 'full' ? ['near', 'far'] : ['near'], scenery === 'full');
+      root.add(traffic.root); traffic.setNightFactor(nightFactor);
       traffic.near.visible = layers.architecture.visible; traffic.far.visible = layers.canyon.visible;
       while (pending.length) {
         // 将几何装配分散到浏览器任务，让加载谱线和场景目录持续响应。

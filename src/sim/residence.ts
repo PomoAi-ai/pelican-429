@@ -20,6 +20,8 @@ export interface ResidencePlacement {
 export interface ResidenceState {
   readonly placements: ResidencePlacement[];
   readonly underground?: Set<number>;
+  /** 交通中心等外部设施用地 [minX, maxX)：其中地面及以上的构件已清除且禁止再建，地下格保留。 */
+  reserved?: { readonly minX: number; readonly maxX: number };
   nextId: number;
   revision: number;
 }
@@ -116,6 +118,11 @@ export function checkResidencePlacement(state: ResidenceState, resourceId: strin
   const bottom = state.underground ? RESIDENCE_WORLD.minY : RESIDENCE_WORLD.foundationTop;
   if (x < RESIDENCE_WORLD.minX || x + resource.width > RESIDENCE_WORLD.maxX || y < bottom || y + resource.height > RESIDENCE_WORLD.height) {
     return { ok: false, message: '超出住宅建造范围' };
+  }
+  // Underground below the station stays free to dig and rebuild; only the street level and above are reserved.
+  if (state.reserved && x < state.reserved.maxX && x + resource.width > state.reserved.minX
+    && y + resource.height > RESIDENCE_WORLD.foundationTop) {
+    return { ok: false, message: '这里是交通中心用地，不能建造' };
   }
   const placement: ResidencePlacement = { id: state.nextId, resourceId, x, y,
     ...depthMode === 'deep' ? { depthMode } : {}, ...resource.kind === 'door' ? { open: false } : {} };
@@ -293,6 +300,69 @@ export function addResidenceGround(state: ResidenceState): void {
     state.placements.push({ id: state.nextId++, resourceId: 'ashlar-B', x, y: RESIDENCE_WORLD.foundationTop, depthMode: 'deep' });
   }
   state.revision++;
+}
+
+/** 清除用地内地面（含默认方石地台）及以上的构件；设施自带街面碰撞，地下格与地下构件不动。 */
+export function reserveResidenceSite(state: ResidenceState, minX: number, maxX: number): void {
+  const kept = state.placements.filter(item => item.y < RESIDENCE_WORLD.foundationTop
+    || item.x >= maxX || item.x + getResidenceResource(item.resourceId).width <= minX);
+  state.placements.splice(0, state.placements.length, ...kept);
+  state.reserved = { minX, maxX };
+  state.revision++;
+}
+
+/**
+ * 主屋下方的两层地下长廊：B1 是主屋正下方的大厅（x 51–67、y −6～0）向两侧延伸的走廊（x 30–92、y −6～−3），
+ * B2 是更深一层的长廊（x 30–92、y −13～−9）。屋内平台竖井（x 58–59）从楼板开洞直通 B2，两端另有竖井（x 32–33、88–89）
+ * 连通两层；单向平台每两格一级。走廊背墙开整排落地窗，透过窗看到地下城远景；吊灯和壁灯沿走廊布置。
+ */
+export function addResidenceBasement(state: ResidenceState): void {
+  const remove = (id: number): void => {
+    const result = removeResidence(state, id);
+    if (!result.ok) throw new Error(`住宅地下室：${result.message}`);
+  };
+  const add = (resourceId: string, x: number, y: number): void => {
+    const result = placeResidence(state, resourceId, x, y, null);
+    if (!result.ok) throw new Error(`住宅地下室 ${resourceId} (${x}, ${y})：${result.message}`);
+  };
+  const rooms = [
+    { x0: 51, x1: 68, y0: -6, y1: 0 }, { x0: 30, x1: 51, y0: -6, y1: -3 }, { x0: 68, x1: 93, y0: -6, y1: -3 },
+    { x0: 30, x1: 93, y0: -13, y1: -9 },
+  ];
+  const shafts = [32, 58, 88];
+  const dug = new Set<string>();
+  const dig = (x: number, y: number): void => {
+    if (dug.has(`${x},${y}`)) return;
+    dug.add(`${x},${y}`); remove(residenceTerrainId(x, y));
+  };
+  for (const room of rooms) for (let y = room.y0; y <= room.y1; y++) for (let x = room.x0; x < room.x1; x++) dig(x, y);
+  for (const shaft of shafts) for (const x of [shaft, shaft + 1]) for (const y of [-8, -7]) dig(x, y);
+  for (const placement of state.placements.filter(item => item.y === 1 && (item.x === 58 || item.x === 59))) remove(placement.id);
+  // 窗先占位，其余挖空格铺背景墙。
+  const windows: Array<[string, number, number, number, number]> = [
+    ['glazing-wide', 52, -3, 4, 3], ['glazing-wide', 62, -3, 4, 3],
+    ...[34, 40, 46, 71, 77, 83].map((x): [string, number, number, number, number] => ['glazing-landscape', x, -5, 3, 2]),
+    ...[35, 42, 50, 64, 72, 80].map((x): [string, number, number, number, number] => ['glazing-wide', x, -12, 4, 3]),
+  ];
+  for (const [id, x, y] of windows) add(id, x, y);
+  const glazed = (x: number, y: number): boolean => windows.some(([, wx, wy, w, h]) => x >= wx && x < wx + w && y >= wy && y < wy + h);
+  for (const key of dug) {
+    const [x, y] = key.split(',').map(Number) as [number, number];
+    if (!glazed(x, y)) add('wall', x, y);
+  }
+  for (const shaft of shafts) for (const x of [shaft, shaft + 1]) {
+    for (const y of shaft === 58 ? [-12.5, -10.5, -8.5, -6.5, -4.5, -2.5, -.5, 1.5] : [-12.5, -10.5, -8.5, -6.5]) add('platform-full', x, y);
+  }
+  for (const x of [31, 38, 45, 70, 77, 84, 91]) add('pendant', x, -3);
+  for (const x of [53, 64]) add('pendant', x, 0);
+  for (const x of [31, 38, 46, 54, 62, 69, 76, 84, 91]) add('pendant', x, -9);
+  for (const [x, y] of [[51, -.5], [67, -.5], [40, -10.5], [48, -10.5], [70, -10.5], [78, -10.5]] as const) add('wall-light', x, y);
+  add('dock', 51, -6); add('terminal-robot', 54, -6); add('depot', 55, -6);
+  add('workstation', 64, -6); add('chair-right', 62.5, -6); add('terminal-compute', 66, -6); add('battery', 67, -6);
+  add('shelf', 60, -6); add('plant', 57, -6);
+  add('plant', 37, -6); add('plant', 74, -6); add('terminal-compute', 80, -6);
+  add('table', 45, -13); add('chair-right', 43.5, -13); add('chair-left', 47, -13);
+  add('shelf', 66, -13); add('battery', 70, -13); add('terminal-robot', 76, -13); add('plant', 84, -13);
 }
 
 export function createResidence(): ResidenceState {

@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { freeWorldSearch } from '../src/app/free-world-navigation.ts';
+import { freeWorldSearch, keepWorldParams, worldMapSearch } from '../src/app/free-world-navigation.ts';
 import { loadGameLevel } from '../src/app/game-level.ts';
 import { freeWorldRegions } from '../src/world/free-world-regions.ts';
 import { worldMusicTheme } from '../src/app/world-music.ts';
@@ -24,16 +24,15 @@ import { createShowcaseLevel } from '../src/world/showcase-level.ts';
 import { freeWorldSafeZones } from '../src/world/free-world-safe-zones.ts';
 
 // 仅避开营地出生点或只测怪物中心，会让其它房屋边缘和宽体怪物仍侵入生活区。
-test('自由世界所有渔屋和居民巡游范围禁止完整敌人体型出生，远处保留敌人', () => {
+test('主世界所有渔屋和居民巡游范围禁止完整敌人体型出生，远处保留敌人', () => {
   for (const [seed, size] of [[0, 'small'], [429, 'medium'], [20260930, 'large']] as const) {
-    const level = generateFreeWorld(seed, size);
+    const level = generateFreeWorld(seed, size, 'wilds');
     try {
       const livingAreas = [
         { x: level.spawn.x - 29, y: level.spawn.y - 10, w: 58, h: 25 },
         ...level.structures.map(house => ({ x: house.x0 - 20, y: house.floorY - 8,
           w: house.x1 - house.x0 + 41, h: house.roofY + house.roofRows + 16 - (house.floorY - 8) })),
       ];
-      assert.ok(level.structures.length > 0);
       assert.ok(level.enemies!.length > 0);
       for (const area of livingAreas) {
         assert.ok(level.safeZones!.some(zone => zone.x <= area.x && zone.y <= area.y
@@ -98,6 +97,23 @@ test('同图区域定位与换种子保留规模和 GM，清理旧独立机房�
   assert.deepEqual(Object.fromEntries(returned), { mode: 'game', quality: 'low', free: '1', seed: '456', gm: '0', region: 'wilds', size: 'small' });
 });
 
+test('城区右端进原野、原野左端回城区，保留种子与规模并去掉对侧入口标记', () => {
+  const wilds = new URLSearchParams(worldMapSearch('?mode=game&from=wilds&seed=7&size=large&gm=1&quality=low', 'wilds'));
+  assert.deepEqual(Object.fromEntries(wilds), { mode: 'game', seed: '7', size: 'large', gm: '1', quality: 'low', free: '1' });
+  const city = new URLSearchParams(worldMapSearch(`?${wilds}&region=fortress`, 'city'));
+  assert.deepEqual(Object.fromEntries(city), { mode: 'game', seed: '7', size: 'large', gm: '1', quality: 'low', from: 'wilds' });
+  const transit = new URLSearchParams(worldMapSearch(`?${wilds}&region=fortress`, 'transit'));
+  assert.deepEqual(Object.fromEntries(transit), { mode: 'game', seed: '7', size: 'large', gm: '1', quality: 'low', from: 'transit' });
+  // 场景页主世界走进原野、快速旅行重建时整页切到游戏页，不带场景目录参数。
+  assert.deepEqual(Object.fromEntries(new URLSearchParams(worldMapSearch('?mode=lab&demo=free-world&gm=1', 'wilds'))), { mode: 'game', gm: '1', free: '1' });
+  assert.equal(new URLSearchParams(freeWorldSearch('?mode=lab&demo=free-world', 7, false, 'wilds', 'small')).has('demo'), false);
+  // 从城区走进原野后再重建或区域定位，不再带着城区的出生入口。
+  assert.equal(new URLSearchParams(freeWorldSearch('?mode=game&free=1&from=wilds', 7, false, 'wilds', 'small')).has('from'), false);
+  // 星舰发射与关卡返程把同一世界的种子、规模与 GM 带到目的地，其余参数不带。
+  const landing = keepWorldParams(new URL('http://x/?mode=game&landing=1'), '?mode=game&level=facility&scene=abyss&seed=7&size=large&gm=1&quality=low');
+  assert.deepEqual(Object.fromEntries(landing.searchParams), { mode: 'game', landing: '1', seed: '7', size: 'large', gm: '1' });
+});
+
 test('大世界配乐跟随真实地形，洞穴与浮岛优先于同列地表，机房使用全局位置', () => {
   const { level, ground } = loadGameLevel(new URLSearchParams('seed=429&size=small'));
   try {
@@ -146,7 +162,7 @@ test('不同种子的真实区域都能容纳玩家与营地 NPC，机房也能�
 test('三档世界保持同种子可复现，扩大地图增加自然区域，旧机房网址加载同一地图', () => {
   let previousRooms = 0;
   for (const size of ['small', 'medium', 'large'] as const satisfies readonly FreeWorldSize[]) {
-    const a = generateFreeWorld(429, size);
+    const a = generateFreeWorld(429, size, 'wilds');
     const b = loadGameLevel(new URLSearchParams(`level=facility&free=1&scene=cathedral&seed=429&size=${size}`)).level;
     try {
       assert.equal(a.map.width, FREE_WORLD_SIZES[size].width);
@@ -163,9 +179,9 @@ test('三档世界保持同种子可复现，扩大地图增加自然区域，�
 });
 
 test('合并保留自然地形、形状与水量，洞穴索引和机房危险区落在实际全局坐标', () => {
-  const merged = generateFreeWorld(429, 'small');
+  const merged = generateFreeWorld(429, 'small', 'wilds');
   const wildWidth = merged.facilities![0]!.x - 32;
-  const wild = generateWorld(429, { ...TUNING.worldgen, width: wildWidth, height: merged.map.height });
+  const wild = generateWorld(429, { ...TUNING.worldgen, width: wildWidth, height: merged.map.height, hutCount: 0 });
   try {
     for (let y = 0; y < wild.map.height; y++) for (let x = 0; x < wildWidth; x++) {
       assert.equal(merged.map.get(x, y), wild.map.get(x, y));
@@ -184,7 +200,7 @@ test('合并保留自然地形、形状与水量，洞穴索引和机房危险�
       assert.deepEqual(merged.lethalCoolant, { ...source.lethalCoolant!, x: source.lethalCoolant!.x + fortress.x, y: source.lethalCoolant!.y + fortress.y });
       const world = createSimWorld({ level: { ...merged, enemies: [] }, windMode: 'calm', precipMode: 'manual', precipState: { rain: 'none', snow: 'none' } });
       const player = getPlayer(world);
-      assert.deepEqual({ x: player.body.x, y: player.body.y }, wild.spawn, '自然世界仍从原野出生');
+      assert.deepEqual({ x: player.body.x, y: player.body.y }, merged.spawn, '自然世界从原野左端入场');
       Object.assign(player.body, { x: source.blackhole!.x + fortress.x + 2, y: source.blackhole!.y + fortress.y - player.body.height / 2 });
       stepSim(world, NEUTRAL_INPUT);
       assert.ok(player.body.vx < 0, '合并后的堡垒黑洞在真实全局位置吸引玩家');
@@ -197,9 +213,41 @@ test('合并保留自然地形、形状与水量，洞穴索引和机房危险�
   } finally { merged.fluid.dispose(); wild.fluid.dispose(); }
 });
 
-test('自由世界原野、浮岛和洞室有共享敌人，出生身体净空且避开水体和营地', () => {
+test('主世界不生成渔屋出生区，从原野左端干燥平地入场且身体稳定落地', () => {
+  for (const [seed, size] of [[0, 'small'], [7, 'small'], [7, 'large'], [429, 'medium'], [20260930, 'small'], [0xffffffff, 'large']] as const) {
+    const level = generateFreeWorld(seed, size, 'wilds');
+    try {
+      const { spawn } = level;
+      assert.deepEqual(level.structures, []);
+      assert.equal(level.spawnFacing, undefined, `${seed}/${size}: 没有渔屋时不应保留开场取景朝向`);
+      assert.ok(spawn.x < 40, `${seed}/${size}: 出生点 x=${spawn.x} 不在原野左端`);
+      const body = createBody({ x: spawn.x, y: spawn.y, halfWidth: .45, height: 2.8 });
+      for (let x = Math.floor(spawn.x) - 1; x <= Math.floor(spawn.x) + 1; x++) {
+        for (let y = spawn.y; y < spawn.y + body.height; y++) assert.equal(level.fluid.amountAt(x, y), 0, `${seed}/${size}: 出生点 (${x}, ${y}) 有水`);
+      }
+      for (let tick = 0; tick < 30; tick++) {
+        applyGravity(body, TUNING.physics.gravity, TUNING.physics.maxFallSpeed, TUNING.sim.step);
+        moveAndCollide(body, level.map, TUNING.sim.step);
+      }
+      assert.equal(body.onGround, true);
+      assert.deepEqual({ x: body.x, y: body.y }, spawn, `${seed}/${size}: 出生身体没有稳定落脚`);
+    } finally { level.fluid.dispose(); }
+  }
+});
+
+// 家园设施和存档里的树都按渔屋出生区布局，原野改为左端入场不能波及家园。
+test('家园模式仍生成渔屋出生区并从渔屋门外出生', () => {
+  const { level } = loadGameLevel(new URLSearchParams('mode=homestead&seed=429&size=small'));
+  try {
+    assert.ok(level.structures.length > 0);
+    assert.notEqual(level.spawnFacing, undefined);
+    assert.ok(level.structures.some(hut => Math.abs((hut.x0 + hut.x1) / 2 - level.spawn.x) < 20), '出生点不在渔屋旁');
+  } finally { level.fluid.dispose(); }
+});
+
+test('主世界原野、浮岛和洞室有共享敌人，出生身体净空且避开水体和营地', () => {
   for (const seed of [0, 429, 20260930, 0xffffffff]) {
-    const level = generateFreeWorld(seed, 'small');
+    const level = generateFreeWorld(seed, 'small', 'wilds');
     try {
       const wild = level.enemies!.filter(enemy => enemy.x < level.facilities![0]!.x - 32);
       assert.deepEqual(new Set(wild.map(enemy => enemy.kind)), new Set(Object.keys(ENEMY_RULES)));
@@ -228,7 +276,7 @@ test('自由世界原野、浮岛和洞室有共享敌人，出生身体净空�
 });
 
 test('人形玩家能双向步行跨过所有野外与机房接缝，不撞墙或掉进隐形缺口', () => {
-  const level = generateFreeWorld(429, 'small');
+  const level = generateFreeWorld(429, 'small', 'wilds');
   try {
     const joins = level.facilities!.map(facility => ({ left: facility.x - 34, right: facility.x + 10 }));
     const last = level.facilities!.at(-1)!;

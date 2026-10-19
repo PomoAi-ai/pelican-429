@@ -36,6 +36,7 @@ import { checkAnimGeometry, checkPelicanPose, pelicanRestPose, POSE_SIDES } from
 import type { PelicanAnimGeometry, PelicanFootTarget, PelicanPose, Side, Vec3 } from './pelican-pose.ts';
 import { rideBob } from './pelican-ride-anim.ts';
 import { MIN_EXTENSION, POLE_TURN_EXTENSION, RIDE_MIN_EXTENSION, boneLengths, hipPoint, kneePole, upperTransform } from './pelican-skeleton.ts';
+import { addNodePatch } from '../node-patches.ts';
 
 export type { PelicanPose, Side } from './pelican-pose.ts';
 const SIDES: readonly Side[] = POSE_SIDES;
@@ -576,6 +577,7 @@ export function createPelicanRig(options: PelicanRigOptions): PelicanRig {
       shader.fragmentShader = shader.fragmentShader.replace('#include <opaque_fragment>', '#include <opaque_fragment>\ngl_FragColor.a = -0.8;');
     };
     node.material.customProgramCacheKey = () => 'pelican-plumage-occlusion';
+    addNodePatch(node.material, { kind: 'pelican-plumage-occlusion' });
   });
 
   // Regroup the bird under its animation pivots.

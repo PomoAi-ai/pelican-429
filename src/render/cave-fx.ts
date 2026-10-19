@@ -13,6 +13,7 @@ import type { Rng } from '../core/rng.ts';
 import { CAVE_CELL } from '../world/level.ts';
 import type { CaveInfo } from '../world/level.ts';
 import type { TileQuery } from '../world/tile-map.ts';
+import { glslFloat as f } from './wind.ts';
 
 export const CAVE_FX_RULES = Object.freeze({
   /** 顶棚格成为滴水点的比例。 */
@@ -81,6 +82,9 @@ export interface CaveFx {
   dispose(): void;
 }
 
+/** 光点着色器：透视缩放时的最小深度（避免除零），WebGPU 节点版本同表。 */
+export const CAVE_FX_SHADER = { minDepth: 0.001 } as const;
+
 function pointMaterial(): THREE.ShaderMaterial {
   return new THREE.ShaderMaterial({
     name: 'cave-fx-points',
@@ -96,7 +100,7 @@ function pointMaterial(): THREE.ShaderMaterial {
       'void main() {',
       '  vColor = aColor;',
       '  vec4 mv = modelViewMatrix * vec4( position, 1.0 );',
-      '  gl_PointSize = aSize * uScale / max( 0.001, -mv.z );',
+      `  gl_PointSize = aSize * uScale / max( ${f(CAVE_FX_SHADER.minDepth)}, -mv.z );`,
       '  gl_Position = projectionMatrix * mv;',
       '}',
     ].join('\n'),

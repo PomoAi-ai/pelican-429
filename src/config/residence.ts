@@ -1,5 +1,8 @@
 import { AI_CITY_SUN } from './ai-city-look.ts';
 import { TILE_SHAPE_DEFINITIONS } from './definition-kit.ts';
+import { TRANSIT } from './transit.ts';
+
+export type ResidenceVariant = 'original' | 'harbor' | 'three';
 
 export const RESIDENCE_MATERIALS = { ceramic: '暖白岩板块', alloy: '深蓝合金块', ashlar: '米黄色方石块',
   grass: '草地土块', dirt: '泥土块', stone: '石块', sand: '沙块', sandstone: '砂岩块', timber: '木料块' } as const;
@@ -96,6 +99,15 @@ const WORLD_MIN_X = -1152;
 const WORLD_MAX_X = 1280;
 export const RESIDENCE_WORLD = { minX: WORLD_MIN_X, maxX: WORLD_MAX_X, width: WORLD_MAX_X - WORLD_MIN_X,
   height: 36, minY: -63, foundationTop: 1, groundTop: 1.5, spawn: { x: 18, y: 1.5 } } as const;
+// 街道右缘停在主院区最左构件（庭院短灯 x 25）之前 2 格。
+const TRANSIT_STREET_RIGHT = 23;
+const TRANSIT_ORIGIN_X = TRANSIT_STREET_RIGHT - TRANSIT.walkwayMaxX - TRANSIT.pavingMargin;
+/** 城区中的星舰交通中心：交通中心本地坐标 + origin 即住宅世界坐标；[minX, maxX) 为清空并禁建的用地。 */
+export const RESIDENCE_TRANSIT = {
+  origin: { x: TRANSIT_ORIGIN_X, y: RESIDENCE_WORLD.groundTop - TRANSIT.groundY },
+  minX: TRANSIT_ORIGIN_X + TRANSIT.walkwayMinX - TRANSIT.pavingMargin,
+  maxX: TRANSIT_STREET_RIGHT,
+} as const;
 export const RESIDENCE_SEGMENT_WIDTH = 128;
 export const RESIDENCE_SEGMENTS = Array.from({ length: RESIDENCE_WORLD.width / RESIDENCE_SEGMENT_WIDTH }, (_, offset) => {
   const index = WORLD_MIN_X / RESIDENCE_SEGMENT_WIDTH + offset;

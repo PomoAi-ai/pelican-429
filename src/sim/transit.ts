@@ -1,4 +1,4 @@
-import { TRANSIT, TRANSIT_PHASE_SECONDS, type TransitDestinationId } from '../config/transit.ts';
+import { TRANSIT, TRANSIT_HATCH, TRANSIT_PHASE_SECONDS, type TransitDestinationId } from '../config/transit.ts';
 import type { Vec2 } from '../core/math.ts';
 
 type TimedPhase = keyof typeof TRANSIT_PHASE_SECONDS;
@@ -64,6 +64,16 @@ export function selectTransitDestination(state: TransitState, destination: Trans
   return true;
 }
 
+/** 跳过登舱：直接入座并选定目的地；入舱位置记为舱门等候点，取消时照常从舱门离开。 */
+export function seatTransit(state: TransitState, destination: TransitDestinationId): boolean {
+  if (state.phase !== 'ground') return false;
+  state.entryFrom = { x: TRANSIT_HATCH.waitingX, y: TRANSIT_HATCH.floor };
+  state.phase = 'cabin';
+  state.elapsed = 0;
+  state.destination = destination;
+  return true;
+}
+
 export function launchTransit(state: TransitState): boolean {
   if (state.phase !== 'cabin' || state.destination === null) return false;
   state.phase = 'retract';
@@ -83,6 +93,24 @@ export function transitPhaseProgress(state: TransitState): number {
   if (state.phase === 'ground') return 0;
   if (state.phase === 'cabin' || state.phase === 'complete') return 1;
   return state.elapsed / TRANSIT_PHASE_SECONDS[state.phase];
+}
+
+/** 沿通道穿过侧舱门，身体完全进入后才转向前排座椅。 */
+export function transitCabinPosition(from: Vec2, progress: number): { x: number; y: number; z: number } {
+  const threshold = { x: TRANSIT_HATCH.insideX, y: TRANSIT_HATCH.floor, z: TRANSIT_HATCH.centerZ };
+  const seat = { x: TRANSIT.seatX, y: TRANSIT.seatY, z: TRANSIT_HATCH.seatZ };
+  const outsideDistance = Math.hypot(threshold.x - from.x, threshold.y - from.y);
+  const insideDistance = Math.hypot(seat.x - threshold.x, seat.y - threshold.y, seat.z - threshold.z);
+  const distance = (outsideDistance + insideDistance) * progress;
+  const inside = distance > outsideDistance;
+  const start = inside ? threshold : { ...from, z: TRANSIT_HATCH.centerZ };
+  const end = inside ? seat : threshold;
+  const t = inside ? (distance - outsideDistance) / insideDistance : distance / outsideDistance;
+  return { x: start.x + (end.x - start.x) * t, y: start.y + (end.y - start.y) * t, z: start.z + (end.z - start.z) * t };
+}
+
+export function transitExitPosition(from: Vec2): Vec2 {
+  return { x: Math.min(from.x, TRANSIT_HATCH.waitingX), y: TRANSIT_HATCH.floor };
 }
 
 /** 剩余时间跨阶段推进；只有穿越完成的那次转换通知场景导航。 */

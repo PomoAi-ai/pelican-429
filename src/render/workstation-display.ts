@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { createParticleCloud } from './grassy/grassy-particles.ts';
 import { createWorkstationDisplayState, type WorkstationDisplay } from './workstation-display-state.ts';
+import { glslFloat } from './wind.ts';
 
 function displayBuilder(root: THREE.Group) {
   const geometries = new Map<string, THREE.BufferGeometry>();
@@ -199,6 +200,15 @@ function holographicDisplay(builder: DisplayBuilder): (time: number) => void {
   };
 }
 
+/** 能量球外壳：菲涅尔边缘 + 纬向扫光 + 经线；WebGPU 节点版本同表。 */
+export const ORB_SHELL_SHADER = {
+  rimSharp: 3, sweep: { freq: 28, speed: 1.3, sharp: 30 }, meridian: { freq: 18.8496, sharp: 100 },
+  alpha: { base: 0.035, rim: 0.48, sweep: 0.06, meridian: 0.035 }, inner: [0.12, 0.52, 0.95], rim: [0.3, 0.9, 1],
+} as const;
+const O = ORB_SHELL_SHADER;
+// 原 GLSL 的小数省略前导 0（.035）；按同样格式生成，WebGL 着色器文本逐字不变。
+const o = (n: number): string => glslFloat(n).replace(/^0\./, '.');
+
 function globeDisplay(builder: DisplayBuilder): (time: number) => void {
   const { root, part, ink, materials, stencil, geometries } = builder;
   const orb = new THREE.Group();
@@ -206,6 +216,7 @@ function globeDisplay(builder: DisplayBuilder): (time: number) => void {
   root.add(orb);
   const phase = { value: 0 };
   const shellMaterial = new THREE.ShaderMaterial({
+    name: 'workstation-orb-shell',
     uniforms: { phase }, transparent: true, depthWrite: false, toneMapped: false,
     blending: THREE.AdditiveBlending, side: THREE.FrontSide, ...stencil,
     vertexShader: `varying vec3 vNormal, vEye; varying vec2 vUv;
@@ -216,11 +227,11 @@ function globeDisplay(builder: DisplayBuilder): (time: number) => void {
       }`,
     fragmentShader: `uniform float phase; varying vec3 vNormal, vEye; varying vec2 vUv;
       void main() {
-        float rim = pow(1.0 - max(0.0, dot(normalize(vNormal), normalize(vEye))), 3.0);
-        float sweep = pow(max(0.0, sin(vUv.y * 28.0 - phase * 1.3)), 30.0);
-        float meridian = pow(abs(cos(vUv.x * 18.8496)), 100.0);
-        float alpha = .035 + rim * .48 + sweep * .06 + meridian * .035;
-        gl_FragColor = vec4(mix(vec3(.12, .52, .95), vec3(.3, .9, 1.0), rim), alpha);
+        float rim = pow(1.0 - max(0.0, dot(normalize(vNormal), normalize(vEye))), ${o(O.rimSharp)});
+        float sweep = pow(max(0.0, sin(vUv.y * ${o(O.sweep.freq)} - phase * ${o(O.sweep.speed)})), ${o(O.sweep.sharp)});
+        float meridian = pow(abs(cos(vUv.x * ${o(O.meridian.freq)})), ${o(O.meridian.sharp)});
+        float alpha = ${o(O.alpha.base)} + rim * ${o(O.alpha.rim)} + sweep * ${o(O.alpha.sweep)} + meridian * ${o(O.alpha.meridian)};
+        gl_FragColor = vec4(mix(vec3(${O.inner.map(o).join(', ')}), vec3(${O.rim.map(o).join(', ')}), rim), alpha);
         #include <colorspace_fragment>
       }`,
   });

@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import type { FacilityLamp } from './facility-lighting.ts';
+import { glslFloat as f } from './wind.ts';
 
 export type FacilitySignalKind = 'power' | 'nvlink' | 'network';
 export type FacilitySignalPoint = readonly [number, number, number];
@@ -45,6 +46,17 @@ const STYLES = {
   network: { color: 0x859fb8, lanes: 2, spacing: 1.65, laneGap: 0.24, speed: 7 },
 } as const;
 
+/** 线缆流光带：沿线拖尾 + 横向中心亮芯；WebGPU 节点版本同表。 */
+export const SIGNAL_RIBBON_SHADER = {
+  trail: 10,
+  edge: { lo: 0.05, hi: 0.5 },
+  coreSharp: 5,
+  base: 0.06,
+  edgeGain: 0.32,
+  coreGain: 0.5,
+} as const;
+const R = SIGNAL_RIBBON_SHADER;
+
 function flowingRibbon(routes: readonly FacilitySignalRoute[], kind: FacilitySignalKind) {
   const positions: number[] = [], uv: number[] = [];
   const width = kind === 'nvlink' ? 0.14 : kind === 'power' ? 0.28 : 0.38;
@@ -70,6 +82,7 @@ function flowingRibbon(routes: readonly FacilitySignalRoute[], kind: FacilitySig
   geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
   geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
   const material = new THREE.ShaderMaterial({
+    name: 'facility-signals-ribbon',
     uniforms: { time: { value: 0 }, speed: { value: STYLES[kind].speed },
       period: { value: kind === 'nvlink' ? 3 : 9 }, color: { value: new THREE.Color(STYLES[kind].color) } },
     vertexShader: 'varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
@@ -77,10 +90,10 @@ function flowingRibbon(routes: readonly FacilitySignalRoute[], kind: FacilitySig
       uniform float time; uniform float speed; uniform float period; uniform vec3 color;
       void main() {
         float behind = fract((time * speed - vUv.x) / period);
-        float trail = exp(-behind * 10.0);
-        float edge = 1.0 - smoothstep(0.05, 0.5, abs(vUv.y - 0.5));
-        float core = pow(edge, 5.0);
-        float energy = 0.06 * core + trail * (0.32 * edge + 0.5 * core);
+        float trail = exp(-behind * ${f(R.trail)});
+        float edge = 1.0 - smoothstep(${f(R.edge.lo)}, ${f(R.edge.hi)}, abs(vUv.y - 0.5));
+        float core = pow(edge, ${f(R.coreSharp)});
+        float energy = ${f(R.base)} * core + trail * (${f(R.edgeGain)} * edge + ${f(R.coreGain)} * core);
         gl_FragColor = vec4(color, energy);
       }`,
     transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, toneMapped: false,

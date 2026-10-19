@@ -91,7 +91,7 @@ export function createStoryHud(parent: HTMLElement, world: SimWorld, options: {
         ? `${guards} guards · ${mobile ? 'Left stick to move / push up to jump · Right button to attack' : 'A/D move · Space jump · J attack'}`
         : `剩余 ${guards} 名守卫 · ${mobile ? '左侧摇杆移动 / 上推跳跃 · 右侧按钮攻击' : 'A/D 移动 · 空格跳跃 · J 攻击'}`)
       : state.phase === 'countdown' ? (en ? `Sam arrives in ${Math.ceil(state.countdownTicks * world.tuning.sim.step)}s` : `Sam 抵达倒计时 ${Math.ceil(state.countdownTicks * world.tuning.sim.step)} 秒`)
-      : state.phase === 'restored' ? (en ? 'Keep exploring freely · Enter the free world whenever you are ready.' : '现在可自由探索堡垒 · 随时进入自由世界。')
+      : state.phase === 'restored' ? (en ? 'Keep exploring freely · Enter the main world whenever you are ready.' : '现在可自由探索堡垒 · 随时进入主世界。')
       : en ? 'J attack · RMB / 1–3 skills · F transform after Tibo · R bicycle' : 'J 攻击 · 右键 / 1–3 技能 · F 变身（Tibo 后解锁）· R 自行车');
     const boss = world.entities.find((entity) => entity.id === state.bossId);
     health.hidden = boss === undefined;
@@ -103,13 +103,13 @@ export function createStoryHud(parent: HTMLElement, world: SimWorld, options: {
     }
     setText(saveNote, en ? 'Progress auto-saved in this browser · Return to continue' : '进度自动保存至此浏览器 · 下次进入继续游戏');
     ending.hidden = !restored;
-    setText(free, en ? 'Enter the free world →' : '进入自由世界 →');
+    setText(free, en ? 'Enter the main world →' : '进入主世界 →');
     setText(topic, en ? 'The storm has passed' : '降智风暴告一段落');
     setText(line, en
-      ? 'The dumbing-down storm is over for now. Compute is restored, and frontier models are back online.\nKeep exploring the fortress, or join me in the free world. The next stage is ready whenever you are.'
-      : '降智风暴终于告一段落了。算力已经恢复，前沿模型也重新开放了。\n你可以继续探索这座堡垒，或者和我一起前往自由世界。准备好了，随时进入下一阶段。');
+      ? 'The dumbing-down storm is over for now. Compute is restored, and frontier models are back online.\nKeep exploring the fortress, or join me in the main world. The next stage is ready whenever you are.'
+      : '降智风暴终于告一段落了。算力已经恢复，前沿模型也重新开放了。\n你可以继续探索这座堡垒，或者和我一起前往主世界。准备好了，随时进入下一阶段。');
     setText(continueButton.querySelector('span')!, en ? 'Keep exploring' : '继续探索');
-    setText(enterButton.querySelector('span')!, en ? 'Enter the free world' : '进入自由世界');
+    setText(enterButton.querySelector('span')!, en ? 'Enter the main world' : '进入主世界');
     setText(countdownTitle, en ? 'Tibo defeated' : '已击败 Tibo');
     setText(countdownDetail, en ? 'Human form restored · Transformation unlocked' : '人形已恢复 · 变身已解锁');
     setText(countdownSeconds, String(Math.ceil(state.countdownTicks * world.tuning.sim.step)));

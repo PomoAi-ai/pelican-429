@@ -370,7 +370,7 @@ describe('逻辑层：环境命令与雨天嘴囊水量回复', () => {
 });
 
 
-test('自由世界天气按位置和高度变化，手动覆盖保留；补水取实体当地天气', () => {
+test('主世界天气按位置和高度变化，手动覆盖保留；补水取实体当地天气', () => {
   const rows = [...Array<string>(39).fill('.'.repeat(180)), '.....P' + '.'.repeat(174), '#'.repeat(180)];
   const parsed = parseLevel(rows, LEVEL_LEGEND);
   const level = { ...parsed, seed: 429,

@@ -17,6 +17,7 @@ import type { TileQuery } from '../world/tile-map.ts';
 import { SHAPE_FULL } from '../world/tile-shapes.ts';
 import { cobwebGeometry, crystalGeometry, mossGeometry, mushroomGeometry, stalactiteGeometry, stalagmiteGeometry } from './cave-geometry.ts';
 import { injectAfter } from './tile-material.ts';
+import { addNodePatch } from './node-patches.ts';
 
 export const CAVE_DECOR_BAND = 32;
 export const CAVE_DECOR_Z_MIN = -0.9;
@@ -157,6 +158,7 @@ export function createCaveDecorMaterial(uTime: THREE.IUniform<number>, name = 'c
     shader.fragmentShader = fs;
   };
   material.customProgramCacheKey = () => `${CAVE_DECOR_PROGRAM_KEY}|${name}`;
+  addNodePatch(material, { kind: 'cave-decor-glow', time: uTime });
   return material;
 }
 

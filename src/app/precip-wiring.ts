@@ -10,7 +10,7 @@ import type { CameraRig } from '../render/camera-rig.ts';
 import type { FacilitySceneId } from '../config/facility-scenes.ts';
 import { createPrecipView, precipSurfaceRoots } from '../render/precip-view.ts';
 import type { PrecipView } from '../render/precip-view.ts';
-import type { Stage } from '../render/stage.ts';
+import type { Stage, StageRenderer } from '../render/stage.ts';
 import type { WorldViews } from '../render/world-views.ts';
 import type { SimWorld } from '../sim/sim-world.ts';
 import type { LevelData } from '../world/level.ts';
@@ -34,7 +34,7 @@ export function facilityWeather(sceneId: FacilitySceneId) {
   };
 }
 
-export function createWorldPrecip(stage: Stage, level: LevelData, worldViews: WorldViews, background: FreeWorldBackgroundView | null, daylight: FreeWorldDaylight | null): PrecipView {
+export function createWorldPrecip(stage: Stage<StageRenderer>, level: LevelData, worldViews: WorldViews, background: FreeWorldBackgroundView | null, daylight: FreeWorldDaylight | null): PrecipView {
   return createPrecipView({
     scene: stage.scene,
     level,
@@ -45,7 +45,7 @@ export function createWorldPrecip(stage: Stage, level: LevelData, worldViews: Wo
   });
 }
 
-export function createEnvironmentViews(stage: Stage, level: LevelData, world: SimWorld, worldViews: WorldViews, cameraRig: CameraRig, disposers: Array<() => void>, background: FreeWorldBackgroundView | null, daylight: FreeWorldDaylight | null): EnvironmentViews {
+export function createEnvironmentViews(stage: Stage<StageRenderer>, level: LevelData, world: SimWorld, worldViews: WorldViews, cameraRig: Pick<CameraRig, 'visibleRect'>, disposers: Array<() => void>, background: FreeWorldBackgroundView | null, daylight: FreeWorldDaylight | null): EnvironmentViews {
   const precipView = createWorldPrecip(stage, level, worldViews, background, daylight);
   disposers.push(() => precipView.dispose());
   const update = (time: number, dt: number, alpha: number): void => {

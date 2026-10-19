@@ -95,7 +95,7 @@
 
 .world-controls { position: relative; flex: none; }
 .world-controls > summary { padding: 6px 10px; cursor: pointer; white-space: nowrap; color: #177fba; }
-.world-controls output { margin-left: 8px; font-variant-numeric: tabular-nums; font-weight: 700; }
+.world-controls-time { margin-left: 8px; font-variant-numeric: tabular-nums; font-weight: 700; }
 .world-controls-panel { position: absolute; z-index: 12; left: 0; top: calc(100% + 6px); width: min(330px, 85vw); padding: 16px; border: 1px solid #9fc5d8; border-radius: 12px; background: #f5fbff; color: #263c4c; box-shadow: 0 12px 32px #0e294945; }
 .world-controls-heading, .world-cycle-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .world-controls-heading span { color: #2983ae; font-size: 12px; }

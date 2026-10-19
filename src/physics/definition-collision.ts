@@ -3,6 +3,8 @@ import { COLLISION_EPS as EPS } from './tile-collision.ts';
 
 export interface DefinitionCollider {
   readonly points: readonly (readonly [number, number])[];
+  /** 舰体、设备等实体仍可承托落地，但侧面不能作为台阶自动攀上。 */
+  readonly autoStep?: boolean;
 }
 
 export interface DefinitionPlatform {
@@ -53,17 +55,24 @@ export function definitionGroundAt(geometry: DefinitionCollision, x: number, ref
   return nearest;
 }
 
-function horizontalLimit(b: Body, geometry: DefinitionCollision, target: number, y: number): number {
+function horizontalLimit(b: Body, geometry: DefinitionCollision, target: number, y: number): { x: number; stepAllowed: boolean } {
   let limit = target;
+  let stepAllowed = true;
   for (const solid of geometry.solids) {
     const range = definitionColliderSection(solid, 1, y + EPS, y + b.height - EPS);
     if (range === null) continue;
     const left = range[0] - b.halfWidth;
     const right = range[1] + b.halfWidth;
-    if (target > b.x && b.x < right - EPS && target > left) limit = Math.min(limit, Math.max(b.x, left));
-    if (target < b.x && b.x > left + EPS && target < right) limit = Math.max(limit, Math.min(b.x, right));
+    if (target > b.x && b.x < right - EPS && target > left) {
+      limit = Math.min(limit, Math.max(b.x, left));
+      stepAllowed &&= solid.autoStep !== false;
+    }
+    if (target < b.x && b.x > left + EPS && target < right) {
+      limit = Math.max(limit, Math.min(b.x, right));
+      stepAllowed &&= solid.autoStep !== false;
+    }
   }
-  return Math.abs(limit - target) <= EPS ? target : limit;
+  return { x: Math.abs(limit - target) <= EPS ? target : limit, stepAllowed };
 }
 
 function ceilingLimit(b: Body, geometry: DefinitionCollision, target: number): number {
@@ -95,14 +104,15 @@ function support(b: Body, geometry: DefinitionCollision, low: number, high: numb
 function moveHorizontal(b: Body, geometry: DefinitionCollision, dx: number, grounded: boolean): void {
   if (dx === 0) return;
   const target = b.x + dx;
-  let limit = horizontalLimit(b, geometry, target, b.y);
-  if (limit !== target && grounded && b.vy <= 0 && b.stepUp > 0) {
+  const contact = horizontalLimit(b, geometry, target, b.y);
+  let limit = contact.x;
+  if (limit !== target && contact.stepAllowed && grounded && b.vy <= 0 && b.stepUp > 0) {
     let top = b.y;
     for (const solid of geometry.solids) {
       const range = definitionColliderSection(solid, 0, Math.min(b.x, target) - b.halfWidth + EPS, Math.max(b.x, target) + b.halfWidth - EPS);
       if (range !== null && range[0] < b.y + b.height - EPS && range[1] > b.y) top = Math.max(top, range[1]);
     }
-    if (top - b.y <= b.stepUp + EPS && ceilingLimit(b, geometry, top) >= top - EPS && horizontalLimit(b, geometry, target, top) === target) {
+    if (top - b.y <= b.stepUp + EPS && ceilingLimit(b, geometry, top) >= top - EPS && horizontalLimit(b, geometry, target, top).x === target) {
       b.y = top;
       limit = target;
     }

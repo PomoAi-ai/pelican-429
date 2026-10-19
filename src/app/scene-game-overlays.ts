@@ -44,7 +44,7 @@ export function createSceneGameOverlays(toolbar: HTMLElement, viewport: HTMLElem
       profiler.mark('render');
       profiler.end(stage.renderer.info.render);
       const snapshot = profiler.snapshot();
-      perf.update(() => snapshot, performance.now(), snapshot.fps);
+      perf.update(() => snapshot, () => null, performance.now(), snapshot.fps);
       mapButton.setAttribute('aria-expanded', String(map.bigMapOpen));
       perfButton.setAttribute('aria-expanded', String(perf.visible));
     },

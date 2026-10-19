@@ -25,6 +25,7 @@ import { createTileMap } from '../src/world/tile-map.ts';
 import { BUILTIN_TILES, DEFAULT_TILES, TILE_DIRT, TILE_PLATFORM, TILE_STONE, createTileRegistry } from '../src/world/tile-types.ts';
 import { startAttack } from '../src/combat/attacks.ts';
 import { createDummyEntity, createPelicanEntity } from '../src/entities/entity.ts';
+import { createEnemyEntity } from '../src/entities/enemy.ts';
 import type { Entity } from '../src/entities/entity.ts';
 import { FakeElement, withFakeDocument } from './helpers/fake-dom.ts';
 
@@ -350,6 +351,30 @@ describe('view-registry', () => {
     assert.throws(() => registry.sync([createPelicanEntity(3, { x: 0, y: 0 }, TUNING)], 0, 0), /no view factory for entity kind 'pelican'/);
     registry.dispose();
     assert.equal(scene.children.length, 0);
+  });
+
+  test('镜头外的敌人视图移出场景且不同步，回到边距内再挂回；离开时多留一段边距', () => {
+    const scene = new THREE.Scene();
+    const synced: number[] = [];
+    const factory = (e: Entity): EntityView => ({ object: new THREE.Object3D(), sync: () => synced.push(e.id), dispose() {} });
+    const registry = createViewRegistry(scene, { gatekeeper: factory, trainingDummy: factory });
+    const enemy = createEnemyEntity(1, 'gatekeeper', { x: 50, y: 5 }, TUNING);
+    const dummy = createDummyEntity(2, { x: 50, y: 5 }, TUNING);
+    const view = { x: 0, y: 0, w: 20, h: 10 };
+    registry.sync([enemy, dummy], 0, 0, view);
+    assert.deepEqual(synced, [2], '敌人在范围外，假人不参与剔除');
+    assert.equal(scene.children.length, 1);
+    enemy.body.x = 23;
+    registry.sync([enemy, dummy], 0, 0, view);
+    assert.equal(scene.children.length, 2, '进入移入边距即挂回');
+    enemy.body.x = 27;
+    registry.sync([enemy, dummy], 0, 0, view);
+    assert.equal(scene.children.length, 2, '移出边距之内仍保留');
+    enemy.body.x = 29;
+    registry.sync([enemy, dummy], 0, 0, view);
+    assert.equal(scene.children.length, 1, '超出移出边距后移出');
+    registry.sync([enemy, dummy], 0, 0);
+    assert.equal(scene.children.length, 2, '不给可视矩形时全部同步');
   });
 
   test('攻击阶段内进度', () => {

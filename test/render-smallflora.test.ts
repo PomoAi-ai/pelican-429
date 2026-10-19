@@ -23,7 +23,7 @@ import type { FloraEnv } from '../src/render/flora.ts';
 import { createCloudShadowPatcher, CLOUD_SHADOW_PROGRAM_TAG } from '../src/render/cloud-shadow.ts';
 import { isLightMappable } from '../src/render/light-texture.ts';
 import { createTileView } from '../src/render/tile-view.ts';
-import { VARIANT_PROGRAM_TAG, addVariantCollapse, mergeVariants, variantInstanceGeometry, variantYRange } from '../src/render/variant-atlas.ts';
+import { VARIANT_PROGRAM_TAG, addVariantCollapse, createVariantBatch, mergeVariants, variantInstanceGeometry, variantYRange } from '../src/render/variant-atlas.ts';
 import { sharedWindUniforms } from '../src/render/wind.ts';
 import { createTileMap } from '../src/world/tile-map.ts';
 import { SHAPE_FULL, SHAPE_SLOPE_R } from '../src/world/tile-shapes.ts';
@@ -116,6 +116,19 @@ describe('flora-cover：地被物种与生境', () => {
 });
 
 describe('variant-atlas：一网格多变体', () => {
+  test('变体批次：每个实例只引用自己变体的几何（顶点数 = 该变体本身，不是整个图集）；非法变体即抛', () => {
+    const atlas = createCoverAtlas();
+    const aVar = atlas.getAttribute('aVar');
+    const own = (v: number): number => { let n = 0; for (let i = 0; i < aVar.count; i++) if (aVar.getX(i) === v) n++; return n; };
+    const variants = [2, 0, 2, 5];
+    const mesh = createVariantBatch(atlas, variants, new THREE.MeshStandardMaterial());
+    assert.equal(mesh.instanceCount, variants.length);
+    variants.forEach((v, i) => assert.equal(mesh.getGeometryRangeAt(mesh.getGeometryIdAt(i))!.vertexCount, own(v)));
+    assert.throws(() => createVariantBatch(atlas, [99], new THREE.MeshStandardMaterial()), /variant index/);
+    mesh.dispose();
+    atlas.dispose();
+  });
+
   test('合并几何带 aVar；实例几何带 aVariant；塌缩注入在 project_vertex 之前且链式保留原钩子', () => {
     const atlas = createCoverAtlas();
     assert.ok(atlas.getAttribute('aVar'));
@@ -155,17 +168,14 @@ describe('tile-view 接入地被', () => {
     }
     const view = createTileView(map);
     view.update();
-    const covers: THREE.InstancedMesh[] = [];
-    view.root.traverse((o) => o.name.startsWith('tiles-cover-') && covers.push(o as THREE.InstancedMesh));
+    const covers: THREE.BatchedMesh[] = [];
+    view.root.traverse((o) => o.name.startsWith('tiles-cover-') && covers.push(o as THREE.BatchedMesh));
     assert.equal(covers.length, 2, 'one cover mesh per chunk (2 chunks wide)');
-    for (const m of covers) {
-      assert.equal((m.geometry.getAttribute('aVariant') as THREE.InstancedBufferAttribute).count, m.count);
-      assert.ok(m.count > 0);
-    }
+    for (const m of covers) assert.ok(m.instanceCount > 0);
     const xs: number[] = [];
     const v = new THREE.Vector3();
     const mtx = new THREE.Matrix4();
-    for (const m of covers) for (let i = 0; i < m.count; i++) xs.push(v.setFromMatrixPosition((m.getMatrixAt(i, mtx), mtx)).x);
+    for (const m of covers) for (let i = 0; i < m.instanceCount; i++) xs.push(v.setFromMatrixPosition((m.getMatrixAt(i, mtx), mtx)).x);
     const grass = xs.filter((x) => x < 24).length / 24;
     const sand = xs.filter((x) => x >= 44).length / 20;
     assert.ok(grass > sand * 3, `grass ${grass}/cell vs sand ${sand}/cell`);

@@ -3,7 +3,9 @@ import { TILE_SHAPE_DEFINITIONS, type DefinitionDepthMode } from '../config/defi
 import { addResidenceGround, checkResidencePlacement, type ResidencePlacement, type ResidenceState } from '../sim/residence.ts';
 
 export const RESIDENCE_SAVE_KEY = 'pelican-residence:v1';
-export const RESIDENCE_HARBOR_SAVE_KEY = 'pelican-residence-harbor:v1';
+// v2 起港湾城区左侧划出交通中心用地；旧 v1 存档不迁移。
+export const RESIDENCE_HARBOR_SAVE_KEY = 'pelican-residence-harbor:v2';
+export const RESIDENCE_THREE_SAVE_KEY = 'pelican-residence-three:v1';
 
 export function saveResidence(storage: Pick<Storage, 'setItem'>, state: ResidenceState, key = RESIDENCE_SAVE_KEY): void {
   storage.setItem(key, JSON.stringify({ version: 2, nextId: state.nextId, revision: state.revision, placements: state.placements,

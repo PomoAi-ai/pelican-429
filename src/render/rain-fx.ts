@@ -17,13 +17,34 @@ import { blocksPrecip } from '../world/sky-exposure.ts';
 import type { TileQuery } from '../world/tile-map.ts';
 import { PRECIP_COLUMN_GLSL, sharedPrecipUniforms } from './precip-surface.ts';
 import { TREE_Z } from './tree-skeleton.ts';
-import { WIND_GLSL, sharedWindUniforms } from './wind.ts';
+import { WIND_GLSL, glslFloat as f, sharedWindUniforms } from './wind.ts';
 
 /** 末尾渐隐的实例比例。 */
 export const FADE_FRACTION = 0.08;
 /** 溅射所在 z 区间（方块顶面）、滴水重力（格/秒²）。 */
-const SPLASH_Z = { min: -0.85, max: 0.4 } as const;
+export const SPLASH_Z = { min: -0.85, max: 0.4 } as const;
 export const DRIP_GRAVITY = 30;
+
+/** 雨丝/溅射/滴水着色器常量（GLSL 与 WebGPU 节点版本同表）。 */
+export const RAIN_SHADER = {
+  /** 环绕盒相对视锥的外扩（格）、投影深度下限。 */
+  box: { margin: [2, 3], minDepth: 0.001 },
+  /** 透明度低于 cut 丢弃（三种粒子共用）。 */
+  cut: 0.004,
+  /** 随机数哈希 fract( sin( n ) * scale )。 */
+  hashScale: 43758.5453,
+  streak: { speed: [0.82, 0.36], length: [0.7, 0.6], lengthNear: [0.8, 1.15], widthNear: [0.55, 1.35], alphaNear: [0.35, 0.85], tailPow: 0.7, edge: [0.3, 0.5] },
+  splash: {
+    period: [0.32, 0.55], hashX: [917.3, 13.37], hashZ: [311.7, 5.1], lift: 0.01, ring: 0.3, ringSquash: 0.7, crown: 0.17,
+    ringWidth: 0.1, echo: { gain: 0.6, width: 0.08, radius: 0.55, after: 0.25 },
+    drops: 5, dropSpread: 0.38, dropUp: [1.5, 0.3], dropGravity: 2.4, dropEdge: [0.1, 0.035], foot: { gain: 0.6, life: 0.3, edge: 0.5, squash: 5 },
+  },
+  drip: {
+    period: [0.7, 1.5], hashPeriod: 7.1, hang: 0.3, hashShow: 3.3, growMin: 0.3, width: 0.035, height: [0.06, 0.06], stretchRate: 6, offset: 0.04,
+    taper: 0.25, edge: 0.55, glint: { gain: 0.4, radius: 0.6, at: [-0.3, 0.3] },
+  },
+} as const;
+const R = RAIN_SHADER;
 
 /** 相机（PerspectiveCamera 满足）。 */
 export interface PrecipCamera {
@@ -57,7 +78,7 @@ uniform vec2 uTan;
 uniform vec2 uZ;
 vec3 precipBoxPos( vec4 seed, float fallMul, float driftMul, float fall, float drift ) {
   float z = mix( uZ.x, uZ.y, seed.z );
-  vec2 halfExt = uTan * ( uCam.z - z ) + vec2( 2.0, 3.0 );
+  vec2 halfExt = uTan * ( uCam.z - z ) + vec2( ${f(R.box.margin[0])}, ${f(R.box.margin[1])} );
   vec2 size = 2.0 * halfExt;
   vec2 boxMin = uCam.xy - halfExt;
   vec2 p = boxMin + mod( seed.xy * size + vec2( drift * driftMul, -fall * fallMul ) - boxMin, size );
@@ -66,7 +87,7 @@ vec3 precipBoxPos( vec4 seed, float fallMul, float driftMul, float fall, float d
 // 遮雨按真实视线投到 z = 0；uCam 只定义粒子盒，斜视和俯视时不代表实际相机。
 vec2 precipGroundProj( vec3 p ) {
   float depth = cameraPosition.z - p.z;
-  depth = depth < 0.0 ? min( depth, -0.001 ) : max( depth, 0.001 );
+  depth = depth < 0.0 ? min( depth, -${f(R.box.minDepth)} ) : max( depth, ${f(R.box.minDepth)} );
   return cameraPosition.xy + ( p.xy - cameraPosition.xy ) * ( cameraPosition.z / depth );
 }
 `;
@@ -87,7 +108,7 @@ ${WIND_GLSL}
 ${PRECIP_COLUMN_GLSL}
 ${PRECIP_BOX_GLSL}
 void main() {
-  float sp = 0.82 + 0.36 * aSeed.w;
+  float sp = ${f(R.streak.speed[0])} + ${f(R.streak.speed[1])} * aSeed.w;
   vec3 p = precipBoxPos( aSeed, sp, sp, uFall, uDrift );
   vec2 g = precipGroundProj( p );
   vec4 col = precipColumn( g.x );
@@ -96,11 +117,11 @@ void main() {
   vec2 vel = vec2( windSway( p.x, p.y, uWeatherTime ) * uSlant, -uSpeed );
   vec2 dir = normalize( vel );
   vec2 perp = vec2( -dir.y, dir.x );
-  float len = uLen * ( 0.7 + 0.6 * aSeed.w ) * mix( 0.8, 1.15, near );
-  float wid = uWidth * mix( 0.55, 1.35, near );
+  float len = uLen * ( ${f(R.streak.length[0])} + ${f(R.streak.length[1])} * aSeed.w ) * mix( ${f(R.streak.lengthNear[0])}, ${f(R.streak.lengthNear[1])}, near );
+  float wid = uWidth * mix( ${f(R.streak.widthNear[0])}, ${f(R.streak.widthNear[1])}, near );
   vec2 q = p.xy - dir * position.y * len + perp * position.x * wid;
   vQ = position.xy;
-  vAlpha = vis * mix( 0.35, 0.85, near );
+  vAlpha = vis * mix( ${f(R.streak.alphaNear[0])}, ${f(R.streak.alphaNear[1])}, near );
   gl_Position = vis > 0.0 ? projectionMatrix * viewMatrix * vec4( q, p.z, 1.0 ) : vec4( 2.0, 2.0, 2.0, 1.0 );
 }
 `;
@@ -111,8 +132,8 @@ uniform float uOpacity;
 varying float vAlpha;
 varying vec2 vQ;
 void main() {
-  float a = vAlpha * uOpacity * pow( 1.0 - clamp( vQ.y, 0.0, 1.0 ), 0.7 ) * ( 1.0 - smoothstep( 0.3, 0.5, abs( vQ.x ) ) );
-  if ( a < 0.004 ) discard;
+  float a = vAlpha * uOpacity * pow( 1.0 - clamp( vQ.y, 0.0, 1.0 ), ${f(R.streak.tailPow)} ) * ( 1.0 - smoothstep( ${f(R.streak.edge[0])}, ${f(R.streak.edge[1])}, abs( vQ.x ) ) );
+  if ( a < ${f(R.cut)} ) discard;
   gl_FragColor = vec4( uColor, a );
 }
 `;
@@ -129,25 +150,25 @@ varying float vWater;
 varying float vAge;
 varying float vAlpha;
 ${PRECIP_COLUMN_GLSL}
-float prH1( float n ) { return fract( sin( n ) * 43758.5453 ); }
+float prH1( float n ) { return fract( sin( n ) * ${f(R.hashScale)} ); }
 void main() {
-  float period = mix( 0.32, 0.55, aSeed.y );
+  float period = mix( ${f(R.splash.period[0])}, ${f(R.splash.period[1])}, aSeed.y );
   float cyc = uTime / period + aSeed.z;
   float ci = floor( cyc );
   float age = cyc - ci;
-  float x = uBox.x + prH1( aSeed.x * 917.3 + ci * 13.37 ) * uBox.z;
+  float x = uBox.x + prH1( aSeed.x * ${f(R.splash.hashX[0])} + ci * ${f(R.splash.hashX[1])} ) * uBox.z;
   vec4 col = precipColumn( x );
   float inView = step( uBox.y, col.y ) * step( col.y, uBox.y + uBox.w );
   float vis = inView * clamp( ( uCount - float( gl_InstanceID ) ) / uFade, 0.0, 1.0 );
-  float z = mix( ${SPLASH_Z.min.toFixed(2)}, ${SPLASH_Z.max.toFixed(2)}, prH1( aSeed.w * 311.7 + ci * 5.1 ) );
-  vec3 c = vec3( x, col.y + 0.01, z );
+  float z = mix( ${SPLASH_Z.min.toFixed(2)}, ${SPLASH_Z.max.toFixed(2)}, prH1( aSeed.w * ${f(R.splash.hashZ[0])} + ci * ${f(R.splash.hashZ[1])} ) );
+  vec3 c = vec3( x, col.y + ${f(R.splash.lift)}, z );
   vec3 pos;
   if ( col.w > 0.5 ) {
-    float r = uScale * 0.3;
+    float r = uScale * ${f(R.splash.ring)};
     vUv = vec2( position.x * 2.0, position.y * 2.0 - 1.0 );
-    pos = c + vec3( vUv.x * r, 0.0, vUv.y * r * 0.7 );
+    pos = c + vec3( vUv.x * r, 0.0, vUv.y * r * ${f(R.splash.ringSquash)} );
   } else {
-    float s = uScale * 0.17;
+    float s = uScale * ${f(R.splash.crown)};
     vUv = vec2( position.x * 2.0, position.y * 0.5 );
     pos = c + vec3( vUv.x * s, vUv.y * s * 2.0, 0.0 );
   }
@@ -169,18 +190,18 @@ void main() {
   float a = 0.0;
   if ( vWater > 0.5 ) {
     float r = length( vUv );
-    a = ( 1.0 - smoothstep( 0.0, 0.1, abs( r - vAge ) ) ) * ( 1.0 - vAge );
-    a += 0.6 * ( 1.0 - smoothstep( 0.0, 0.08, abs( r - vAge * 0.55 ) ) ) * step( 0.25, vAge ) * ( 1.0 - vAge );
+    a = ( 1.0 - smoothstep( 0.0, ${f(R.splash.ringWidth)}, abs( r - vAge ) ) ) * ( 1.0 - vAge );
+    a += ${f(R.splash.echo.gain)} * ( 1.0 - smoothstep( 0.0, ${f(R.splash.echo.width)}, abs( r - vAge * ${f(R.splash.echo.radius)} ) ) ) * step( ${f(R.splash.echo.after)}, vAge ) * ( 1.0 - vAge );
   } else {
-    for ( int k = 0; k < 5; k++ ) {
+    for ( int k = 0; k < ${R.splash.drops}; k++ ) {
       float fk = float( k ) - 2.0;
-      vec2 d = vec2( fk * 0.38 * vAge, ( 1.5 - abs( fk ) * 0.3 ) * vAge - 2.4 * vAge * vAge );
-      a += smoothstep( 0.1, 0.035, length( vUv - d ) );
+      vec2 d = vec2( fk * ${f(R.splash.dropSpread)} * vAge, ( ${f(R.splash.dropUp[0])} - abs( fk ) * ${f(R.splash.dropUp[1])} ) * vAge - ${f(R.splash.dropGravity)} * vAge * vAge );
+      a += smoothstep( ${f(R.splash.dropEdge[0])}, ${f(R.splash.dropEdge[1])}, length( vUv - d ) );
     }
-    a = a * ( 1.0 - vAge ) + 0.6 * ( 1.0 - smoothstep( 0.0, 0.3, vAge ) ) * smoothstep( 0.5, 0.0, length( vec2( vUv.x, vUv.y * 5.0 ) ) );
+    a = a * ( 1.0 - vAge ) + ${f(R.splash.foot.gain)} * ( 1.0 - smoothstep( 0.0, ${f(R.splash.foot.life)}, vAge ) ) * smoothstep( ${f(R.splash.foot.edge)}, 0.0, length( vec2( vUv.x, vUv.y * ${f(R.splash.foot.squash)} ) ) );
   }
   a = clamp( a, 0.0, 1.0 ) * vAlpha * uOpacity;
-  if ( a < 0.004 ) discard;
+  if ( a < ${f(R.cut)} ) discard;
   gl_FragColor = vec4( uColor, a );
 }
 `;
@@ -193,22 +214,22 @@ uniform vec4 uBox;
 varying vec2 vUv;
 varying float vAlpha;
 ${PRECIP_COLUMN_GLSL}
-float prH1( float n ) { return fract( sin( n ) * 43758.5453 ); }
+float prH1( float n ) { return fract( sin( n ) * ${f(R.hashScale)} ); }
 void main() {
   float seed = aDrip.w;
-  float period = mix( 0.7, 1.5, prH1( seed * 7.1 ) );
+  float period = mix( ${f(R.drip.period[0])}, ${f(R.drip.period[1])}, prH1( seed * ${f(R.drip.hashPeriod)} ) );
   float age = fract( uTime / period + seed ) * period;
-  float hang = 0.3 * period;
+  float hang = ${f(R.drip.hang)} * period;
   float ft = max( 0.0, age - hang );
   float y = aDrip.y - 0.5 * ${DRIP_GRAVITY.toFixed(1)} * ft * ft;
   vec4 col = precipColumn( aDrip.x );
   float inView = step( uBox.x, aDrip.x ) * step( aDrip.x, uBox.x + uBox.z ) * step( uBox.y, aDrip.y ) * step( y, uBox.y + uBox.w );
-  float vis = inView * step( col.y, y ) * step( prH1( seed * 3.3 ), uDrip );
-  float grow = clamp( age / hang, 0.3, 1.0 );
-  vec2 size = vec2( 0.035, 0.06 + 0.06 * clamp( ft * 6.0, 0.0, 1.0 ) ) * grow;
+  float vis = inView * step( col.y, y ) * step( prH1( seed * ${f(R.drip.hashShow)} ), uDrip );
+  float grow = clamp( age / hang, ${f(R.drip.growMin)}, 1.0 );
+  vec2 size = vec2( ${f(R.drip.width)}, ${f(R.drip.height[0])} + ${f(R.drip.height[1])} * clamp( ft * ${f(R.drip.stretchRate)}, 0.0, 1.0 ) ) * grow;
   vUv = position.xy * 2.0;
   vAlpha = vis;
-  vec3 pos = vec3( aDrip.x + position.x * size.x * 2.0, y - 0.04 + position.y * size.y * 2.0, aDrip.z );
+  vec3 pos = vec3( aDrip.x + position.x * size.x * 2.0, y - ${f(R.drip.offset)} + position.y * size.y * 2.0, aDrip.z );
   gl_Position = vis > 0.0 ? projectionMatrix * viewMatrix * vec4( pos, 1.0 ) : vec4( 2.0, 2.0, 2.0, 1.0 );
 }
 `;
@@ -219,10 +240,10 @@ uniform float uOpacity;
 varying vec2 vUv;
 varying float vAlpha;
 void main() {
-  float d = length( vec2( vUv.x, vUv.y + 0.25 * max( vUv.y, 0.0 ) ) );
-  float a = smoothstep( 1.0, 0.55, d ) * vAlpha * uOpacity;
-  if ( a < 0.004 ) discard;
-  gl_FragColor = vec4( uColor * ( 1.0 + 0.4 * smoothstep( 0.6, 0.0, length( vUv - vec2( -0.3, 0.3 ) ) ) ), a );
+  float d = length( vec2( vUv.x, vUv.y + ${f(R.drip.taper)} * max( vUv.y, 0.0 ) ) );
+  float a = smoothstep( 1.0, ${f(R.drip.edge)}, d ) * vAlpha * uOpacity;
+  if ( a < ${f(R.cut)} ) discard;
+  gl_FragColor = vec4( uColor * ( 1.0 + ${f(R.drip.glint.gain)} * smoothstep( ${f(R.drip.glint.radius)}, 0.0, length( vUv - vec2( ${f(R.drip.glint.at[0])}, ${f(R.drip.glint.at[1])} ) ) ) ), a );
 }
 `;
 

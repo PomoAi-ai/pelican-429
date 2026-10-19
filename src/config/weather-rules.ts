@@ -14,10 +14,6 @@ export type SceneWeatherMode = (typeof SCENE_WEATHER_MODES)[number];
 export const SCENE_WEATHER_LABELS: Readonly<Record<SceneWeatherMode, string>> = {
   clear: '晴天', overcast: '阴天', rain: '下雨', storm: '暴雨', snow: '下雪',
 };
-export function resolveSceneWeatherMode(value: string): SceneWeatherMode {
-  if (!(SCENE_WEATHER_MODES as readonly string[]).includes(value)) throw new Error(`weather: invalid scene weather ${value}`);
-  return value as SceneWeatherMode;
-}
 export const WIND_LABELS: Readonly<Record<WindMode, string>> = {
   calm: '无风', breeze: '微风', moderate: '中风', storm: '大风', gale: '暴风', auto: '自动',
 };

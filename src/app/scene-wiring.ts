@@ -24,7 +24,7 @@ import type { PelicanRig } from '../render/pelican/pelican-rig.ts';
 import { createProjectileFx } from '../render/projectile-fx.ts';
 import { createProjectileViews } from '../render/projectile-views.ts';
 import { createGrassyProjectileViews } from '../render/grassy/grassy-projectile-view.ts';
-import type { Stage } from '../render/stage.ts';
+import type { Stage, StageRenderer } from '../render/stage.ts';
 import type { TreeRideQuery } from '../render/tree-ride.ts';
 import { createViewRegistry } from '../render/view-registry.ts';
 import type { EntityView } from '../render/view-registry.ts';
@@ -82,6 +82,8 @@ export function createEntityViews(stage: { scene: THREE.Object3D }, level: Level
     tibo: entity => entity.npc ? createWandererView(entity) : takeBossView(entity),
     healthPack: createHealthPackView,
     flyingRoadster: createFlyingRoadsterView,
+    // 跟随机由 utility-drone 的跟随机队绘制，实体只是碰撞体。
+    followDrone: () => ({ object: new THREE.Group(), sync() {}, dispose() {} }),
     orb: orbs.factory,
     ...projectiles.factories,
     codexShot: grassyProjectiles.factory, bugShot: grassyProjectiles.factory,
@@ -127,7 +129,7 @@ function caveFloorY(level: LevelData, depth: number): number {
  * 跟随相机：对准玩家出生点；出生在渔屋门外（生成世界有渔屋）时先让整座渔屋与鹈鹕同框，
  * 停留后（或玩家一有输入）平滑过渡到跟随。
  */
-export function createGameCamera(stage: Stage, level: LevelData, player: Entity, tuning: Tuning = TUNING, minY?: number): CameraRig {
+export function createGameCamera(stage: Stage<StageRenderer>, level: LevelData, player: Entity, tuning: Tuning = TUNING, minY?: number): CameraRig {
   const canvas = stage.canvas;
   const cameraRig = createCameraRig({
     camera: stage.camera,

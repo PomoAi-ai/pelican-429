@@ -53,7 +53,6 @@ export const HAIR_MODEL_PATHS = {
 /** 构建与 CI 按需拉取共用同一份正式模型清单。 */
 export const RELEASE_MODEL_PATHS: readonly string[] = [
   FLYING_ROADSTER_MODEL,
-  './robots/utility-drone/model.glb',
   ...WEB_MODEL_SOURCES.map(source => compactModelPath(source, 512)),
   ...GRASSY_CUSTOMIZATION_MODELS.map(model => model.path),
   ...Object.values(HAIR_MODEL_PATHS),

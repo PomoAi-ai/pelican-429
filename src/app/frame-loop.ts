@@ -17,9 +17,13 @@ import type { ActionTracker } from '../input/action-map.ts';
 import type { KeyboardMouseBinding } from '../input/keyboard-mouse.ts';
 import { waterSpanInColumn } from '../physics/fluid-contact.ts';
 import type { CameraRig } from '../render/camera-rig.ts';
+import type { GpuTimer } from '../render/gpu-timer.ts';
+import type { ResolutionGovernor } from '../core/resolution-governor.ts';
+import type { GpuTimings } from '../core/frame-profiler.ts';
 import type { LightShafts } from '../render/light-shafts.ts';
 import type { LumaCompanion } from '../render/luma/luma-companion.ts';
-import type { Stage } from '../render/stage.ts';
+import type { LandingPod } from '../render/transit-landing-pod.ts';
+import type { Stage, StageRenderer } from '../render/stage.ts';
 import type { WorldViews } from '../render/world-views.ts';
 import { getPlayer, stepSim } from '../sim/sim-world.ts';
 import type { SimWorld } from '../sim/sim-world.ts';
@@ -35,6 +39,7 @@ import { mainlineTransformUnlocked } from '../sim/mainline.ts';
 import type { LevelData } from '../world/level.ts';
 import { pourAtWorld } from './debug-tools.ts';
 import type { PourState } from './debug-tools.ts';
+import type { Bench } from './bench.ts';
 import type { WorldLighting } from './lighting-wiring.ts';
 import type { EnvironmentViews } from './precip-wiring.ts';
 import type { EntityViewSet } from './scene-wiring.ts';
@@ -45,7 +50,7 @@ import { selectMobileAim } from './mobile-aim.ts';
 export interface FrameLoopDeps {
   readonly world: SimWorld;
   readonly level: LevelData;
-  readonly stage: Stage;
+  readonly stage: Stage<StageRenderer>;
   readonly cameraRig: CameraRig;
   readonly tracker: ActionTracker;
   readonly controls: ControlSurface;
@@ -66,7 +71,12 @@ export interface FrameLoopDeps {
   readonly settingsPanel: SettingsPanel;
   readonly perfPanel: PerfPanel;
   readonly prof: FrameProfiler;
+  readonly gpu: GpuTimer;
+  readonly bench: Bench | null;
+  /** 动态分辨率（基准下为 null：像素比固定，结果才可比）。 */
+  readonly resolution: ResolutionGovernor | null;
   readonly facility: { update(time: number): void } | null;
+  readonly lander: LandingPod | null;
   readonly chapterHud: FacilityChapterHud | null;
   readonly audio: GameAudio | null;
 }
@@ -78,8 +88,11 @@ export interface FrameLoop {
   resetClock(now: number): void;
 }
 
+/** 面板收起时动态分辨率每隔多少帧读一次 GPU 均值。 */
+const RESOLUTION_WINDOW_FRAMES = 30;
+
 export function createFrameLoop(d: FrameLoopDeps): FrameLoop {
-  const { world, level, stage, cameraRig, tracker, input, stepper, pour, hud, weaponHud, minimap, settings, perfPanel, prof } = d;
+  const { world, level, stage, cameraRig, tracker, input, stepper, pour, hud, weaponHud, minimap, settings, perfPanel, prof, gpu, bench, resolution } = d;
   const { views, orbs, orbFx, projectileFx } = d.entityViews;
   const aim: Vec2 = { x: 0, y: 0 };
   const pourAt: Vec2 = { x: 0, y: 0 };
@@ -91,6 +104,18 @@ export function createFrameLoop(d: FrameLoopDeps): FrameLoop {
   // 一帧有多次 renderer.render（阴影/场景/后期）：改为每帧手动清零，统计整帧。
   info.autoReset = false;
   const perfSnapshot = () => prof.snapshot();
+  // 基准独占 GPU 计时器的累计；否则面板与动态分辨率共用一次读数，读后清零，得到的是最近一个窗口的均值。
+  const readGpu = (): GpuTimings => {
+    const timings = gpu.averages();
+    // 还没读回任何帧时不清零：reset 会丢掉在途查询，低帧率下面板会永远等不到结果。
+    if (timings !== 'unsupported' && timings.frames > 0) {
+      gpu.reset();
+      if (resolution?.sample(timings.total)) stage.setPixelRatio(resolution.ratio);
+    }
+    return timings;
+  };
+  const perfGpu = bench === null ? readGpu : () => null;
+  let wasProfiling = false;
   // Esc 先关大地图（小地图自己监听 Escape）：上一帧大地图开着时，本帧的 settings 按键只用于关地图。
   let bigMapWasOpen = false;
 
@@ -157,15 +182,17 @@ export function createFrameLoop(d: FrameLoopDeps): FrameLoop {
     const returnAt = MAINLINE_REVEAL.zoomSeconds + (PLAYER_TRANSFORM.durationTicks + 1) * world.tuning.sim.step + MAINLINE_REVEAL.holdSeconds;
     const amount = clamp(Math.min(age / MAINLINE_REVEAL.zoomSeconds, 1 - (age - returnAt) / MAINLINE_REVEAL.returnSeconds), 0, 1);
     cameraRig.update(lerp(pl.body.prevX, pl.body.x, alpha), lerp(pl.body.prevY, pl.body.y, alpha), pl.facing, paused ? 0 : frameDt,
-      reveal < 0 ? undefined : {
+      reveal < 0 ? d.lander?.closeup() : {
         shot: { x: pl.body.x, y: pl.body.y + 1.6, distance: Math.min(world.tuning.camera.distance, 7 / Math.min(1, stage.camera.aspect)) },
         blend: amount * amount * (3 - 2 * amount),
       });
     waterTime += frameDt;
     d.env.update(waterTime, worldDt, alpha);
-    d.facility?.update(waterTime);
     // 实体视图在世界视图之后同步：树平台随动取本帧写入 GPU 的风 uniform（与树的顶点位移同一帧）。
-    views.sync(world.entities, alpha, animDt);
+    views.sync(world.entities, alpha, animDt, cameraRig.visibleRect());
+    d.lander?.update(alpha, waterTime, animDt);
+    // 机房背景视图复制主相机，放在着陆舱之后才能拿到起飞冲击改过的视角。
+    d.facility?.update(waterTime);
     d.shafts.update(cameraRig.visibleRect(2), waterTime);
     orbFx.update(paused ? 0 : frameDt);
     d.lighting.updateAura(pl, alpha, frameDt);
@@ -198,10 +225,20 @@ export function createFrameLoop(d: FrameLoopDeps): FrameLoop {
   };
 
   const frame = (now: number): void => {
-    const profiling = perfPanel.visible;
+    const profiling = bench === null ? perfPanel.visible : bench.timing;
+    // 收起前留下的在途查询属于上一次展开，展开时丢掉。
+    if (profiling && !wasProfiling) gpu.reset();
+    wasProfiling = profiling;
     info.reset();
+    const timingGpu = profiling || resolution !== null;
     if (profiling) prof.begin();
-    const elapsed = Math.max(0, (now - last) / 1000);
+    if (timingGpu) {
+      gpu.beginFrame();
+      // 从帧首开始计 world 段：原野背景 RT 与纹理上传发生在 env.update 等视图更新里。
+      gpu.mark('world');
+    }
+    // 基准按帧号驱动：每帧固定推进一个模拟步长，重复运行走同一条路径。
+    const elapsed = bench === null ? Math.max(0, (now - last) / 1000) : TUNING.sim.step;
     last = now;
     const frameDt = Math.min(elapsed, TUNING.sim.maxFrameTime);
     if (frameDt > 0) fps = lerp(fps, 1 / frameDt, 0.1);
@@ -211,18 +248,24 @@ export function createFrameLoop(d: FrameLoopDeps): FrameLoop {
     if (paused) weaponHud.resetInput();
     d.audio?.update(world, paused);
     if (!paused && PLAY_ACTIONS.some((a) => tracker.isHeld(a))) hud.noteInput();
+    bench?.drive();
     // 暂停：模拟不步进（插值系数保持），实体动画冻结；风场随模拟暂停，水等视觉效果继续。
     const alpha = settings.advance(stepper, elapsed, tick);
     if (profiling) prof.mark('sim');
     const pl = updateViews(alpha, frameDt, paused, profiling);
     stage.render();
+    if (timingGpu) gpu.endFrame();
     if (profiling) prof.mark('render');
     updateUi(pl, alpha, frameDt);
     if (profiling) {
       prof.mark('ui');
-      prof.end({ calls: info.render.calls, triangles: info.render.triangles });
+      // WebGPU 的 render.calls 数的是 render() 次数，绘制次数在 drawCalls。
+      prof.end({ calls: 'drawCalls' in info.render ? info.render.drawCalls : info.render.calls, triangles: info.render.triangles });
     }
-    perfPanel.update(perfSnapshot, now, fps);
+    perfPanel.update(perfSnapshot, perfGpu, now, fps);
+    // 面板收起时由这里按窗口读数；展开时面板每次刷新已读。
+    if (resolution !== null && !perfPanel.visible && frameIndex % RESOLUTION_WINDOW_FRAMES === 0) readGpu();
+    bench?.afterFrame(now);
   };
 
   return {

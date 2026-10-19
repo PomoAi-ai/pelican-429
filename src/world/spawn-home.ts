@@ -47,7 +47,7 @@ export function pickHomeHut(huts: readonly FishingHut[], width: number): Fishing
   return best;
 }
 
-function bodyHitsSolid(map: TileQuery, x: number, y: number): boolean {
+export function bodyHitsSolid(map: TileQuery, x: number, y: number): boolean {
   const x0 = Math.floor(x - BODY.halfWidth + 1e-9);
   const x1 = Math.floor(x + BODY.halfWidth - 1e-9);
   const y1 = Math.ceil(y + BODY.height) - 1;
@@ -65,7 +65,7 @@ function topBelow(map: TileQuery, tx: number, fromY: number): number {
  * 列 tx 在 y 处是否平整可站：脚下整砖实心、y 行为空；左右邻列脚下实心、y 行为空，且贴着出生列的那条边是满高
  * （整砖，或高端朝出生列、向外下降的斜坡）——出生列本身一整格平地，两侧没有台阶。
  */
-function flatAt(map: TileQuery, tx: number, y: number): boolean {
+export function flatAt(map: TileQuery, tx: number, y: number): boolean {
   if (tx < 1 || tx >= map.width - 1 || y < 1 || y >= map.height) return false;
   if (map.shapeAt(tx, y - 1) !== SHAPE_FULL) return false;
   for (let x = tx - 1; x <= tx + 1; x++) {

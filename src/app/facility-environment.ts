@@ -61,7 +61,7 @@ export async function createFacilityEnvironment(stage: Stage, sceneId: FacilityS
         worldViews.handleEvents(world.events.drain());
         worldViews.update(view, time, dt, alpha);
         precip.update(view, time, dt, world.env.precip, world.env);
-        entities.views.sync(world.entities, alpha, dt);
+        entities.views.sync(world.entities, alpha, dt, view);
         lighting.updateAura(getPlayer(world), alpha, dt);
         lighting.worldLight.update(stage.scene, ++frame);
       },

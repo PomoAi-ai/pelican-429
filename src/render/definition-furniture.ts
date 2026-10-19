@@ -6,6 +6,7 @@ import { createAiCityMaterial, type AiCityMaterial } from './ai-city-architectur
 import { injectAfter } from './tile-material.ts';
 import { createWorkstationDisplay } from './workstation-display.ts';
 import { isPlayerNearWorkstation, type WorkstationPlayer } from './workstation-display-state.ts';
+import { addNodePatch } from './node-patches.ts';
 
 export type FurnitureKind = 'bed' | 'pendant' | 'workstation' | 'depot' | 'dock' | 'battery'
   | 'terminal-compute' | 'terminal-robot' | 'solar' | 'table' | 'chair' | 'shelf' | 'plant';
@@ -59,6 +60,7 @@ function furnitureBuilder(kind: FurnitureKind) {
       `, 'furniture-fabric');
     };
     value.customProgramCacheKey = () => 'furniture-fabric';
+    addNodePatch(value, { kind: 'furniture-fabric' });
     return value;
   };
   const soft = fabric(0x5b7695);

@@ -15,6 +15,7 @@ import type { CaveInfo } from '../world/level.ts';
 import type { TileQuery } from '../world/tile-map.ts';
 import { injectAfter } from './tile-material.ts';
 import { BLOCK_BACK_Z } from './tile-geometry.ts';
+import { addNodePatch } from './node-patches.ts';
 
 export const CAVE_WALL_BAND = 64;
 export const CAVE_WALL_Z = BLOCK_BACK_Z - 0.01;
@@ -120,6 +121,7 @@ export function createCaveWallMaterial(maskTexture: THREE.DataTexture, roomTextu
     shader.fragmentShader = injectAfter(injectAfter(shader.fragmentShader, 'common', FRAGMENT_PARS, 'cave-wall'), 'color_fragment', FRAGMENT_COLOR, 'cave-wall');
   };
   material.customProgramCacheKey = () => CAVE_WALL_PROGRAM_KEY;
+  addNodePatch(material, { kind: 'cave-wall', uniforms });
   return material;
 }
 

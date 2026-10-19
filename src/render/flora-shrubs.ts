@@ -18,11 +18,12 @@ import type { CoverGround, CoverSite } from './flora-cover.ts';
 import { siteTopY } from './flora.ts';
 import type { FloraEnv } from './flora.ts';
 import { DISTURB_GLSL, sharedDisturbUniforms } from './grass-disturb.ts';
+import { addNodePatch } from './node-patches.ts';
 import { createBambooGeometry, createCattailGeometry, createMarramGeometry, createTallFernGeometry, herbToLeafGeometry } from './shrub-geometry.ts';
 import { WOODY_SPECS, buildWoody } from './shrub-woody.ts';
 import { BLOCK_BACK_Z, GROUND_DECOR_Z_MIN } from './tile-geometry.ts';
 import { createLeafMaterial } from './tree-material.ts';
-import { addVariantCollapse, mergeIndexedVariants, variantInstanceGeometry } from './variant-atlas.ts';
+import { addVariantCollapse, createVariantBatch, mergeIndexedVariants } from './variant-atlas.ts';
 
 export const SHRUB_KINDS = ['hedge', 'azalea', 'berry', 'fernclump', 'sapling', 'cattail', 'rose', 'bamboo', 'marram', 'buckthorn'] as const;
 export type ShrubKind = (typeof SHRUB_KINDS)[number];
@@ -209,23 +210,30 @@ export function createShrubAtlas(): THREE.BufferGeometry {
 
 /** 草地扰动（世界空间位移经实例矩阵逆变换回局部，乘 aSway）。 */
 const SHRUB_DISTURB_BODY = [
+  '#if defined( USE_INSTANCING ) || defined( USE_BATCHING )',
   '#ifdef USE_INSTANCING',
+  '  #define SHRUB_IM instanceMatrix',
+  '#else',
+  '  #define SHRUB_IM batchingMatrix',
+  '#endif',
   '{',
-  '  vec3 dw = ( modelMatrix * instanceMatrix * vec4( position, 1.0 ) ).xyz;',
-  '  transformed += inverse( mat3( instanceMatrix ) ) * ( aSway * uDisturbScale * grassDisturb( dw ) );',
+  '  vec3 dw = ( modelMatrix * SHRUB_IM * vec4( position, 1.0 ) ).xyz;',
+  '  transformed += inverse( mat3( SHRUB_IM ) ) * ( aSway * uDisturbScale * grassDisturb( dw ) );',
   '}',
   '#endif',
 ].join('\n');
 
 /** 灌木材质 = 树叶材质（同图集/alphaTest/风摆）+ 草地扰动 + 变体塌缩。 */
 export function createShrubMaterial(uTime: THREE.IUniform<number>): THREE.MeshStandardMaterial {
+  const scale: THREE.IUniform<number> = { value: SHRUB_DISTURB_SCALE };
   const mat = createLeafMaterial(uTime, {
     name: 'flora-shrubs',
     cacheKey: SHRUB_PROGRAM_KEY,
     vertexDecl: `uniform float uDisturbScale;\n${DISTURB_GLSL}`,
     vertexBody: SHRUB_DISTURB_BODY,
-    uniforms: { ...sharedDisturbUniforms(), uDisturbScale: { value: SHRUB_DISTURB_SCALE } },
+    uniforms: { ...sharedDisturbUniforms(), uDisturbScale: scale },
   });
+  addNodePatch(mat, { kind: 'shrub-disturb', disturb: sharedDisturbUniforms(), scale });
   return addVariantCollapse(mat, 'flora-shrubs');
 }
 
@@ -244,11 +252,11 @@ export function shrubMatrix(s: ShrubInstance, out: THREE.Matrix4): THREE.Matrix4
   return out.compose(_p.set(s.x, s.y, s.z), _q, _s.set(k, k, Math.min(k, SHRUB_MAX_DEPTH / 0.45)));
 }
 
-/** 区块灌木网格（名 `tiles-shrub-<chunkName>`）；空计划返回 null；超预算即抛。几何为私有拷贝，卸载时释放。 */
-export function createShrubMesh(plan: readonly ShrubInstance[], atlas: THREE.BufferGeometry, material: THREE.Material, chunkName: string): THREE.InstancedMesh | null {
+/** 区块灌木网格（名 `tiles-shrub-<chunkName>`）；空计划返回 null；超预算即抛。批次网格持有自己的几何与实例纹理，卸载时 dispose 网格。 */
+export function createShrubMesh(plan: readonly ShrubInstance[], atlas: THREE.BufferGeometry, material: THREE.Material, chunkName: string): THREE.BatchedMesh | null {
   if (plan.length > SHRUB_CHUNK_BUDGET) throw new Error(`flora-shrubs: chunk ${chunkName} has ${plan.length} shrubs (budget ${SHRUB_CHUNK_BUDGET})`);
   if (plan.length === 0) return null;
-  const mesh = new THREE.InstancedMesh(variantInstanceGeometry(atlas, plan.map((s) => SHRUB_KINDS.indexOf(s.kind))), material, plan.length);
+  const mesh = createVariantBatch(atlas, plan.map((s) => SHRUB_KINDS.indexOf(s.kind)), material);
   mesh.name = `tiles-shrub-${chunkName}`;
   const counts: Partial<Record<ShrubKind, number>> = {};
   plan.forEach((s, i) => {

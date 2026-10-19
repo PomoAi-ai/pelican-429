@@ -4,6 +4,7 @@ import { npcAction, SAM_ROUTING_SOURCE } from '../../config/npc.ts';
 import { SAM_CATCHPHRASE } from '../../config/npc-dialogue.ts';
 import type { NpcAction, NpcKind } from '../../config/npc.ts';
 import { createParticleCloud } from '../grassy/grassy-particles.ts';
+import { glslFloat as f } from '../wind.ts';
 
 const TAU = Math.PI * 2;
 const clamp = (v: number) => THREE.MathUtils.clamp(v, 0, 1);
@@ -242,18 +243,30 @@ function createSurge(kind: NpcKind) {
   };
 }
 
+/** 降临光柱着色器：竖向光线（频率约 24 条 × 2π、速度、锐度）、流动带、上下渐隐区间、透明度与白化，WebGPU 节点版本同表。 */
+export const ARRIVAL_COLUMN_SHADER = {
+  rays: { freq: 75.398, speed: 2, pow: 18 },
+  flow: { base: 0.65, amp: 0.35, freq: 35, speed: 9 },
+  fade: { bottom: 0.05, top: 0.75 },
+  alpha: { base: 0.04, rays: 0.12 },
+  white: 1.8,
+  whiteMix: 0.6,
+} as const;
+
 function createColumn(color: string) {
+  const K = ARRIVAL_COLUMN_SHADER;
   const material = new THREE.ShaderMaterial({
+    name: 'npc-arrival-column',
     uniforms: { color: { value: new THREE.Color(color) }, time: { value: 0 }, strength: { value: 0 } },
     vertexShader: 'varying vec2 vUv; void main(){vUv=uv; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0);}',
     fragmentShader: /* glsl */`
       uniform vec3 color; uniform float time; uniform float strength; varying vec2 vUv;
       void main(){
-        float rays=pow(0.5+0.5*sin(vUv.x*75.398+time*2.0),18.0);
-        float flow=0.65+0.35*sin(vUv.y*35.0-time*9.0);
-        float fade=smoothstep(0.0,0.05,vUv.y)*(1.0-smoothstep(0.75,1.0,vUv.y));
-        float alpha=(0.04+rays*0.12)*flow*fade*strength;
-        gl_FragColor=vec4(mix(color,vec3(1.8),rays*0.6),alpha);
+        float rays=pow(0.5+0.5*sin(vUv.x*${f(K.rays.freq)}+time*${f(K.rays.speed)}),${f(K.rays.pow)});
+        float flow=${f(K.flow.base)}+${f(K.flow.amp)}*sin(vUv.y*${f(K.flow.freq)}-time*${f(K.flow.speed)});
+        float fade=smoothstep(0.0,${f(K.fade.bottom)},vUv.y)*(1.0-smoothstep(${f(K.fade.top)},1.0,vUv.y));
+        float alpha=(${f(K.alpha.base)}+rays*${f(K.alpha.rays)})*flow*fade*strength;
+        gl_FragColor=vec4(mix(color,vec3(${f(K.white)}),rays*${f(K.whiteMix)}),alpha);
         #include <colorspace_fragment>
       }`,
     transparent: true, depthWrite: false, side: THREE.DoubleSide, forceSinglePass: true, toneMapped: false, blending: THREE.AdditiveBlending,

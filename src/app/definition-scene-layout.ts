@@ -507,7 +507,7 @@ export function createDefinitionSceneLayout(selectedId: string) {
         floraMaterial.dispose();
         shrubMesh.geometry.dispose(); shrubMesh.dispose(); atlas.dispose(); shrubMaterial.dispose();
         rockBatch.dispose(); rockMaterial.dispose(); aoBatch.dispose(); aoMaterial.dispose();
-        for (const mesh of climbers.children as THREE.InstancedMesh[]) { mesh.dispose(); mesh.geometry.dispose(); }
+        for (const mesh of climbers.children as THREE.BatchedMesh[]) mesh.dispose();
         climbers.removeFromParent(); hangAtlas.dispose(); bottomAtlas.dispose(); climberMaterial.dispose();
       });
       const geometry = new THREE.BufferGeometry().setFromPoints(points);

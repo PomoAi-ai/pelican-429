@@ -1,11 +1,11 @@
 import * as THREE from 'three';
-import type { Stage } from '../render/stage.ts';
+import type { Stage, StageRenderer } from '../render/stage.ts';
 import { createHarborSideScene } from '../render/harbor-side-scene.ts';
 import { DEPTH_HAZE_HALF_DISTANCE } from '../render/depth-haze.ts';
 import type { LevelData } from '../world/level.ts';
 
 /** 横版玩法保持 XY；城市只在规范的背景层中沿 X 延展。 */
-export async function createHarborPresentation(stage: Stage, level: LevelData) {
+export async function createHarborPresentation(stage: Stage<StageRenderer>, level: LevelData) {
   const harbor = await createHarborSideScene({ minX: 0, maxX: level.map.width, homeCenter: level.map.width / 2 });
   harbor.root.position.y = level.spawn.y;
   stage.scene.add(harbor.root);

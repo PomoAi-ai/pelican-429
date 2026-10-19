@@ -1,6 +1,6 @@
 import type { FreeWorldWeatherState } from '../world/free-world-weather.ts';
 /**
- * 模拟环境状态（任务 022）：降水是逻辑层的确定性输入 —— 状态由模式与 tick 时刻决定，自由世界自动模式同时采样当地地貌，
+ * 模拟环境状态（任务 022）：降水是逻辑层的确定性输入 —— 状态由模式与 tick 时刻决定，主世界自动模式同时采样当地地貌，
  * 模式只能经环境命令 setPrecipMode 改变（设置面板/URL/调试键 → main 调用；命令在两个 tick 之间生效，与 tick 号一起即可复现）。
  * 渲染层只读 world.env.precip 做视觉过渡，不反向写入。
  * 玩法联动：露天（world/sky-exposure：头顶上方无遮挡格）下雨时，鹈鹕嘴囊水量按 precip.refill 缓慢回复（小数余量逐实体累积，整数入账）。

@@ -1,45 +1,37 @@
 import { AI_CITY_LAYERS } from '../config/ai-city-look.ts';
 import { RESIDENCE_SEGMENTS, RESIDENCE_WORLD, type ResidenceResource } from '../config/residence.ts';
-import { WORLD_CONTROLS } from './world-controls.ts';
-import { SCENE_WEATHER_LABELS, SCENE_WEATHER_MODES, WIND_LABELS, WIND_MODES } from '../config/weather-rules.ts';
+import { SCENE_VIEW_CONTROLS } from './scene-view-controls.ts';
 
-/** 界面只提供控件与容器，建造状态和保存反馈由住宅应用统一驱动。 */
-export function createResidenceHud(resources: readonly ResidenceResource[], mode: 'demo' | 'saved', parent: HTMLElement = document.body) {
+/**
+ * 界面只提供控件与容器，建造状态和保存反馈由住宅应用统一驱动；世界与天气控制由共享场景工具条提供。
+ * world 是主世界城区：只留建造与视角控制，没有保存与场景位置。
+ */
+export function createResidenceHud(resources: readonly ResidenceResource[], mode: 'demo' | 'saved' | 'world', parent: HTMLElement = document.body) {
+  const scene = mode !== 'world';
   const root = document.createElement('section');
-  root.className = 'residence';
-  root.setAttribute('aria-label', mode === 'demo' ? 'AI 住宅游戏演示' : 'AI 住宅建造');
+  root.className = 'residence scene-page';
+  root.setAttribute('aria-label', mode === 'demo' ? 'AI 住宅游戏演示' : mode === 'world' ? '主世界城区' : 'AI 住宅建造');
   root.innerHTML = `
     <header class="residence-toolbar">
       <div class="residence-heading">
         <span class="residence-emblem" aria-hidden="true">⌂</span>
-        <div><h1>AI 住宅 <span>· ${mode === 'demo' ? '游戏演示' : '建造'}</span></h1><p data-mode>正在准备住宅</p></div>
+        <div><h1>${scene ? 'AI 住宅' : '主世界'} <span>· ${mode === 'demo' ? '游戏演示' : scene ? '建造' : '城区'}</span></h1><p data-mode>正在准备住宅</p></div>
       </div>
       <div class="residence-actions" role="group" aria-label="住宅操作">
         ${mode === 'saved' ? '<a href="./?mode=lab&demo=residence">住宅游戏演示</a>' : ''}
-        <button type="button" class="residence-primary" data-build aria-expanded="false" aria-controls="residence-resources" aria-pressed="false">${mode === 'demo' ? '体验建造' : '开始建造'}</button>
+        <button type="button" class="residence-primary" data-build aria-expanded="false" aria-controls="residence-resources" aria-pressed="false">${mode === 'demo' ? '体验建造' : scene ? '开始建造' : '建造'}</button>
         <span class="residence-door-note">能量门 · 靠近自动开启，离开自动关闭</span>
-        <button type="button" data-save${mode === 'demo' ? ' hidden' : ''}>保存住宅</button>
+        ${scene ? `<button type="button" data-save${mode === 'demo' ? ' hidden' : ''}>保存住宅</button>` : ''}
         ${mode === 'demo' ? '<a href="./?mode=homestead&scene=residence">住宅建造 · 独立存档</a>' : ''}
       </div>
       <div class="residence-camera" role="group" aria-label="游玩与镜头">
         <section class="residence-control-group" aria-label="视角控制">
           <h2>视角控制</h2>
           <div class="residence-control-buttons">
-            <button type="button" data-residence-view="front" aria-pressed="true">正视</button>
-            <button type="button" data-residence-view="angle" aria-pressed="false">斜视</button>
-            <button type="button" data-residence-view="top" aria-pressed="false">俯视</button>
-            <button type="button" data-play-view>游玩视角</button>
-            <button type="button" data-camera aria-pressed="true">自由镜头</button>
-            <button type="button" data-play aria-pressed="true">暂停游玩</button>
+            ${SCENE_VIEW_CONTROLS}
           </div>
         </section>
-        <section class="residence-control-group" aria-label="世界与天气">
-          <h2>世界与天气</h2>
-          ${WORLD_CONTROLS}
-          <label class="residence-weather-field">天气 <select data-weather aria-label="场景天气">${SCENE_WEATHER_MODES.map(weather => `<option value="${weather}">${SCENE_WEATHER_LABELS[weather]}</option>`).join('')}</select></label>
-          <label class="residence-weather-field">风力 <select data-wind aria-label="场景风力">${WIND_MODES.filter(wind => wind !== 'auto').map(wind => `<option value="${wind}"${wind === 'breeze' ? ' selected' : ''}>${WIND_LABELS[wind]}</option>`).join('')}</select></label>
-        </section>
-        <section class="residence-control-group" aria-label="场景位置">
+        ${scene ? `<section class="residence-control-group" aria-label="场景位置">
           <h2>场景位置</h2>
           <div class="residence-control-buttons">
             <button type="button" data-overview>看住宅</button>
@@ -50,7 +42,7 @@ export function createResidenceHud(resources: readonly ResidenceResource[], mode
           <label class="residence-travel">前往 <select data-travel aria-label="前往院区分段">${RESIDENCE_SEGMENTS.map(segment => `<option value="${segment.index}"${segment.index === 0 ? ' selected' : ''}>${segment.label}</option>`).join('')}</select></label>
           <details class="city-layer-controls"><summary>背景分层</summary><div>${AI_CITY_LAYERS.map(layer => `<label><input type="checkbox" data-city-layer="${layer.id}" checked>${layer.label}</label>`).join('')}</div></details>
           <label><input type="checkbox" data-reflections checked>地面反射</label>
-        </section>
+        </section>` : ''}
       </div>
     </header>
     <div class="residence-workspace">
@@ -90,11 +82,7 @@ export function createResidenceHud(resources: readonly ResidenceResource[], mode
         <p class="room-preview-hint">A / D 移动 · 空格跳跃 · 能量门自动感应</p>
       </div>
     </div>`;
-  if (mode === 'demo') {
-    root.classList.add('residence-demo');
-    root.querySelector('.world-controls')!.remove();
-    root.querySelector('[data-weather]')!.closest('section')!.remove();
-  }
+  if (mode === 'demo') root.classList.add('residence-demo');
   parent.append(root);
   return { root, viewport: root.querySelector<HTMLElement>('.residence-viewport')!, dispose(): void { root.remove(); } };
 }

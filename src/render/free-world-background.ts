@@ -4,12 +4,12 @@ import type { LevelData } from '../world/level.ts';
 import { createBackgroundRegions, type BackgroundWeights } from '../world/free-world-background-regions.ts';
 import { acquireKtx2Loader } from './ktx2-loader.ts';
 import { createFacilitySky } from './facility-sky.ts';
-import type { Stage } from './stage.ts';
+import type { Stage, StageRenderer } from './stage.ts';
 
 type FortressTextures = Parameters<typeof createFacilitySky>[0];
 
 /** 单层横幅仅在边界重叠；累计 alpha 保持混合后覆盖率为 1，不露出暗底。 */
-export function createFreeWorldBackground(stage: Stage, level: LevelData, ground: Int16Array, loadFortress: () => Promise<FortressTextures>, interiors: { cathedral: THREE.Texture; abyss: THREE.Texture }) {
+export function createFreeWorldBackground(stage: Stage<StageRenderer>, level: LevelData, ground: Int16Array, loadFortress: () => Promise<FortressTextures>, interiors: { cathedral: THREE.Texture; abyss: THREE.Texture }) {
   const root = new THREE.Group();
   root.name = 'free-world-background';
   stage.scene.add(root);
@@ -23,6 +23,9 @@ export function createFreeWorldBackground(stage: Stage, level: LevelData, ground
   const renderedFortressWorld = new THREE.Matrix4();
   const renderedFortressProjection = new THREE.Matrix4();
   const bufferSize = new THREE.Vector2();
+  const forward = new THREE.Vector3();
+  const right = new THREE.Vector3();
+  const up = new THREE.Vector3();
   let disposed = false;
   let failure: unknown;
   let blended: BackgroundWeights | null = null;
@@ -49,6 +52,11 @@ export function createFreeWorldBackground(stage: Stage, level: LevelData, ground
         const target = new THREE.WebGLRenderTarget(1, 1, { depthBuffer: false, stencilBuffer: false });
         fortress = { view, scene, target };
         texture = target.texture;
+        // WebGPU 的渲染目标首行是画面顶部（实测读回），three 对网格贴图不做 Y 翻转，WebGL 则首行是底部。
+        if ('isWebGPURenderer' in stage.renderer) {
+          texture.repeat.y = -1;
+          texture.offset.y = 1;
+        }
       } else if (theme === 'cathedral' || theme === 'abyss') texture = interiors[theme];
       else {
         const decoder = acquireKtx2Loader(stage.renderer);
@@ -67,7 +75,6 @@ export function createFreeWorldBackground(stage: Stage, level: LevelData, ground
       material.userData.noPrecip = true;
       const mesh = new THREE.Mesh(geometry, material);
       mesh.frustumCulled = false;
-      mesh.position.z = -121;
       mesh.visible = false;
       layers.set(theme, mesh);
       root.add(mesh);
@@ -135,6 +142,12 @@ export function createFreeWorldBackground(stage: Stage, level: LevelData, ground
       environment.sky *= THREE.MathUtils.smoothstep(y - surface, -12, -4);
       let cumulative = 0;
       let order = -20;
+      // 背景板朝向相机，放在视线与玩法平面交点后 121 格：正视时与原先 z=-121 的平面重合，斜视、俯视也铺满视野；掠射角限幅免得越过远裁面。
+      const camera = stage.camera;
+      camera.getWorldDirection(forward);
+      right.setFromMatrixColumn(camera.matrixWorld, 0);
+      up.setFromMatrixColumn(camera.matrixWorld, 1);
+      const distance = Math.min(camera.far * .95, camera.position.z / Math.max(.2, -forward.z) + 121);
       for (const [theme, mesh] of layers) {
         const weight = weights[theme] / sum;
         cumulative += weight;
@@ -142,8 +155,7 @@ export function createFreeWorldBackground(stage: Stage, level: LevelData, ground
         if (!mesh.visible) continue;
         mesh.material.opacity = weight / cumulative;
         mesh.renderOrder = order++;
-        const projection = stage.camera.projectionMatrix.elements;
-        const distance = stage.camera.position.z - mesh.position.z;
+        const projection = camera.projectionMatrix.elements;
         const viewHeight = 2 * distance / projection[5]!;
         const viewWidth = 2 * distance / projection[0]!;
         const texture = mesh.material.map!;
@@ -151,8 +163,10 @@ export function createFreeWorldBackground(stage: Stage, level: LevelData, ground
         const height = theme === 'fortress' ? viewHeight : Math.max(viewHeight * 1.08, viewWidth / aspect * 1.08);
         const width = theme === 'fortress' ? viewWidth : height * aspect;
         mesh.scale.set(width, height, 1);
-        mesh.position.x = stage.camera.position.x - Math.sin(x / 160) * (width - viewWidth) * .3;
-        mesh.position.y = stage.camera.position.y - Math.tanh((y - surface) / 60) * (height - viewHeight) * .3;
+        mesh.quaternion.copy(camera.quaternion);
+        mesh.position.copy(camera.position).addScaledVector(forward, distance)
+          .addScaledVector(right, -Math.sin(x / 160) * (width - viewWidth) * .3)
+          .addScaledVector(up, -Math.tanh((y - surface) / 60) * (height - viewHeight) * .3);
       }
       if (fortress && fortressPlacement && weights.fortress > 0) {
         stage.renderer.getDrawingBufferSize(bufferSize);
@@ -172,7 +186,8 @@ export function createFreeWorldBackground(stage: Stage, level: LevelData, ground
         stage.renderer.setRenderTarget(fortress.target);
         stage.renderer.clear();
         stage.renderer.render(fortress.scene, fortressCamera);
-        stage.renderer.setRenderTarget(previous);
+        // 联合类型的方法参数取两者交集；previous 取自同一渲染器，类型必然匹配。
+        stage.renderer.setRenderTarget(previous as THREE.WebGLRenderTarget | null);
         renderedFortressWorld.copy(fortressCamera.matrixWorld);
         renderedFortressProjection.copy(fortressCamera.projectionMatrix);
       }

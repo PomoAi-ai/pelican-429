@@ -26,7 +26,7 @@ export function createPlantAttachments(kind: PlantAttachmentKind, time: THREE.IU
   const root = new THREE.Group();
   const atlas = createClimberAtlas('attachment');
   const material = createClimberMaterial(time);
-  const meshes: THREE.InstancedMesh[] = [];
+  const meshes: THREE.BatchedMesh[] = [];
   const item = (variant: ClimberVariant, x: number, y: number, z: number, scale = 1): ClimberInstance =>
     ({ variant, x, y, z, scale, flip: false, rot: 0, tint: [1, 1, 1] });
   const add = (plan: ClimberInstance[], back = false): void => {
@@ -56,7 +56,7 @@ export function createPlantAttachments(kind: PlantAttachmentKind, time: THREE.IU
   }
   return { root, dispose() {
     root.removeFromParent();
-    for (const mesh of meshes) { mesh.dispose(); mesh.geometry.dispose(); }
+    for (const mesh of meshes) mesh.dispose();
     atlas.dispose(); material.dispose();
   } };
 }

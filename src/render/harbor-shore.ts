@@ -5,6 +5,7 @@ import { createAiCityFixture } from './ai-city-architecture.ts';
 import { createDefinitionKit } from './definition-kit.ts';
 import { DEPTH_HAZE_HALF_DISTANCE } from './depth-haze.ts';
 import type { PrecipSkyLook } from './precip-sky.ts';
+import { addNodePatch } from './node-patches.ts';
 
 const SEGMENT = 32;
 
@@ -47,6 +48,7 @@ export function createHarborShore(bounds: { minX: number; maxX: number; homeCent
               #endif`);
         };
         material.customProgramCacheKey = () => `${key.call(material)}|harbor-shore-haze`;
+        addNodePatch(material, { kind: 'harbor-shore-haze', near: fogNear, color: fogColor, halfDistance: DEPTH_HAZE_HALF_DISTANCE });
       }
     });
   }

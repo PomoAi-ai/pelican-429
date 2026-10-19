@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import type { ResidenceMaterial } from '../config/residence.ts';
 import { generateTileTextures, tileLayerIndex, TILE_TEXTURE_PERIOD, type TileTextureData } from './tile-textures.ts';
+import { addNodePatch } from './node-patches.ts';
 
 export type NaturalBuildingMaterial = Exclude<ResidenceMaterial, 'ceramic' | 'alloy' | 'ashlar'>;
 const layers = { grass: 'dirt', dirt: 'dirt', stone: 'stone', sand: 'sand', sandstone: 'sandstone', timber: 'planks' } as const;
@@ -45,6 +46,7 @@ export function createNaturalBuildingMaterials() {
         shader.uniforms.buildingGrass = { value: kind === 'grass' ? texture('grassTop') : null };
       };
       value.customProgramCacheKey = () => `natural-building-${kind}`;
+      addNodePatch(value, { kind: 'natural-building', grass: kind === 'grass' ? texture('grassTop') : null, period: TILE_TEXTURE_PERIOD });
       materials.set(kind, value);
       return value;
     },

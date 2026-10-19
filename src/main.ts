@@ -1,4 +1,4 @@
-import { parseAppMode, RELEASE_MODES } from './config/app-mode.ts';
+import { opensSceneGame, parseAppMode, RELEASE_MODES } from './config/app-mode.ts';
 import { attachDomLanguage } from './ui/dom-language.ts';
 import { STORY_SAVE_KEY } from './config/story-save.ts';
 import { getLanguage, onLanguageChange } from './ui/language.ts';
@@ -7,6 +7,7 @@ import { homeScreenInstallState } from './ui/home-screen-install.ts';
 import { fullscreenOnFirstTap } from './ui/fullscreen.ts';
 import { mountSitePage } from './ui/site-pages.ts';
 import { mountSiteNavigation } from './ui/site-navigation.ts';
+import { attachGameNavigation, configureGameInterface } from './ui/game-interface.ts';
 
 function bootError(error: unknown): void {
   console.error(error);
@@ -15,53 +16,25 @@ function bootError(error: unknown): void {
   document.getElementById('error-message')!.textContent = error instanceof Error ? `${error.message}\n\n${error.stack}` : String(error);
 }
 
-function attachGameNavigation(navigation: HTMLElement, game: boolean): void {
-  const drawer = document.createElement('details');
-  drawer.id = 'game-navigation';
-  drawer.open = !game;
-  const handle = document.createElement('summary');
-  handle.className = 'game-navigation-handle';
-  const label = (): void => {
-    handle.textContent = getLanguage() === 'en' ? 'Navigation' : '导航';
-    handle.title = getLanguage() === 'en' ? 'Expand / collapse navigation and world controls' : '展开 / 收起导航与世界工具条';
-  };
-  label();
-  onLanguageChange(label);
-  navigation.before(drawer);
-  drawer.append(handle, navigation);
-  drawer.addEventListener('toggle', () => {
-    if (!drawer.open) {
-      for (const popover of navigation.querySelectorAll<HTMLElement>(':popover-open')) popover.hidePopover();
-    }
-  });
-  for (const type of ['keydown', 'keyup']) drawer.addEventListener(type, event => event.stopPropagation());
-  const app = document.getElementById('app')!;
-  const collapse = (): void => { drawer.open = false; };
-  if (game) {
-    app.addEventListener('pointerdown', collapse);
-    app.addEventListener('focusin', collapse);
-  }
-}
-
 async function boot(): Promise<void> {
   homeScreenInstallState();
   const params = new URLSearchParams(location.search);
   const release = import.meta.env.PROD && import.meta.env.MODE !== 'full';
   const mode = parseAppMode(params, release);
+  // ?bench 只在原野整页游戏里生效：其他入口不会读它，在路由前校验，避免静默忽略。
+  if (params.has('bench')) (await import('./app/bench.ts')).parseBench(params);
   if (release) {
     for (const link of document.querySelectorAll<HTMLAnchorElement>('a[href]')) {
       const url = new URL(link.href);
       if (url.origin === location.origin && url.searchParams.has('mode') && !RELEASE_MODES.includes(url.searchParams.get('mode')!)) link.remove();
     }
   }
-  const sceneWorkspace = mode === 'lab' || mode === 'resources' || mode === 'facility';
-  const playing = mode === 'game' || mode === 'homestead' || mode === 'story' || mode === 'controls';
-  if (playing) {
-    document.documentElement.classList.add('game-interface');
-    document.querySelector<HTMLMetaElement>('meta[name="viewport"]')!.content = 'width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover';
-    document.addEventListener('contextmenu', event => {
-      if (!(event.target instanceof Element && event.target.closest('input, textarea, [contenteditable="true"]'))) event.preventDefault();
-    });
+  const sceneGame = opensSceneGame(params, { release, embedded: window !== window.parent, coarsePointer: matchMedia('(pointer: coarse)').matches });
+  const sceneWorkspace = sceneGame || mode === 'lab' || mode === 'resources' || mode === 'facility';
+  const playing = !sceneGame && (mode === 'game' || mode === 'homestead' || mode === 'story' || mode === 'controls');
+  const mobileTransit = mode === 'lab' && params.get('demo') === 'transit' && matchMedia('(pointer: coarse)').matches;
+  if (playing || mobileTransit) {
+    configureGameInterface();
     if (mountMobileGameViewport()) return;
     if (matchMedia('(pointer: coarse)').matches) fullscreenOnFirstTap();
   }
@@ -83,9 +56,8 @@ async function boot(): Promise<void> {
   }
   // 放在“继续游戏”改名之后，二级栏里的“主线”保持原名。
   mountSiteNavigation(navigation, params, release);
-  if (mode !== 'index' && !sceneWorkspace) {
-    attachGameNavigation(navigation, playing);
-  }
+  // 游戏页默认收起顶部，场景页默认展开；收起后由把手再展开。
+  if (mode !== 'index') attachGameNavigation(navigation, playing);
   if (mode === 'catalog' || mode === 'about' || mode === 'concepts') {
     attachDomLanguage();
     mountSitePage(mode);
@@ -180,7 +152,8 @@ async function boot(): Promise<void> {
   } else if (mode === 'game' && params.get('level') === 'transit') {
     const { startTransit } = await import('./app/transit-app.ts');
     await startTransit(bootError);
-  } else if (mode === 'game' && params.get('level') === 'harbor') {
+  } else if (mode === 'game' && (params.get('level') === 'harbor' || (params.get('level') === null && params.get('free') !== '1'))) {
+    // 世界地图从城区出发；free=1 的主世界网址（重建、区域定位、城区右端出口）直接进原野。
     const { startResidence } = await import('./app/residence-app.ts');
     await startResidence('saved', bootError, 'harbor');
   } else if (mode === 'homestead' && params.get('scene') === 'residence') {

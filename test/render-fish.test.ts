@@ -50,7 +50,7 @@ function instance(mesh: THREE.InstancedMesh, i: number) {
 describe('fish-view', () => {
   test('真实大世界的完整鱼群能初始化并连续更新', () => {
     for (const size of ['small', 'medium', 'large'] as const) {
-      const level = generateFreeWorld(392740869, size);
+      const level = generateFreeWorld(392740869, size, 'wilds');
       const school = createFishSchool(level.fishSpawns, level.fluid, TUNING.fish);
       const view = createFishView(school);
       try {

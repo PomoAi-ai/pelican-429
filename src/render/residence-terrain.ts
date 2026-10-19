@@ -9,7 +9,8 @@ const CHUNK_WIDTH = 32;
 const CHUNK_HEIGHT = 16;
 
 /** 地下按可见分区直接实例化共享格子；挖掘仅重建受影响分区。 */
-export function createResidenceTerrainView(state: ResidenceState) {
+export function createResidenceTerrainView(state: ResidenceState, backdropTop: number = RESIDENCE_WORLD.foundationTop,
+  backdropBottom: number = RESIDENCE_WORLD.minY) {
   const root = new THREE.Group();
   root.name = 'residence-underground';
   root.scale.z = -1;
@@ -19,13 +20,13 @@ export function createResidenceTerrainView(state: ResidenceState) {
     kit.solid('A', variant * 4, span * 2, 'ashlar', 'deep', span);
     templates[span - 1]!.push(kit.root.children.at(-1) as THREE.Mesh);
   }
-  // 剖面只是观察入口，挖空后仍有地质背层，不能透出室外城市。
+  // 地质背层盖住深地下远景；地表衔接场景可降低上沿，让浅层窗口看见岸边露台。
   const backdrop = new THREE.Mesh(
-    new THREE.PlaneGeometry(RESIDENCE_WORLD.width, RESIDENCE_WORLD.foundationTop - RESIDENCE_WORLD.minY),
+    new THREE.PlaneGeometry(RESIDENCE_WORLD.width, backdropTop - backdropBottom),
     new THREE.MeshStandardMaterial({ color: 0x655b4e, roughness: .98 }),
   );
   backdrop.position.set((RESIDENCE_WORLD.minX + RESIDENCE_WORLD.maxX) / 2,
-    (RESIDENCE_WORLD.minY + RESIDENCE_WORLD.foundationTop) / 2, 1.7);
+    (backdropBottom + backdropTop) / 2, 1.7);
   backdrop.rotation.y = Math.PI;
   backdrop.visible = state.underground !== undefined;
   root.add(backdrop);

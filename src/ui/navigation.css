@@ -91,8 +91,13 @@ body:has(#game-navigation:not([open])) { --dev-nav-height: 0px; }
 #dev-navigation:not([data-context=home]) .home-social { height: 32px; padding: 0; }
 #dev-navigation:not([data-context=home]) .home-social > :is(a, button) { width: 32px; height: 32px; }
 #dev-navigation:not([data-context=home]) .site-language { font-size: 14px; }
-#game-navigation[open]:has(#dev-navigation[data-context=resources]) > .game-navigation-handle { top: 8px; left: auto; right: 8px; transform: none; background: transparent; }
-#game-navigation[open] #dev-navigation[data-context=resources] { padding-right: 58px; }
+body:not(:has(.scene-world-toolbar)) #game-navigation[open]:has(#dev-navigation[data-context=resources]) > .game-navigation-handle { top: 8px; left: auto; right: 8px; transform: none; background: transparent; }
+body:not(:has(.scene-world-toolbar)) #game-navigation[open] #dev-navigation[data-context=resources] { padding-right: 58px; }
+/* 有场景工具条的页面：展开时把手放在工具条右端，由贴右的设置块给它留位；原野工具条叠在站点导航下方。 */
+body:has(.scene-world-toolbar) #game-navigation[open] > .game-navigation-handle { top: calc(var(--site-nav-height) + 14px); left: auto; right: 12px; transform: none; }
+body:has(#game-navigation[open]) :is(.scene-workspace, .scene-page) :is(.scene-toolbar, .scene-workspace-main > .scene-world-toolbar) .scene-world-settings { padding-right: 60px; }
+body:has(#game-navigation[open]) :is(.scene-workspace, .scene-page) :is(.scene-toolbar, .scene-workspace-main > .scene-world-toolbar):has(.scene-world-settings[hidden]) { padding-right: 72px; }
+body:has(#game-navigation[open]):has(.scene-toolbar-overlay) { --dev-nav-height: calc(var(--site-nav-height) + 52px); }
 #dev-navigation .site-language { order: 2; }
 .home-play-control { anchor-name: --home-play; display: inline-flex; overflow: hidden; border-radius: 10px; background: var(--home-accent); }
 #dev-navigation .home-play-control > :is(a, button) { display: inline-flex; align-items: center; justify-content: center; height: 100%; margin: 0; border-radius: 0; color: #10180f; background: transparent; }

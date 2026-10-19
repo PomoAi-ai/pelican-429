@@ -1,12 +1,12 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { loadResidence, RESIDENCE_HARBOR_SAVE_KEY, RESIDENCE_SAVE_KEY, saveResidence } from '../src/app/residence-save.ts';
+import { loadResidence, RESIDENCE_HARBOR_SAVE_KEY, RESIDENCE_SAVE_KEY, RESIDENCE_THREE_SAVE_KEY, saveResidence } from '../src/app/residence-save.ts';
 import { createBody } from '../src/physics/body.ts';
 import { moveDefinitionBody } from '../src/physics/definition-collision.ts';
 import { createResidenceLight, type ResidenceLightField } from '../src/sim/residence-light.ts';
 import { residenceTerrainId, residenceTerrainPlacement } from '../src/sim/residence-terrain.ts';
-import { RESIDENCE_WORLD } from '../src/config/residence.ts';
-import { buildResidenceCollision, checkResidencePlacement, createResidence, findSafeResidenceSpawn, placeResidence, removeResidence, toggleResidenceDoor, updateResidenceDoors,
+import { getResidenceResource, RESIDENCE_TRANSIT, RESIDENCE_WORLD } from '../src/config/residence.ts';
+import { addResidenceBasement, buildResidenceCollision, checkResidencePlacement, createResidence, findSafeResidenceSpawn, placeResidence, removeResidence, reserveResidenceSite, toggleResidenceDoor, updateResidenceDoors,
   type ResidenceState } from '../src/sim/residence.ts';
 
 const empty = (): ResidenceState => ({ placements: [], nextId: 1, revision: 0 });
@@ -15,6 +15,22 @@ const storage = () => {
   return { values, getItem: (key: string) => values.get(key) ?? null, setItem: (key: string, value: string) => { values.set(key, value); } };
 };
 const close = (actual: number, expected: number): void => assert.ok(Math.abs(actual - expected) < .001, `${actual} ≠ ${expected}`);
+
+test('住宅2地下长廊挖空主屋下方两层，竖井单向平台从楼板逐级接到 B1 与 B2', () => {
+  const state = createResidence();
+  addResidenceBasement(state);
+  const collision = buildResidenceCollision(state);
+  const fall = (x: number, y: number): number => {
+    const body = createBody({ x, y, halfWidth: .2, height: 1, vy: -10 });
+    for (let i = 0; i < 10; i++) moveDefinitionBody(body, collision, .1);
+    return body.y;
+  };
+  close(fall(54.5, -1), -6);
+  close(fall(58.6, 3), 2);
+  close(fall(58.6, -1.5), -2);
+  close(fall(60.5, -10), -13);
+  close(fall(88.6, -9), -10);
+});
 
 // 漏掉双向检查、半砖使用实际半高或先写入再检查，都会让冲突构件进入存档。
 test('加深半砖与背景墙双向互斥，拒绝保留完整状态，拆除后释放格位', () => {
@@ -82,16 +98,20 @@ test('加深规格保存后仍约束建造，旧普通砖存档保留构件并�
   assert.equal(upgraded.placements.filter(item => item.resourceId === 'ashlar-B').length, RESIDENCE_WORLD.width);
 });
 
-test('住宅与住宅二区独立保存，交替建造不会覆盖另一张地图', () => {
+test('三版住宅独立保存，交替建造不会覆盖其他地图', () => {
   const store = storage();
   const original = empty();
   const harbor = empty();
+  const three = empty();
   placeResidence(original, 'ceramic-C', 8, 3, null);
   placeResidence(harbor, 'wall', 12, 4, null);
+  placeResidence(three, 'ceramic-C', 16, 3, null);
   saveResidence(store, original);
   saveResidence(store, harbor, RESIDENCE_HARBOR_SAVE_KEY);
+  saveResidence(store, three, RESIDENCE_THREE_SAVE_KEY);
   assert.deepEqual(loadResidence(store), original);
   assert.deepEqual(loadResidence(store, RESIDENCE_HARBOR_SAVE_KEY), harbor);
+  assert.deepEqual(loadResidence(store, RESIDENCE_THREE_SAVE_KEY), three);
 
   placeResidence(harbor, 'wall', 13, 4, null);
   saveResidence(store, harbor, RESIDENCE_HARBOR_SAVE_KEY);
@@ -100,6 +120,34 @@ test('住宅与住宅二区独立保存，交替建造不会覆盖另一张地�
   saveResidence(store, original);
   assert.deepEqual(loadResidence(store, RESIDENCE_HARBOR_SAVE_KEY), harbor);
   assert.deepEqual(loadResidence(store), original);
+  assert.deepEqual(loadResidence(store, RESIDENCE_THREE_SAVE_KEY), three);
+  placeResidence(three, 'wall', 17, 4, null);
+  saveResidence(store, three, RESIDENCE_THREE_SAVE_KEY);
+  assert.deepEqual(loadResidence(store, RESIDENCE_HARBOR_SAVE_KEY), harbor);
+  assert.deepEqual(loadResidence(store), original);
+  assert.deepEqual(loadResidence(store, RESIDENCE_THREE_SAVE_KEY), three);
+});
+
+// 漏删地面方石会让人物踩在交通中心街面之上，误删用地外或地下格会破坏城区与地下室。
+test('交通中心用地清除地面及以上构件、保留用地外与地下格，地面以上禁建、地下可建', () => {
+  const state = createResidence();
+  const { minX, maxX } = RESIDENCE_TRANSIT;
+  const inSite = (item: { x: number; resourceId: string }): boolean =>
+    item.x < maxX && item.x + getResidenceResource(item.resourceId).width > minX;
+  const outside = state.placements.filter(item => !inSite(item));
+  assert.ok(state.placements.some(item => inSite(item) && item.resourceId === 'ashlar-B'));
+  assert.ok(state.placements.some(item => inSite(item) && item.resourceId === 'energy-column'));
+  reserveResidenceSite(state, minX, maxX);
+  assert.deepEqual(state.placements, outside);
+  assert.ok(residenceTerrainPlacement(state, residenceTerrainId(minX + 10, 0)));
+  const blocked = placeResidence(state, 'wall', maxX - 1, 4, null);
+  assert.equal(blocked.ok, false);
+  assert.match(blocked.message, /交通中心用地/);
+  assert.equal(placeResidence(state, 'wall', minX - 1, 4, null).ok, true);
+  assert.equal(placeResidence(state, 'wall', maxX, 4, null).ok, true);
+  addResidenceBasement(state);
+  assert.equal(removeResidence(state, residenceTerrainId(minX + 10, -3)).ok, true);
+  assert.equal(placeResidence(state, 'ashlar-B', minX + 10, -3, null).ok, true);
 });
 
 test('非法存档深度和墙窗冲突明确拒绝并保留原始存储', () => {

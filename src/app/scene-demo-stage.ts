@@ -1,4 +1,4 @@
-import { loadUtilityDroneFleet } from '../render/utility-drone.ts';
+import { createUtilityDroneFleet } from '../render/utility-drone.ts';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { TUNING, type Tuning } from '../config/tuning.ts';
@@ -8,21 +8,22 @@ import { createAiCityLighting } from '../render/ai-city-lighting.ts';
 import { createGrassyRig } from '../render/grassy/grassy-rig.ts';
 import { createResidenceWeather } from '../render/residence-weather.ts';
 import { shadowReceiverBounds } from '../render/shadow-fit.ts';
-import { attachStage } from '../render/stage.ts';
+import { attachStage, WEBGL_STAGE_BACKEND } from '../render/stage.ts';
 import { warmUpStage } from '../render/warm-up.ts';
 import { createCharacterAppearanceStore } from './character-appearance.ts';
 import type { SceneSection } from './definition-scene-layout.ts';
-import { createPerspectiveControls } from './perspective-controls.ts';
+import { createPerspectiveControls, tiltCamera } from './perspective-controls.ts';
 import type { SceneMountContext } from './scene-mount.ts';
 import { createPlayableDefinitionMinimap } from './perspective-minimap.ts';
 import { createSceneGameOverlays } from './scene-game-overlays.ts';
+import { SCENE_VIEW_ANGLES, SCENE_VIEW_CONTROLS, type SceneViewAngle } from '../ui/scene-view-controls.ts';
 
 export function createSceneDemoStage(context: SceneMountContext, tuning: Tuning = TUNING) {
   const page = document.createElement('section');
   page.className = 'room-preview scene-demo-player';
   page.innerHTML = `<div class="room-preview-toolbar">
     <span class="room-preview-status" data-mode>游玩中 · 跟随镜头</span>
-    <button type="button" data-play>暂停游玩</button><button type="button" data-camera>自由镜头</button>
+    ${SCENE_VIEW_CONTROLS}
     <button type="button" data-reset-player>回到起点</button>
     <span data-sample-label></span>
     </div><div class="room-preview-viewport" style="position:relative;min-height:0;overflow:hidden">
@@ -30,7 +31,7 @@ export function createSceneDemoStage(context: SceneMountContext, tuning: Tuning 
   context.root.append(page);
   context.onDispose(() => page.remove());
   const viewport = page.querySelector<HTMLElement>('.room-preview-viewport')!;
-  const stage = attachStage(viewport, context.renderer, tuning, { quality: 'high', antialias: 'smaa' });
+  const stage = attachStage(viewport, context.renderer, tuning, { quality: 'high', antialias: 'smaa' }, WEBGL_STAGE_BACKEND);
   stage.camera.far = 1200;
   stage.camera.updateProjectionMatrix();
   context.onDispose(() => stage.dispose());
@@ -60,7 +61,7 @@ export function createSceneDemoStage(context: SceneMountContext, tuning: Tuning 
       const weather = createResidenceWeather(stage, () => collision.solids,
         { minX: Math.floor(bounds.min.x), width: Math.ceil(bounds.max.x - bounds.min.x), precipColumns });
       context.onDispose(() => weather.dispose());
-      const droneFleet = await loadUtilityDroneFleet(stage.scene);
+      const droneFleet = createUtilityDroneFleet(stage.scene, stage.createPmrem());
       if (context.signal.aborted) { droneFleet.dispose(); context.signal.throwIfAborted(); }
       const gameplay = createPerspectiveControls(page, stage, droneFleet, orbit, rig, collision, bounds, sections[0]!, [0, 0], [], false,
         { cameraMode: 'game', tuning, applyForce: weather.applyToBody, airWind: weather.airWind, world: context.world });
@@ -73,6 +74,23 @@ export function createSceneDemoStage(context: SceneMountContext, tuning: Tuning 
       const overlays = createSceneGameOverlays(page.querySelector<HTMLElement>('.room-preview-toolbar')!, viewport, stage, minimap);
       context.onDispose(() => overlays.dispose());
       page.querySelector('[data-reset-player]')!.addEventListener('click', () => gameplay.select(sections[0]!), { signal: context.signal });
+      const presets = page.querySelectorAll<HTMLButtonElement>('[data-scene-view]');
+      const playView = page.querySelector<HTMLButtonElement>('[data-play-view]')!;
+      const markView = (preset: string | null): void => {
+        for (const button of presets) button.setAttribute('aria-pressed', String(button.dataset.sceneView === preset));
+        playView.setAttribute('aria-pressed', String(gameplay.following));
+      };
+      markView('front');
+      for (const button of presets) button.addEventListener('click', () => {
+        const angles = SCENE_VIEW_ANGLES[button.dataset.sceneView as SceneViewAngle];
+        // 跟随时换预设倾角；自由镜头绕当前注视点转过去，保持自由镜头。
+        if (gameplay.following) gameplay.setViewAngles(angles);
+        else { tiltCamera(stage.camera, orbit.target, stage.camera.position.distanceTo(orbit.target), angles); orbit.update(); }
+        markView(button.dataset.sceneView!);
+      }, { signal: context.signal });
+      playView.addEventListener('click', () => { gameplay.setFollowing(true); markView(null); }, { signal: context.signal });
+      page.querySelector('[data-camera]')!.addEventListener('click', () => markView(null), { signal: context.signal });
+      orbit.addEventListener('start', () => markView(null));
       const lighting = createAiCityLighting(stage);
       lighting.setEnabled(true);
       context.onDispose(() => lighting.dispose());

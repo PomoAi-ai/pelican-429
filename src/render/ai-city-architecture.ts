@@ -3,6 +3,7 @@ import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.j
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { createDaisyGeometry, createFernGeometry, createShrubGeometry, createWeedRoundGeometry } from './flora-geometry.ts';
 import { createParticleCloud } from './grassy/grassy-particles.ts';
+import { addNodePatch } from './node-patches.ts';
 
 export type AiCityBuildingMaterial = 'ceramic' | 'alloy' | 'ashlar';
 export type AiCityMaterial = AiCityBuildingMaterial | 'wall' | 'gold' | 'dark' | 'steel' | 'cyan' | 'warm' | 'glass' | 'soil';
@@ -94,6 +95,7 @@ export function createAiCityMaterial(kind: AiCityMaterial): THREE.MeshStandardMa
           roughnessFactor *= mix(1.0, .72, finishTop);`);
     };
     material.customProgramCacheKey = () => `architectural-finish-${kind}`;
+    addNodePatch(material, { kind: 'ai-city-finish', finish: kind, variation: BLOCK_VARIATION[kind] });
   }
   return material;
 }
@@ -262,6 +264,7 @@ function createDoorEnergy(parts: ReturnType<typeof architecturalParts>, side: 'l
           #include <opaque_fragment>
         `);
     };
+    addNodePatch(material, { kind: 'gate-dissolve', dissolve });
   }
   // 门面侧对游戏镜头，扫描同步延伸到前柱，避免只看到始终发光的门框。
   const frontCharge = part('cyan', .22, 3.13, .004, .25, 1.75, -.993, .001);

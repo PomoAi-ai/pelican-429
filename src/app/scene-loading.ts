@@ -950,17 +950,21 @@ export function createSceneLoading(parent: HTMLElement, retry: () => void) {
       retryButton.hidden = false;
       status.textContent = `加载失败：${error instanceof Error ? error.message : String(error)}`;
     },
-    /** 奏完就绪音、星核迸发后再淡出；淡出结束才停帧并解绑全局监听。 */
-    hide(): void {
-      if (failed || readyRequested) return;
+    /** 奏完就绪音、星核迸发后再淡出；淡出结束才停帧并解绑全局监听。开始淡出时兑现，开场动画可以等到画面露出再播。 */
+    hide(): Promise<void> {
+      if (failed || readyRequested) return Promise.resolve();
       finishPhases(measureCount());
       readyRequested = true;
       readyCue = cue('ready', BEAT, 84, { phaseIndex: Math.max(0, phases.length - 1), u: 1, progress: 1, lit: NODES });
       status.textContent = '加载完成';
-      leaveTimer = window.setTimeout(() => {
-        root.classList.add('is-leaving');
-        leaveTimer = window.setTimeout(() => { root.hidden = true; stop(); }, 600);
-      }, (readyCue.at + .35 - clock()) * 1000);
+      const delay = (readyCue.at + .35 - clock()) * 1000;
+      return new Promise(resolve => {
+        leaveTimer = window.setTimeout(() => {
+          root.classList.add('is-leaving');
+          resolve();
+          leaveTimer = window.setTimeout(() => { root.hidden = true; stop(); }, 600);
+        }, delay);
+      });
     },
     dispose(): void {
       clearTimeout(leaveTimer); stop(); root.remove();

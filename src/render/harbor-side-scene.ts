@@ -6,6 +6,7 @@ import type { PrecipSkyLook } from './precip-sky.ts';
 import { createHarborWater } from './harbor-perspective.ts';
 import { createHarborPaintedTraffic } from './harbor-painted-traffic.ts';
 import { createHarborShore } from './harbor-shore.ts';
+import { addNodePatch } from './node-patches.ts';
 
 async function loadPaintedTextures(): Promise<Map<string, THREE.Texture>> {
   const files = [
@@ -59,6 +60,7 @@ export async function createHarborSideScene(bounds: { minX: number; maxX: number
         `);
     };
     value.customProgramCacheKey = () => `harbor-painted-air-${haze}`;
+    addNodePatch(value, { kind: 'harbor-painted-air', air, night, cloud: overcast, haze });
     owned.push(value); return value;
   }
   function cityBand(parent: THREE.Group, file: 'waterfront.png' | 'midtown.png' | 'horizon.png', height: number,
@@ -154,6 +156,7 @@ export async function createHarborSideScene(bounds: { minX: number; maxX: number
       .replace('#include <opaque_fragment>', 'outgoingLight *= harborWaterLight; diffuseColor.a *= 0.32;\n#include <opaque_fragment>');
   };
   water.mesh.material.customProgramCacheKey = () => 'harbor-lake-ripples';
+  addNodePatch(water.mesh.material, { kind: 'harbor-lake-light', light: waterLight });
   reflectionMaterial.userData.noLightMap = true;
 
   // 干燥对岸一直延伸到远城背后，俯看也不会露出楼脚下的天空。

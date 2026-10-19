@@ -344,6 +344,17 @@ describe('表面注入：湿润/积雪', () => {
     lambert.onBeforeCompile(ls as unknown as THREE.WebGLProgramParametersWithUniforms, {} as THREE.WebGLRenderer);
     assert.ok(ls.fragmentShader.includes('uPrSnowColor'));
   });
+
+  test('两个场景实例的挂接器遇到同一共享材质只注入一次', () => {
+    const m = new THREE.MeshStandardMaterial();
+    const uniforms = createPrecipUniforms();
+    assert.ok(createPrecipSurfacePatcher(uniforms).patch(m));
+    assert.ok(createPrecipSurfacePatcher(uniforms).patch(m));
+    const shader = { vertexShader: THREE.ShaderLib.standard.vertexShader, fragmentShader: THREE.ShaderLib.standard.fragmentShader, uniforms: {} };
+    m.onBeforeCompile(shader as unknown as THREE.WebGLProgramParametersWithUniforms, {} as THREE.WebGLRenderer);
+    assert.equal(shader.vertexShader.split('varying vec3 vPrWorld;').length, 2);
+    assert.equal(m.customProgramCacheKey().split(PRECIP_PROGRAM_TAG).length, 2);
+  });
 });
 
 describe('GPU 粒子（CPU 不逐粒子更新）与 draw call 上限', () => {

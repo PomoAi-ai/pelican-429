@@ -12,7 +12,8 @@
  */
 import * as THREE from 'three';
 import { injectAfter } from './tile-material.ts';
-import { WIND_GLSL, sharedWindUniforms } from './wind.ts';
+import { WIND_GLSL, glslFloat as g, sharedWindUniforms } from './wind.ts';
+import { addNodePatch } from './node-patches.ts';
 import { generateBarkTexture, generateLeafAtlas } from './tree-textures.ts';
 import { TREE_WIND_BODY, TREE_WIND_GLSL, TREE_WIND_PROGRAM_KEYS } from './tree-wind.ts';
 import type { TreeTextureData } from './tree-textures.ts';
@@ -49,6 +50,21 @@ export function sharedLeafAtlas(): THREE.DataTexture {
   return (leafAtlas ??= toTexture(generateLeafAtlas(), THREE.ClampToEdgeWrapping, 'tree-leaf-atlas'));
 }
 
+/** 叶层风摆常量（GLSL 与 WebGPU 节点由这张表生成）：顺风倾倒、抖动幅度随风强、两层横向抖动与一层竖向起伏（相位取顶点本体坐标）。 */
+export const LEAF_WIND = Object.freeze({
+  lean: 0.18,
+  flutterBase: 0.35,
+  flutterGain: 0.65,
+  flutterCap: 1.5,
+  x1: Object.freeze({ a: 0.05, t: 1.3, x: 0.35, y: 0.2 }),
+  x2: Object.freeze({ a: 0.025, t: 2.9, x: 0.9 }),
+  drop: 0.04,
+  bob: Object.freeze({ a: 0.02, t: 1.9, x: 0.5 }),
+});
+const LW = LEAF_WIND;
+/** 树皮边缘压暗：正对视线 1，掠射 BARK_EDGE_SHADE。 */
+export const BARK_EDGE_SHADE = 0.5;
+
 /**
  * 全局风（render/wind 的 windSway，共享 uniform）：顺风倾倒（柳丝/羽叶梢 aSway=1 最大，阵风经过同步增强）；
  * 本地抖动保留两层正弦（按顶点 x 相位，枝与枝不同步），频率固定、幅度随 |风| 增强。
@@ -57,13 +73,15 @@ const WIND = [
   '{',
   '#ifdef USE_INSTANCING',
   '  vec3 tw = ( modelMatrix * instanceMatrix * vec4( position, 1.0 ) ).xyz;',
+  '#elif defined( USE_BATCHING )',
+  '  vec3 tw = ( modelMatrix * batchingMatrix * vec4( position, 1.0 ) ).xyz;',
   '#else',
   '  vec3 tw = ( modelMatrix * vec4( position, 1.0 ) ).xyz;',
   '#endif',
   '  float wind = windSway( tw.x, tw.y, uWeatherTime );',
-  '  float flutter = 0.35 + 0.65 * min( abs( wind ), 1.5 );',
-  '  transformed.x += aSway * ( 0.18 * wind + flutter * ( 0.05 * sin( 1.3 * uTreeTime + 0.35 * position.x + 0.2 * position.y ) + 0.025 * sin( 2.9 * uTreeTime + 0.9 * position.x ) ) );',
-  '  transformed.y += aSway * ( -0.04 * abs( wind ) + 0.02 * flutter * sin( 1.9 * uTreeTime + 0.5 * position.x ) );',
+  `  float flutter = ${g(LW.flutterBase)} + ${g(LW.flutterGain)} * min( abs( wind ), ${g(LW.flutterCap)} );`,
+  `  transformed.x += aSway * ( ${g(LW.lean)} * wind + flutter * ( ${g(LW.x1.a)} * sin( ${g(LW.x1.t)} * uTreeTime + ${g(LW.x1.x)} * position.x + ${g(LW.x1.y)} * position.y ) + ${g(LW.x2.a)} * sin( ${g(LW.x2.t)} * uTreeTime + ${g(LW.x2.x)} * position.x ) ) );`,
+  `  transformed.y += aSway * ( -${g(LW.drop)} * abs( wind ) + ${g(LW.bob.a)} * flutter * sin( ${g(LW.bob.t)} * uTreeTime + ${g(LW.bob.x)} * position.x ) );`,
   '}',
 ].join('\n');
 
@@ -85,6 +103,7 @@ function createWindDepthMaterial(uTime: THREE.IUniform<number>, name: string, ke
   };
   const full = `${key}|${TREE_WIND_PROGRAM_KEYS.tag}`;
   depth.customProgramCacheKey = () => full;
+  addNodePatch(depth, { kind: 'tree-shadow-wind', wind: sharedWindUniforms(), time: uTime });
   return depth;
 }
 
@@ -113,7 +132,7 @@ const BARK_NORMAL = [
   '  vec3 grad = sign( det ) * ( dH.x * r1 + dH.y * r2 );',
   '  normal = normalize( abs( det ) * normal - grad );',
   '  float facing = clamp( dot( normal, normalize( vViewPosition ) ), 0.0, 1.0 );',
-  '  diffuseColor.rgb *= mix( 0.5, 1.0, sqrt( facing ) );',
+  `  diffuseColor.rgb *= mix( ${g(BARK_EDGE_SHADE)}, 1.0, sqrt( facing ) );`,
   '}',
 ].join('\n');
 
@@ -148,6 +167,7 @@ export function createLeafMaterial(uTime: THREE.IUniform<number>, options: LeafM
   };
   const key = `${options.cacheKey ?? TREE_WIND_PROGRAM_KEYS.leaf}|${TREE_WIND_PROGRAM_KEYS.tag}`;
   leaf.customProgramCacheKey = () => key;
+  addNodePatch(leaf, { kind: 'tree-wind', wind: sharedWindUniforms(), time: uTime });
   return leaf;
 }
 
@@ -178,6 +198,8 @@ export function createTreeMaterials(uTime: THREE.IUniform<number>): TreeMaterial
   };
   const barkKey = `${TREE_WIND_PROGRAM_KEYS.bark}|${TREE_WIND_PROGRAM_KEYS.tag}`;
   bark.customProgramCacheKey = () => barkKey;
+  addNodePatch(bark, { kind: 'tree-wind', wind: sharedWindUniforms(), time: uTime });
+  addNodePatch(bark, { kind: 'tree-bark', bump: uBarkBump });
 
   const leaf = createLeafMaterial(uTime);
   const barkDepth = createWindDepthMaterial(uTime, 'tree-bark-depth', TREE_WIND_PROGRAM_KEYS.barkDepth);

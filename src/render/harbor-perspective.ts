@@ -6,6 +6,7 @@ import { createAiCityBatches, type AiCityBatches } from './ai-city-batches.ts';
 import { addHarborBuilding } from './harbor-buildings.ts';
 import { aiCityRailPoint, createVehicleTemplates } from './ai-city-traffic.ts';
 import { createWaterMaterials } from './water-shading.ts';
+import { addNodePatch } from './node-patches.ts';
 
 function detailGlazing(material: THREE.MeshStandardMaterial): void {
   material.onBeforeCompile = shader => {
@@ -33,6 +34,7 @@ function detailGlazing(material: THREE.MeshStandardMaterial): void {
         normal = normalize(normal + vec3((paneHash - 0.5) * 0.045, sin(paneHash * 12.0) * 0.012, 0.0) * (1.0 - frame));`);
   };
   material.customProgramCacheKey = () => 'harbor-curtain-wall';
+  addNodePatch(material, { kind: 'harbor-curtain-wall' });
 }
 
 export function configureHarborCity(city: AiCityBatches): void {

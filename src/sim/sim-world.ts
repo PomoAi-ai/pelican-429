@@ -26,6 +26,8 @@ import { cancelPlayerTransform, stepPlayerTransform } from './player-transform.t
 import { stepPlayerTeleport } from './player-teleport.ts';
 import { teleportLocksMovement } from '../entities/teleport.ts';
 import type { Tuning } from '../config/tuning.ts';
+import type { LandingPodPlan } from '../config/transit.ts';
+import { carryInPod, liftInPod, placeInPod, POD_BOARD_INPUT, podLandingPhase, podTakeoffPhase, POD_WALK_INPUT, type PodLanding } from './pod-landing.ts';
 import { isDaytime } from '../core/calendar.ts';
 import { EventQueue } from '../core/events.ts';
 import { hash01, hashU32 } from '../core/rng.ts';
@@ -60,6 +62,7 @@ import type { PelicanInput } from '../entities/pelican-controller.ts';
 import { consumeRideEvents, resolvePelicanRide, solidExtents } from '../entities/pelican-ride.ts';
 import { tickDummyReset, updateDummy } from '../entities/training-dummy.ts';
 import { updateFlyingRoadster } from '../entities/flying-roadster.ts';
+import { updateFollowDrone } from '../entities/follow-drone.ts';
 import { applyWetMarks, collectProjectileRequests, resolveWeaponInteractions, spawnProjectiles, steerHumanProjectiles, updateShooters, wetMarks } from './weapon-system.ts';
 import { createEnvironment, entityExposed, stepEnvironment } from './environment.ts';
 import { stepPlayerBreath } from './player-breath.ts';
@@ -89,6 +92,12 @@ export interface SimWorld {
   respawnTicks: number;
   /** 首次从黑洞出现时固定身体；只消耗可见游戏开始后的模拟时间。 */
   blackholeArrivalTicks: number;
+  /** 着陆舱开场：舱内阶段冻结世界并让身体随舱下降，走出阶段世界仍冻结、只推进玩家向左步行，抵达出生点后清空。 */
+  podLanding: PodLanding | null;
+  /** 在舷梯出口右侧确认返回：世界冻结，玩家自动向左走到出口后转为 podTakeoff，起飞才能从出口接上走出路径。 */
+  podBoarding: PodLanding | null;
+  /** 停舱起飞返回主世界：世界冻结，玩家自动走进舱后随舱升起；升到顶后保持冻结，等装配层离开关卡。 */
+  podTakeoff: PodLanding | null;
   /** 连续脱战的 tick 数，每满一秒结算自然回血。 */
   playerRecoveryTicks: number;
   readonly photon: { cooldownTicks: number; chargeTicks: number; buffered: boolean; activeTicks: number; volleyIndex: number; x: number; y: number; aim: Vec2 | null; launchAngle: number };
@@ -159,6 +168,9 @@ export function createSimWorld(options: SimWorldOptions): SimWorld {
     hitstopTicks: 0,
     respawnTicks: 0,
     blackholeArrivalTicks: 0,
+    podLanding: null,
+    podBoarding: null,
+    podTakeoff: null,
     playerRecoveryTicks: 0,
     photon: { cooldownTicks: 0, chargeTicks: 0, buffered: false, activeTicks: 0, volleyIndex: 0, x: 0, y: 0, aim: null, launchAngle: 0 },
     level,
@@ -200,6 +212,22 @@ export function beginBlackholeArrival(world: SimWorld): void {
   player.pelican!.coyoteTicks = 0;
   savePrev(player.body);
   world.blackholeArrivalTicks = Math.ceil(1 / world.tuning.sim.step);
+}
+
+/** 装配层仅在从交通中心抵达或网址参数 landing=1（着陆测试入口）时调用；出生点不变，死亡重生照常回到地面。 */
+export function beginPodLanding(world: SimWorld, plan: LandingPodPlan): void {
+  world.podLanding = placeInPod(getPlayer(world), plan, world.tuning.sim.step);
+}
+
+/** 装配层在玩家确认返回主世界时调用；pod 为关卡里停着的舱，起飞倒放它的时间线。 */
+export function beginPodTakeoff(world: SimWorld, pod: PodLanding): void {
+  const player = getPlayer(world);
+  // 起飞分支不再推进变身、受击与连招；留着它们，登舱步行会一直被中性输入替换而走不进舱。
+  cancelPlayerTransform(player);
+  cancelPelicanCombat(player);
+  player.health!.hitstunTicks = 0;
+  if (player.body.x > pod.exitX) world.podBoarding = pod;
+  else world.podTakeoff = pod;
 }
 
 export type With<K extends keyof Entity> = Entity & Required<Pick<Entity, K>>;
@@ -302,7 +330,7 @@ function resolveDroneStomp(world: SimWorld): void {
   world.hitstopTicks = Math.max(world.hitstopTicks, hit.hitstop);
 }
 
-/** 家园模式的夜晚：野外敌人更凶。主线和普通自由世界没有 homestead，不受影响。 */
+/** 家园模式的夜晚：野外敌人更凶。主线和普通主世界没有 homestead，不受影响。 */
 function homesteadNight(world: SimWorld): boolean {
   return world.homestead !== undefined && !isDaytime(world.homestead.economy);
 }
@@ -474,6 +502,55 @@ export function stepSim(world: SimWorld, input: InputFrame): void {
     world.tick++;
     return;
   }
+  const landing = world.podLanding;
+  if (landing) {
+    const player = getPlayer(world);
+    const phase = podLandingPhase(landing, player.body);
+    if (phase !== 'done') {
+      // 走出阶段玩家无法操作，世界像舱内阶段一样冻结，只推进步行，避免被敌人攻击。
+      for (const entity of entities) savePrev(entity.body);
+      for (const fish of world.fish.fish) savePrev(fish.body);
+      if (phase === 'carry') carryInPod(landing, player.body);
+      else {
+        updatePelican(player, POD_WALK_INPUT, map, tuning, dt, fluid, 0, rideProbe);
+        moveAndCollide(player.body, map, dt);
+        resolvePelicanState(player);
+      }
+      world.tick++;
+      return;
+    }
+    world.podLanding = null;
+  }
+  const boarding = world.podBoarding;
+  if (boarding) {
+    const player = getPlayer(world);
+    if (player.body.x > boarding.exitX) {
+      for (const entity of entities) savePrev(entity.body);
+      for (const fish of world.fish.fish) savePrev(fish.body);
+      updatePelican(player, POD_WALK_INPUT, map, tuning, dt, fluid, 0, rideProbe);
+      moveAndCollide(player.body, map, dt);
+      resolvePelicanState(player);
+      world.tick++;
+      return;
+    }
+    world.podBoarding = null;
+    world.podTakeoff = boarding;
+  }
+  const takeoff = world.podTakeoff;
+  if (takeoff) {
+    const player = getPlayer(world);
+    const phase = podTakeoffPhase(takeoff, player.body);
+    for (const entity of entities) savePrev(entity.body);
+    for (const fish of world.fish.fish) savePrev(fish.body);
+    if (phase === 'carry') liftInPod(takeoff, player.body);
+    else if (phase === 'walk') {
+      updatePelican(player, POD_BOARD_INPUT, map, tuning, dt, fluid, 0, rideProbe);
+      moveAndCollide(player.body, map, dt);
+      resolvePelicanState(player);
+    }
+    world.tick++;
+    return;
+  }
   if (!mainlineTransformUnlocked(world)) {
     if (input.transformPressed) world.events.push({ type: 'transformBlocked', id: world.playerId, reason: 'story' });
     input = { ...input, transformPressed: false };
@@ -596,6 +673,7 @@ export function stepSim(world: SimWorld, input: InputFrame): void {
   for (const e of entities) {
     if (e.removed) continue;
     if (e.flyingRoadster) updateFlyingRoadster(e, dt);
+    else if (e.followDrone) updateFollowDrone(e, dt);
     else if (e.projectile) {
       if (e.team === 'enemy' && enemyTouchesSafeZone(e.body, world.level)) e.removed = true;
       else {

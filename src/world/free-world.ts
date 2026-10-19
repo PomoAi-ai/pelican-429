@@ -12,23 +12,42 @@ import { generateWorld } from './worldgen.ts';
 import type { WorldComposition } from './worldgen-compositions.ts';
 import { enemySpawnFits, populateWildEnemies } from './enemy-spawns.ts';
 import { freeWorldSafeZones } from './free-world-safe-zones.ts';
+import { bodyHitsSolid, flatAt } from './spawn-home.ts';
+import type { Vec2 } from '../core/math.ts';
 
 const FACILITIES: readonly FacilityChapterId[] = ['fortress', 'cathedral', 'abyss'];
 const APPROACH = 32;
 const END_APRON = 16;
 const INDUSTRIAL_WIDTH = FACILITIES.reduce((sum, id) => sum + FACILITY_SCENES[id].width + APPROACH, END_APRON);
 
-/** 原野和共享机房只在这里合并一次，探索期间共用地图、液体与实体状态。 */
-export function generateFreeWorld(seed: number, size: FreeWorldSize): LevelData & { readonly compositions: readonly WorldComposition[] } {
+/** 原野左端入场点：从左往右第一列平整、身体不嵌墙、三列无水且不在浮岛下的地表。 */
+function entrySpawn(wild: LevelData): Vec2 {
+  for (let tx = 2; tx < wild.map.width - 1; tx++) {
+    // surface 取最高碰撞格，浮岛列会落到岛顶，故整列跳过。
+    if (wild.islands.some(island => tx + 1 >= island.x0 && tx - 1 <= island.x1)) continue;
+    const y = wild.surface[tx]!;
+    if (!flatAt(wild.map, tx, y) || bodyHitsSolid(wild.map, tx + .5, y)) continue;
+    if ([tx - 1, tx, tx + 1].some(x => wild.fluid.amountAt(x, y) > 0)) continue;
+    return { x: tx + .5, y };
+  }
+  throw new Error(`generateFreeWorld(seed=${wild.seed}): no dry flat ground for the wilds entry spawn`);
+}
+
+/**
+ * 原野和共享机房只在这里合并一次，探索期间共用地图、液体与实体状态。
+ * entry：wilds 从城区步行进入原野左端，不生成渔屋出生区；hut 为家园模式，家园设施围绕渔屋布局。
+ */
+export function generateFreeWorld(seed: number, size: FreeWorldSize, entry: 'wilds' | 'hut'): LevelData & { readonly compositions: readonly WorldComposition[] } {
   const { width, height } = FREE_WORLD_SIZES[size];
   const wildWidth = width - INDUSTRIAL_WIDTH;
-  const wild = generateWorld(seed, { ...TUNING.worldgen, width: wildWidth, height });
+  const wild = generateWorld(seed, { ...TUNING.worldgen, width: wildWidth, height, ...(entry === 'wilds' ? { hutCount: 0 } : {}) });
+  const spawn = entry === 'wilds' ? entrySpawn(wild) : wild.spawn;
   const ids = new Uint16Array(width * height);
   const shapes = new Uint8Array(width * height);
   const water = new Uint8Array(width * height);
   const mask = new Uint8Array(width * height);
   const facilities: NonNullable<LevelData['facilities']>[number][] = [];
-  const safeZones = freeWorldSafeZones(wild);
+  const safeZones = freeWorldSafeZones({ spawn, structures: wild.structures });
   const enemies = populateWildEnemies({ ...wild, safeZones }, seed);
   let lethalCoolant: LevelData['lethalCoolant'];
   let blackhole: LevelData['blackhole'];
@@ -100,7 +119,7 @@ export function generateFreeWorld(seed: number, size: FreeWorldSize): LevelData 
     }
     return {
       map, fluid, seed, surface: computeSurface(map),
-      spawn: wild.spawn, spawnFacing: wild.spawnFacing, dummies: [],
+      spawn, ...(entry === 'hut' ? { spawnFacing: wild.spawnFacing } : {}), dummies: [],
       trees: wild.trees, lakes: wild.lakes, structures: wild.structures,
       fishSpawns: wild.fishSpawns, deserts: wild.deserts, islands: wild.islands,
       caves: { ...wild.caves, mask, pools: wild.caves.pools.map(pool => ({

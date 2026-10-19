@@ -5,20 +5,24 @@ export interface FreeWorldToolbarOptions {
   seed: number;
   size: FreeWorldSize;
   gm: boolean;
+  /** GM 勾选的提示：原野切换即重新加载，城区只记下设置、进入原野后生效。 */
+  gmHint: 'reload' | 'wilds';
   region: string;
   regions: readonly { id: string; label: string; labelEn: string }[];
   onSeed(seed: number, size: FreeWorldSize): void;
   onGm(on: boolean): void;
   onRegion(id: string): boolean;
-  onSettings(): void;
+  /** null 表示该场景没有设置面板，不显示 GM 设置按钮。 */
+  onSettings: (() => void) | null;
   onFocus(): void;
+  /** 点按钮、改下拉后把焦点还给画布，键盘立即驱动角色。 */
+  onFocusGame(): void;
 }
 
-export function createFreeWorldToolbar(parent: HTMLElement, options: FreeWorldToolbarOptions): { setRegion(id: string): void; dispose(): void } {
+/** 主世界控件片段：插进宿主场景工具条，标题、世界与天气控制由宿主工具条提供。 */
+export function createFreeWorldToolbar(host: HTMLElement, options: FreeWorldToolbarOptions): { setRegion(id: string): void; dispose(): void } {
   const root = document.createElement('form');
   root.className = 'free-world-toolbar';
-  const title = document.createElement('strong');
-  title.className = 'free-world-title';
   const regionLabel = document.createElement('label');
   const regionName = document.createElement('span');
   const region = document.createElement('select');
@@ -83,23 +87,28 @@ export function createFreeWorldToolbar(parent: HTMLElement, options: FreeWorldTo
   const settings = document.createElement('button');
   settings.type = 'button';
   settings.hidden = !gm.checked;
-  settings.addEventListener('click', options.onSettings);
+  if (options.onSettings) settings.addEventListener('click', options.onSettings);
   gm.addEventListener('change', () => {
     settings.hidden = !gm.checked;
     options.onGm(gm.checked);
   });
   const hint = document.createElement('span');
   hint.className = 'free-world-hint';
-  root.append(title, regionLabel, sizeLabel, seedLabel, apply, random, gmLabel, settings, hint);
-  root.addEventListener('focusin', options.onFocus);
+  root.append(regionLabel, sizeLabel, seedLabel, apply, random, gmLabel, ...options.onSettings ? [settings] : [], hint);
+  // 监听挂在整条宿主工具条上，世界与天气控制、场景按钮同样适用。
+  const events = new AbortController();
+  const signal = events.signal;
+  host.addEventListener('focusin', options.onFocus, { signal });
+  // 冒泡到宿主时各控件自己的处理已执行完；种子输入框保留焦点以便继续输入，应用与规模留着以便看到种子的校验提示。
+  host.addEventListener('click', (event) => { if (event.target instanceof Element && event.target.closest('button:not([type=submit]), summary')) options.onFocusGame(); }, { signal });
+  host.addEventListener('change', (event) => { if ((event.target instanceof HTMLSelectElement && event.target !== size) || event.target === gm) options.onFocusGame(); }, { signal });
   // 表单操作保留浏览器默认行为，同时避免触发角色动作和游戏快捷键。
   for (const type of ['keydown', 'keyup', 'pointerdown', 'mousedown', 'wheel']) {
-    root.addEventListener(type, (event) => event.stopPropagation());
+    host.addEventListener(type, (event) => event.stopPropagation(), { signal });
   }
   const syncLanguage = (): void => {
     const en = getLanguage() === 'en';
-    title.textContent = en ? 'Free world' : '自由世界';
-    root.setAttribute('aria-label', en ? 'Free world controls' : '自由世界工具条');
+    root.setAttribute('aria-label', en ? 'Main world controls' : '主世界工具条');
     regionName.textContent = en ? 'Travel' : '快速旅行';
     region.title = en ? 'Walk between regions or travel instantly within this world. Progress is preserved.' : '可步行跨区，或在同一世界快速旅行；不会重置探索进度。';
     options.regions.forEach((entry, index) => { region.options[index]!.textContent = en ? entry.labelEn : entry.label; });
@@ -113,20 +122,21 @@ export function createFreeWorldToolbar(parent: HTMLElement, options: FreeWorldTo
     apply.textContent = en ? 'Apply' : '应用';
     random.textContent = en ? 'Random world' : '随机世界';
     gmName.textContent = en ? 'GM tools' : 'GM 工具';
-    gm.title = en ? 'Changing GM tools reloads the world.' : '切换 GM 工具会重新加载世界。';
+    gm.title = options.gmHint === 'reload'
+      ? en ? 'Changing GM tools reloads the world.' : '切换 GM 工具会重新加载世界。'
+      : en ? 'Takes effect in the wilds' : '进入原野后生效';
     settings.textContent = en ? 'GM settings' : 'GM 设置';
     hint.textContent = en ? 'Same seed + size, same world · Walk or travel without resetting' : '同种子与规模可复现 · 步行跨区 / 快速旅行不重置';
   };
   syncLanguage();
   const unsubscribe = onLanguageChange(syncLanguage);
-  document.body.classList.add('free-world');
-  parent.append(root);
+  host.append(root);
   return {
     setRegion(id): void { selectedRegion = id; region.value = id; },
     dispose(): void {
       unsubscribe();
+      events.abort();
       root.remove();
-      document.body.classList.remove('free-world');
     },
   };
 }

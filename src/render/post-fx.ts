@@ -29,6 +29,7 @@ import { SMAAPass } from 'three/addons/postprocessing/SMAAPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { ANTIALIAS_MODES } from '../config/lighting-rules.ts';
 import type { AntialiasMode, LightingQuality, LightingTuning } from '../config/lighting-rules.ts';
+import type { GpuTimer } from './gpu-timer.ts';
 
 export interface PassPlan {
   readonly ao: boolean;
@@ -220,6 +221,32 @@ export const GRADE_FRAGMENT = /* glsl */ `
     gl_FragColor = vec4( clamp( c, 0.0, 1.0 ), src.a < 0.0 ? 1.0 : src.a );
   }`;
 
+/** 调色 uniform 中 OutputPass 之外的部分及其初值。 */
+export function gradeUniformDefaults(): Omit<GradeUniforms, 'tDiffuse' | 'toneMappingExposure'> {
+  return {
+    tBloom: { value: null },
+    uBloom: { value: 0 },
+    tAO: { value: null },
+    uAoIntensity: { value: 0 },
+    tDepth: { value: null },
+    tNormal: { value: null },
+    uSsr: { value: 0 },
+    uSsrMaxDistance: { value: 1 },
+    uSsrThickness: { value: 1 },
+    uProjection: { value: new THREE.Matrix4() },
+    uInverseProjection: { value: new THREE.Matrix4() },
+    uViewUp: { value: new THREE.Vector3(0, 1, 0) },
+    uTint: { value: new THREE.Color(1, 1, 1) },
+    uContrast: { value: 1 },
+    uSaturation: { value: 1 },
+    uVignette: { value: 0 },
+    uVignetteStart: { value: 0.5 },
+    uAspect: { value: 1 },
+    uGravityLens: { value: new THREE.Vector3() },
+    uHalfTexel: { value: new THREE.Vector2(0.5, 0.5) },
+  };
+}
+
 /** OutputPass（色调映射/色彩空间 defines 与曝光由父类按 renderer 维护）+ bloom 相加 + 调色。 */
 class GradeOutputPass extends OutputPass {
   readonly gradeUniforms: GradeUniforms;
@@ -227,28 +254,7 @@ class GradeOutputPass extends OutputPass {
   constructor() {
     super();
     const u = this.uniforms as Record<string, THREE.IUniform>;
-    const extra = {
-      tBloom: { value: null },
-      uBloom: { value: 0 },
-      tAO: { value: null },
-      uAoIntensity: { value: 0 },
-      tDepth: { value: null },
-      tNormal: { value: null },
-      uSsr: { value: 0 },
-      uSsrMaxDistance: { value: 1 },
-      uSsrThickness: { value: 1 },
-      uProjection: { value: new THREE.Matrix4() },
-      uInverseProjection: { value: new THREE.Matrix4() },
-      uViewUp: { value: new THREE.Vector3(0, 1, 0) },
-      uTint: { value: new THREE.Color(1, 1, 1) },
-      uContrast: { value: 1 },
-      uSaturation: { value: 1 },
-      uVignette: { value: 0 },
-      uVignetteStart: { value: 0.5 },
-      uAspect: { value: 1 },
-      uGravityLens: { value: new THREE.Vector3() },
-      uHalfTexel: { value: new THREE.Vector2(0.5, 0.5) },
-    };
+    const extra = gradeUniformDefaults();
     Object.assign(u, extra);
     if (this.material.uniforms !== u) throw new Error('post-fx: OutputPass material no longer shares its uniforms object (three API changed?)');
     this.material.name = 'PelicanGradeOutput';
@@ -448,12 +454,10 @@ export interface PostFxInput {
   readonly antialias?: AntialiasMode;
 }
 
+/** 舞台使用的后期接口；WebGL 实现见 createPostFx，WebGPU 实现见 app/webgpu-post-fx。 */
 export interface PostFx {
-  readonly composer: EffectComposer;
   /** 当前抗锯齿方式（setAntialias 运行时切换）。 */
   readonly antialias: AntialiasMode;
-  /** 场景渲染目标（HalfFloat + 深度纹理；msaa 模式多重采样，每帧唯一一次 resolve）。 */
-  readonly sceneTarget: THREE.WebGLRenderTarget;
   readonly quality: LightingQuality;
   /** 调色 uniform（022 降水：天气改饱和度/色温；调用方负责记住并恢复基础值）。 */
   readonly grade: GradeUniforms;
@@ -468,13 +472,55 @@ export interface PostFx {
   setSize(width: number, height: number, pixelRatio: number): void;
   /** 世界空间引力透镜；整幅场景一起折射，包含角色与场景遮挡。 */
   setGravityLens(lens: { readonly center: THREE.Vector3; readonly radius: number } | null): void;
+  /** 各 pass 开始时打 GPU 计时段（段名同 enabledPasses）；null 停止。 */
+  setGpuTimer(timer: GpuTimer | null): void;
   render(deltaTime?: number): void;
+  /** 按场景灯光异步编译 root 的材质，绑定场景实际渲染进的目标（程序键才与真实渲染一致）。 */
+  compile(root: THREE.Object3D): Promise<unknown>;
   /** 已完成色调映射与 sRGB 编码的最终画面，合成时直接复制像素。 */
   renderTexture(): THREE.Texture;
   dispose(): void;
 }
 
-export function createPostFx(input: PostFxInput): PostFx {
+export interface WebGLPostFx extends PostFx {
+  readonly composer: EffectComposer;
+  /** 场景渲染目标（HalfFloat + 深度纹理；msaa 模式多重采样，每帧唯一一次 resolve）。 */
+  readonly sceneTarget: THREE.WebGLRenderTarget;
+}
+
+export type GravityLens = Parameters<PostFx['setGravityLens']>[0];
+
+/** 反射开启时写视空间世界上方向（两种后端共用）。 */
+export function updateViewUpUniform(gu: GradeUniforms, camera: THREE.PerspectiveCamera): void {
+  if (gu.uSsr.value <= 0) return;
+  camera.updateWorldMatrix(true, false);
+  gu.uViewUp.value.set(0, 1, 0).transformDirection(camera.matrixWorldInverse);
+}
+
+const lensCenter = new THREE.Vector3();
+const lensEdge = new THREE.Vector3();
+/** 世界空间引力透镜 → uGravityLens（xy = 屏幕 uv，y 向上；不在视锥内或完全出屏时 z = 0）；两种后端共用。 */
+export function updateGravityLensUniform(gu: GradeUniforms, camera: THREE.PerspectiveCamera, gravityLens: GravityLens): void {
+  gu.uGravityLens.value.z = 0;
+  if (!gravityLens) return;
+  // 后期早于 RenderPass 执行投影，因此必须先同步本帧相机的位置与朝向。
+  camera.updateWorldMatrix(true, false);
+  lensCenter.copy(gravityLens.center).applyMatrix4(camera.matrixWorldInverse);
+  if (lensCenter.z >= -camera.near || lensCenter.z <= -camera.far) return;
+  lensEdge.copy(lensCenter);
+  lensEdge.y += gravityLens.radius;
+  lensCenter.applyMatrix4(camera.projectionMatrix);
+  lensEdge.applyMatrix4(camera.projectionMatrix);
+  const radius = Math.abs(lensEdge.y - lensCenter.y) * 0.5;
+  const x = lensCenter.x * 0.5 + 0.5;
+  const y = lensCenter.y * 0.5 + 0.5;
+  const dx = Math.max(-x, 0, x - 1) * gu.uAspect.value;
+  const dy = Math.max(-y, 0, y - 1);
+  if (Math.hypot(dx, dy) >= radius) return;
+  gu.uGravityLens.value.set(x, y, radius);
+}
+
+export function createPostFx(input: PostFxInput): WebGLPostFx {
   const { renderer, scene, camera, lighting } = input;
   if (!renderer || !scene || !camera || !lighting) throw new Error('post-fx: renderer, scene, camera and lighting are required');
   let quality = input.quality;
@@ -537,42 +583,28 @@ export function createPostFx(input: PostFxInput): PostFx {
   gu.uProjection.value = camera.projectionMatrix;
   gu.uInverseProjection.value = camera.projectionMatrixInverse;
   let reflections = true;
-  const updateViewUp = (): void => {
-    if (gu.uSsr.value <= 0) return;
-    camera.updateWorldMatrix(true, false);
-    gu.uViewUp.value.set(0, 1, 0).transformDirection(camera.matrixWorldInverse);
-  };
+  const updateViewUp = (): void => updateViewUpUniform(gu, camera);
 
-  let gravityLens: Parameters<PostFx['setGravityLens']>[0] = null;
-  const lensCenter = new THREE.Vector3();
-  const lensEdge = new THREE.Vector3();
-  const updateGravityLens = (): void => {
-    gu.uGravityLens.value.z = 0;
-    if (!gravityLens) return;
-    // 后期早于 RenderPass 执行投影，因此必须先同步本帧相机的位置与朝向。
-    camera.updateWorldMatrix(true, false);
-    lensCenter.copy(gravityLens.center).applyMatrix4(camera.matrixWorldInverse);
-    if (lensCenter.z >= -camera.near || lensCenter.z <= -camera.far) return;
-    lensEdge.copy(lensCenter);
-    lensEdge.y += gravityLens.radius;
-    lensCenter.applyMatrix4(camera.projectionMatrix);
-    lensEdge.applyMatrix4(camera.projectionMatrix);
-    const radius = Math.abs(lensEdge.y - lensCenter.y) * 0.5;
-    const x = lensCenter.x * 0.5 + 0.5;
-    const y = lensCenter.y * 0.5 + 0.5;
-    const dx = Math.max(-x, 0, x - 1) * gu.uAspect.value;
-    const dy = Math.max(-y, 0, y - 1);
-    if (Math.hypot(dx, dy) >= radius) return;
-    gu.uGravityLens.value.set(x, y, radius);
-  };
+  let gravityLens: GravityLens = null;
+  const updateGravityLens = (): void => updateGravityLensUniform(gu, camera, gravityLens);
 
+  let gpuTimer: GpuTimer | null = null;
+  // 改写实例方法（同 ScaledBloomPass 的 quad.render）：composer 只调用 enabled 的 pass，计时段与实际执行一致。
+  const timed = <P extends Pass>(name: string, pass: P): P => {
+    const render = pass.render.bind(pass);
+    pass.render = (...args) => {
+      gpuTimer?.mark(name);
+      render(...args);
+    };
+    return pass;
+  };
   const named: Array<readonly [string, Pass]> = [
-    ['render', renderPass],
-    ['ao', ao],
-    ['bloom', bloom],
-    ['grade', grade],
+    ['render', timed('render', renderPass)],
+    ['ao', timed('ao', ao)],
+    ['bloom', timed('bloom', bloom)],
+    ['grade', timed('grade', grade)],
   ];
-  let smaa: SMAAPass | null = smaaMode ? createSmaaPass() : null;
+  let smaa: SMAAPass | null = smaaMode ? timed('smaa', createSmaaPass()) : null;
   if (smaa) named.push(['smaa', smaa]);
   for (const [, p] of named) composer.addPass(p);
 
@@ -620,7 +652,7 @@ export function createPostFx(input: PostFxInput): PostFx {
       sceneTarget.samples = toSmaa ? 0 : lighting.msaa;
       sceneTarget.dispose(); // 释放 GPU 帧缓冲；下次 setRenderTarget 按新采样数重建（对象/深度纹理引用不变）
       if (toSmaa) {
-        smaa = createSmaaPass();
+        smaa = timed('smaa', createSmaaPass());
         composer.addPass(smaa); // addPass 按 composer 当前尺寸 × 像素比 setSize
         named.push(['smaa', smaa]);
       } else if (smaa) {
@@ -648,12 +680,22 @@ export function createPostFx(input: PostFxInput): PostFx {
     setGravityLens(lens) {
       gravityLens = lens;
     },
+    setGpuTimer(timer) {
+      gpuTimer = timer;
+    },
     render(deltaTime) {
       if (disposed) throw new Error('post-fx: render after dispose');
       updateGravityLens();
       updateViewUp();
       composer.renderToScreen = true;
       composer.render(deltaTime);
+    },
+    compile(root) {
+      const target = renderer.getRenderTarget();
+      renderer.setRenderTarget(sceneTarget);
+      const ready = renderer.compileAsync(root, camera, scene);
+      renderer.setRenderTarget(target);
+      return ready;
     },
     renderTexture() {
       updateGravityLens();

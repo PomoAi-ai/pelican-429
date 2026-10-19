@@ -3,14 +3,17 @@ import { test } from 'node:test';
 import { loadGameLevel } from '../src/app/game-level.ts';
 import { FACILITY_CHAPTERS, parseFacilityChapter } from '../src/config/facility-scenes.ts';
 import type { FacilityChapterId } from '../src/config/facility-scenes.ts';
+import type { PlayerForm } from '../src/config/player-form.ts';
 import { FORTRESS_CHASM, FORTRESS_COOLANT } from '../src/config/facility-structure.ts';
-import { beginBlackholeArrival, createSimWorld, getPlayer, NEUTRAL_INPUT, stepSim } from '../src/sim/sim-world.ts';
+import { LANDING_POD, landingPodPlan } from '../src/config/transit.ts';
+import { beginBlackholeArrival, beginPodLanding, beginPodTakeoff, createSimWorld, getPlayer, NEUTRAL_INPUT, stepSim } from '../src/sim/sim-world.ts';
+import { canBoardPod, parkedPod, podTakeoffPhase } from '../src/sim/pod-landing.ts';
 import { createFacilityLevel } from '../src/world/facility-level.ts';
 
-function chapter(id: FacilityChapterId, withEnemies = false) {
+function chapter(id: FacilityChapterId, withEnemies = false, playerForm?: PlayerForm) {
   const loaded = loadGameLevel(new URLSearchParams({ level: 'facility', scene: id }));
   const level = withEnemies ? loaded.level : { ...loaded.level, enemies: [] };
-  const world = createSimWorld({ level, windMode: 'calm', precipMode: 'manual', precipState: { rain: 'none', snow: 'none' } });
+  const world = createSimWorld({ level, playerForm, windMode: 'calm', precipMode: 'manual', precipState: { rain: 'none', snow: 'none' } });
   return { world, player: getPlayer(world), dispose: () => loaded.level.fluid.dispose() };
 }
 
@@ -39,6 +42,124 @@ test('黑洞开场完整悬停一秒且丢弃动作，随后无输入也会自�
     assert.equal(player.body.onGround, true);
     assert.ok(player.body.y < y - 4);
     assert.equal(player.health!.hp, player.health!.maxHp);
+  } finally { dispose(); }
+});
+
+for (const id of ['fortress', 'cathedral', 'abyss'] as const) test(`${id} 着陆舱开场锁定输入且不受敌人伤害，走出舱门后在出生点交还控制`, () => {
+  // 与游戏一致：带敌人、人形出生。
+  const { world, player, dispose } = chapter(id, true, 'human');
+  const spawn = FACILITY_CHAPTERS[id].spawn;
+  try {
+    beginPodLanding(world, landingPodPlan(spawn, LANDING_POD.altitude[id], false));
+    const landing = world.podLanding!;
+    const input = { ...NEUTRAL_INPUT, moveX: 1 as const, jumpHeld: true, jumpPressed: true,
+      attackPressed: true, shootPressed: true, transformPressed: true, skillPressed: 4 as const };
+    let y = player.body.y;
+    assert.ok(y > spawn.y);
+    for (let tick = 0; tick < landing.descentTicks + landing.settleTicks + landing.doorTicks; tick++) {
+      stepSim(world, input);
+      assert.equal(player.body.x, landing.x);
+      assert.ok(player.body.y <= y);
+      y = player.body.y;
+    }
+    assert.equal(player.body.y, spawn.y);
+    assert.equal(player.attack, undefined);
+    assert.equal(world.entities.some(entity => entity.projectile), false);
+    assert.equal(player.pelican!.transformTicks, -1);
+    assert.equal(world.photon.chargeTicks, 0);
+    const walk = { ...NEUTRAL_INPUT, moveX: 1 as const };
+    for (let tick = 0; world.podLanding !== null; tick++) {
+      assert.ok(tick < 300, '应在 300 tick 内走出着陆舱');
+      stepSim(world, walk);
+    }
+    assert.equal(player.health!.hp, player.health!.maxHp);
+    assert.ok(player.body.x <= spawn.x && player.body.x >= spawn.x - .3, `交还控制时 x=${player.body.x}`);
+    assert.equal(player.body.y, spawn.y);
+    assert.equal(player.body.onGround, true);
+    const handback = player.body.x;
+    for (let tick = 0; tick < 40; tick++) stepSim(world, walk);
+    assert.ok(player.body.x > handback);
+  } finally { dispose(); }
+});
+
+for (const id of ['fortress', 'cathedral', 'abyss'] as const) test(`${id} 停在出生点旁的着陆舱可登舱起飞，期间锁定输入且不受敌人伤害`, () => {
+  const { world, player, dispose } = chapter(id, true, 'human');
+  const pod = parkedPod(landingPodPlan(FACILITY_CHAPTERS[id].spawn, LANDING_POD.altitude[id], false), world.tuning.sim.step);
+  try {
+    for (let tick = 0; tick < 30; tick++) stepSim(world, NEUTRAL_INPUT);
+    assert.equal(canBoardPod(pod, player.body), true);
+    const x = player.body.x;
+    player.body.x = pod.x + 20;
+    assert.equal(canBoardPod(pod, player.body), false);
+    player.body.x = x;
+    beginPodTakeoff(world, pod);
+    const input = { ...NEUTRAL_INPUT, moveX: -1 as const, jumpHeld: true, jumpPressed: true,
+      attackPressed: true, shootPressed: true, transformPressed: true, skillPressed: 4 as const };
+    for (let tick = 0; podTakeoffPhase(pod, player.body) === 'walk'; tick++) {
+      assert.ok(tick < 300, '应在 300 tick 内走进着陆舱');
+      stepSim(world, input);
+    }
+    assert.ok(player.body.x >= pod.x);
+    let y = player.body.y;
+    while (podTakeoffPhase(pod, player.body) === 'carry') {
+      stepSim(world, input);
+      assert.ok(player.body.y >= y);
+      y = player.body.y;
+    }
+    assert.equal(player.body.y, pod.ground + pod.altitude);
+    assert.equal(player.health!.hp, player.health!.maxHp);
+    assert.equal(player.attack, undefined);
+    assert.equal(world.entities.some(entity => entity.projectile), false);
+    const parked = [player.body.x, player.body.y];
+    for (let tick = 0; tick < 10; tick++) stepSim(world, input);
+    assert.deepEqual([player.body.x, player.body.y], parked);
+  } finally { dispose(); }
+});
+
+for (const id of ['fortress', 'cathedral', 'abyss'] as const) test(`${id} 站在舱体右侧两格内确认登舱，先自动走到出口再进舱起飞`, () => {
+  const { world, player, dispose } = chapter(id, true, 'human');
+  const pod = parkedPod(landingPodPlan(FACILITY_CHAPTERS[id].spawn, LANDING_POD.altitude[id], false), world.tuning.sim.step);
+  const right = pod.x + Math.max(...LANDING_POD.skirt.map(([radius]) => radius)) + 2;
+  try {
+    for (let tick = 0; tick < 30; tick++) stepSim(world, NEUTRAL_INPUT);
+    player.body.x = right + .3;
+    assert.equal(canBoardPod(pod, player.body), false);
+    // 堡垒舱右侧 x=54 起是深渊，可站的地面在那里截止。
+    player.body.x = Math.min(right, id === 'fortress' ? FORTRESS_CHASM.left : right) - .1;
+    stepSim(world, NEUTRAL_INPUT);
+    assert.equal(canBoardPod(pod, player.body), true, `x=${player.body.x} y=${player.body.y}`);
+    beginPodTakeoff(world, pod);
+    const input = { ...NEUTRAL_INPUT, moveX: 1 as const, jumpHeld: true, jumpPressed: true,
+      attackPressed: true, shootPressed: true, transformPressed: true, skillPressed: 4 as const };
+    let minX = player.body.x;
+    for (let tick = 0; podTakeoffPhase(pod, player.body) !== 'gone'; tick++) {
+      assert.ok(tick < 2000, `应完成起飞，x=${player.body.x} 出口=${pod.exitX}`);
+      stepSim(world, input);
+      minX = Math.min(minX, player.body.x);
+    }
+    assert.ok(minX <= pod.exitX, `应先走到出口，最左 x=${minX} 出口=${pod.exitX}`);
+    assert.equal(player.body.y, pod.ground + pod.altitude);
+    assert.equal(player.health!.hp, player.health!.maxHp);
+    assert.equal(player.attack, undefined);
+    assert.equal(world.entities.some(entity => entity.projectile), false);
+  } finally { dispose(); }
+});
+
+for (const [id, state] of [['fortress', '变身'], ['cathedral', '受击硬直']] as const) test(`${id} ${state}中确认登舱仍会走进着陆舱并起飞`, () => {
+  const { world, player, dispose } = chapter(id, true, 'human');
+  const pod = parkedPod(landingPodPlan(FACILITY_CHAPTERS[id].spawn, LANDING_POD.altitude[id], false), world.tuning.sim.step);
+  try {
+    for (let tick = 0; tick < 30; tick++) stepSim(world, NEUTRAL_INPUT);
+    if (state === '变身') {
+      stepSim(world, { ...NEUTRAL_INPUT, transformPressed: true });
+      assert.ok(player.pelican!.transformTicks >= 0);
+    } else player.health!.hitstunTicks = 5;
+    beginPodTakeoff(world, pod);
+    for (let tick = 0; podTakeoffPhase(pod, player.body) !== 'gone'; tick++) {
+      assert.ok(tick < 2000, `应完成起飞，x=${player.body.x} 舱轴=${pod.x}`);
+      stepSim(world, NEUTRAL_INPUT);
+    }
+    assert.equal(player.body.y, pod.ground + pod.altitude);
   } finally { dispose(); }
 });
 

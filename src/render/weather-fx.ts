@@ -14,6 +14,7 @@ import type { Rect } from '../core/math.ts';
 import { mulberry32 } from '../core/rng.ts';
 import type { Rng } from '../core/rng.ts';
 import type { WindController } from '../world/wind.ts';
+import { glslFloat as f } from './wind.ts';
 
 export interface WeatherFxOptions {
   readonly scene: THREE.Object3D;
@@ -55,6 +56,8 @@ export interface WeatherFx {
 /** 风线：存活时间、描画进度总长（头部走过 [0, 1 + 尾长]）、尾长、速度。 */
 const LINE_LIFE = { min: 0.9, max: 1.5 };
 const LINE_TAIL = 0.55;
+/** 风线着色器：沿弧描画的渐显尾长（tail）、渐显宽度（rise）、头部渐隐宽度（head），WebGPU 节点版本同表。 */
+export const LINE_SHADER = { tail: LINE_TAIL, rise: 0.25, head: 0.06 } as const;
 const LINE_SEGMENTS = 20;
 const LINE_Z = { min: 0.7, max: 2.6 };
 /** 飘叶：生成位置在视野外的余量、回收边距、风速增益、下落/寿命。 */
@@ -104,7 +107,7 @@ attribute vec2 aLine;
 varying float vAlpha;
 void main() {
   float head = aLine.x;
-  float a = smoothstep( head - ${LINE_TAIL.toFixed(2)}, head - ${(LINE_TAIL - 0.25).toFixed(2)}, aU ) * ( 1.0 - smoothstep( head - 0.06, head, aU ) );
+  float a = smoothstep( head - ${LINE_SHADER.tail.toFixed(2)}, head - ${(LINE_SHADER.tail - LINE_SHADER.rise).toFixed(2)}, aU ) * ( 1.0 - smoothstep( head - ${LINE_SHADER.head.toFixed(2)}, head, aU ) );
   vAlpha = a * aLine.y;
   gl_Position = projectionMatrix * viewMatrix * modelMatrix * instanceMatrix * vec4( position, 1.0 );
 }
@@ -139,7 +142,22 @@ void main() {
   gl_Position = projectionMatrix * viewMatrix * modelMatrix * instanceMatrix * vec4( position, 1.0 );
 }
 `;
-/** 团块云：5 个按种子摆放的圆（平滑并集）+ 平底；顶亮底暗，远处偏向天色。aCloud = (种子, 远近 0..1)。 */
+/** 团块云：5 个按种子摆放的圆（平滑并集）+ 平底；顶亮底暗，远处偏向天色。aCloud = (种子, 远近 0..1)。WebGPU 节点版本同表。 */
+export const CLOUD_SHADER = {
+  hash: { n: 91.345, seed: 47.13, scale: 43758.5453 },
+  lobes: 5,
+  lobeX: { start: -0.62, step: 0.31, jitter: 0.16 },
+  radius: { base: 0.2, rand: 0.2, seed: 7, taper: 0.6 },
+  lobeY: { base: 0.22, rise: 0.55 },
+  aspect: CLOUD_ASPECT,
+  floor: { y: 0.16, slope: 0.6 },
+  edge: 0.025,
+  cut: 0.001,
+  shade: { lo: 0.16, hi: 0.75 },
+  skyMix: 0.4,
+  farFade: 0.35,
+} as const;
+const C = CLOUD_SHADER;
 const CLOUD_FRAGMENT = /* glsl */ `
 uniform vec3 uTop;
 uniform vec3 uBottom;
@@ -147,25 +165,25 @@ uniform vec3 uSky;
 uniform float uOpacity;
 varying vec2 vUv;
 varying vec2 vCloud;
-float h1( float n ) { return fract( sin( n * 91.345 + vCloud.x * 47.13 ) * 43758.5453 ); }
+float h1( float n ) { return fract( sin( n * ${f(C.hash.n)} + vCloud.x * ${f(C.hash.seed)} ) * ${f(C.hash.scale)} ); }
 void main() {
   vec2 p = vec2( ( vUv.x - 0.5 ) * 2.0, vUv.y );
   float field = -1.0;
-  for ( int i = 0; i < 5; i++ ) {
+  for ( int i = 0; i < ${C.lobes}; i++ ) {
     float fi = float( i );
-    float cx = -0.62 + 0.31 * fi + ( h1( fi ) - 0.5 ) * 0.16;
-    float r = 0.2 + 0.2 * h1( fi + 7.0 ) * ( 1.0 - abs( cx ) * 0.6 );
-    float cy = 0.22 + r * 0.55;
-    vec2 d = ( p - vec2( cx, cy ) ) * vec2( ${CLOUD_ASPECT.toFixed(2)} * 2.0, 1.0 );
+    float cx = ${f(C.lobeX.start)} + ${f(C.lobeX.step)} * fi + ( h1( fi ) - 0.5 ) * ${f(C.lobeX.jitter)};
+    float r = ${f(C.radius.base)} + ${f(C.radius.rand)} * h1( fi + ${f(C.radius.seed)} ) * ( 1.0 - abs( cx ) * ${f(C.radius.taper)} );
+    float cy = ${f(C.lobeY.base)} + r * ${f(C.lobeY.rise)};
+    vec2 d = ( p - vec2( cx, cy ) ) * vec2( ${C.aspect.toFixed(2)} * 2.0, 1.0 );
     field = max( field, r - length( d ) );
   }
-  field = min( field, ( vUv.y - 0.16 ) * 0.6 );
-  float alpha = smoothstep( 0.0, 0.025, field );
-  if ( alpha <= 0.001 ) discard;
-  float shade = smoothstep( 0.16, 0.75, vUv.y );
+  field = min( field, ( vUv.y - ${f(C.floor.y)} ) * ${f(C.floor.slope)} );
+  float alpha = smoothstep( 0.0, ${f(C.edge)}, field );
+  if ( alpha <= ${f(C.cut)} ) discard;
+  float shade = smoothstep( ${f(C.shade.lo)}, ${f(C.shade.hi)}, vUv.y );
   vec3 col = mix( uBottom, uTop, shade );
-  col = mix( col, uSky, 0.4 * vCloud.y );
-  gl_FragColor = vec4( col, alpha * uOpacity * ( 1.0 - 0.35 * vCloud.y ) );
+  col = mix( col, uSky, ${f(C.skyMix)} * vCloud.y );
+  gl_FragColor = vec4( col, alpha * uOpacity * ( 1.0 - ${f(C.farFade)} * vCloud.y ) );
 }
 `;
 

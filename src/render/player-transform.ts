@@ -1,5 +1,7 @@
 import * as THREE from 'three';
 import type { PlayerForm } from '../config/player-form.ts';
+import { addNodePatch, removeNodePatch } from './node-patches.ts';
+import type { NodePatch } from './node-patches.ts';
 
 const ease = THREE.MathUtils.smoothstep;
 const HEAD_HANDOFF = 0.526;
@@ -68,7 +70,9 @@ function createSurfaceHandoff(human: THREE.Object3D, bird: THREE.Object3D) {
   const entries: Array<{ mesh: THREE.Mesh; geometry: THREE.BufferGeometry; shadow: boolean; isBird: boolean }> = [];
   const geometries: THREE.BufferGeometry[] = [];
   const attributes = new Map<THREE.BufferGeometry, { stage: ReturnType<THREE.BufferGeometry['getAttribute']>; bill: ReturnType<THREE.BufferGeometry['getAttribute']> }>();
-  const materials = new Map<THREE.Material, { hook: THREE.Material['onBeforeCompile']; key: THREE.Material['customProgramCacheKey'] }>();
+  const materials = new Map<THREE.Material, { hook: THREE.Material['onBeforeCompile']; key: THREE.Material['customProgramCacheKey']; patch: NodePatch }>();
+  const nodePatch = (bird: boolean): NodePatch => ({ kind: 'feather-surface-growth', phase, active, bird });
+  const nodePatches = { human: nodePatch(false), bird: nodePatch(true) };
   for (const [model, isBird] of [[human, false], [bird, true]] as const) model.traverse(node => {
     if (!(node instanceof THREE.Mesh) || Array.isArray(node.material)) return;
     if (!isBird && (!(node.material instanceof THREE.MeshStandardMaterial) || node.material.transparent)) return;
@@ -96,7 +100,8 @@ function createSurfaceHandoff(human: THREE.Object3D, bird: THREE.Object3D) {
     if (materials.has(material)) return;
     const previous = material.onBeforeCompile, previousKey = material.customProgramCacheKey;
     const key = previousKey.call(material);
-    materials.set(material, { hook: previous, key: previousKey });
+    const patch = isBird ? nodePatches.bird : nodePatches.human;
+    materials.set(material, { hook: previous, key: previousKey, patch });
     material.onBeforeCompile = (shader, renderer) => {
       previous.call(material, shader, renderer);
       shader.uniforms.uFeatherPhase = phase; shader.uniforms.uFeatherActive = active;
@@ -110,6 +115,7 @@ function createSurfaceHandoff(human: THREE.Object3D, bird: THREE.Object3D) {
           if (uFeatherActive > 0.5 && ${isBird ? 'uFeatherPhase < vFeatherStage' : 'uFeatherPhase >= vFeatherStage'}) discard;`);
     };
     material.customProgramCacheKey = () => `${key}|feather-surface-growth-${isBird}`;
+    addNodePatch(material, patch);
     material.needsUpdate = true;
   });
   return {
@@ -127,6 +133,7 @@ function createSurfaceHandoff(human: THREE.Object3D, bird: THREE.Object3D) {
       }
       for (const [material, saved] of materials) {
         material.onBeforeCompile = saved.hook; material.customProgramCacheKey = saved.key; material.needsUpdate = true;
+        removeNodePatch(material, saved.patch);
       }
       for (const geometry of geometries) geometry.dispose();
     },

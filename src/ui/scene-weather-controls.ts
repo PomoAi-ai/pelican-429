@@ -1,10 +1,33 @@
 import { SETTING_DEFS, isSettingValue, type SettingDef } from '../config/game-settings.ts';
-import { applySceneWeatherPreset, type SceneWeatherSettings } from '../config/scene-weather.ts';
+import { sceneWeatherPatch, type SceneWeatherPreset, type SceneWeatherSettings } from '../config/scene-weather.ts';
 import { SCENE_WEATHER_LABELS, SCENE_WEATHER_MODES, type SceneWeatherMode } from '../config/weather-rules.ts';
 
 type WeatherKey = keyof SceneWeatherSettings;
 
-export function createSceneWeatherControls(parent: HTMLElement, model: { weather: SceneWeatherMode; weatherConfig: SceneWeatherSettings }) {
+/** 场景世界持有天气；原野改由游戏设置持有，写入经 set 持久化。 */
+export interface SceneWeatherModel<P extends SceneWeatherPreset> {
+  readonly presets: readonly P[];
+  readonly weather: P;
+  readonly weatherConfig: Readonly<SceneWeatherSettings>;
+  set(patch: Partial<SceneWeatherSettings>, weather?: P): void;
+}
+
+/** 自动天气只把雨雪交给降水自动模式，场景天空仍沿用上一个具体预设。 */
+export function sceneWorldWeather(world: { weather: SceneWeatherMode; readonly weatherConfig: SceneWeatherSettings }): SceneWeatherModel<SceneWeatherPreset> {
+  return {
+    presets: ['auto', ...SCENE_WEATHER_MODES],
+    get weather() { return world.weatherConfig.precip === 'auto' ? 'auto' : world.weather; },
+    weatherConfig: world.weatherConfig,
+    set(patch, weather) {
+      Object.assign(world.weatherConfig, patch);
+      if (weather !== undefined && weather !== 'auto') world.weather = weather;
+    },
+  };
+}
+
+const PRESET_LABELS: Readonly<Record<SceneWeatherPreset, string>> = { ...SCENE_WEATHER_LABELS, auto: '自动 · 区域天气' };
+
+export function createSceneWeatherControls<P extends SceneWeatherPreset>(parent: HTMLElement, model: SceneWeatherModel<P>) {
   const root = document.createElement('details');
   root.className = 'scene-weather-controls';
   root.innerHTML = `<summary>天气控制 <span data-weather-summary></span></summary>
@@ -13,6 +36,8 @@ export function createSceneWeatherControls(parent: HTMLElement, model: { weather
       <p class="scene-weather-note">即时生效，可叠加雨雪、风力与龙卷风。切换场景保留当前设置。</p></div>`;
   parent.append(root);
   root.querySelector('button')!.addEventListener('click', () => { root.open = false; });
+  // 设置面板等其他入口也会改天气，展开时重读当前值。
+  root.addEventListener('toggle', () => { if (root.open) refresh(); });
   const tabs = root.querySelector('.scene-weather-tabs')!;
   const panes = root.querySelector('.scene-weather-panes')!;
   const refreshers: Array<() => void> = [];
@@ -32,7 +57,7 @@ export function createSceneWeatherControls(parent: HTMLElement, model: { weather
   const panels: HTMLElement[] = [];
   const set = <K extends WeatherKey>(key: K, value: unknown): void => {
     if (!isSettingValue(key, value)) throw new Error(`无效天气设置：${key}=${String(value)}`);
-    model.weatherConfig[key] = value;
+    model.set({ [key]: value });
     refresh();
   };
   for (const [index, group] of groups.entries()) {
@@ -50,10 +75,10 @@ export function createSceneWeatherControls(parent: HTMLElement, model: { weather
     panel.hidden = index !== 0; tab.setAttribute('aria-selected', String(index === 0));
     if (index === 0) {
       const presets = document.createElement('div'); presets.className = 'scene-weather-presets'; panel.append(presets);
-      for (const mode of SCENE_WEATHER_MODES) {
-        const button = document.createElement('button'); button.type = 'button'; button.textContent = SCENE_WEATHER_LABELS[mode];
+      for (const mode of model.presets) {
+        const button = document.createElement('button'); button.type = 'button'; button.textContent = PRESET_LABELS[mode];
         presets.append(button);
-        button.addEventListener('click', () => { model.weather = mode; applySceneWeatherPreset(model.weatherConfig, mode); refresh(); });
+        button.addEventListener('click', () => { model.set(sceneWeatherPatch(mode), mode); refresh(); });
         refreshers.push(() => button.setAttribute('aria-pressed', String(model.weather === mode)));
       }
       const description = document.createElement('p');

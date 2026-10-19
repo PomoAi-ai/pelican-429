@@ -3,23 +3,40 @@ import { hash01 } from '../core/rng.ts';
 import { FORTRESS_CHASM, FORTRESS_COOLANT } from '../config/facility-structure.ts';
 import { BLOCK_BACK_Z, BLOCK_FRONT_Z } from './tile-geometry.ts';
 import type { FacilityKit } from './facility-kit.ts';
+import { glslFloat as f } from './wind.ts';
+
+/** 冷却液液面：横向波纹 + 一组循环扩散的圆环；WebGPU 节点版本同表。 */
+export const COOLANT_SURFACE_SHADER = {
+  wave: { freq: 4.6, speed: 1.3, wobble: 13 },
+  rings: 8,
+  ring: { speed: 0.19, stagger: 0.27, x0: 0.06, dx: 0.125, y0: 0.45, yFreq: 4, yAmp: 0.2, grow: 1.2, sharp: 24 },
+  deep: [0.04, 0.23, 0.19],
+  shallow: [0.18, 0.47, 0.36],
+  waveMix: 0.32,
+  glint: [0.22, 0.4, 0.31],
+  glintGain: 0.42,
+  alpha: 0.85,
+  rippleAlpha: 0.12,
+} as const;
+const S = COOLANT_SURFACE_SHADER;
+const v3 = (c: readonly number[]): string => c.map(f).join(', ');
 
 const SURFACE_FRAGMENT = `
 uniform float uTime;
 uniform vec2 uSize;
 varying vec2 vUv;
 void main() {
-  float wave = sin(vUv.x * uSize.x * 4.6 + uTime * 1.3 + sin(vUv.y * 13.0)) * 0.5 + 0.5;
+  float wave = sin(vUv.x * uSize.x * ${f(S.wave.freq)} + uTime * ${f(S.wave.speed)} + sin(vUv.y * ${f(S.wave.wobble)})) * 0.5 + 0.5;
   float ripple = 0.0;
-  for (int i = 0; i < 8; i++) {
+  for (int i = 0; i < ${S.rings}; i++) {
     float n = float(i);
-    float phase = fract(uTime * 0.19 + n * 0.27);
-    vec2 p = (vUv - vec2(0.06 + n * 0.125, 0.45 + sin(n * 4.0) * 0.2)) * uSize;
-    ripple += exp(-pow((length(p) - phase * 1.2) * 24.0, 2.0)) * (1.0 - phase);
+    float phase = fract(uTime * ${f(S.ring.speed)} + n * ${f(S.ring.stagger)});
+    vec2 p = (vUv - vec2(${f(S.ring.x0)} + n * ${f(S.ring.dx)}, ${f(S.ring.y0)} + sin(n * ${f(S.ring.yFreq)}) * ${f(S.ring.yAmp)})) * uSize;
+    ripple += exp(-pow((length(p) - phase * ${f(S.ring.grow)}) * ${f(S.ring.sharp)}, 2.0)) * (1.0 - phase);
   }
-  vec3 color = mix(vec3(0.04, 0.23, 0.19), vec3(0.18, 0.47, 0.36), wave * 0.32);
-  color += vec3(0.22, 0.4, 0.31) * ripple * 0.42;
-  gl_FragColor = vec4(color, 0.85 + ripple * 0.12);
+  vec3 color = mix(vec3(${v3(S.deep)}), vec3(${v3(S.shallow)}), wave * ${f(S.waveMix)});
+  color += vec3(${v3(S.glint)}) * ripple * ${f(S.glintGain)};
+  gl_FragColor = vec4(color, ${f(S.alpha)} + ripple * ${f(S.rippleAlpha)});
   #include <tonemapping_fragment>
   #include <colorspace_fragment>
 }`;
@@ -44,6 +61,7 @@ export function createFortressCoolant(k: FacilityKit) {
   root.add(liquid);
   const surfaceGeometry = new THREE.PlaneGeometry(pool.w, depth);
   const surfaceMaterial = new THREE.ShaderMaterial({
+    name: 'facility-coolant-surface',
     uniforms: { uTime: time, uSize: { value: new THREE.Vector2(pool.w, depth) } },
     vertexShader: 'varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
     fragmentShader: SURFACE_FRAGMENT, transparent: true, depthWrite: false, side: THREE.DoubleSide,

@@ -30,6 +30,8 @@ function f(n: number): string {
   const s = String(n);
   return /[.eE]/.test(s) ? s : `${s}.0`;
 }
+/** 其他着色器常量表生成 GLSL 时复用。 */
+export const glslFloat = f;
 
 const TAU_GLSL = f(TAU);
 

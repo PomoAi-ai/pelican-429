@@ -1,7 +1,8 @@
-import { ClampToEdgeWrapping, SRGBColorSpace, type Texture, type WebGLRenderer } from 'three';
+import { ClampToEdgeWrapping, SRGBColorSpace, type Texture } from 'three';
+import type { StageRenderer } from './stage.ts';
 import { acquireKtx2Loader } from './ktx2-loader.ts';
 
-export async function loadInteriorBackgroundTexture(renderer: WebGLRenderer, theme: 'cave' | 'cathedral' | 'abyss'): Promise<Texture> {
+export async function loadInteriorBackgroundTexture(renderer: StageRenderer, theme: 'cave' | 'cathedral' | 'abyss'): Promise<Texture> {
   const session = acquireKtx2Loader(renderer);
   try {
     const texture = await session.loader.loadAsync(`${import.meta.env.BASE_URL}resources/free-world/${theme}.ktx2`);
@@ -14,7 +15,7 @@ export async function loadInteriorBackgroundTexture(renderer: WebGLRenderer, the
   } finally { session.release(); }
 }
 
-export async function loadInteriorBackgroundTextures(renderer: WebGLRenderer) {
+export async function loadInteriorBackgroundTextures(renderer: StageRenderer) {
   const results = await Promise.allSettled(['cave', 'cathedral', 'abyss'].map(theme =>
     loadInteriorBackgroundTexture(renderer, theme as 'cave' | 'cathedral' | 'abyss')));
   const failure = results.find(result => result.status === 'rejected');

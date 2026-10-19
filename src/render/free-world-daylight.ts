@@ -5,11 +5,11 @@ import { createCelestialSky, keyLightDirection } from './celestial-sky.ts';
 import type { FreeWorldBackgroundView } from './free-world-background.ts';
 import type { LightShafts } from './light-shafts.ts';
 import type { PrecipSkyBase } from './precip-sky.ts';
-import type { Stage } from './stage.ts';
+import type { Stage, StageRenderer } from './stage.ts';
 import type { WeatherFx } from './weather-fx.ts';
 
 export interface FreeWorldDaylightOptions {
-  readonly stage: Stage;
+  readonly stage: Stage<StageRenderer>;
   readonly background: FreeWorldBackgroundView;
   readonly shafts: LightShafts;
   readonly clouds: WeatherFx;

@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { injectAfter } from './tile-material.ts';
+import { addNodePatch } from './node-patches.ts';
 
 /** 后墙保持屏幕构图，近距离行走不会把整座大厅的图片放大成色块。 */
 export function createFacilityWallMaterial(background: THREE.Texture): THREE.MeshStandardMaterial {
@@ -31,5 +32,6 @@ export function createFacilityWallMaterial(background: THREE.Texture): THREE.Mes
     `);
   };
   material.customProgramCacheKey = () => 'facility-wall-projected-v2';
+  addNodePatch(material, { kind: 'facility-wall', background });
   return material;
 }

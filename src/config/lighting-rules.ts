@@ -4,6 +4,8 @@
  * 强度类基础值沿用 tuning.render.{exposure,keyLight,hemi,envIntensity}，这里只放新增的光照/后期参数。
  */
 
+import type { ResolutionTuning } from '../core/resolution-governor.ts';
+
 export const LIGHTING_QUALITIES = ['low', 'high'] as const;
 export type LightingQuality = (typeof LIGHTING_QUALITIES)[number];
 
@@ -51,6 +53,8 @@ export interface LightingTuning {
   readonly quality: LightingQuality;
   /** 设备像素比上限（[0.5, 3]）。 */
   readonly maxPixelRatio: number;
+  /** 游戏页按 GPU 帧耗时在 [minPixelRatio, 像素比上限] 间调像素比（基准与不支持 GPU 计时的浏览器不调）。 */
+  readonly dynamicResolution: ResolutionTuning;
   /** 抗锯齿方式（默认 smaa）；URL ?aa=smaa|msaa 覆盖（见 resolveAntialias）。 */
   readonly antialias: AntialiasMode;
   /** antialias = msaa 时后期主渲染目标的 MSAA 采样数（0/2/4/8）。 */
@@ -65,8 +69,8 @@ export interface LightingTuning {
   readonly hemi: { readonly sky: string; readonly ground: string };
   readonly shadow: {
     readonly type: ShadowTypeName;
-    /** 阴影贴图边长（2 的幂，512..4096）。 */
-    readonly mapSize: number;
+    /** 各画质的阴影贴图边长（2 的幂，512..4096）：高画质提高纹素密度让角色接触阴影更清晰，低画质降档省填充与显存。 */
+    readonly mapSize: Readonly<Record<LightingQuality, number>>;
     /** PCF/VSM 模糊半径（纹素）。 */
     readonly radius: number;
     readonly bias: number;
@@ -161,6 +165,8 @@ export interface LightingTuning {
 export const DEFAULT_LIGHTING: LightingTuning = {
   quality: 'high',
   maxPixelRatio: 2,
+  // 预算留出 CPU 与合成的余量；4K 屏 2× 像素比时 GPU 实测 11-26 ms。
+  dynamicResolution: { minPixelRatio: 1, targetGpuMs: 12, step: 0.25, raiseSamples: 4 },
   antialias: 'smaa',
   msaa: 4,
   toneMapping: 'neutral',
@@ -181,7 +187,7 @@ export const DEFAULT_LIGHTING: LightingTuning = {
   hemi: { sky: '#bcd8ff', ground: '#9cae6e' },
   shadow: {
     type: 'pcf',
-    mapSize: 2048,
+    mapSize: { low: 1024, high: 4096 },
     radius: 2,
     bias: -0.0004,
     normalBias: 0.025,
@@ -244,6 +250,11 @@ function direction(path: string, d: Direction3): void {
 export function validateLightingTuning(l: LightingTuning, path: string): void {
   oneOf(`${path}.quality`, l.quality, LIGHTING_QUALITIES);
   num(`${path}.maxPixelRatio`, l.maxPixelRatio, 0.5, 3);
+  const dr = l.dynamicResolution;
+  num(`${path}.dynamicResolution.minPixelRatio`, dr.minPixelRatio, 0.5, 3);
+  num(`${path}.dynamicResolution.targetGpuMs`, dr.targetGpuMs, 1, 100);
+  num(`${path}.dynamicResolution.step`, dr.step, 0.05, 1);
+  int(`${path}.dynamicResolution.raiseSamples`, dr.raiseSamples, 1, 100);
   oneOf(`${path}.antialias`, l.antialias, ANTIALIAS_MODES);
   if (![0, 2, 4, 8].includes(l.msaa)) fail(`${path}.msaa`, 'must be one of 0|2|4|8', l.msaa);
   oneOf(`${path}.toneMapping`, l.toneMapping, TONE_MAPPINGS);
@@ -269,8 +280,11 @@ export function validateLightingTuning(l: LightingTuning, path: string): void {
 
   const s = l.shadow;
   oneOf(`${path}.shadow.type`, s.type, SHADOW_TYPES);
-  if (!(Number.isInteger(s.mapSize) && s.mapSize >= 512 && s.mapSize <= 4096 && (s.mapSize & (s.mapSize - 1)) === 0)) {
-    fail(`${path}.shadow.mapSize`, 'must be a power of two in [512,4096]', s.mapSize);
+  for (const q of LIGHTING_QUALITIES) {
+    const size = s.mapSize[q];
+    if (!(Number.isInteger(size) && size >= 512 && size <= 4096 && (size & (size - 1)) === 0)) {
+      fail(`${path}.shadow.mapSize.${q}`, 'must be a power of two in [512,4096]', size);
+    }
   }
   num(`${path}.shadow.radius`, s.radius, 0, 16);
   num(`${path}.shadow.bias`, s.bias, -0.01, 0.01);

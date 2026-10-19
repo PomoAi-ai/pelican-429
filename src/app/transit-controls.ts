@@ -1,13 +1,13 @@
 import { TRANSIT_DESTINATIONS } from '../config/transit.ts';
 import { NEUTRAL_INPUT } from '../entities/pelican-controller.ts';
 
-export function createTransitInterface(root: HTMLElement) {
-  root.innerHTML = `<section class="transit-app" aria-label="星舰交通中心">
+/** hosted: the station overlays another scene's canvas instead of owning the page. */
+export function createTransitInterface(root: HTMLElement, hosted: boolean) {
+  root.insertAdjacentHTML('beforeend', `<section class="transit-app" aria-label="星舰交通中心">
     <header class="room-preview-toolbar transit-toolbar">
       <a href="./?mode=lab&demo=transit">交通中心</a>
       <button type="button" data-sound aria-pressed="true">♪ 声音 开</button>
       <button type="button" data-overview aria-pressed="false">查看顶部座舱</button>
-      <a href="./?mode=game&level=transit">全屏试玩 ↗</a>
     </header>
     <div class="transit-viewport">
       <div class="transit-canvas"></div>
@@ -28,11 +28,19 @@ export function createTransitInterface(root: HTMLElement) {
       </section>
       <div class="transit-bottom"><p data-hint role="status" aria-live="polite">按住空格飞行 · S 下降 · E 交互</p><button type="button" class="transit-board" data-board>乘电梯 ↑</button></div>
       <div class="transit-touch" aria-label="移动控制"><button type="button" data-move="-1" aria-label="向左移动">←</button><button type="button" data-move="1" aria-label="向右移动">→</button><button type="button" data-flight aria-label="飞行">↑</button><button type="button" data-down aria-label="下降">↓</button></div>
+      <section class="transit-loading" aria-label="目的地加载" hidden>
+        <span class="transit-eyebrow">下一站</span><h2 data-loading-destination></h2>
+        <p data-loading-status role="status" aria-live="polite"></p>
+        <p class="transit-loading-error" data-loading-error role="alert" hidden></p>
+        <button type="button" class="transit-launch" data-loading-retry hidden>重新加载目的地</button>
+      </section>
       <div class="transit-jump" aria-hidden="true"><span>航道开启</span></div>
     </div>
-  </section>`;
-  const element = <T extends HTMLElement>(selector: string) => root.querySelector<T>(selector)!;
-  return { section: element<HTMLElement>('.transit-app'), viewport: element<HTMLElement>('.transit-canvas'),
+  </section>`);
+  const section = root.lastElementChild as HTMLElement;
+  section.classList.toggle('transit-hosted', hosted);
+  const element = <T extends HTMLElement>(selector: string) => section.querySelector<T>(selector)!;
+  return { section, viewport: element<HTMLElement>('.transit-canvas'),
     panel: element<HTMLElement>('.transit-destinations'), entry: element<HTMLElement>('.transit-entry'),
     phase: element<HTMLElement>('[data-phase]'), readout: element<HTMLElement>('[data-readout]'),
     engine: element<HTMLElement>('[data-engine]'), hint: element<HTMLElement>('[data-hint]'),
@@ -40,6 +48,9 @@ export function createTransitInterface(root: HTMLElement) {
     launch: element<HTMLButtonElement>('[data-launch]'), cancel: element<HTMLButtonElement>('[data-cancel]'),
     overview: element<HTMLButtonElement>('[data-overview]'), sound: element<HTMLButtonElement>('[data-sound]'),
     hatch: element<HTMLButtonElement>('[data-hatch]'), enter: element<HTMLButtonElement>('[data-enter]'),
+    loading: element<HTMLElement>('.transit-loading'), loadingDestination: element<HTMLElement>('[data-loading-destination]'),
+    loadingStatus: element<HTMLElement>('[data-loading-status]'), loadingError: element<HTMLElement>('[data-loading-error]'),
+    loadingRetry: element<HTMLButtonElement>('[data-loading-retry]'),
     closeEntry: element<HTMLButtonElement>('[data-close-entry]'), flash: element<HTMLElement>('.transit-jump') };
 }
 

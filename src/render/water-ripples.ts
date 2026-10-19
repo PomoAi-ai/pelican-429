@@ -11,6 +11,7 @@ import type { FluidQuery } from '../world/fluid-map.ts';
 import { createParticlePool } from './particle-pool.ts';
 import { WATER_WAVE_GLSL, waterWaveAt } from './water-shading.ts';
 import { sharedWindUniforms } from './wind.ts';
+import { addNodePatch } from './node-patches.ts';
 
 export const RIPPLE_CAPACITY = 64;
 export const SPLASH_CAPACITY = 120;
@@ -110,6 +111,7 @@ float arc = smoothstep(-0.6, 0.5, sin(angle * 3.0 + 0.7) + 0.45 * sin(angle * 7.
 diffuseColor.a *= vRipFade * edge * mix(0.15, 1.0, arc);`);
   };
   m.customProgramCacheKey = () => `${baseKey}|${RIPPLE_PROGRAM_TAG}`;
+  addNodePatch(m, { kind: 'water-ripples', wind: sharedWindUniforms(), time: timeUniform });
   return m;
 }
 

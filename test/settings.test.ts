@@ -19,6 +19,7 @@ import {
   settingDef,
 } from '../src/config/game-settings.ts';
 import type { GameSettings, SettingKey } from '../src/config/game-settings.ts';
+import { sceneWeatherPatch, wildsWeatherPreset } from '../src/config/scene-weather.ts';
 import { createLocalSettingsStore, createSettingsController, loadSettings } from '../src/ui/settings-model.ts';
 import type { SettingsRuntime, SettingsStore } from '../src/ui/settings-model.ts';
 import { createSettingsPanel } from '../src/ui/settings-panel.ts';
@@ -508,4 +509,15 @@ test('连续天气强度从网址加载、实时应用并保存，非法强度�
   assert.equal(restored.snowPower, 5);
   assert.equal(restored.tornadoPower, 4);
   assert.equal(restored.tornadoCount, 6);
+});
+
+test('原野天气控制台从游戏设置推出高亮预设，预设写回设置后再读得到同一预设', () => {
+  assert.equal(wildsWeatherPreset({ ...DEFAULTS, precip: 'auto', rain: 'heavy' }), 'auto');
+  assert.equal(wildsWeatherPreset({ ...DEFAULTS, rain: 'heavy' }), 'storm');
+  assert.equal(wildsWeatherPreset({ ...DEFAULTS, rain: 'light' }), 'rain');
+  assert.equal(wildsWeatherPreset({ ...DEFAULTS, snow: 'medium' }), 'snow');
+  assert.equal(wildsWeatherPreset(DEFAULTS), 'clear');
+  for (const preset of ['auto', 'clear', 'rain', 'storm', 'snow'] as const) {
+    assert.equal(wildsWeatherPreset({ ...DEFAULTS, ...sceneWeatherPatch(preset) }), preset);
+  }
 });

@@ -23,7 +23,7 @@ const chapter = (scene: string) => (params: URLSearchParams): boolean =>
 export const SITE_SECTIONS: readonly SiteSection[] = [
   {
     id: 'play', label: ['游玩', 'Play'], clusters: [[
-      { id: 'free-world', label: ['自由世界', 'Free world'], description: ['按种子生成的自然世界，自由探索。', 'A seeded natural world to explore freely.'], href: './?mode=game',
+      { id: 'free-world', label: ['主世界', 'Main world'], description: ['从 AI 城区出发，左有星舰交通中心，向右走进按种子生成的原野。', 'Start in the AI city: the starship transit center on the left, seeded wilds to the right.'], href: './?mode=game',
         match: params => mode(params) === 'game' && (params.get('level') === null || (params.get('level') === 'facility' && params.get('free') === '1')) },
       { id: 'story', label: ['主线', 'Story'], description: ['序章到山体堡垒，含守卫与首领战。', 'From the prelude to the mountain fortress.'], href: './?mode=story', match: params => mode(params) === 'story' },
       { id: 'homestead', label: ['家园', 'Homestead'], description: ['家园概念版：人形探索、机器人生产、电力与算力。', 'Homestead concept: exploration, robots, power and compute.'], href: './?mode=homestead', match: params => mode(params) === 'homestead' && params.get('scene') !== 'residence' },

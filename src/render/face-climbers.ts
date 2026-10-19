@@ -17,7 +17,7 @@ import { createLeafMaterial } from './tree-material.ts';
 import type { LeafCluster, Vec3 } from './tree-skeleton.ts';
 import { LEAF_TILE_UV } from './tree-textures.ts';
 import type { LeafTile } from './tree-textures.ts';
-import { addVariantCollapse, mergeIndexedVariants, variantInstanceGeometry } from './variant-atlas.ts';
+import { addVariantCollapse, createVariantBatch, mergeIndexedVariants } from './variant-atlas.ts';
 
 export const CLIMBER_Z = BLOCK_FRONT_Z;
 /** 地表攀附从草皮下缘起长：草边垂草带（grassSide）约在顶线下 .3–.56。 */
@@ -365,11 +365,11 @@ const _s = new THREE.Vector3();
 const _c = new THREE.Color();
 const Z_AXIS = new THREE.Vector3(0, 0, 1);
 
-/** 攀附网格；空计划返回 null。几何为图集的私有拷贝，调用方随网格释放。 */
-export function createClimberMesh(set: ClimberSet, plan: readonly ClimberInstance[], atlas: THREE.BufferGeometry, material: THREE.Material, name: string): THREE.InstancedMesh | null {
+/** 攀附网格；空计划返回 null。批次网格持有自己的几何与实例纹理，调用方 dispose 网格。 */
+export function createClimberMesh(set: ClimberSet, plan: readonly ClimberInstance[], atlas: THREE.BufferGeometry, material: THREE.Material, name: string): THREE.BatchedMesh | null {
   if (plan.length === 0) return null;
   const ids: readonly ClimberVariant[] = CLIMBER_SETS[set];
-  const mesh = new THREE.InstancedMesh(variantInstanceGeometry(atlas, plan.map((c) => ids.indexOf(c.variant))), material, plan.length);
+  const mesh = createVariantBatch(atlas, plan.map((c) => ids.indexOf(c.variant)), material);
   mesh.name = name;
   // z 不缩放：叶卡前后层次固定，缩小的实例也不会压到正面里。
   plan.forEach((c, i) => {

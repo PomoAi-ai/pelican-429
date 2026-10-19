@@ -1,6 +1,6 @@
 # PLAN -- 住宅2完整湖岸构图修正
 
-## Status: implementing
+## Status: completed
 ## Task: 517
 ## Related: 514
 ## Baseline Commit: c292d188
@@ -16,7 +16,10 @@
 - 视觉问题不新增几何常量/源码字符串测试。按正常横屏和当前窗口验收。
 
 ## Validation
-- npm run typecheck: pending
-- npm test: pending
-- npm run build: pending
-- 浏览器正常游玩、移动、昼夜、雨天、横屏及当前窗口: pending
+- npm run typecheck: passed
+- npm test: passed — 2004 tests, 0 failures
+- npm run build: passed，仍有超过 500 kB 的分块警告。
+- 浏览器：1600×900 与 1000×800；行走、跳跃、昼夜、雨天及斜视已目视检查。修正岸线高度、塔顶裁切和列车落点；截图存于 evidence/。
+- 子代理内存对照：756 组堡垒层摆放与旧公式等价，局部远城比例及父级坐标转换通过；独立复核未发现阻断问题。
+- 当前浏览器显示约 5–6 FPS，交互偶有超时；本次未进行性能归因或优化，不能据此宣称性能达标。
+- git diff --check（本次涉及文件）通过；未新增渲染自动测试，未提交或推送。

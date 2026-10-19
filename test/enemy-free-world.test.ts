@@ -23,7 +23,7 @@ function arena(kind: EnemyKind) {
   return { terrain, groundY, enemy, step };
 }
 
-test('自由世界哨蜂无法贴住全速逃跑的玩家，甩开后不会立即重新锁定', () => {
+test('主世界哨蜂无法贴住全速逃跑的玩家，甩开后不会立即重新锁定', () => {
   const a = arena('watchWasp');
   try {
     a.enemy.enemy!.cooldownTicks = 10000;
@@ -42,7 +42,7 @@ test('自由世界哨蜂无法贴住全速逃跑的玩家，甩开后不会立�
   } finally { a.terrain.fluid.dispose(); }
 });
 
-test('自由世界哨蜂持续丢失视线会放弃，正在出招也不能延长追击', () => {
+test('主世界哨蜂持续丢失视线会放弃，正在出招也不能延长追击', () => {
   for (const blocked of [false, true]) {
     const a = arena('watchWasp');
     try {

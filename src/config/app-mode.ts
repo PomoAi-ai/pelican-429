@@ -10,3 +10,21 @@ export function parseAppMode(params: URLSearchParams, release: boolean): 'index'
   }
   return mode;
 }
+
+/** 开发版桌面把这些游戏网址（城区、原野、交通中心、机房关卡）交给场景工作区挂载，其余关卡仍走整页游戏。 */
+export function isSceneGameLevel(params: URLSearchParams): boolean {
+  const level = params.get('level');
+  return level === null || level === 'harbor' || level === 'facility' || level === 'transit';
+}
+
+export interface AppHost {
+  readonly release: boolean;
+  /** 页面运行在 iframe 内（如手机横屏宿主）。 */
+  readonly embedded: boolean;
+  readonly coarsePointer: boolean;
+}
+
+/** 游戏网址是否由场景工作区挂载；发布版、手机、内嵌页与渲染基准（整页帧循环驱动）仍是整页游戏。 */
+export function opensSceneGame(params: URLSearchParams, host: AppHost): boolean {
+  return !host.release && !host.embedded && !host.coarsePointer && parseAppMode(params, false) === 'game' && isSceneGameLevel(params) && !params.has('bench');
+}

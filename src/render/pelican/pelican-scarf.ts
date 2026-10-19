@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import type { PelicanAnimInput } from './pelican-animator.ts';
 import type { PelicanPose } from './pelican-pose.ts';
 import { SCARF_PARTS } from './pelican-follow-rig.ts';
+import { addNodePatch } from '../node-patches.ts';
 
 const CLOTH_SHADER = /* glsl */`
 uniform float uScarfPhase;
@@ -56,6 +57,7 @@ export function createPelicanScarf(root: THREE.Object3D) {
             objectNormal.x = (objectNormal.x - dot(scarfSlope.yz, objectNormal.yz)) / (1.0 + scarfSlope.x);`);
       };
       target.customProgramCacheKey = () => `${key}|pelican-scarf`;
+      addNodePatch(target, { kind: 'pelican-scarf', uniforms: { phase, amplitude, lift, flow, ribbon } });
     }
     patch(material, original);
     patch(depth, oldDepth ?? depth);

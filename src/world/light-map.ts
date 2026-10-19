@@ -88,8 +88,8 @@ export interface LightMap {
   readonly reach: number;
   /** 重新读取 (tx,ty) 的瓦片/水/树冠介质；变化则标脏该列。越界抛。 */
   refreshCell(tx: number, ty: number): void;
-  /** 对比水量（行主序 cells）与当前介质，按变化标脏列；返回是否有变化。 */
-  syncWater(cells: Uint8Array): boolean;
+  /** 对比水量（行主序 cells）与当前介质，按变化标脏列；返回介质变化的列范围（无变化为 null）。 */
+  syncWater(cells: Uint8Array): ColumnRange | null;
   /** 处理脏列：重算并返回写回的列范围（无脏列为 null）。 */
   flush(): ColumnRange | null;
   /** 移除一个树冠（按值匹配，找不到抛错）：擦掉它的遮光并标脏受影响的列，下次 flush 生效。 */
@@ -259,7 +259,8 @@ export function createLightMap(input: LightMapInput): LightMap {
     },
     syncWater(cells) {
       if (cells.length !== width * height) throw new Error(`light-map: water length ${cells.length} does not match ${width}×${height}`);
-      let changed = false;
+      let x0 = width;
+      let x1 = -1;
       const thr = config.waterThreshold;
       for (let i = 0; i < cells.length; i++) {
         const m = medium[i] as number;
@@ -267,10 +268,12 @@ export function createLightMap(input: LightMapInput): LightMap {
         const wet = (cells[i] as number) >= thr;
         if (wet === (m === MEDIUM.WATER)) continue;
         medium[i] = wet ? MEDIUM.WATER : foliage[i] === 1 ? MEDIUM.FOLIAGE : MEDIUM.AIR;
-        markDirty(i % width);
-        changed = true;
+        const tx = i % width;
+        markDirty(tx);
+        x0 = Math.min(x0, tx);
+        x1 = Math.max(x1, tx);
       }
-      return changed;
+      return x1 < 0 ? null : { x0, x1 };
     },
     flush() {
       if (dirtyHi < dirtyLo) return null;

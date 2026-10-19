@@ -72,7 +72,7 @@ function aboutPage(en: boolean): string {
         <h1>${t('冒险，从这里上手。', 'Your adventure starts here.')}</h1>
         <p>${t('怎么移动、如何战斗、进度存在哪——出发前需要知道的，都在这里。', 'Movement, combat and saved progress. Everything you need before heading out.')}</p>
         <a class="help-primary" href="./?mode=story">${t('进入主线', 'Enter the story')} <span aria-hidden="true">→</span></a>
-        <a class="help-text-link" href="./?mode=game">${t('去自由世界练习', 'Practice in free world')} <span aria-hidden="true">↗</span></a>
+        <a class="help-text-link" href="./?mode=game">${t('去主世界练习', 'Practice in the main world')} <span aria-hidden="true">↗</span></a>
       </div>
       <figure><img src="./resources/home/fortress-overview.webp" alt="${t('山体堡垒与海边都市的游戏实景', 'In-game view of the mountain fortress and coastal city')}" /><figcaption>01 / ${t('山体堡垒 · 开发中试玩', 'MOUNTAIN FORTRESS · IN DEVELOPMENT')}</figcaption></figure>
     </header>
@@ -89,7 +89,7 @@ function aboutPage(en: boolean): string {
           <p class="home-eyebrow">01 / GET STARTED</p><h2>${t('选一条出发的路', 'Choose where to begin')}</h2>
           <div class="help-start-grid">
             <a href="./?mode=story"><span class="help-tag">${t('首次游玩', 'FIRST TIME')}</span><h3>${t('跟随主线', 'Follow the story')} <span aria-hidden="true">↗</span></h3><p>${t('从序章进入山体堡垒，跟随剧情熟悉探索与战斗。已有存档会继续进度。', 'Begin with the prelude and explore the fortress. An existing save resumes your progress.')}</p></a>
-            <a href="./?mode=game"><span class="help-tag">${t('自由练习', 'EXPLORE')}</span><h3>${t('自由世界', 'Free world')} <span aria-hidden="true">↗</span></h3><p>${t('试试移动、飞行、变身和技能，按自己的节奏探索。', 'Try movement, flight, transformations and skills at your own pace.')}</p></a>
+            <a href="./?mode=game"><span class="help-tag">${t('自由练习', 'EXPLORE')}</span><h3>${t('主世界', 'Main world')} <span aria-hidden="true">↗</span></h3><p>${t('试试移动、飞行、变身和技能，按自己的节奏探索。', 'Try movement, flight, transformations and skills at your own pace.')}</p></a>
             <a href="./?mode=intro&amp;opening=finale"><span class="help-tag">${t('了解故事', 'THE PRELUDE')}</span><h3>${t('观看序章', 'Watch the prelude')} <span aria-hidden="true">↗</span></h3><p>${t('一场 AGI 降智风暴，一个被 429 截断的未来。看看一切如何开始。', 'An AGI storm. A future interrupted by 429. See how it all began.')}</p></a>
           </div>
         </section>

@@ -24,3 +24,17 @@
   .facility-chapter-controls { gap: 3px 8px; }
   .facility-chapter-exit { max-width: 180px; font-size: 10px; }
 }
+.pod-return-target { position: fixed; z-index: 12; display: inline-flex; align-items: center; gap: 8px; transform: translate(-50%, -100%); min-height: 32px; padding: 5px 12px; border: 1px solid #8de5d388; border-radius: 6px; background: #0c1c23eb; color: #d9f4ea; font: 600 12px/1.4 system-ui, sans-serif; white-space: nowrap; cursor: pointer; box-shadow: 0 4px 12px #0004; touch-action: manipulation; }
+.pod-return-target[hidden] { display: none; }
+.pod-return-target:hover { background: #18343a; border-color: #b6f1e2; }
+.pod-return-target:focus-visible, .pod-return-dialog button:focus-visible { outline: 2px solid #a1efcb; outline-offset: 3px; }
+.pod-return-target kbd, .pod-return-dialog kbd { padding: 0 5px; border: 1px solid #a4b8ad66; border-radius: 4px; color: #a7bdb3; font: 11px/1.5 system-ui, sans-serif; }
+.pod-return-dialog { box-sizing: border-box; width: min(420px, calc(100vw - 32px)); padding: 22px 24px; border: 1px solid #8de5d388; border-radius: 12px; background: #0c1c23f2; color: #edf5ed; box-shadow: 0 20px 60px #0008; font: 14px/1.6 system-ui, sans-serif; }
+.pod-return-dialog::backdrop { background: #02090d45; }
+.pod-return-dialog h2 { margin: 0; color: #8de5d3; font-size: 18px; }
+.pod-return-dialog p { margin: 8px 0 18px; color: #c0d6d3; }
+.pod-return-dialog footer { display: flex; flex-wrap: wrap; gap: 10px; }
+.pod-return-dialog button { display: inline-flex; align-items: center; gap: 10px; min-height: 40px; padding: 8px 18px; border: 1px solid #8de5d3; border-radius: 8px; background: #153a3a; color: #f2fbf6; font: 600 14px/1.4 system-ui, sans-serif; cursor: pointer; touch-action: manipulation; }
+.pod-return-dialog [data-confirm]:hover { background: #1f5250; }
+.pod-return-dialog [data-cancel] { border-color: #b1c7c080; background: #ffffff05; color: #d2ded8; font-weight: 500; }
+.pod-return-dialog [data-cancel]:hover { background: #ffffff14; }

@@ -20,7 +20,7 @@ const NATURAL_TILES: ReadonlySet<number> = new Set([TILE_DIRT, TILE_GRASS, TILE_
 const MAX_TILE_MARKS = 64;
 /** 闲着的无人机每隔这么多游戏秒重新挑一次任务。 */
 const SCAN_SECONDS = 30;
-/** 与自由世界出生点安全区（±40 列）一致：设施要放在敌人进不来的范围里。 */
+/** 与主世界出生点安全区（±40 列）一致：设施要放在敌人进不来的范围里。 */
 const LAYOUT_REACH = 40;
 
 export type MarkBlock = RouteBlock | 'zone' | 'enemy' | 'level' | 'buried' | 'reach';

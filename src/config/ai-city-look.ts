@@ -22,6 +22,8 @@ export const AI_CITY_LOOK = {
   duskBottom: '#f5ad7d',
   rimDirection: { x: .6, y: .5, z: -.8 },
   aoIntensity: .45,
+  // 日月起落线在画面中的高度（0 底、1 顶），按远景天际线设定。
+  celestialHorizon: .45,
 };
 export type AiCityLook = typeof AI_CITY_LOOK;
 
@@ -48,7 +50,9 @@ export const AI_CITY_RESIDENCE_LOOK: AiCityLook = {
 
 // 住宅 2 是明亮的白昼原画：白岩板顶面同时吃主光、天光与环境图，通用强度把它推到色调映射肩部而发白，
 // 单压主光几乎无效，三项一起压低；室内只靠天光、环境图与灯，也随之略暗。
-export const AI_CITY_HARBOR_LOOK: AiCityLook = { ...AI_CITY_LOOK, keyIntensity: 2.2, hemiIntensity: .85, environmentIntensity: .3 };
+// 住宅2对岸塔群高到画面上部，起落线抬高，正午太阳才会越过塔顶而不是一直藏在楼后。
+export const AI_CITY_HARBOR_LOOK: AiCityLook = { ...AI_CITY_LOOK, keyIntensity: 2.2, hemiIntensity: .85, environmentIntensity: .3,
+  celestialHorizon: .52 };
 
 // 目录和建造共用同一后期基础，避免资源在两处检查时变色。
 export const BUILDING_SCENE_TUNING = {

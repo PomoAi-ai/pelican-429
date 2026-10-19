@@ -9,6 +9,7 @@ import * as THREE from 'three';
 import type { Direction3, LightingTuning } from '../config/lighting-rules.ts';
 import type { Rect } from '../core/math.ts';
 import type { TreeInstance } from '../world/level.ts';
+import { glslFloat as f } from './wind.ts';
 
 type ShaftTuning = LightingTuning['shafts'];
 
@@ -110,6 +111,12 @@ const VERTEX = /* glsl */ `
     gl_Position = projectionMatrix * modelViewMatrix * p;
   }`;
 
+/** 光束着色：条纹（基值、幅度、频率、漂移速度）、顶/底渐隐、呼吸（基值、幅度）；GLSL 与 WebGPU 节点版本同表。 */
+export const SHAFT_SHADER = {
+  pi: 3.14159265, tau: 6.2831, streak: { base: 0.72, amp: 0.28, freq: 17, drift: 0.17 }, topFade: 0.8, bottomFade: 0.5, pulse: { base: 0.68, amp: 0.32 },
+} as const;
+const K = SHAFT_SHADER;
+
 const FRAGMENT = /* glsl */ `
   uniform vec3 uColor;
   uniform float uIntensity;
@@ -118,11 +125,11 @@ const FRAGMENT = /* glsl */ `
   varying vec2 vUv;
   varying float vSeed;
   void main() {
-    float across = sin(vUv.x * 3.14159265);
+    float across = sin(vUv.x * ${f(K.pi)});
     across *= across;
-    float streak = 0.72 + 0.28 * sin(vUv.x * 17.0 + vSeed * 6.2831 + uTime * 0.17);
-    float along = smoothstep(1.0, 0.8, vUv.y) * smoothstep(0.0, 0.5, vUv.y);
-    float pulse = 0.68 + 0.32 * sin(uTime * uPulse + vSeed * 6.2831);
+    float streak = ${f(K.streak.base)} + ${f(K.streak.amp)} * sin(vUv.x * ${f(K.streak.freq)} + vSeed * ${f(K.tau)} + uTime * ${f(K.streak.drift)});
+    float along = smoothstep(1.0, ${f(K.topFade)}, vUv.y) * smoothstep(0.0, ${f(K.bottomFade)}, vUv.y);
+    float pulse = ${f(K.pulse.base)} + ${f(K.pulse.amp)} * sin(uTime * uPulse + vSeed * ${f(K.tau)});
     float a = across * streak * along * pulse * uIntensity;
     gl_FragColor = vec4(uColor, a);
   }`;

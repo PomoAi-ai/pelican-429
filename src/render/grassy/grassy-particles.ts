@@ -1,4 +1,29 @@
 import * as THREE from 'three';
+import { currentViewportHeight } from '../stage.ts';
+import { glslFloat as f } from '../wind.ts';
+
+/** 软粒子着色器：边缘羽化起点、白热核心半径与混合量、丢弃阈值，WebGPU 节点版本同表。 */
+export const PARTICLE_CLOUD_SHADER = { edge: 0.15, core: 0.5, cut: 0.003, hot: [2, 2.8, 3.4], hotMix: 0.88 } as const;
+/** 推进器光束着色器：摆动、外鞘/核心宽度与衰减、脉动、颜色，WebGPU 节点版本同表。 */
+export const THRUSTER_BEAM_SHADER = {
+  bend: { freq: 15, speed: 2, amp: 0.07 },
+  width: { base: 0.64, grow: 0.25 },
+  coreWidth: 0.18,
+  sheathFalloff: 1.8,
+  coreFalloff: 2,
+  pulse: { freq: 34, speed: 4 },
+  flow: { base: 0.78, amp: 0.22 },
+  fadePow: 1.35,
+  hotDecay: 4,
+  sheathGain: 0.36,
+  cut: 0.003,
+  blueLow: [0.012, 0.22, 0.9],
+  blueHigh: [0.04, 0.5, 1.8],
+  hot: [2.8, 3.8, 4.8],
+} as const;
+const P = PARTICLE_CLOUD_SHADER;
+const T = THRUSTER_BEAM_SHADER;
+const vec3 = (c: readonly number[]): string => `vec3(${c.map(f).join(', ')})`;
 
 /** 固定容量的软粒子；尺寸与角色一起缩放，并使用当前离屏预览的像素高度。 */
 export function createParticleCloud(count: number, color: THREE.ColorRepresentation) {
@@ -10,6 +35,7 @@ export function createParticleCloud(count: number, color: THREE.ColorRepresentat
   geometry.setAttribute('size', sizes);
   geometry.setAttribute('alpha', alphas);
   const material = new THREE.ShaderMaterial({
+    name: 'grassy-particle-cloud',
     uniforms: { color: { value: new THREE.Color(color) }, viewportHeight: { value: 1 } },
     vertexShader: /* glsl */`
       attribute float size;
@@ -28,11 +54,11 @@ export function createParticleCloud(count: number, color: THREE.ColorRepresentat
       varying float vAlpha;
       void main() {
         float radius = length(gl_PointCoord - 0.5) * 2.0;
-        float edge = 1.0 - smoothstep(0.15, 1.0, radius);
-        float core = 1.0 - smoothstep(0.0, 0.5, radius);
+        float edge = 1.0 - smoothstep(${f(P.edge)}, 1.0, radius);
+        float core = 1.0 - smoothstep(0.0, ${f(P.core)}, radius);
         float opacity = vAlpha * edge * edge;
-        if (opacity < 0.003) discard;
-        gl_FragColor = vec4(mix(color, vec3(2.0, 2.8, 3.4), core * 0.88), opacity);
+        if (opacity < ${f(P.cut)}) discard;
+        gl_FragColor = vec4(mix(color, ${vec3(P.hot)}, core * ${f(P.hotMix)}), opacity);
         #include <colorspace_fragment>
       }
     `,
@@ -45,8 +71,7 @@ export function createParticleCloud(count: number, color: THREE.ColorRepresentat
   points.frustumCulled = false;
   const viewport = new THREE.Vector4();
   points.onBeforeRender = renderer => {
-    renderer.getCurrentViewport(viewport);
-    material.uniforms.viewportHeight!.value = viewport.w;
+    material.uniforms.viewportHeight!.value = currentViewportHeight(renderer, viewport);
   };
   return { points, positions, sizes, alphas };
 }
@@ -58,6 +83,7 @@ export function createThruster(socket: THREE.Object3D) {
   const beamGeometry = new THREE.PlaneGeometry(nozzleWidth, 1.2);
   beamGeometry.translate(0, -0.6, 0);
   const beamMaterial = new THREE.ShaderMaterial({
+    name: 'grassy-thruster-beam',
     uniforms: { phase: { value: 0 }, strength: { value: 0 } },
     vertexShader: /* glsl */`
       varying vec2 vUv;
@@ -72,21 +98,21 @@ export function createThruster(socket: THREE.Object3D) {
       varying vec2 vUv;
       void main() {
         float age = 1.0 - vUv.y;
-        float bend = sin(age * 15.0 - phase * 2.0) * age * 0.07;
+        float bend = sin(age * ${f(T.bend.freq)} - phase * ${f(T.bend.speed)}) * age * ${f(T.bend.amp)};
         float x = abs(vUv.x * 2.0 - 1.0 - bend);
-        float width = 0.64 + age * 0.25;
+        float width = ${f(T.width.base)} + age * ${f(T.width.grow)};
         float outerDistance = x / width;
-        float innerDistance = x / (width * 0.18);
-        float sheath = exp(-outerDistance * outerDistance * 1.8);
-        float core = exp(-innerDistance * innerDistance * 2.0);
-        float pulse = sin(age * 34.0 - phase * 4.0);
-        float flow = 0.78 + 0.22 * pulse * pulse;
-        float fade = pow(max(0.0, 1.0 - age), 1.35);
-        float hotCore = core * exp(-age * 4.0);
-        float alpha = min(1.0, (sheath * 0.36 + hotCore) * fade * flow * strength);
-        if (alpha < 0.003) discard;
-        vec3 blue = mix(vec3(0.012, 0.22, 0.9), vec3(0.04, 0.5, 1.8), sheath);
-        gl_FragColor = vec4(mix(blue, vec3(2.8, 3.8, 4.8), hotCore), alpha);
+        float innerDistance = x / (width * ${f(T.coreWidth)});
+        float sheath = exp(-outerDistance * outerDistance * ${f(T.sheathFalloff)});
+        float core = exp(-innerDistance * innerDistance * ${f(T.coreFalloff)});
+        float pulse = sin(age * ${f(T.pulse.freq)} - phase * ${f(T.pulse.speed)});
+        float flow = ${f(T.flow.base)} + ${f(T.flow.amp)} * pulse * pulse;
+        float fade = pow(max(0.0, 1.0 - age), ${f(T.fadePow)});
+        float hotCore = core * exp(-age * ${f(T.hotDecay)});
+        float alpha = min(1.0, (sheath * ${f(T.sheathGain)} + hotCore) * fade * flow * strength);
+        if (alpha < ${f(T.cut)}) discard;
+        vec3 blue = mix(${vec3(T.blueLow)}, ${vec3(T.blueHigh)}, sheath);
+        gl_FragColor = vec4(mix(blue, ${vec3(T.hot)}, hotCore), alpha);
         #include <colorspace_fragment>
       }
     `,

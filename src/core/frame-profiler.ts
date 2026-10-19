@@ -114,3 +114,26 @@ export function createFrameProfiler(segments: readonly string[], options: FrameP
     },
   };
 }
+
+/** GPU 分段耗时（ms，自上次清零以来读回帧的均值）；'unsupported' = 设备没有 timer query。 */
+export type GpuTimings = 'unsupported' | {
+  /** 已读回的帧数。 */
+  readonly frames: number;
+  readonly total: number;
+  readonly segments: Readonly<Record<string, number>>;
+};
+
+export interface FrameTimeStats {
+  readonly p50: number;
+  readonly p95: number;
+  readonly p99: number;
+  readonly max: number;
+  readonly mean: number;
+}
+
+/** 帧耗时分布；分位数用 nearest-rank（取排序后第 ⌈p·n⌉ 个样本），结果总是真实出现过的帧耗时。 */
+export function frameTimeStats(samples: readonly number[]): FrameTimeStats {
+  const sorted = [...samples].sort((a, b) => a - b);
+  const rank = (p: number): number => sorted[Math.ceil(p * sorted.length) - 1] as number;
+  return { p50: rank(0.5), p95: rank(0.95), p99: rank(0.99), max: sorted[sorted.length - 1] as number, mean: sorted.reduce((s, v) => s + v, 0) / sorted.length };
+}

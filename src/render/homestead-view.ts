@@ -124,7 +124,7 @@ export function createHomesteadView(scene: THREE.Scene, trees: readonly TreeInst
     root.add(g);
     const cargo = part(g, cargoMaterial, 0.28, 0.24, 0.28, 0, -0.38);
     const stall = caption('429', '#ff5a5a', 1.1);
-    stall.position.set(0, 0.75, 0);
+    stall.position.set(0, 1.45, 0);
     g.add(stall);
     const tag = caption(String(drones.length + 1), '#5fe6ff', 0.7, true);
     root.add(tag);

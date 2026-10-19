@@ -1,16 +1,16 @@
 import { WEB_MODEL_SOURCES, webModelPath, web1kModelPath, ktxModelPath, ktx256ModelPath, compactModelPath } from '../config/web-models.ts';
-import type { WebGLRenderer } from 'three';
+import type { StageRenderer } from './stage.ts';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
 import { acquireKtx2Loader } from './ktx2-loader.ts';
 
-let renderer: WebGLRenderer | null = null;
+let renderer: StageRenderer | null = null;
 type TextureSession = ReturnType<typeof acquireKtx2Loader> & { pending: number; retired: boolean };
 let textureSession: TextureSession | null = null;
 const preloaded = new Map<string, Promise<ArrayBuffer>>();
 export type TextureTier = 'original' | 'web-1k' | 'web' | 'ktx2' | 'ktx2-256' | 'ktx2-compact' | 'ktx2-256-compact';
 
-export function configureCharacterTextures(value: WebGLRenderer | null): void {
+export function configureCharacterTextures(value: StageRenderer | null): void {
   if (renderer === value) return;
   if (textureSession) {
     textureSession.retired = true;
@@ -20,7 +20,7 @@ export function configureCharacterTextures(value: WebGLRenderer | null): void {
   renderer = value;
 }
 
-export function currentCharacterTextureRenderer(): WebGLRenderer | null {
+export function currentCharacterTextureRenderer(): StageRenderer | null {
   return renderer;
 }
 

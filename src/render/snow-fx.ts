@@ -10,6 +10,7 @@ import { mulberry32 } from '../core/rng.ts';
 import { PRECIP_COLUMN_GLSL, sharedPrecipUniforms } from './precip-surface.ts';
 import { FADE_FRACTION, PRECIP_BOX_GLSL } from './rain-fx.ts';
 import type { PrecipCamera } from './rain-fx.ts';
+import { glslFloat as f } from './wind.ts';
 
 export interface SnowFrame {
   readonly time: number;
@@ -22,6 +23,15 @@ export interface SnowFrame {
   readonly big: number;
   readonly brightness: number;
 }
+
+/** 雪花着色器常量（GLSL 与 WebGPU 节点版本同表）。 */
+export const SNOW_SHADER = {
+  fall: [0.6, 0.8], drift: [0.7, 0.6], swayRate: [0.7, 1.1], swayPhase: 40, keepHash: [7.13, 3.1], bigHash: 13.7, bigAt: 0.86, blurFrom: 0.82,
+  size: [0.7, 0.6], sizeHash: 91.3, sizeNear: [0.8, 1.25], blurGrow: 0.7, spin: { seed: 6.2832, rate: [0.2, 0.6] }, alphaNear: [0.55, 0.95], blurFade: 0.6,
+  /** 六角形：扇区角（π/3）、半角、内切比例、六角程度、清晰边缘起点。 */
+  sector: 1.0472, halfSector: 0.5236, hex: 0.866, hexMix: 0.35, edge: 0.45, cut: 0.004,
+} as const;
+const S = SNOW_SHADER;
 
 const SNOW_VERTEX = /* glsl */ `
 attribute vec4 aSeed;
@@ -40,21 +50,21 @@ varying float vRot;
 ${PRECIP_COLUMN_GLSL}
 ${PRECIP_BOX_GLSL}
 void main() {
-  float sp = 0.6 + 0.8 * aSeed.w;
-  vec3 p = precipBoxPos( aSeed, sp, 0.7 + 0.6 * aSeed.w, uFall, uDrift );
+  float sp = ${f(S.fall[0])} + ${f(S.fall[1])} * aSeed.w;
+  vec3 p = precipBoxPos( aSeed, sp, ${f(S.drift[0])} + ${f(S.drift[1])} * aSeed.w, uFall, uDrift );
   float near = aSeed.z;
-  p.x += uSway * sin( uTime * ( 0.7 + 1.1 * aSeed.w ) + aSeed.x * 40.0 ) * ( 0.5 + 0.5 * near );
+  p.x += uSway * sin( uTime * ( ${f(S.swayRate[0])} + ${f(S.swayRate[1])} * aSeed.w ) + aSeed.x * ${f(S.swayPhase)} ) * ( 0.5 + 0.5 * near );
   vec2 g = precipGroundProj( p );
   vec4 col = precipColumn( g.x );
-  float keep = step( fract( aSeed.w * 7.13 + aSeed.x * 3.1 ), col.z );
+  float keep = step( fract( aSeed.w * ${f(S.keepHash[0])} + aSeed.x * ${f(S.keepHash[1])} ), col.z );
   float vis = step( col.y, g.y ) * keep * clamp( ( uCount - float( gl_InstanceID ) ) / uFade, 0.0, 1.0 );
-  float big = step( 0.86, fract( aSeed.w * 13.7 ) ) * uBig;
-  float blur = smoothstep( 0.82, 1.0, near );
-  float r = uSize * ( 0.7 + 0.6 * fract( aSeed.x * 91.3 ) ) * ( 1.0 + 1.0 * big ) * mix( 0.8, 1.25, near * near ) * ( 1.0 + 0.7 * blur );
+  float big = step( ${f(S.bigAt)}, fract( aSeed.w * ${f(S.bigHash)} ) ) * uBig;
+  float blur = smoothstep( ${f(S.blurFrom)}, 1.0, near );
+  float r = uSize * ( ${f(S.size[0])} + ${f(S.size[1])} * fract( aSeed.x * ${f(S.sizeHash)} ) ) * ( 1.0 + 1.0 * big ) * mix( ${f(S.sizeNear[0])}, ${f(S.sizeNear[1])}, near * near ) * ( 1.0 + ${f(S.blurGrow)} * blur );
   vUv = position.xy;
   vBlur = blur;
-  vRot = aSeed.w * 6.2832 + uTime * ( 0.2 + 0.6 * aSeed.y );
-  vAlpha = vis * mix( 0.55, 0.95, near ) * ( 1.0 - 0.6 * blur );
+  vRot = aSeed.w * ${f(S.spin.seed)} + uTime * ( ${f(S.spin.rate[0])} + ${f(S.spin.rate[1])} * aSeed.y );
+  vAlpha = vis * mix( ${f(S.alphaNear[0])}, ${f(S.alphaNear[1])}, near ) * ( 1.0 - ${f(S.blurFade)} * blur );
   gl_Position = vis > 0.0 ? projectionMatrix * viewMatrix * vec4( p.xy + position.xy * r, p.z, 1.0 ) : vec4( 2.0, 2.0, 2.0, 1.0 );
 }
 `;
@@ -69,11 +79,11 @@ varying float vRot;
 void main() {
   float r = length( vUv );
   float ang = atan( vUv.y, vUv.x ) + vRot;
-  float sector = mod( ang, 1.0472 ) - 0.5236;
-  float hex = 0.866 / cos( sector );
-  float d = r / mix( 1.0, hex, 0.35 * ( 1.0 - vBlur ) );
-  float a = smoothstep( 1.0, mix( 0.45, 0.0, vBlur ), d ) * vAlpha * uOpacity;
-  if ( a < 0.004 ) discard;
+  float sector = mod( ang, ${f(S.sector)} ) - ${f(S.halfSector)};
+  float hex = ${f(S.hex)} / cos( sector );
+  float d = r / mix( 1.0, hex, ${f(S.hexMix)} * ( 1.0 - vBlur ) );
+  float a = smoothstep( 1.0, mix( ${f(S.edge)}, 0.0, vBlur ), d ) * vAlpha * uOpacity;
+  if ( a < ${f(S.cut)} ) discard;
   gl_FragColor = vec4( uColor, a );
 }
 `;

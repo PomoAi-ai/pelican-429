@@ -103,8 +103,9 @@ describe('light-map', () => {
       if (k % 7 === 0) lm.flush();
     }
     // 水只经 syncWater 发现
-    for (let tx = 100; tx < 110; tx++) if (map.collisionAt(tx, 20) === 'none') water[20 * W + tx] = 200;
-    assert.equal(lm.syncWater(water), true);
+    const poured: number[] = [];
+    for (let tx = 100; tx < 110; tx++) if (map.collisionAt(tx, 20) === 'none' && (lm.medium[20 * W + tx] === MEDIUM.AIR || lm.medium[20 * W + tx] === MEDIUM.FOLIAGE)) { water[20 * W + tx] = 200; poured.push(tx); }
+    assert.deepEqual(lm.syncWater(water), { x0: poured[0], x1: poured[poured.length - 1] });
     const range = lm.flush();
     assert.ok(range && range.x0 >= 0 && range.x1 < W);
     assert.equal(lm.flush(), null, '无脏列');

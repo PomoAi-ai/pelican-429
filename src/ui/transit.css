@@ -52,6 +52,24 @@
 .transit-app:not([data-phase=ground]) .transit-touch { display: none; }
 .transit-app [hidden] { display: none !important; }
 .scene-mount[data-kind=transit] { height: 100%; }
+/* Mounted inside another scene: a transparent overlay on that scene's canvas; only controls take the pointer. */
+.transit-hosted { position: absolute; inset: 0; height: auto; min-height: 0; background: transparent; pointer-events: none; }
+.transit-hosted[hidden] { display: none; }
+.transit-hosted :is(button, .transit-entry, .transit-destinations, .transit-loading) { pointer-events: auto; }
+.transit-hosted :is(.transit-toolbar, .transit-heading, .transit-touch) { display: none; }
+/* The host keeps its minimap top-right and its skill bar and hints along the bottom corners. */
+.transit-hosted .transit-telemetry { right: auto; left: 50%; transform: translateX(-50%); }
+.transit-hosted .transit-bottom { left: 50%; right: auto; bottom: 64px; transform: translateX(-50%); }
+.transit-handoff { position: fixed; inset: 0; z-index: 1000; min-height: 0; height: 100dvh; }
+.transit-handoff :is(.transit-toolbar, .transit-heading, .transit-telemetry, .transit-bottom, .transit-touch, .transit-jump) { display: none; }
+/* A hosting city's viewport travels into the handoff with its minimap still attached. */
+.transit-handoff .hud-map { display: none; }
+.transit-loading { position: absolute; z-index: 6; left: max(24px, env(safe-area-inset-left)); bottom: max(6vh, 24px); width: min(330px, calc(100% - 48px)); box-sizing: border-box; padding: 18px 22px; border-left: 2px solid #8be5ff; border-radius: 0 10px 10px 0; background: #041222cf; text-align: left; color: #effbff; text-shadow: 0 2px 18px #020c24; }
+.transit-loading h2 { font-size: clamp(22px, 2.6vw, 32px); font-weight: 550; letter-spacing: .12em; margin: 10px 0; }
+.transit-loading p { font-size: 13px; line-height: 1.7; color: #b9d8ef; }
+.transit-loading .transit-launch { max-width: 250px; }
+.transit-load-failed { background: radial-gradient(ellipse at 50% 35%, #1b4367, #080d22 70%); }
+.transit-loading-error { overflow-wrap: anywhere; max-height: 25vh; overflow-y: auto; }
 #app:has(> .transit-app) { height: 100dvh; padding: 0; }
 @media (pointer: coarse) { .transit-touch { display: flex; } }
 @media (max-width: 760px) {

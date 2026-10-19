@@ -215,9 +215,9 @@ describe('灌木层：材质与区块网格', () => {
     for (let x = 0; x < 64; x++) map.set(x, 5, x < 32 ? TILE_GRASS : TILE_SAND);
     const view = createTileView(map, { floraEnv: env(0.5) });
     view.update();
-    const shrubs: THREE.InstancedMesh[] = [];
+    const shrubs: THREE.BatchedMesh[] = [];
     view.root.traverse((o) => {
-      if ((o as THREE.InstancedMesh).isInstancedMesh && o.name.startsWith('tiles-shrub-')) shrubs.push(o as THREE.InstancedMesh);
+      if ((o as THREE.BatchedMesh).isBatchedMesh && o.name.startsWith('tiles-shrub-')) shrubs.push(o as THREE.BatchedMesh);
     });
     assert.ok(shrubs.length >= 1 && shrubs.length <= 2, `shrub meshes ${shrubs.map((m) => m.name)}`);
     const counts = shrubs.reduce<Record<string, number>>((acc, m) => {

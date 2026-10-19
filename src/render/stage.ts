@@ -6,13 +6,14 @@
  * 世界坐标：1 瓦片 = 1 单位，y 向上，逻辑平面为 z=0，相机位于 +Z 侧看向 -Z。
  */
 import * as THREE from 'three';
+import type { WebGPURenderer } from 'three/webgpu';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { hash01, valueNoise1D } from '../core/rng.ts';
 import type { AntialiasMode, LightingQuality, LightingTuning, ShadowTypeName, ToneMappingName } from '../config/lighting-rules.ts';
 import type { Tuning } from '../config/tuning.ts';
 import type { TileQuery } from '../world/tile-map.ts';
 import { createPostFx } from './post-fx.ts';
-import type { PostFx } from './post-fx.ts';
+import type { PostFx, PostFxInput } from './post-fx.ts';
 import { fitShadowCamera, shadowReceiverBounds } from './shadow-fit.ts';
 import type { ShadowFit, Vec3Like } from './shadow-fit.ts';
 import { configureCharacterTextures, disposeCharacterTextures } from './character-model.ts';
@@ -23,14 +24,19 @@ const SHADOW_HALF_EXTENT_MIN = 14;
 export const SKY_TOP = '#8ec9e8';
 export const SKY_BOTTOM = '#f4ecd6';
 
-export interface Stage {
-  readonly renderer: THREE.WebGLRenderer;
+/** 游戏页可经 ?renderer=webgpu 换用 WebGPURenderer（见 app/webgpu-stage）；其他页面只用 WebGL。 */
+export type StageRenderer = THREE.WebGLRenderer | WebGPURenderer;
+
+export interface Stage<R extends StageRenderer = THREE.WebGLRenderer> {
+  readonly renderer: R;
   readonly scene: THREE.Scene;
   readonly camera: THREE.PerspectiveCamera;
   readonly keyLight: THREE.DirectionalLight;
   readonly rimLight: THREE.DirectionalLight;
   readonly hemiLight: THREE.HemisphereLight;
   readonly postFx: PostFx;
+  /** 新建与渲染器后端匹配的 PMREM 生成器（局部反射环境用），调用方负责 dispose。 */
+  createPmrem(): EnvironmentGenerator;
   readonly canvas: HTMLCanvasElement;
   readonly quality: LightingQuality;
   setQuality(quality: LightingQuality): void;
@@ -44,6 +50,10 @@ export interface Stage {
   /** 按地图尺寸与地表高度添加远景（山丘剪影），只调用一次。 */
   addBackdrop(options: BackdropOptions): void;
   setSize(width: number, height: number): void;
+  /** 运行时改像素比（动态分辨率）：画布缓冲与后期目标按新比例重建，CSS 尺寸不变。 */
+  setPixelRatio(ratio: number): void;
+  /** 用零强度占位点光源把可见点光源数补到历史最高值（render 内自动调用；编译前也要调用，程序键才与渲染一致）。 */
+  padPointLights(): void;
   render(): void;
   renderTexture(): THREE.Texture;
   dispose(): void;
@@ -251,14 +261,45 @@ export interface StageOptions {
   readonly antialias?: AntialiasMode;
 }
 
+/** 两种后端的 PMREMGenerator 共有的部分。 */
+export interface EnvironmentGenerator {
+  fromScene(scene: THREE.Scene, sigma: number): THREE.RenderTarget;
+  dispose(): void;
+}
+
+/**
+ * 当前视口高度（像素）。onBeforeRender 的类型声明只写了 WebGLRenderer，但游戏页可能传入没有 getCurrentViewport 的 WebGPURenderer；
+ * WebGPU 不支持点精灵尺寸，这里的值只在 WebGL 下影响画面。
+ */
+export function currentViewportHeight(renderer: StageRenderer, out: THREE.Vector4): number {
+  return ('isWebGPURenderer' in renderer ? renderer.getViewport(out) : renderer.getCurrentViewport(out)).w;
+}
+
+/** 环境贴图与后期随渲染器后端不同；舞台其余部分共用。 */
+export interface StageBackend<R extends StageRenderer> {
+  pmrem(renderer: R): EnvironmentGenerator;
+  postFx(input: Omit<PostFxInput, 'renderer'> & { readonly renderer: R }): PostFx;
+}
+
+export const WEBGL_STAGE_BACKEND: StageBackend<THREE.WebGLRenderer> = {
+  pmrem: (renderer) => new THREE.PMREMGenerator(renderer),
+  postFx: createPostFx,
+};
+
 /** 一个页面只拥有一个 WebGL 上下文；多个预览舞台共用它。 */
 export function createStageRenderer(tuning: Tuning, options: Pick<THREE.WebGLRendererParameters, 'alpha' | 'antialias'> = {}): THREE.WebGLRenderer {
-  const r = tuning.render;
-  const l = r.lighting;
   const renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: 'high-performance', ...options });
   // 着色器错误检查让每个程序首次使用时同步读取编译日志；GPU 进程忙时每次往返上百毫秒，新建渲染器（切换透视标签）累计可达十秒。
   // 只在 ?debug 下开启；关闭时着色器出错仍有浏览器的 WebGL 警告。
   renderer.debug.checkShaderErrors = new URLSearchParams(location.search).has('debug');
+  configureStageRenderer(renderer, tuning);
+  return renderer;
+}
+
+/** 像素比、输出色彩空间、色调映射、曝光与阴影类型；两种后端共用。 */
+export function configureStageRenderer(renderer: StageRenderer, tuning: Tuning): void {
+  const r = tuning.render;
+  const l = r.lighting;
   const pixelRatio = Math.min(window.devicePixelRatio || 1, l.maxPixelRatio);
   renderer.setPixelRatio(pixelRatio);
   renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -267,12 +308,11 @@ export function createStageRenderer(tuning: Tuning, options: Pick<THREE.WebGLRen
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = SHADOW_TYPE[l.shadow.type];
   configureCharacterTextures(renderer);
-  return renderer;
 }
 
 export function createStage(container: HTMLElement, tuning: Tuning, options: StageOptions): Stage {
   const renderer = createStageRenderer(tuning);
-  const stage = attachStage(container, renderer, tuning, options);
+  const stage = attachStage(container, renderer, tuning, options, WEBGL_STAGE_BACKEND);
   const detach = stage.dispose;
   stage.dispose = () => {
     detach();
@@ -283,13 +323,13 @@ export function createStage(container: HTMLElement, tuning: Tuning, options: Sta
 }
 
 /** 把已有渲染器挂进容器并建立场景视图；释放时只摘下画布，渲染器留给调用方继续复用。 */
-export function attachStage(container: HTMLElement, renderer: THREE.WebGLRenderer, tuning: Tuning, options: StageOptions): Stage {
+export function attachStage<R extends StageRenderer>(container: HTMLElement, renderer: R, tuning: Tuning, options: StageOptions, backend: StageBackend<R>): Stage<R> {
   if (!container?.isConnected) throw new Error('stage: container element is missing or detached');
   const canvas = renderer.domElement;
   canvas.tabIndex = 0;
   canvas.setAttribute('aria-label', '游戏画面');
   container.append(canvas);
-  const stage = createStageView(renderer, tuning, options);
+  const stage = createStageViewWith(renderer, tuning, options, backend);
   const resize = (): void => {
     const width = Math.max(1, container.clientWidth);
     const height = Math.max(1, container.clientHeight);
@@ -309,6 +349,10 @@ export function attachStage(container: HTMLElement, renderer: THREE.WebGLRendere
 }
 
 export function createStageView(renderer: THREE.WebGLRenderer, tuning: Tuning, options: StageOptions): Stage {
+  return createStageViewWith(renderer, tuning, options, WEBGL_STAGE_BACKEND);
+}
+
+export function createStageViewWith<R extends StageRenderer>(renderer: R, tuning: Tuning, options: StageOptions, backend: StageBackend<R>): Stage<R> {
   const r = tuning.render;
   const l = r.lighting;
   let quality = options.quality;
@@ -321,7 +365,7 @@ export function createStageView(renderer: THREE.WebGLRenderer, tuning: Tuning, o
   const camera = new THREE.PerspectiveCamera(tuning.camera.fov, 1, 0.5, 200);
   camera.position.set(0, 0, tuning.camera.distance);
 
-  const pmrem = new THREE.PMREMGenerator(renderer);
+  const pmrem = backend.pmrem(renderer);
   const room = new RoomEnvironment();
   const environment = pmrem.fromScene(room, 0.04).texture;
   room.dispose();
@@ -338,7 +382,7 @@ export function createStageView(renderer: THREE.WebGLRenderer, tuning: Tuning, o
   const keyLight = new THREE.DirectionalLight(l.sun.color, r.keyLight);
   keyLight.name = 'key-light';
   keyLight.castShadow = true;
-  keyLight.shadow.mapSize.set(l.shadow.mapSize, l.shadow.mapSize);
+  keyLight.shadow.mapSize.setScalar(l.shadow.mapSize[quality]);
   keyLight.shadow.bias = l.shadow.bias;
   keyLight.shadow.normalBias = l.shadow.normalBias;
   keyLight.shadow.radius = l.shadow.radius;
@@ -354,7 +398,7 @@ export function createStageView(renderer: THREE.WebGLRenderer, tuning: Tuning, o
   rimLight.target.position.set(0, 0, 0);
   scene.add(rimLight, rimLight.target);
 
-  const postFx = createPostFx({ renderer, scene, camera, lighting: l, quality, antialias: options.antialias ?? l.antialias });
+  const postFx = backend.postFx({ renderer, scene, camera, lighting: l, quality, antialias: options.antialias ?? l.antialias });
 
   let lastFit: ShadowFit | null = null;
   let sunDirection = l.sun.direction;
@@ -384,7 +428,7 @@ export function createStageView(renderer: THREE.WebGLRenderer, tuning: Tuning, o
       zMax: l.shadow.zMax,
       casterReach: l.shadow.casterReach,
       direction: sunDirection,
-      mapSize: l.shadow.mapSize,
+      mapSize: l.shadow.mapSize[quality],
     });
     keyLight.position.set(fit.position.x, fit.position.y, fit.position.z);
     keyLight.target.position.set(fit.target.x, fit.target.y, fit.target.z);
@@ -404,6 +448,26 @@ export function createStageView(renderer: THREE.WebGLRenderer, tuning: Tuning, o
   };
   let backdrop: Backdrop | null = null;
 
+  // 可见点光源数是每个受光材质程序键的一部分：数目一变（灯随机房、无人机、技能特效显隐），场景里的材质当帧全部重编，
+  // 游玩中卡顿数百毫秒。用零强度占位灯把数目补到历史最高值：只增不减，只在出现新高时编译一次。
+  const padding: THREE.PointLight[] = [];
+  let paddingShown = 0;
+  let pointLightPeak = 0;
+  const padPointLights = (): void => {
+    let visible = 0;
+    scene.traverseVisible((node) => { if ((node as THREE.PointLight).isPointLight) visible++; });
+    const real = visible - paddingShown;
+    pointLightPeak = Math.max(pointLightPeak, real);
+    paddingShown = pointLightPeak - real;
+    while (padding.length < paddingShown) {
+      const light = new THREE.PointLight(0xffffff, 0, 0.001);
+      light.name = 'stage.point-light-padding';
+      padding.push(light);
+      scene.add(light);
+    }
+    padding.forEach((light, i) => { light.visible = i < paddingShown; });
+  };
+
   return {
     renderer,
     scene,
@@ -412,6 +476,7 @@ export function createStageView(renderer: THREE.WebGLRenderer, tuning: Tuning, o
     rimLight,
     hemiLight,
     postFx,
+    createPmrem: () => backend.pmrem(renderer),
     canvas,
     get quality() {
       return quality;
@@ -419,6 +484,16 @@ export function createStageView(renderer: THREE.WebGLRenderer, tuning: Tuning, o
     setQuality(q) {
       postFx.setQuality(q);
       quality = q;
+      const size = l.shadow.mapSize[q];
+      if (keyLight.shadow.mapSize.x === size) return;
+      keyLight.shadow.mapSize.setScalar(size);
+      // WebGL 在下次阴影渲染时按新尺寸重建贴图；WebGPU 的阴影节点每帧按 mapSize 自行调整，且仍引用原贴图，销毁会让阴影失效。
+      if (!('isWebGPURenderer' in renderer)) {
+        keyLight.shadow.map?.dispose();
+        keyLight.shadow.map = null;
+      }
+      // 拟合按贴图尺寸对齐纹素，也要重算。
+      lastFit = null;
     },
     setSunDirection(direction) {
       sunDirection = direction;
@@ -436,12 +511,20 @@ export function createStageView(renderer: THREE.WebGLRenderer, tuning: Tuning, o
       scene.add(backdrop.root);
     },
     setSize,
+    setPixelRatio(ratio) {
+      const size = renderer.getSize(new THREE.Vector2());
+      renderer.setPixelRatio(ratio);
+      setSize(size.x, size.y);
+    },
+    padPointLights,
     render() {
       updateKeyLight();
+      padPointLights();
       postFx.render();
     },
     renderTexture() {
       updateKeyLight();
+      padPointLights();
       return postFx.renderTexture();
     },
     dispose() {

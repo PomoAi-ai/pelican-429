@@ -10,7 +10,7 @@ import type { GameSettings } from '../config/game-settings.ts';
 import type { LightingQuality } from '../config/lighting-rules.ts';
 import type { ActionTracker } from '../input/action-map.ts';
 import type { WorldLight } from '../render/light-texture.ts';
-import type { Stage } from '../render/stage.ts';
+import type { Stage, StageRenderer } from '../render/stage.ts';
 import type { TileGrid } from '../render/tile-grid.ts';
 import type { WorldViews } from '../render/world-views.ts';
 import { dummyShooting, setDummyShooting, setPrecipIntensity, setPrecipMode, setTornado, setTornadoPower, setTornadoCount } from '../sim/sim-world.ts';
@@ -36,7 +36,8 @@ export interface StartupSettings {
 export function loadStartupSettings(params: URLSearchParams, defaultPrecip: PrecipMode = DEFAULT_PRECIP.mode): StartupSettings {
   const store = createLocalSettingsStore(() => window.localStorage);
   const defaults: GameSettings = {
-    quality: TUNING.render.lighting.quality,
+    // 手机浏览器多半没有 GPU 计时扩展，动态分辨率不生效，默认低画质；用户仍可在设置里切到高。
+    quality: matchMedia('(pointer: coarse)').matches ? 'low' : TUNING.render.lighting.quality,
     antialias: TUNING.render.lighting.antialias,
     wind: TUNING.render.weather.mode,
     windDirection: TUNING.render.weather.direction === 1 ? 'right' : 'left',
@@ -65,7 +66,7 @@ export interface SettingsWiringInput {
   readonly chapter: boolean;
   readonly gm: boolean;
   readonly startup: StartupSettings;
-  readonly stage: Stage;
+  readonly stage: Stage<StageRenderer>;
   readonly world: SimWorld;
   readonly worldViews: WorldViews;
   readonly worldLight: WorldLight;

@@ -13,6 +13,7 @@ import * as THREE from 'three';
 import { ROCK_STYLE } from './rock-geometry.ts';
 import { injectAfter } from './tile-material.ts';
 import { glslConstants } from './tile-organic.ts';
+import { addNodePatch } from './node-patches.ts';
 
 export const ROCK_SHADER_PARAMS = Object.freeze({
   RS_GRANITE: ROCK_STYLE.granite,
@@ -195,5 +196,6 @@ export function createRockMaterial(): THREE.MeshStandardMaterial {
     shader.fragmentShader = fs;
   };
   mat.customProgramCacheKey = () => ROCK_PROGRAM_KEY;
+  addNodePatch(mat, { kind: 'surface-rocks' });
   return mat;
 }

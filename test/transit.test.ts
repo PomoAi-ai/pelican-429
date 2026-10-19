@@ -1,9 +1,12 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { TRANSIT, TRANSIT_PHASE_SECONDS as seconds } from '../src/config/transit.ts';
+import { TRANSIT, TRANSIT_HATCH, TRANSIT_HULL_COLLIDER, TRANSIT_PHASE_SECONDS as seconds } from '../src/config/transit.ts';
+import { TUNING } from '../src/config/tuning.ts';
+import { HUMAN_BODY_HEIGHT } from '../src/config/player-form.ts';
+import { definitionColliderSection } from '../src/physics/definition-collision.ts';
 import {
-  boardTransit, cancelTransit, createTransit, descendTransit, enterTransit, launchTransit,
-  selectTransitDestination, stepTransit, transitPhaseProgress,
+  boardTransit, cancelTransit, createTransit, descendTransit, enterTransit, launchTransit, seatTransit,
+  selectTransitDestination, stepTransit, transitCabinPosition, transitExitPosition, transitPhaseProgress,
 } from '../src/sim/transit.ts';
 
 const hatch = { x: TRANSIT.hatchX - 1, y: TRANSIT.cabinFloor };
@@ -14,6 +17,30 @@ function enterCabin() {
   stepTransit(state, seconds.opening + seconds.boarding);
   return state;
 }
+
+test('从实际站位沿门通道进舱，完全越过门后才转向座椅，出舱回到关门范围外', () => {
+  for (const x of [TRANSIT.hatchX - 2.4, TRANSIT.hatchX - .5]) {
+    const from = { x, y: TRANSIT.cabinFloor };
+    assert.deepEqual(transitCabinPosition(from, 0), { ...from, z: TRANSIT_HATCH.centerZ });
+    const seat = transitCabinPosition(from, 1);
+    assert.ok(Math.abs(seat.x - TRANSIT.seatX) < 1e-9);
+    assert.ok(Math.abs(seat.y - TRANSIT.seatY) < 1e-9);
+    assert.ok(Math.abs(seat.z - TRANSIT_HATCH.seatZ) < 1e-9);
+    for (let step = 1; step < 20; step++) {
+      const position = transitCabinPosition(from, step / 20);
+      if (position.x - TUNING.player.halfWidth <= TRANSIT_HATCH.x) {
+        assert.equal(position.z, TRANSIT_HATCH.centerZ);
+        assert.equal(position.y, TRANSIT.cabinFloor);
+      }
+    }
+    const exit = transitExitPosition(from);
+    const outside = transitCabinPosition(exit, 0);
+    assert.deepEqual(outside, { ...exit, z: TRANSIT_HATCH.centerZ });
+    assert.ok(outside.x + TUNING.player.halfWidth < TRANSIT_HATCH.x);
+    const hull = definitionColliderSection(TRANSIT_HULL_COLLIDER, 1, outside.y, outside.y + HUMAN_BODY_HEIGHT)!;
+    assert.ok(outside.x + TUNING.player.halfWidth < hull[0]);
+  }
+});
 
 test('电梯到顶恢复自由控制，玩家确认舱门后才开门进入', () => {
   const state = createTransit();
@@ -136,6 +163,22 @@ test('发射锁定目的地，先收桥再升空化光，穿越结束只通知�
   assert.equal(stepTransit(state, 100), null);
   assert.equal(launchTransit(state), false);
   assert.equal(enterTransit(state, hatch), false);
+});
+
+test('跳过登舱只能从地面直接入座，发射后照常穿越到选定目的地', () => {
+  const boarding = createTransit();
+  boardTransit(boarding);
+  assert.equal(seatTransit(boarding, 'fortress'), false);
+  const state = createTransit();
+  assert.equal(seatTransit(state, 'cathedral'), true);
+  assert.equal(launchTransit(state), true);
+  assert.equal(stepTransit(state, 100), 'cathedral');
+  const cancelled = createTransit();
+  seatTransit(cancelled, 'abyss');
+  cancelTransit(cancelled);
+  stepTransit(cancelled, seconds.disembarking);
+  assert.equal(cancelled.phase, 'ground');
+  assert.deepEqual(transitExitPosition(cancelled.entryFrom!), { x: TRANSIT_HATCH.waitingX, y: TRANSIT_HATCH.floor });
 });
 
 test('长帧跨阶段保留剩余时间，但电梯和开门流程不会越过等待点', () => {

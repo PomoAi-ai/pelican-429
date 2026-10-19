@@ -99,7 +99,7 @@ const FLYERS = {
   far: { scale: .55, y: [13, 24], z: [-55, -82], speed: .8 },
 } as const;
 
-export function createAiCityTraffic(homeCenter: number) {
+export function createAiCityTraffic(homeCenter: number, depths: readonly ('near' | 'far')[], flyers: boolean) {
   const root = new THREE.Group(); root.name = 'ai-city-traffic';
   const near = new THREE.Group(), far = new THREE.Group();
   near.name = 'ai-city-traffic-near'; far.name = 'ai-city-traffic-far';
@@ -112,7 +112,7 @@ export function createAiCityTraffic(homeCenter: number) {
   const minX = RESIDENCE_WORLD.minX - RESIDENCE_SEGMENT_WIDTH * 2;
   const span = RESIDENCE_WORLD.width + RESIDENCE_SEGMENT_WIDTH * 4;
   const vehicles: Array<{ object: THREE.Object3D; offset: number; speed: number; place(x: number, time: number): void }> = [];
-  for (const depth of ['near', 'far'] as const) {
+  for (const depth of depths) {
     const group = depth === 'near' ? near : far;
     const rail = AI_CITY_RAILS[depth];
     const trainCount = Math.ceil(span / (depth === 'near' ? 90 : 60));
@@ -124,6 +124,7 @@ export function createAiCityTraffic(homeCenter: number) {
       vehicles.push({ object: train, offset: homeCenter + 28 + i * span / trainCount, speed: (depth === 'near' ? 3.2 : 2) * direction,
         place(x): void { train.position.set(x, rail.y + .76 * rail.scale, rail.z); } });
     }
+    if (!flyers) continue;
     const look = FLYERS[depth];
     const droneCount = Math.ceil(span / (depth === 'near' ? 70 : 40));
     for (let i = 0; i < droneCount; i++) {

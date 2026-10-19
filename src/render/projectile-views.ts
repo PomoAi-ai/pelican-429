@@ -19,6 +19,8 @@ import { createGlowTexture } from './orb-view.ts';
 import type { EntityView, EntityViewFactory } from './view-registry.ts';
 import { createPhotonProjectileViews } from './photon-projectile-view.ts';
 import { createDronePayloadViews } from './drone-payload-view.ts';
+import { addNodePatch } from './node-patches.ts';
+import type { JellyUniforms } from './node-patches.ts';
 
 /** 投射物视图 z：在地形方块前表面（z=0.5）之前一点，避免被方块遮住。 */
 export const PROJECTILE_Z = 0.15;
@@ -74,7 +76,7 @@ const JELLY_FRAGMENT = /* glsl */ `
 `;
 
 /** 给水弹主体材质挂上果冻抖动 + 菲涅尔（链式 onBeforeCompile，缓存键加标签；与光照图/云影注入顺序无关）。 */
-function applyJelly(material: THREE.Material, uniforms: Record<string, THREE.IUniform<number>>): void {
+function applyJelly(material: THREE.Material, uniforms: JellyUniforms): void {
   const prev = material.onBeforeCompile;
   const baseKey = material.customProgramCacheKey();
   material.onBeforeCompile = (shader, renderer) => {
@@ -90,6 +92,7 @@ function applyJelly(material: THREE.Material, uniforms: Record<string, THREE.IUn
     shader.fragmentShader = shader.fragmentShader.replace('#include <emissivemap_fragment>', `#include <emissivemap_fragment>\n${JELLY_FRAGMENT}`);
   };
   material.customProgramCacheKey = () => `${baseKey}|water-jelly-v1`;
+  addNodePatch(material, { kind: 'water-jelly', uniforms });
 }
 
 /** 一条鱼模型（卡通鱼，共享几何/材质，身长 1、朝 +X）。 */
@@ -124,7 +127,7 @@ export function createProjectileViews(): ProjectileViews {
   const waterGeo = new THREE.SphereGeometry(1, 24, 18);
   const waterMat = new THREE.MeshStandardMaterial({ color: WATER_COLOR, roughness: 0.06, metalness: 0, transparent: true, opacity: 0.5, depthWrite: false, emissive: '#2a6f9a', emissiveIntensity: 0.18 });
   waterMat.name = 'water-shot';
-  const jellyUniforms: Record<string, THREE.IUniform<number>> = {
+  const jellyUniforms: JellyUniforms = {
     uJellyTime: { value: 0 },
     uJellyAmp: { value: WATER_JELLY.amplitude },
     uJellyFreq: { value: WATER_JELLY.frequency },

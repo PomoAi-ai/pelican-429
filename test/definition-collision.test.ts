@@ -6,6 +6,8 @@ import { tileDefinitionCollision } from '../src/physics/tile-definition-collisio
 import { createTileMap } from '../src/world/tile-map.ts';
 import { DEFAULT_TILES, TILE_STONE, TILE_PLATFORM } from '../src/world/tile-types.ts';
 import { SHAPE_HALF, SHAPE_SLOPE_R } from '../src/world/tile-shapes.ts';
+import { HUMAN_BODY_HEIGHT } from '../src/config/player-form.ts';
+import { TRANSIT, TRANSIT_HULL_COLLIDER } from '../src/config/transit.ts';
 
 const rectangle = (left: number, bottom: number, right: number, top: number): DefinitionCollider => ({
   points: [[left, bottom], [right, bottom], [right, top], [left, top]],
@@ -102,6 +104,44 @@ test('沿斜坡上下行走维持角支撑与贴地，台阶抬升不穿过低�
   close(b.x, -0.1);
   close(b.y, 0);
   assert.equal(b.wallContact, 1);
+});
+
+test('不可踏阶的收尖实体挡住平台上的角色，不把侧面当作楼梯逐帧抬到顶部', () => {
+  const geometry: DefinitionCollision = {
+    solids: [{ points: [[0, 0], [4, 0], [4, 5], [3.6, 8], [2, 11], [.4, 8], [0, 5]], autoStep: false }],
+    platforms: [{ left: -4, right: .1, top: 5 }],
+  };
+  const body = createBody({ x: -.5, y: 5, halfWidth: .4, height: 2.8, stepUp: 1, groundSnap: .5 });
+  body.onGround = true;
+  for (let tick = 0; tick < 60; tick++) {
+    body.vx = 4.8; body.vy = -.6;
+    moveDefinitionBody(body, geometry, 1 / 60);
+  }
+  close(body.x, -.4);
+  close(body.y, 5);
+  assert.equal(body.wallContact, 1);
+  assert.equal(body.onGround, true);
+});
+
+test('人形角色沿街从舰底下走过，舰体仍阻止顶头穿入并承托从顶部下落的角色', () => {
+  const walk = world(rectangle(0, -1, 60, 0), TRANSIT_HULL_COLLIDER);
+  const walker = createBody({ x: 20, y: 0, halfWidth: .4, height: HUMAN_BODY_HEIGHT });
+  for (let tick = 0; tick < 240; tick++) {
+    walker.vx = 6; walker.vy = -1;
+    moveDefinitionBody(walker, walk, 1 / 60);
+  }
+  assert.ok(walker.x > 40, `${walker.x}`);
+  close(walker.y, 0);
+  const geometry = world(TRANSIT_HULL_COLLIDER);
+  const body = createBody({ x: TRANSIT.rocketX, y: 0, halfWidth: .4, height: 1, vy: 40 });
+  moveDefinitionBody(body, geometry, .5);
+  close(body.y + body.height, TRANSIT.hullClearance);
+  assert.equal(body.vy, 0);
+  body.y = TRANSIT.rocketHeight + 4;
+  body.vy = -40;
+  moveDefinitionBody(body, geometry, .5);
+  close(body.y, TRANSIT.rocketHeight);
+  assert.equal(body.onGround, true);
 });
 
 test('半宽非整数高度平台允许上穿、下落站立与主动下穿', () => {

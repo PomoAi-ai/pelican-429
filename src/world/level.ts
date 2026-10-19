@@ -230,7 +230,7 @@ export function emptyCaves(width: number, height: number): CaveInfo {
 export interface LevelData {
   /** 玩家受向心吸力影响的黑洞中心，使用逻辑平面坐标。 */
   readonly blackhole?: Vec2;
-  /** 自由世界的房屋和居民生活区；敌人生成与移动均避开完整矩形。 */
+  /** 主世界的房屋和居民生活区；敌人生成与移动均避开完整矩形。 */
   readonly safeZones?: readonly Rect[];
   /** 连续世界中的机房实例，坐标是共享关卡原点在大地图上的位置。 */
   readonly facilities?: readonly { readonly id: FacilityChapterId; readonly x: number; readonly y: number }[];

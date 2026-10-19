@@ -86,6 +86,23 @@ describe('water-depth', () => {
     assert.equal(deep.at(1, 0).depth, WATER_DEPTH_MAX);
   });
 
+  test('按列窗口计算：窗口内与全量结果逐字节一致（含紧贴窗口的岸壁），窗口外不写', () => {
+    const g = grid(LAKE);
+    const full = new Uint8Array(g.width * g.height * 2);
+    computeWaterDepth({ ...g, threshold: 96 }, full);
+    for (const [x0, x1] of [[0, 0], [1, 3], [5, 7]] as const) {
+      const part = new Uint8Array(g.width * g.height * 2).fill(7);
+      computeWaterDepth({ ...g, threshold: 96 }, part, 2, 0, x0, x1);
+      for (let ty = 0; ty < g.height; ty++) {
+        for (let tx = 0; tx < g.width; tx++) {
+          const i = (ty * g.width + tx) * 2;
+          const expected = tx >= x0 && tx <= x1 ? [full[i], full[i + 1]] : [7, 7];
+          assert.deepEqual([part[i], part[i + 1]], expected, `窗口 [${x0},${x1}] 格 (${tx},${ty})`);
+        }
+      }
+    }
+  });
+
   test('非法输入即抛', () => {
     const g = grid(['..']);
     assert.throws(() => computeWaterDepth({ ...g, threshold: 96 }, new Uint8Array(3)), /water-depth/);

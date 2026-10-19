@@ -5,8 +5,8 @@
  * - 贴岩苔团、根部叶丛与细垂藤：树叶材质与风摆（全局风 uniform），aSway 从根部 0 → 末梢 1，随风摆动；
  * - 泥土正面的攀附植被（face-climbers，与地表共用）：常春藤从岛底沿正面向上爬、苔垫/苔斑、岛底短垂藤，底部连片、向上渐稀；
  * - 岛下薄雾/投影：竖向渐隐的半透明面片（不挂光照图）；地面上的淡投影由光照图 skyPass/skyShade 产生。
- * 全部浮空块一次构建（≤ 4 大岛 + 数十小块，几何很小）：静态部件合并成 1 个网格，根须 1 个 InstancedMesh（变体图集），
- * 攀附植被 1 个 InstancedMesh（自己的小图集），薄雾 1 个网格 = 4 draw call。
+ * 全部浮空块一次构建（≤ 4 大岛 + 数十小块，几何很小）：静态部件合并成 1 个网格，根须 1 个变体批次（BatchedMesh），
+ * 攀附植被 1 个 InstancedMesh（自己的小图集），薄雾 1 个网格。
  */
 import * as THREE from 'three';
 import { hash01, valueNoise1D } from '../core/rng.ts';
@@ -17,6 +17,7 @@ import { createCaveDecorMaterial } from './cave-decor-view.ts';
 import { createLeafMaterial } from './tree-material.ts';
 import { addCard, addLeafClump, addStrand, crownShade, planLeafClump } from './tree-foliage.ts';
 import { LEAF_COLORS } from './tree-geometry.ts';
+import { createVariantBatch, mergeIndexedVariants } from './variant-atlas.ts';
 import type { LeafCluster, Vec3 } from './tree-skeleton.ts';
 import { LEAF_TILE_UV } from './tree-textures.ts';
 import { CLIMBER_Z, climberInstance, createClimberAtlas, createClimberMaterial, createClimberMesh, fitIvy } from './face-climbers.ts';
@@ -25,7 +26,6 @@ import { createGroundProfile } from './ground-profile.ts';
 import type { GroundProfile } from './ground-profile.ts';
 import type { LakeSpan } from './surface-smooth.ts';
 import { MeshBuilder, concatGeometries } from './tree-builder.ts';
-import { addVariantCollapse, mergeIndexedVariants, variantInstanceGeometry } from './variant-atlas.ts';
 
 export const SKY_ISLAND_Z = Object.freeze({ LUMP_MIN: -0.75, LUMP_MAX: 0.15, ROOT_MIN: 0.56, ROOT_MAX: 0.7, MIST: -1.3 });
 export const ROOT_VARIANTS = 12;
@@ -400,26 +400,26 @@ export function createSkyIslandView(islands: readonly SkyIsland[]): SkyIslandVie
     disposables.push(merged, mat);
   }
   for (const g of geoms.values()) g.dispose();
-  // 根须/藤蔓：变体图集 + 风摆材质。
+  // 根须/藤蔓：变体批次（每个实例只画自己的变体，逐实例视锥剔除）+ 风摆材质。
   if (plan.roots.length > 0) {
     const rootParts = createRootParts();
     const atlas = mergeIndexedVariants(rootParts, 'sky-island-roots');
     for (const g of rootParts) g.dispose();
-    const geom = variantInstanceGeometry(atlas, plan.roots.map((r) => r.variant));
+    const mat = createLeafMaterial(uTime, { name: 'sky-island-roots' });
+    const mesh = createVariantBatch(atlas, plan.roots.map((r) => r.variant), mat);
     atlas.dispose();
-    const mat = addVariantCollapse(createLeafMaterial(uTime, { name: 'sky-island-roots' }), 'sky-island-roots');
-    const mesh = new THREE.InstancedMesh(geom, mat, plan.roots.length);
     mesh.name = 'sky-island-roots';
     const m = new THREE.Matrix4();
+    const white = new THREE.Color(1, 1, 1);
     plan.roots.forEach((r, i) => {
       mesh.setMatrixAt(i, m.makeScale(r.scale, r.scale, r.scale).setPosition(r.x, r.y, r.z));
-      mesh.setColorAt(i, new THREE.Color(1, 1, 1));
+      mesh.setColorAt(i, white);
     });
     mesh.computeBoundingSphere();
     mesh.castShadow = false;
     mesh.receiveShadow = true;
     root.add(mesh);
-    disposables.push(geom, mat);
+    disposables.push(mesh, mat);
   }
   // 正面攀附：自己的小图集（不让根须实例跑攀附变体的顶点，反之亦然）。
   const atlas = createClimberAtlas('island');
@@ -429,7 +429,7 @@ export function createSkyIslandView(islands: readonly SkyIsland[]): SkyIslandVie
   if (climbers) {
     climbers.computeBoundingSphere();
     root.add(climbers);
-    disposables.push(climbers.geometry, climberMat);
+    disposables.push(climbers, climberMat);
   } else climberMat.dispose();
   const mistGeom = buildMistGeometry(islands);
   if (mistGeom) {

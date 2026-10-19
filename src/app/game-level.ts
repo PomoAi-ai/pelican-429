@@ -50,6 +50,6 @@ export function loadGameLevel(params: URLSearchParams): { level: LevelData; grou
     const { level, ground } = createTerrainCompositionLevel(kind, seed, material, environment);
     return { level, ground, compositions: [], chapter: null };
   }
-  const level = generateFreeWorld(seed, parseFreeWorldSize(params.get('size')));
+  const level = generateFreeWorld(seed, parseFreeWorldSize(params.get('size')), params.get('mode') === 'homestead' ? 'hut' : 'wilds');
   return { level, ground: levelGroundColumns(level), compositions: level.compositions, chapter: null };
 }

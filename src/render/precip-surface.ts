@@ -11,6 +11,7 @@
  * 不挂接：userData.noPrecip 为真的材质、ShaderMaterial 等非网格光照材质（水面/云/粒子）。
  */
 import * as THREE from 'three';
+import { addNodePatch } from './node-patches.ts';
 
 export const PRECIP_PROGRAM_TAG = 'precip-v2';
 
@@ -188,8 +189,10 @@ export interface PrecipSurfacePatcher {
   patchTree(root: THREE.Object3D): void;
 }
 
+// 模块级缓存的材质会被多个场景实例（如星舰抵达时新旧城区并存）各自的挂接器遇到，按材质全局去重才不会重复注入导致着色器重定义。
+const done = new WeakSet<THREE.Material>();
+
 export function createPrecipSurfacePatcher(uniforms: PrecipUniforms = sharedPrecipUniforms()): PrecipSurfacePatcher {
-  const done = new WeakSet<THREE.Material>();
   let patched = 0;
   const patch = (material: THREE.Material): boolean => {
     if (done.has(material)) return true;
@@ -212,6 +215,7 @@ export function createPrecipSurfacePatcher(uniforms: PrecipUniforms = sharedPrec
         .replace('#include <emissivemap_fragment>', `${PRECIP_SURFACE_FRAGMENT}\n#include <emissivemap_fragment>`);
     };
     material.customProgramCacheKey = () => `${baseKey}|${PRECIP_PROGRAM_TAG}`;
+    addNodePatch(material, { kind: 'precip-surface', uniforms });
     material.needsUpdate = true;
     done.add(material);
     patched++;

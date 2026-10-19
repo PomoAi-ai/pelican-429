@@ -11,7 +11,7 @@ export interface FreeWorldRegion {
 
 /** 目的地来自实际生成结果，种子变化时区域位置也随之变化。 */
 export function freeWorldRegions(level: LevelData, ground: Int16Array): FreeWorldRegion[] {
-  const regions: FreeWorldRegion[] = [{ id: 'wilds', label: '渔屋营地 · Sam 与 Tibo', labelEn: 'Camp · Sam & Tibo', position: level.spawn }];
+  const regions: FreeWorldRegion[] = [{ id: 'wilds', label: '原野入口 · Sam 与 Tibo', labelEn: 'Wilds entrance · Sam & Tibo', position: level.spawn }];
   const forest = level.trees.find(tree => tree.kind !== 'palm' && tree.baseY === ground[tree.x]);
   if (forest) regions.push({ id: 'forest', label: '林间漫游', labelEn: 'Woodland', position: { x: forest.x + .5, y: forest.baseY + 3 } });
   level.lakes.filter(lake => !lake.perched).forEach((lake, i) => regions.push({

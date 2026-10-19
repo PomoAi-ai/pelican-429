@@ -6,6 +6,7 @@
  */
 import * as THREE from 'three';
 import { concatGeometries } from './tree-builder.ts';
+import { addNodePatch } from './node-patches.ts';
 
 export const VARIANT_PROGRAM_TAG = 'variant-atlas-v1';
 /** 合并要求的公共属性（FloraBuilder.build 的输出）。 */
@@ -90,6 +91,7 @@ export function addVariantCollapse<M extends THREE.Material>(material: M, label:
       .replace('#include <project_vertex>', `${VERTEX}\n#include <project_vertex>`);
   };
   material.customProgramCacheKey = () => `${baseKey}|${VARIANT_PROGRAM_TAG}`;
+  addNodePatch(material, { kind: 'variant-collapse' });
   material.userData.variantAtlas = true;
   return material;
 }
@@ -100,4 +102,63 @@ export function variantInstanceGeometry(atlas: THREE.BufferGeometry, variants: r
   const g = atlas.clone();
   g.setAttribute('aVariant', new THREE.InstancedBufferAttribute(Float32Array.from(variants), 1));
   return g;
+}
+
+const slicesByAtlas = new WeakMap<THREE.BufferGeometry, THREE.BufferGeometry[]>();
+
+/** 图集按 aVar 切回各变体的子几何（合并时各变体顶点与三角形都是连续段；不含 aVar）。按图集缓存，只是 CPU 数组，随图集回收。 */
+function variantSlices(atlas: THREE.BufferGeometry): THREE.BufferGeometry[] {
+  const cached = slicesByAtlas.get(atlas);
+  if (cached) return cached;
+  const aVar = atlas.getAttribute('aVar');
+  const ranges: [number, number][] = [];
+  for (let i = 0; i < aVar.count; i++) {
+    const v = aVar.getX(i);
+    const r = (ranges[v] ??= [i, i]);
+    r[1] = i + 1;
+  }
+  const index = atlas.index;
+  const slices = ranges.map(([start, end]) => {
+    const g = new THREE.BufferGeometry();
+    for (const [name, a] of Object.entries(atlas.attributes)) {
+      if (name === 'aVar') continue;
+      const attr = a as THREE.BufferAttribute;
+      g.setAttribute(name, new THREE.BufferAttribute(attr.array.slice(start * attr.itemSize, end * attr.itemSize), attr.itemSize, attr.normalized));
+    }
+    if (index) {
+      const out: number[] = [];
+      for (let t = 0; t < index.count; t++) {
+        const k = index.getX(t);
+        if (k >= start && k < end) out.push(k - start);
+      }
+      g.setIndex(out);
+    }
+    return g;
+  });
+  slicesByAtlas.set(atlas, slices);
+  return slices;
+}
+
+/**
+ * 变体批次（BatchedMesh，multi-draw = 1 draw call，逐实例视锥剔除）：每个实例只画自己变体的几何。
+ * 取代 InstancedMesh + 塌缩：那种写法每个实例都跑全部变体的顶点，几百三角形的变体每帧白跑数十万个退化三角形。
+ * 实例 id = variants 下标；调用方 setMatrixAt / setColorAt，静态批次再 computeBoundingSphere。
+ */
+export function createVariantBatch(atlas: THREE.BufferGeometry, variants: readonly number[], material: THREE.Material): THREE.BatchedMesh {
+  const slices = variantSlices(atlas);
+  const used = [...new Set(variants)];
+  let vertices = 0;
+  let indices = 0;
+  for (const v of used) {
+    const g = slices[v];
+    if (!g) throw new Error(`variant-atlas: invalid variant index ${v}`);
+    vertices += g.getAttribute('position').count;
+    indices += g.index?.count ?? 0;
+  }
+  const mesh = new THREE.BatchedMesh(Math.max(1, variants.length), Math.max(1, vertices), Math.max(1, indices), material);
+  const ids = new Map(used.map((v) => [v, mesh.addGeometry(slices[v]!)]));
+  for (const v of variants) mesh.addInstance(ids.get(v)!);
+  mesh.sortObjects = false;
+  mesh.perObjectFrustumCulled = true;
+  return mesh;
 }

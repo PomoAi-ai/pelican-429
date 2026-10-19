@@ -1,7 +1,29 @@
 import * as THREE from 'three';
 import { mulberry32 } from '../../core/rng.ts';
+import { currentViewportHeight } from '../stage.ts';
+import { glslFloat as f } from '../wind.ts';
 
 const LIGHT_INTENSITY = 1.8;
+
+/**
+ * 光点着色器（uLayer 0 = 光核、1 = 弥散辉光、2 = 外围光点）：漂移、脉动、闪烁、高斯辉光与颜色，WebGPU 节点版本同表。
+ * swarm / core 为外围光点与光核的位移（freq 乘 uCycle、amp 为幅度）。
+ */
+export const LUMA_RIG_SHADER = {
+  tau: 6.2831853,
+  swarm: { xFreq: 0.7, xAmp: 0.11, yFreq: 0.9, yPhase: 3, yAmp: 0.12, zFreq: 0.6, zAmp: 0.12 },
+  core: { xAmp: 0.018, yFreq: 1.3, yAmp: 0.022 },
+  pulse: { base: 0.88, amp: 0.12, freq: 1.4 },
+  twinkle: { freq: 1.5, pow: 3, gain: 0.8 },
+  haloOpacity: 0.19,
+  falloff: 28,
+  edge: [0.16, 0.25],
+  haloColor: [0.18, 0.72, 1],
+  moteColor: [1.15, 1.3, 1.18],
+  alertColor: [1.3, 1, 0.45],
+} as const;
+const L = LUMA_RIG_SHADER;
+const vec3 = (c: readonly number[]): string => `vec3(${c.map(f).join(', ')})`;
 
 const lightVertex = /* glsl */`
   attribute float seed;
@@ -13,25 +35,25 @@ const lightVertex = /* glsl */`
   uniform float uLayer;
   varying float vOpacity;
   void main() {
-    float phase = seed * 6.2831853;
+    float phase = seed * ${f(L.tau)};
     vec3 p = position;
     if (uLayer > 1.5) {
-      p.x += sin(uCycle * 0.7 + phase) * 0.11;
-      p.y += sin(uCycle * 0.9 + phase * 3.0) * 0.12;
-      p.z += cos(uCycle * 0.6 + phase) * 0.12;
+      p.x += sin(uCycle * ${f(L.swarm.xFreq)} + phase) * ${f(L.swarm.xAmp)};
+      p.y += sin(uCycle * ${f(L.swarm.yFreq)} + phase * ${f(L.swarm.yPhase)}) * ${f(L.swarm.yAmp)};
+      p.z += cos(uCycle * ${f(L.swarm.zFreq)} + phase) * ${f(L.swarm.zAmp)};
       p *= uSpread;
     } else {
-      p.x += sin(uCycle + phase) * 0.018;
-      p.y += cos(uCycle * 1.3 + phase) * 0.022;
+      p.x += sin(uCycle + phase) * ${f(L.core.xAmp)};
+      p.y += cos(uCycle * ${f(L.core.yFreq)} + phase) * ${f(L.core.yAmp)};
     }
-    float pulse = 0.88 + 0.12 * sin(uCycle * 1.4 + phase);
+    float pulse = ${f(L.pulse.base)} + ${f(L.pulse.amp)} * sin(uCycle * ${f(L.pulse.freq)} + phase);
     vec4 mv = modelViewMatrix * vec4(p, 1.0);
     gl_Position = projectionMatrix * mv;
     gl_PointSize = size * pulse * length(modelMatrix[0].xyz)
       * uPixels * 0.5 * projectionMatrix[1][1] / -mv.z;
     vOpacity = uEnergy * (uLayer > 1.5
-      ? pow(0.5 + 0.5 * sin(uCycle * 1.5 + phase), 3.0) * 0.8
-      : (uLayer > 0.5 ? 0.19 : 1.0));
+      ? pow(0.5 + 0.5 * sin(uCycle * ${f(L.twinkle.freq)} + phase), ${f(L.twinkle.pow)}) * ${f(L.twinkle.gain)}
+      : (uLayer > 0.5 ? ${f(L.haloOpacity)} : 1.0));
   }
 `;
 
@@ -43,10 +65,10 @@ const lightFragment = /* glsl */`
     vec2 p = gl_PointCoord - 0.5;
     float radius2 = dot(p, p);
     // Gaussian falloff vanishes before the point boundary; no visible shell.
-    float glow = exp(-radius2 * 28.0) * (1.0 - smoothstep(0.16, 0.25, radius2));
+    float glow = exp(-radius2 * ${f(L.falloff)}) * (1.0 - smoothstep(${f(L.edge[0])}, ${f(L.edge[1])}, radius2));
     vec3 color = uLayer > 0.5 && uLayer < 1.5
-      ? vec3(0.18, 0.72, 1.0) : vec3(1.15, 1.3, 1.18);
-    color = mix(color, vec3(1.3, 1.0, 0.45), uAlert);
+      ? ${vec3(L.haloColor)} : ${vec3(L.moteColor)};
+    color = mix(color, ${vec3(L.alertColor)}, uAlert);
     gl_FragColor = vec4(color, glow * vOpacity);
   }
 `;
@@ -104,6 +126,7 @@ export function createLumaRig(): LumaRig {
     geometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
     geometry.boundingSphere = new THREE.Sphere(new THREE.Vector3(), 1.3);
     const material = new THREE.ShaderMaterial({
+      name: 'luma-rig-light',
       vertexShader: lightVertex, fragmentShader: lightFragment,
       uniforms: { ...uniforms, uPixels: { value: 1 }, uLayer: { value: layer } },
       transparent: true, depthWrite: false, toneMapped: false, blending: THREE.AdditiveBlending,
@@ -111,8 +134,7 @@ export function createLumaRig(): LumaRig {
     const points = new THREE.Points(geometry, material);
     points.renderOrder = 3;
     points.onBeforeRender = renderer => {
-      renderer.getCurrentViewport(viewport);
-      material.uniforms.uPixels!.value = viewport.w;
+      material.uniforms.uPixels!.value = currentViewportHeight(renderer, viewport);
     };
     particles.add(points);
     moteGeometries.push(geometry);

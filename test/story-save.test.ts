@@ -27,7 +27,7 @@ test('旧难度存档按剩余比例降低 Boss 血量，重新保存加载不�
   }
 });
 
-test('浏览器检查点往返保留倒计时与通关后的自由世界选择', () => {
+test('浏览器检查点往返保留倒计时与通关后的主世界选择', () => {
   const storage = memoryStorage();
   assert.equal(loadStorySave(storage), null);
   saveStory(storage, { phase: 'countdown', countdownTicks: 123 }, 'fortress');

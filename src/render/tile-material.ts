@@ -20,6 +20,7 @@ import { BLOCK_BACK_Z, BLOCK_BEVEL, BLOCK_FRONT_Z, FILLET_RING_BASE } from './ti
 import { RELIEF_GLSL, RELIEF_PARAMS } from './tile-relief.ts';
 import { ORGANIC_GLSL, glslConstants } from './tile-organic.ts';
 import { CONVEX_RADIUS, HALF_CONVEX_RADIUS, FILLET_RADIUS } from './tile-transitions.ts';
+import { addNodePatch } from './node-patches.ts';
 
 /** 带自定义 defines 的材质视图。 */
 export type TileMaterialDefines = THREE.Material & { defines?: Record<string, string> };
@@ -718,6 +719,7 @@ export function createTileMaterial(tex: TileTextureData): THREE.MeshStandardMate
     shader.fragmentShader = fs;
   };
   material.customProgramCacheKey = () => TILE_PROGRAM_KEY;
+  addNodePatch(material, { kind: 'tile-layers', texture });
   material.addEventListener('dispose', () => texture.dispose());
   return material;
 }

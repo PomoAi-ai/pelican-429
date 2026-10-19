@@ -4,6 +4,7 @@ import { lerp } from '../core/math.ts';
 import type { Entity } from '../entities/entity.ts';
 import { loadCharacterModel } from './character-model.ts';
 import type { EntityView } from './view-registry.ts';
+import { glslFloat } from './wind.ts';
 
 const NODES = ['TailPivot', 'TailEmitter', 'CanopyPivot', 'WheelPivot_0', 'WheelPivot_1', 'WheelPivot_2', 'StandDeck', 'LiftEmitter_0', 'LiftEmitter_1', 'LiftEmitter_2', 'LiftEmitter_3'] as const;
 const DOWN = new THREE.Vector3(0, -1, 0);
@@ -55,29 +56,50 @@ export function disposeFlyingRoadsterAsset(): void {
   loading = null;
 }
 
+/** 离子尾喷光片着色：外鞘半径随混合度张开并带波纹，周期性“胞”收紧白芯；WebGPU 节点版本同表。 */
+export const ROADSTER_JET_SHADER = {
+  mixing: [0.08, 0.85], ripple: { freq: 42, speed: 17, freq2: 19, across: 9, speed2: 7, amp: 0.025 }, radius: [0.7, 0.94], sheathInner: 0.45,
+  cells: { freq: 22, speed: 1.8, sharp: 8, shrink: 0.12 }, coreRadius: [0.56, 0.18], coreInner: 0.6, coreFade: [0.18, 0.72], fade: 0.2,
+  flow: { base: 0.92, amp: 0.08 }, alpha: { sheath: 0.32, core: 0.62 }, blue: [0.12, 0.58, 1], white: [0.78, 0.96, 1], cellTint: [0.14, 0.2, 0.24],
+} as const;
+const J = ROADSTER_JET_SHADER;
+// 原 GLSL 的小数写作 .70 这样两位、省略前导 0；按同样格式生成，WebGL 着色器文本逐字不变。
+const glslShort = (n: number): string => glslFloat(n).replace(/^0\./, '.');
+const j2 = (n: number): string => (Number.isInteger(n) ? glslFloat(n) : n.toFixed(2).replace(/^0\./, '.'));
+const jv = (c: readonly number[]): string => `vec3(${c.map(j2).join(', ')})`;
+
 /** 双层光片只保留柔和离子辉光；尾喷光片随真实喷口的旋转节点运动。 */
 function createIonJets(model: THREE.Group) {
   const shape = new THREE.PlaneGeometry(1, 1);
   shape.translate(0, -.5, 0);
   const time = { value: 0 };
+  const power = { value: 0 };
   const material = new THREE.ShaderMaterial({
-    uniforms: { uTime: time },
+    name: 'roadster-ion-jet',
+    uniforms: { uTime: time, uPower: power },
     vertexShader: `varying vec2 vUv;
       void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
-    fragmentShader: `uniform float uTime; varying vec2 vUv;
+    fragmentShader: `uniform float uTime; uniform float uPower; varying vec2 vUv;
       void main() {
         float t = 1.0 - vUv.y;
         float across = abs(vUv.x - .5) * 2.0;
-        float width = mix(.30, .70, smoothstep(0.0, .6, t));
-        float envelope = exp(-pow(across / width, 2.0) * 4.0);
-        float tip = pow(1.0 - smoothstep(.15, 1.0, t), 1.15);
-        float core = exp(-pow(across / .18, 2.0) * 3.0) * (1.0 - t);
-        float bands = .92 + .08 * sin(t * 55.0 - uTime * 25.0);
-        vec3 color = mix(vec3(.04, .38, 1.0), vec3(.30, .83, 1.0), envelope);
-        color = mix(color, vec3(.88, .99, 1.0), core);
-        gl_FragColor = vec4(color * mix(1.1, 2.0, core), (envelope * .65 + core * .25) * tip * bands);
+        float mixing = smoothstep(${j2(J.mixing[0])}, ${j2(J.mixing[1])}, t);
+        float ripple = sin(t * ${j2(J.ripple.freq)} - uTime * ${j2(J.ripple.speed)}) * sin(t * ${j2(J.ripple.freq2)} + across * ${j2(J.ripple.across)} - uTime * ${j2(J.ripple.speed2)});
+        float radius = mix(${j2(J.radius[0])}, ${j2(J.radius[1])}, mixing) + ripple * ${glslShort(J.ripple.amp)} * mixing;
+        float sheath = 1.0 - smoothstep(radius * ${j2(J.sheathInner)}, radius, across);
+        float cells = pow(.5 + .5 * cos(t * ${j2(J.cells.freq)} - uTime * ${glslShort(J.cells.speed)}), ${j2(J.cells.sharp)});
+        float coreRadius = mix(${j2(J.coreRadius[0])}, ${j2(J.coreRadius[1])}, t) * (1.0 - cells * ${j2(J.cells.shrink)});
+        float core = (1.0 - smoothstep(coreRadius * ${glslShort(J.coreInner)}, coreRadius, across))
+          * (1.0 - smoothstep(${j2(J.coreFade[0])}, ${j2(J.coreFade[1])}, t));
+        float fade = 1.0 - smoothstep(${j2(J.fade)}, 1.0, t);
+        float flow = ${j2(J.flow.base)} + ripple * ${j2(J.flow.amp)};
+        float alpha = (sheath * ${j2(J.alpha.sheath)} + core * ${j2(J.alpha.core)}) * fade * flow * uPower;
+        vec3 color = mix(${jv(J.blue)}, ${jv(J.white)}, core);
+        color += ${jv(J.cellTint)} * cells * core;
+        gl_FragColor = vec4(color, alpha);
+        #include <colorspace_fragment>
       }`,
-    transparent: true, depthWrite: false, side: THREE.DoubleSide,
+    transparent: true, depthWrite: false, side: THREE.DoubleSide, forceSinglePass: true,
     blending: THREE.NormalBlending, toneMapped: false,
   });
   material.userData.noLightMap = true;
@@ -108,6 +130,7 @@ function createIonJets(model: THREE.Group) {
   return {
     update(elapsed: number, lift: number, cruise: number) {
       time.value = elapsed;
+      power.value = lift;
       for (const jet of jets) {
         const pulse = 1 + .035 * Math.sin(elapsed * 19 + jet.phase);
         jet.root.visible = lift > .01;

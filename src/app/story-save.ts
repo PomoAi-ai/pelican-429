@@ -71,7 +71,7 @@ export function loadStorySave(storage: Pick<Storage, 'getItem'>): StorySave | nu
     || (save.destination === 'free' && cp.phase !== 'restored')) {
     throw new Error('主线存档版本或检查点无效 / Invalid story save version or checkpoint');
   }
-  if (save.progress !== undefined && save.destination !== 'fortress') throw new Error('自由世界选择不能携带堡垒快照 / Invalid story progress destination');
+  if (save.progress !== undefined && save.destination !== 'fortress') throw new Error('主世界选择不能携带堡垒快照 / Invalid story progress destination');
   return { version: 3, checkpoint: { phase: cp.phase, countdownTicks: cp.countdownTicks }, destination: save.destination,
     ...(save.progress === undefined ? {} : { progress: readProgress(save.progress, cp, save.version) }) };
 }

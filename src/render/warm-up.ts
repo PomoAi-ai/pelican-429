@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import type { Stage } from './stage.ts';
+import type { Stage, StageRenderer } from './stage.ts';
 
 /**
  * 加载阶段预热：首次上屏时的着色器编译与贴图上传是游玩中长任务的主因，挪到加载层显示期间完成。
@@ -9,7 +9,7 @@ import type { Stage } from './stage.ts';
  * 所以每次编译后再关掉视锥剔除真实渲染一帧，把这些都在加载层显示期间做完。
  * 须在世界光照补丁（worldLight.update）之后调用，否则补丁会改掉程序键，预热白做。
  */
-export async function warmUpStage(stage: Stage, lightGroups: readonly THREE.Object3D[], signal?: AbortSignal): Promise<void> {
+export async function warmUpStage(stage: Stage<StageRenderer>, lightGroups: readonly THREE.Object3D[], signal?: AbortSignal): Promise<void> {
   const { renderer, scene } = stage;
   scene.traverse((node) => {
     if (!(node instanceof THREE.Mesh || node instanceof THREE.Points || node instanceof THREE.Line || node instanceof THREE.Sprite)) return;
@@ -43,10 +43,7 @@ export async function warmUpStage(stage: Stage, lightGroups: readonly THREE.Obje
  * 场景实际画进后期的 HDR 目标（线性输出、不做色调映射）；编译时绑定同一目标，程序键才与真实渲染一致。
  * root 可以是尚未挂进场景的对象：按场景灯光异步编译，挂上后首帧不再同步编译。
  */
-export function compileForStage({ renderer, scene, camera, postFx }: Stage, root: THREE.Object3D): Promise<unknown> {
-  const target = renderer.getRenderTarget();
-  renderer.setRenderTarget(postFx.sceneTarget);
-  const ready = renderer.compileAsync(root, camera, scene);
-  renderer.setRenderTarget(target);
-  return ready;
+export function compileForStage(stage: Stage<StageRenderer>, root: THREE.Object3D): Promise<unknown> {
+  stage.padPointLights();
+  return stage.postFx.compile(root);
 }

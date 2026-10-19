@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { TELEPORT_TAIL_TICKS, type TeleportState } from '../entities/teleport.ts';
+import { addNodePatch } from './node-patches.ts';
 
 const PARTICLES = 64;
 const smooth = THREE.MathUtils.smoothstep;
@@ -27,6 +28,7 @@ function fadeMaterials(models: THREE.Object3D[], amount: { value: number }) {
       `);
     };
     material.customProgramCacheKey = () => `${key}|teleport-block-dissolve`;
+    addNodePatch(material, { kind: 'teleport-dissolve', amount });
     copies.set(original, material);
     owned.push(material);
     return material;

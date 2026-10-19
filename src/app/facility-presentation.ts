@@ -7,7 +7,7 @@ import { createFacilityView } from '../render/facility-view.ts';
 import { createFortressView } from '../render/facility-fortress.ts';
 import { createCathedralView } from '../render/facility-cathedral.ts';
 import { createAbyssView } from '../render/facility-abyss.ts';
-import type { Stage } from '../render/stage.ts';
+import type { Stage, StageRenderer } from '../render/stage.ts';
 import type { Rect } from '../core/math.ts';
 import { loadInteriorBackgroundTexture, type InteriorBackgroundTextures } from '../render/free-world-interior-textures.ts';
 import { acquireKtx2Loader } from '../render/ktx2-loader.ts';
@@ -42,7 +42,7 @@ export function disposePreloadedFortressTextures(): void {
   fortressBytes.clear();
 }
 
-export async function loadFortressTextures(renderer: THREE.WebGLRenderer, format: 'ktx2' | 'webp'): Promise<THREE.Texture[]> {
+export async function loadFortressTextures(renderer: StageRenderer, format: 'ktx2' | 'webp'): Promise<THREE.Texture[]> {
   const paths = fortressTexturePaths(format);
   const compressed = paths[0]!.endsWith('.ktx2');
   const decoder = compressed ? acquireKtx2Loader(renderer) : null;
@@ -71,7 +71,7 @@ export async function loadFortressTextures(renderer: THREE.WebGLRenderer, format
   return textures;
 }
 
-async function loadFortressView(renderer: THREE.WebGLRenderer, format: 'ktx2' | 'webp') {
+async function loadFortressView(renderer: StageRenderer, format: 'ktx2' | 'webp') {
   const textures = await loadFortressTextures(renderer, format);
   return createFortressView({
     sky: textures[0]!, farCity: textures[1]!, middleDistrict: textures[2]!, nearRooftops: textures[3]!,
@@ -79,7 +79,7 @@ async function loadFortressView(renderer: THREE.WebGLRenderer, format: 'ktx2' | 
 }
 
 /** Configure the scene before precipitation captures its baseline lighting. */
-export async function createFacilityPresentation(stage: Stage, sceneId: FacilitySceneId, textureFormat: 'ktx2' | 'webp' = 'ktx2') {
+export async function createFacilityPresentation(stage: Stage<StageRenderer>, sceneId: FacilitySceneId, textureFormat: 'ktx2' | 'webp' = 'ktx2') {
   const interior = sceneId === 'cathedral' || sceneId === 'abyss' ? await loadInteriorBackgroundTexture(stage.renderer, sceneId) : null;
   const view = sceneId === 'fortress'
     ? await loadFortressView(stage.renderer, textureFormat)
@@ -125,7 +125,7 @@ export async function createFacilityPresentation(stage: Stage, sceneId: Facility
 }
 
 /** 连通世界共用天空与灯光环境；机房动画仍使用各自的局部坐标。 */
-export async function createFreeWorldFacilities(stage: Stage, placements: readonly { id: FacilityChapterId; x: number; y: number }[], interiors: InteriorBackgroundTextures) {
+export async function createFreeWorldFacilities(stage: Stage<StageRenderer>, placements: readonly { id: FacilityChapterId; x: number; y: number }[], interiors: InteriorBackgroundTextures) {
   const root = new THREE.Group();
   root.name = 'free-world-facilities';
   const views: Array<{ view: ReturnType<typeof createCathedralView>; camera: THREE.PerspectiveCamera; bounds: THREE.Box3 }> = [];
@@ -169,7 +169,7 @@ export async function createFreeWorldFacilities(stage: Stage, placements: readon
 }
 
 /** 机房预览与首屏共用的取景：镜头对准 (x, y)，可见高度为 height，返回带边距的环境更新范围。 */
-export function frameFacilityCamera(stage: Stage, x: number, y: number, height: number): Rect {
+export function frameFacilityCamera(stage: Stage<StageRenderer>, x: number, y: number, height: number): Rect {
   const width = height * stage.camera.aspect;
   const distance = height / (2 * Math.tan(THREE.MathUtils.degToRad(stage.camera.fov) / 2));
   // 竖屏全景会把相机拉远，裁剪范围随之覆盖建筑及自然后景。

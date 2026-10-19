@@ -1,10 +1,11 @@
-import { LoadingManager, type WebGLRenderer } from 'three';
+import { LoadingManager } from 'three';
+import type { StageRenderer } from './stage.ts';
 import { KTX2Loader } from 'three/addons/loaders/KTX2Loader.js';
 
-const loaders = new WeakMap<WebGLRenderer, { loader: KTX2Loader; users: number }>();
+const loaders = new WeakMap<StageRenderer, { loader: KTX2Loader; users: number }>();
 
 /** 同一 renderer 共用 Worker；使用者必须等待自己的加载结算后归还。 */
-export function acquireKtx2Loader(renderer: WebGLRenderer) {
+export function acquireKtx2Loader(renderer: StageRenderer) {
   let entry = loaders.get(renderer);
   if (!entry) {
     entry = { loader: createKtx2Loader(renderer), users: 0 };
@@ -20,7 +21,7 @@ export function acquireKtx2Loader(renderer: WebGLRenderer) {
   } };
 }
 
-function createKtx2Loader(renderer: WebGLRenderer): KTX2Loader {
+function createKtx2Loader(renderer: StageRenderer): KTX2Loader {
   // 由 Vite 输出带哈希的本地转码器文件，兼容子路径部署。
   const manager = new LoadingManager().setURLModifier(url => {
     if (url === 'basis_transcoder.js') return new URL('../../node_modules/three/examples/jsm/libs/basis/basis_transcoder.js', import.meta.url).href;

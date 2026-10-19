@@ -8,7 +8,7 @@ export const clock = (second: number): string =>
 
 export const WORLD_CONTROLS = `
   <details class="world-controls">
-    <summary>世界控制 <output data-world-time>10:00</output></summary>
+    <summary>世界控制 <span class="world-controls-time" data-world-time>10:00</span></summary>
     <div class="world-controls-panel">
       <div class="world-controls-heading"><strong data-world-date></strong><span data-world-phase></span></div>
       <p data-world-sun></p>
@@ -45,7 +45,7 @@ export function bindWorldControls(root: HTMLElement) {
   const now = new Date();
   const time: GameTime = timeFromReal(now.getFullYear(), now.getMonth() + 1, now.getDate(), now.getHours(), now.getMinutes());
   const slider = root.querySelector<HTMLInputElement>('[data-world-minute]')!;
-  const output = root.querySelector<HTMLOutputElement>('[data-world-time]')!;
+  const timeLabel = root.querySelector<HTMLElement>('[data-world-time]')!;
   const date = root.querySelector<HTMLElement>('[data-world-date]')!;
   const phase = root.querySelector<HTMLElement>('[data-world-phase]')!;
   const sun = root.querySelector<HTMLElement>('[data-world-sun]')!;
@@ -64,9 +64,9 @@ export function bindWorldControls(root: HTMLElement) {
     const rise = sunriseSecond(time.day);
     const set = sunsetSecond(time.day);
     const s = time.second;
-    output.value = clock(s);
+    timeLabel.textContent = clock(s);
     slider.value = String(Math.floor(s / 60));
-    slider.setAttribute('aria-valuetext', output.value);
+    slider.setAttribute('aria-valuetext', timeLabel.textContent);
     date.textContent = `第 ${c.year} 年 · ${SEASON_NAMES[c.season]}季 · 第 ${c.dayOfSeason} 天`;
     phase.textContent = Math.abs(s - rise) < 3600 ? '黎明' : Math.abs(s - set) < 3600 ? '黄昏' : s > rise && s < set ? '白昼' : '星夜';
     sun.textContent = `日出 ${clock(rise)} · 日落 ${clock(set)} · ${MOON_PHASE_NAMES[moonPhase(time)]}`;

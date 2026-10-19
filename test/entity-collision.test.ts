@@ -7,6 +7,7 @@ import type { ContactDamageTuning, SolidTuning, Tuning } from '../src/config/tun
 import type { DismountEvent, HitEvent, SimEvent } from '../src/core/game-events.ts';
 import type { Entity } from '../src/entities/entity.ts';
 import { createFlyingRoadster } from '../src/entities/flying-roadster.ts';
+import { createFollowDrone, steerFollowDrone } from '../src/entities/follow-drone.ts';
 import { createBody } from '../src/physics/body.ts';
 import { createSolid, resolveSolids, solidsCollide } from '../src/physics/entity-collision.ts';
 import type { SolidAgent } from '../src/physics/entity-collision.ts';
@@ -311,6 +312,38 @@ describe('站在假人头上', () => {
     step(w2, { jumpPressed: true, jumpHeld: true, moveX: 1, runHeld: true });
     steps(w2, 120, { moveX: 1, runHeld: true, jumpHeld: false }, (w) => assertNoOverlap(w, '低空'));
     assert.ok(p2.body.x < dummy(w2).body.x, '没有穿过');
+  });
+});
+
+describe('跟随无人机承载玩家', () => {
+  test('落到车顶后随无人机按帧写入的目标移动，侧面走过去会被挡住', () => {
+    const w = createSimWorld({ level: parseLevel(level(64, 20, [{ x: 10, y: 7, ch: 'P' }]), LEVEL_LEGEND), playerForm: 'human' });
+    const player = getPlayer(w);
+    const drone = addEntity(w, id => createFollowDrone(id, 10.5, 1, w.tuning));
+    steps(w, 90);
+    assert.equal(player.solid!.supportId, drone.id);
+    assert.ok(Math.abs(player.body.y - drone.body.y - drone.body.height) < 1e-6);
+    const offset = player.body.x - drone.body.x;
+    // 表现层每个渲染帧写一次目标，一帧里跑 3 个 tick：位移均匀分摊到每个 tick。
+    const tick = w.tuning.sim.step;
+    for (let frame = 0; frame < 40; frame++) {
+      steerFollowDrone(drone, drone.followDrone!.targetX + 0.15, 1 + frame * 0.03, tick * 3);
+      for (let i = 0; i < 3; i++) {
+        const before = drone.body.x;
+        step(w);
+        assert.ok(Math.abs(drone.body.x - before - 0.05) < 1e-6, `frame ${frame} 匀速`);
+        assert.equal(player.solid!.supportId, drone.id, `frame ${frame} 抬升时仍站在车顶`);
+      }
+    }
+    assert.ok(Math.abs(drone.body.x - 16.5) < 1e-6);
+    assert.ok(Math.abs(player.body.x - drone.body.x - offset) < 1e-6, '随无人机移动');
+
+    const w2 = world(level(40, 20, [{ x: 6, y: 1, ch: 'P' }]));
+    const walker = getPlayer(w2);
+    const parked = addEntity(w2, id => createFollowDrone(id, 12, 1, w2.tuning));
+    settle(w2);
+    steps(w2, 120, { moveX: 1 });
+    assert.ok(walker.body.x + walker.body.halfWidth <= parked.body.x - parked.body.halfWidth + 1e-6, '没有穿过车身');
   });
 });
 

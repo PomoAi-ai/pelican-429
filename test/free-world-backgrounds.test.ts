@@ -7,7 +7,7 @@ import { caveCovered } from '../src/world/level.ts';
 import { groundSurface } from '../src/render/stage.ts';
 
 test('区域混合在边界保持连续、归一，空岛只在升高后出现', () => {
-  const level = generateFreeWorld(429, 'small');
+  const level = generateFreeWorld(429, 'small', 'wilds');
   try {
     const ground = groundSurface(level.map, 3, caveCovered(level.caves, level.map.width));
     const sample = createBackgroundRegions(level, ground);
@@ -32,7 +32,7 @@ test('区域混合在边界保持连续、归一，空岛只在升高后出现',
 });
 
 test('连续林带的树间空隙不闪回营地，设施连接道路仅在两侧设施之间过渡', () => {
-  const level = generateFreeWorld(429, 'small');
+  const level = generateFreeWorld(429, 'small', 'wilds');
   try {
     const ground = groundSurface(level.map, 3, caveCovered(level.caves, level.map.width));
     const sample = createBackgroundRegions(level, ground);
@@ -62,15 +62,15 @@ test('连续林带的树间空隙不闪回营地，设施连接道路仅在两�
 });
 
 test('湖泊与沙漠过渡覆盖完整时只混合这两个区域，营地生活区保持自身背景', () => {
-  const level = generateFreeWorld(429, 'small');
+  const level = generateFreeWorld(0, 'small', 'wilds');
   try {
     const ground = groundSurface(level.map, 3, caveCovered(level.caves, level.map.width));
     const sample = createBackgroundRegions(level, ground);
-    const weights = sample(77, ground[77]! + 2);
+    const weights = sample(740, ground[740]! + 2);
     assert.equal(weights.camp, 0, '两个区域覆盖完整的边缘不应混入第三幅营地图片');
     assert.ok(weights.lake > 0 && weights.desert > 0);
     assert.ok(Math.abs(weights.lake + weights.desert - 1) < 1e-10);
-    const next = sample(77.001, ground[77]! + 2);
+    const next = sample(740.001, ground[740]! + 2);
     for (const theme of Object.keys(weights) as Array<keyof typeof weights>) assert.ok(Math.abs(weights[theme] - next[theme]) < .001);
     assert.equal(sample(level.spawn.x, level.spawn.y).camp, 1);
   } finally { level.fluid.dispose(); }

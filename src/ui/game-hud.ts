@@ -3,7 +3,8 @@
  * NPC 式对话气泡、真实家园派工与物品面板（含 1 格回收站）。挂在 weapon-hud 同一个根元素里，复用它的投影。
  */
 import { clamp } from '../core/math.ts';
-import { createDroneLocomotion, updateDroneLocomotion, type DroneGroundAt } from './drone-locomotion.ts';
+import { createDroneLocomotion, separateDrones, updateDroneLocomotion, type DroneBlocked, type DroneGroundAt } from './drone-locomotion.ts';
+import { FOLLOW_DRONE } from '../config/follow-drone.ts';
 import { SEASON_NAMES, calendarOf, type GameTime } from '../core/calendar.ts';
 import { SCENE_WEATHER_LABELS, type SceneWeatherMode } from '../config/weather-rules.ts';
 import { TUNING } from '../config/tuning.ts';
@@ -16,8 +17,11 @@ export interface GameHudWorld { readonly time: Readonly<GameTime>; readonly weat
 export interface GameHudOptions {
   readonly canvas: HTMLElement;
   readonly workOrders?: { readonly state: HomesteadState; readonly command: (tool: 'chop' | 'dig' | 'build') => void };
-  readonly updateDrone: (index: number, x: number, y: number, dt: number, talking: boolean, flying: boolean, groundAngle: number, groundHeight: number | null) => void;
+  readonly updateDrone: (index: number, x: number, y: number, dt: number, talking: boolean, flying: boolean, groundAngle: number, groundHeight: number | null, depth?: number) => void;
+  /** 着陆舱开场接管随行无人机：hidden 时留在舱内不显示，否则沿出舱路径行进；undefined 时自主跟随。 */
+  readonly droneEscort?: (index: number) => DroneEscort | undefined;
   readonly groundAt: DroneGroundAt;
+  readonly droneBlocked: DroneBlocked;
   readonly project: WorldToScreen;
   /** 设置、大地图、死亡等状态下为真：收起 HUD 自己打开的东西，并放行全部输入。attachMap 挂上的地图带 is-open 时同样视为阻塞。 */
   readonly blocked: () => boolean;
@@ -25,6 +29,7 @@ export interface GameHudOptions {
   /** 家园用 Tab 进指挥模式，传 false 让出 Tab。 */
   readonly tabOpensDrone?: boolean;
 }
+export type DroneEscort = { readonly hidden: true } | { readonly hidden: false; readonly x: number; readonly ground: number; readonly depth: number };
 export interface GameHud {
   update(entity: Entity, dt: number): void;
   attachMap(el: HTMLElement): void;
@@ -425,17 +430,37 @@ export function createGameHud(root: HTMLElement, options: GameHudOptions): GameH
       const margin = Math.min(center.x, rootWidth - center.x) * 0.72;
       droneActivityRadius = clamp(margin / Math.abs(unit.x - center.x), 3, 12);
     }
+    const free: number[] = [];
+    const shown: number[] = [];
     for (const [i, d] of drones.entries()) {
       const real = options.workOrders?.state.drones[i];
       if (options.workOrders && !real) {
         setHidden(droneEls[i]!, true);
         continue;
       }
-      if (real) { d.x = real.x; d.y = real.y; }
-      else {
-        updateDroneLocomotion(d, entity.body, DRONE_OFFSETS[i]!, options.groundAt, droneActivityRadius, dt);
-        options.updateDrone(i, d.x, d.y, dt, talking === i, d.flying, d.groundAngle, d.groundHeight);
+      const escort = real ? undefined : options.droneEscort?.(i);
+      if (escort?.hidden) {
+        setHidden(droneEls[i]!, true);
+        continue;
       }
+      shown.push(i);
+      if (real) { d.x = real.x; d.y = real.y; }
+      else if (escort) {
+        // Rolling on the hatch floor, stair and ground; the free follower picks up from here once released.
+        Object.assign(d, { x: escort.x, y: escort.ground + 0.34, flying: false, groundAngle: 0, groundHeight: escort.ground, placed: true });
+        options.updateDrone(i, d.x, d.y, dt, false, false, 0, escort.ground, escort.depth);
+      } else {
+        updateDroneLocomotion(d, entity.body, DRONE_OFFSETS[i]!, options.groundAt, options.droneBlocked, droneActivityRadius, dt);
+        free.push(i);
+      }
+    }
+    if (free.length === 2) separateDrones(drones[free[0]!]!, drones[free[1]!]!, FOLLOW_DRONE.halfWidth, FOLLOW_DRONE.roof, options.droneBlocked);
+    for (const i of free) {
+      const d = drones[i]!;
+      options.updateDrone(i, d.x, d.y, dt, talking === i, d.flying, d.groundAngle, d.groundHeight);
+    }
+    for (const i of shown) {
+      const d = drones[i]!;
       const p = project(d.x, d.y);
       const button = droneEls[i]!;
       setHidden(button, p === null);

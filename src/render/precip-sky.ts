@@ -12,6 +12,7 @@ import type { GradeUniforms } from './post-fx.ts';
 import type { LightningSample, PrecipVisual } from './precip.ts';
 import type { PrecipCamera } from './rain-fx.ts';
 import { SKY_BOTTOM, SKY_TOP } from './stage.ts';
+import { glslFloat } from './wind.ts';
 
 /** 雾幕与闪电的深度（z，负值在世界后方：近山 −18 之前、远山 −40 之后）。 */
 export const VEIL_Z = -12;
@@ -137,13 +138,15 @@ void main() {
   gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
 }
 `;
+/** 雾幕：顶部透明度比例、渐变起点、丢弃阈值（GLSL 与 WebGPU 节点版本同表）。 */
+export const VEIL_SHADER = { top: 0.45, from: 0.2, cut: 0.003 } as const;
 const VEIL_FRAGMENT = /* glsl */ `
 uniform vec3 uColor;
 uniform float uAlpha;
 varying float vY;
 void main() {
-  float a = uAlpha * mix( 1.0, 0.45, smoothstep( 0.2, 1.0, vY ) );
-  if ( a < 0.003 ) discard;
+  float a = uAlpha * mix( 1.0, ${glslFloat(VEIL_SHADER.top)}, smoothstep( ${glslFloat(VEIL_SHADER.from)}, 1.0, vY ) );
+  if ( a < ${glslFloat(VEIL_SHADER.cut)} ) discard;
   gl_FragColor = vec4( uColor, a );
 }
 `;

@@ -24,7 +24,8 @@ export function createFlyingRoadsterActor(card: ShowcaseCard, entry: ShowcaseEnt
     // 游戏车头朝 +X，检视面板的零度正面朝 +Z。
     inspection.rotation.set(card.modelPitch, card.modelYaw - Math.PI / 2, 0);
     vehicle.object.rotation.y = card.facing === 1 ? 0 : Math.PI;
-    vehicle.object.position.x = roll ? 1.5 * Math.sin(progress * Math.PI * 2) : cruise ? 3 * progress - 1.5 : 0;
+    const travel = THREE.MathUtils.smoothstep(time, cruise ? .85 : 0, duration);
+    vehicle.object.position.x = roll || cruise ? (3 * travel - 1.5) * card.facing : 0;
     // 轮底原点偏向车头，检视俯仰按非对称车身包络补高，起飞高度仍独立保留。
     const yaw = inspection.rotation.y;
     const pitch = Math.sin(card.modelPitch);
@@ -34,7 +35,7 @@ export function createFlyingRoadsterActor(card: ShowcaseCard, entry: ShowcaseEnt
       lift,
       cruise: cruise ? THREE.MathUtils.smoothstep(time, 0, 1.2) : 0,
       canopy: entry.action === 'canopy' ? THREE.MathUtils.smoothstep(time, .3, 2.3) : 0,
-      wheelSpeed: roll ? 1.5 * Math.PI * 2 / duration * Math.cos(progress * Math.PI * 2) * card.facing : 0,
+      wheelSpeed: roll ? 18 * progress * (1 - progress) / duration : 0,
     });
   };
   sample(0);

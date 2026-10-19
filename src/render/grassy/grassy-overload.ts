@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { HUMAN_SKILLS } from '../../config/human-combat.ts';
+import { glslFloat as f } from '../wind.ts';
 import { createParticleCloud } from './grassy-particles.ts';
 
 const clamp = THREE.MathUtils.clamp;
@@ -8,6 +9,19 @@ const ease = (value: number) => { const t = clamp(value, 0, 1); return t * t * (
 const noise = (index: number) => { const value = Math.sin(index * 127.1 + 311.7) * 43758.5453; return value - Math.floor(value); };
 const RELEASE = HUMAN_SKILLS.server_overload.release / HUMAN_SKILLS.server_overload.ticks;
 const CORE_Y = 4.05;
+
+/** 冲击波面着色器：亮边半径与锐度、尾迹区间、条纹（径向/角向频率、相位速度）、颜色，WebGPU 节点版本同表。 */
+export const SHOCKWAVE_SHADER = {
+  rim: { radius: 0.97, sharp: 95 },
+  wake: { inner: [0.67, 0.88], outer: 0.98 },
+  striae: { base: 0.55, amp: 0.45, radial: 180, angular: 6, speed: 40 },
+  wakeGain: 0.58,
+  cut: 0.004,
+  deep: [0.005, 0.16, 0.85],
+  hot: [1.8, 2.6, 3],
+} as const;
+const S = SHOCKWAVE_SHADER;
+const vec3 = (c: readonly number[]): string => `vec3(${c.map(f).join(', ')})`;
 
 function light(color: string, opacity = 1) {
   const material = new THREE.MeshBasicMaterial({ color, transparent: true, opacity, depthWrite: false, toneMapped: false });
@@ -72,6 +86,7 @@ function createShockwave(root: THREE.Group) {
   // 微倾的实体波面在横版镜头中仍有宽度，避免水平圆环只剩一条线。
   group.rotation.x = Math.PI / 2 - 0.3;
   const material = new THREE.ShaderMaterial({
+    name: 'grassy-overload-shockwave',
     uniforms: { opacity: { value: 0 }, phase: { value: 0 } },
     vertexShader: /* glsl */`
       varying vec2 point;
@@ -87,12 +102,12 @@ function createShockwave(root: THREE.Group) {
       void main() {
         float radius = length(point);
         float angle = atan(point.y, point.x);
-        float rim = exp(-pow((radius - 0.97) * 95.0, 2.0));
-        float wake = smoothstep(0.67, 0.88, radius) * (1.0 - smoothstep(0.98, 1.0, radius));
-        float striae = 0.55 + 0.45 * pow(sin(radius * 180.0 - angle * 6.0 + phase * 40.0), 2.0);
-        float alpha = (rim + wake * striae * 0.58) * opacity;
-        if (alpha < 0.004) discard;
-        gl_FragColor = vec4(mix(vec3(0.005, 0.16, 0.85), vec3(1.8, 2.6, 3.0), rim), alpha);
+        float rim = exp(-pow((radius - ${f(S.rim.radius)}) * ${f(S.rim.sharp)}, 2.0));
+        float wake = smoothstep(${f(S.wake.inner[0])}, ${f(S.wake.inner[1])}, radius) * (1.0 - smoothstep(${f(S.wake.outer)}, 1.0, radius));
+        float striae = ${f(S.striae.base)} + ${f(S.striae.amp)} * pow(sin(radius * ${f(S.striae.radial)} - angle * ${f(S.striae.angular)} + phase * ${f(S.striae.speed)}), 2.0);
+        float alpha = (rim + wake * striae * ${f(S.wakeGain)}) * opacity;
+        if (alpha < ${f(S.cut)}) discard;
+        gl_FragColor = vec4(mix(${vec3(S.deep)}, ${vec3(S.hot)}, rim), alpha);
         #include <colorspace_fragment>
       }
     `,

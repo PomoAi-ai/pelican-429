@@ -65,12 +65,10 @@
 .residence-control-group { min-width: 0; }
 .residence-control-group h2 { margin: 0 0 7px; font-size: 12px; font-weight: 600; }
 .residence-control-buttons { display: flex; flex-wrap: wrap; gap: 6px; }
-.residence-camera [data-residence-view][aria-pressed='true'], .residence-camera [data-play-view][aria-pressed='true'] { color: #1d6c74; border-color: #6aa8a6; background: #e6f1eb; }
+.residence-camera [data-scene-view][aria-pressed='true'], .residence-camera [data-play-view][aria-pressed='true'] { color: #1d6c74; border-color: #6aa8a6; background: #e6f1eb; }
 .residence-camera select { min-width: 0; max-width: 100%; min-height: 32px; padding: 4px 6px; border: 1px solid var(--residence-line); border-radius: 5px; color: var(--residence-ink); background: #fffdf7; font: inherit; }
 .residence-travel { display: flex; align-items: center; gap: 7px; margin-top: 8px; }
 .residence-travel select { flex: 1; }
-.residence-weather-field { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
-.residence-weather-field select { flex: 1; }
 .residence-demo { --residence-ink: var(--sc-text); --residence-muted: var(--sc-muted); --residence-line: var(--sc-line); --residence-paper: #131e24; background: var(--sc-bg); color-scheme: dark; }
 .residence-demo :focus-visible { outline-color: var(--sc-accent); }
 .residence-demo .residence-emblem { display: none; }
@@ -84,7 +82,7 @@
 .residence-demo :is(button, .residence-actions a):hover:not(.room-preview-hud *) { background: #30444b; border-color: #637b80; }
 .residence-demo .residence-primary { background: var(--sc-accent); border-color: var(--sc-accent); color: #17201b; }
 .residence-demo .residence-primary:hover { background: #c9edb2; border-color: #c9edb2; }
-.residence-demo :is([data-build], [data-residence-view], [data-play-view])[aria-pressed='true'] { color: var(--sc-accent); border-color: #779963; background: #293c2e; }
+.residence-demo :is([data-build], [data-scene-view], [data-play-view])[aria-pressed='true'] { color: var(--sc-accent); border-color: #779963; background: #293c2e; }
 .residence-demo .residence-panel-heading span { background: #293c2e; color: var(--sc-accent); }
 .residence-demo :is(.residence-build-status, .residence-action-status, .residence-save-status, .room-preview-hint) { background: #142126e8; border-color: #42555d; color: #e2eddf; box-shadow: none; }
 .residence-demo :is(.residence-build-status, .residence-action-status, .residence-save-status)[data-error='true'] { color: #ffccab; background: #3c2b25; border-color: #885d48; }
@@ -154,10 +152,14 @@
 @media (max-width: 460px) {
   .residence-demo .residence-workspace, .residence-demo.is-building .residence-workspace { grid-template-columns: 145px minmax(0, 1fr); }
   .residence-demo .residence-control-buttons { grid-template-columns: minmax(0, 1fr); }
-  .residence-demo .world-controls output { margin-left: 3px; }
+  .residence-demo .world-controls-time { margin-left: 3px; }
 }
 
 /* 图文类别与构件并排，建造时给实际预览留出空间。 */
 .residence.is-building .residence-workspace,.residence.residence-demo.is-building .residence-workspace{grid-template-columns:350px minmax(0,1fr)}
 @media(max-width:800px){.residence.is-building .residence-workspace,.residence.residence-demo.is-building .residence-workspace{grid-template-columns:280px minmax(0,1fr)}}
 @media(max-width:600px){.residence:not(.residence-demo).is-building .residence-workspace{grid-template-columns:minmax(0,1fr)}.residence:not(.residence-demo) [data-resource-picker]{grid-column:1 / -1}}
+
+/* 星舰穿越期间城市工具与 HUD 让位，舞台铺满全屏。 */
+.residence-in-flight .residence-stage { position: fixed; inset: 0; z-index: 30; }
+.residence-in-flight .residence-stage > :not(.residence-viewport):not(.transit-app) { display: none; }

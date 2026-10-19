@@ -135,7 +135,7 @@ export interface TileView {
   dispose(): void;
 }
 
-type VegetationMeshes = Record<'cover' | 'climbers' | 'flora' | 'shrubs', THREE.InstancedMesh[]>;
+type VegetationMeshes = Record<'cover' | 'climbers' | 'shrubs', THREE.BatchedMesh[]> & { readonly flora: THREE.InstancedMesh[] };
 
 function showVegetation(meshes: VegetationMeshes, mode: ResourceOptions['vegetation']): void {
   for (const mesh of [...meshes.cover, ...meshes.climbers]) mesh.visible = mode !== 'ground';
@@ -147,6 +147,8 @@ interface ChunkMeshes {
   readonly vegetation: VegetationMeshes;
   readonly group: THREE.Group;
   readonly meshes: THREE.InstancedMesh[];
+  /** 地被、灌木、攀附的变体批次（各自持有几何与实例纹理）。 */
+  readonly batches: THREE.BatchedMesh[];
   /** 区块私有的几何（共享基础属性的拷贝 + 实例属性），卸载时释放。 */
   readonly geometries: THREE.BufferGeometry[];
 }
@@ -325,6 +327,7 @@ function clearChunk(ctx: TileViewCtx, cx: number, cy: number): void {
   const c = ctx.chunks.get(index);
   if (!c) return;
   for (const m of c.meshes) m.dispose();
+  for (const b of c.batches) b.dispose();
   for (const g of c.geometries) g.dispose();
   c.group.removeFromParent();
   ctx.chunks.delete(index);
@@ -554,24 +557,22 @@ function buildChunk(ctx: TileViewCtx, cx: number, cy: number): void {
   }
   if (plan.fillets.length > 0) meshes.push(filletMesh(ctx, plan.fillets, `tiles-fillet-${cx}-${cy}`, geometries));
   const vegetation: VegetationMeshes = { cover: [], climbers: [], flora: [], shrubs: [] };
+  const batches: THREE.BatchedMesh[] = [];
   if (plan.flora.length > 0) {
     vegetation.flora.push(...createFloraMeshes(planFlora(plan.flora, ctx.floraEnv), ctx.floraGeometries, ctx.floraMaterial, `${cx}-${cy}`));
     meshes.push(...vegetation.flora);
   }
   const coverMesh = plan.cover.length > 0 ? createCoverMesh(planCover(plan.cover, ctx.floraEnv), ctx.coverAtlas, ctx.coverMaterial, `${cx}-${cy}`) : null;
   if (coverMesh) {
-    geometries.push(coverMesh.geometry);
-    meshes.push(coverMesh); vegetation.cover.push(coverMesh);
+    batches.push(coverMesh); vegetation.cover.push(coverMesh);
   }
   const shrubMesh = plan.cover.length > 0 ? createShrubMesh(planShrubs(plan.cover, ctx.floraEnv), ctx.shrubAtlas, ctx.shrubMaterial, `${cx}-${cy}`) : null;
   if (shrubMesh) {
-    geometries.push(shrubMesh.geometry);
-    meshes.push(shrubMesh); vegetation.shrubs.push(shrubMesh);
+    batches.push(shrubMesh); vegetation.shrubs.push(shrubMesh);
   }
   const climberMesh = createClimberMesh('ground', planGroundClimbers(plan.climbers), ctx.climberAtlas, ctx.climberMaterial, `tiles-climb-${cx}-${cy}`);
   if (climberMesh) {
-    geometries.push(climberMesh.geometry);
-    meshes.push(climberMesh); vegetation.climbers.push(climberMesh);
+    batches.push(climberMesh); vegetation.climbers.push(climberMesh);
   }
   showVegetation(vegetation, ctx.vegetationMode);
   for (const m of meshes) {
@@ -580,8 +581,12 @@ function buildChunk(ctx: TileViewCtx, cx: number, cy: number): void {
     m.computeBoundingSphere();
     group.add(m);
   }
+  for (const b of batches) {
+    b.computeBoundingSphere();
+    group.add(b);
+  }
   ctx.root.add(group);
-  ctx.chunks.set(chunkIndex(ctx.map, cx, cy), { group, meshes, geometries, vegetation });
+  ctx.chunks.set(chunkIndex(ctx.map, cx, cy), { group, meshes, batches, geometries, vegetation });
 }
 
 /** 脏区块及其 8 邻区块（边缘格的过渡、草皮暴露、填角都取决于相邻区块的格）。 */

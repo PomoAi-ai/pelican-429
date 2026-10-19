@@ -93,7 +93,7 @@ export function createAiCityLighting(stage: Stage, look: AiCityLook = AI_CITY_LO
     envDirty = false;
     return envTarget;
   };
-  const celestial = createCelestialSky();
+  const celestial = createCelestialSky({ horizonLine: look.celestialHorizon });
   celestial.root.visible = false;
   scene.add(celestial.root);
   const fog = new THREE.Fog(look.fog, 55, 240);

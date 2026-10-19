@@ -17,6 +17,7 @@ import type { Fish, FishSchool } from '../entities/fish.ts';
 import { injectAfter } from './tile-material.ts';
 import { BLOCK_BACK_Z } from './tile-geometry.ts';
 import { WATER_FRONT_Z } from './water-view.ts';
+import { addNodePatch } from './node-patches.ts';
 
 /** 尾摆在 z / y 方向的幅度（格，乘 aBody² 与实例幅度）。 */
 const TAIL_WAG_Z = 0.08;
@@ -119,6 +120,7 @@ function createFishMaterial(): THREE.MeshStandardMaterial {
     shader.vertexShader = vs;
   };
   material.customProgramCacheKey = () => 'fish-tail-v1';
+  addNodePatch(material, { kind: 'fish-tail', wagY: TAIL_WAG_Y, wagZ: TAIL_WAG_Z });
   return material;
 }
 

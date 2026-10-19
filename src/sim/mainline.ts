@@ -65,7 +65,7 @@ function syncGarrisonHold(world: SimWorld): void {
   }
 }
 
-/** 主线显式启用，场景预览和自由世界不受其阶段限制。 */
+/** 主线显式启用，场景预览和主世界不受其阶段限制。 */
 export function initializeMainline(world: SimWorld, checkpoint: MainlineCheckpoint = { phase: 'perimeter', countdownTicks: 0 }): void {
   world.mainline = { ...checkpoint, revealTicks: -1, bossId: null, perimeterIds: [] };
   for (let i = world.entities.length - 1; i >= 0; i--) {

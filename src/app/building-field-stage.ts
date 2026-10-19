@@ -6,7 +6,7 @@ import { sampleWorldTime, type WorldTime } from '../core/calendar.ts';
 import type { DefinitionCollider } from '../physics/definition-collision.ts';
 import { createAiCityLighting } from '../render/ai-city-lighting.ts';
 import { createResidenceWeather } from '../render/residence-weather.ts';
-import { attachStage } from '../render/stage.ts';
+import { attachStage, WEBGL_STAGE_BACKEND } from '../render/stage.ts';
 import type { SceneMountContext } from './scene-mount.ts';
 
 export type BuildingFieldView = 'front' | 'angle' | 'top';
@@ -21,7 +21,7 @@ export function createBuildingFieldStage(context: SceneMountContext, viewport: H
     context.renderer.setPixelRatio(1);
     context.onDispose(() => context.renderer.setPixelRatio(pixelRatio));
   }
-  const stage = attachStage(viewport, context.renderer, BUILDING_SCENE_TUNING, { quality, antialias: 'smaa' });
+  const stage = attachStage(viewport, context.renderer, BUILDING_SCENE_TUNING, { quality, antialias: 'smaa' }, WEBGL_STAGE_BACKEND);
   context.onDispose(() => stage.dispose());
   stage.canvas.setAttribute('aria-label', '建筑自由场地');
   stage.camera.far = 1800;

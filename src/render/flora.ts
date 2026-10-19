@@ -44,8 +44,9 @@ import { injectAfter } from './tile-material.ts';
 import { hermiteAt, hermiteSlope, smoothTopY } from './tile-organic.ts';
 import type { Hermite } from './tile-organic.ts';
 import { CONVEX_RADIUS } from './tile-transitions.ts';
-import { WIND_GLSL, sharedWindUniforms } from './wind.ts';
+import { WIND_GLSL, glslFloat as g, sharedWindUniforms } from './wind.ts';
 import { DISTURB_GLSL, sharedDisturbUniforms } from './grass-disturb.ts';
+import { addNodePatch } from './node-patches.ts';
 
 export const FLORA_SPECIES = [
   'turf',
@@ -519,6 +520,46 @@ export interface WindOptions {
   readonly name?: string;
 }
 
+/** 风摆着色器常量（GLSL 与 WebGPU 节点由这张表生成）。 */
+export const FLORA_WIND_SHADER = Object.freeze({
+  /** 本地相位 ph = phaseX·世界 x + phaseZ·世界 z。 */
+  phaseX: 0.9,
+  phaseZ: 0.7,
+  /** 本地抖动幅度 = gustBase + gustGain·min(|风|, gustCap)。 */
+  gustBase: 0.3,
+  gustGain: 0.7,
+  gustCap: 1.5,
+  /** 顺风倾倒增益。 */
+  lean: 2,
+  /** 两层本地抖动：a·sin(ph + t·ft)，a·sin(x·世界 x + z·世界 z − t·ft)。 */
+  flutter1: Object.freeze({ a: 0.45, t: 1.7 }),
+  flutter2: Object.freeze({ a: 0.2, x: 2.7, z: 1.3, t: 3.1 }),
+  /** 下沉比例；z 向摆幅 zAmp·sway·sin(zPhase·ph + ft)。 */
+  sink: 0.35,
+  zAmp: 0.3,
+  zPhase: 1.3,
+  /** 蝴蝶：实例相位哈希 fract(sin(dot(xz, hash.xy))·hash.z)·hash.w，扑翼频率/相位倍数、翼展收拢、翼尖上下、风推偏。 */
+  butterfly: Object.freeze({
+    hash: Object.freeze([12.9898, 78.233, 43758.5453, 6.2831853] as const),
+    flapRate: 15,
+    flapPhase: 3,
+    fold: 0.6,
+    lift: 0.035,
+    drift: 0.5,
+    /** 飞行轨迹 x/y/z：Σ a·sin(f·t + p·相位)。 */
+    fly: Object.freeze({
+      x: Object.freeze([Object.freeze({ a: 0.8, f: 0.31, p: 1 }), Object.freeze({ a: 0.3, f: 0.83, p: 2.1 })]),
+      y: Object.freeze([Object.freeze({ a: 0.22, f: 1.1, p: 1 }), Object.freeze({ a: 0.08, f: 2.9, p: 1.3 })]),
+      z: Object.freeze([Object.freeze({ a: 0.12, f: 0.47, p: 1.7 })]),
+    }),
+  }),
+});
+
+const FW = FLORA_WIND_SHADER;
+const FB = FW.butterfly;
+const flyAxis = (terms: readonly { readonly a: number; readonly f: number; readonly p: number }[]): string =>
+  terms.map((o) => `${g(o.a)} * sin( ${g(o.f)} * uWindTime + ${o.p === 1 ? 'bp' : `${g(o.p)} * bp`} )`).join(' + ');
+
 /**
  * 风摆材质：顶点色 × 实例色（只乘 aPetal 部分）+ 风摆（叶尖幅度 ∝ aTip²）：
  * 全局风 W = windSway(世界 x)（render/wind 共享 uniform）给出顺风倾倒（方向一致、阵风经过时形成草浪），
@@ -564,24 +605,24 @@ export function createWindMaterial(uTime: THREE.IUniform<number>, options: WindO
         '{',
         '  vec3 fw = ( modelMatrix * FLORA_IM * vec4( transformed, 1.0 ) ).xyz;',
         '  float ft = uWindTime * uWindSpeed;',
-        '  float ph = 0.9 * fw.x + 0.7 * fw.z;',
+        `  float ph = ${g(FW.phaseX)} * fw.x + ${g(FW.phaseZ)} * fw.z;`,
         // 全局风：顺风倾倒（阵风扫过 = 草浪）；本地抖动频率固定、幅度随风强（频率随风变会让相位在大 t 时乱跳）。
         '  float wind = uWindScale * windSway( fw.x, fw.y, uWeatherTime );',
-        '  float gust = 0.3 + 0.7 * min( abs( wind ), 1.5 );',
-        '  float sway = ( 1.0 - aFly ) * aTip * aTip * uWindAmp * ( 2.0 * wind + gust * ( 0.45 * sin( ph + 1.7 * ft ) + 0.2 * sin( 2.7 * fw.x + 1.3 * fw.z - 3.1 * ft ) ) );',
-        '  vec3 woff = vec3( sway, -abs( sway ) * 0.35, 0.3 * sway * sin( 1.3 * ph + ft ) );',
+        `  float gust = ${g(FW.gustBase)} + ${g(FW.gustGain)} * min( abs( wind ), ${g(FW.gustCap)} );`,
+        `  float sway = ( 1.0 - aFly ) * aTip * aTip * uWindAmp * ( ${g(FW.lean)} * wind + gust * ( ${g(FW.flutter1.a)} * sin( ph + ${g(FW.flutter1.t)} * ft ) + ${g(FW.flutter2.a)} * sin( ${g(FW.flutter2.x)} * fw.x + ${g(FW.flutter2.z)} * fw.z - ${g(FW.flutter2.t)} * ft ) ) );`,
+        `  vec3 woff = vec3( sway, -abs( sway ) * ${g(FW.sink)}, ${g(FW.zAmp)} * sway * sin( ${g(FW.zPhase)} * ph + ft ) );`,
         '  transformed += inverse( mat3( FLORA_IM ) ) * woff;',
         // 草地扰动场：啄击/光球/落地/骑车把草压弯（按 aTip² 叠加，世界空间 → 局部）。
         '  transformed += inverse( mat3( FLORA_IM ) ) * ( ( 1.0 - aFly ) * aTip * aTip * uDisturbScale * grassDisturb( fw ) );',
         // 蝴蝶：按实例位置取相位，扑翼（翼尖上下 + 翼展收拢）+ 绕悬停点的正弦飞行轨迹（世界空间，经逆变换回局部）。
         '  if ( aFly > 0.5 ) {',
         '    vec3 ip = FLORA_IM[3].xyz;',
-        '    float bp = fract( sin( dot( ip.xz, vec2( 12.9898, 78.233 ) ) ) * 43758.5453 ) * 6.2831853;',
-        '    float flap = sin( uWindTime * 15.0 + 3.0 * bp );',
-        '    transformed.x *= 1.0 - 0.6 * aTip * ( 0.5 + 0.5 * flap );',
-        '    transformed.y += aTip * 0.035 * flap;',
-        '    vec3 fly = vec3( 0.8 * sin( 0.31 * uWindTime + bp ) + 0.3 * sin( 0.83 * uWindTime + 2.1 * bp ), 0.22 * sin( 1.1 * uWindTime + bp ) + 0.08 * sin( 2.9 * uWindTime + 1.3 * bp ), 0.12 * sin( 0.47 * uWindTime + 1.7 * bp ) );',
-        '    fly.x += 0.5 * wind;',
+        `    float bp = fract( sin( dot( ip.xz, vec2( ${g(FB.hash[0])}, ${g(FB.hash[1])} ) ) ) * ${g(FB.hash[2])} ) * ${g(FB.hash[3])};`,
+        `    float flap = sin( uWindTime * ${g(FB.flapRate)} + ${g(FB.flapPhase)} * bp );`,
+        `    transformed.x *= 1.0 - ${g(FB.fold)} * aTip * ( 0.5 + 0.5 * flap );`,
+        `    transformed.y += aTip * ${g(FB.lift)} * flap;`,
+        `    vec3 fly = vec3( ${[FB.fly.x, FB.fly.y, FB.fly.z].map(flyAxis).join(', ')} );`,
+        `    fly.x += ${g(FB.drift)} * wind;`,
         '    transformed += inverse( mat3( FLORA_IM ) ) * fly;',
         '  }',
         '}',
@@ -606,6 +647,7 @@ export function createWindMaterial(uTime: THREE.IUniform<number>, options: WindO
     shader.fragmentShader = injectAfter(shader.fragmentShader, 'normal_fragment_begin', '#ifndef FLAT_SHADED\n  normal = normalize( vNormal );\n#endif', name);
   };
   material.customProgramCacheKey = () => 'flora-wind-v6';
+  addNodePatch(material, { kind: 'flora-wind', wind: sharedWindUniforms(), disturb: sharedDisturbUniforms(), uniforms: { time: uTime, amplitude: amp, speed: spd, windScale: wsc, disturbScale: dsc } });
   return material;
 }
 

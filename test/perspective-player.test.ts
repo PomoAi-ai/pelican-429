@@ -7,6 +7,7 @@ import { createDefinitionDepthLayout, DEPTH_STOPS } from '../src/app/definition-
 import { HUMAN_BODY_HEIGHT } from '../src/config/player-form.ts';
 import { HUMAN_CODEX_SHOT, HUMAN_SKILLS } from '../src/config/human-combat.ts';
 import { TUNING } from '../src/config/tuning.ts';
+import { TRANSIT, TRANSIT_HULL_COLLIDER } from '../src/config/transit.ts';
 import { createPelicanEntity } from '../src/entities/entity.ts';
 import { createFlyingRoadster } from '../src/entities/flying-roadster.ts';
 import { NEUTRAL_INPUT, resolvePelicanState, updatePelican } from '../src/entities/pelican-controller.ts';
@@ -51,6 +52,26 @@ test('无限飞行仍受真实屋顶阻挡，骑车腾空后可以弃车起飞',
   preview.step({ ...NEUTRAL_INPUT, jumpHeld: true, jumpPressed: true });
   assert.equal(preview.entity.pelican!.ride.cause, 'takeoff');
   assert.equal(preview.entity.pelican!.flightMode, 'fly');
+});
+
+test('正式飞行从两侧撞到共享舰体时保持侧向阻挡，平台走向舱壁也不会被抬上外壳', () => {
+  const collision = { solids: [TRANSIT_HULL_COLLIDER], platforms: [{ left: 16, right: TRANSIT.hatchX, top: TRANSIT.cabinFloor }] };
+  for (const moveX of [-1, 1] as const) {
+    const player = createPerspectivePlayer(collision,
+      { x: TRANSIT.rocketX - moveX * (TRANSIT.rocketRadius + 1.5), y: 7 }, { width: 50, height: 80 }, [], false);
+    for (let tick = 0; tick < 45; tick++) player.step({ ...NEUTRAL_INPUT, jumpHeld: true, moveX, runHeld: true });
+    const body = player.entity.body;
+    assert.ok(Math.abs(body.x - (TRANSIT.rocketX - moveX * (TRANSIT.rocketRadius + body.halfWidth))) < .001);
+    assert.equal(body.wallContact, moveX);
+    assert.ok(body.y > 7 && body.y < TRANSIT.cabinFloor);
+    assert.equal(player.entity.pelican!.flightMode, 'fly');
+  }
+  const player = createPerspectivePlayer(collision,
+    { x: TRANSIT.hatchX - 1, y: TRANSIT.cabinFloor }, { width: 50, height: 80 }, [], false);
+  for (let tick = 0; tick < 120; tick++) player.step({ ...NEUTRAL_INPUT, moveX: 1, runHeld: true });
+  assert.ok(Math.abs(player.entity.body.y - TRANSIT.cabinFloor) < .001);
+  assert.equal(player.entity.body.wallContact, 1);
+  assert.equal(player.entity.body.onGround, true);
 });
 
 test('飞出场景左右边界后代码弹仍正常飞行，不撞占位地图的人工边墙', () => {

@@ -6,6 +6,7 @@
  */
 import type * as THREE from 'three';
 import { CLOUD_GLSL, sharedWindUniforms } from './wind.ts';
+import { addNodePatch } from './node-patches.ts';
 
 export const CLOUD_SHADOW_PROGRAM_TAG = 'cloudshadow-v1';
 
@@ -71,6 +72,7 @@ export function createCloudShadowPatcher(): CloudShadowPatcher {
         .replace('#include <opaque_fragment>', `${FRAGMENT_APPLY}\n#include <opaque_fragment>`);
     };
     material.customProgramCacheKey = () => `${baseKey}|${CLOUD_SHADOW_PROGRAM_TAG}`;
+    addNodePatch(material, { kind: 'cloud-shadow', uniforms });
     material.needsUpdate = true;
     done.add(material);
     patched++;

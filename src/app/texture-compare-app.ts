@@ -210,7 +210,7 @@ export async function startTextureCompare(onError: (error: unknown) => void): Pr
     const fit = fitShadowCamera({ centerX: 0, centerY: subject.height / 2,
       halfWidth: subject.height, halfHeight: subject.height, zMin: -subject.height, zMax: subject.height,
       margin: lighting.shadow.margin, casterReach: lighting.shadow.casterReach,
-      direction: lighting.sun.direction, mapSize: lighting.shadow.mapSize });
+      direction: lighting.sun.direction, mapSize: lighting.shadow.mapSize.low });
     for (const stage of stages) {
       stage.keyLight.position.copy(fit.position);
       stage.keyLight.target.position.copy(fit.target);

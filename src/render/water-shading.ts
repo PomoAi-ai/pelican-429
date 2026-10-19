@@ -19,6 +19,7 @@ import type { WaterPalette } from '../config/water-palettes.ts';
 import { injectAfter } from './tile-material.ts';
 import { WIND_GLSL, sharedWindUniforms } from './wind.ts';
 import { sharedPrecipUniforms } from './precip-surface.ts';
+import { addNodePatch } from './node-patches.ts';
 
 /** 波幅（格）与风增益：幅度 = WAVE_AMPLITUDE·(1 + WAVE_WIND_GAIN·min(|windSway|, WAVE_WIND_CAP))。 */
 export const WAVE_AMPLITUDE = 0.035;
@@ -280,6 +281,7 @@ export function createWaterMaterials(palette: WaterPalette, uTime: THREE.IUnifor
     shader.fragmentShader = fs;
   };
   front.customProgramCacheKey = () => WATER_PROGRAM_KEYS.front;
+  addNodePatch(front, { kind: 'water-surface', wind, time: uTime, palette: uniforms, ripple: sharedPrecipUniforms().uPrRipple });
 
   // 背板仅补充水色，不写深度，避免把远景和后方透明物体截断。
   const back = new THREE.MeshStandardMaterial({ vertexColors: true, transparent: true, opacity: 0.12, depthWrite: false, roughness: 0.6, metalness: 0 });
@@ -287,6 +289,7 @@ export function createWaterMaterials(palette: WaterPalette, uTime: THREE.IUnifor
   back.userData.waterBody = true;
   back.onBeforeCompile = (shader) => vertex(shader);
   back.customProgramCacheKey = () => WATER_PROGRAM_KEYS.back;
+  addNodePatch(back, { kind: 'water-wave', wind, time: uTime });
 
   let current = palette;
   const apply = (p: WaterPalette): void => {

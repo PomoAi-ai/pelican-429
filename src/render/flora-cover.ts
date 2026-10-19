@@ -28,7 +28,7 @@ import { hermiteSlope } from './tile-organic.ts';
 import { BLOCK_FRONT_Z, GROUND_DECOR_Z_MIN } from './tile-geometry.ts';
 import { RELIEF_PARAMS } from './tile-relief.ts';
 import { CONVEX_RADIUS } from './tile-transitions.ts';
-import { addVariantCollapse, mergeVariants, variantInstanceGeometry } from './variant-atlas.ts';
+import { addVariantCollapse, createVariantBatch, mergeVariants } from './variant-atlas.ts';
 
 export const COVER_KINDS = ['moss', 'clover', 'fiddlehead', 'rosette', 'sprout', 'lichen', 'seedling', 'litter', 'drape'] as const;
 export type CoverKind = (typeof COVER_KINDS)[number];
@@ -291,12 +291,11 @@ export function coverMatrix(c: CoverInstance, out: THREE.Matrix4): THREE.Matrix4
   return out.compose(_p.set(c.x, c.y, c.z), _q, _s.set(c.scale, c.scale, c.scale));
 }
 
-/** 区块地被网格（名 `tiles-cover-<chunkName>`，不投影、接收阴影）；空计划返回 null；超预算即抛。返回的网格几何为私有拷贝，卸载时释放。 */
-export function createCoverMesh(plan: readonly CoverInstance[], atlas: THREE.BufferGeometry, material: THREE.Material, chunkName: string): THREE.InstancedMesh | null {
+/** 区块地被网格（名 `tiles-cover-<chunkName>`，不投影、接收阴影）；空计划返回 null；超预算即抛。批次网格持有自己的几何与实例纹理，卸载时 dispose 网格。 */
+export function createCoverMesh(plan: readonly CoverInstance[], atlas: THREE.BufferGeometry, material: THREE.Material, chunkName: string): THREE.BatchedMesh | null {
   if (plan.length > COVER_CHUNK_BUDGET) throw new Error(`flora-cover: chunk ${chunkName} has ${plan.length} instances (budget ${COVER_CHUNK_BUDGET})`);
   if (plan.length === 0) return null;
-  const geometry = variantInstanceGeometry(atlas, plan.map((c) => COVER_KINDS.indexOf(c.kind)));
-  const mesh = new THREE.InstancedMesh(geometry, material, plan.length);
+  const mesh = createVariantBatch(atlas, plan.map((c) => COVER_KINDS.indexOf(c.kind)), material);
   mesh.name = `tiles-cover-${chunkName}`;
   plan.forEach((c, i) => {
     mesh.setMatrixAt(i, coverMatrix(c, _m));

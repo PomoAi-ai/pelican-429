@@ -13,6 +13,7 @@ import { injectAfter } from './tile-material.ts';
 import { HUT_TEXTURE_MEAN, generateHutTextures } from './hut-textures.ts';
 import type { HutTextureData } from './hut-textures.ts';
 import { WIND_GLSL, sharedWindUniforms } from './wind.ts';
+import { addNodePatch } from './node-patches.ts';
 
 export const HUT_SMOKE_PUFFS = 14;
 /** 烟团：每秒循环次数、总上升高度、最大半径。 */
@@ -82,6 +83,7 @@ function patchHut(material: THREE.MeshStandardMaterial, uniforms: { uHutTex: THR
     shader.fragmentShader = fs;
   };
   material.customProgramCacheKey = () => `${label}-v1`;
+  addNodePatch(material, { kind: 'hut-texture', texture: uniforms.uHutTex, wind: sway ? sharedWindUniforms() : null, sway: SWAY });
 }
 
 const SMOKE_VERT = [
@@ -110,6 +112,7 @@ function patchSmoke(material: THREE.MeshStandardMaterial): void {
     shader.fragmentShader = fs;
   };
   material.customProgramCacheKey = () => `${label}-v1`;
+  addNodePatch(material, { kind: 'hut-smoke', wind: sharedWindUniforms(), smoke: SMOKE });
 }
 
 export function createHutMaterials(): HutMaterials {

@@ -36,7 +36,7 @@ describe('render.lighting 调参校验', () => {
     ['sun 在地平线下', (l) => (l.sun.direction.y = -0.2), /render\.lighting\.sun\.direction\.y/],
     ['rim 方向为零向量', (l) => (l.rim.direction = { x: 0, y: 0, z: 0 }), /render\.lighting\.rim\.direction/],
     ['颜色格式错误', (l) => (l.hemi.sky = 'blue'), /render\.lighting\.hemi\.sky/],
-    ['shadow.mapSize 非 2 的幂', (l) => (l.shadow.mapSize = 1000), /render\.lighting\.shadow\.mapSize/],
+    ['shadow.mapSize 非 2 的幂', (l) => (l.shadow.mapSize.high = 1000), /render\.lighting\.shadow\.mapSize\.high/],
     ['shadow.type 非法', (l) => (l.shadow.type = 'basic'), /render\.lighting\.shadow\.type/],
     ['shadow.zMax <= zMin', (l) => (l.shadow.zMax = l.shadow.zMin), /render\.lighting\.shadow\.zMax/],
     ['shadow.intensity 超出 [0,1]', (l) => (l.shadow.intensity = 1.5), /render\.lighting\.shadow\.intensity/],
@@ -285,7 +285,7 @@ function fitInput(over: Partial<ShadowFitInput> = {}): ShadowFitInput {
     zMax: s.zMax,
     casterReach: s.casterReach,
     direction: DEFAULT_LIGHTING.sun.direction,
-    mapSize: s.mapSize,
+    mapSize: s.mapSize.high,
     ...over,
   };
 }

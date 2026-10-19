@@ -1,4 +1,4 @@
-import { loadUtilityDroneFleet } from '../render/utility-drone.ts';
+import { createUtilityDroneFleet } from '../render/utility-drone.ts';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GRASSY_HEIGHT } from '../config/grassy.ts';
@@ -6,7 +6,7 @@ import { TUNING } from '../config/tuning.ts';
 import { DEFINITION_DEPTH } from '../config/definition-kit.ts';
 import { createGrassyRig, loadGrassyAsset } from '../render/grassy/grassy-rig.ts';
 import { animateGrassy } from '../render/grassy/grassy-animator.ts';
-import { attachStage } from '../render/stage.ts';
+import { attachStage, WEBGL_STAGE_BACKEND } from '../render/stage.ts';
 import { compileForStage, warmUpStage } from '../render/warm-up.ts';
 import { createDefinitionSceneLayout, type SceneSection } from './definition-scene-layout.ts';
 import { loadDefinitionSettlementLayout } from './definition-settlement-layout.ts';
@@ -141,7 +141,7 @@ export async function mountScenePerspective(context: SceneMountContext, entry: P
     const { container, showTools } = mountPreview(app, layout.sections, variant);
     app.querySelector<HTMLButtonElement>('[data-play]')!.disabled = true;
     const stage = attachStage(container, renderer, TUNING,
-      { quality: 'high', antialias: 'smaa' });
+      { quality: 'high', antialias: 'smaa' }, WEBGL_STAGE_BACKEND);
     disposers.push(() => stage.dispose());
     stage.canvas.setAttribute('aria-label', '全定义透视场景与当前男玩家');
     // 定义套件以 +Z 指向背景墙建模；游戏从 +Z 观察，统一映射整个建筑组，保持 X/Y 与深度尺寸。
@@ -430,7 +430,7 @@ export async function mountScenePerspective(context: SceneMountContext, entry: P
     stage.scene.add(rig.root);
     await compileForStage(stage, rig.root);
     signal.throwIfAborted();
-    const droneFleet = await loadUtilityDroneFleet(stage.scene);
+    const droneFleet = createUtilityDroneFleet(stage.scene, stage.createPmrem());
     if (signal.aborted) { droneFleet.dispose(); signal.throwIfAborted(); }
     gameplay = createPerspectiveControls(app, stage, droneFleet, controls, rig, layout.collision, bounds, current, viewAngles(), solarLayout ? solarLayout.solarPanels : [], true,
       { cameraMode: 'inspection', tuning: TUNING, world: context.world });

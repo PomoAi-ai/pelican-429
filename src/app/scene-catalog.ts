@@ -1,12 +1,14 @@
-import { FACILITY_SCENES, FACILITY_SCENE_IDS, type FacilitySceneId } from '../config/facility-scenes.ts';
+import { parseAppMode } from '../config/app-mode.ts';
+import { FACILITY_SCENES, FACILITY_SCENE_IDS, parseFacilityChapter, type FacilitySceneId } from '../config/facility-scenes.ts';
 import { SCENE_DEMOS } from '../config/scene-demos.ts';
+import type { ResidenceVariant } from '../config/residence.ts';
 import { RESOURCE_CATALOG } from '../render/resource-catalog.ts';
 
 interface SceneEntryBase {
   readonly id: string;
   readonly title: string;
   readonly href: string;
-  readonly section: 'scenes' | 'perspectives';
+  readonly section: 'world' | 'scenes' | 'perspectives';
 }
 export interface PerspectiveSceneEntry extends SceneEntryBase {
   readonly kind: 'perspective';
@@ -18,11 +20,13 @@ export interface ResourceSceneEntry extends SceneEntryBase {
   readonly resourceId: string;
 }
 export type SceneEntry = PerspectiveSceneEntry | ResourceSceneEntry
-  // 自由世界是整页游戏，内嵌进工作区以保留左侧目录。
-  | (SceneEntryBase & { readonly kind: 'game' })
+  // 主世界的城区、原野与关卡条目网址就是游戏网址，场景间切换都留在工作区里。
+  | (SceneEntryBase & { readonly kind: 'main-world' })
+  | (SceneEntryBase & { readonly kind: 'wilds' })
   | (SceneEntryBase & { readonly kind: 'sandbox' })
   | (SceneEntryBase & { readonly kind: 'transit' })
-  | (SceneEntryBase & { readonly kind: 'residence'; readonly variant: 'original' | 'harbor' })
+  | (SceneEntryBase & { readonly kind: 'landing-lab' })
+  | (SceneEntryBase & { readonly kind: 'residence'; readonly variant: ResidenceVariant })
   | (SceneEntryBase & { readonly kind: 'demo'; readonly demoId: string })
   | (SceneEntryBase & { readonly kind: 'facility'; readonly sceneId: FacilitySceneId });
 
@@ -53,15 +57,19 @@ const perspectives = (variant: PerspectiveSceneEntry['variant'], entries: readon
     section: 'perspectives', kind: 'perspective', variant, sectionId, href: `./?mode=resources&scene=${variant}#${sectionId}` }));
 
 export const SCENE_ENTRIES: readonly SceneEntry[] = [
+  { id: 'city', title: '城区', href: './?mode=game', section: 'world', kind: 'main-world' },
+  { id: 'wilds', title: '原野', href: './?mode=game&free=1', section: 'world', kind: 'wilds' },
+  ...FACILITY_SCENE_IDS.map(sceneId => ({ id: `facility:${sceneId}`, title: FACILITY_SCENES[sceneId].name, sceneId, kind: 'facility' as const,
+    ...sceneId === 'original' ? { href: `./?mode=facility&scene=${sceneId}`, section: 'scenes' as const }
+      : { href: `./?mode=game&level=facility&scene=${sceneId}`, section: 'world' as const } })),
   { id: 'sandbox', title: '自由搭建场', href: './?mode=lab&demo=sandbox', section: 'scenes', kind: 'sandbox' },
-  { id: 'free-world', title: '自由世界', href: './?mode=lab&demo=free-world', section: 'scenes', kind: 'game' },
   { id: 'transit', title: '星舰交通中心', href: './?mode=lab&demo=transit', section: 'scenes', kind: 'transit' },
+  { id: 'transit-flight-lab', title: '星舰飞行 · 着陆测试', href: './?mode=lab&demo=transit-flight-lab', section: 'scenes', kind: 'landing-lab' },
   { id: 'residence', title: 'AI 住宅', href: './?mode=lab&demo=residence', section: 'scenes', kind: 'residence', variant: 'original' },
   { id: 'residence-2', title: 'AI 住宅 2', href: './?mode=lab&demo=residence-2', section: 'scenes', kind: 'residence', variant: 'harbor' },
+  { id: 'residence-3', title: 'AI 住宅 3', href: './?mode=lab&demo=residence-3', section: 'scenes', kind: 'residence', variant: 'three' },
   ...SCENE_DEMOS.map(demo => ({ id: demo.id, title: demo.title.replace(/^\d+\s*·\s*/, ''),
     href: `./?mode=lab&demo=${demo.id}`, section: 'scenes' as const, kind: 'demo' as const, demoId: demo.id })),
-  ...FACILITY_SCENE_IDS.map(sceneId => ({ id: `facility:${sceneId}`, title: FACILITY_SCENES[sceneId].name,
-    href: `./?mode=facility&scene=${sceneId}`, section: 'scenes' as const, kind: 'facility' as const, sceneId })),
   ...perspectives('room', room), ...perspectives('settlement', settlement, '城镇 · '), ...perspectives('depth', depth, '分层 · '),
   ...RESOURCE_CATALOG.subjects.map(subject => ({ id: `resource:${subject.id}`, title: subject.name,
     href: `./?mode=resources&resource=${subject.id}`, section: 'perspectives' as const, kind: 'resource' as const, resourceId: subject.id })),
@@ -70,9 +78,16 @@ export const SCENE_ENTRIES: readonly SceneEntry[] = [
 
 export function resolveSceneEntry(url: URL): SceneEntry {
   const params = url.searchParams;
-  const mode = params.get('mode');
+  const mode = parseAppMode(params, false);
   let id: string;
-  if (mode === 'lab') id = params.get('demo') ?? 'residence';
+  if (mode === 'game') {
+    const level = params.get('level');
+    if (params.get('free') === '1') id = 'wilds';
+    else if (level === null || level === 'harbor') id = 'city';
+    else if (level === 'transit') id = 'transit';
+    else if (level === 'facility') id = `facility:${parseFacilityChapter(params)}`;
+    else throw new Error(`场景工作区不挂载此游戏关卡：${level}`);
+  } else if (mode === 'lab') id = params.get('demo') ?? 'residence';
   else if (mode === 'facility') id = `facility:${params.get('scene') ?? 'fortress'}`;
   else if (mode === 'resources') {
     const variant = params.get('scene');

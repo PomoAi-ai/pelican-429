@@ -1,5 +1,5 @@
 /**
- * 水生小植物视图（纯渲染）：三个全局 InstancedMesh（变体图集，各 1 draw call；视野内无湖时整网格隐藏 = 0 draw call）——
+ * 水生小植物视图（纯渲染）：湖底与漂浮各一个全局变体批次（BatchedMesh），悬浮物一个变体图集 InstancedMesh（各 1 draw call；视野内无湖时整网格隐藏 = 0 draw call）——
  * - water-flora-bed：湖底矮水草（风材质 ×.35 风，与 water-weeds 同参；根部水量 < WEED_DRY_AMOUNT 时 y 收拢到 WEED_DRY_SCALE）；
  * - water-flora-float：水面漂浮植物（每湖漂移量随风积分 → 湖内回绕；y 贴当前水面 + 波动、随波倾斜；鹈鹕排斥 + 缓慢回流；两端渐隐）；
  * - water-flora-motes：水中悬浮藻丝/絮片/微粒（半透明，透明度随深度渐隐，缓慢漂移、上下浮动；renderOrder 1 先于水前面）。
@@ -28,7 +28,8 @@ import {
   BED_NATIVE_HEIGHT,
 } from './aquatic-geometry.ts';
 import { createWindMaterial } from './flora.ts';
-import { addVariantCollapse, mergeVariants, variantInstanceGeometry } from './variant-atlas.ts';
+import { addNodePatch } from './node-patches.ts';
+import { addVariantCollapse, createVariantBatch, mergeVariants, variantInstanceGeometry } from './variant-atlas.ts';
 import {
   AQUATIC_WIND,
   BED_KINDS,
@@ -103,6 +104,7 @@ export function addInstanceFade(material: THREE.MeshStandardMaterial, label: str
       .replace('#include <color_fragment>', '#include <color_fragment>\ndiffuseColor.a *= vInstFade;');
   };
   material.customProgramCacheKey = () => `${baseKey}|${WATER_FLORA_PROGRAM_TAG}`;
+  addNodePatch(material, { kind: 'instance-fade' });
   return material;
 }
 
@@ -126,6 +128,17 @@ function atlasMesh(name: string, atlas: THREE.BufferGeometry, variants: number[]
   return mesh;
 }
 
+/** 湖底与漂浮：变体批次（变体有数百个三角形，图集写法每个实例都跑全部变体）；全局网格同样由“视野内有湖”控制 visible。 */
+function batchMesh(name: string, atlas: THREE.BufferGeometry, variants: number[], material: THREE.Material): THREE.BatchedMesh {
+  const mesh = createVariantBatch(atlas, variants, material);
+  mesh.name = name;
+  mesh.castShadow = false;
+  mesh.receiveShadow = true;
+  // 漂浮物逐帧移动，整体包围球无意义；逐实例剔除仍按各自位置。
+  mesh.frustumCulled = false;
+  return mesh;
+}
+
 interface Surface {
   readonly y: number;
   /** 波动幅度系数（浅水按水深减小）。 */
@@ -145,7 +158,7 @@ function surfaceAt(fluid: FluidQuery, lake: LakeInfo, bedRow: Float32Array | und
   return null;
 }
 
-/** 三个全局 InstancedMesh（湖底/漂浮/悬浮）及其材质、变体图集、悬浮物透明度属性。 */
+/** 湖底/漂浮批次与悬浮 InstancedMesh 及其材质、变体图集、悬浮物透明度属性。 */
 function createFloraMeshes(uTime: THREE.IUniform<number>, bedPlan: readonly BedInstance[], floatPlan: readonly FloatInstance[], motePlan: readonly MoteInstance[]) {
   const bedMaterial = addVariantCollapse(createWindMaterial(uTime, { ...AQUATIC_WIND, name: 'water-flora-bed' }), 'water-flora-bed');
   const floatMaterial = addVariantCollapse(createWindMaterial(uTime, { amplitude: 0.02, speed: 0.6, windScale: 0.35, name: 'water-flora-float' }), 'water-flora-float');
@@ -155,8 +168,8 @@ function createFloraMeshes(uTime: THREE.IUniform<number>, bedPlan: readonly BedI
     float: mergeVariants([createDuckweedGeometry, createLilyPadGeometry, createLilyFlowerGeometry, createFrogbitGeometry, createLeafRaftGeometry].map(built), 'water-flora-float'),
     motes: mergeVariants([createAlgaeThreadGeometry, createFlakeGeometry, createSpeckGeometry].map(built), 'water-flora-motes'),
   };
-  const bedMesh = atlasMesh('water-flora-bed', atlases.bed, bedPlan.map((b) => BED_KINDS.indexOf(b.kind)), bedMaterial);
-  const floatMesh = atlasMesh('water-flora-float', atlases.float, floatPlan.map((f) => FLOAT_KINDS.indexOf(f.kind)), floatMaterial);
+  const bedMesh = batchMesh('water-flora-bed', atlases.bed, bedPlan.map((b) => BED_KINDS.indexOf(b.kind)), bedMaterial);
+  const floatMesh = batchMesh('water-flora-float', atlases.float, floatPlan.map((f) => FLOAT_KINDS.indexOf(f.kind)), floatMaterial);
   const moteMesh = atlasMesh('water-flora-motes', atlases.motes, motePlan.map((m) => MOTE_KINDS.indexOf(m.kind)), moteMaterial);
   moteMesh.renderOrder = 1;
   moteMesh.receiveShadow = false;
@@ -238,10 +251,8 @@ export function createWaterFloraView(level: LevelData, options: { readonly groun
     moteMesh.setMatrixAt(i, ZERO);
     moteMesh.setColorAt(i, _c.setHex(m.tint));
   });
-  for (const mesh of [bedMesh, floatMesh, moteMesh]) {
-    mesh.instanceMatrix.needsUpdate = true;
-    if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
-  }
+  moteMesh.instanceMatrix.needsUpdate = true;
+  if (moteMesh.instanceColor) moteMesh.instanceColor.needsUpdate = true;
 
   const drift = new Float64Array(lakes.length);
   const offset = new Float32Array(floatPlan.length);
@@ -275,11 +286,12 @@ export function createWaterFloraView(level: LevelData, options: { readonly groun
       const any = visibleLake.some(Boolean);
       // 泡沫读取本帧可见标记，离开湖区时不能沿用上一帧。
       floatVisible.fill(0);
-      for (const mesh of [bedMesh, floatMesh, moteMesh]) mesh.visible = any && mesh.count > 0;
+      bedMesh.visible = any && bedPlan.length > 0;
+      floatMesh.visible = any && floatPlan.length > 0;
+      moteMesh.visible = any && motePlan.length > 0;
       if (!any) return;
       // 湖底：根部水量收拢/舒展。
       const k = 1 - Math.exp(-DRY_RATE * dryDt);
-      let bedDirty = false;
       for (let i = 0; i < bedPlan.length; i++) {
         const b = bedPlan[i] as BedInstance;
         if (!visibleLake[b.lake]) continue;
@@ -290,9 +302,7 @@ export function createWaterFloraView(level: LevelData, options: { readonly groun
         if (next === cur) continue;
         dryScale[i] = next;
         writeBed(i);
-        bedDirty = true;
       }
-      if (bedDirty) bedMesh.instanceMatrix.needsUpdate = true;
       // 水面漂浮。
       const cache = new Map<number, Surface | null>();
       const surf = (li: number, x: number): Surface | null => {
@@ -329,7 +339,6 @@ export function createWaterFloraView(level: LevelData, options: { readonly groun
         _q.setFromEuler(_e);
         floatMesh.setMatrixAt(i, _m.compose(_p.set(x, y, f.z), _q, _s.set(scale, scale, scale)));
       }
-      floatMesh.instanceMatrix.needsUpdate = true;
       // 水中悬浮。
       writeMotes(moteCtx, visibleLake, t, surf);
       moteMesh.instanceMatrix.needsUpdate = true;

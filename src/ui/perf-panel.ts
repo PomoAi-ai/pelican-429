@@ -2,17 +2,24 @@
  * 性能面板：Cmd+Option+Z / Ctrl+Alt+Z 或设置面板切换，调试模式也可按 P；显示 FPS、帧时间、CPU 耗时、draw call、三角形。
  * 默认显示简洁 FPS，点击展开完整信息；每 PANEL_REFRESH_MS 刷新一次，收起时不启用分段计时。
  */
-import type { PerfSnapshot } from '../core/frame-profiler.ts';
+import type { GpuTimings, PerfSnapshot } from '../core/frame-profiler.ts';
 import { getLanguage, onLanguageChange, type Language } from './language.ts';
 
 export const PANEL_REFRESH_MS = 250;
 
 const fmtCount = (n: number): string => (n >= 1e6 ? `${(n / 1e6).toFixed(2)}M` : n >= 1e3 ? `${(n / 1e3).toFixed(1)}k` : String(Math.round(n)));
 
-/** 面板文本（纯函数，测试用）。 */
-export function formatPerfText(s: PerfSnapshot, language: Language, version: string): string {
+/** 面板文本（纯函数，测试用）；gpu 为 null 时不显示 GPU 行。 */
+export function formatPerfText(s: PerfSnapshot, gpu: GpuTimings | null, language: Language, version: string): string {
   const lines = [`FPS    ${s.fps.toFixed(1)} · v${version}`, `${language === 'en' ? 'Frame ' : '帧    '}${s.frameTime.toFixed(1)} ms`, `CPU    ${s.cpu.toFixed(2)} ms`];
   for (const [k, v] of Object.entries(s.segments)) lines.push(`  ${k.padEnd(8)}${v.toFixed(2)}`);
+  if (gpu === 'unsupported') lines.push(language === 'en' ? 'GPU    timer query unsupported' : 'GPU    不支持 timer query');
+  // 刚展开时查询结果还没读回，显示占位而不是 0。
+  else if (gpu !== null && gpu.frames === 0) lines.push('GPU    …');
+  else if (gpu !== null) {
+    lines.push(`GPU    ${gpu.total.toFixed(2)} ms`);
+    for (const [k, v] of Object.entries(gpu.segments)) lines.push(`  ${k.padEnd(8)}${v.toFixed(2)}`);
+  }
   lines.push(`draw   ${Math.round(s.calls)}`, `tris   ${fmtCount(s.triangles)}`);
   return lines.join('\n');
 }
@@ -22,8 +29,8 @@ export interface PerfPanel {
   readonly visible: boolean;
   toggle(): void;
   setVisible(visible: boolean): void;
-  /** 每帧调用；按 PANEL_REFRESH_MS 节流刷新文本。 */
-  update(snapshot: () => PerfSnapshot, nowMs: number, fps: number): void;
+  /** 每帧调用；按 PANEL_REFRESH_MS 节流刷新文本，只在展开且刷新时读取 snapshot 与 gpu。 */
+  update(snapshot: () => PerfSnapshot, gpu: () => GpuTimings | null, nowMs: number, fps: number): void;
   dispose(): void;
 }
 
@@ -81,10 +88,10 @@ export function createPerfPanel(parent: HTMLElement, keyTarget: Window, debug: b
       el.setAttribute('aria-expanded', String(expanded));
       lastRefresh = Number.NEGATIVE_INFINITY;
     },
-    update(snapshot, nowMs, fps) {
+    update(snapshot, gpu, nowMs, fps) {
       if (nowMs - lastRefresh < PANEL_REFRESH_MS) return;
       lastRefresh = nowMs;
-      el.textContent = expanded ? formatPerfText(snapshot(), getLanguage(), version) : `FPS ${fps.toFixed(0)} · v${version}`;
+      el.textContent = expanded ? formatPerfText(snapshot(), gpu(), getLanguage(), version) : `FPS ${fps.toFixed(0)} · v${version}`;
     },
     dispose() {
       keyTarget.removeEventListener('keydown', onKey);

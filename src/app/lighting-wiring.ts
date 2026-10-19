@@ -16,7 +16,7 @@ import { createWorldLight } from '../render/light-texture.ts';
 import type { WorldLight } from '../render/light-texture.ts';
 import { createPelicanAura, sampleLight } from '../render/pelican-aura.ts';
 import { planPasses } from '../render/post-fx.ts';
-import type { Stage } from '../render/stage.ts';
+import type { Stage, StageRenderer } from '../render/stage.ts';
 import type { SimWorld } from '../sim/sim-world.ts';
 import { caveLightSources } from '../world/cave-features.ts';
 import type { LevelData } from '../world/level.ts';
@@ -29,7 +29,7 @@ export interface ShaftsWiring {
 }
 
 /** 体积光束（树冠下/天空斜射）加入场景，并按舞台当前画质设置一次；画质 low 时关闭。 */
-export function installLightShafts(stage: Stage, level: LevelData, ground: Int16Array, disposers: Array<() => void>): ShaftsWiring {
+export function installLightShafts(stage: Stage<StageRenderer>, level: LevelData, ground: Int16Array, disposers: Array<() => void>): ShaftsWiring {
   const shafts = createLightShafts({ trees: level.trees, ground, lighting: TUNING.render.lighting });
   stage.scene.add(shafts.root);
   disposers.push(() => shafts.dispose());

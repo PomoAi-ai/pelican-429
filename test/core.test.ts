@@ -280,7 +280,7 @@ describe('011 W0 契约：tuning 新段', () => {
     ['orb.lifeTicks 为 0', (t) => (t.attacks.orb.lifeTicks = 0), /attacks\.orb\.lifeTicks/],
     ['render.orbLights 超出 0..4', (t) => (t.render.orbLights = 5), /render\.orbLights/],
     ['render.lighting.quality 非法', (t) => (t.render.lighting.quality = 'ultra'), /render\.lighting\.quality/],
-    ['render.lighting.shadow.mapSize 非 2 的幂', (t) => (t.render.lighting.shadow.mapSize = 1000), /render\.lighting\.shadow\.mapSize/],
+    ['render.lighting.shadow.mapSize 非 2 的幂', (t) => (t.render.lighting.shadow.mapSize.low = 1000), /render\.lighting\.shadow\.mapSize/],
     ['render.lighting.bloom.threshold 负数', (t) => (t.render.lighting.bloom.threshold = -1), /render\.lighting\.bloom\.threshold/],
     ['render.weather.gustSpeed 非正', (t) => (t.render.weather.gustSpeed = 0), /render\.weather\.gustSpeed/],
     ['render.weather.particles.lineMax 负数', (t) => (t.render.weather.particles.lineMax = -1), /render\.weather\.particles\.lineMax/],

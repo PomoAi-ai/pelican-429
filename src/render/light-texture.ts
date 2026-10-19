@@ -41,6 +41,8 @@ import type { TreeInstance } from '../world/level.ts';
 import { LIGHT_FULL, createLightMap, treeCanopies } from '../world/light-map.ts';
 import type { LightEmitter, LightMap } from '../world/light-map.ts';
 import type { TileMap } from '../world/tile-map.ts';
+import { addNodePatch, removeNodePatch } from './node-patches.ts';
+import type { NodePatch } from './node-patches.ts';
 
 export const LIGHT_MAP_PROGRAM_TAG = 'lightmap-v4';
 
@@ -406,8 +408,8 @@ export function createWorldLight(input: WorldLightInput): WorldLight {
   const { width, height } = lightMap;
   const data = new Uint8Array(width * height * 4);
   const scratch = new Uint16Array(width * height);
-  const packWater = (): void =>
-    computeWaterDepth({ width, height, water: fluid.cells, isSolid: (tx, ty) => map.collisionAt(tx, ty) === 'solid', threshold: cfg.waterThreshold }, data, 4, 2);
+  const packWater = (x0 = 0, x1 = width - 1): void =>
+    computeWaterDepth({ width, height, water: fluid.cells, isSolid: (tx, ty) => map.collisionAt(tx, ty) === 'solid', threshold: cfg.waterThreshold }, data, 4, 2, x0, x1);
   packLightColumns(lightMap.light, data, width, height, 0, width - 1, scratch);
   packWater();
 
@@ -442,13 +444,15 @@ export function createWorldLight(input: WorldLightInput): WorldLight {
     uniforms.uWaterRange.value = p.depthRange;
   };
   setWaterPalette(input.waterPalette ?? waterPalette(DEFAULT_WATER_PALETTE));
-  /** 瓦片变化（实心 ↔ 非实心）或水介质变化后，水下深度图全量重算（罕见事件；1200×160 约 1 ms）。 */
-  let waterDirty = false;
+  /** 瓦片变化（实心 ↔ 非实心）或水介质变化的列：水下深度图只重算这些列（水在流时每次扫描都有变化，全图重算在中型图上约 30 ms）。 */
+  let waterLo = width;
+  let waterHi = -1;
   let fluidRevision = fluid.revision;
 
   const unsubscribe = map.onChange((tx, ty) => {
     lightMap.refreshCell(tx, ty);
-    waterDirty = true;
+    waterLo = Math.min(waterLo, tx);
+    waterHi = Math.max(waterHi, tx);
   });
   const patchedSet = new WeakSet<THREE.Material>();
   const restoreMaterials: Array<() => void> = [];
@@ -471,7 +475,9 @@ export function createWorldLight(input: WorldLightInput): WorldLight {
     const water = material.userData?.waterBody === true;
     const auraReceive = (material.userData?.auraReceive as number | undefined) ?? 1;
     if (!(Number.isFinite(auraReceive) && auraReceive >= 0 && auraReceive <= 1)) throw new Error(`light-texture: material '${name}' userData.auraReceive must be in [0,1], got ${auraReceive}`);
-    const options: LightMapPatchOptions = { floor, terrain, water, auraReceive };
+    const options: Required<LightMapPatchOptions> = { floor, terrain, water, auraReceive };
+    const nodePatch: NodePatch = { kind: 'light-map', uniforms, dynMax: cfg.dynamicMax, options };
+    addNodePatch(material, nodePatch);
     material.onBeforeCompile = (shader, renderer) => {
       prev.call(material, shader, renderer);
       // 传送克隆会委托原材质的编译链，同一光照已注入时不能再次声明 GLSL。
@@ -485,6 +491,7 @@ export function createWorldLight(input: WorldLightInput): WorldLight {
     restoreMaterials.push(() => {
       material.onBeforeCompile = prev;
       material.customProgramCacheKey = prevKey;
+      removeNodePatch(material, nodePatch);
       material.needsUpdate = true;
     });
     patchedSet.add(material);
@@ -533,17 +540,23 @@ export function createWorldLight(input: WorldLightInput): WorldLight {
       uniforms.uDynCount.value = dyn;
       if (frame % cfg.fluidScanFrames === 0 && fluidRevision !== fluid.revision) {
         fluidRevision = fluid.revision;
-        if (lightMap.syncWater(fluid.cells)) waterDirty = true;
+        const wet = lightMap.syncWater(fluid.cells);
+        if (wet) {
+          waterLo = Math.min(waterLo, wet.x0);
+          waterHi = Math.max(waterHi, wet.x1);
+        }
       }
+      // 改动后整张上传：按列窗口逐行分段上传（每次数百次 texSubImage2D）在 ANGLE 上实测反而慢数倍。
       const range = lightMap.flush();
       if (range) {
         packLightColumns(lightMap.light, data, width, height, range.x0, range.x1, scratch);
         texture.needsUpdate = true;
       }
-      if (waterDirty) {
-        waterDirty = false;
-        packWater();
+      if (waterHi >= waterLo) {
+        packWater(waterLo, waterHi);
         texture.needsUpdate = true;
+        waterLo = width;
+        waterHi = -1;
       }
     },
     setWaterPalette(p) {

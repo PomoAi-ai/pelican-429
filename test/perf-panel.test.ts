@@ -2,8 +2,9 @@
 import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { createFrameProfiler } from '../src/core/frame-profiler.ts';
+import { createFrameProfiler, frameTimeStats } from '../src/core/frame-profiler.ts';
 import { createPerfPanel, formatPerfText } from '../src/ui/perf-panel.ts';
+import { createResolutionGovernor } from '../src/core/resolution-governor.ts';
 import { FakeElement, withFakeDocument } from './helpers/fake-dom.ts';
 
 function clock(values: number[]) {
@@ -54,6 +55,14 @@ describe('frame-profiler', () => {
     assert.throws(() => createFrameProfiler([], { now: () => 0 }), /frame-profiler/);
     assert.throws(() => createFrameProfiler(['a'], {} as never), /frame-profiler/);
   });
+
+  test('帧耗时分位数取排序后第 ⌈p·n⌉ 个样本，与输入顺序无关', () => {
+    // 1..100 打乱：p50 = 第 50 个，p95 = 第 95 个，p99 = 第 99 个。
+    const samples = Array.from({ length: 100 }, (_, i) => ((i * 37) % 100) + 1);
+    assert.deepEqual(frameTimeStats(samples), { p50: 50, p95: 95, p99: 99, max: 100, mean: 50.5 });
+    // 样本少时高分位落到最大值，而不是插值出不存在的帧耗时。
+    assert.deepEqual(frameTimeStats([16, 17, 40]), { p50: 17, p95: 40, p99: 40, max: 40, mean: 73 / 3 });
+  });
 });
 
 describe('perf-panel', () => {
@@ -86,7 +95,7 @@ describe('perf-panel', () => {
   }));
 
   test('文本：FPS、帧时间、CPU 分段、draw call、三角形（千/百万）', () => {
-    const text = formatPerfText({ frames: 60, fps: 59.94, frameTime: 16.68, cpu: 3.2, segments: { sim: 0.21, render: 1.6 }, calls: 252, triangles: 1_090_000 }, 'zh', 'test');
+    const text = formatPerfText({ frames: 60, fps: 59.94, frameTime: 16.68, cpu: 3.2, segments: { sim: 0.21, render: 1.6 }, calls: 252, triangles: 1_090_000 }, null, 'zh', 'test');
     assert.match(text, /FPS\s+59\.9/);
     assert.match(text, /帧\s+16\.7 ms/);
     assert.match(text, /CPU\s+3\.20 ms/);
@@ -94,5 +103,33 @@ describe('perf-panel', () => {
     assert.match(text, /render\s+1\.60/);
     assert.match(text, /draw\s+252/);
     assert.match(text, /tris\s+1\.09M/);
+  });
+});
+
+describe('createResolutionGovernor', () => {
+  const tuning = { minPixelRatio: 1, targetGpuMs: 12, step: 0.25, raiseSamples: 4 };
+
+  test('超预算按像素数比例一次降档，不低于下限', () => {
+    const g = createResolutionGovernor(tuning, 2);
+    assert.equal(g.sample(24), true);
+    assert.equal(g.ratio, 1.25);
+    assert.equal(g.sample(13), true);
+    assert.equal(g.ratio, 1);
+    assert.equal(g.sample(50), false);
+    assert.equal(g.ratio, 1);
+  });
+
+  test('预估升档后仍有余量的窗口连续够数才升一档，中途超出余量重新计数；不超过上限', () => {
+    const g = createResolutionGovernor(tuning, 1.5);
+    g.sample(100);
+    assert.equal(g.ratio, 1);
+    assert.deepEqual([6, 6, 6].map((ms) => g.sample(ms)), [false, false, false]);
+    assert.equal(g.sample(6), true);
+    assert.equal(g.ratio, 1.25);
+    assert.deepEqual([7, 7.5, 7, 7, 7].map((ms) => g.sample(ms)), [false, false, false, false, false]);
+    assert.equal(g.sample(7), true);
+    assert.equal(g.ratio, 1.5);
+    assert.deepEqual([1, 1, 1, 1, 1].map((ms) => g.sample(ms)), [false, false, false, false, false]);
+    assert.equal(g.ratio, 1.5);
   });
 });

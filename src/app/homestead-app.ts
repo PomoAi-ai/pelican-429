@@ -6,7 +6,7 @@ import type { ActionTracker } from '../input/action-map.ts';
 import type { CameraRig } from '../render/camera-rig.ts';
 import type { UtilityDroneFleet } from '../render/utility-drone.ts';
 import { createHomesteadView } from '../render/homestead-view.ts';
-import type { Stage } from '../render/stage.ts';
+import type { Stage, StageRenderer } from '../render/stage.ts';
 import { canSleep, captureHomestead, cancelArea, checkDepot, checkSolar, markArea, placeDepot, placeSolar, purchase, sleepHomestead } from '../sim/homestead.ts';
 import type { Spot } from '../sim/homestead.ts';
 import { getPlayer } from '../sim/sim-world.ts';
@@ -21,7 +21,7 @@ const SAVE_SECONDS = 20;
 export interface HomesteadAppOptions {
   readonly world: SimWorld;
   readonly droneFleet: UtilityDroneFleet;
-  readonly stage: Stage;
+  readonly stage: Stage<StageRenderer>;
   /** 砍倒一棵树后通知各个视图（树、光照、小地图、光柱）同步移除。 */
   readonly removeTree: (id: number) => void;
   readonly cameraRig: CameraRig;
