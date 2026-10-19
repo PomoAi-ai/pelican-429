@@ -13,8 +13,8 @@ import { disposeModelResources } from '../render/model-resources.ts';
 
 type PreviewCard = { version: D1LabVersion; element: HTMLElement; button: HTMLButtonElement; viewport: HTMLElement };
 type Projection = 'perspective' | 'orthographic';
-const SPHERICAL_EYE_MODELS = ['blender-eye-surface', 'blender-hair-contact', 'blender-d12', 'blender-scalp-fit', 'rodin-smooth-extracted', 'rodin-ear-aligned', 'rodin-source-remake', 'rodin-snug-fit', 'rodin-raw-head'];
-const DEFAULT_SPHERICAL_EYE_MODELS = ['blender-scalp-fit', 'rodin-smooth-extracted', 'rodin-ear-aligned', 'rodin-source-remake', 'rodin-snug-fit', 'rodin-raw-head'];
+const SPHERICAL_EYE_MODELS = ['blender-eye-surface', 'blender-hair-contact', 'blender-d12', 'blender-scalp-fit', 'rodin-smooth-extracted', 'rodin-ear-aligned', 'rodin-source-remake', 'rodin-snug-fit', 'rodin-raw-head', 'rodin-braid-y21', 'procedural-braid', 'blender-scalp-flow'];
+const DEFAULT_SPHERICAL_EYE_MODELS = ['blender-scalp-fit', 'rodin-smooth-extracted', 'rodin-ear-aligned', 'rodin-source-remake', 'rodin-snug-fit', 'rodin-raw-head', 'rodin-braid-y21', 'procedural-braid', 'blender-scalp-flow'];
 
 function syncPreviewNavigation(): void {
   const params = new URLSearchParams(location.search);

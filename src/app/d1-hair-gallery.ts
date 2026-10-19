@@ -1,7 +1,8 @@
 import * as THREE from 'three';
 import { TUNING } from '../config/tuning.ts';
 import { createStageRenderer } from '../render/stage.ts';
-import { disposeCharacterTextures } from '../render/character-model.ts';
+import { disposeCharacterTextures, loadCharacterModel } from '../render/character-model.ts';
+import { disposeModelResources } from '../render/model-resources.ts';
 import { createD1HairGameStage } from '../render/grassy/d1-hair-game-stage.ts';
 import { createD1Rig, disposeD1Asset, loadD1Asset } from '../render/grassy/d1-rig.ts';
 import { applyD1LabLooks, D1_LAB_VERSIONS, type D1LabVersion } from '../render/grassy/d1-lab-looks.ts';
@@ -55,6 +56,7 @@ let closed = false;
 let sequence = 0;
 let renderer: THREE.WebGLRenderer;
 let visible: Card[] = [];
+let sphericalEyeAsset: THREE.Object3D | undefined;
 
 function previewUrl(hair: HairStyle): string {
   const url = new URL('./render-lab.html', location.href);
@@ -173,7 +175,7 @@ function evict(): void {
 
 function createModel(card: Card): Model {
   const family = isBlenderHair(card.hair) ? 'blender' : 'rodin';
-  const rig = createD1Rig(card.variant, 'anime', 'web-1k', undefined, card.path);
+  const rig = createD1Rig(card.variant, 'anime', 'web-1k', card.hair === 'blender-scalp-flow' ? sphericalEyeAsset : undefined, card.path);
   let fit: Model['fit'] = null;
   let look: Model['look'] | null = null;
   try {
@@ -223,6 +225,11 @@ async function loadNext(): Promise<void> {
     if (closed) {
       disposeD1Asset(card.variant, 'web-1k', card.path);
       return;
+    }
+    if (card.hair === 'blender-scalp-flow' && !sphericalEyeAsset) {
+      const loaded = await loadCharacterModel('./characters/human/render-lab/d1-spherical-eyes-v3.glb', 'original');
+      if (closed) { disposeModelResources(loaded.scene); return; }
+      sphericalEyeAsset = loaded.scene;
     }
     card.model = createModel(card);
     updateCamera(card.viewport.clientWidth / card.viewport.clientHeight);
@@ -413,6 +420,7 @@ async function initialize(): Promise<void> {
     cancelAnimationFrame(frame);
     clearTimeout(saving);
     for (const card of cards) if (card.model) release(card);
+    if (sphericalEyeAsset) disposeModelResources(sphericalEyeAsset);
     gameStage.dispose();
     disposeCharacterTextures();
     renderer.dispose();

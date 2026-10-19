@@ -266,6 +266,34 @@ test('已退出的定制资源请求延迟失败时不删除新场景的加载�
   await currentFailure;
 });
 
+test('D1 短发实验沿用批准身体尺度，未声明或缩放身体的资源仍拒绝', async (t) => {
+  t.after(() => { disposeD1Assets(); disposeCharacterTextures(); });
+  t.mock.method(GLTFLoader.prototype, 'loadAsync', async (path: string) => {
+    const gltf = await new GLTFLoader().parseAsync(JSON.stringify({ asset: { version: '2.0' }, scene: 0, scenes: [{}] }), '');
+    if (path !== 'unmarked.glb') gltf.scene.userData.d1ScaleReference = 'approved-outfit-body';
+    if (path === 'scaled.glb') gltf.scene.scale.setScalar(1.03);
+    const geometry = new BoxGeometry(1.41261637, 2.96568698, .99921259).translate(0, 2.96568698 / 2, 0);
+    const count = geometry.getAttribute('position').count;
+    geometry.setAttribute('skinIndex', new Uint16BufferAttribute(new Uint16Array(count * 4), 4));
+    const weights = new Float32Array(count * 4);
+    for (let i = 0; i < count; i++) weights[i * 4] = 1;
+    geometry.setAttribute('skinWeight', new Float32BufferAttribute(weights, 4));
+    const body = new SkinnedMesh(geometry, new MeshStandardMaterial({ name: 'model' }));
+    body.name = 'Body';
+    const bone = new Bone(); body.add(bone); body.bind(new Skeleton([bone]));
+    const hair = new Mesh(new BoxGeometry(.8, .1, .8).translate(0, 2.99, 0), new MeshStandardMaterial({ name: 'model.001' }));
+    hair.name = 'Hair';
+    gltf.scene.add(body, hair);
+    gltf.animations = ['idle', 'walk', 'run', 'jump'].map(name => new AnimationClip(name, 1, [new NumberKeyframeTrack('.position[x]', [0, 1], [0, 1])]));
+    return gltf;
+  });
+  await loadD1Asset('outfit', 'original', 'short-hair.glb');
+  const rig = createD1Rig('outfit', 'anime', 'original', undefined, 'short-hair.glb');
+  rig.dispose();
+  await assert.rejects(loadD1Asset('outfit', 'original', 'unmarked.glb'), /尺寸不符/);
+  await assert.rejects(loadD1Asset('outfit', 'original', 'scaled.glb'), /身体尺度不符/);
+});
+
 test('D1 三档与贴图缓存独立，复制实例不串用模型或头发开关', async (t) => {
   const rigs: ReturnType<typeof createD1Rig>[] = [];
   t.after(() => { for (const rig of rigs) rig.dispose(); disposeD1Assets(); disposeCharacterTextures(); });

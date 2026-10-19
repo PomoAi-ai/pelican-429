@@ -1,8 +1,8 @@
 import { D1_ANIMATED_MODELS } from '../config/grassy.ts';
 import { characterModelPath } from '../render/character-model.ts';
 
-export type BlenderHairStyle = 'blender-redrawn' | 'blender-flow' | 'blender-plait' | 'blender-eye-surface' | 'blender-hair-contact' | 'blender-d12' | 'blender-scalp-fit';
-export type HairStyle = 'showcase' | 'game-detailed' | 'rodin-contour' | 'rodin-smooth-extracted' | 'rodin-ear-aligned' | 'rodin-source-remake' | 'rodin-snug-fit' | 'rodin-raw-head' | BlenderHairStyle;
+export type BlenderHairStyle = 'blender-redrawn' | 'blender-flow' | 'blender-plait' | 'blender-eye-surface' | 'blender-hair-contact' | 'blender-d12' | 'blender-scalp-fit' | 'blender-scalp-flow';
+export type HairStyle = 'showcase' | 'game-detailed' | 'rodin-contour' | 'rodin-smooth-extracted' | 'rodin-ear-aligned' | 'rodin-source-remake' | 'rodin-snug-fit' | 'rodin-raw-head' | 'rodin-braid-y21' | 'procedural-braid' | BlenderHairStyle;
 
 export const HAIR_ASSETS: Record<HairStyle, string> = {
   'game-detailed': characterModelPath(D1_ANIMATED_MODELS.find(model => model.id === 'detailed')!.path, 'web-1k'),
@@ -20,6 +20,9 @@ export const HAIR_ASSETS: Record<HairStyle, string> = {
   'rodin-source-remake': './characters/human/render-lab/d1-outfit-rodin-source-remake-v1.glb',
   'rodin-snug-fit': './characters/human/render-lab/d1-outfit-rodin-snug-fit-v1.glb',
   'rodin-raw-head': './characters/human/render-lab/d1-outfit-rodin-raw-head-v1.glb',
+  'rodin-braid-y21': './characters/human/render-lab/d1-outfit-rodin-braid-y21-v1.glb',
+  'procedural-braid': './characters/human/render-lab/d1-outfit-procedural-braid-v1.glb',
+  'blender-scalp-flow': './characters/human/render-lab/d1-outfit-blender-scalp-flow-v1.glb',
 };
 
 export const HAIR_NUMBERS: Record<HairStyle, number> = {
@@ -38,13 +41,16 @@ export const HAIR_NUMBERS: Record<HairStyle, number> = {
   'rodin-source-remake': 42,
   'rodin-snug-fit': 43,
   'rodin-raw-head': 44,
+  'rodin-braid-y21': 45,
+  'procedural-braid': 46,
+  'blender-scalp-flow': 47,
 };
 
 export function isBlenderHair(value: string): value is BlenderHairStyle {
-  return value === 'blender-redrawn' || value === 'blender-flow' || value === 'blender-plait' || value === 'blender-eye-surface' || value === 'blender-hair-contact' || value === 'blender-d12' || value === 'blender-scalp-fit';
+  return value === 'blender-redrawn' || value === 'blender-flow' || value === 'blender-plait' || value === 'blender-eye-surface' || value === 'blender-hair-contact' || value === 'blender-d12' || value === 'blender-scalp-fit' || value === 'blender-scalp-flow';
 }
 
 export function readHairStyle(value: string): HairStyle {
-  if (value !== 'showcase' && value !== 'game-detailed' && value !== 'rodin-contour' && value !== 'rodin-smooth-extracted' && value !== 'rodin-ear-aligned' && value !== 'rodin-source-remake' && value !== 'rodin-snug-fit' && value !== 'rodin-raw-head' && !isBlenderHair(value)) throw new Error(`未知头发版本：${value}`);
+  if (value !== 'showcase' && value !== 'game-detailed' && value !== 'rodin-contour' && value !== 'rodin-smooth-extracted' && value !== 'rodin-ear-aligned' && value !== 'rodin-source-remake' && value !== 'rodin-snug-fit' && value !== 'rodin-raw-head' && value !== 'rodin-braid-y21' && value !== 'procedural-braid' && !isBlenderHair(value)) throw new Error(`未知头发版本：${value}`);
   return value;
 }

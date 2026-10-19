@@ -38,8 +38,25 @@ function readAsset(gltf: GLTF): D1Asset {
   try {
     const bounds = new THREE.Box3().setFromObject(scene);
     const height = bounds.max.y - bounds.min.y;
-    if (bounds.isEmpty() || !Number.isFinite(height) || Math.abs(bounds.min.y) > .02 || Math.abs(height - GRASSY_HEIGHT) > .02) {
+    const scaleReference = scene.userData.d1ScaleReference;
+    if (scaleReference !== undefined && scaleReference !== 'approved-outfit-body') {
+      throw new Error(`D1 动画模型未知尺度参照：${String(scaleReference)}`);
+    }
+    if (bounds.isEmpty() || !Number.isFinite(height) || Math.abs(bounds.min.y) > .02
+      || (scaleReference === undefined && Math.abs(height - GRASSY_HEIGHT) > .02)) {
       throw new Error(`D1 动画模型尺寸不符：脚底 ${bounds.min.y}、全高 ${height}`);
+    }
+    if (scaleReference === 'approved-outfit-body') {
+      // 发型变短不应抬高发冠；实验沿用批准角色的身体倍率。
+      const bodyBounds = new THREE.Box3();
+      scene.traverse(node => {
+        if (node instanceof THREE.Mesh && node.name !== 'Hair') bodyBounds.expandByObject(node);
+      });
+      const size = bodyBounds.getSize(new THREE.Vector3()).toArray();
+      const reference = [1.41261637, 2.96568698, .99921259];
+      if (!size.every((value, axis) => Number.isFinite(value) && Math.abs(value - reference[axis]!) <= .002)) {
+        throw new Error(`D1 动画模型身体尺度不符：${size.join(' × ')}`);
+      }
     }
     const clips = {} as Record<D1Action, THREE.AnimationClip>;
     for (const { id } of D1_ACTIONS) {
