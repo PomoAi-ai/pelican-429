@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { npcAction, SAM_ROUTING_SOURCE } from '../../config/npc.ts';
 import type { NpcAction, NpcKind } from '../../config/npc.ts';
+import { mergeStaticParts } from '../merge-static-parts.ts';
 
 const UP = new THREE.Vector3(0, 1, 0);
 const UNIT = new THREE.Vector3(1, 1, 1);
@@ -56,6 +57,8 @@ function createRouterCore() {
   });
   const bridgeGeometry = new THREE.CylinderGeometry(.032, .032, 1, 6);
   const bridges = satellites.map(() => mesh(head, bridgeGeometry, steel));
+  // 杖身与各卫星节点内部的小件相对父组静止，按材质合并；水晶、内核与连桥逐帧变换，挂在 head 下不参与。
+  for (const parent of [root, ...satellites.map(({ part }) => part)]) mergeStaticParts(parent, new Set());
   const delta = new THREE.Vector3();
   return {
     root,
@@ -121,6 +124,8 @@ function createResetMallet() {
       mesh(head, new THREE.SphereGeometry(.022, 6, 4), brass, Math.cos(a) * .296, Math.sin(a) * .296, side * .19);
     }
   }
+  // 棘轮组逐帧旋转，组内小件相对组静止：各父组内按材质合并。
+  for (const parent of [root, head, ...ratchets]) mergeStaticParts(parent, new Set());
   return {
     root,
     sample(action: NpcAction, seconds: number) {

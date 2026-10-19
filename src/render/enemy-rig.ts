@@ -80,11 +80,31 @@ export function disposeEnemyAssets(): void {
   assets.clear(); loading.clear();
 }
 
+/**
+ * glTF 每个蒙皮网格各带一个 Skeleton（同一 skin 也各一份），SkeletonUtils.clone 再逐网格复制：
+ * 一只看门人有 90 套骨架，每帧各算一遍骨骼矩阵、各传一张骨骼纹理。骨骼与逆绑定矩阵相同的网格共用一套。
+ */
+function shareSkeletons(model: THREE.Object3D): void {
+  const shared: THREE.Skeleton[] = [];
+  model.traverse((node) => {
+    if (!(node instanceof THREE.SkinnedMesh)) return;
+    const own = node.skeleton;
+    const same = shared.find((s) => s.bones.length === own.bones.length && s.bones.every((bone, i) => bone === own.bones[i] && s.boneInverses[i]!.equals(own.boneInverses[i]!)));
+    if (same === undefined) {
+      shared.push(own);
+      return;
+    }
+    node.bind(same, node.bindMatrix);
+    own.dispose();
+  });
+}
+
 /** GLB 几何与纹理由缓存持有，独立材质使受击闪光不会影响同类敌人。 */
 export function createEnemyRig(kind: EnemyKind, appearanceIndex = 0, tier: TextureTier = characterTextureTier()) {
   const asset = assets.get(`${kind}:${tier}`);
   if (!asset) throw new Error(`${ENEMY_RULES[kind].name} 尚未加载：${ENEMY_MODEL_DIRS[kind]}/model.glb`);
   const model = clone(asset.scene) as THREE.Group;
+  shareSkeletons(model);
   const root = new THREE.Group();
   root.add(model);
   const materials = new Map<THREE.Material, THREE.Material>();

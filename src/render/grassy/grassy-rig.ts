@@ -5,6 +5,7 @@ import type { GLTF } from 'three/addons/loaders/GLTFLoader.js';
 import { clone } from 'three/addons/utils/SkeletonUtils.js';
 import { GRASSY_ACTIONS, GRASSY_ANIMATED_MODELS, GRASSY_HEIGHT } from '../../config/grassy.ts';
 import type { GrassyAction, GrassyAnimatedVariant } from '../../config/grassy.ts';
+import { mergeStaticParts } from '../merge-static-parts.ts';
 import { createGrassyEffects, GRASSY_EFFECT_SOCKETS } from './grassy-effects.ts';
 import type { GrassyEffects } from './grassy-effects.ts';
 import { createGrassyCycle } from './grassy-cycle.ts';
@@ -161,6 +162,9 @@ function readAsset(gltf: GLTF, path: string, variant: GrassyAnimatedVariant): Gr
       if (!scene.getObjectByName(name)) throw new Error(`Grassy 装备模型 ${path} 缺少特效挂点：${name}`);
     }
     if (!scene.getObjectByName('FlightHarness')) throw new Error(`Grassy 装备模型 ${path} 缺少飞行背包 FlightHarness`);
+    // 背带、推进舱与护腕各由几十个小件拼成（每件一次主视图 + 一次阴影绘制）；clip 只驱动 KeyboardWeapon，这些件相对父节点静止。
+    // 在共享模板上合并一次：主角实例与 NPC 背包克隆共用合并几何，随资源释放。挂点是 Object3D，不受影响。
+    for (const name of ['FlightHarness', 'FlightPod_L', 'FlightPod_R', 'FlightCuff_L', 'FlightCuff_R']) mergeStaticParts(scene.getObjectByName(name)!, new Set());
     for (const name of GRASSY_MOTION_NODES) {
       if (!scene.getObjectByName(name)) throw new Error(`Grassy 装备模型 ${path} 缺少动作组合节点：${name}`);
     }
