@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { injectAfter } from '../tile-material.ts';
+import { injectAfter } from '../tile/tile-material.ts';
 import { createD1GouacheMaterial } from './d1-gouache-material.ts';
 import { studyParameters, type StudySource, type StudySurface } from './d1-study-surface.ts';
 

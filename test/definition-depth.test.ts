@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { createDefinitionKit } from '../src/render/definition-kit.ts';
+import { createDefinitionKit } from '../src/render/building/definition-kit.ts';
 import { createDefinitionDepthOccupancy, definitionDepthConflict, type DefinitionDepthPlacement } from '../src/sim/definition-depth.ts';
 
 const wall = (x = 0, y = 0, width = 1, height = 1): DefinitionDepthPlacement => ({ kind: 'wall', x, y, width, height });

@@ -15,12 +15,12 @@ import { createPelicanAttackLayer } from '../src/render/pelican/pelican-attack-l
 import type { PelicanSpitInput } from '../src/render/pelican/pelican-attack-layer.ts';
 import { createPelicanPouch } from '../src/render/pelican/pelican-pouch.ts';
 import { createPelicanRig } from '../src/render/pelican/pelican-rig.ts';
-import { fillSpitInput, mouthTimeline } from '../src/render/pelican-weapon-view.ts';
-import { createProjectileViews } from '../src/render/projectile-views.ts';
-import { DROP_CAPACITY, createProjectileFx } from '../src/render/projectile-fx.ts';
-import { isLightMappable } from '../src/render/light-texture.ts';
-import { createWeaponHud } from '../src/ui/weapon-hud.ts';
-import { setLanguage } from '../src/ui/language.ts';
+import { fillSpitInput, mouthTimeline } from '../src/render/pelican/pelican-weapon-view.ts';
+import { createProjectileViews } from '../src/render/fx/projectile-views.ts';
+import { DROP_CAPACITY, createProjectileFx } from '../src/render/fx/projectile-fx.ts';
+import { isLightMappable } from '../src/render/stage/light-texture.ts';
+import { createWeaponHud } from '../src/ui/hud/weapon-hud.ts';
+import { setLanguage } from '../src/ui/model/language.ts';
 import { FakeElement, withFakeDocument } from './helpers/fake-dom.ts';
 import { GEO, REST } from './helpers/pelican-fixtures.ts';
 import { pelicanRestPose } from '../src/render/pelican/pelican-pose.ts';

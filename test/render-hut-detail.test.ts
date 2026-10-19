@@ -4,17 +4,17 @@ import assert from 'node:assert/strict';
 
 import * as THREE from 'three';
 import { TUNING } from '../src/config/tuning.ts';
-import { isCloudShadowable } from '../src/render/cloud-shadow.ts';
-import { HUT_LAYER } from '../src/render/hut-builder.ts';
-import { HUT_FACADE_Z_MAX, HUT_PARTS, HUT_PROP_Z_MAX, HUT_SWAY_PARTS, buildHutGeometry, buildHutParts, buildHutSwayParts, hutSmokeOrigin } from '../src/render/hut-geometry.ts';
-import type { BedHeight } from '../src/render/hut-geometry.ts';
-import { HUT_SMOKE_PUFFS, buildSmokeGeometry, createHutMaterials } from '../src/render/hut-material.ts';
-import { HUT_TEXTURE_LAYERS, HUT_TEXTURE_SIZE, generateHutTextures } from '../src/render/hut-textures.ts';
-import { injectLightMap, isLightMappable } from '../src/render/light-texture.ts';
-import type { LightMapUniforms } from '../src/render/light-texture.ts';
-import { HUT_MESHES_PER_HUT, createStructureView } from '../src/render/structure-view.ts';
-import { BLOCK_FRONT_Z } from '../src/render/tile-geometry.ts';
-import { sharedWindUniforms } from '../src/render/wind.ts';
+import { isCloudShadowable } from '../src/render/sky/cloud-shadow.ts';
+import { HUT_LAYER } from '../src/render/building/hut-builder.ts';
+import { HUT_FACADE_Z_MAX, HUT_PARTS, HUT_PROP_Z_MAX, HUT_SWAY_PARTS, buildHutGeometry, buildHutParts, buildHutSwayParts, hutSmokeOrigin } from '../src/render/building/hut-geometry.ts';
+import type { BedHeight } from '../src/render/building/hut-geometry.ts';
+import { HUT_SMOKE_PUFFS, buildSmokeGeometry, createHutMaterials } from '../src/render/building/hut-material.ts';
+import { HUT_TEXTURE_LAYERS, HUT_TEXTURE_SIZE, generateHutTextures } from '../src/render/building/hut-textures.ts';
+import { injectLightMap, isLightMappable } from '../src/render/stage/light-texture.ts';
+import type { LightMapUniforms } from '../src/render/stage/light-texture.ts';
+import { HUT_MESHES_PER_HUT, createStructureView } from '../src/render/building/structure-view.ts';
+import { BLOCK_FRONT_Z } from '../src/render/tile/tile-geometry.ts';
+import { sharedWindUniforms } from '../src/render/sky/wind.ts';
 import type { FishingHut } from '../src/world/level.ts';
 import { generateWorld } from '../src/world/worldgen.ts';
 

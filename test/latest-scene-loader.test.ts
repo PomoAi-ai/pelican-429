@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { createLatestSceneLoader } from '../src/app/latest-scene-loader.ts';
+import { createLatestSceneLoader } from '../src/app/workspace/latest-scene-loader.ts';
 
 // 去掉取消检查或并行开始旧/新装配，会显示过期画面或在编译结束前释放材质。
 for (const fails of [false, true]) test(`连续切换仅装配最后选择，旧加载${fails ? '失败' : '完成'}不覆盖新场景`, async () => {

@@ -6,8 +6,8 @@ import { TUNING } from '../src/config/tuning.ts';
 import { DEFAULT_TILES, TILE_ROOF, TILE_TIMBER } from '../src/world/tile-types.ts';
 import { LEVEL_LEGEND, TEST_LEVEL, WATER_TEST_LEVEL, parseLevel } from '../src/world/test-level.ts';
 import { SHAPE_FULL, SHAPE_HALF, SHAPE_SLOPE_L, SHAPE_SLOPE_R } from '../src/world/tile-shapes.ts';
-import { TILE_APPEARANCE, resolveAppearance } from '../src/render/tile-view.ts';
-import { TILE_TRANSITIONS, contourStyle } from '../src/render/tile-transitions.ts';
+import { TILE_APPEARANCE, resolveAppearance } from '../src/render/tile/tile-view.ts';
+import { TILE_TRANSITIONS, contourStyle } from '../src/render/tile/tile-transitions.ts';
 import { generateWorld } from '../src/world/worldgen.ts';
 
 describe('013 W0：tile-types', () => {

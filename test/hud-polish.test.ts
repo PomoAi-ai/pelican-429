@@ -8,10 +8,10 @@ import type { Bindings } from '../src/config/keybindings.ts';
 import { createActionTracker } from '../src/input/action-map.ts';
 import { createDummyEntity, createPelicanEntity } from '../src/entities/entity.ts';
 import type { Entity } from '../src/entities/entity.ts';
-import { BAR_HALF_WIDTH, BAR_HEIGHT, BAR_OFFSET, BAR_OVERLAP_OPACITY, pelicanVisualRect, placeDummyBar } from '../src/ui/dummy-bar-layout.ts';
-import type { Rect } from '../src/ui/dummy-bar-layout.ts';
-import { CONTROL_HINTS, HINTS_AFTER_INPUT, HINTS_AUTO_HIDE, createHud } from '../src/ui/hud.ts';
-import { setLanguage } from '../src/ui/language.ts';
+import { BAR_HALF_WIDTH, BAR_HEIGHT, BAR_OFFSET, BAR_OVERLAP_OPACITY, pelicanVisualRect, placeDummyBar } from '../src/ui/hud/dummy-bar-layout.ts';
+import type { Rect } from '../src/ui/hud/dummy-bar-layout.ts';
+import { CONTROL_HINTS, HINTS_AFTER_INPUT, HINTS_AUTO_HIDE, createHud } from '../src/ui/hud/hud.ts';
+import { setLanguage } from '../src/ui/model/language.ts';
 import { FakeElement, withFakeDocument } from './helpers/fake-dom.ts';
 
 const DT = 1 / 60;

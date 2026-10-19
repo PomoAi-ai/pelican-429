@@ -72,5 +72,5 @@
       ]
     }
   },
-  "source": "src/render/maglev-model.ts"
+  "source": "src/render/transit/maglev-model.ts"
 }

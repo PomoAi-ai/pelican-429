@@ -12,9 +12,9 @@ import { createProjectileEntity, projectileHitSource, retireSpentProjectile, ste
 import { tickDummyReset, updateDummy } from '../../entities/training-dummy.ts';
 import { savePrev } from '../../physics/body.ts';
 import { moveAndCollide } from '../../physics/tile-collision.ts';
-import { createDummyViewFactory } from '../../render/entity-views.ts';
-import { createPhotonProjectileViews } from '../../render/photon-projectile-view.ts';
-import { createViewRegistry } from '../../render/view-registry.ts';
+import { createDummyViewFactory } from '../../render/character/entity-views.ts';
+import { createPhotonProjectileViews } from '../../render/fx/photon-projectile-view.ts';
+import { createViewRegistry } from '../../render/stage/view-registry.ts';
 import { createPhotonVolley, steerPhotonProjectiles } from '../../sim/photon-system.ts';
 import { createTileMap } from '../../world/tile-map.ts';
 import { DEFAULT_TILES, TILE_STONE } from '../../world/tile-types.ts';

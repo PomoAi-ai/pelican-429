@@ -86,7 +86,7 @@
 
 ## 地表岩石四档：游戏 23 种的位置与行为
 
-2026-10-12 定稿。游戏地表的 23 种岩石按 `src/render/surface-decor.ts` 已有的四档分类，不另立尺寸规则；长廊全建筑展示直接调用同一套生成函数（`rockGroupFor`、`scatterRockFor`、`landmarkInstance`）。Z 以人物平面为 0、镜头侧为正，游戏与新定义在人物平面之后的数值一致。
+2026-10-12 定稿。游戏地表的 23 种岩石按 `src/render/decor/surface-decor.ts` 已有的四档分类，不另立尺寸规则；长廊全建筑展示直接调用同一套生成函数（`rockGroupFor`、`scatterRockFor`、`landmarkInstance`）。Z 以人物平面为 0、镜头侧为正，游戏与新定义在人物平面之后的数值一致。
 
 | 档 | 种类 | 宽（格） | 中心 Z | 与人物 |
 | --- | --- | --- | --- | --- |

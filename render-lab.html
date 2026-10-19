@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#eee9e1" />
     <title>D1 · 独立渲染实验</title>
-    <link rel="stylesheet" href="./src/ui/d1-render-lab.css" />
+    <link rel="stylesheet" href="/src/ui/lab/d1-render-lab.css" />
   </head>
   <body>
     <nav class="d1-preview-nav" aria-label="D1 预览页面">
@@ -17,26 +17,7 @@
       <div class="lab-brand"><span class="lab-mark" aria-hidden="true">D1</span><div><p>PELICAN 429 / RENDER STUDY</p><h1>独立渲染实验</h1></div></div>
       <a id="lab-showcase-link" href="./?mode=showcase&amp;stageActor=d1.idle,1,1,0.7854,0,1,1,outfit,1&amp;textures=web-1k" target="_blank" rel="noopener">打开当前展示场 <span aria-hidden="true">↗</span></a>
     </header>
-<fieldset id="lab-hair-controls" class="lab-hair-picker" disabled aria-describedby="lab-hair-version-hint"><legend>模型 / 头发版本</legend><div class="lab-hair-buttons" role="group" aria-label="模型 / 头发版本">
-        <button type="button" data-hair="showcase" aria-pressed="false">展示场 · 白色基础服游戏标准版</button>
-        <button type="button" data-hair="rodin-contour" aria-pressed="false">Rodin · 自然收拢版（保留）</button>
-        <button type="button" data-hair="blender-redrawn" aria-pressed="false">Blender · 刘海与短卷重绘〔阶段稿〕</button>
-        <button type="button" data-hair="blender-flow" aria-pressed="false">Blender · 短发收束与沿束配色〔阶段稿〕</button>
-        <button type="button" data-hair="blender-plait" aria-pressed="false">Blender · 编辫逐瓣重塑〔阶段稿〕</button>
-        <button type="button" data-hair="blender-eye-surface" aria-pressed="false">Blender · 眼周连续与眨眼修复〔阶段稿〕</button>
-        <button type="button" data-hair="blender-hair-contact" aria-pressed="false">Blender · 冠发衔接与后脑补缝〔阶段稿〕</button>
-        <button type="button" data-hair="blender-d12" aria-pressed="false">Blender · D12 细发丝与内刘海衔接〔阶段稿〕</button>
-        <button type="button" data-hair="game-detailed" aria-pressed="false">游戏正式版 · 精细检查（当前资源）</button>
-        <button type="button" data-hair="blender-scalp-fit" aria-pressed="false">Blender · 原画发束与头皮贴合〔新款〕</button>
-        <button type="button" data-hair="rodin-smooth-extracted" aria-pressed="false">Rodin · 整头拆分平滑发束〔阶段稿〕</button>
-        <button type="button" data-hair="rodin-ear-aligned" aria-pressed="false">Rodin · 整头配准〔修正版〕</button>
-        <button type="button" data-hair="rodin-source-remake" aria-pressed="false">Rodin · 原始整头重新拆分〔新款〕</button>
-        <button type="button" data-hair="rodin-snug-fit" aria-pressed="false">Rodin · 原始头发贴合头皮〔新款〕</button>
-        <button type="button" data-hair="rodin-raw-head" aria-pressed="false">Rodin · 原始整头未修改〔对照〕</button>
-        <button type="button" data-hair="rodin-braid-y21" aria-pressed="false">Rodin · 两股辫 y21 贴合头皮〔新款〕</button>
-        <button type="button" data-hair="procedural-braid" aria-pressed="false">程序化 · 波波头两股辫〔新款〕</button>
-        <button type="button" data-hair="blender-scalp-flow" aria-pressed="false">Blender · 偏分发流与贴头三股辫〔新款〕</button>
-</div>
+<fieldset id="lab-hair-controls" class="lab-hair-picker" disabled aria-describedby="lab-hair-version-hint"><legend>模型 / 头发版本</legend><div class="lab-hair-buttons" role="group" aria-label="模型 / 头发版本"></div>
 <p id="lab-hair-version-hint" class="lab-version-description">新头发在 Blender 中按发束制作，重点检查正面、侧面和头皮贴合。保留所选八款发型，并加入游戏正式精细版对照；切换保留当前视角。</p>
 </fieldset>
     <main class="lab-layout">
@@ -108,6 +89,6 @@
         <p class="lab-isolation-note">独立实验页面，使用角色与候选头发资源。</p>
       </aside>
     </main>
-    <script type="module" src="./src/app/d1-render-lab.ts"></script>
+    <script type="module" src="/src/app/lab/d1-render-lab.ts"></script>
   </body>
 </html>

@@ -2,8 +2,8 @@ import { writeFileSync } from 'node:fs';
 import { Box3, Vector3 } from 'three';
 import { RESIDENCE_LIGHTS, RESIDENCE_RESOURCES, RESIDENCE_WORLD, type ResidenceResource } from '../src/config/residence.ts';
 import { TILE_SHAPE_DEFINITIONS } from '../src/config/definition-kit.ts';
-import { createAiCityFixture } from '../src/render/ai-city-architecture.ts';
-import { TILE_TEXTURE_PERIOD } from '../src/render/tile-textures.ts';
+import { createAiCityFixture } from '../src/render/city/ai-city-architecture.ts';
+import { TILE_TEXTURE_PERIOD } from '../src/render/tile/tile-textures.ts';
 
 const fixtureDepths = new Map(RESIDENCE_RESOURCES.filter(r => r.kind === 'fixture').map(r => {
   const view = createAiCityFixture(r.fixture);
@@ -109,7 +109,7 @@ writeFileSync(new URL('../public/concepts/material-library.md', import.meta.url)
 <details>
 <summary>资料来源与更新</summary>
 
-正文由 src/config/residence.ts、src/config/definition-kit.ts 生成；附属构件包络来自 src/render/ai-city-architecture.ts。修改资源后运行 npm run docs:resources，不直接编辑生成正文。材质或模型改变时，在 Vite 浏览器环境调用 scripts/export-material-previews.ts 的 exportMaterialPreviews()，重新导出 material-previews 图片快照。网页与 HTTP Markdown 使用同一份图文，LLM 索引见 [llms.txt](../llms.txt)。
+正文由 src/config/residence.ts、src/config/definition-kit.ts 生成；附属构件包络来自 src/render/city/ai-city-architecture.ts。修改资源后运行 npm run docs:resources，不直接编辑生成正文。材质或模型改变时，在 Vite 浏览器环境调用 scripts/export-material-previews.ts 的 exportMaterialPreviews()，重新导出 material-previews 图片快照。网页与 HTTP Markdown 使用同一份图文，LLM 索引见 [llms.txt](../llms.txt)。
 
 </details>
 

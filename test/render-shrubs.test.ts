@@ -3,8 +3,8 @@ import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
 
 import * as THREE from 'three';
-import { CLOUD_SHADOW_PROGRAM_TAG, createCloudShadowPatcher } from '../src/render/cloud-shadow.ts';
-import type { CoverSite } from '../src/render/flora-cover.ts';
+import { CLOUD_SHADOW_PROGRAM_TAG, createCloudShadowPatcher } from '../src/render/sky/cloud-shadow.ts';
+import type { CoverSite } from '../src/render/flora/flora-cover.ts';
 import {
   SHRUB_CHUNK_BUDGET,
   SHRUB_DISTURB_SCALE,
@@ -20,21 +20,21 @@ import {
   planShrubs,
   shrubMatrix,
   validateShrubRules,
-} from '../src/render/flora-shrubs.ts';
-import type { ShrubInstance, ShrubKind } from '../src/render/flora-shrubs.ts';
-import type { FloraEnv } from '../src/render/flora.ts';
-import { siteTopY } from '../src/render/flora.ts';
-import { sharedDisturbUniforms } from '../src/render/grass-disturb.ts';
-import { WOODY_SPECS } from '../src/render/shrub-woody.ts';
-import { LEAF_ALPHA_TEST, createTreeMaterials, sharedLeafAtlas } from '../src/render/tree-material.ts';
-import { isLightMappable } from '../src/render/light-texture.ts';
-import { createTileView } from '../src/render/tile-view.ts';
-import { GROUND_DECOR_Z_MIN } from '../src/render/tile-geometry.ts';
-import { VARIANT_PROGRAM_TAG, variantYRange } from '../src/render/variant-atlas.ts';
+} from '../src/render/flora/flora-shrubs.ts';
+import type { ShrubInstance, ShrubKind } from '../src/render/flora/flora-shrubs.ts';
+import type { FloraEnv } from '../src/render/flora/flora.ts';
+import { siteTopY } from '../src/render/flora/flora.ts';
+import { sharedDisturbUniforms } from '../src/render/flora/grass-disturb.ts';
+import { WOODY_SPECS } from '../src/render/flora/shrub-woody.ts';
+import { LEAF_ALPHA_TEST, createTreeMaterials, sharedLeafAtlas } from '../src/render/tree/tree-material.ts';
+import { isLightMappable } from '../src/render/stage/light-texture.ts';
+import { createTileView } from '../src/render/tile/tile-view.ts';
+import { GROUND_DECOR_Z_MIN } from '../src/render/tile/tile-geometry.ts';
+import { VARIANT_PROGRAM_TAG, variantYRange } from '../src/render/flora/variant-atlas.ts';
 import { createTileMap } from '../src/world/tile-map.ts';
 import { SHAPE_FULL } from '../src/world/tile-shapes.ts';
 import { DEFAULT_TILES, TILE_GRASS, TILE_SAND } from '../src/world/tile-types.ts';
-import { TREE_WIND_PROGRAM_KEYS } from '../src/render/tree-wind.ts';
+import { TREE_WIND_PROGRAM_KEYS } from '../src/render/tree/tree-wind.ts';
 
 const sites = (n: number, ground: CoverSite['ground'], ty = 10): CoverSite[] => Array.from({ length: n }, (_, tx) => ({ tx, ty, shape: SHAPE_FULL, ground }));
 const env = (shade: number, water = Infinity): FloraEnv => ({ waterDistance: () => water, shade: () => shade });

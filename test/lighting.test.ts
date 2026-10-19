@@ -7,11 +7,11 @@ import { TUNING, validateTuning } from '../src/config/tuning.ts';
 import type { Tuning } from '../src/config/tuning.ts';
 import { DEFAULT_LIGHTING, resolveAntialias, resolveQuality, validateLightingTuning } from '../src/config/lighting-rules.ts';
 import type { LightingTuning } from '../src/config/lighting-rules.ts';
-import { createPostFx, planPasses } from '../src/render/post-fx.ts';
-import { fitShadowCamera, lightBasis, shadowReceiverBounds } from '../src/render/shadow-fit.ts';
-import type { ShadowFitInput, Vec3Like } from '../src/render/shadow-fit.ts';
-import { createBackdrop, hazeFactor } from '../src/render/stage.ts';
-import { buildShaftAnchors, createLightShafts, selectVisibleShafts, shaftAxis } from '../src/render/light-shafts.ts';
+import { createPostFx, planPasses } from '../src/render/stage/post-fx.ts';
+import { fitShadowCamera, lightBasis, shadowReceiverBounds } from '../src/render/stage/shadow-fit.ts';
+import type { ShadowFitInput, Vec3Like } from '../src/render/stage/shadow-fit.ts';
+import { createBackdrop, hazeFactor } from '../src/render/stage/stage.ts';
+import { buildShaftAnchors, createLightShafts, selectVisibleShafts, shaftAxis } from '../src/render/sky/light-shafts.ts';
 import { makeTree } from './helpers/render-fixtures.ts';
 
 function cloneLighting(): LightingTuning {

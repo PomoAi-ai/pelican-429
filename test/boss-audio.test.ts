@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { BossScore } from '../src/app/boss-audio.ts';
+import { BossScore } from '../src/app/audio/boss-audio.ts';
 
 test('Boss 蓄力中续播保留剩余声部和扫频进度，停止后清理未来声音', () => {
   const voices: { start: number; end: number; frequency: number; stop: number; disconnected: boolean }[] = [];

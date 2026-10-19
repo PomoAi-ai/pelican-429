@@ -3,7 +3,7 @@ import { NPCS, npcAction } from '../../config/npc.ts';
 import type { NpcAction, NpcForm, NpcKind } from '../../config/npc.ts';
 import { animateNpc } from './npc-animator.ts';
 import { createNpcRig, loadNpcAsset } from './npc-rig.ts';
-import { addNodePatch } from '../node-patches.ts';
+import { addNodePatch } from '../stage/node-patches.ts';
 
 export async function loadNpcForms(kind: NpcKind): Promise<void> {
   await Promise.all(NPCS[kind].forms.map(form => loadNpcAsset(kind, form.id)));

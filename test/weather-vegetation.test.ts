@@ -4,10 +4,10 @@ import assert from 'node:assert/strict';
 
 import * as THREE from 'three';
 import { mulberry32 } from '../src/core/rng.ts';
-import { createWindMaterial } from '../src/render/flora.ts';
-import { createPetalFx } from '../src/render/petal-fx.ts';
-import { createTreeMaterials } from '../src/render/tree-material.ts';
-import { WIND_UNIFORM_NAMES, sharedWindUniforms } from '../src/render/wind.ts';
+import { createWindMaterial } from '../src/render/flora/flora.ts';
+import { createPetalFx } from '../src/render/fx/petal-fx.ts';
+import { createTreeMaterials } from '../src/render/tree/tree-material.ts';
+import { WIND_UNIFORM_NAMES, sharedWindUniforms } from '../src/render/sky/wind.ts';
 import { glslCalls, glslDeclarations, glslFunctionNames } from './helpers/glsl.ts';
 
 type Shader = { vertexShader: string; fragmentShader: string; uniforms: Record<string, THREE.IUniform> };

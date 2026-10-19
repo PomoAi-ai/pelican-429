@@ -17,12 +17,12 @@ import {
   createWindMaterial,
   floraMatrix,
   planFlora,
-} from '../src/render/flora.ts';
-import type { FloraEnv, FloraInstance, FloraSite } from '../src/render/flora.ts';
-import { TURF_BLADES } from '../src/render/flora-geometry.ts';
-import { BLOCK_BACK_Z, BLOCK_FRONT_Z, GROUND_DECOR_Z_MAX, GROUND_DECOR_Z_MIN } from '../src/render/tile-geometry.ts';
-import { ORGANIC_TOP_AMP, organicTopOffset } from '../src/render/tile-organic.ts';
-import { createTileView } from '../src/render/tile-view.ts';
+} from '../src/render/flora/flora.ts';
+import type { FloraEnv, FloraInstance, FloraSite } from '../src/render/flora/flora.ts';
+import { TURF_BLADES } from '../src/render/flora/flora-geometry.ts';
+import { BLOCK_BACK_Z, BLOCK_FRONT_Z, GROUND_DECOR_Z_MAX, GROUND_DECOR_Z_MIN } from '../src/render/tile/tile-geometry.ts';
+import { ORGANIC_TOP_AMP, organicTopOffset } from '../src/render/tile/tile-organic.ts';
+import { createTileView } from '../src/render/tile/tile-view.ts';
 import {
   WEED_DRY_AMOUNT,
   WEED_DRY_SCALE,
@@ -32,7 +32,7 @@ import {
   WEED_MIN_HEIGHT,
   createWaterWeedView,
   planWaterWeeds,
-} from '../src/render/water-weeds.ts';
+} from '../src/render/water/water-weeds.ts';
 import { WATER_TEST_LEVEL, parseLevel } from '../src/world/test-level.ts';
 import { CHUNK_SIZE, createTileMap } from '../src/world/tile-map.ts';
 import { SHAPE_FULL, SHAPE_HALF, SHAPE_SLOPE_L, SHAPE_SLOPE_R } from '../src/world/tile-shapes.ts';

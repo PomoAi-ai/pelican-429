@@ -25,7 +25,7 @@ import { LEVEL_LEGEND, parseLevel } from '../src/world/test-level.ts';
 import { blocksPrecip, roofTop, skyExposed } from '../src/world/sky-exposure.ts';
 import { createTileMap } from '../src/world/tile-map.ts';
 import { DEFAULT_TILES, TILE_BRANCH, TILE_DIRT, TILE_PLATFORM } from '../src/world/tile-types.ts';
-import { nextPrecipMode } from '../src/ui/precip-debug.ts';
+import { nextPrecipMode } from '../src/ui/hud/precip-debug.ts';
 
 const OPEN = ['................', '................', '................', '................', '................', '.......P........', '################', '################'];
 const COVERED = ['................', '..============..', '................', '................', '................', '.......P........', '################', '################'];

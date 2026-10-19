@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { isSceneGameLevel, opensSceneGame, parseAppMode } from '../src/config/app-mode.ts';
-import { resolveSceneEntry } from '../src/app/scene-catalog.ts';
+import { isSceneGameLevel, opensSceneGame, pageRoute, parseAppMode, parsePageParams } from '../src/config/app-mode.ts';
+import { resolveSceneEntry } from '../src/app/workspace/scene-catalog.ts';
 import { SITE_SECTIONS, findSitePage } from '../src/config/site-directory.ts';
 
 test('发布版支持主线与场景游玩，但阻止需要本地素材的旧入口', () => {
@@ -22,12 +22,37 @@ test('发布版支持主线与场景游玩，但阻止需要本地素材的旧�
 });
 
 test('发布版拒绝未发布的画质资源，本地仍可对照原版', () => {
-  assert.equal(parseAppMode(new URLSearchParams('mode=game&textures=ktx2-compact'), true), 'game');
+  assert.deepEqual(parsePageParams(new URLSearchParams('mode=game'), true), { textures: 'ktx2-compact', debug: false });
+  assert.equal(parsePageParams(new URLSearchParams('mode=game&textures=ktx2-compact'), true).textures, 'ktx2-compact');
   for (const textures of ['original', 'web', 'web-1k', 'ktx2', 'ktx2-256', 'ktx2-256-compact']) {
     const params = new URLSearchParams({ mode: 'game', textures });
-    assert.throws(() => parseAppMode(params, true));
-    assert.equal(parseAppMode(params, false), 'game');
+    assert.throws(() => parsePageParams(params, true), /在线版仅提供优化画质/);
+    assert.equal(parsePageParams(params, false).textures, textures);
   }
+  assert.deepEqual(parsePageParams(new URLSearchParams('textures=original&debug'), false), { textures: 'original', debug: true });
+  for (const release of [false, true]) assert.throws(() => parsePageParams(new URLSearchParams('textures=4k'), release), /未知角色资源规格：4k/);
+});
+
+test('网址按入口条件依次分派：站点页、场景工作区、交通中心、城区与原野、家园与展示场', () => {
+  const desktop = { release: false, embedded: false, coarsePointer: false };
+  const phone = { ...desktop, coarsePointer: true };
+  const route = (query: string, host = desktop) => pageRoute(new URLSearchParams(query), host);
+  assert.equal(route(''), 'index');
+  for (const mode of ['catalog', 'about', 'concepts', 'story', 'compare', 'sounds', 'intro', 'showcase'] as const) assert.equal(route(`mode=${mode}`), mode);
+  for (const mode of ['lab', 'resources', 'facility']) assert.equal(route(`mode=${mode}`), 'workspace');
+  assert.equal(route('mode=game&level=transit'), 'workspace');
+  assert.equal(route('mode=game&level=transit', phone), 'transit');
+  assert.equal(route('mode=game', phone), 'harbor');
+  assert.equal(route('seed=7&level=harbor', phone), 'harbor');
+  assert.equal(route('mode=game&free=1', phone), 'game');
+  assert.equal(route('mode=game&level=facility', phone), 'game');
+  assert.equal(route('mode=game&level=boss-arena'), 'game');
+  assert.equal(route('mode=game&bench=1'), 'harbor');
+  assert.equal(route('mode=game', { ...desktop, release: true }), 'harbor');
+  assert.equal(route('mode=homestead&scene=residence'), 'residence');
+  assert.equal(route('mode=homestead'), 'game');
+  assert.equal(route('mode=controls'), 'game');
+  assert.throws(() => route('mode=lab', { ...desktop, release: true }));
 });
 
 test('两级导航：每个入口地址都落回自己，同一页的其他参数也归到同一入口', () => {

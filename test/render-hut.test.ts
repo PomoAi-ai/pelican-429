@@ -15,10 +15,10 @@ import {
   buildHutParts,
   buildHutSwayParts,
   hutRoofTop,
-} from '../src/render/hut-geometry.ts';
-import type { BedHeight } from '../src/render/hut-geometry.ts';
-import { createStructureView } from '../src/render/structure-view.ts';
-import { BLOCK_BACK_Z } from '../src/render/tile-geometry.ts';
+} from '../src/render/building/hut-geometry.ts';
+import type { BedHeight } from '../src/render/building/hut-geometry.ts';
+import { createStructureView } from '../src/render/building/structure-view.ts';
+import { BLOCK_BACK_Z } from '../src/render/tile/tile-geometry.ts';
 import type { FishingHut } from '../src/world/level.ts';
 import { createTileMap } from '../src/world/tile-map.ts';
 import { SHAPE_SLOPE_L, SHAPE_SLOPE_R, shapeTopAt } from '../src/world/tile-shapes.ts';

@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import type { PelicanAnimInput } from './pelican-animator.ts';
 import type { PelicanPose } from './pelican-pose.ts';
 import { SCARF_PARTS } from './pelican-follow-rig.ts';
-import { addNodePatch } from '../node-patches.ts';
+import { addNodePatch } from '../stage/node-patches.ts';
 
 const CLOTH_SHADER = /* glsl */`
 uniform float uScarfPhase;

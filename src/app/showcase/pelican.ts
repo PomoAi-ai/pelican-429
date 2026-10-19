@@ -8,6 +8,7 @@ import type { InputFrame } from '../../sim/sim-world.ts';
 import { TILE_PLATFORM } from '../../world/tile-types.ts';
 import { entityFocus, placeBody } from './scenario.ts';
 import type { ScenarioContext, ScenarioDriver } from './scenario.ts';
+import { t } from '../../config/i18n.ts';
 
 export function preparePelican(ctx: ScenarioContext): ScenarioDriver {
   const { world, entry, groundY, facing } = ctx;
@@ -98,9 +99,9 @@ export function preparePelican(ctx: ScenarioContext): ScenarioDriver {
     focus: () => targets.length > 0 || transforming ? { x: centerX, y: centerY } : entityFocus(player),
     width, height,
     status: () => {
-      if (transforming) return p.transformTicks >= 0
+      if (transforming) return t(p.transformTicks >= 0
         ? p.transformFrom === 'human' ? '羽毛生长 · 身体换形' : '羽毛收退 · 身体换形'
-        : p.form === 'human' ? 'Grassy · 人类形态 · F 变为鹈鹕' : '鹈鹕形态 · F 变为主角';
+        : p.form === 'human' ? 'Grassy · 人类形态 · F 变为鹈鹕' : '鹈鹕形态 · F 变为主角');
       if (targets.length > 0) {
         const hit = targets.filter((entity) => entity.health!.hp < entity.health!.maxHp).length;
         const hp = targets.reduce((sum, entity) => sum + entity.health!.hp, 0);
@@ -108,10 +109,10 @@ export function preparePelican(ctx: ScenarioContext): ScenarioDriver {
         const phase = action === 'swallow' ? p.weapon.mouthful ? '已吞入 · 凝聚反击' : swallowed ? '反吐完成' : '等待来袭弹'
           : action === 'ultimate' ? world.photon.chargeTicks > 0 ? '光子聚光' : world.photon.activeTicks > 0 ? '虫群光轮追击' : '光子爆裂'
           : action === 'dash' ? p.weapon.dashTicks > 0 ? '振翅突进' : '突进演示' : action === 'fish' ? '鱼群轰炸' : '吐水普攻';
-        return `${phase} · ${hit}/${targets.length} 目标受击 · 生命 ${hp}/${maxHp}`;
+        return `${t(phase)} · ${t(`${hit}/${targets.length} 目标受击`)} · ${t(`生命 ${hp}/${maxHp}`)}`;
       }
-      if (p.ride.mode !== 'off') return ({ mounting: '上车中', riding: '骑行', dismounting: '下车中' })[p.ride.mode];
-      return ({ idle: '待机', run: p.moveGear === 'walk' ? '走路' : '跑步', jump: '起跳', fall: '下落', attack: '攻击', fly: '振翅飞行', glide: '滑翔', swim: '游泳' })[p.state];
+      if (p.ride.mode !== 'off') return t({ mounting: '上车中', riding: '骑行', dismounting: '下车中' }[p.ride.mode]);
+      return t({ idle: '待机', run: p.moveGear === 'walk' ? '走路' : '跑步', jump: '起跳', fall: '下落', attack: '攻击', fly: '振翅飞行', glide: '滑翔', swim: '游泳' }[p.state]);
     },
   };
 }

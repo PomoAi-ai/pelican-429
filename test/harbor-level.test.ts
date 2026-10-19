@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { loadGameLevel } from '../src/app/game-level.ts';
+import { loadGameLevel } from '../src/app/game/game-level.ts';
 import { HUMAN_BODY_HEIGHT } from '../src/config/player-form.ts';
 import { TUNING } from '../src/config/tuning.ts';
 import { createBody } from '../src/physics/body.ts';

@@ -54,7 +54,7 @@ try {
     await page.route('**/@vite/client',r=>r.fulfill({contentType:'text/javascript',body:''}));
     let rejectRoute;
     const failed=new Promise((_,reject)=>{rejectRoute=reject;});
-    await page.route('**/src/app/game-app.ts*',async route=>{
+    await page.route('**/src/app/game/game-app.ts*',async route=>{
       try{
         const response=await route.fetch();let body=await response.text();
         const replace=(from,to)=>{assert(typeof from==='string'?body.includes(from):from.test(body),`录制接入点变化：${from}`);body=body.replace(from,to);};
@@ -76,7 +76,7 @@ try {
       const h=window.__pelicanGame;
       const {createBossEntity}=await import('/src/entities/boss.ts');
       const {createBossDirector}=await import('/scripts/pelican-boss-director.mjs');
-      const {GameAudioCues}=await import('/src/app/game-audio-cues.ts');
+      const {GameAudioCues}=await import('/src/app/audio/game-audio-cues.ts');
       const p=h.world.entities.find(e=>e.id===h.world.playerId);
       const b=createBossEntity(h.world.nextId++,kind,{x:172,y:75},h.world.tuning);
       p.health.hp=p.health.maxHp=10000;p.armored=true;

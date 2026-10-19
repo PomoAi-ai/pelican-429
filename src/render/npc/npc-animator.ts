@@ -1,7 +1,7 @@
 import { LoopOnce, MathUtils } from 'three';
 import { BOSS_RULES } from '../../config/boss-rules.ts';
 import { TUNING } from '../../config/tuning.ts';
-import { previewHairLift } from '../hair-sway.ts';
+import { previewHairLift } from '../character/hair-sway.ts';
 import { npcAction } from '../../config/npc.ts';
 import type { NpcAction } from '../../config/npc.ts';
 import type { NpcRig } from './npc-rig.ts';

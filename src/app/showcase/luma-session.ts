@@ -2,9 +2,10 @@ import * as THREE from 'three';
 import { showcaseEntry } from '../../config/showcase.ts';
 import type { ShowcaseCard } from '../../config/showcase.ts';
 import { TUNING } from '../../config/tuning.ts';
-import { createStageView } from '../../render/stage.ts';
+import { createStageView } from '../../render/stage/stage.ts';
 import type { InputFrame } from '../../sim/sim-world.ts';
 import { createLumaActor } from './stage-actor.ts';
+import { t } from '../../config/i18n.ts';
 
 /** 角色形状与动作来自共享资产，这里只负责检视环境、镜头和播放时间。 */
 export function createLumaShowcaseSession(renderer: THREE.WebGLRenderer, card: ShowcaseCard) {
@@ -45,7 +46,7 @@ export function createLumaShowcaseSession(renderer: THREE.WebGLRenderer, card: S
     get ticks() { return Math.floor(actor.progress * showcaseEntry(card.entryId).seconds / TUNING.sim.step); },
     get duration() { return showcaseEntry(card.entryId).seconds; },
     get progress() { return actor.progress; },
-    get status() { return actor.complete ? '演示完成' : actor.status; },
+    get status() { return actor.complete ? t('演示完成') : actor.status; },
     get needsReset() { return revision !== card.revision; },
     reset,
     advance(elapsed: number, playing: boolean, _manual: (() => InputFrame) | null): number {

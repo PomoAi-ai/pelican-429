@@ -1,0 +1,132 @@
+.room-preview { --room-bg: #10191e; --room-panel: #152127; --room-line: #2b393f; --room-muted: #91a5ae; --room-text: #e6eeed; --room-accent: #b8df9d; height: 100%; display: grid; grid-template-rows: auto minmax(0, 1fr); font: 13px/1.5 'PingFang SC', system-ui, sans-serif; background: var(--room-bg); color: var(--room-text); }
+.room-preview * { box-sizing: border-box; }
+.room-preview [hidden] { display: none; }
+/* 场景预览只在工作区内出现，按钮配色、边框、内边距与焦点框由 scene-workspace.css 的工作区皮肤提供。 */
+.room-preview :is(.room-preview-toolbar, .room-preview-directory, .room-preview-tools) button { min-height: 32px; white-space: nowrap; }
+:where(.room-preview-toolbar) a { min-height: 32px; padding: 4px 10px; border: 1px solid var(--room-line); border-radius: 6px; background: #1d2b32; color: var(--room-text); font: inherit; text-decoration: none; cursor: pointer; white-space: nowrap; }
+.room-preview :is(.room-preview-toolbar, .room-preview-directory, .room-preview-tools) button:hover { border-color: #637b80; }
+.room-preview-toolbar a:hover { background: #2a3b42; border-color: #637b80; }
+.room-preview :is(.room-preview-toolbar, .room-preview-directory, .room-preview-tools) button[aria-pressed="true"] { color: var(--room-accent); background: #26392e; border-color: #59724c; }
+.room-preview :is(.room-preview-toolbar, .room-preview-directory, .room-preview-tools) button:disabled { color: #829293; border-color: #34454a; cursor: default; }
+/* 公共工具条只给默认值；交通、搭建等页面的工具条同时带自己的类名覆盖它，:where 让覆盖不依赖样式表先后。 */
+:where(.room-preview-toolbar) { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; min-height: 44px; padding: 6px 12px; background: var(--room-bg); border-bottom: 1px solid var(--room-line); }
+.room-preview-status { margin-right: auto; color: var(--room-muted); white-space: nowrap; }
+.room-preview-workspace { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) 248px; min-height: 0; }
+.room-preview-workspace:has(.room-preview-tools[hidden]) { grid-template-columns: minmax(0, 1fr); }
+.room-preview-directory, .room-preview-tools { overflow-y: auto; scrollbar-width: thin; scrollbar-color: #42555d transparent; background: var(--room-panel); }
+.room-preview-directory { padding: 10px; border-right: 1px solid var(--room-line); }
+.room-preview-tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; padding: 3px; border: 1px solid var(--room-line); border-radius: 7px; background: var(--room-bg); }
+.room-preview-tabs a { padding: 6px 2px; color: var(--room-muted); border-radius: 4px; text-align: center; text-decoration: none; white-space: nowrap; font-size: 12px; }
+.room-preview-tabs a:hover { color: var(--room-text); }
+.room-preview-tabs a[aria-current="page"] { color: var(--room-accent); background: #293c2e; }
+.room-preview-heading { display: flex; justify-content: space-between; margin: 14px 6px 6px; color: var(--room-muted); font-size: 12px; font-weight: 500; }
+.room-preview-heading span { font-variant-numeric: tabular-nums; }
+.room-preview-sections { display: grid; gap: 4px; }
+.room-preview-sections button { width: 100%; text-align: left; padding: 7px 10px; border-color: transparent; background: transparent; white-space: normal; }
+.room-preview-caption { display: flex; flex-direction: column; gap: 5px; margin: 8px 0 0; }
+.room-preview-caption strong { font-size: 13px; font-weight: 500; }
+.room-preview-caption span { color: var(--room-muted); font-size: 12px; line-height: 1.8; }
+.room-preview-coverage { margin: 16px 8px 0; color: var(--room-muted); font-size: 12px; line-height: 1.8; }
+.room-preview-coverage summary { cursor: pointer; }
+.room-preview-coverage h3 { margin: 12px 0 4px; font-size: 13px; color: var(--room-text); }
+.room-preview-coverage ul { padding-left: 17px; margin: 0; }
+.room-preview-main { min-width: 0; min-height: 0; display: grid; grid-template-rows: minmax(0, 1fr); }
+.room-preview-viewport { min-width: 0; min-height: 0; position: relative; overflow: hidden; }
+.room-preview-canvas { position: absolute; inset: 0; }
+.room-preview-canvas canvas { cursor: grab; touch-action: none; }
+.room-preview-canvas canvas:active { cursor: grabbing; }
+.room-preview-tools { padding: 0 12px; border-left: 1px solid var(--room-line); }
+.room-preview-control-section { padding: 9px 0; border-bottom: 1px solid var(--room-line); }
+.room-preview-control-section:last-child { border-bottom: 0; }
+.room-preview-control-section > summary { cursor: pointer; font-weight: 500; color: var(--room-text); }
+.room-preview-control-section[open] > summary { margin-bottom: 7px; }
+.room-preview-depth-stops, .room-preview-depth-layers { display: grid; gap: 8px; }
+.room-preview-depth-stops button { text-align: left; white-space: normal; }
+.room-preview-depth-stops small { display: block; margin-top: 4px; color: var(--room-muted); font-weight: 400; }
+.room-preview-depth-layers label { display: flex; gap: 8px; align-items: center; font-size: 12px; }
+.room-preview-depth-layers input { accent-color: var(--room-accent); }
+.room-preview-depth-layers small { display: block; color: var(--room-muted); font-size: 11px; }
+.room-preview-depth-layers label:has(input:disabled) { opacity: .4; }
+/* 常用控制放进工具栏横排，侧面板只放分区专用的操作。 */
+.room-preview-group { display: flex; align-items: center; gap: 4px; padding-left: 10px; border-left: 1px solid var(--room-line); }
+.room-preview-control-row { display: flex; gap: 4px; }
+.room-preview-control-row button { flex: 1; padding: 4px 6px; }
+.room-preview-notes { color: var(--room-muted); font-size: 12px; line-height: 1.8; margin: 0; }
+/* 控制面板默认收起，操作提示放在画面上，进入页面就能看到。 */
+.room-preview-hint { position: absolute; right: 12px; bottom: 12px; max-width: min(560px, calc(100% - 24px)); margin: 0; padding: 6px 10px; border-radius: 6px; background: #10191ecc; color: var(--room-text); font-size: 12px; line-height: 1.6; pointer-events: none; }
+.room-preview-solar label { color: var(--room-muted); font-size: 12px; white-space: nowrap; }
+.room-preview-solar output { display: inline-block; min-width: 4.5em; color: var(--room-text); font-variant-numeric: tabular-nums; }
+.room-preview-solar input { width: 88px; margin: 0; accent-color: var(--room-accent); cursor: pointer; }
+[data-solar-trial] .room-preview-control-row { flex-wrap: wrap; }
+[data-solar-trial] .room-preview-control-row button { flex-basis: 70px; }
+@media (max-width: 1000px) {
+  .room-preview-workspace, .room-preview-workspace:has(.room-preview-tools[hidden]) { grid-template-columns: minmax(0, 1fr); }
+  .room-preview-tools { position: absolute; z-index: 4; right: 0; top: 0; bottom: 0; width: 260px; box-shadow: -12px 0 30px #0005; }
+}
+@media (max-width: 600px) {
+  :where(.room-preview-toolbar) { padding: 8px; gap: 6px; }
+  .room-preview-status { font-size: 12px; }
+  .room-preview-hint { display: none; }
+  .room-preview-group { padding-left: 0; border-left: 0; }
+  .room-preview-toolbar [data-definition] { display: none; }
+  .room-preview-workspace, .room-preview-workspace:has(.room-preview-tools[hidden]) { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); }
+  .room-preview-directory { padding: 8px; border-right: 0; border-bottom: 1px solid var(--room-line); }
+  .room-preview-tabs { max-width: 290px; }
+  .room-preview-heading, .room-preview-description, .room-preview-coverage { display: none; }
+  .room-preview-sections { display: flex; overflow-x: auto; margin-top: 6px; }
+  .room-preview-sections button { flex: 0 0 auto; width: auto; white-space: nowrap; padding: 6px 9px; }
+  .room-preview-tools { width: min(280px, 90%); }
+}
+
+.room-preview-description { margin: 14px 6px 0; padding-top: 10px; border-top: 1px solid var(--room-line); color: var(--room-muted); font-size: 12px; }
+.room-preview-description summary { cursor: pointer; }
+.room-preview-hud { --dev-nav-height: 0px; --control-gold: #e5c789; position: absolute; inset: 0; pointer-events: none; }
+.room-preview-hud .hud-skill-aim, .room-preview-hud .hud-skill-aim-status, .room-preview-hud .hud-weapon-toast { position: absolute; }
+.room-preview-hud .hud-character-switch { display: none; }
+.room-preview-hud .control-pad { cursor: pointer; font: inherit; touch-action: none; }
+.room-preview-hud[inert] { opacity: .6; }
+.room-preview-minimap { position: absolute; z-index: 2; top: 12px; right: 12px; width: min(420px, 45%); }
+.room-preview-minimap canvas { display: block; width: 100%; height: 100%; }
+.room-preview-minimap i { position: absolute; width: 8px; height: 8px; margin: -8px 0 0 -4px; border: 1px solid #10191e; border-radius: 50%; background: #ff6b5a; pointer-events: none; }
+@media (max-width: 600px) { .room-preview-minimap { width: 60%; } }
+
+.city-layer-controls { position: relative; flex: none; }
+.city-layer-controls summary { padding: 6px 8px; cursor: pointer; white-space: nowrap; }
+.city-layer-controls > div { position: absolute; z-index: 8; top: 100%; right: 0; min-width: 230px; padding: 8px; border: 1px solid var(--residence-line, var(--room-line)); border-radius: 8px; background: var(--residence-paper, var(--room-panel)); color: var(--residence-ink, var(--room-text)); box-shadow: 0 8px 24px #0004; }
+.city-layer-controls label { display: flex; gap: 8px; align-items: center; min-height: 32px; white-space: nowrap; cursor: pointer; }
+.city-layer-controls input { margin: 0; }
+
+.world-controls { position: relative; flex: none; }
+.world-controls > summary { padding: 6px 10px; cursor: pointer; white-space: nowrap; color: #177fba; }
+.world-controls-time { margin-left: 8px; font-variant-numeric: tabular-nums; font-weight: 700; }
+.world-controls-panel { position: absolute; z-index: 12; left: 0; top: calc(100% + 6px); width: min(330px, 85vw); padding: 16px; border: 1px solid #9fc5d8; border-radius: 12px; background: #f5fbff; color: #263c4c; box-shadow: 0 12px 32px #0e294945; }
+.world-controls-heading, .world-cycle-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.world-controls-heading span { color: #2983ae; font-size: 12px; }
+.world-controls .world-time-slider { display: block; margin-top: 16px; font-size: 12px; }
+.world-controls input[type="range"] { display: block; width: 100%; margin: 8px 0 0; accent-color: #268bb9; cursor: pointer; }
+.world-time-scale { display: flex; justify-content: space-between; font-size: 10px; color: #5a768a; }
+.world-time-presets { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin: 14px 0; }
+.world-controls .world-time-presets button { min-width: 0; }
+.world-cycle-row label { display: flex; align-items: center; gap: 6px; font-size: 12px; }
+.world-cycle-row + .world-cycle-row { margin-top: 10px; }
+.world-controls-panel p { margin: 12px 0 0; font-size: 11px; line-height: 1.7; color: #637c8e; }
+
+.resource-inspection { --sc-muted: #91a5ae; display: grid; grid-template-rows: auto minmax(0, 1fr) auto; height: 100%; min-height: 0; background: #10191e; color: #e6eeed; font: 13px/1.5 'PingFang SC', system-ui, sans-serif; }
+.resource-inspection [hidden] { display: none; }
+.resource-inspection-toolbar { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 12px; padding: 8px 12px; border-bottom: 1px solid #2b393f; }
+.resource-inspection :is(button, select, input) { min-height: 30px; border: 1px solid #3c5058; border-radius: 5px; background: #1d2b32; color: #e6eeed; padding: 3px 7px; font: inherit; }
+.resource-inspection button { cursor: pointer; }
+.resource-inspection-variant { display: flex; align-items: center; gap: 6px; }
+.resource-inspection-stage { min-height: 0; position: relative; overflow: hidden; }
+.resource-inspection-canvas, .resource-inspection-samples { position: absolute; inset: 0; width: 100%; height: 100%; }
+.resource-inspection-samples { display: grid; }
+.resource-inspection-comparison { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: repeat(2, minmax(0, 1fr)); }
+.resource-inspection-sample { position: relative; min-height: 0; cursor: grab; outline-offset: -3px; }
+.resource-inspection-sample:active { cursor: grabbing; }
+.resource-inspection-tools { padding: 8px 12px; max-height: 38vh; overflow: auto; border-top: 1px solid #2b393f; background: #152127; }
+.resource-inspection-tools summary { cursor: pointer; }
+.resource-inspection-tools [data-resource-controls] { margin-top: 10px; }
+.resource-inspection .sc-camera-hint { position: absolute; right: 10px; bottom: 8px; padding: 3px 6px; background: #10191ecc; font-size: 11px; pointer-events: none; }
+.resource-inspection .sc-card-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 5px 0; }
+.resource-inspection .sc-control { display: inline-flex; align-items: center; gap: 5px; color: #91a5ae; font-size: 12px; }
+.resource-inspection .sc-resource-controls input { width: 95px; }

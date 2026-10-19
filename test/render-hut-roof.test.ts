@@ -3,11 +3,11 @@ import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
 
 import * as THREE from 'three';
-import { HUT_LAYER } from '../src/render/hut-builder.ts';
-import { buildHutParts } from '../src/render/hut-geometry.ts';
-import type { BedHeight } from '../src/render/hut-geometry.ts';
-import { HUT_ROOF_Z_MAX, HUT_ROOF_Z_MIN, hutRoofTop } from '../src/render/hut-layout.ts';
-import { ROOF_COURSES_PER_TILE, ROOF_SHINGLES_MIN_PER_COURSE } from '../src/render/hut-roof.ts';
+import { HUT_LAYER } from '../src/render/building/hut-builder.ts';
+import { buildHutParts } from '../src/render/building/hut-geometry.ts';
+import type { BedHeight } from '../src/render/building/hut-geometry.ts';
+import { HUT_ROOF_Z_MAX, HUT_ROOF_Z_MIN, hutRoofTop } from '../src/render/building/hut-layout.ts';
+import { ROOF_COURSES_PER_TILE, ROOF_SHINGLES_MIN_PER_COURSE } from '../src/render/building/hut-roof.ts';
 import type { FishingHut } from '../src/world/level.ts';
 
 function makeHut(lakeSide: 1 | -1): FishingHut {

@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { injectAfter } from '../tile-material.ts';
+import { injectAfter } from '../tile/tile-material.ts';
 import { FIBER_LOBES, patchStudySurface, studyParameters, type StudySource, type StudySurface } from './d1-study-surface.ts';
 
 export function createD1FiberMaterial(source: StudySource, geometry: THREE.BufferGeometry, surface: StudySurface): THREE.Material {

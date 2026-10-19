@@ -1,5 +1,6 @@
 import * as THREE from 'three';
-import { characterTextureTier, loadCharacterModel, type TextureTier } from '../character-model.ts';
+import type { TextureTier } from '../../config/app-mode.ts';
+import { characterTextureTier, loadCharacterModel } from '../character/character-model.ts';
 import type { GLTF } from 'three/addons/loaders/GLTFLoader.js';
 import { D1_MODELS, GRASSY_CUSTOMIZATION_MODELS, GRASSY_HEIGHT, GRASSY_MODELS } from '../../config/grassy.ts';
 import type { GrassyModelVariant } from '../../config/grassy.ts';

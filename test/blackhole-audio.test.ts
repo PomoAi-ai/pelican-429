@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { blackholeAudioMix } from '../src/app/blackhole-audio.ts';
+import { blackholeAudioMix } from '../src/app/audio/blackhole-audio.ts';
 import { FORTRESS_BLACKHOLE } from '../src/config/facility-structure.ts';
-import { GameAudio } from '../src/app/game-audio.ts';
+import { GameAudio } from '../src/app/audio/game-audio.ts';
 import { createSimWorld, getPlayer } from '../src/sim/sim-world.ts';
 import { LEVEL_LEGEND, parseLevel } from '../src/world/test-level.ts';
 import { FakeElement, withFakeDocument } from './helpers/fake-dom.ts';

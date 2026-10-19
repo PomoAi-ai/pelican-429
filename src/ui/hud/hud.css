@@ -1,0 +1,122 @@
+.hud-stats {
+  position: absolute; top: 12px; left: 12px; padding: 4px 10px; border-radius: 6px;
+  background: var(--panel); font: 12px/1.6 ui-monospace, 'SF Mono', Menlo, monospace; color: var(--muted);
+}
+.hud-hints {
+  position: absolute; right: 12px; bottom: 12px; padding: 8px 12px; border-radius: 8px;
+  background: var(--panel); font-size: 13px; line-height: 1.7;
+  transition: opacity 600ms ease, transform 600ms ease;
+}
+.hud-hints-hidden { opacity: 0; transform: translateY(8px); pointer-events: none; }
+.hud-help-badge {
+  position: absolute; right: 12px; bottom: 12px; padding: 2px 8px; border-radius: 6px;
+  background: var(--panel); font-size: 12px; line-height: 1.6; opacity: 0.75;
+}
+.hud-help-badge[hidden] { display: none; }
+.hud-status {
+  position: absolute; top: 44px; left: 12px; display: flex; flex-direction: column; gap: 6px;
+  padding: 6px 10px; border-radius: 8px; background: var(--panel); font-size: 12px; min-width: 190px;
+}
+.hud-status:empty { display: none; }
+.hud-flight, .hud-orb { display: flex; align-items: center; gap: 8px; }
+.hud-flight[hidden] { display: none; }
+.hud-flight-label, .hud-orb-label { width: 28px; color: var(--muted); }
+.hud-flight-track, .hud-orb-track {
+  position: relative; flex: 1; height: 8px; border-radius: 4px; overflow: hidden;
+  background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(255, 255, 255, 0.25);
+}
+.hud-flight-fill {
+  height: 100%; width: 100%; background: linear-gradient(90deg, #5ec8f0, #b6ecff);
+  transition: width 80ms linear, background-color 120ms;
+}
+.hud-flight-low .hud-flight-fill { background: linear-gradient(90deg, #d8453a, #ff8a6e); }
+.hud-flight-low .hud-flight-label { color: #ff8a7a; }
+.hud-orb-fill { height: 100%; width: 100%; background: #b88a3c; }
+.hud-orb-fill.hud-orb-ready { background: linear-gradient(90deg, #ffb43c, #ffe29a); }
+.hud-oxygen { display: flex; align-items: center; gap: 7px; min-height: 20px; color: #b4e7f7; }
+.hud-oxygen[hidden] { display: none; }
+.hud-oxygen-label { flex: 0 0 60px; font-size: 10px; white-space: nowrap; text-shadow: 0 1px 3px #000; }
+.hud-oxygen-track { position: relative; flex: 1; min-width: 0; height: 12px; overflow: hidden; border: 1px solid #afdff18c; border-radius: 8px; background: #102235df; }
+.hud-oxygen-fill { height: 100%; width: 100%; background: linear-gradient(90deg, #287da8, #65c7e9); transition: width 80ms linear; }
+.hud-oxygen-bubbles { position: absolute; inset: 0; display: flex; align-items: center; justify-content: space-around; }
+.hud-oxygen-bubble { box-sizing: border-box; width: 7px; height: 7px; border: 1px solid #d5f7ff80; border-radius: 50%; }
+.hud-oxygen-bubble-full { background: #d7f7ffe0; }
+.hud-oxygen-low { color: #ffb69e; }
+.hud-oxygen-low .hud-oxygen-track { border-color: #ff9e86; }
+.hud-oxygen-low .hud-oxygen-fill { background: linear-gradient(90deg, #b54c39, #ed8862); }
+.hud-oxygen-low .hud-oxygen-bubble-full { background: #ffe0cf; }
+.hud-breath-veil {
+  position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(ellipse at center, transparent 42%, #17628970 100%);
+  animation: hud-breath-pulse 2.4s ease-in-out infinite;
+}
+.hud-breath-veil[hidden] { display: none; }
+.hud-breath-drowning {
+  background: radial-gradient(ellipse at center, transparent 35%, #9e273b99 100%);
+  animation-duration: 1.2s;
+}
+@keyframes hud-breath-pulse { 0%, 100% { opacity: .35; } 50% { opacity: .85; } }
+@media (prefers-reduced-motion: reduce) { .hud-breath-veil { animation: none; opacity: .6; } }
+/* 普攻水量与四个技能冷却。 */
+.hud-weapon {
+  position: absolute; left: 12px; bottom: 12px; display: flex; flex-direction: column; gap: 6px;
+  padding: 8px 10px; border-radius: 10px; background: var(--panel); font-size: 12px; min-width: 230px;
+}
+.hud-weapon-slots { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+.hud-weapon-slot {
+  position: relative; min-width: 104px; border-radius: 7px; display: grid; grid-template-columns: 1fr auto; gap: 4px;
+  padding: 6px 7px; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.12); color: var(--muted);
+}
+.hud-weapon-slot[hidden] { display: none; }
+.hud-weapon-key { grid-column: 1; font: 10px ui-monospace, monospace; color: #b0cbd5; }
+.hud-skill-name { grid-column: 1 / -1; grid-row: 2; color: #e3eff4; font-size: 12px; }
+.hud-skill-state { grid-column: 2; grid-row: 1; font-size: 10px; }
+.hud-skill-track { grid-column: 1 / -1; height: 3px; background: #0b1723; border-radius: 3px; overflow: hidden; }
+.hud-skill-fill { height: 100%; background: linear-gradient(90deg, #5576b8, #8cf2eb); }
+.hud-weapon-slot:last-child .hud-skill-fill { background: linear-gradient(90deg, #ad80ee, #73e8ff, #ffe3a1); }
+.hud-weapon-ready .hud-skill-state { color: #9ee5db; }
+.hud-weapon-slot.hud-weapon-active { border-color: #ffe29a; color: #fff; background: rgba(255, 210, 120, 0.22); box-shadow: 0 0 8px rgba(255, 210, 120, 0.45); }
+.hud-weapon-slot.hud-weapon-disabled { opacity: 0.35; }
+.hud-weapon-main { display: flex; align-items: center; gap: 10px; }
+.hud-weapon-icon {
+  width: 38px; height: 38px; flex: none; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-size: 19px; font-weight: 800; color: #10151c; background: #9fd6ee; box-shadow: 0 0 10px rgba(159, 214, 238, 0.5);
+}
+.hud-weapon-info { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+.hud-weapon-name { font-size: 14px; font-weight: 700; }
+.hud-weapon-track {
+  height: 8px; border-radius: 4px; overflow: hidden; background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(255, 255, 255, 0.25);
+}
+.hud-weapon-toast[hidden] { display: none; }
+.hud-weapon-fill { height: 100%; width: 100%; background: linear-gradient(90deg, #4fb2e6, #bfe9ff); transition: width 80ms linear; }
+.hud-weapon-low .hud-weapon-fill { background: linear-gradient(90deg, #d8453a, #ff8a6e); }
+.hud-weapon-low .hud-weapon-detail { color: #ff8a7a; }
+.hud-character-switch { pointer-events: auto; padding: 6px 10px; border: 1px solid #9fd6ee; border-radius: 6px; color: var(--fg); background: #203b49; font: inherit; cursor: pointer; }
+.hud-character-switch:focus-visible { outline: 2px solid #ffe29a; outline-offset: 2px; }
+.hud-character-switch:disabled { opacity: 0.5; cursor: default; }
+.hud-weapon-detail { color: var(--muted); font-size: 11px; }
+.hud-weapon-toast {
+  position: absolute; left: 50%; top: 18%; transform: translateX(-50%); padding: 6px 16px; border-radius: 18px;
+  background: rgba(12, 16, 22, 0.72); font-size: 18px; font-weight: 700; color: #ffe9b0; white-space: nowrap;
+  text-shadow: 0 1px 0 #000;
+}
+.hud-world { position: absolute; inset: 0; }
+.hud-bar {
+  position: absolute; left: 0; top: 0; width: 72px; height: 10px; border-radius: 5px; overflow: hidden;
+  background: rgba(0, 0, 0, 0.55); border: 1px solid rgba(255, 255, 255, 0.35);
+  transition: opacity 200ms ease;
+}
+.hud-bar-fill { height: 100%; background: var(--hp); transition: width 120ms ease-out; }
+.hud-bar-empty .hud-bar-fill { background: var(--accent); }
+.hud-bar-label {
+  position: absolute; inset: 0; font-size: 8px; line-height: 10px; text-align: center; color: #fff;
+  text-shadow: 0 0 2px #000;
+}
+.hud-bar-reset { animation: hud-bar-reset 400ms ease-out; }
+@keyframes hud-bar-reset { from { box-shadow: 0 0 10px 3px var(--hp); } to { box-shadow: none; } }
+.hud-popup {
+  position: absolute; left: 0; top: 0; font-size: 22px; font-weight: 800; color: #ffe27a;
+  text-shadow: 0 2px 0 #7a2b10, 0 0 6px rgba(0, 0, 0, 0.6); white-space: nowrap;
+}
+.hud-popup-heal { color: #9dffc4; text-shadow: 0 2px 0 #145b3a, 0 0 8px #123e2b; }
+.hud-popup-immune { font-size: 14px; color: #bfe5ff; text-shadow: 0 1px 0 #254663, 0 0 6px #182b40; }

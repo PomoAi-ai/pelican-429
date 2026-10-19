@@ -4,7 +4,7 @@ import { npcAction } from '../../config/npc.ts';
 import type { NpcAction, NpcKind } from '../../config/npc.ts';
 import { TUNING } from '../../config/tuning.ts';
 import { createDummyEntity } from '../../entities/entity.ts';
-import { createDummyViewFactory } from '../entity-views.ts';
+import { createDummyViewFactory } from '../character/entity-views.ts';
 import { createParticleCloud } from '../grassy/grassy-particles.ts';
 import { createImpacts } from '../grassy/grassy-projectiles.ts';
 import { caption } from './npc-effects.ts';

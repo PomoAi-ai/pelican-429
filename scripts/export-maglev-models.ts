@@ -3,7 +3,7 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import assert from 'node:assert/strict';
 import * as THREE from 'three';
 import { GLTFExporter } from 'three/addons/exporters/GLTFExporter.js';
-import { createMaglevCar, createMaglevTrack, disposeMaglevResources } from '../src/render/maglev-model.ts';
+import { createMaglevCar, createMaglevTrack, disposeMaglevResources } from '../src/render/transit/maglev-model.ts';
 import { MAGLEV } from '../src/config/maglev.ts';
 
 // The binary exporter only needs this browser adapter; models contain no image textures.
@@ -53,7 +53,7 @@ for (const [file, root, closed] of [
 await writeFile(new URL('dimensions.json', destination), JSON.stringify({
   units: '1 unit = 1 game tile; X travel, Y up, +Z toward camera',
   configuration: MAGLEV, measurements,
-  source: 'src/render/maglev-model.ts',
+  source: 'src/render/transit/maglev-model.ts',
 }, null, 2) + '\n');
 disposeMaglevResources(car);
 disposeMaglevResources(track);

@@ -53,9 +53,9 @@
 概念图：/concepts/platform-definition.png
 房屋示例：/concepts/room-two-storey-perspective.png
 
-当前建筑平台：`src/config/residence.ts` 注册两种材料与三种宽度；`src/render/definition-kit.ts` 的 platform 工厂生成0.2格厚的实体；`src/sim/residence.ts` 生成实际宽度和顶面的单向承托线；`src/physics/definition-collision.ts` 处理上穿、落脚与下穿。`test/residence.test.ts` 与 `test/building-brush.test.ts` 验证半格承托、空半边不承托、左右半平台同格与清理范围。
+当前建筑平台：`src/config/residence.ts` 注册两种材料与三种宽度；`src/render/building/definition-kit.ts` 的 platform 工厂生成0.2格厚的实体；`src/sim/residence.ts` 生成实际宽度和顶面的单向承托线；`src/physics/definition-collision.ts` 处理上穿、落脚与下穿。`test/residence.test.ts` 与 `test/building-brush.test.ts` 验证半格承托、空半边不承托、左右半平台同格与清理范围。
 
-旧世界的 `TILE_PLATFORM` 与 `src/render/tile-view.ts` 是世界地形瓦片实现；它的外观参数不能覆盖当前建筑平台标准。
+旧世界的 `TILE_PLATFORM` 与 `src/render/tile/tile-view.ts` 是世界地形瓦片实现；它的外观参数不能覆盖当前建筑平台标准。
 
 <a id="platform-mounts" class="concepts-anchor"></a>
 

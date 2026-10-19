@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { createWorkstationDisplayState, isPlayerNearWorkstation } from '../src/render/workstation-display-state.ts';
+import { createWorkstationDisplayState, isPlayerNearWorkstation } from '../src/render/residence/workstation-display-state.ts';
 
 test('桌边两格包含身体边缘，离开范围或隔层的玩家不会唤醒工作站', () => {
   const desk = { x: 10, y: 2 };

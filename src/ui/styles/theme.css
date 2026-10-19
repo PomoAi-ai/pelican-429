@@ -1,0 +1,46 @@
+/* 全站 :root 级主题变量，每个只定义一次；组件内的作用域覆盖与随页面状态切换的 :root:has() 留在各组件文件。 */
+:root {
+  color-scheme: dark;
+  --bg: #11151c;
+  --fg: #f3efe4;
+  --muted: #b8b3a6;
+  --panel: rgba(12, 16, 22, 0.62);
+  --accent: #e0584a;
+  --hp: #7bd46a;
+  font-family: 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Noto Sans CJK SC', 'Source Han Sans SC', system-ui, sans-serif;
+}
+
+/* 站点导航高度，按导航状态的覆盖见 navigation.css。 */
+:root { --site-nav-base-height: 72px; --site-nav-height: var(--site-nav-base-height); --dev-nav-height: var(--site-nav-height); }
+
+/* 首页、导航与概念页共用的站点配色。 */
+:root {
+  --home-bg: #08111a; --home-surface: #0e1b26; --home-surface-2: #132431; --home-line: #ffffff17;
+  --home-fg: #f2f1e8; --home-muted: #a7b6c0; --home-dim: #7d8f9b; --home-accent: #d6ed8d; --home-accent-strong: #e8ffa3;
+  --home-gutter: max(6%, calc((100% - 1240px) / 2)); --home-radius: 18px;
+}
+
+/* 游戏 HUD 配色与字体；--hud-skin 也给小地图外框共用。 */
+:root {
+  --hud-cobalt: #1D4A8F;
+  --hud-cobalt-hi: #2B67C2;
+  --hud-led: #45D2F2;
+  --hud-gold: #E0A940;
+  --hud-line: #ffffff33;
+  --hud-ink: #EEF3FA;
+  --hud-muted: #9AABC2;
+  --hud-pearl: #F2F6FC;
+  --hud-blue: #5CA8FF;
+  --hud-cyan: #5CC8FF;
+  --hud-warn: #FF8A5C;
+  --hud-ok: #6EE7A8;
+  --hud-skin: #0a1220b8;
+  --hud-edge: #ffffff1f;
+  --hud-shadow: 0 2px 8px #00000059;
+  --hud-text-shadow: 0 1px 2px #000000b3;
+  --hud-font: 'Noto Sans SC', 'PingFang SC', system-ui, sans-serif;
+  --hud-num-font: 'Chakra Petch', 'DIN Alternate', 'Bahnschrift', ui-monospace, monospace;
+}
+
+/* 移动端安全区。 */
+:root { --game-safe-top: env(safe-area-inset-top, 0px); --game-safe-right: env(safe-area-inset-right, 0px); --game-safe-bottom: env(safe-area-inset-bottom, 0px); --game-safe-left: env(safe-area-inset-left, 0px); }

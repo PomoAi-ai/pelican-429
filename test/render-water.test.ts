@@ -3,8 +3,8 @@ import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
 
 import * as THREE from 'three';
-import { WATER_BACK_Z, WATER_BED_SINK, WATER_BED_Z, WATER_DEPTH_CAP, WATER_FILM_HEIGHT, WATER_FRONT_Z, createWaterView } from '../src/render/water-view.ts';
-import { BLOCK_BEVEL, BLOCK_FRONT_Z } from '../src/render/tile-geometry.ts';
+import { WATER_BACK_Z, WATER_BED_SINK, WATER_BED_Z, WATER_DEPTH_CAP, WATER_FILM_HEIGHT, WATER_FRONT_Z, createWaterView } from '../src/render/water/water-view.ts';
+import { BLOCK_BEVEL, BLOCK_FRONT_Z } from '../src/render/tile/tile-geometry.ts';
 import { glslDeclarations, glslIdentifiers } from './helpers/glsl.ts';
 import { createFluidMap } from '../src/world/fluid-map.ts';
 import { createTileMap } from '../src/world/tile-map.ts';

@@ -3,7 +3,8 @@ import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
 
 import { createFrameProfiler, frameTimeStats } from '../src/core/frame-profiler.ts';
-import { createPerfPanel, formatPerfText } from '../src/ui/perf-panel.ts';
+import { createPerfPanel, formatPerfText } from '../src/ui/hud/perf-panel.ts';
+import { setLanguage } from '../src/config/i18n.ts';
 import { createResolutionGovernor } from '../src/core/resolution-governor.ts';
 import { FakeElement, withFakeDocument } from './helpers/fake-dom.ts';
 
@@ -95,7 +96,8 @@ describe('perf-panel', () => {
   }));
 
   test('文本：FPS、帧时间、CPU 分段、draw call、三角形（千/百万）', () => {
-    const text = formatPerfText({ frames: 60, fps: 59.94, frameTime: 16.68, cpu: 3.2, segments: { sim: 0.21, render: 1.6 }, calls: 252, triangles: 1_090_000 }, null, 'zh', 'test');
+    setLanguage('zh');
+    const text = formatPerfText({ frames: 60, fps: 59.94, frameTime: 16.68, cpu: 3.2, segments: { sim: 0.21, render: 1.6 }, calls: 252, triangles: 1_090_000 }, null, 'test');
     assert.match(text, /FPS\s+59\.9/);
     assert.match(text, /帧\s+16\.7 ms/);
     assert.match(text, /CPU\s+3\.20 ms/);

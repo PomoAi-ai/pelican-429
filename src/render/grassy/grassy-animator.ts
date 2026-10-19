@@ -3,7 +3,7 @@ import { grassyAction } from '../../config/grassy.ts';
 import { HUMAN_SKILLS } from '../../config/human-combat.ts';
 import { TUNING } from '../../config/tuning.ts';
 import type { GrassyAction, GrassyFlightState, GrassyMotionState } from '../../config/grassy.ts';
-import { previewHairLift } from '../hair-sway.ts';
+import { previewHairLift } from '../character/hair-sway.ts';
 import type { GrassyRig } from './grassy-rig.ts';
 
 /** Sample Blender clips at absolute time so paused previews retain their exact pose. */

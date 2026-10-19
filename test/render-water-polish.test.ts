@@ -6,8 +6,8 @@ import * as THREE from 'three';
 import { DEFAULT_LIGHTING } from '../src/config/lighting-rules.ts';
 import { DEFAULT_WATER_PALETTE, WATER_PALETTES, WATER_PALETTE_NAMES, resolveWaterPalette, validateWaterPalette, waterPalette } from '../src/config/water-palettes.ts';
 import type { WaterPalette } from '../src/config/water-palettes.ts';
-import { createWorldLight } from '../src/render/light-texture.ts';
-import { createWaterRipples, rippleShape } from '../src/render/water-ripples.ts';
+import { createWorldLight } from '../src/render/stage/light-texture.ts';
+import { createWaterRipples, rippleShape } from '../src/render/water/water-ripples.ts';
 import {
   WAVE_WIND_CAP,
   causticStrengthAt,
@@ -16,9 +16,9 @@ import {
   waterBodyAt,
   waterWaveAt,
   waveWindGain,
-} from '../src/render/water-shading.ts';
-import { WATER_BACK_Z, WATER_FRONT_Z, WATER_TOP_BACK_Z, createWaterView } from '../src/render/water-view.ts';
-import { WIND_UNIFORM_NAMES, sharedWindUniforms } from '../src/render/wind.ts';
+} from '../src/render/water/water-shading.ts';
+import { WATER_BACK_Z, WATER_FRONT_Z, WATER_TOP_BACK_Z, createWaterView } from '../src/render/water/water-view.ts';
+import { WIND_UNIFORM_NAMES, sharedWindUniforms } from '../src/render/sky/wind.ts';
 import { glslCalls, glslDeclarations, glslFunctionNames } from './helpers/glsl.ts';
 import { createFluidMap } from '../src/world/fluid-map.ts';
 import { createTileMap } from '../src/world/tile-map.ts';

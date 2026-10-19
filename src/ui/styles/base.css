@@ -1,0 +1,19 @@
+/* 全站重置与入口骨架（#app、#hud、加载与报错遮罩）。 */
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; overflow: hidden; background: var(--bg); color: var(--fg); }
+#app { position: fixed; inset: 0; }
+#app canvas { display: block; width: 100%; height: 100%; outline: none; cursor: crosshair; }
+#hud { position: fixed; inset: 0; pointer-events: none; user-select: none; }
+.overlay {
+  position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; flex-direction: column;
+  gap: 12px; background: var(--bg); z-index: 10;
+}
+.overlay[hidden] { display: none; }
+#loading h1 { margin: 0; font-size: 32px; letter-spacing: 0.08em; }
+#loading p { margin: 0; color: var(--muted); }
+#error { background: rgba(40, 8, 8, 0.94); padding: 24px; z-index: 20; }
+#error h2 { margin: 0; color: #ff8a7a; }
+#error pre {
+  max-width: min(900px, 92vw); max-height: 60vh; overflow: auto; margin: 0; padding: 12px; border-radius: 8px;
+  background: rgba(0, 0, 0, 0.4); font-size: 12px; white-space: pre-wrap; word-break: break-word;
+}

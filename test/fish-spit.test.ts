@@ -17,19 +17,19 @@ import {
   fishTumbleRate,
   fishVariantOf,
   fishWiggle,
-} from '../src/render/cartoon-fish.ts';
+} from '../src/render/fx/cartoon-fish.ts';
 import { FISH_COLORS } from '../src/config/fish-appearance.ts';
-import { FISH_FLOP, createFlopState, findWaterTarget, startDive, startFlop, stepFlop } from '../src/render/fish-flop.ts';
-import type { FlopEnv, FlopSignal, FlopState } from '../src/render/fish-flop.ts';
-import { FISH_SHOT } from '../src/render/fish-shot-view.ts';
-import { isLightMappable } from '../src/render/light-texture.ts';
+import { FISH_FLOP, createFlopState, findWaterTarget, startDive, startFlop, stepFlop } from '../src/render/fx/fish-flop.ts';
+import type { FlopEnv, FlopSignal, FlopState } from '../src/render/fx/fish-flop.ts';
+import { FISH_SHOT } from '../src/render/fx/fish-shot-view.ts';
+import { isLightMappable } from '../src/render/stage/light-texture.ts';
 import { createPelicanAttackLayer, FISH_TOSS } from '../src/render/pelican/pelican-attack-layer.ts';
 import type { PelicanSpitInput, PouchState } from '../src/render/pelican/pelican-attack-layer.ts';
 import { MOUTH_FISH, createPelicanPouch } from '../src/render/pelican/pelican-pouch.ts';
 import { pelicanRestPose } from '../src/render/pelican/pelican-pose.ts';
 import { createPelicanRig } from '../src/render/pelican/pelican-rig.ts';
-import { FLOPPER_CAPACITY, STAR_CAPACITY, createProjectileFx } from '../src/render/projectile-fx.ts';
-import { createProjectileViews } from '../src/render/projectile-views.ts';
+import { FLOPPER_CAPACITY, STAR_CAPACITY, createProjectileFx } from '../src/render/fx/projectile-fx.ts';
+import { createProjectileViews } from '../src/render/fx/projectile-views.ts';
 import { GEO } from './helpers/pelican-fixtures.ts';
 
 const DT = 1 / 60;

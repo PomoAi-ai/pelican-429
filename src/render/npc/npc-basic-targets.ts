@@ -9,7 +9,7 @@ import { createProjectileEntity } from '../../entities/projectile.ts';
 import { createBody } from '../../physics/body.ts';
 import { createParticleCloud } from '../grassy/grassy-particles.ts';
 import { createImpacts } from '../grassy/grassy-projectiles.ts';
-import { createProjectileViews } from '../projectile-views.ts';
+import { createProjectileViews } from '../fx/projectile-views.ts';
 
 const SAMPLE_STEP = 1 / 120;
 

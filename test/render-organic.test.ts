@@ -3,8 +3,8 @@ import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
 
 import * as THREE from 'three';
-import { ARC_SEGMENTS, EDGE_SEGMENTS } from '../src/render/tile-geometry.ts';
-import { TILE_PROGRAM_KEY, TILE_SHADER_INJECTIONS, TILE_SHADER_PARAMS, createTileMaterial } from '../src/render/tile-material.ts';
+import { ARC_SEGMENTS, EDGE_SEGMENTS } from '../src/render/tile/tile-geometry.ts';
+import { TILE_PROGRAM_KEY, TILE_SHADER_INJECTIONS, TILE_SHADER_PARAMS, createTileMaterial } from '../src/render/tile/tile-material.ts';
 import { glslCalls, glslConstantValues, glslDeclarations, glslFunctionNames, glslIdentifiers, glslNumericLiterals, injectedAfter } from './helpers/glsl.ts';
 import {
   INTERLOCK_JAG,
@@ -31,10 +31,10 @@ import {
   organicHash,
   organicNoise2,
   seamShade,
-} from '../src/render/tile-organic.ts';
-import { TILE_TEXTURE_PERIOD, generateTileTextures } from '../src/render/tile-textures.ts';
-import { CONVEX_RADIUS, MAX_CONTOUR_DEVIATION, contourDeviation } from '../src/render/tile-transitions.ts';
-import { ORGANIC_FLAG, createTileView } from '../src/render/tile-view.ts';
+} from '../src/render/tile/tile-organic.ts';
+import { TILE_TEXTURE_PERIOD, generateTileTextures } from '../src/render/tile/tile-textures.ts';
+import { CONVEX_RADIUS, MAX_CONTOUR_DEVIATION, contourDeviation } from '../src/render/tile/tile-transitions.ts';
+import { ORGANIC_FLAG, createTileView } from '../src/render/tile/tile-view.ts';
 import { createTileMap } from '../src/world/tile-map.ts';
 import { DEFAULT_TILES, TILE_DIRT, TILE_GRASS, TILE_PLATFORM, TILE_TIMBER } from '../src/world/tile-types.ts';
 import { L, texel } from './helpers/render-fixtures.ts';

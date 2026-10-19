@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { HUMAN_SKILLS } from '../../config/human-combat.ts';
-import { glslFloat as f } from '../wind.ts';
+import { glslFloat as f } from '../sky/wind.ts';
 import { createParticleCloud } from './grassy-particles.ts';
 
 const clamp = THREE.MathUtils.clamp;

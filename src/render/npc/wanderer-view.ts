@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { NPCS } from '../../config/npc.ts';
 import { TUNING } from '../../config/tuning.ts';
 import { lerp } from '../../core/math.ts';
-import type { EntityViewFactory } from '../view-registry.ts';
+import type { EntityViewFactory } from '../stage/view-registry.ts';
 import { animateNpc } from './npc-animator.ts';
 import { caption } from './npc-effects.ts';
 import { createNpcRig } from './npc-rig.ts';

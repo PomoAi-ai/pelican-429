@@ -1,0 +1,96 @@
+.scene-workspace { position: fixed; inset: var(--dev-nav-height, 64px) 0 0; z-index: 3; display: grid; grid-template-columns: 140px minmax(0, 1fr); background: #101a1e; color: #dce6e8; font: 13px/1.45 system-ui, sans-serif; color-scheme: dark; }
+:is(.scene-workspace, .scene-page) * { box-sizing: border-box; }
+/* 小地图自带 content-box；在场景页内一直由上面的重置改成 border-box，这里写明，不靠样式表加载先后。 */
+:is(.scene-workspace, .scene-page) .hud-map { box-sizing: border-box; }
+.scene-directory { min-height: 0; overflow-y: auto; padding: 16px 8px; border-right: 1px solid #304047; scrollbar-width: thin; }
+.scene-directory h1 { margin: 0 8px 14px; font-size: 16px; }
+.scene-directory nav { display: grid; gap: 6px; }
+.scene-directory h2 { margin: 12px 8px 0; color: #92a8af; font-size: 12px; font-weight: 600; letter-spacing: .04em; }
+.scene-directory h2:first-child { margin-top: 0; }
+.scene-directory a { display: block; padding: 10px 8px; border: 1px solid transparent; border-radius: 7px; color: #c1d0d3; background: #19262c; text-decoration: none; }
+.scene-directory a:hover { background: #263940; }
+.scene-directory a[aria-current] { color: #c4e8a6; border-color: #668058; background: #293a2d; }
+.scene-workspace-main { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+.scene-world-toolbar { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; padding: 9px 14px; border-bottom: 1px solid #304047; background: #142126; z-index: 12; }
+.scene-world-toolbar > strong { margin-right: auto; }
+.scene-world-settings { display: flex; align-items: center; gap: 14px; }
+.scene-world-settings[hidden] { display: none; }
+/* 场景内的游戏 HUD 有自己的皮肤，工作台按钮样式只管工作台。 */
+:is(.scene-workspace, .scene-page) :is(button, select):not(.room-preview-hud *) { font: inherit; color: #dce6e8; background: #22343b; border: 1px solid #41575f; border-radius: 6px; padding: 6px 9px; cursor: pointer; }
+:is(.scene-workspace, .scene-page) button:hover:not(.room-preview-hud *) { background: #304850; }
+:is(.scene-workspace, .scene-page) :focus-visible { outline: 2px solid #c4e8a6; outline-offset: 2px; }
+:is(.scene-workspace, .scene-page) .world-controls-panel { background: #17252a; border-color: #42565d; color: #e1e9e6; }
+:is(.scene-workspace, .scene-page) .world-controls > summary { color: #c4e8a6; }
+.scene-workspace-view, .scene-mount { position: relative; min-width: 0; min-height: 0; height: 100%; overflow: hidden; }
+.scene-workspace-view { flex: 1; height: auto; }
+.scene-game-frame { display: block; width: 100%; height: 100%; border: 0; }
+.scene-workspace .residence { position: absolute; inset: 0; }
+.residence.scene-page { --residence-ink: #dce6e8; --residence-muted: #92a8af; --residence-line: #304047; --residence-paper: #142126; background: #101a1e; color-scheme: dark; }
+:is(.scene-workspace, .scene-page) .residence-toolbar { gap: 6px 12px; padding: 8px 12px; max-height: 150px; overflow-y: auto; }
+:is(.scene-workspace, .scene-page) .residence-heading, :is(.scene-workspace, .scene-page) .residence-door-note { display: none; }
+:is(.scene-workspace, .scene-page) .residence-camera { display: flex; gap: 12px; padding: 0; width: auto; }
+:is(.scene-workspace, .scene-page) .residence-control-group { padding: 0; border: 0; }
+:is(.scene-workspace, .scene-page) .residence-control-group h2 { display: none; }
+:is(.scene-workspace, .scene-page) .residence-control-buttons { display: flex; flex-wrap: wrap; }
+:is(.scene-workspace, .scene-page) .residence-actions { display: flex; padding: 0; border: 0; }
+:is(.scene-workspace, .scene-page) .residence-actions a { display: none; }
+:is(.scene-workspace, .scene-page) .residence-workspace { grid-template-columns: minmax(0, 1fr); }
+:is(.scene-workspace, .scene-page) .residence.is-building .residence-workspace { grid-template-columns: 350px minmax(0, 1fr); }
+:is(.scene-workspace, .scene-page) .residence-stage { grid-column: auto; grid-row: auto; }
+:is(.scene-workspace, .scene-page) .residence-travel { display: inline-flex; margin-top: 0; }
+:is(.scene-workspace, .scene-page) .residence-save-status:not([data-error='true']) { display: none; }
+@media(max-width: 800px) { .scene-workspace { grid-template-columns: 120px minmax(0, 1fr); } .scene-directory { padding: 12px 6px; } .scene-directory a { padding: 9px 8px; font-size: 12px; } .scene-world-toolbar { padding: 7px 10px; gap: 6px; } :is(.scene-workspace, .scene-page) .residence-toolbar { max-height: 124px; } }
+@media(max-width: 520px) { .scene-world-settings { gap: 8px; flex-wrap: wrap; } :is(.scene-workspace, .scene-page) .residence-toolbar { max-height: 100px; } }
+.scene-weather-controls { position: relative; }
+.scene-weather-controls > summary { cursor: pointer; color: #c4e8a6; padding: 6px 0; white-space: nowrap; }
+.scene-weather-controls > summary span { color: #94a9af; margin-left: 5px; font-size: 11px; }
+.scene-weather-panel { position: absolute; right: 0; top: calc(100% + 10px); width: min(420px, calc(100vw - 24px)); padding: 16px; background: #17252a; border: 1px solid #45616a; border-radius: 12px; box-shadow: 0 15px 45px #0008; max-height: min(620px, 72vh); overflow-y: auto; }
+.scene-weather-panel > header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.scene-weather-panel > header button { padding: 2px 9px; font-size: 20px; }
+.scene-weather-panel .ctl-tab-list { flex-wrap: nowrap; gap: 5px; margin-bottom: 12px; }
+.scene-weather-panel .ctl-tab { flex: 1; white-space: nowrap; }
+.scene-weather-panel [aria-selected='true'], .scene-weather-panel [aria-pressed='true'] { background: #30452e; border-color: #7b9f66; color: #c4e8a6; }
+.scene-weather-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 10px 0; border-bottom: 1px solid #2a3d45; }
+.scene-weather-row > label { min-width: 64px; }
+.scene-weather-row .ctl-slider { flex: 1; min-width: 80px; }
+.scene-weather-row output { min-width: 42px; text-align: right; font-variant-numeric: tabular-nums; }
+.scene-weather-row .ctl-toggle-group, .scene-weather-presets { display: flex; flex-wrap: wrap; gap: 5px; }
+.scene-weather-row .ctl-toggle-group { flex: 1; }
+.scene-weather-note, .scene-weather-panel .ctl-tab-panel p { color: #93a8ad; font-size: 12px; line-height: 1.7; }
+:is(.scene-workspace, .scene-page) .residence-camera, :is(.scene-workspace, .scene-page) .residence-control-group, :is(.scene-workspace, .scene-page) .residence-control-buttons { display: contents; }
+:is(.scene-workspace, .scene-page) .residence-heading { display: block; margin-right: 0; }
+:is(.scene-workspace, .scene-page) .residence-heading :is(.residence-emblem, h1) { display: none; }
+:is(.scene-workspace, .scene-page) .residence-heading p { margin: 0; }
+:is(.scene-workspace, .scene-page) .residence-travel select { max-width: 215px; }
+:is(.scene-workspace, .scene-page) .residence-toolbar { align-content: center; }
+:is(.scene-workspace, .scene-page) .world-controls-panel { left: auto; right: 0; width: min(330px, calc(100vw - 24px)); max-height: 72vh; overflow-y: auto; }
+:is(.scene-workspace, .scene-page) .scene-toolbar { position: relative; z-index: 12; display: flex; align-items: center; flex-wrap: nowrap; gap: 6px; height: 52px; min-height: 52px; max-height: 52px; padding: 6px 12px; overflow-x: auto; overflow-y: hidden; scrollbar-width: thin; background: #142126; }
+/* 原野没有场景宿主，工具条叠在站点导航下方。 */
+.scene-page > .scene-toolbar-overlay { position: fixed; z-index: 29; inset: var(--site-nav-height) 0 auto; border-bottom: 1px solid #304047; color: #dce6e8; font: 13px/1.45 system-ui, sans-serif; color-scheme: dark; }
+.scene-toolbar .scene-world-toolbar { display: contents; }
+.scene-toolbar [data-scene-title] { flex: none; order: -1; margin-right: 6px; white-space: nowrap; }
+/* 设置块贴住右端，中间控件在它下方横向滚动，世界与天气控制始终可见；阴影盖住工具条右内边距，滚动内容不从右缘露出。 */
+.scene-toolbar .scene-world-settings { position: sticky; right: 0; z-index: 1; flex: none; order: 2; align-self: stretch; gap: 10px; padding-left: 8px; margin-left: auto; background: #142126; box-shadow: 12px 0 #142126; }
+:is(.scene-workspace, .scene-page) .scene-toolbar :is(button, select, summary, .residence-heading, .room-preview-status, .residence-travel, .resource-inspection-variant, .room-preview-group, .scene-game-overlay-tools, .ctl-toggle-group) { flex-shrink: 0; white-space: nowrap; }
+/* 视角预设是一组按钮，间距与工具条上其他按钮一致。 */
+:is(.scene-workspace, .scene-page) .scene-toolbar .ctl-toggle-group { gap: 6px; }
+:is(.scene-workspace, .scene-page) :is(.residence-toolbar, .room-preview-toolbar) :is(.ctl-toggle, [data-play-view])[aria-pressed='true'] { color: #c4e8a6; border-color: #7b9f66; background: #30452e; }
+:is(.scene-workspace, .scene-page) .scene-toolbar :is(button, select) { min-height: 32px; padding: 5px 7px; font-size: 12px; }
+:is(.scene-workspace, .scene-page) .scene-toolbar .residence-travel select { max-width: 180px; }
+:is(.scene-workspace, .scene-page) .scene-toolbar :is(.residence-heading, .room-preview-status) { margin: 0; font-size: 11px; }
+:is(.scene-workspace, .scene-page) .scene-toolbar .residence-actions { flex: none; gap: 6px; }
+:is(.scene-workspace, .scene-page) .scene-toolbar .scene-world-settings[hidden] { display: none; }
+:is(.scene-workspace, .scene-page) .scene-toolbar :is(.world-controls-panel, .scene-weather-panel, .city-layer-controls > div) { position: fixed; z-index: 40; top: calc(var(--site-nav-height) + 58px); right: 12px; left: auto; margin: 0; max-height: calc(100dvh - var(--site-nav-height) - 82px); overflow-y: auto; box-shadow: 0 12px 32px #0007; }
+:is(.scene-workspace, .scene-page) .scene-toolbar .city-layer-controls > div { width: min(280px, calc(100vw - 24px)); min-width: 0; padding: 12px; border: 1px solid #45616a; border-radius: 10px; background: #17252a; color: #dce6e8; }
+:is(.scene-workspace, .scene-page) .scene-toolbar .city-layer-controls label { white-space: nowrap; }
+
+@media(max-width:800px){:is(.scene-workspace, .scene-page) .residence.is-building .residence-workspace{grid-template-columns:280px minmax(0,1fr)}}
+@media(max-width:700px){
+  :is(.scene-workspace, .scene-page) .residence.is-building .residence-workspace{grid-template-columns:minmax(0,1fr);position:relative}
+  :is(.scene-workspace, .scene-page) .residence.is-building .residence-sidebar{position:absolute;inset:0 auto 0 0;width:min(280px,calc(100% - 48px));max-height:none;z-index:5;border-right:1px solid #405762;box-shadow:8px 0 24px #0005}
+}
+
+/* 收起顶部：侧栏与工具条让出画面；工具条只收成零高、不移出网格，场景行不错位。 */
+body:has(#game-navigation:not([open])) :is(.scene-directory, .scene-workspace-main > .scene-world-toolbar) { display: none; }
+body:has(#game-navigation:not([open])) .scene-workspace { grid-template-columns: minmax(0, 1fr); }
+body:has(#game-navigation:not([open])) :is(.scene-workspace, .scene-page) .scene-toolbar { height: 0; min-height: 0; padding: 0; border: 0; visibility: hidden; }

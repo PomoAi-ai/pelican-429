@@ -4,13 +4,13 @@ import { TUNING } from '../../config/tuning.ts';
 import { DEFAULT_WATER_PALETTE } from '../../config/water-palettes.ts';
 import type { Rect } from '../../core/math.ts';
 import { mulberry32 } from '../../core/rng.ts';
-import { sharedPrecipUniforms } from '../../render/precip-surface.ts';
-import type { createStageView } from '../../render/stage.ts';
-import { createWorldViews } from '../../render/world-views.ts';
+import { sharedPrecipUniforms } from '../../render/sky/precip-surface.ts';
+import type { createStageView } from '../../render/stage/stage.ts';
+import { createWorldViews } from '../../render/stage/world-views.ts';
 import { createSimWorld } from '../../sim/sim-world.ts';
 import { createTerrainCompositionLevel } from '../../world/terrain-compositions.ts';
 import { planTree } from '../../world/trees.ts';
-import { createWorldLighting } from '../lighting-wiring.ts';
+import { createWorldLighting } from '../game/lighting-wiring.ts';
 
 /** 演示只摆放角色，地形、植被和洞穴由正式可玩关卡及世界视图提供。 */
 export function createNpcWorld(stage: ReturnType<typeof createStageView>, environment: ShowcaseEnvironment, caveBackground: THREE.Texture) {

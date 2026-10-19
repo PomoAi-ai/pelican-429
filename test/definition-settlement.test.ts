@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { after, before, test } from 'node:test';
-import { createDefinitionSettlementLayout } from '../src/app/definition-settlement-layout.ts';
-import { createPerspectivePlayer } from '../src/app/perspective-player.ts';
+import { createDefinitionSettlementLayout } from '../src/app/perspective/definition-settlement-layout.ts';
+import { createPerspectivePlayer } from '../src/app/perspective/perspective-player.ts';
 import { NEUTRAL_INPUT } from '../src/entities/pelican-controller.ts';
 import { TUNING } from '../src/config/tuning.ts';
 

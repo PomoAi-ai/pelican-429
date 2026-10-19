@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { CHARACTER_PRESETS, parseCharacterAppearance } from '../src/config/character-appearance.ts';
-import { createCharacterAppearanceStore } from '../src/app/character-appearance.ts';
+import { createCharacterAppearanceStore } from '../src/app/character/character-appearance.ts';
 
 // 若先发布新状态再写存储，保存失败会让游戏外观与刷新后的角色不一致。
 test('外观保存失败保留已应用角色，重试成功后可重新读取', () => {

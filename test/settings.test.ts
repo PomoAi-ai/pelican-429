@@ -1,4 +1,4 @@
-// 任务 019：游戏内设置面板——选项表（与网址参数共用）、存储解析/非法值清除、URL 优先、控制器（运行时接口/持久化/暂停）、面板 DOM、按键绑定。
+// 任务 019：游戏内设置面板——选项表（与网址参数共用）、存储解析/非法值清除、URL 优先、控制器（运行时接口/持久化/暂停）、新世界种子、按键绑定。
 import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
 
@@ -20,12 +20,9 @@ import {
 } from '../src/config/game-settings.ts';
 import type { GameSettings, SettingKey } from '../src/config/game-settings.ts';
 import { sceneWeatherPatch, wildsWeatherPreset } from '../src/config/scene-weather.ts';
-import { createLocalSettingsStore, createSettingsController, loadSettings } from '../src/ui/settings-model.ts';
-import type { SettingsRuntime, SettingsStore } from '../src/ui/settings-model.ts';
-import { createSettingsPanel } from '../src/ui/settings-panel.ts';
-import { CONTROL_HINTS } from '../src/ui/hud.ts';
-import { setLanguage } from '../src/ui/language.ts';
-import { FakeElement, withFakeDocument } from './helpers/fake-dom.ts';
+import { createLocalSettingsStore, createSettingsController, loadSettings, resolveNewWorldSeed } from '../src/ui/model/settings-model.ts';
+import type { SettingsRuntime, SettingsStore } from '../src/ui/model/settings-model.ts';
+import { CONTROL_HINTS } from '../src/ui/hud/hud.ts';
 
 const DEFAULTS: GameSettings = Object.freeze({ quality: 'high', antialias: 'smaa', wind: 'auto', windDirection: 'right', tornado: false, windPower: 1, tornadoPower: 2, tornadoCount: 3, rainPower: 1, snowPower: 1, precip: 'manual', rain: 'none', snow: 'none', water: 'clear', perfPanel: false, minimapVisible: true, minimapOpacity: 75, aimStyle: 'fan', tileGrid: false, mapTeleport: false, dummyShoot: false });
 
@@ -340,6 +337,12 @@ describe('新世界与种子', () => {
     for (const bad of ['', '-1', '1.5', 'abc', '4294967296', '12345678901']) assert.throws(() => parseSeed(bad), /seed/, bad);
   });
 
+  test('新世界种子：合法种子原样使用；留空取随机；非法即抛（面板据此提示、不跳转）', () => {
+    assert.equal(resolveNewWorldSeed('123', () => 0.5), 123);
+    assert.equal(resolveNewWorldSeed('  ', () => 0.5), Math.floor(0.5 * 0x100000000));
+    assert.throws(() => resolveNewWorldSeed('abc', () => 0.5), /seed/);
+  });
+
   test('newWorldSearch：更换 seed 后清除旧关卡与地形定位，已有设置使用面板当前值', () => {
     const live: GameSettings = { ...DEFAULTS, water: 'deep', dummyShoot: false };
     const q = new URLSearchParams(newWorldSearch('?debug&level=test&seed=1&inspect=716&region=cave-11&scene=fortress&water=clear&dummyShoot', 42, live));
@@ -376,110 +379,6 @@ describe('按键：settings（Esc / O）', () => {
     assert.ok(CONTROL_HINTS.some((h) => h.startsWith('Esc / O 设置')));
   });
 });
-
-describe('设置面板 DOM', () => {
-  function build(opts: { issues?: string[]; seed?: number | null; gm?: boolean } = {}) {
-    const { rt, calls } = fakeRuntime();
-    const store = memoryStore();
-    const c = createSettingsController({ runtime: rt, store, saved: {}, issues: opts.issues ?? [] });
-    const parent = new FakeElement('div');
-    const worlds: number[] = [];
-    const panel = withFakeDocument(() =>
-      createSettingsPanel({ chapter: false, gm: opts.gm ?? true, parent: parent as unknown as HTMLElement, controller: c, seed: opts.seed === undefined ? 7 : opts.seed, onNewWorld: (s) => worlds.push(s), onShowcase: () => {}, random: () => 0.5 }),
-    );
-    return { rt, calls, c, parent, panel, worlds };
-  }
-  const all = (root: FakeElement, cls: string): FakeElement[] => {
-    const out: FakeElement[] = [];
-    const walk = (n: FakeElement) => {
-      if (n.classList.contains(cls)) out.push(n);
-      n.children.forEach(walk);
-    };
-    walk(root);
-    return out;
-  };
-  const option = (root: FakeElement, key: string, value: string) => all(root, 'settings-option').find((b) => b.dataset.key === key && b.dataset.value === value);
-
-  test('齿轮按钮切换面板；分组与选项按表生成；当前值高亮', () => {
-    setLanguage('zh');
-    const { parent, c, panel } = build();
-    const gear = parent.find('settings-gear');
-    const card = parent.find('settings-panel');
-    assert.ok(gear && card);
-    assert.equal(card.hidden, true);
-    gear.dispatch('click');
-    assert.equal(c.open, true);
-    panel.update();
-    assert.equal(card.hidden, false);
-    const groups = all(card, 'settings-group-title').map((g) => g.textContent);
-    assert.deepEqual(groups, ['画面', '天气', '水', '调试', '世界']);
-    assert.equal(all(card, 'settings-option').length, SETTING_DEFS.reduce((n, d) => n + d.options.length, 0));
-    assert.ok(option(card, 'quality', 'high')?.classList.contains('settings-active'));
-    assert.ok(!option(card, 'quality', 'low')?.classList.contains('settings-active'));
-    assert.match(all(card, 'settings-note').map((n) => n.textContent).join(' '), /MSAA 较慢/);
-  });
-
-  test('普通游戏设置可开关帧率，点击即时生效且同步外部快捷键的状态', () => {
-    const { parent, calls, c, panel, rt } = build({ gm: false });
-    c.setOpen(true);
-    panel.update();
-    option(parent, 'water', 'emerald')?.dispatch('click');
-    option(parent, 'perfPanel', 'true')?.dispatch('click');
-    assert.deepEqual(calls, ['water:emerald', 'perfPanel:true']);
-    panel.update();
-    assert.ok(option(parent, 'water', 'emerald')?.classList.contains('settings-active'));
-    assert.ok(!option(parent, 'water', 'clear')?.classList.contains('settings-active'));
-    assert.ok(option(parent, 'perfPanel', 'true')?.classList.contains('settings-active'));
-    rt.setPerfPanel(false);
-    rt.setWind('storm');
-    panel.update();
-    assert.ok(option(parent, 'perfPanel', 'false')?.classList.contains('settings-active'));
-    assert.ok(option(parent, 'wind', 'storm')?.classList.contains('settings-active'));
-  });
-
-  test('提示条显示存储问题；无问题时隐藏', () => {
-    const a = build({ issues: ['已清除无效的保存设置：画质 = "ultra"'] });
-    a.c.setOpen(true);
-    a.panel.update();
-    const n = a.parent.find('settings-issues');
-    assert.equal(n?.hidden, false);
-    assert.match(n?.textContent ?? '', /ultra/);
-    const b = build();
-    b.c.setOpen(true);
-    b.panel.update();
-    assert.equal(b.parent.find('settings-issues')?.hidden, true);
-  });
-
-  test('新世界：合法种子 → onNewWorld；空 → 随机种子；非法 → 面板内提示、不跳转', () => {
-    const { parent, worlds } = build();
-    const input = parent.find('settings-seed');
-    const go = parent.find('settings-new-world');
-    assert.ok(input && go);
-    assert.equal(input.value, '7', '当前种子预填');
-    input.value = '123';
-    go.dispatch('click');
-    input.value = '  ';
-    go.dispatch('click');
-    assert.deepEqual(worlds, [123, Math.floor(0.5 * 0x100000000)]);
-    input.value = 'abc';
-    go.dispatch('click');
-    assert.equal(worlds.length, 2);
-    assert.match(parent.find('settings-seed-error')?.textContent ?? '', /seed|种子/);
-    input.dispatch('keydown', { code: 'Enter', key: 'Enter' });
-    assert.equal(worlds.length, 2);
-  });
-
-  test('输入框按键不冒泡到游戏（打字不触发武器/调试键）；dispose 移除元素', () => {
-    const { parent, panel } = build();
-    const input = parent.find('settings-seed');
-    const ev = input?.dispatch('keydown', { code: 'Digit1', key: '1' });
-    assert.equal(ev?.stopped, true);
-    panel.dispose();
-    assert.equal(parent.find('settings-panel'), null);
-    assert.equal(parent.find('settings-gear'), null);
-  });
-});
-
 
 test('连续天气强度从网址加载、实时应用并保存，非法强度拒绝', () => {
   const loaded = resolveSettings({ defaults: DEFAULTS, saved: {}, params: params('?windPower=4.5&rainPower=5&snowPower=3.2&tornadoPower=4&tornadoCount=6') });

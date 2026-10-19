@@ -1,6 +1,6 @@
 import type * as THREE from 'three';
 import type { Rect } from '../../core/math.ts';
-import { createTileView } from '../../render/tile-view.ts';
+import { createTileView } from '../../render/tile/tile-view.ts';
 import { createTileMap } from '../../world/tile-map.ts';
 import { DEFAULT_TILES, TILE_AIR, TILE_DIRT, TILE_GRASS } from '../../world/tile-types.ts';
 

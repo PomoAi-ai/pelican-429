@@ -3,7 +3,7 @@ import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
 
 import * as THREE from 'three';
-import { TILE_TEXTURE_LAYERS, TILE_TEXTURE_PERIOD, generateTileTextures } from '../src/render/tile-textures.ts';
+import { TILE_TEXTURE_LAYERS, TILE_TEXTURE_PERIOD, generateTileTextures } from '../src/render/tile/tile-textures.ts';
 import {
   BLOCK_BACK_Z,
   BLOCK_FRONT_Z,
@@ -13,11 +13,11 @@ import {
   createBlockGeometry,
   createFilletGeometry,
   createSlabGeometry,
-} from '../src/render/tile-geometry.ts';
-import { BLADE_SEGMENTS, TUFT_BLADES, createDaisyGeometry, createGrassTuftGeometry } from '../src/render/flora-geometry.ts';
-import { TILE_INSTANCE_ATTRIBUTES, TILE_PROGRAM_KEY, TILE_SHADER_INJECTIONS, TILE_VERTEX_ATTRIBUTES, createTileMaterial } from '../src/render/tile-material.ts';
+} from '../src/render/tile/tile-geometry.ts';
+import { BLADE_SEGMENTS, TUFT_BLADES, createDaisyGeometry, createGrassTuftGeometry } from '../src/render/flora/flora-geometry.ts';
+import { TILE_INSTANCE_ATTRIBUTES, TILE_PROGRAM_KEY, TILE_SHADER_INJECTIONS, TILE_VERTEX_ATTRIBUTES, createTileMaterial } from '../src/render/tile/tile-material.ts';
 import { glslCalls, glslDeclarations, glslFunctionNames, injectedAfter } from './helpers/glsl.ts';
-import { FILLET_RADIUS } from '../src/render/tile-transitions.ts';
+import { FILLET_RADIUS } from '../src/render/tile/tile-transitions.ts';
 import { L, layerStats, texel } from './helpers/render-fixtures.ts';
 
 describe('tile-textures', () => {

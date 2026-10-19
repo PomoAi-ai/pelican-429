@@ -6,7 +6,7 @@ import { cancelArea, captureHomestead, checkSolar, initializeHomestead, markArea
 import { DAY_SECONDS, sunriseSecond } from '../src/core/calendar.ts';
 import { GAME_HOUR } from '../src/sim/homestead-economy.ts';
 import { HOMESTEAD } from '../src/config/homestead.ts';
-import { loadHomesteadSave, saveHomestead } from '../src/app/homestead-save.ts';
+import { loadHomesteadSave, saveHomestead } from '../src/app/homestead/homestead-save.ts';
 import { LEVEL_LEGEND, parseLevel } from '../src/world/test-level.ts';
 import type { TreeInstance } from '../src/world/level.ts';
 import { TILE_AIR, TILE_STONE } from '../src/world/tile-types.ts';

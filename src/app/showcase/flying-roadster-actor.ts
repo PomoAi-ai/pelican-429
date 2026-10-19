@@ -1,9 +1,9 @@
 import * as THREE from 'three';
 import type { ShowcaseCard, ShowcaseEntry } from '../../config/showcase.ts';
 import { FLYING_ROADSTER } from '../../config/flying-roadster.ts';
-import { TUNING } from '../../config/tuning.ts';
-import { createFlyingRoadsterModel } from '../../render/flying-roadster-view.ts';
+import { createFlyingRoadsterModel } from '../../render/character/flying-roadster-view.ts';
 import type { StageActor } from './stage-actor.ts';
+import { t } from '../../config/i18n.ts';
 
 /** 展示场只编排位移与动作，车轮、面罩、尾喷和材质都由游戏模型驱动。 */
 export function createFlyingRoadsterActor(card: ShowcaseCard, entry: ShowcaseEntry): StageActor {
@@ -45,9 +45,9 @@ export function createFlyingRoadsterActor(card: ShowcaseCard, entry: ShowcaseEnt
     ready: true,
     get complete() { return time >= duration; },
     get progress() { return time / duration; },
-    get status() { return `白色飞行车 · ${entry.label} · ${time >= duration ? '演示完成' : '共享游戏模型'}`; },
+    get status() { return `${t('白色飞行车')} · ${t(entry.label)} · ${t(time >= duration ? '演示完成' : '共享游戏模型')}`; },
     update(elapsed) {
-      const dt = card.playing ? Math.min(Math.min(elapsed, TUNING.sim.maxFrameTime) * card.speed, duration - time) : 0;
+      const dt = card.playing ? Math.min(elapsed * card.speed, duration - time) : 0;
       time += dt;
       sample(dt);
     },

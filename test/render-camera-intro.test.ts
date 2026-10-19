@@ -7,8 +7,8 @@ import * as THREE from 'three';
 import { TUNING } from '../src/config/tuning.ts';
 import type { Tuning } from '../src/config/tuning.ts';
 import { validateTuning } from '../src/config/tuning.ts';
-import { hutIntroBox, introBlend, introShot } from '../src/render/camera-intro.ts';
-import { createCameraRig, focusHeight } from '../src/render/camera-rig.ts';
+import { hutIntroBox, introBlend, introShot } from '../src/render/stage/camera-intro.ts';
+import { createCameraRig, focusHeight } from '../src/render/stage/camera-rig.ts';
 import { pickHomeHut } from '../src/world/spawn-home.ts';
 import { generateWorld } from '../src/world/worldgen.ts';
 

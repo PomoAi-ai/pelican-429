@@ -1,0 +1,96 @@
+import { SCENE_DEMOS } from '../../config/scene-demos.ts';
+import { MAX_SHOWCASE_CARDS } from '../../config/showcase.ts';
+import { BUILDING_KIT_VARIANTS } from '../../config/building-kit.ts';
+import type { ShowcaseCatalog, ShowcaseEntry } from '../../config/showcase.ts';
+import { DEFAULT_TILES } from '../../world/tile-types.ts';
+import { WATER_PALETTE_NAMES } from '../../config/water-palettes.ts';
+import type { WaterPaletteName } from '../../config/water-palettes.ts';
+import { TREE_KINDS } from '../../config/worldgen-rules.ts';
+import type { TreeKind } from '../../world/level.ts';
+import { SHRUB_KINDS } from '../flora/flora-shrubs.ts';
+import type { ShrubKind } from '../flora/flora-shrubs.ts';
+import { FLORA_SPECIES } from '../flora/flora.ts';
+import type { FloraSpecies } from '../flora/flora.ts';
+import { COVER_KINDS } from '../flora/flora-cover.ts';
+import type { CoverKind } from '../flora/flora-cover.ts';
+import { ROCK_KINDS } from '../decor/rock-geometry.ts';
+import type { RockKind } from '../decor/rock-geometry.ts';
+import { DESERT_KINDS } from '../decor/desert-geometry.ts';
+import type { DesertKind } from '../decor/desert-geometry.ts';
+import { CAVE_DECOR_KINDS } from '../decor/cave-decor-view.ts';
+import type { CaveDecorKind } from '../decor/cave-decor-view.ts';
+import { BED_KINDS, FLOAT_KINDS, MOTE_KINDS } from '../water/water-flora.ts';
+import type { BedKind, FloatKind, MoteKind } from '../water/water-flora.ts';
+import { TREE_LABELS, SHRUB_LABELS, FLORA_LABELS, COVER_LABELS, ROCK_LABELS, DESERT_LABELS, CAVE_LABELS, AQUATIC_LABELS } from './resource-labels.ts';
+
+import { PLANT_ATTACHMENT_KINDS, PLANT_ATTACHMENT_LABELS, PLANT_ATTACHMENT_DESCRIPTIONS } from '../flora/plant-attachments.ts';
+import type { PlantAttachmentKind } from '../flora/plant-attachments.ts';
+
+interface ResourceActions {
+  climber: PlantAttachmentKind;
+  block: (typeof BUILDING_KIT_VARIANTS.block)[number];
+  wall: (typeof BUILDING_KIT_VARIANTS.wall)[number];
+  door: (typeof BUILDING_KIT_VARIANTS.door)[number];
+  solar: (typeof BUILDING_KIT_VARIANTS.solar)[number];
+  terrain: string;
+  tree: TreeKind;
+  shrub: ShrubKind;
+  grass: FloraSpecies | 'natural';
+  cover: CoverKind;
+  rock: RockKind;
+  desert: DesertKind;
+  hut: 'right' | 'left';
+  water: WaterPaletteName;
+  aquatic: BedKind | FloatKind | MoteKind;
+  cave: CaveDecorKind;
+}
+export type ResourceEntry = { [K in keyof ResourceActions]: ShowcaseEntry<K> & { readonly action: ResourceActions[K] } }[keyof ResourceActions];
+
+function variants<K extends string>(kinds: readonly K[], labels: Record<K, string>): Array<readonly [K, string]> {
+  return kinds.map((kind) => [kind, labels[kind]]);
+}
+function resource<K extends keyof ResourceActions>(id: K, name: string, description: string, choices: ReadonlyArray<readonly [ResourceActions[K], string]>, image = id as string) {
+  return {
+    subject: { id, name, description, image: `./resources/${image}.jpg`, defaultEntry: `${id}.${choices[0]![0]}` },
+    entries: choices.map(([action, label]) => ({ id: `${id}.${action}`, actor: id, action, label, group: '游戏变体', description, seconds: 30, supportsShapes: id === 'terrain' && DEFAULT_TILES.byKey(action).collision === 'solid' })) as ResourceEntry[],
+  };
+}
+const tileLabels: Record<string, string> = { air: '空气（留空）', dirt: '泥土', stone: '石头', platform: '木平台', grass: '草地', sand: '沙地', sandstone: '砂岩', timber: '木料', branch: '树枝平台（树模型）', roof: '屋顶（渔屋模型）' };
+// 名称与说明属于展示层，种类始终来自游戏注册表。
+const tiles = [...DEFAULT_TILES.all()].sort((a, b) => Number(b.key === 'grass') - Number(a.key === 'grass'));
+const resources = [
+  resource('terrain', '地形瓦片', '完整瓦片注册表；树枝与屋顶通过所属模型展示', tiles.map((tile) => {
+    const label = tileLabels[tile.key];
+    if (label === undefined) throw new Error(`瓦片展示配置缺少名称：${tile.key}`);
+    return [tile.key, label];
+  })),
+  resource('tree', '树木', '全部树种，使用游戏生成规则、树冠和枝干', variants(TREE_KINDS, TREE_LABELS)),
+  resource('shrub', '灌木', '全部灌丛与植株轮廓', variants(SHRUB_KINDS, SHRUB_LABELS)),
+  resource('grass', '花草', '自然组合与全部花草物种', [['natural', '自然花草'], ...variants(FLORA_SPECIES, FLORA_LABELS)]),
+  resource('climber', '附着与下垂植物', '植物的顶面、正背面、边缘与底面空间组合', variants(PLANT_ATTACHMENT_KINDS, PLANT_ATTACHMENT_LABELS), 'cover'),
+  resource('cover', '地被', '苔藓、嫩芽、落叶与垂挂地被', variants(COVER_KINDS, COVER_LABELS)),
+  resource('rock', '岩石', '碎石、巨石、地标岩与岩脚装饰', variants(ROCK_KINDS, ROCK_LABELS)),
+  resource('desert', '沙漠装饰', '仙人掌、荒漠植物、骨骸与沙纹', variants(DESERT_KINDS, DESERT_LABELS)),
+  resource('hut', '渔屋', '完整屋顶、墙体、室内与栈桥', [['right', '右侧栈桥'], ['left', '左侧栈桥']]),
+  resource('water', '水池', '真实水体、波纹与全部配色', variants(WATER_PALETTE_NAMES, { clear: '清澈', emerald: '翡翠', deep: '深蓝' })),
+  resource('aquatic', '水生植物', '湖底、水面与悬浮植物的全部变体', variants([...BED_KINDS, ...FLOAT_KINDS, ...MOTE_KINDS], AQUATIC_LABELS)),
+  resource('cave', '洞穴装饰', '全部地面与顶壁装饰，保留游戏的悬挂方向', variants(CAVE_DECOR_KINDS, CAVE_LABELS)),
+  resource('block', '实心建筑格', '1 × 1 格；标准深 0.9，齐地形变体深 1.5；暖白封板与钴蓝包边', variants(BUILDING_KIT_VARIANTS.block, { single: '单格砖块', row: '连续三格', corner: '墙地转角', 'full-depth': '齐地形全深度' }), 'free-world/building-kit/block'),
+  resource('wall', '背景墙格', '1 × 1 格薄墙板，置于角色后方；与实心建筑格分层', variants(BUILDING_KIT_VARIANTS.wall, { single: '单格墙板', patch: '墙板拼接' }), 'free-world/building-kit/wall'),
+  resource('door', '能量门', '沿通行方向厚 0.14 格；基础门高 3、Z 跨度 1.4；一体门楣高 4、Z 跨度 1.5，齐地形前后沿；开启只关闭屏障', variants(BUILDING_KIT_VARIANTS.door, { closed: '关闭状态', open: '开启状态', 'lintel-closed': '一体门楣 · 关闭', 'lintel-open': '一体门楣 · 开启' }), 'free-world/building-kit/door'),
+  resource('solar', '太阳能板', '宽 1、高 0.5、深 1 格；整板左右倾转，踩踏受力，离开后渐进恢复追光；支撑砖独立', variants(BUILDING_KIT_VARIANTS.solar, { left: '向左受光', level: '水平面板', right: '向右受光' }), 'free-world/building-kit/solar'),
+];
+export const RESOURCE_ENTRIES: readonly ResourceEntry[] = resources.flatMap((r) => r.entries).map((entry) => entry.actor === 'climber' ? { ...entry, description: PLANT_ATTACHMENT_DESCRIPTIONS[entry.action] } : entry);
+export const RESOURCE_CATALOG: ShowcaseCatalog = {
+  mode: 'resources', title: '场景资源展示场', entries: RESOURCE_ENTRIES, subjects: resources.map((r) => r.subject), maxCards: MAX_SHOWCASE_CARDS,
+  demos: [{
+    id: 'building-kit', title: '建筑构件 · 四类', description: '砖块、背景墙、能量门与半格太阳能板；可旋转检查包边与底座。',
+    cards: [{ entryId: 'block.single' }, { entryId: 'wall.single' }, { entryId: 'door.closed' }, { entryId: 'solar.level' }],
+  }],
+};
+export const LAB_CATALOG: ShowcaseCatalog = { ...RESOURCE_CATALOG, mode: 'lab', title: '场景功能展示', demos: SCENE_DEMOS };
+export function resourceEntry(id: string): ResourceEntry {
+  const entry = RESOURCE_ENTRIES.find((e) => e.id === id);
+  if (!entry) throw new Error(`场景资源中不存在项目：${id}`);
+  return entry;
+}

@@ -27,4 +27,4 @@
 
 用户要求继续制作并加入游戏；游戏制作采用 A 能量结构与 C 流线外壳的组合。这不等于三张候选原画均已单独确认，也不代表历史稿中被修改的细节继续有效。
 
-assets/concepts/follow-drone-modeling-v11/compact.png、extended.png 是 Blender 模型渲染，game-*.png 是游戏截图，本次不作为概念原画收录。V11 GLB 已停用；游戏模型现为程序化建模，见 src/render/utility-drone.ts 与 public/robots/utility-drone/SOURCE.md。
+assets/concepts/follow-drone-modeling-v11/compact.png、extended.png 是 Blender 模型渲染，game-*.png 是游戏截图，本次不作为概念原画收录。V11 GLB 已停用；游戏模型现为程序化建模，见 src/render/character/utility-drone.ts 与 public/robots/utility-drone/SOURCE.md。

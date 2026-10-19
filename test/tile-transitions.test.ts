@@ -3,7 +3,7 @@ import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
 import * as THREE from 'three';
 
-import { tileLayerIndex } from '../src/render/tile-textures.ts';
+import { tileLayerIndex } from '../src/render/tile/tile-textures.ts';
 import {
   CONVEX_RADIUS,
   EDGE_BLEND,
@@ -23,9 +23,9 @@ import {
   pairKey,
   resolvePairTransition,
   validateTransitionTable,
-} from '../src/render/tile-transitions.ts';
-import type { CellClass, TransitionTable } from '../src/render/tile-transitions.ts';
-import { createTileView } from '../src/render/tile-view.ts';
+} from '../src/render/tile/tile-transitions.ts';
+import type { CellClass, TransitionTable } from '../src/render/tile/tile-transitions.ts';
+import { createTileView } from '../src/render/tile/tile-view.ts';
 import { createTileMap } from '../src/world/tile-map.ts';
 import { DEFAULT_TILES, TILE_DIRT, TILE_GRASS, TILE_PLATFORM, TILE_SAND, TILE_STONE } from '../src/world/tile-types.ts';
 

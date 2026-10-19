@@ -7,8 +7,8 @@ import { PLATFORM_CLEARANCE, TREE_KINDS, TREE_SHAPES, validateTreeShapes } from 
 import type { TreeShape } from '../src/config/worldgen-rules.ts';
 import { TUNING } from '../src/config/tuning.ts';
 import { mulberry32 } from '../src/core/rng.ts';
-import { planTreeSkeleton, TOP_LIFT } from '../src/render/tree-skeleton.ts';
-import type { LeafCluster } from '../src/render/tree-skeleton.ts';
+import { planTreeSkeleton, TOP_LIFT } from '../src/render/tree/tree-skeleton.ts';
+import type { LeafCluster } from '../src/render/tree/tree-skeleton.ts';
 import { createSimWorld, getPlayer, NEUTRAL_INPUT, stepSim } from '../src/sim/sim-world.ts';
 import type { InputFrame, SimWorld } from '../src/sim/sim-world.ts';
 import type { TreeInstance, TreeKind, TreePlatform } from '../src/world/level.ts';

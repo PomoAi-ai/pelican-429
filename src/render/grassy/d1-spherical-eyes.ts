@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { injectAfter } from '../tile-material.ts';
+import { injectAfter } from '../tile/tile-material.ts';
 
 export const D1_SPHERICAL_EYE_MATERIAL = 'D1 spherical eye';
 export const D1_EYELID_MATERIAL = 'D1 eyelid';

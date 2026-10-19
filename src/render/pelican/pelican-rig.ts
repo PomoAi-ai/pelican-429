@@ -36,7 +36,7 @@ import { checkAnimGeometry, checkPelicanPose, pelicanRestPose, POSE_SIDES } from
 import type { PelicanAnimGeometry, PelicanFootTarget, PelicanPose, Side, Vec3 } from './pelican-pose.ts';
 import { rideBob } from './pelican-ride-anim.ts';
 import { MIN_EXTENSION, POLE_TURN_EXTENSION, RIDE_MIN_EXTENSION, boneLengths, hipPoint, kneePole, upperTransform } from './pelican-skeleton.ts';
-import { addNodePatch } from '../node-patches.ts';
+import { addNodePatch } from '../stage/node-patches.ts';
 
 export type { PelicanPose, Side } from './pelican-pose.ts';
 const SIDES: readonly Side[] = POSE_SIDES;

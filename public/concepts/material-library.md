@@ -7,7 +7,7 @@
 <details>
 <summary>资料来源与更新</summary>
 
-正文由 src/config/residence.ts、src/config/definition-kit.ts 生成；附属构件包络来自 src/render/ai-city-architecture.ts。修改资源后运行 npm run docs:resources，不直接编辑生成正文。材质或模型改变时，在 Vite 浏览器环境调用 scripts/export-material-previews.ts 的 exportMaterialPreviews()，重新导出 material-previews 图片快照。网页与 HTTP Markdown 使用同一份图文，LLM 索引见 [llms.txt](../llms.txt)。
+正文由 src/config/residence.ts、src/config/definition-kit.ts 生成；附属构件包络来自 src/render/city/ai-city-architecture.ts。修改资源后运行 npm run docs:resources，不直接编辑生成正文。材质或模型改变时，在 Vite 浏览器环境调用 scripts/export-material-previews.ts 的 exportMaterialPreviews()，重新导出 material-previews 图片快照。网页与 HTTP Markdown 使用同一份图文，LLM 索引见 [llms.txt](../llms.txt)。
 
 </details>
 

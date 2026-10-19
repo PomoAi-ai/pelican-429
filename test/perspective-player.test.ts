@@ -2,8 +2,8 @@ import { consumeRideEvents, resolvePelicanRide } from '../src/entities/pelican-r
 import { createTileRideProbe } from '../src/physics/ride-probe.ts';
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { createPerspectivePlayer } from '../src/app/perspective-player.ts';
-import { createDefinitionDepthLayout, DEPTH_STOPS } from '../src/app/definition-depth-layout.ts';
+import { createPerspectivePlayer } from '../src/app/perspective/perspective-player.ts';
+import { createDefinitionDepthLayout, DEPTH_STOPS } from '../src/app/perspective/definition-depth-layout.ts';
 import { HUMAN_BODY_HEIGHT } from '../src/config/player-form.ts';
 import { HUMAN_CODEX_SHOT, HUMAN_SKILLS } from '../src/config/human-combat.ts';
 import { TUNING } from '../src/config/tuning.ts';

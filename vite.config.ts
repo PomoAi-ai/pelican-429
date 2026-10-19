@@ -6,6 +6,15 @@ import { RELEASE_MODEL_PATHS } from './src/config/web-models.ts';
 import { NPCS } from './src/config/npc.ts';
 import { HARBOR_PAINTED_FILES, HARBOR_PAINTED_PATH, HARBOR_LAKE_FILES, HARBOR_LAKE_PATH } from './src/config/harbor-painted.ts';
 
+// 普通构建只发布 index（Vite 默认入口）；full 构建全部页面。
+const PAGES = {
+  main: 'index.html',
+  renderLab: 'render-lab.html',
+  hairGallery: 'd1-hair-gallery.html',
+  harborPerspective: 'harbor-perspective.html',
+  maglevTrack: 'maglev-track.html',
+};
+
 function configureMarkdownEncoding(server: Pick<ViteDevServer, 'middlewares'>) {
   server.middlewares.use((req, res, next) => {
     // 按 UTF-8 原文展示，避免浏览器猜错中文编码或将 Markdown 当成下载。
@@ -23,11 +32,8 @@ export default defineConfig(({ command, mode }) => ({
   preview: { host: '127.0.0.1', port: 4174 },
   build: {
     target: 'es2022', copyPublicDir: mode === 'full',
-    ...(mode === 'full' ? { rolldownOptions: { input: {
-      main: fileURLToPath(new URL('./index.html', import.meta.url)),
-      renderLab: fileURLToPath(new URL('./render-lab.html', import.meta.url)),
-      hairGallery: fileURLToPath(new URL('./d1-hair-gallery.html', import.meta.url)),
-    } } } : {}),
+    ...(mode === 'full' ? { rolldownOptions: { input: Object.fromEntries(Object.entries(PAGES)
+      .map(([name, file]) => [name, fileURLToPath(new URL(`./${file}`, import.meta.url))])) } } : {}),
   },
   plugins: [{
     name: 'markdown-utf8',

@@ -1,9 +1,9 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { freeWorldSearch, keepWorldParams, worldMapSearch } from '../src/app/free-world-navigation.ts';
-import { loadGameLevel } from '../src/app/game-level.ts';
+import { freeWorldSearch, keepWorldParams, worldMapSearch } from '../src/app/game/free-world-navigation.ts';
+import { loadGameLevel } from '../src/app/game/game-level.ts';
 import { freeWorldRegions } from '../src/world/free-world-regions.ts';
-import { worldMusicTheme } from '../src/app/world-music.ts';
+import { worldMusicTheme } from '../src/app/audio/world-music.ts';
 import { createSimWorld, getPlayer, NEUTRAL_INPUT, stepSim } from '../src/sim/sim-world.ts';
 import { initializeFreeWorldNpcs } from '../src/sim/free-world-npcs.ts';
 import { placePlayer } from '../src/sim/player-teleport.ts';

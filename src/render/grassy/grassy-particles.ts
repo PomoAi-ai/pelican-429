@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-import { currentViewportHeight } from '../stage.ts';
-import { glslFloat as f } from '../wind.ts';
+import { currentViewportHeight } from '../stage/stage.ts';
+import { glslFloat as f } from '../sky/wind.ts';
 
 /** 软粒子着色器：边缘羽化起点、白热核心半径与混合量、丢弃阈值，WebGPU 节点版本同表。 */
 export const PARTICLE_CLOUD_SHADER = { edge: 0.15, core: 0.5, cut: 0.003, hot: [2, 2.8, 3.4], hotMix: 0.88 } as const;

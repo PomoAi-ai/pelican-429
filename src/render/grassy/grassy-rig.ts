@@ -1,11 +1,12 @@
 import * as THREE from 'three';
-import { addHairMorphs, createHairSway } from '../hair-sway.ts';
-import { characterTextureTier, loadCharacterModel, type TextureTier } from '../character-model.ts';
+import { addHairMorphs, createHairSway } from '../character/hair-sway.ts';
+import type { TextureTier } from '../../config/app-mode.ts';
+import { characterTextureTier, loadCharacterModel } from '../character/character-model.ts';
 import type { GLTF } from 'three/addons/loaders/GLTFLoader.js';
 import { clone } from 'three/addons/utils/SkeletonUtils.js';
 import { GRASSY_ACTIONS, GRASSY_ANIMATED_MODELS, GRASSY_HEIGHT } from '../../config/grassy.ts';
 import type { GrassyAction, GrassyAnimatedVariant } from '../../config/grassy.ts';
-import { mergeStaticParts } from '../merge-static-parts.ts';
+import { mergeStaticParts } from '../stage/merge-static-parts.ts';
 import { createGrassyEffects, GRASSY_EFFECT_SOCKETS } from './grassy-effects.ts';
 import type { GrassyEffects } from './grassy-effects.ts';
 import { createGrassyCycle } from './grassy-cycle.ts';
@@ -14,7 +15,7 @@ import { createGrassyMotionPose, GRASSY_MOTION_NODES } from './grassy-motion-pos
 import type { GrassyMotionPose } from './grassy-motion-pose.ts';
 import { DEFAULT_CHARACTER_APPEARANCE, type CharacterAppearance } from '../../config/character-appearance.ts';
 import { createGrassyAppearance, disposeCustomizationAssets, loadCustomizationAssets } from './grassy-appearance.ts';
-import { disposeModelResources as disposeSceneResources } from '../model-resources.ts';
+import { disposeModelResources as disposeSceneResources } from '../character/model-resources.ts';
 
 interface GrassyAsset {
   scene: THREE.Group;

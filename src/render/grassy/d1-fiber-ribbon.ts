@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { injectAfter } from '../tile-material.ts';
+import { injectAfter } from '../tile/tile-material.ts';
 
 const PARAMETERS = `
   attribute float _d1_fiber_radius;

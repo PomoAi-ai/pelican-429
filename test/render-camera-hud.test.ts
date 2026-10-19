@@ -4,9 +4,9 @@ import assert from 'node:assert/strict';
 
 import * as THREE from 'three';
 import { TUNING } from '../src/config/tuning.ts';
-import { cameraFloorY, createCameraRig, focusHeight } from '../src/render/camera-rig.ts';
-import { createHud } from '../src/ui/hud.ts';
-import { setLanguage } from '../src/ui/language.ts';
+import { cameraFloorY, createCameraRig, focusHeight } from '../src/render/stage/camera-rig.ts';
+import { createHud } from '../src/ui/hud/hud.ts';
+import { setLanguage } from '../src/ui/model/language.ts';
 import { createPelicanEntity } from '../src/entities/entity.ts';
 import { FakeElement, withFakeDocument } from './helpers/fake-dom.ts';
 

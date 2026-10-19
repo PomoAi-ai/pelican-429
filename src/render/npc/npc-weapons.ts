@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { npcAction, SAM_ROUTING_SOURCE } from '../../config/npc.ts';
 import type { NpcAction, NpcKind } from '../../config/npc.ts';
-import { mergeStaticParts } from '../merge-static-parts.ts';
+import { mergeStaticParts } from '../stage/merge-static-parts.ts';
 
 const UP = new THREE.Vector3(0, 1, 0);
 const UNIT = new THREE.Vector3(1, 1, 1);

@@ -1,6 +1,6 @@
 import { FACILITY_SCENES } from '../config/facility-scenes.ts';
 import type { FreeWorldBackground } from '../config/free-world-backgrounds.ts';
-import type { LevelData } from '../world/level.ts';
+import type { LevelData } from './level.ts';
 
 const smooth = (v: number): number => { const t = Math.max(0, Math.min(1, v)); return t * t * (3 - 2 * t); };
 const band = (v: number, lo: number, hi: number, edge: number): number => smooth((v - lo + edge) / edge) * smooth((hi + edge - v) / edge);

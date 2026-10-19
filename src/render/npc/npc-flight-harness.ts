@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import type { TextureTier } from '../character-model.ts';
+import type { TextureTier } from '../../config/app-mode.ts';
 import { createGrassyFlightHarness } from '../grassy/grassy-rig.ts';
 import { createThruster } from '../grassy/grassy-particles.ts';
 import type { NpcMotion } from './npc-pose.ts';

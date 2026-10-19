@@ -8,6 +8,7 @@ import type { InputFrame } from '../../sim/sim-world.ts';
 import { TILE_PLATFORM } from '../../world/tile-types.ts';
 import { placeBody } from './scenario.ts';
 import type { ScenarioContext, ScenarioDriver } from './scenario.ts';
+import { t } from '../../config/i18n.ts';
 
 /** 演示只给正式控制器发送输入；移动、命中和假人归位均由 stepSim 结算。 */
 export function prepareHuman(ctx: ScenarioContext, attackMotion: 'still' | 'walk' | 'run'): ScenarioDriver {
@@ -87,7 +88,7 @@ export function prepareHuman(ctx: ScenarioContext, attackMotion: 'still' | 'walk
         : p.ride.mode !== 'off' ? '骑行' : p.flightMode !== 'none' ? Math.abs(player.body.vx) > (world.tuning.player.flight.humanSpeed + world.tuning.player.flight.humanFastSpeed) / 2 ? '快速飞行' : '推进飞行'
           : p.state === 'run' ? p.moveGear === 'run' ? '跑动' : '走路'
             : p.state === 'jump' ? '跳跃' : p.state === 'fall' ? '下落' : '呼吸';
-      return `${phase} · ${hit}/${targets.length} 目标受击 · 生命 ${hp}/${targets.length * world.tuning.dummy.maxHp}`;
+      return `${t(phase)} · ${t(`${hit}/${targets.length} 目标受击`)} · ${t(`生命 ${hp}/${targets.length * world.tuning.dummy.maxHp}`)}`;
     },
   };
 }

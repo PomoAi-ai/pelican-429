@@ -1,8 +1,8 @@
 // render-* 测试共享辅助（原 render-surface 拆出）。
 import * as THREE from 'three';
 import { TREE_SHAPES } from '../../src/config/worldgen-rules.ts';
-import { TILE_TEXTURE_LAYERS } from '../../src/render/tile-textures.ts';
-import type { TileTextureData } from '../../src/render/tile-textures.ts';
+import { TILE_TEXTURE_LAYERS } from '../../src/render/tile/tile-textures.ts';
+import type { TileTextureData } from '../../src/render/tile/tile-textures.ts';
 import type { TreeInstance, TreeKind, TreePlatform } from '../../src/world/level.ts';
 
 export const L = (name: (typeof TILE_TEXTURE_LAYERS)[number]): number => TILE_TEXTURE_LAYERS.indexOf(name);

@@ -1,6 +1,6 @@
 # 树木：物种、冠团平台、空间与生长定义
 
-状态：草案（2026-10-11）。本文可独立复制。物种、尺寸和平台以现行游戏为准（`src/config/worldgen-rules.ts` 的 TREE_SHAPES、`src/world/trees.ts`）；树冠深度已在游戏实现（`src/render/tree-skeleton.ts` 的 TREE_BACK_MIN、TREE_FRONT_MAX）；树桩和生长阶段是**设计草案**，游戏尚未实现。坐标按 core-coordinates.md（2026-10-11 新定义）：+Z 朝镜头，格子深 2、Z=[−1,+1]，前沿 [+1,+1.5]、后沿 [−1.5,−1] 在格子之外，总深 3 格。
+状态：草案（2026-10-11）。本文可独立复制。物种、尺寸和平台以现行游戏为准（`src/config/worldgen-rules.ts` 的 TREE_SHAPES、`src/world/trees.ts`）；树冠深度已在游戏实现（`src/render/tree/tree-skeleton.ts` 的 TREE_BACK_MIN、TREE_FRONT_MAX）；树桩和生长阶段是**设计草案**，游戏尚未实现。坐标按 core-coordinates.md（2026-10-11 新定义）：+Z 朝镜头，格子深 2、Z=[−1,+1]，前沿 [+1,+1.5]、后沿 [−1.5,−1] 在格子之外，总深 3 格。
 
 ## 依据与口径
 

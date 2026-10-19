@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { selectMobileAim } from '../src/app/mobile-aim.ts';
+import { selectMobileAim } from '../src/app/game/mobile-aim.ts';
 import { TUNING } from '../src/config/tuning.ts';
 import { createDummyEntity, createPelicanEntity } from '../src/entities/entity.ts';
 

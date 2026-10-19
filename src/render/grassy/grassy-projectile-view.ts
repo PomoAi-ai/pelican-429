@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { lerp } from '../../core/math.ts';
-import type { EntityViewFactory } from '../view-registry.ts';
-import { PROJECTILE_Z } from '../projectile-views.ts';
+import type { EntityViewFactory } from '../stage/view-registry.ts';
+import { PROJECTILE_Z } from '../fx/projectile-views.ts';
 import { createCodeBolt, createMechanicalBugs } from './grassy-projectiles.ts';
 
 /** 实体生命周期与弹道属于模拟；这里只复用角色资料中的代码弹与机械虫造型。 */

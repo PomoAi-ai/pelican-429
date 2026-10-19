@@ -7,10 +7,10 @@ import * as THREE from 'three';
 
 import { TUNING } from '../src/config/tuning.ts';
 import type { Entity } from '../src/entities/entity.ts';
-import { createPelicanViewFactory, fillPelicanAnimInput, rideProgress } from '../src/render/entity-views.ts';
-import type { EntityView } from '../src/render/view-registry.ts';
+import { createPelicanViewFactory, fillPelicanAnimInput, rideProgress } from '../src/render/character/entity-views.ts';
+import type { EntityView } from '../src/render/stage/view-registry.ts';
 import { RIDE_RIGS } from '../src/vendor/pelican-3d/standing-ride/ride-rig.js';
-import { CONTROL_HINTS } from '../src/ui/hud.ts';
+import { CONTROL_HINTS } from '../src/ui/hud/hud.ts';
 import { parseLevel } from '../src/world/test-level.ts';
 import { SHAPE_SLOPE_L, SHAPE_SLOPE_R } from '../src/world/tile-shapes.ts';
 import { createSimWorld, getPlayer, NEUTRAL_INPUT, stepSim } from '../src/sim/sim-world.ts';

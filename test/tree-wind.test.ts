@@ -5,10 +5,10 @@ import assert from 'node:assert/strict';
 import * as THREE from 'three';
 import { TREE_KINDS } from '../src/config/worldgen-rules.ts';
 import { DEFAULT_WEATHER } from '../src/config/weather-rules.ts';
-import { createShrubAtlas, createShrubMaterial } from '../src/render/flora-shrubs.ts';
-import { buildTreeGeometry } from '../src/render/tree-geometry.ts';
-import { createTreeMaterials } from '../src/render/tree-material.ts';
-import { createTreeView } from '../src/render/tree-view.ts';
+import { createShrubAtlas, createShrubMaterial } from '../src/render/flora/flora-shrubs.ts';
+import { buildTreeGeometry } from '../src/render/tree/tree-geometry.ts';
+import { createTreeMaterials } from '../src/render/tree/tree-material.ts';
+import { createTreeView } from '../src/render/tree/tree-view.ts';
 import {
   SHRUB_WIND,
   TREE_BEND,
@@ -20,8 +20,8 @@ import {
   mainBend,
   treeBendAmount,
   validateTreeWind,
-} from '../src/render/tree-wind.ts';
-import type { SwayFn } from '../src/render/tree-wind.ts';
+} from '../src/render/tree/tree-wind.ts';
+import type { SwayFn } from '../src/render/tree/tree-wind.ts';
 import { modeState, windAt } from '../src/world/wind.ts';
 import { glslCalls, glslDeclarations, glslFunctionNames } from './helpers/glsl.ts';
 import { makeTree } from './helpers/render-fixtures.ts';

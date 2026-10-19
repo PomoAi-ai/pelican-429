@@ -3,13 +3,13 @@ import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
 
 import * as THREE from 'three';
-import { GROUND_DECOR_Z_MAX, GROUND_DECOR_Z_MIN } from '../src/render/tile-geometry.ts';
-import { createChunkStreamer } from '../src/render/chunk-streamer.ts';
-import { createTileView } from '../src/render/tile-view.ts';
+import { GROUND_DECOR_Z_MAX, GROUND_DECOR_Z_MIN } from '../src/render/tile/tile-geometry.ts';
+import { createChunkStreamer } from '../src/render/tile/chunk-streamer.ts';
+import { createTileView } from '../src/render/tile/tile-view.ts';
 import { createTileMap } from '../src/world/tile-map.ts';
 import type { ChunkCoord } from '../src/world/tile-map.ts';
 import { DEFAULT_TILES, TILE_BRANCH, TILE_DIRT, TILE_GRASS, TILE_SAND, TILE_STONE } from '../src/world/tile-types.ts';
-import { ORGANIC_TOP_AMP } from '../src/render/tile-organic.ts';
+import { ORGANIC_TOP_AMP } from '../src/render/tile/tile-organic.ts';
 import { L, blockInstances, floraPositions } from './helpers/render-fixtures.ts';
 import { glslDeclarations } from './helpers/glsl.ts';
 

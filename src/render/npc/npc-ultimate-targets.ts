@@ -16,9 +16,9 @@ import { moveAndCollide } from '../../physics/tile-collision.ts';
 import { createFluidMap } from '../../world/fluid-map.ts';
 import { createTileMap } from '../../world/tile-map.ts';
 import { DEFAULT_TILES, TILE_STONE } from '../../world/tile-types.ts';
-import { createDummyViewFactory } from '../entity-views.ts';
-import { createProjectileViews } from '../projectile-views.ts';
-import { createViewRegistry } from '../view-registry.ts';
+import { createDummyViewFactory } from '../character/entity-views.ts';
+import { createProjectileViews } from '../fx/projectile-views.ts';
+import { createViewRegistry } from '../stage/view-registry.ts';
 
 /** 展示只装配场地与靶子，出招、弹道和伤害全部运行游戏逻辑。 */
 export function createNpcUltimateTargets(kind: NpcKind, showTargets: boolean) {

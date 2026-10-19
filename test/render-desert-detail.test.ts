@@ -3,12 +3,12 @@ import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
 
 import * as THREE from 'three';
-import { DESERT_KINDS, DESERT_NATIVE_HEIGHT, createDesertParts } from '../src/render/desert-geometry.ts';
-import { DESERT_DECOR_RULES, desertCluster, planDesertDecor } from '../src/render/desert-decor-plan.ts';
-import { ROCK_KINDS, ROCK_NATIVE, ROCK_STYLE, createRockParts } from '../src/render/rock-geometry.ts';
-import { ROCK_PROGRAM_KEY, ROCK_SHADER_INJECTIONS, ROCK_SHADER_PARAMS, createRockMaterial } from '../src/render/rock-material.ts';
-import { SAND_DUST_MAX, SAND_DUST_RULES, createSandDustFx, duneCrests } from '../src/render/sand-dust-fx.ts';
-import type { SandDustFrame } from '../src/render/sand-dust-fx.ts';
+import { DESERT_KINDS, DESERT_NATIVE_HEIGHT, createDesertParts } from '../src/render/decor/desert-geometry.ts';
+import { DESERT_DECOR_RULES, desertCluster, planDesertDecor } from '../src/render/decor/desert-decor-plan.ts';
+import { ROCK_KINDS, ROCK_NATIVE, ROCK_STYLE, createRockParts } from '../src/render/decor/rock-geometry.ts';
+import { ROCK_PROGRAM_KEY, ROCK_SHADER_INJECTIONS, ROCK_SHADER_PARAMS, createRockMaterial } from '../src/render/decor/rock-material.ts';
+import { SAND_DUST_MAX, SAND_DUST_RULES, createSandDustFx, duneCrests } from '../src/render/fx/sand-dust-fx.ts';
+import type { SandDustFrame } from '../src/render/fx/sand-dust-fx.ts';
 import {
   BIG_ROCKS,
   LANDMARK_ROCKS,
@@ -24,11 +24,11 @@ import {
   planRocks,
   rockClass,
   rockGroupInstances,
-} from '../src/render/surface-decor.ts';
-import type { DecorEnv, DecorGround, RockInstance } from '../src/render/surface-decor.ts';
-import { createDecorBatch, createDesertMaterial } from '../src/render/surface-decor-view.ts';
-import { TILE_SHADER_INJECTIONS, TILE_SHADER_PARAMS, createTileMaterial } from '../src/render/tile-material.ts';
-import { SAND_GRAIN, SAND_RIPPLE_SETS, TILE_TEXTURE_LAYERS, TILE_TEXTURE_PERIOD, generateTileTextures } from '../src/render/tile-textures.ts';
+} from '../src/render/decor/surface-decor.ts';
+import type { DecorEnv, DecorGround, RockInstance } from '../src/render/decor/surface-decor.ts';
+import { createDecorBatch, createDesertMaterial } from '../src/render/decor/surface-decor-view.ts';
+import { TILE_SHADER_INJECTIONS, TILE_SHADER_PARAMS, createTileMaterial } from '../src/render/tile/tile-material.ts';
+import { SAND_GRAIN, SAND_RIPPLE_SETS, TILE_TEXTURE_LAYERS, TILE_TEXTURE_PERIOD, generateTileTextures } from '../src/render/tile/tile-textures.ts';
 import { glslCalls, glslConstantValues, injectedAfter } from './helpers/glsl.ts';
 import type { DesertInfo } from '../src/world/level.ts';
 

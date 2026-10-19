@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { glslFloat as f } from '../wind.ts';
+import { glslFloat as f } from '../sky/wind.ts';
 
 /**
  * 爆发着色器：蓄力（charge）时收拢的光核与旋转聚能环；释放（release）后的冲击壳、撕裂、射线、闪光与十字光，

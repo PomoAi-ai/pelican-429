@@ -4,10 +4,10 @@
 import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { BLOCK_BACK_Z, BLOCK_FRONT_Z, FILLET_RING_BASE, GROUND_DECOR_Z_MAX, createBlockGeometry, createFilletGeometry } from '../src/render/tile-geometry.ts';
-import { TILE_SHADER_INJECTIONS, TILE_SHADER_PARAMS } from '../src/render/tile-material.ts';
-import { RELIEF_PARAMS, ROUND_RINGS, WALL_RINGS, edgeInset, reliefFactors, reliefRings, sideShade, wallNormalZ } from '../src/render/tile-relief.ts';
-import { MAX_CONTOUR_DEVIATION } from '../src/render/tile-transitions.ts';
+import { BLOCK_BACK_Z, BLOCK_FRONT_Z, FILLET_RING_BASE, GROUND_DECOR_Z_MAX, createBlockGeometry, createFilletGeometry } from '../src/render/tile/tile-geometry.ts';
+import { TILE_SHADER_INJECTIONS, TILE_SHADER_PARAMS } from '../src/render/tile/tile-material.ts';
+import { RELIEF_PARAMS, ROUND_RINGS, WALL_RINGS, edgeInset, reliefFactors, reliefRings, sideShade, wallNormalZ } from '../src/render/tile/tile-relief.ts';
+import { MAX_CONTOUR_DEVIATION } from '../src/render/tile/tile-transitions.ts';
 
 const P = RELIEF_PARAMS;
 const ZEND = BLOCK_FRONT_Z - P.FRONT_ROUND_DEPTH;

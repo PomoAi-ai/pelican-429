@@ -5,12 +5,12 @@ import assert from 'node:assert/strict';
 import * as THREE from 'three';
 
 import { DEFAULT_LIGHTING } from '../src/config/lighting-rules.ts';
-import { LIGHT_MAP_PROGRAM_TAG, LM_WATER_FRONT_Z, createWorldLight, injectLightMap, isLightMappable, packLightColumns } from '../src/render/light-texture.ts';
-import { WATER_FRONT_Z } from '../src/render/water-view.ts';
-import { createTeleportEffect } from '../src/render/teleport-effect.ts';
+import { LIGHT_MAP_PROGRAM_TAG, LM_WATER_FRONT_Z, createWorldLight, injectLightMap, isLightMappable, packLightColumns } from '../src/render/stage/light-texture.ts';
+import { WATER_FRONT_Z } from '../src/render/water/water-view.ts';
+import { createTeleportEffect } from '../src/render/fx/teleport-effect.ts';
 import { WATER_PALETTES } from '../src/config/water-palettes.ts';
 import { decodeWaterDepth } from '../src/world/water-depth.ts';
-import type { LightMapUniforms } from '../src/render/light-texture.ts';
+import type { LightMapUniforms } from '../src/render/stage/light-texture.ts';
 import { createFluidMap } from '../src/world/fluid-map.ts';
 import { createTileMap } from '../src/world/tile-map.ts';
 import { DEFAULT_TILES, TILE_DIRT } from '../src/world/tile-types.ts';

@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { mulberry32 } from '../../core/rng.ts';
-import { currentViewportHeight } from '../stage.ts';
-import { glslFloat as f } from '../wind.ts';
+import { currentViewportHeight } from '../stage/stage.ts';
+import { glslFloat as f } from '../sky/wind.ts';
 
 const LIGHT_INTENSITY = 1.8;
 

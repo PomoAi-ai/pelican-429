@@ -17,7 +17,7 @@
 - 材料为深蓝合金，提供左右安装方向。注册占位宽1×高4；门框实际沿X占半格，Z方向标准占深2，位于Z=[−1,+1]。粒子、辉光和开门时消散的能量不额外扩大建筑占格。
 - 当前门洞净高3.5，顶部0.5用于门框；净空与关闭阻挡由共享门实现生成，不再使用旧图固定3＋1比例。
 - 玩家靠近自动开启、离开自动关闭；关闭前检查人物仍在门内时不合闸。能量屏障开合使用消散与重聚表现，门框保留。
-- 来源：`src/config/residence.ts` 的门资源、`src/render/ai-city-architecture.ts` 的 `createAiCityDoor` 和 `src/sim/residence.ts` 的门碰撞与自动感应。尺寸是当前门型标准，不要求所有未来门型使用相同净高和机构。
+- 来源：`src/config/residence.ts` 的门资源、`src/render/city/ai-city-architecture.ts` 的 `createAiCityDoor` 和 `src/sim/residence.ts` 的门碰撞与自动感应。尺寸是当前门型标准，不要求所有未来门型使用相同净高和机构。
 
 [下载房间与门的最新定义](room-layout-definitions.md)
 

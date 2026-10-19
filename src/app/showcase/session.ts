@@ -3,17 +3,17 @@ import { TUNING } from '../../config/tuning.ts';
 import { DEFAULT_CHARACTER_APPEARANCE } from '../../config/character-appearance.ts';
 import type { ShowcaseCard } from '../../config/showcase.ts';
 import { createResourceScenario } from './resource-scenario.ts';
-import { createResourcePreview } from '../../render/resource-preview.ts';
+import { createResourcePreview } from '../../render/resource/resource-preview.ts';
 import { resolveWaterPalette, DEFAULT_WATER_PALETTE } from '../../config/water-palettes.ts';
 import type { InputFrame } from '../../sim/sim-world.ts';
 import { getPlayer } from '../../sim/sim-world.ts';
-import { createStageView } from '../../render/stage.ts';
+import { createStageView } from '../../render/stage/stage.ts';
 import { createPelicanRig } from '../../render/pelican/pelican-rig.ts';
-import { levelGroundColumns } from '../../render/surface-decor-view.ts';
-import { createWorldViews } from '../../render/world-views.ts';
-import { sharedPrecipUniforms } from '../../render/precip-surface.ts';
-import { createEntityViews } from '../scene-wiring.ts';
-import { createWorldLighting } from '../lighting-wiring.ts';
+import { levelGroundColumns } from '../../render/decor/surface-decor-view.ts';
+import { createWorldViews } from '../../render/stage/world-views.ts';
+import { sharedPrecipUniforms } from '../../render/sky/precip-surface.ts';
+import { createEntityViews } from '../game/game-wiring.ts';
+import { createWorldLighting } from '../game/lighting-wiring.ts';
 import { createShowcaseScenario } from './catalog.ts';
 import { createShowcaseRunner } from './runner.ts';
 import { showcaseEntry } from '../../config/showcase.ts';
@@ -21,8 +21,9 @@ import { createHumanShowcaseSession } from './human-session.ts';
 import { createLumaShowcaseSession } from './luma-session.ts';
 import { createNpcShowcaseSession } from './npc-session.ts';
 import { createLumaCompanion } from '../../render/luma/luma-companion.ts';
-import { DUMMY_HEALTH_LAYER } from '../../render/entity-views.ts';
-import { warmUpStage } from '../../render/warm-up.ts';
+import { DUMMY_HEALTH_LAYER } from '../../render/character/entity-views.ts';
+import { warmUpStage } from '../../render/stage/warm-up.ts';
+import { t } from '../../config/i18n.ts';
 
 function createSceneContent(stage: ReturnType<typeof createStageView>, rig: ReturnType<typeof createPelicanRig>, card: ShowcaseCard, caveBackground: THREE.Texture) {
   const disposers: Array<() => void> = [];
@@ -153,7 +154,7 @@ export function createWorldShowcaseSession(renderer: THREE.WebGLRenderer, card: 
     get ticks() { return content.scenario.elapsedTicks; },
     get duration() { return content.scenario.durationTicks * TUNING.sim.step; },
     get progress() { return Math.min(1, content.scenario.elapsedTicks / content.scenario.durationTicks); },
-    get status() { return content.scenario.status() + (content.runner.complete && !card.manual ? ' · 演示完成' : ''); },
+    get status() { return content.scenario.status() + (content.runner.complete && !card.manual ? ` · ${t('演示完成')}` : ''); },
     reset() {
       content.dispose();
       content = createSceneContent(stage, rig, card, caveBackground);

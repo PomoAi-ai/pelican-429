@@ -7,7 +7,6 @@ export type HarborBuilding = {
 };
 
 export const HARBOR_RIVER = { left: -50, right: 50, near: 2, far: -480, level: -2.8 } as const;
-export const HARBOR_ART_FILES = ['sky.jpg'];
 
 export function createHarborDistrict(): HarborBuilding[] {
   const random = mulberry32(0x48b0a);

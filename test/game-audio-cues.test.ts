@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { GameAudioCues } from '../src/app/game-audio-cues.ts';
+import { GameAudioCues } from '../src/app/audio/game-audio-cues.ts';
 import { ENEMY_RULES } from '../src/config/enemy-rules.ts';
 import { createEnemyEntity, startEnemySkill } from '../src/entities/enemy.ts';
 import { HUMAN_SKILLS } from '../src/config/human-combat.ts';

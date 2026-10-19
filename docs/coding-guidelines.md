@@ -10,7 +10,7 @@
 |------|------|----------|
 | 调参配置 | `validateTuning(TUNING)`（`src/main.ts` 启动时调用） | 校验全部字段，非法值直接抛错 |
 | 网址参数（seed 等） | `parseSeed`、`resolveSettings` | 非法值直接抛错 |
-| localStorage | `src/ui/settings-model.ts` 的 `loadSettings` | 读写失败时告警并使用默认值，原因写在注释里 |
+| localStorage | `src/ui/model/settings-model.ts` 的 `loadSettings` | 读写失败时告警并使用默认值，原因写在注释里 |
 | DOM 事件、键盘鼠标 | `src/input/keyboard-mouse.ts` | 映射为 action，未知按键忽略 |
 | vendor 模型 | `src/vendor/pelican-3d/` | 不修改；在包装层适配 |
 
@@ -41,16 +41,16 @@
 ### 3.1 每帧重复校验内部参数
 
 ```ts
-// src/ui/hud.ts —— 每帧执行
+// src/ui/hud/hud.ts —— 每帧执行
 if (!(Number.isFinite(frameDt) && frameDt >= 0)) throw new Error(`hud: invalid frameDt ${frameDt}`);
 ```
 
-`frameDt` 只来自 `app/frame-loop.ts`，在那里由 rAF 时间戳算出，并已夹到 `[0, TUNING.sim.maxFrameTime]`。HUD 再查一次没有价值。改法：删除这一行。
+`frameDt` 只来自 `app/game/frame-loop.ts`，在那里由 rAF 时间戳算出，并已夹到 `[0, TUNING.sim.maxFrameTime]`。HUD 再查一次没有价值。改法：删除这一行。
 
 ### 3.2 守卫与静默兜底混用
 
 ```ts
-// src/render/water-flora-view.ts
+// src/render/water/water-flora-view.ts
 if (!frame || !frame.fluid || typeof frame.windAt !== 'function') throw new Error('water-flora: fluid and windAt are required');
 const dt = Math.max(0, Math.min(0.25, Number.isFinite(dtIn) ? dtIn : 0));
 ```
@@ -60,7 +60,7 @@ const dt = Math.max(0, Math.min(0.25, Number.isFinite(dtIn) ? dtIn : 0));
 ### 3.3 对已声明类型的参数检查 `typeof`
 
 ```ts
-// src/ui/minimap-model.ts
+// src/ui/model/minimap-model.ts
 function checkPositive(name: string, v: number): void {
   if (typeof v !== 'number' || !Number.isFinite(v) || v <= 0) throw ...
 }
@@ -71,7 +71,7 @@ function checkPositive(name: string, v: number): void {
 ### 3.4 为测试替身写的生产分支
 
 ```ts
-// src/render/precip-sky.ts
+// src/render/sky/precip-sky.ts
 if (!skyTex || !skyCanvas || typeof skyCanvas.getContext !== 'function') return;
 ```
 

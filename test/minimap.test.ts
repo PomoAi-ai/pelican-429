@@ -33,9 +33,9 @@ import {
   waterOver,
   worldToView,
   zoomBigMapAt,
-} from '../src/ui/minimap-model.ts';
-import type { MinimapSource } from '../src/ui/minimap-model.ts';
-import { createMinimap } from '../src/ui/minimap.ts';
+} from '../src/ui/model/minimap-model.ts';
+import type { MinimapSource } from '../src/ui/model/minimap-model.ts';
+import { createMinimap } from '../src/ui/hud/minimap.ts';
 import { createTileMap } from '../src/world/tile-map.ts';
 import type { TileMap } from '../src/world/tile-map.ts';
 import { createFluidMap } from '../src/world/fluid-map.ts';
@@ -704,14 +704,14 @@ describe('minimap DOM', () => {
 describe('minimap 分层', () => {
   const SRC = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../src/ui');
   test('minimap*.ts 不依赖 three/render/vendor/input/sim 运行时；world 运行时仅限纯常量模块', () => {
-    for (const f of ['minimap.ts', 'minimap-model.ts']) {
+    for (const f of ['hud/minimap.ts', 'model/minimap-model.ts']) {
       const code = readFileSync(path.join(SRC, f), 'utf8');
       const specs = [...code.matchAll(/^import\s+(type\s+)?[^'"]*from\s+'([^']+)'/gm)].map((m) => ({ type: Boolean(m[1]), spec: m[2] as string }));
       assert.ok(specs.length > 0);
       for (const { type, spec } of specs) {
         assert.ok(!/three|render|vendor|input|main/.test(spec), `${f} imports ${spec}`);
-        if (!type && spec.startsWith('../world/')) assert.ok(['../world/tile-shapes.ts', '../world/fluid-map.ts'].includes(spec), `${f} runtime-imports ${spec}`);
-        if (!type && spec.startsWith('../sim/')) assert.fail(`${f} runtime-imports ${spec}`);
+        if (!type && spec.startsWith('../../world/')) assert.ok(['../../world/tile-shapes.ts', '../../world/fluid-map.ts'].includes(spec), `${f} runtime-imports ${spec}`);
+        if (!type && spec.startsWith('../../sim/')) assert.fail(`${f} runtime-imports ${spec}`);
       }
     }
   });

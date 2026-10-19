@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { loadStorySave, saveStory } from '../src/app/story-save.ts';
+import { loadStorySave, saveStory } from '../src/app/story/story-save.ts';
 import { STORY_SAVE_KEY } from '../src/config/story-save.ts';
 import { captureMainlineProgress } from '../src/sim/mainline-progress.ts';
 import { initializeMainline, mainlineCheckpoint } from '../src/sim/mainline.ts';

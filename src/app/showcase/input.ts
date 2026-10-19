@@ -9,24 +9,25 @@ export function createShowcaseInput(activeSurface: () => HTMLElement | null) {
   const listeners: Array<() => void> = [];
   let current: HTMLElement | null = null;
   const pointer = { x: 0, y: 0, inside: false };
-  const on = <K extends keyof WindowEventMap>(type: K, handler: (event: WindowEventMap[K]) => void): void => {
-    window.addEventListener(type, handler);
-    listeners.push(() => window.removeEventListener(type, handler));
+  const on = <K extends keyof WindowEventMap>(type: K, handler: (event: WindowEventMap[K]) => void, capture = false): void => {
+    window.addEventListener(type, handler, capture);
+    listeners.push(() => window.removeEventListener(type, handler, capture));
   };
   const focused = (): HTMLElement | null => {
     const surface = activeSurface();
     return surface && document.activeElement === surface ? surface : null;
   };
+  // 画面在面板的 React 根内，KeyFence 截断冒泡，按键只能在 window 捕获阶段收到。
   on('keydown', (event) => {
     if (!focused() || event.ctrlKey || event.metaKey || event.altKey) return;
     const action = lookup.keys.get(event.code);
     if (!action) return;
     event.preventDefault(); tracker.press(action, 'keyboard', event.code);
-  });
+  }, true);
   on('keyup', (event) => {
     const action = lookup.keys.get(event.code);
     if (action) tracker.release(action, event.code);
-  });
+  }, true);
   on('mousedown', (event) => {
     const surface = activeSurface();
     if (!surface || !(event.target instanceof Node) || !surface.contains(event.target)) return;

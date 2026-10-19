@@ -4,6 +4,7 @@ import { NEUTRAL_INPUT } from '../../entities/pelican-controller.ts';
 import { getPlayer } from '../../sim/sim-world.ts';
 import { placeBody } from './scenario.ts';
 import type { ScenarioContext, ScenarioDriver } from './scenario.ts';
+import { t } from '../../config/i18n.ts';
 
 export function prepareFish(ctx: ScenarioContext): ScenarioDriver {
   const { world, groundY, entry, facing } = ctx;
@@ -27,6 +28,6 @@ export function prepareFish(ctx: ScenarioContext): ScenarioDriver {
     focus: () => ({ x: fish.body.x, y: fish.body.y + fish.body.height * 0.5 }),
     height: 2.5,
     width: 2.5,
-    status: () => `${species.name} · ${{ swim: '自由游动', flee: '受惊逃离', stranded: '搁浅扑腾', dead: '演示结束' }[fish.state]}`,
+    status: () => `${t(species.name)} · ${t({ swim: '自由游动', flee: '受惊逃离', stranded: '搁浅扑腾', dead: '演示结束' }[fish.state])}`,
   };
 }

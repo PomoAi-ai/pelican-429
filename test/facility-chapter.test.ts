@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { loadGameLevel } from '../src/app/game-level.ts';
+import { loadGameLevel } from '../src/app/game/game-level.ts';
 import { FACILITY_CHAPTERS, parseFacilityChapter } from '../src/config/facility-scenes.ts';
 import type { FacilityChapterId } from '../src/config/facility-scenes.ts';
 import type { PlayerForm } from '../src/config/player-form.ts';

@@ -1,6 +1,6 @@
 import { RESIDENCE_RESOURCES } from '../src/config/residence.ts';
-import { createResourceThumbnailRenderer } from '../src/render/resource-thumbnail.ts';
-import { generateTileTextures, tileLayerIndex } from '../src/render/tile-textures.ts';
+import { createResourceThumbnailRenderer } from '../src/render/resource/resource-thumbnail.ts';
+import { generateTileTextures, tileLayerIndex } from '../src/render/tile/tile-textures.ts';
 
 /** 在 Vite 页面导入并调用，将返回的 PNG data URL 按文件名保存到 public/concepts/material-previews/。 */
 export async function exportMaterialPreviews(): Promise<Record<string, string>> {

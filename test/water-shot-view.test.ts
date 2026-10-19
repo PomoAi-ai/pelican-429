@@ -6,9 +6,9 @@ import * as THREE from 'three';
 import { TUNING } from '../src/config/tuning.ts';
 import { createProjectileEntity } from '../src/entities/projectile.ts';
 import type { Entity } from '../src/entities/entity.ts';
-import { injectLightMap, isLightMappable } from '../src/render/light-texture.ts';
-import type { LightMapUniforms } from '../src/render/light-texture.ts';
-import { WATER_JELLY, WATER_SHOT_MAX_ASPECT, createProjectileViews, waterShotScale } from '../src/render/projectile-views.ts';
+import { injectLightMap, isLightMappable } from '../src/render/stage/light-texture.ts';
+import type { LightMapUniforms } from '../src/render/stage/light-texture.ts';
+import { WATER_JELLY, WATER_SHOT_MAX_ASPECT, createProjectileViews, waterShotScale } from '../src/render/fx/projectile-views.ts';
 
 const DT = 1 / 60;
 

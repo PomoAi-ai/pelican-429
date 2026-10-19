@@ -2,8 +2,8 @@ import * as THREE from 'three';
 import { FullScreenQuad } from 'three/addons/postprocessing/Pass.js';
 import { TUNING } from '../../config/tuning.ts';
 import { CHARACTER_STAGE_LOOK, characterStageSunDirection, characterStageFraming } from '../../config/character-stage-look.ts';
-import { createStageView } from '../stage.ts';
-import { compileForStage } from '../warm-up.ts';
+import { createStageView } from '../stage/stage.ts';
+import { compileForStage } from '../stage/warm-up.ts';
 
 /** 各发型顺序共用正式游戏灯光与后期，避免每张卡片占一套渲染目标。 */
 export function createD1HairGameStage(renderer: THREE.WebGLRenderer) {

@@ -15,7 +15,7 @@ export function createShowcaseRunner(scenario: ShowcaseScenario) {
     get complete() { return scenario.elapsedTicks >= scenario.durationTicks; },
     advance(elapsed: number, speed: number, playing: boolean, manual: (() => InputFrame) | null, aim?: Vec2): number {
       if (!playing || (!manual && scenario.elapsedTicks >= scenario.durationTicks)) return 0;
-      const dt = Math.min(elapsed, TUNING.sim.maxFrameTime) * speed;
+      const dt = elapsed * speed;
       alpha = stepper.advance(dt, () => {
         if (manual || scenario.elapsedTicks < scenario.durationTicks) scenario.step(manual ? manual() : undefined, aim);
       });

@@ -1,6 +1,6 @@
 # AGENTS.md
 
-鹈鹕 429：横版瓦片世界动作游戏，逻辑为 2D，用 TypeScript 编写，three.js 渲染，Vite 构建，`node --test` 测试。游戏渲染依赖 `three`；基础概念页面通过 `marked` 渲染同源 Markdown，转换器仅由 `ui/concept-markdown.ts` 引入。
+鹈鹕 429：横版瓦片世界动作游戏，逻辑为 2D，用 TypeScript 编写，three.js 渲染，Vite 构建，`node --test` 测试。游戏渲染依赖 `three`；站点外壳与低频面板用 React + Base UI（`@base-ui/react`）；基础概念页面通过 `marked` 渲染同源 Markdown，转换器仅由 `ui/site/concept-markdown.ts` 引入。
 
 在本仓库内，测试与验证的范围以本文件为准；通用 skill 或全局规则中“多写测试”“每步都验证”一类要求，以本文件的收敛版本执行。
 
@@ -12,11 +12,12 @@
 ## 命令
 
 ```sh
-npm run dev         # 开发服务器 127.0.0.1:5174
+npm run dev         # 开发服务器 127.0.0.1:5174，开发页（render-lab.html 等）同端口
 npm run typecheck   # tsc --noEmit
 node --test test/<文件>.test.ts   # 单个测试文件，约 1 秒
 npm test            # 全量测试，约 60 秒
-npm run build
+npm run build       # 发布构建，只含 index.html
+npm run build:full  # 含全部开发页，输出 dist-full
 ```
 
 本地测试只用内存夹具，不访问网络和外部服务。可以直接运行；修复由本次改动引起的失败，然后重跑受影响的测试，不需要每一步都请示。
@@ -26,6 +27,11 @@ npm run build
 - `src/core`、`src/config`：基础工具与调参。启动时由 `config/tuning.ts` 的 `validateTuning` 校验全部配置。
 - 逻辑层 `world → physics → combat → entities → sim`：只能向左依赖，不使用 three、DOM、`Date`、`Math.random`（随机数用 `core/rng.ts`），这样才能保证同一种子生成同一世界。
 - `src/render`、`src/ui`、`src/input`、`src/app`、`src/main.ts`：表现与装配。
+  - `src/app` 按子应用分目录（game、story、workspace、showcase、transit、residence…），`app/shell` 放路由与 `PageContext`；`src/render` 按主题分目录（tile、water、flora、grassy、webgpu…）。
+  - 入口统一为 `mountX(ctx: PageContext)`，清理登记到 `ctx.onDispose`，不自行监听 `pagehide`。
+  - `src/ui`：`react` 挂载与基础设施，`controls` 封装 Base UI 控件，`site` 站点页，`panels` 低频面板，`hud` 每帧更新的原生 HUD，`model` 纯逻辑（.ts），`styles` 主题与基础样式。
+  - React、Base UI 与 `.tsx` 只出现在 `src/ui`。测试导入链不得触达 `.tsx`、`.css`，需要测试的逻辑放 `ui/model`。
+  - 样式：`ui/styles/theme.css`、`base.css` 由 HTML link；其余 CSS 由使用它的模块 import（组件 CSS 由 .tsx，原生 HUD CSS 由装配它的 app 入口）。
 - `src/vendor/pelican-3d`：外部模型快照，不修改，由 `test/vendor-integrity.test.ts` 校验。需要适配时改包装层。
 - 分层规则由 `test/architecture.test.ts` 强制执行。
 - `task/` 下的 PLAN/REVIEW 是历史记录，其中的约束不自动适用于新任务；当前任务以用户最新的要求为准。
@@ -41,6 +47,7 @@ npm run build
 - 生产代码不为测试替身增加分支，应该修改替身。
 - 只改任务涉及的代码。发现的其他问题写进汇报，不顺手修复。
 - 注释写“为什么”，不写任务编号和修改历史，历史由 git 记录。
+- 界面文案一律 `t('中文原文')`（`config/i18n.ts`），译文按领域写入 `config/i18n/*.ts`。同形异义用语境 `t(原文, scope)`（词条 `'scope:原文'`），带变量用占位符 `t('与 {name} 交谈').replace('{name}', …)`。英文缺词时 `t()` 抛错。配置里的中文显示数据在显示处调用 `t()`；新增显示数据要补译文，并加入 `test/language.test.ts` 的覆盖用例。
 
 ## 展示场与资源复用
 

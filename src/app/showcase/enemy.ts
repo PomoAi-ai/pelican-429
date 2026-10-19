@@ -7,6 +7,7 @@ import { addEntity, getPlayer } from '../../sim/sim-world.ts';
 import { entityFocus, placeBody } from './scenario.ts';
 import type { ScenarioContext, ScenarioDriver } from './scenario.ts';
 import { DRONE_APPEARANCES } from '../../config/drone-appearance.ts';
+import { t } from '../../config/i18n.ts';
 
 export function prepareEnemy(ctx: ScenarioContext): ScenarioDriver {
   const { world, entry, groundY, facing } = ctx;
@@ -49,6 +50,6 @@ export function prepareEnemy(ctx: ScenarioContext): ScenarioDriver {
     focus: () => combat ? { x: (enemy.body.x + player.body.x) / 2, y: groundY + 1.6 } : entityFocus(enemy),
     width: combat ? Math.abs(distance) + 5 : 5.5,
     height: kind === 'watchWasp' || combat ? 6 : 4.5,
-    status: () => enemy.removed ? '已清除' : `${cfg.name} · ${enemy.attack ? `${enemy.attack.def.id === cfg.skills[0].id ? cfg.skills[0].name : cfg.skills[1].name} · ${attackPhase(enemy.attack) === 'startup' ? '准备' : attackPhase(enemy.attack) === 'active' ? '攻击' : '收招'}` : enemy.health!.hitstunTicks > 0 ? '受击' : entry.label} · ${enemy.health!.hp} / ${enemy.health!.maxHp} HP`,
+    status: () => enemy.removed ? t('已清除') : `${t(cfg.name)} · ${enemy.attack ? `${t(enemy.attack.def.id === cfg.skills[0].id ? cfg.skills[0].name : cfg.skills[1].name)} · ${t(attackPhase(enemy.attack) === 'startup' ? '准备' : attackPhase(enemy.attack) === 'active' ? '攻击' : '收招')}` : t(enemy.health!.hitstunTicks > 0 ? '受击' : entry.label)} · ${enemy.health!.hp} / ${enemy.health!.maxHp} HP`,
   };
 }

@@ -4,6 +4,7 @@ import { setShooterEnabled } from '../../entities/enemy-shooter.ts';
 import { addEntity, getPlayer } from '../../sim/sim-world.ts';
 import { entityFocus, placeBody } from './scenario.ts';
 import type { ScenarioContext, ScenarioDriver } from './scenario.ts';
+import { t } from '../../config/i18n.ts';
 
 export function prepareDummy(ctx: ScenarioContext): ScenarioDriver {
   const { world, entry, groundY, facing } = ctx;
@@ -24,6 +25,6 @@ export function prepareDummy(ctx: ScenarioContext): ScenarioDriver {
     focus: () => entityFocus(dummy),
     height: 5,
     width: action === 'shoot' ? 13 : 5,
-    status: () => dummy.dummy!.resetPending ? '生命归零 · 等待归位' : dummy.health!.hitstunTicks > 0 ? '受击 / 击退' : `${dummy.health!.hp} / ${dummy.health!.maxHp} HP`,
+    status: () => dummy.dummy!.resetPending ? t('生命归零 · 等待归位') : dummy.health!.hitstunTicks > 0 ? t('受击 / 击退') : `${dummy.health!.hp} / ${dummy.health!.maxHp} HP`,
   };
 }

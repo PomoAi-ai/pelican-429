@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { createDroneLocomotion, separateDrones, updateDroneLocomotion, type DroneGroundAt } from '../src/ui/drone-locomotion.ts';
+import { createDroneLocomotion, separateDrones, updateDroneLocomotion, type DroneGroundAt } from '../src/ui/model/drone-locomotion.ts';
 import { terrainHeightAt } from '../src/physics/tile-collision.ts';
 import { createTileMap } from '../src/world/tile-map.ts';
 import { DEFAULT_TILES, TILE_STONE } from '../src/world/tile-types.ts';

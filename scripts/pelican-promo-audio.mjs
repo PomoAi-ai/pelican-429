@@ -1,4 +1,4 @@
-import { FortressScore } from '../src/app/fortress-score.ts';
+import { FortressScore } from '../src/app/audio/fortress-score.ts';
 import { FORTRESS_BEAT } from '../src/config/game-audio.ts';
 
 /** 在视频时间轴上离线渲染游戏原声，不受录制机器的实时帧率影响。 */

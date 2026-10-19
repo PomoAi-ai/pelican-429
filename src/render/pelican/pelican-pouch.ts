@@ -8,8 +8,8 @@
 // A live fish (state.wriggle) shows two ways: lumps run back and forth over the sac skin, and the cartoon fish
 // (render/cartoon-fish.ts) sits in the bill with its tail poking out of the tip (state.tailOut), flapping.
 import * as THREE from 'three';
-import { createCartoonFishKit, fishWiggle } from '../cartoon-fish.ts';
-import type { CartoonFish, FishPose, FishVariantRelay } from '../cartoon-fish.ts';
+import { createCartoonFishKit, fishWiggle } from '../fx/cartoon-fish.ts';
+import type { CartoonFish, FishPose, FishVariantRelay } from '../fx/cartoon-fish.ts';
 import type { PouchContent, PouchState } from './pelican-attack-layer.ts';
 
 /** Bird-space sac at rest: centre and radii (inside the painted pouch). */

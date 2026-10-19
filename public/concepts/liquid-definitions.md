@@ -150,8 +150,8 @@
 - `src/physics/fluid-contact.ts`：身体浸没查询。
 - `src/entities/pelican-controller.ts`、`src/sim/player-breath.ts`：水中运动与呼吸交互。
 - `src/sim/sim-world.ts`：独立的要塞冷却液危险区域伤害。
-- `src/render/water-view.ts`、`src/render/water-shading.ts`：水面几何、当前深度与视觉延伸、材质。
-- `src/render/tile-geometry.ts`：地形前后沿与倒角。
+- `src/render/water/water-view.ts`、`src/render/water/water-shading.ts`：水面几何、当前深度与视觉延伸、材质。
+- `src/render/tile/tile-geometry.ts`：地形前后沿与倒角。
 - `src/config/water-palettes.ts`：现有水色板。
 
 阅读和后续实现时，先区分“已有行为”“本次设计深度”和“未实现限制”。不因画出完整水体就要求新增液体种类、压力、浮体或闸门系统。

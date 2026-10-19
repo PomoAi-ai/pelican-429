@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { injectAfter } from '../tile-material.ts';
+import { injectAfter } from '../tile/tile-material.ts';
 import { patchStudySurface, studyParameters, type StudySource, type StudySurface } from './d1-study-surface.ts';
 
 /** 笔触固定在模型表面，镜头运动时不会像屏幕噪点一样滑动。 */

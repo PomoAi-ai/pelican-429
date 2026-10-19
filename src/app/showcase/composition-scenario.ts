@@ -2,10 +2,11 @@ import type { ShowcaseCard } from '../../config/showcase.ts';
 import { TERRAIN_COMPOSITIONS } from '../../config/terrain-compositions.ts';
 import { TUNING } from '../../config/tuning.ts';
 import { NEUTRAL_INPUT } from '../../entities/pelican-controller.ts';
-import { resourceEntry } from '../../render/resource-catalog.ts';
+import { resourceEntry } from '../../render/resource/resource-catalog.ts';
 import { createSimWorld, stepSim } from '../../sim/sim-world.ts';
 import { createTerrainCompositionLevel } from '../../world/terrain-compositions.ts';
 import type { ShowcaseScenario } from './scenario.ts';
+import { t } from '../../config/i18n.ts';
 
 export function createCompositionScenario(card: ShowcaseCard): ShowcaseScenario {
   const options = card.resource!;
@@ -22,7 +23,7 @@ export function createCompositionScenario(card: ShowcaseCard): ShowcaseScenario 
     get elapsedTicks() { return ticks; },
     step(input = NEUTRAL_INPUT) { stepSim(world, input); ticks++; },
     focus: () => ({ x: frame.x, y: frame.y }),
-    status: () => `${definition.label} · Seed ${options.seed}`,
+    status: () => `${t(definition.label)} · Seed ${options.seed}`,
     dispose() { level.fluid.dispose(); },
   };
 }

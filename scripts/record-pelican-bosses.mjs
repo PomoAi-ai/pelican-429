@@ -41,7 +41,7 @@ try {
     await page.route('**/@vite/client', route => route.fulfill({ contentType: 'text/javascript', body: '' }));
     let rejectRoute;
     const routeFailed = new Promise((_,reject) => { rejectRoute=reject; });
-    await page.route('**/src/app/game-app.ts*', async route => {
+    await page.route('**/src/app/game/game-app.ts*', async route => {
       try {
         const response = await route.fetch();
         let body = await response.text();

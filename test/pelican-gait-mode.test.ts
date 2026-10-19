@@ -8,7 +8,7 @@ import type { GaitFrame, GaitMode } from '../src/render/pelican/pelican-gait.ts'
 import { TUNING } from '../src/config/tuning.ts';
 import { DT, GEO, T, drive, range, steadyCounts, steadyFrames, worldSole } from './helpers/gait-drive.ts';
 import { createPelicanAnimator, DEFAULT_PELICAN_ANIM_TUNING } from '../src/render/pelican/pelican-animator.ts';
-import { fillPelicanAnimInput } from '../src/render/entity-views.ts';
+import { fillPelicanAnimInput } from '../src/render/character/entity-views.ts';
 import { input as animInput } from './helpers/pelican-fixtures.ts';
 import { LEVEL_LEGEND, parseLevel } from '../src/world/test-level.ts';
 import { computeSurface } from '../src/world/level.ts';

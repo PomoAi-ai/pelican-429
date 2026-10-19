@@ -14,7 +14,7 @@
 
 世界与试玩范围：`README.md`
 经济与生存草案：`docs/economy.md`
-构件尺寸与形态：`src/config/building-kit.ts` · `src/render/building-kit.ts`
+构件尺寸与形态：`src/config/building-kit.ts` · `src/render/building/building-kit.ts`
 当前家园数值与行为：`src/config/homestead.ts` · `src/sim/homestead.ts` · `src/sim/homestead-economy.ts`
 场景与地形：`src/config/scene-demos.ts` · `src/config/facility-scenes.ts` · `src/world/tile-shapes.ts`
 原图：`assets/characters/grassy/customization/female/concepts/d1-no-gear/individual/`

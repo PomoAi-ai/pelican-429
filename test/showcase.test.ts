@@ -195,9 +195,9 @@ test('假人实际受击归零后恢复生命，小鱼从搁浅恢复游动', ()
 });
 
 // 资源预览和角色预览共用容量与独立卡片状态。
-import { createShowcaseModel } from '../src/ui/showcase-model.ts';
+import { createShowcaseModel } from '../src/ui/model/showcase-model.ts';
 import { CHARACTER_CATALOG } from '../src/config/showcase.ts';
-import { readCharacterStageLocation, writeCharacterStageLocation } from '../src/ui/character-stage-location.ts';
+import { readCharacterStageLocation, writeCharacterStageLocation } from '../src/ui/model/character-stage-location.ts';
 
 test('切换贴图档位的链接保留多个角色、形态动作、暂停和镜头', () => {
   const model = createShowcaseModel();
@@ -220,9 +220,9 @@ test('切换贴图档位的链接保留多个角色、形态动作、暂停和�
   assert.deepEqual(readCharacterStageLocation(params, CHARACTER_CATALOG), { ...view, cards: [] });
 });
 import { FISH_SPECIES, fishSpeciesIndex } from '../src/config/fish-appearance.ts';
-import { RESOURCE_CATALOG } from '../src/render/resource-catalog.ts';
+import { RESOURCE_CATALOG } from '../src/render/resource/resource-catalog.ts';
 import { createResourceScenario } from '../src/app/showcase/resource-scenario.ts';
-import { loadGameLevel } from '../src/app/game-level.ts';
+import { loadGameLevel } from '../src/app/game/game-level.ts';
 
 test('组合卡和游戏入口生成相同地形、形状、水体与树平台', () => {
   const model = createShowcaseModel(LAB_CATALOG);
@@ -402,7 +402,7 @@ test('地面单格保留承托地面，只在地表上放一块所选形状的�
   }
 });
 
-import { LAB_CATALOG } from '../src/render/resource-catalog.ts';
+import { LAB_CATALOG } from '../src/render/resource/resource-catalog.ts';
 
 test('同形单格的自然样本使用不同游戏坐标，悬空和贴地可重复配对', () => {
   const model = createShowcaseModel(RESOURCE_CATALOG);

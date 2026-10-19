@@ -10,8 +10,9 @@ import { createGrassyRig, loadGrassyAsset } from '../../render/grassy/grassy-rig
 import type { GrassyRig } from '../../render/grassy/grassy-rig.ts';
 import { animateGrassy } from '../../render/grassy/grassy-animator.ts';
 import { DEFAULT_PELICAN_ANIM_TUNING } from '../../render/pelican/pelican-animator.ts';
-import { createStageView } from '../../render/stage.ts';
+import { createStageView } from '../../render/stage/stage.ts';
 import type { InputFrame } from '../../sim/sim-world.ts';
+import { t } from '../../config/i18n.ts';
 
 /** 模型与骨骼动作来自共享资源；展示场只管理版本、播放时间、灯光与镜头。 */
 export function createHumanShowcaseSession(renderer: THREE.WebGLRenderer, card: ShowcaseCard) {
@@ -99,8 +100,8 @@ export function createHumanShowcaseSession(renderer: THREE.WebGLRenderer, card: 
     get duration() { return duration(); },
     get progress() { return model ? rig ? Math.min(1, time / duration()) : 1 : 0; },
     get status() {
-      if (!model) return `${entry.label} · 正在加载模型…`;
-      return `${entry.label} · ${rig ? time >= duration() ? '演示完成' : '骨骼动画' : '静态'} · ${GRASSY_HEIGHT} 格`;
+      if (!model) return `${t(entry.label)} · ${t('正在加载模型…')}`;
+      return `${t(entry.label)} · ${t(rig ? time >= duration() ? '演示完成' : '骨骼动画' : '静态')} · ${t(`${GRASSY_HEIGHT} 格`)}`;
     },
     get needsReset() { return revision !== card.revision; },
     reset,
@@ -110,7 +111,7 @@ export function createHumanShowcaseSession(renderer: THREE.WebGLRenderer, card: 
       viewYaw += Math.atan2(Math.sin(card.modelYaw - viewYaw), Math.cos(card.modelYaw - viewYaw)) * blend;
       viewPitch += (card.modelPitch - viewPitch) * blend;
       if (!rig || !entry.grassyAnimation || !playing || time >= duration()) return 0;
-      const dt = Math.min(Math.min(elapsed, TUNING.sim.maxFrameTime) * card.speed, duration() - time);
+      const dt = Math.min(elapsed * card.speed, duration() - time);
       time += dt;
       animate(dt);
       return dt;

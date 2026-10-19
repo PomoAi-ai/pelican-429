@@ -3,14 +3,14 @@ import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
 
 import * as THREE from 'three';
-import { DESERT_KINDS, createDesertParts } from '../src/render/desert-geometry.ts';
-import { RIB_DEPTH, SPINE_SCALE } from '../src/render/desert-plant-parts.ts';
-import { FLORA_SPECIES, createFloraEnv, planFlora } from '../src/render/flora.ts';
-import type { FloraSite } from '../src/render/flora.ts';
-import { ROCK_AO, ROCK_KINDS, ROCK_NATIVE, createRockAoGeometry, createRockAoMaterial, createRockParts } from '../src/render/rock-geometry.ts';
-import { ROCK_PROGRAM_KEY, ROCK_SHADER_INJECTIONS, ROCK_SHADER_PARAMS } from '../src/render/rock-material.ts';
-import { SAND_DUST_MAX, SAND_DUST_RULES, createSandDustFx } from '../src/render/sand-dust-fx.ts';
-import type { SandDustFrame } from '../src/render/sand-dust-fx.ts';
+import { DESERT_KINDS, createDesertParts } from '../src/render/decor/desert-geometry.ts';
+import { RIB_DEPTH, SPINE_SCALE } from '../src/render/flora/desert-plant-parts.ts';
+import { FLORA_SPECIES, createFloraEnv, planFlora } from '../src/render/flora/flora.ts';
+import type { FloraSite } from '../src/render/flora/flora.ts';
+import { ROCK_AO, ROCK_KINDS, ROCK_NATIVE, createRockAoGeometry, createRockAoMaterial, createRockParts } from '../src/render/decor/rock-geometry.ts';
+import { ROCK_PROGRAM_KEY, ROCK_SHADER_INJECTIONS, ROCK_SHADER_PARAMS } from '../src/render/decor/rock-material.ts';
+import { SAND_DUST_MAX, SAND_DUST_RULES, createSandDustFx } from '../src/render/fx/sand-dust-fx.ts';
+import type { SandDustFrame } from '../src/render/fx/sand-dust-fx.ts';
 import {
   BIG_ROCKS,
   LANDMARK_ROCKS,
@@ -25,9 +25,9 @@ import {
   rockGrassClearance,
   rockGroupInstances,
   rockHabitat,
-} from '../src/render/surface-decor.ts';
-import type { DecorEnv, DecorGround } from '../src/render/surface-decor.ts';
-import { TILE_SHADER_INJECTIONS, TILE_SHADER_PARAMS } from '../src/render/tile-material.ts';
+} from '../src/render/decor/surface-decor.ts';
+import type { DecorEnv, DecorGround } from '../src/render/decor/surface-decor.ts';
+import { TILE_SHADER_INJECTIONS, TILE_SHADER_PARAMS } from '../src/render/tile/tile-material.ts';
 import { SHAPE_FULL } from '../src/world/tile-shapes.ts';
 import type { DesertInfo } from '../src/world/level.ts';
 

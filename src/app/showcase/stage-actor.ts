@@ -10,8 +10,8 @@ import { showcaseEntry } from '../../config/showcase.ts';
 import type { ShowcaseCard, ShowcaseEntry } from '../../config/showcase.ts';
 import { TUNING } from '../../config/tuning.ts';
 import type { Vec2 } from '../../core/math.ts';
-import { loadEnemyAsset } from '../../render/enemy-rig.ts';
-import { createFishView } from '../../render/fish-view.ts';
+import { loadEnemyAsset } from '../../render/character/enemy-rig.ts';
+import { createFishView } from '../../render/water/fish-view.ts';
 import { loadGrassyAsset } from '../../render/grassy/grassy-rig.ts';
 import { createGrassyStaticModel, loadGrassyStaticAsset } from '../../render/grassy/grassy-static.ts';
 import { createD1Rig, loadD1Asset } from '../../render/grassy/d1-rig.ts';
@@ -24,15 +24,16 @@ import { createLumaUltimate } from '../../render/luma/luma-ultimate.ts';
 import { createNpcTransformation, loadNpcForms } from '../../render/npc/npc-transformation.ts';
 import { createNpcTargets } from '../../render/npc/npc-targets.ts';
 import { createPelicanRig } from '../../render/pelican/pelican-rig.ts';
-import { createSizeRuler, RULER_TILES } from '../../render/size-ruler.ts';
+import { createSizeRuler, RULER_TILES } from '../../render/stage/size-ruler.ts';
 import { getPlayer } from '../../sim/sim-world.ts';
-import { BossScore } from '../boss-audio.ts';
-import { createEntityViews } from '../scene-wiring.ts';
+import { BossScore } from '../audio/boss-audio.ts';
+import { createEntityViews } from '../game/game-wiring.ts';
 import { createShowcaseScenario } from './catalog.ts';
 import { createShowcaseRunner } from './runner.ts';
 import { createLumaProjectilePreview } from './luma-projectile-preview.ts';
-import { loadFlyingRoadsterAsset } from '../../render/flying-roadster-view.ts';
+import { loadFlyingRoadsterAsset } from '../../render/character/flying-roadster-view.ts';
 import { createFlyingRoadsterActor } from './flying-roadster-actor.ts';
+import { t } from '../../config/i18n.ts';
 
 export interface StageActor {
   readonly root: THREE.Group;
@@ -73,7 +74,7 @@ export async function createStageActor(card: ShowcaseCard, isCurrent: () => bool
     return {
       root, anchor: new THREE.Vector3(0, GRASSY_HEIGHT + .4, 0),
       framing: { x: 0, y: GRASSY_HEIGHT / 2, width: 3.2, height: GRASSY_HEIGHT },
-      ready: true, complete: false, progress: 0, status: `${entry.label} · 静态模型，尚未绑定`,
+      ready: true, complete: false, progress: 0, get status() { return `${t(entry.label)} · ${t('静态模型，尚未绑定')}`; },
       update: sample, reset: sample,
       dispose() { model.dispose(); root.removeFromParent(); },
     };
@@ -98,7 +99,7 @@ function createRulerActor(): StageActor {
   return {
     root: ruler.root, anchor: new THREE.Vector3(0, RULER_TILES + .4, 0),
     framing: { x: 0, y: RULER_TILES / 2, width: 2, height: RULER_TILES },
-    ready: true, complete: false, progress: 0, status: '标尺 · 1 格 = 1 世界单位',
+    ready: true, complete: false, progress: 0, get status() { return t('标尺 · 1 格 = 1 世界单位'); },
     update() {}, reset() {},
     dispose: ruler.dispose,
   };
@@ -122,11 +123,11 @@ function createD1Actor(card: ShowcaseCard, entry: ShowcaseEntry): StageActor {
     framing: { x: 0, y: 2, width: 3.2, height: 4 }, ready: true,
     get complete() { return time >= duration; },
     get progress() { return time / duration; },
-    get status() { return `D1 · ${entry.label} · ${time >= duration ? '演示完成' : '骨骼动画'}`; },
+    get status() { return `D1 · ${t(entry.label)} · ${t(time >= duration ? '演示完成' : '骨骼动画')}`; },
     update(elapsed) {
       rotate();
       if (!card.playing || time >= duration) return;
-      const dt = Math.min(Math.min(elapsed, TUNING.sim.maxFrameTime) * card.speed, duration - time);
+      const dt = Math.min(elapsed * card.speed, duration - time);
       time += dt;
       rig.update(dt);
     },
@@ -268,11 +269,11 @@ export function createLumaActor(card: ShowcaseCard): StageActor {
     root, anchor, framing: ultimate ? { x: 0, y: 4.5, width: 28, height: 12 } : { x: 0, y: 1.1, width: 2.8, height: 2.6 }, ready: true,
     get complete() { return time >= action.seconds; },
     get progress() { return time / action.seconds; },
-    get status() { return `光子 · ${action.label}`; },
+    get status() { return `${t('光子')} · ${t(action.label)}`; },
     update(elapsed) {
       sample();
       if (!card.playing || time >= action.seconds) return;
-      const dt = Math.min(Math.min(elapsed, TUNING.sim.maxFrameTime) * card.speed, action.seconds - time);
+      const dt = Math.min(elapsed * card.speed, action.seconds - time);
       const previous = time;
       time += dt; sample();
       if (ultimate) {
@@ -339,13 +340,13 @@ function createNpcActor(card: ShowcaseCard, kind: NpcKind, entry: ShowcaseEntry,
         && transformationRevision === card.npcTransformationRevision;
     },
     get progress() { return time / duration; },
-    get status() { return `${npcModel(kind, rig.form).label} · ${time >= duration ? '演示完成' : action.label}`; },
+    get status() { return `${t(npcModel(kind, rig.form).label)} · ${t(time >= duration ? '演示完成' : action.label)}`; },
     update(elapsed) {
       if (action.id !== showcaseEntry(card.entryId).action || revision !== card.revision) reset();
       rig.setForm(showcaseEntry(card.entryId).npcForm!);
       if (transformationRevision !== card.npcTransformationRevision) rig.replay();
       transformationRevision = card.npcTransformationRevision;
-      const dt = card.playing ? Math.min(elapsed, TUNING.sim.maxFrameTime) * card.speed : 0;
+      const dt = card.playing ? elapsed * card.speed : 0;
       if (!card.playing || time >= duration) stopAudio();
       else if (soundEnabled && audioContext?.state === 'running' && (!audioPlaying || audioSpeed !== card.speed)) {
         stopAudio(); score!.schedule(kind, action.id, audioContext.currentTime, card.speed, time);

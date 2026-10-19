@@ -62,14 +62,14 @@
 
 | 项目 | 做法 | 位置 |
 |---|---|---|
-| 层距 | `DEEP_DISTANCE` 覆盖 `DEPTH_LAYERS` 的距离，只在景深 G 下生效 | `src/app/definition-depth-layout.ts` `DEEP_DISTANCE` |
+| 层距 | `DEEP_DISTANCE` 覆盖 `DEPTH_LAYERS` 的距离，只在景深 G 下生效 | `src/app/perspective/definition-depth-layout.ts` `DEEP_DISTANCE` |
 | 远景保持构图 | 三层远景推远后按 (D − 新距离) ÷ (D − 原距离) 放大，绕 (24, 4) 缩放，走动时移动变慢；两层背景格子保持真实格子尺寸，不放大。补偿按固定 D = 30、中心 (24, 4) 计算，只在参考镜头附近近似保持构图；本页跟随镜头的实际距离随画布高度变化，全览镜头另有取景，都不是严格不变 | 同文件 `SCENERY_LAYERS`、`SCENERY_PIVOT`、`setLayering` |
 | 距离雾 | three 的线性雾按 smoothstep 计算，玩法平面后几格内几乎为零。改为对环境材质注入指数雾：雾量 = 1 − 2^(−距离 ÷ 25)，上限 0.65；背景格子一约 18%，背景格子二约 36%，近林约 62%，约 37.6 格后封顶。三层远景山脊（−35 / −70 / −140 的 `createBackdrop` 山体）全部 `fog: false`，不吃这层雾；所以同一层里普通物体和山脊的明暗关系取决于原色、雾色、光照和调色，0.65 上限不能保证远处地形一定比身后的山更深。注入在创建检查视图之前完成，线框、半透明替代材质克隆时会沿用 | 同文件 `HAZE_FRAGMENT`、`HAZE_HALF_DISTANCE`、`HAZE_MAX`、`haze()` |
 | 雾与前景单独模糊只在正面镜头下开 | 侧看、俯视、绕到背后时视线不垂直于各层：按视深算雾会罩住整个场景，单独合成的前景也没有主场景深度、会错误盖在最上面。视线 z 分量 < −0.95 才启用，否则前景回到普通渲染 | 同文件 `update()` 的 `separate` |
-| 前景模糊 | 前景物体同时在渲染层 0 和层 2（层 1 已被训练假人血条占用）。主渲染里前景照常进入阴影贴图，但绘制时临时关掉颜色和深度写入（`onBeforeRender` / `onAfterRender` 只在这次绘制前后切换，共享材质不受影响），所以不重复出现又不丢投影；`stage.render()` 之后用层 2 把前景单独渲染到半分辨率缓冲，横、竖两遍 15 采样高斯模糊，压暗 18%（`uShade = .82`），按预乘透明度叠回画面。模糊半径 σ = 0.24% 画面高度（第一版 0.53%，用户反馈太糊后减半） | 同文件 `renderForeground()`；调用处 `src/app/room-scene-preview.ts` 主循环 `depthEnvironment?.renderForeground()` |
+| 前景模糊 | 前景物体同时在渲染层 0 和层 2（层 1 已被训练假人血条占用）。主渲染里前景照常进入阴影贴图，但绘制时临时关掉颜色和深度写入（`onBeforeRender` / `onAfterRender` 只在这次绘制前后切换，共享材质不受影响），所以不重复出现又不丢投影；`stage.render()` 之后用层 2 把前景单独渲染到半分辨率缓冲，横、竖两遍 15 采样高斯模糊，压暗 18%（`uShade = .82`），按预乘透明度叠回画面。模糊半径 σ = 0.24% 画面高度（第一版 0.53%，用户反馈太糊后减半） | 同文件 `renderForeground()`；调用处 `src/app/perspective/room-scene-preview.ts` 主循环 `depthEnvironment?.renderForeground()` |
 | 前景下沉 | 前景组 y −1，上沿不再贴人物脚线 | `setLayering` |
-| 玩法地面贴图 | 原来的定义色（米白）地面在画面里是一条亮白带，最破坏纵深感。景深 G 下把它换成与近景相同的贴图：山谷、湖畔用泥土，其余用石头。只换外观，碰撞仍是原来的实心格 | `createDefinitionDepthLayout` 的 `setGroundSkin`；`src/app/depth-scenery.ts` `groundMaterial()` |
-| 切换按钮 | 工具栏「原层次 / 景深 G」，打开页面默认景深 G | `src/app/room-scene-preview.ts` `data-layering` |
+| 玩法地面贴图 | 原来的定义色（米白）地面在画面里是一条亮白带，最破坏纵深感。景深 G 下把它换成与近景相同的贴图：山谷、湖畔用泥土，其余用石头。只换外观，碰撞仍是原来的实心格 | `createDefinitionDepthLayout` 的 `setGroundSkin`；`src/app/perspective/depth-scenery.ts` `groundMaterial()` |
+| 切换按钮 | 工具栏「原层次 / 景深 G」，打开页面默认景深 G | `src/app/perspective/room-scene-preview.ts` `data-layering` |
 
 ## 5. 截图
 
@@ -93,7 +93,7 @@
 ## 7. 已知问题与待定
 
 1. **云的位置。** 天气系统的云实际分布在 −24 ~ −60 格（`src/config/weather-rules.ts`），跨过新的近林层 −35。低云穿插近山不算技术错误；是否改成天边的云属于美术选择，若要改，需同时调距离、尺寸、覆盖范围和运动。
-2. **只改了本页面，层距没有共享来源。** 本页和主世界共用山脊生成函数 `createBackdrop`，但层距各自写死：游戏在 `src/render/stage.ts`（−20 / −43 / −76），本页在 `definition-depth-layout.ts` 的 `DEPTH_LAYERS`。只改一边不会同步另一边；推广时应先统一距离来源，再重算远山放大和画面覆盖。游戏相机 D = 30 时到 −140 为 170，最低缩放 0.75 时约 180，都在远裁剪面 200 以内；开场等其他镜头迁移时要再核对。
+2. **只改了本页面，层距没有共享来源。** 本页和主世界共用山脊生成函数 `createBackdrop`，但层距各自写死：游戏在 `src/render/stage/stage.ts`（−20 / −43 / −76），本页在 `definition-depth-layout.ts` 的 `DEPTH_LAYERS`。只改一边不会同步另一边；推广时应先统一距离来源，再重算远山放大和画面覆盖。游戏相机 D = 30 时到 −140 为 170，最低缩放 0.75 时约 180，都在远裁剪面 200 以内；开场等其他镜头迁移时要再核对。
 3. **面板「场景图层」的距离说明和「完整覆盖清单」** 仍写原层次的 4 / 10 格，未随景深 G 更新。
 4. **洞厅里地面和前景都是石头。** 两者颜色接近，层次较弱；先调明度、色相和接触边缘，再判断是否需要改距离。
 5. **雾色是单一颜色。** 按天空上下两色插值；不同主题的雾色、浓度没有逐个调。

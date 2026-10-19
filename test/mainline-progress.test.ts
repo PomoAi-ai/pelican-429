@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { BOSS_RULES } from '../src/config/boss-rules.ts';
 import { test } from 'node:test';
-import { loadStorySave, saveStory } from '../src/app/story-save.ts';
+import { loadStorySave, saveStory } from '../src/app/story/story-save.ts';
 import type { MainlineCheckpoint } from '../src/config/mainline.ts';
 import { MAINLINE_COUNTDOWN_SECONDS } from '../src/config/mainline.ts';
 import { startEnemySkill } from '../src/entities/enemy.ts';

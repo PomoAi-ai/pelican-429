@@ -14,7 +14,7 @@ import {
   sharedWindUniforms,
   windUniformValues,
   writeWindUniforms,
-} from '../src/render/wind.ts';
+} from '../src/render/sky/wind.ts';
 import { cloudShadeAt, createWindController, modeState, weatherCycleLevel, windAt, windGust } from '../src/world/wind.ts';
 import { glslDeclarations, glslFunctionNames } from './helpers/glsl.ts';
 

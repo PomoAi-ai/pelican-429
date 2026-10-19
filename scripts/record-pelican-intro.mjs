@@ -67,11 +67,11 @@ try {
     const response=await route.fetch();let body=await response.text();
     const anchor='const rendered = await context.startRendering();';
     assert(body.includes(anchor),'音频渲染接入点变化');
-    body=body.replace(anchor,`const { BossScore } = await import('/src/app/boss-audio.ts'); const bosses = new BossScore(context, limiter); for (const cue of window.intro.bossTimeline) bosses.schedule(cue.kind, cue.action, cue.at, cue.speed); ${anchor}`);
+    body=body.replace(anchor,`const { BossScore } = await import('/src/app/audio/boss-audio.ts'); const bosses = new BossScore(context, limiter); for (const cue of window.intro.bossTimeline) bosses.schedule(cue.kind, cue.action, cue.at, cue.speed); ${anchor}`);
     await route.fulfill({response,body});
   });
   let rejectRoute;const failed=new Promise((_,reject)=>{rejectRoute=reject;});
-  await page.route('**/src/app/game-app.ts*',async route=>{
+  await page.route('**/src/app/game/game-app.ts*',async route=>{
     try {
       const response=await route.fetch();let body=await response.text();
       const replace=(from,to)=>{assert(typeof from==='string'?body.includes(from):from.test(body),`录制接入点变化：${from}`);body=body.replace(from,to);};
@@ -95,7 +95,7 @@ try {
     const {createBossEntity,cancelBossSkill}=await import('/src/entities/boss.ts');
     const {NEUTRAL_INPUT}=await import('/src/entities/pelican-controller.ts');
     const {HUMAN_BODY_HEIGHT}=await import('/src/config/player-form.ts');
-    const {GameAudioCues}=await import('/src/app/game-audio-cues.ts');
+    const {GameAudioCues}=await import('/src/app/audio/game-audio-cues.ts');
     const {npcAction}=await import('/src/config/npc.ts');
     const {startAttack}=await import('/src/combat/attacks.ts');
     const {tiboBasicAttack}=await import('/src/combat/npc-basic-attack.ts');

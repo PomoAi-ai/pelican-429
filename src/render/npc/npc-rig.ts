@@ -1,6 +1,7 @@
 import * as THREE from 'three';
-import { createHairRig, loadHairAsset, type HairAsset } from '../hair-rig.ts';
-import { characterTextureTier, loadCharacterModel, type TextureTier } from '../character-model.ts';
+import { createHairRig, loadHairAsset, type HairAsset } from '../character/hair-rig.ts';
+import type { TextureTier } from '../../config/app-mode.ts';
+import { characterTextureTier, loadCharacterModel } from '../character/character-model.ts';
 import type { GLTF } from 'three/addons/loaders/GLTFLoader.js';
 import { clone } from 'three/addons/utils/SkeletonUtils.js';
 import { NPCS, NPC_ACTIONS, npcModel } from '../../config/npc.ts';

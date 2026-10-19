@@ -4,10 +4,10 @@ import { npcAction } from '../../config/npc.ts';
 import { TUNING } from '../../config/tuning.ts';
 import { lerp } from '../../core/math.ts';
 import type { Entity } from '../../entities/entity.ts';
-import type { EntityView } from '../view-registry.ts';
+import type { EntityView } from '../stage/view-registry.ts';
 import { animateNpc } from './npc-animator.ts';
 import { createNpcRig } from './npc-rig.ts';
-import { createTeleportEffect } from '../teleport-effect.ts';
+import { createTeleportEffect } from '../fx/teleport-effect.ts';
 
 /** Boss 与展示场共享模型和动作；实战时间倍率同时驱动姿态与原动作特效。 */
 export function createBossView(entity: Entity, windAt: (x: number, y: number) => number): EntityView {

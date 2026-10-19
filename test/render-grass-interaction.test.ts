@@ -7,9 +7,9 @@ import { TUNING } from '../src/config/tuning.ts';
 import { startAttack } from '../src/combat/attacks.ts';
 import { createPelicanEntity } from '../src/entities/entity.ts';
 import type { Entity } from '../src/entities/entity.ts';
-import { createWindMaterial } from '../src/render/flora.ts';
-import { createCoverMaterial } from '../src/render/flora-cover.ts';
-import { CUTTABLE_FLORA, createGrassCutter, regrowScale } from '../src/render/grass-cut.ts';
+import { createWindMaterial } from '../src/render/flora/flora.ts';
+import { createCoverMaterial } from '../src/render/flora/flora-cover.ts';
+import { CUTTABLE_FLORA, createGrassCutter, regrowScale } from '../src/render/flora/grass-cut.ts';
 import {
   DISTURB_MAX_SOURCES,
   GRASS_DISTURB,
@@ -18,9 +18,9 @@ import {
   disturbEnvelope,
   sharedDisturbUniforms,
   validateGrassDisturb,
-} from '../src/render/grass-disturb.ts';
-import { createGrassInteraction } from '../src/render/grass-interaction.ts';
-import { createTileView } from '../src/render/tile-view.ts';
+} from '../src/render/flora/grass-disturb.ts';
+import { createGrassInteraction } from '../src/render/flora/grass-interaction.ts';
+import { createTileView } from '../src/render/tile/tile-view.ts';
 import { createTileMap } from '../src/world/tile-map.ts';
 import { DEFAULT_TILES, TILE_GRASS } from '../src/world/tile-types.ts';
 

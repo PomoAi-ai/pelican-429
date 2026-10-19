@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { loadResidence, RESIDENCE_HARBOR_SAVE_KEY, RESIDENCE_SAVE_KEY, RESIDENCE_THREE_SAVE_KEY, saveResidence } from '../src/app/residence-save.ts';
+import { loadResidence, RESIDENCE_HARBOR_SAVE_KEY, RESIDENCE_SAVE_KEY, RESIDENCE_THREE_SAVE_KEY, saveResidence } from '../src/app/residence/residence-save.ts';
 import { createBody } from '../src/physics/body.ts';
 import { moveDefinitionBody } from '../src/physics/definition-collision.ts';
 import { createResidenceLight, type ResidenceLightField } from '../src/sim/residence-light.ts';

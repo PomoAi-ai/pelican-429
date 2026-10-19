@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import type { D1Shading } from '../../config/grassy.ts';
-import { injectAfter } from '../tile-material.ts';
+import { injectAfter } from '../tile/tile-material.ts';
 import { createD1SphericalEyeMaterial, D1_EYELID_MATERIAL, D1_EYE_SOCKET_MATERIAL, isD1SphericalEyeSurface } from './d1-spherical-eyes.ts';
 
 /** D1 动漫着色：柔和暖色明暗交界、皮肤透光散射带、视线补光与边缘光；头发用发丝方向各向异性高光；外壳描边；脸部法线向头部球面收拢以去掉硬阴影；

@@ -16,15 +16,15 @@ import {
   createCoverMesh,
   planCover,
   validateCoverRules,
-} from '../src/render/flora-cover.ts';
-import type { CoverInstance, CoverKind, CoverSite } from '../src/render/flora-cover.ts';
-import { siteTopY } from '../src/render/flora.ts';
-import type { FloraEnv } from '../src/render/flora.ts';
-import { createCloudShadowPatcher, CLOUD_SHADOW_PROGRAM_TAG } from '../src/render/cloud-shadow.ts';
-import { isLightMappable } from '../src/render/light-texture.ts';
-import { createTileView } from '../src/render/tile-view.ts';
-import { VARIANT_PROGRAM_TAG, addVariantCollapse, createVariantBatch, mergeVariants, variantInstanceGeometry, variantYRange } from '../src/render/variant-atlas.ts';
-import { sharedWindUniforms } from '../src/render/wind.ts';
+} from '../src/render/flora/flora-cover.ts';
+import type { CoverInstance, CoverKind, CoverSite } from '../src/render/flora/flora-cover.ts';
+import { siteTopY } from '../src/render/flora/flora.ts';
+import type { FloraEnv } from '../src/render/flora/flora.ts';
+import { createCloudShadowPatcher, CLOUD_SHADOW_PROGRAM_TAG } from '../src/render/sky/cloud-shadow.ts';
+import { isLightMappable } from '../src/render/stage/light-texture.ts';
+import { createTileView } from '../src/render/tile/tile-view.ts';
+import { VARIANT_PROGRAM_TAG, addVariantCollapse, createVariantBatch, mergeVariants, variantInstanceGeometry, variantYRange } from '../src/render/flora/variant-atlas.ts';
+import { sharedWindUniforms } from '../src/render/sky/wind.ts';
 import { createTileMap } from '../src/world/tile-map.ts';
 import { SHAPE_FULL, SHAPE_SLOPE_R } from '../src/world/tile-shapes.ts';
 import type { TileShape } from '../src/world/tile-shapes.ts';

@@ -13,19 +13,19 @@ import {
   KIND_SLOPE_TOP,
   SHAPE_TOP_VERTEX,
   createShapeGeometry,
-} from '../src/render/tile-geometry.ts';
-import { TILE_PROGRAM_KEY, createTileMaterial } from '../src/render/tile-material.ts';
+} from '../src/render/tile/tile-geometry.ts';
+import { TILE_PROGRAM_KEY, createTileMaterial } from '../src/render/tile/tile-material.ts';
 import { glslDeclarations, glslFunctionNames, glslIdentifiers } from './helpers/glsl.ts';
-import { createMapSurfaceQuery, surfaceHermite } from '../src/render/surface-smooth.ts';
-import { generateTileTextures } from '../src/render/tile-textures.ts';
-import { createTileView } from '../src/render/tile-view.ts';
-import { createGroundProfile } from '../src/render/ground-profile.ts';
-import { groundSurface } from '../src/render/stage.ts';
-import { CONVEX_RADIUS, EDGE_EXPOSED_FRINGE, FILLET_RADIUS, TILE_TRANSITIONS, contourStyle } from '../src/render/tile-transitions.ts';
-import { ORGANIC_TOP_AMP, hermiteAt, organicTopOffset, smoothTopY } from '../src/render/tile-organic.ts';
+import { createMapSurfaceQuery, surfaceHermite } from '../src/render/tile/surface-smooth.ts';
+import { generateTileTextures } from '../src/render/tile/tile-textures.ts';
+import { createTileView } from '../src/render/tile/tile-view.ts';
+import { createGroundProfile } from '../src/render/tile/ground-profile.ts';
+import { groundSurface } from '../src/render/stage/stage.ts';
+import { CONVEX_RADIUS, EDGE_EXPOSED_FRINGE, FILLET_RADIUS, TILE_TRANSITIONS, contourStyle } from '../src/render/tile/tile-transitions.ts';
+import { ORGANIC_TOP_AMP, hermiteAt, organicTopOffset, smoothTopY } from '../src/render/tile/tile-organic.ts';
 import { SHAPE_FULL, SHAPE_HALF, SHAPE_SLOPE_L, SHAPE_SLOPE_R, shapeTopAt } from '../src/world/tile-shapes.ts';
 import { L } from './helpers/render-fixtures.ts';
-import { ROUND_RINGS, WALL_RINGS } from '../src/render/tile-relief.ts';
+import { ROUND_RINGS, WALL_RINGS } from '../src/render/tile/tile-relief.ts';
 import { slopeLevel } from './helpers/slope-fixtures.ts';
 
 describe('地面厚度常量', () => {

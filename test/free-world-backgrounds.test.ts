@@ -4,7 +4,7 @@ import { FACILITY_SCENES } from '../src/config/facility-scenes.ts';
 import { createBackgroundRegions } from '../src/world/free-world-background-regions.ts';
 import { generateFreeWorld } from '../src/world/free-world.ts';
 import { caveCovered } from '../src/world/level.ts';
-import { groundSurface } from '../src/render/stage.ts';
+import { groundSurface } from '../src/render/stage/stage.ts';
 
 test('区域混合在边界保持连续、归一，空岛只在升高后出现', () => {
   const level = generateFreeWorld(429, 'small', 'wilds');

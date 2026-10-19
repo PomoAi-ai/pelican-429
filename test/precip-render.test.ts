@@ -9,10 +9,10 @@ import type { PrecipState } from '../src/config/precip-rules.ts';
 import { DEFAULT_WEATHER } from '../src/config/weather-rules.ts';
 import { mulberry32 } from '../src/core/rng.ts';
 import type { Rect } from '../src/core/math.ts';
-import { createCloudShadowPatcher, CLOUD_SHADOW_PROGRAM_TAG } from '../src/render/cloud-shadow.ts';
-import { createPrecipColumns, desertSnowFactor, waterTop } from '../src/render/precip-columns.ts';
-import { PRECIP_VISUAL_KEYS, createPrecipController, lightningAt, precipVisualOf } from '../src/render/precip.ts';
-import { precipSkyLook, boltPolyline } from '../src/render/precip-sky.ts';
+import { createCloudShadowPatcher, CLOUD_SHADOW_PROGRAM_TAG } from '../src/render/sky/cloud-shadow.ts';
+import { createPrecipColumns, desertSnowFactor, waterTop } from '../src/render/sky/precip-columns.ts';
+import { PRECIP_VISUAL_KEYS, createPrecipController, lightningAt, precipVisualOf } from '../src/render/sky/precip.ts';
+import { precipSkyLook, boltPolyline } from '../src/render/sky/precip-sky.ts';
 import {
   PRECIP_PROGRAM_TAG,
   PRECIP_SURFACE_FRAGMENT,
@@ -21,12 +21,12 @@ import {
   isPrecipPatchable,
   snowAmountAt,
   wetFactorAt,
-} from '../src/render/precip-surface.ts';
-import { createPrecipView, precipSurfaceRoots } from '../src/render/precip-view.ts';
-import { createRainFx, planDripEmitters } from '../src/render/rain-fx.ts';
-import { createSnowFx } from '../src/render/snow-fx.ts';
-import { residenceWeatherRoofs } from '../src/render/residence-weather.ts';
-import { createWeatherFx } from '../src/render/weather-fx.ts';
+} from '../src/render/sky/precip-surface.ts';
+import { createPrecipView, precipSurfaceRoots } from '../src/render/sky/precip-view.ts';
+import { createRainFx, planDripEmitters } from '../src/render/sky/rain-fx.ts';
+import { createSnowFx } from '../src/render/sky/snow-fx.ts';
+import { residenceWeatherRoofs } from '../src/render/residence/residence-weather.ts';
+import { createWeatherFx } from '../src/render/sky/weather-fx.ts';
 import { createWindController } from '../src/world/wind.ts';
 import type { DesertInfo, TreeInstance } from '../src/world/level.ts';
 import { createFluidMap } from '../src/world/fluid-map.ts';

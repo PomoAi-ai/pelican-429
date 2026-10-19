@@ -1,0 +1,164 @@
+import * as THREE from 'three';
+import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
+import type { EntityViewFactory } from '../stage/view-registry.ts';
+import { lerp } from '../../core/math.ts';
+import { createParticleCloud } from '../grassy/grassy-particles.ts';
+import { glslFloat as f } from '../sky/wind.ts';
+
+export type PhotonShape = 'bug' | 'wheel';
+export const PHOTON_COLORS = ['#68dfff', '#b293ff', '#ffdc80'] as const;
+/** 尾焰着色器：外鞘宽度随 uv.y 张开、核心宽度比、合成权重、渐入长度、颜色，WebGPU 节点版本同表。 */
+export const PHOTON_EXHAUST_SHADER = {
+  width: { base: 0.16, grow: 0.7 },
+  core: 0.22,
+  sheathGain: 0.48,
+  coreGain: 0.52,
+  fadeIn: 0.4,
+  cut: 0.003,
+  root: [0.48, 0.2, 1],
+  tip: [0.12, 0.82, 1],
+  hot: [1.6, 1.9, 2],
+} as const;
+const E = PHOTON_EXHAUST_SHADER;
+// width.grow 与 root 的前两项用 toFixed(2)，与原字面量 0.70 / 0.20 逐字一致，WebGL 着色器文本不变。
+const vec3 = (c: readonly number[]): string => `vec3(${c.map(f).join(', ')})`;
+
+function merged(parts: THREE.BufferGeometry[]): THREE.BufferGeometry {
+  const result = mergeGeometries(parts)!;
+  for (const part of parts) part.dispose();
+  return result;
+}
+
+function sphere(x: number, y: number, z: number, sx: number, sy: number, sz: number): THREE.BufferGeometry {
+  return new THREE.SphereGeometry(1, 12, 8).scale(sx, sy, sz).translate(x, y, z);
+}
+
+function rod(x: number, y: number, length: number, angle: number, radius = 0.032): THREE.BufferGeometry {
+  return new THREE.CylinderGeometry(radius, radius, length, 6).rotateZ(angle).translate(x, y, 0);
+}
+
+/** 漫游群与真实追踪弹共享同一组实体模型。 */
+export function createPhotonModelKit() {
+  const wheelParts: THREE.BufferGeometry[] = [new THREE.TorusGeometry(0.49, 0.055, 8, 40), new THREE.TorusGeometry(0.42, 0.018, 5, 40), sphere(0, 0, 0, 0.11, 0.11, 0.10)];
+  for (let i = 0; i < 8; i++) {
+    const a = i * Math.PI / 4;
+    wheelParts.push(rod(Math.cos(a) * 0.245, Math.sin(a) * 0.245, 0.40, a - Math.PI / 2, 0.022));
+  }
+  const wheel = merged(wheelParts);
+  const shellParts: THREE.BufferGeometry[] = [sphere(0, 0, 0, 0.30, 0.23, 0.14)];
+  for (const side of [-1, 1]) {
+    for (let i = 0; i < 3; i++) shellParts.push(rod(side * (0.24 + i * 0.015), -0.14 + i * 0.13, 0.28, side * (0.7 + i * 0.3)));
+    shellParts.push(rod(side * 0.17, 0.29, 0.26, -side * 0.45, 0.02), sphere(side * 0.23, 0.42, 0, 0.06, 0.06, 0.06));
+  }
+  const bug = merged(shellParts);
+  const face = new THREE.BoxGeometry(0.33, 0.23, 0.08).translate(0, 0.02, 0.135);
+  const eyes = merged([-1, 1].map(side => new THREE.BoxGeometry(0.035, 0.10, 0.035).translate(side * 0.085, 0.04, 0.19)));
+  const wing = merged([-1, 1].map(side => sphere(side * 0.30, 0.10, -0.05, 0.25, 0.10, 0.018)));
+  const colors = PHOTON_COLORS.map(color => new THREE.MeshBasicMaterial({ color: new THREE.Color(color).multiplyScalar(1.2), toneMapped: false }));
+  const white = new THREE.MeshBasicMaterial({ color: '#f4ffff', toneMapped: false });
+  const dark = new THREE.MeshBasicMaterial({ color: '#233651' });
+  const wingMaterial = new THREE.MeshBasicMaterial({ color: '#c9edff', transparent: true, opacity: 0.55, depthWrite: false, toneMapped: false });
+  const exhaustGeometry = new THREE.PlaneGeometry(0.42, 0.90).translate(0, -0.45, 0);
+  const exhaustMaterial = new THREE.ShaderMaterial({
+    name: 'photon-exhaust',
+    vertexShader: /* glsl */`
+      varying vec2 vUv;
+      void main() {
+        vUv = uv;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+      }
+    `,
+    fragmentShader: /* glsl */`
+      varying vec2 vUv;
+      void main() {
+        float x = abs(vUv.x * 2.0 - 1.0);
+        float width = ${f(E.width.base)} + vUv.y * ${E.width.grow.toFixed(2)};
+        float sheath = 1.0 - smoothstep(0.0, width, x);
+        float core = (1.0 - smoothstep(0.0, width * ${f(E.core)}, x)) * pow(vUv.y, 2.0);
+        float alpha = (sheath * ${f(E.sheathGain)} + core * ${f(E.coreGain)}) * smoothstep(0.0, ${f(E.fadeIn)}, vUv.y);
+        if (alpha < ${f(E.cut)}) discard;
+        vec3 color = mix(vec3(${E.root[0].toFixed(2)}, ${E.root[1].toFixed(2)}, ${f(E.root[2])}), ${vec3(E.tip)}, vUv.y);
+        gl_FragColor = vec4(mix(color, ${vec3(E.hot)}, core), alpha);
+        #include <colorspace_fragment>
+      }
+    `,
+    transparent: true, depthWrite: false, toneMapped: false,
+    side: THREE.DoubleSide, forceSinglePass: true,
+  });
+  return {
+    create(shape: PhotonShape, color: number) {
+      const root = new THREE.Group();
+      const spin = new THREE.Group();
+      root.add(spin);
+      spin.add(new THREE.Mesh(shape === 'wheel' ? wheel : bug, colors[color]!));
+      const exhaust = new THREE.Group();
+      if (shape === 'bug') {
+        spin.add(new THREE.Mesh(face, dark), new THREE.Mesh(eyes, white), new THREE.Mesh(wing, wingMaterial));
+        const jet = new THREE.Mesh(exhaustGeometry, exhaustMaterial);
+        const crossJet = new THREE.Mesh(exhaustGeometry, exhaustMaterial);
+        crossJet.rotation.y = Math.PI / 2;
+        exhaust.position.set(0, -0.20, -0.025);
+        exhaust.add(jet, crossJet);
+        root.add(exhaust);
+      }
+      return {
+        root,
+        animate(time: number) {
+          spin.rotation.set(shape === 'wheel' ? Math.sin(time * 3.1) * 0.65 : Math.sin(time * 17) * 0.12,
+            shape === 'wheel' ? Math.sin(time * 2.3) * 0.65 : Math.sin(time * 13) * 0.20,
+            shape === 'wheel' ? time * 6 : Math.sin(time * 11) * 0.15);
+          exhaust.scale.set(1, 0.88 + Math.sin(time * 29) * 0.12, 1);
+        },
+      };
+    },
+    dispose() {
+      for (const geometry of [wheel, bug, face, eyes, wing, exhaustGeometry]) geometry.dispose();
+      for (const material of [...colors, white, dark, wingMaterial, exhaustMaterial]) material.dispose();
+    },
+  };
+}
+
+/** 真实弹体的尾迹记录已走过的位置，转向时不会穿过目标或预演命中。 */
+export function createPhotonProjectileViews() {
+  const kit = createPhotonModelKit();
+  const factory: EntityViewFactory = entity => {
+    const shape = entity.kind === 'photonWheel' ? 'wheel' : 'bug';
+    const color = shape === 'wheel' ? 2 : 0;
+    const model = kit.create(shape, color);
+    const group = new THREE.Group();
+    const trail = createParticleCloud(36, PHOTON_COLORS[color]);
+    const history = Array.from({ length: 36 }, () => new THREE.Vector3(entity.body.x, entity.body.y + entity.body.height / 2, 0.55));
+    group.add(model.root, trail.points);
+    let time = entity.id * 0.37;
+    model.root.scale.setScalar(entity.projectile!.def.radius / (shape === 'wheel' ? 0.52 : 0.36));
+    return {
+      object: group,
+      sync(e, alpha, dt) {
+        const x = lerp(e.body.prevX, e.body.x, alpha);
+        const y = lerp(e.body.prevY, e.body.y, alpha) + e.body.height / 2;
+        model.root.position.set(x, y, 0.55);
+        if (shape === 'bug') model.root.rotation.z = Math.atan2(e.body.vy, e.body.vx) - Math.PI / 2;
+        time += dt;
+        model.animate(time);
+        if (dt > 0) {
+          for (let i = history.length - 1; i > 0; i--) history[i]!.copy(history[i - 1]!);
+          history[0]!.set(x, y, 0.5);
+        }
+        for (let i = 0; i < history.length; i++) {
+          const p = history[i]!;
+          const fade = 1 - i / history.length;
+          trail.positions.setXYZ(i, p.x, p.y, p.z);
+          trail.sizes.setX(i, 0.18 * fade + 0.025);
+          trail.alphas.setX(i, fade * 0.85);
+        }
+        trail.positions.needsUpdate = trail.sizes.needsUpdate = trail.alphas.needsUpdate = true;
+      },
+      dispose() {
+        group.clear();
+        trail.points.geometry.dispose();
+        trail.points.material.dispose();
+      },
+    };
+  };
+  return { factories: { photonBug: factory, photonWheel: factory }, dispose: () => kit.dispose() };
+}

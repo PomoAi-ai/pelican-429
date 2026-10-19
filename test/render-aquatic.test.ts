@@ -4,8 +4,8 @@ import assert from 'node:assert/strict';
 
 import * as THREE from 'three';
 import { TUNING } from '../src/config/tuning.ts';
-import { createCloudShadowPatcher, CLOUD_SHADOW_PROGRAM_TAG } from '../src/render/cloud-shadow.ts';
-import { isLightMappable } from '../src/render/light-texture.ts';
+import { createCloudShadowPatcher, CLOUD_SHADOW_PROGRAM_TAG } from '../src/render/sky/cloud-shadow.ts';
+import { isLightMappable } from '../src/render/stage/light-texture.ts';
 import {
   BED_HEIGHT_RANGE,
   BED_KINDS,
@@ -24,11 +24,11 @@ import {
   planFloaters,
   stepRepel,
   wrapSpan,
-} from '../src/render/water-flora.ts';
-import { WATER_FLORA_PROGRAM_TAG, createWaterFloraView } from '../src/render/water-flora-view.ts';
-import type { WaterFloraFrame, WaterFloraView } from '../src/render/water-flora-view.ts';
-import { waterWaveAt } from '../src/render/water-view.ts';
-import { WEED_HEADROOM } from '../src/render/water-weeds.ts';
+} from '../src/render/water/water-flora.ts';
+import { WATER_FLORA_PROGRAM_TAG, createWaterFloraView } from '../src/render/water/water-flora-view.ts';
+import type { WaterFloraFrame, WaterFloraView } from '../src/render/water/water-flora-view.ts';
+import { waterWaveAt } from '../src/render/water/water-view.ts';
+import { WEED_HEADROOM } from '../src/render/water/water-weeds.ts';
 import { FLUID_FULL } from '../src/world/fluid-map.ts';
 import type { LakeInfo, LevelData } from '../src/world/level.ts';
 import { createTileMap } from '../src/world/tile-map.ts';

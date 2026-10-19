@@ -2,9 +2,10 @@ import * as THREE from 'three';
 import { CHARACTER_PRESETS, DEFAULT_CHARACTER_APPEARANCE, FACE_PARAMETERS } from '../../config/character-appearance.ts';
 import type { CharacterAppearance, FaceParameter, HairId } from '../../config/character-appearance.ts';
 import { CUSTOMIZATION_MODELS, type CustomizationModelId } from '../../config/character-customization-assets.ts';
-import { loadCharacterModel, type TextureTier } from '../character-model.ts';
-import { disposeModelResources } from '../model-resources.ts';
-import { createHairSway } from '../hair-sway.ts';
+import type { TextureTier } from '../../config/app-mode.ts';
+import { loadCharacterModel } from '../character/character-model.ts';
+import { disposeModelResources } from '../character/model-resources.ts';
+import { createHairSway } from '../character/hair-sway.ts';
 
 export const FACE_TARGETS: Record<FaceParameter, string> = {
   faceWidth: 'FaceWidth', faceLength: 'FaceLength', jawWidth: 'JawWidth', chinLength: 'ChinLength',

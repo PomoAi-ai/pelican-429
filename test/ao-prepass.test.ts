@@ -7,7 +7,7 @@ import * as THREE from 'three';
 
 import { DEFAULT_LIGHTING } from '../src/config/lighting-rules.ts';
 import type { LightingTuning } from '../src/config/lighting-rules.ts';
-import { AO_PREPASS_FRAGMENT, createPostFx } from '../src/render/post-fx.ts';
+import { AO_PREPASS_FRAGMENT, createPostFx } from '../src/render/stage/post-fx.ts';
 
 const stubRenderer = (): THREE.WebGLRenderer => ({ getPixelRatio: () => 1, getSize: (v: THREE.Vector2) => v.set(800, 600) }) as unknown as THREE.WebGLRenderer;
 

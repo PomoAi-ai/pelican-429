@@ -6,10 +6,11 @@ import type { ShowcaseCard } from '../../config/showcase.ts';
 import { TUNING } from '../../config/tuning.ts';
 import { createNpcTransformation, loadNpcForms } from '../../render/npc/npc-transformation.ts';
 import { createNpcTargets } from '../../render/npc/npc-targets.ts';
-import { createStageView } from '../../render/stage.ts';
+import { createStageView } from '../../render/stage/stage.ts';
 import type { InputFrame } from '../../sim/sim-world.ts';
 import { createNpcWorld } from './npc-world.ts';
-import { BossScore } from '../boss-audio.ts';
+import { BossScore } from '../audio/boss-audio.ts';
+import { t } from '../../config/i18n.ts';
 
 /** 模型尺寸、材质和动作由游戏共享资源提供，展示场只控制取景与播放时间。 */
 export function createNpcShowcaseSession(renderer: THREE.WebGLRenderer, card: ShowcaseCard, caveBackground: THREE.Texture) {
@@ -101,9 +102,9 @@ export function createNpcShowcaseSession(renderer: THREE.WebGLRenderer, card: Sh
     get progress() { return rig ? Math.min(1, time / duration()) : 0; },
     get status() {
       const npc = NPCS[kind];
-      const label = `${npc.name} · ${npcModel(kind, showcaseEntry(card.entryId).npcForm!).label}`;
-      if (!rig) return `${label} · 正在加载模型…`;
-      return `${label} · ${npc.title} · ${time >= duration() ? '演示完成' : action.label}`;
+      const label = `${t(npc.name)} · ${t(npcModel(kind, showcaseEntry(card.entryId).npcForm!).label)}`;
+      if (!rig) return `${label} · ${t('正在加载模型…')}`;
+      return `${label} · ${t(npc.title)} · ${t(time >= duration() ? '演示完成' : action.label)}`;
     },
     get needsReset() { return revision !== card.revision; },
     reset,
@@ -122,7 +123,7 @@ export function createNpcShowcaseSession(renderer: THREE.WebGLRenderer, card: Sh
       rig.setForm(showcaseEntry(card.entryId).npcForm!);
       if (transformationRevision !== card.npcTransformationRevision) rig.replay();
       transformationRevision = card.npcTransformationRevision;
-      const dt = playing ? Math.min(elapsed, TUNING.sim.maxFrameTime) * card.speed : 0;
+      const dt = playing ? elapsed * card.speed : 0;
       if (!playing || time >= duration()) stopAudio();
       else if (soundEnabled && audioContext?.state === 'running' && (!audioPlaying || audioSpeed !== card.speed)) {
         stopAudio();

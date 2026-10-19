@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { injectAfter } from '../tile-material.ts';
+import { injectAfter } from '../tile/tile-material.ts';
 import { D1_EYE_SOCKET_MATERIAL } from './d1-spherical-eyes.ts';
 
 export type StudySurface = 'skin' | 'face' | 'hair' | 'cloth';

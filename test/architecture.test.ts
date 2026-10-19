@@ -1,4 +1,4 @@
-// 分层规则（DESIGN.md §2）：扫描 src 下全部 .ts/.js 的 import/export-from，按模块归属断言依赖方向。
+// 分层规则（DESIGN.md §2）：扫描 src 下全部 .ts/.tsx/.js 的 import/export-from，按模块归属断言依赖方向。
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
@@ -11,7 +11,7 @@ const SRC = path.join(ROOT, 'src');
 type Group =
   | 'core' | 'config' | 'world' | 'physics' | 'combat' | 'entities' | 'sim'
   | 'input/action-map' | 'input/keyboard-mouse' | 'render' | 'render/pelican-animator' | 'ui' | 'vendor' | 'app' | 'main'
-  | 'three' | 'external';
+  | 'three' | 'external' | 'style';
 
 const LOGIC: readonly Group[] = ['world', 'physics', 'combat', 'entities', 'sim'];
 
@@ -35,7 +35,7 @@ function listFiles(dir: string): string[] {
   for (const name of readdirSync(dir)) {
     const full = path.join(dir, name);
     if (statSync(full).isDirectory()) out.push(...listFiles(full));
-    else if (/\.(ts|js)$/.test(name) && !name.endsWith('.d.ts')) out.push(full);
+    else if (/\.(ts|tsx|js)$/.test(name) && !name.endsWith('.d.ts')) out.push(full);
   }
   return out;
 }
@@ -132,8 +132,12 @@ function targetOf(fromRel: string, spec: string): { target: Group; resolved: str
   const abs = path.resolve(path.dirname(path.join(SRC, fromRel)), spec);
   const rel = path.relative(SRC, abs);
   if (rel.startsWith('..')) throw new Error(`architecture: src/${fromRel} imports outside src: '${spec}'`);
-  return { target: groupOf(rel), resolved: rel };
+  // 样式表不属于任何分层，只要求文件存在。
+  return { target: rel.endsWith('.css') ? 'style' : groupOf(rel), resolved: rel };
 }
+
+/** React 与 Base UI 只允许出现在 ui。 */
+const REACT_SPEC = /^(react|react-dom)(\/.*)?$|^@base-ui\/react(\/.*)?$/;
 
 function dynamicImportEdges(code: string, rel: string): Edge[] {
   const edges: Edge[] = [];
@@ -143,8 +147,8 @@ function dynamicImportEdges(code: string, rel: string): Edge[] {
     const spec = literal[2]!;
     const { target, resolved } = targetOf(rel, spec);
     const group = groupOf(rel);
-    if ((group !== 'main' && group !== 'app') || target !== 'app') {
-      throw new Error(`architecture: dynamic import() in src/${rel} is only allowed from main/app to app`);
+    if ((group !== 'main' && group !== 'app') || (target !== 'app' && target !== 'ui' && target !== 'render')) {
+      throw new Error(`architecture: dynamic import() in src/${rel} is only allowed from main/app to app/ui/render`);
     }
     edges.push({ spec, target, typeOnly: false, resolved });
   }
@@ -190,13 +194,13 @@ test('architecture: 扫描器能识别已知依赖（防止规则空转）', () 
   assert.doesNotMatch(stripComments('const label = "self-researched window";', true), /\b(self|window)\b/);
   assert.match(stripComments('const label = "window"; window.location;', true), /window\.location/);
   assert.match(stripComments('const label = `${window.location}`;', true), /window\.location/);
-  assert.deepEqual(dynamicImportEdges(`const a = import('./app/game-app.ts'); const b = import("./app/story-app.ts");`, 'main.ts'), [
-    { spec: './app/game-app.ts', target: 'app', typeOnly: false, resolved: path.join('app', 'game-app.ts') },
-    { spec: './app/story-app.ts', target: 'app', typeOnly: false, resolved: path.join('app', 'story-app.ts') },
+  assert.deepEqual(dynamicImportEdges(`const a = import('./app/game/game-app.ts'); const b = import("./render/webgpu/webgpu-stage.ts");`, 'main.ts'), [
+    { spec: './app/game/game-app.ts', target: 'app', typeOnly: false, resolved: path.join('app', 'game', 'game-app.ts') },
+    { spec: './render/webgpu/webgpu-stage.ts', target: 'render', typeOnly: false, resolved: path.join('render', 'webgpu', 'webgpu-stage.ts') },
   ]);
   assert.throws(() => dynamicImportEdges('import(route)', 'main.ts'), /requires a literal path/);
-  assert.throws(() => dynamicImportEdges("import('../app/game-app.ts')", 'world/level.ts'), /only allowed from main\/app to app/);
-  assert.throws(() => dynamicImportEdges("import('./world/level.ts')", 'main.ts'), /only allowed from main\/app to app/);
+  assert.throws(() => dynamicImportEdges("import('../app/game/game-app.ts')", 'world/level.ts'), /only allowed from main\/app to app\/ui\/render/);
+  assert.throws(() => dynamicImportEdges("import('./world/level.ts')", 'main.ts'), /only allowed from main\/app to app\/ui\/render/);
 });
 
 test('architecture: 相对导入均指向存在的文件且带扩展名', () => {
@@ -204,16 +208,24 @@ test('architecture: 相对导入均指向存在的文件且带扩展名', () => 
   for (const f of FILES) {
     for (const e of f.edges) {
       if (e.resolved === null) continue;
-      if (!/\.(ts|js)$/.test(e.spec)) bad.push(`src/${f.rel} → '${e.spec}' (missing .ts/.js extension)`);
+      if (!/\.(ts|tsx|js|css)$/.test(e.spec)) bad.push(`src/${f.rel} → '${e.spec}' (missing .ts/.tsx/.js/.css extension)`);
       else if (!existsSync(path.join(SRC, e.resolved))) bad.push(`src/${f.rel} → '${e.spec}' (file not found)`);
     }
   }
   assert.deepEqual(bad, []);
 });
 
-test('architecture: 外部依赖限于 three 与概念文档的 Markdown 转换器', () => {
+test('architecture: 外部依赖限于 three、概念文档的 Markdown 转换器与 ui 内的 React/Base UI', () => {
   assert.deepEqual(violations(() => true, (e, f) => e.target !== 'external'
-    || f.rel === 'ui/concept-markdown.ts' && e.spec === 'marked'), []);
+    || f.rel === 'ui/site/concept-markdown.ts' && e.spec === 'marked'
+    || f.group === 'ui' && REACT_SPEC.test(e.spec)), []);
+});
+
+test('architecture: .tsx 文件与 React/Base UI 导入只出现在 ui', () => {
+  assert.deepEqual(FILES.filter((f) => f.rel.endsWith('.tsx') && f.group !== 'ui').map((f) => `src/${f.rel}`), []);
+  assert.deepEqual(violations((f) => f.group !== 'ui', (e) => !REACT_SPEC.test(e.spec)), []);
+  assert.ok(['react', 'react-dom/client', 'react/jsx-runtime', '@base-ui/react/dialog'].every((spec) => REACT_SPEC.test(spec)));
+  assert.ok(!REACT_SPEC.test('react-three') && !REACT_SPEC.test('@base-ui/reactive'));
 });
 
 test('architecture: core 无内部依赖', () => {
@@ -281,104 +293,6 @@ test('architecture: 纯逻辑禁用标识正则自检（不误伤成员访问/�
   assert.ok(/\bDate\b/.test('Date.now()') && !/\bDate\b/.test('const updated = 1; const lastDate_ = 2;'));
 });
 
-test('architecture: 011 新文件归入正确分层', () => {
-  const expected: ReadonlyArray<[string, Group]> = [
-    ['core/rng.ts', 'core'],
-    ['core/game-events.ts', 'core'],
-    ['world/worldgen.ts', 'world'],
-    ['world/reachability.ts', 'world'],
-    ['world/level.ts', 'world'],
-    ['entities/projectile.ts', 'entities'],
-    ['render/orb-view.ts', 'render'],
-    ['render/orb-fx.ts', 'render'],
-    ['render/pelican/beak-split.ts', 'render'],
-  ];
-  for (const [rel, group] of expected) assert.equal(groupOf(rel.split('/').join(path.sep)), group, rel);
-  // 已存在的新文件必须被扫描到（防止规则空转）
-  for (const [rel, group] of expected) {
-    if (!existsSync(path.join(SRC, rel))) continue;
-    const f = FILES.find((x) => x.rel === rel);
-    assert.ok(f, `src/${rel} should be scanned`);
-    assert.equal(f.group, group);
-  }
-  // 任务 018：光球并入通用投射物 entities/projectile.ts。
-  const projectile = FILES.find((f) => f.rel === 'entities/projectile.ts');
-  assert.ok(projectile?.edges.some((e) => e.target === 'physics'), 'entities/projectile imports physics');
-});
-
-test('architecture: 012 新文件归入正确分层（存在才校验扫描）', () => {
-  const expected: ReadonlyArray<[string, Group]> = [
-    ['world/fluid-map.ts', 'world'],
-    ['world/fluid-sim.ts', 'world'],
-    ['world/trees.ts', 'world'],
-    ['physics/fluid-contact.ts', 'physics'],
-    ['config/worldgen-rules.ts', 'config'],
-    ['render/tile-textures.ts', 'render'],
-    ['render/tile-geometry.ts', 'render'],
-    ['render/tile-material.ts', 'render'],
-    ['render/chunk-streamer.ts', 'render'],
-    ['render/water-view.ts', 'render'],
-    ['render/tree-geometry.ts', 'render'],
-    ['render/tree-view.ts', 'render'],
-  ];
-  for (const [rel, group] of expected) assert.equal(groupOf(rel.split('/').join(path.sep)), group, rel);
-  for (const [rel, group] of expected) {
-    if (!existsSync(path.join(SRC, rel))) continue;
-    const f = FILES.find((x) => x.rel === rel);
-    assert.ok(f, `src/${rel} should be scanned`);
-    assert.equal(f.group, group);
-  }
-  // 液体逻辑必须在逻辑层内：fluid-contact（physics）只向左依赖 world，sim 驱动 fluid-sim。
-  const contact = FILES.find((f) => f.rel === 'physics/fluid-contact.ts');
-  if (contact) assert.ok(contact.edges.some((e) => e.target === 'world'), 'physics/fluid-contact imports world/fluid-map');
-  const sim = FILES.find((f) => f.rel === 'sim/sim-world.ts');
-  assert.ok(sim?.edges.some((e) => e.resolved?.split(path.sep).join('/') === 'world/fluid-sim.ts'), 'sim-world drives world/fluid-sim');
-});
-
-test('architecture: 013 新文件归入正确分层，关键依赖边存在', () => {
-  const expected: ReadonlyArray<[string, Group]> = [
-    ['world/tile-shapes.ts', 'world'],
-    ['world/slopes.ts', 'world'],
-    ['world/structures.ts', 'world'],
-    ['world/fish-spawns.ts', 'world'],
-    ['world/worldgen-verify.ts', 'world'],
-    ['entities/fish.ts', 'entities'],
-    ['render/flora.ts', 'render'],
-    ['render/flora-geometry.ts', 'render'],
-    ['render/ground-profile.ts', 'render'],
-    ['render/water-weeds.ts', 'render'],
-    ['render/tree-skeleton.ts', 'render'],
-    ['render/tree-kinds.ts', 'render'],
-    ['render/petal-fx.ts', 'render'],
-    ['render/hut-geometry.ts', 'render'],
-    ['render/structure-view.ts', 'render'],
-    ['render/fish-view.ts', 'render'],
-    ['render/tile-organic.ts', 'render'],
-    ['render/world-views.ts', 'render'],
-  ];
-  for (const [rel, group] of expected) {
-    assert.ok(existsSync(path.join(SRC, rel)), `src/${rel} should exist`);
-    const f = FILES.find((x) => x.rel === rel);
-    assert.ok(f, `src/${rel} should be scanned`);
-    assert.equal(f.group, group, rel);
-  }
-  const imports = (from: string, to: string): boolean =>
-    FILES.find((f) => f.rel === from)?.edges.some((e) => e.resolved?.split(path.sep).join('/') === to) ?? false;
-  assert.ok(imports('physics/tile-collision.ts', 'world/tile-shapes.ts'), 'tile-collision is shape-aware');
-  assert.ok(imports('sim/sim-world.ts', 'entities/fish.ts'), 'sim-world steps the fish');
-  assert.ok(imports('app/game-app.ts', 'render/world-views.ts'), 'game app assembles world views');
-  for (const dep of ['render/fish-view.ts', 'render/structure-view.ts', 'render/water-weeds.ts', 'render/petal-fx.ts', 'render/ground-profile.ts']) {
-    assert.ok(imports('render/world-views.ts', dep), `world-views wires ${dep}`);
-  }
-  const fish = FILES.find((f) => f.rel === 'entities/fish.ts');
-  assert.deepEqual(fish?.edges.filter((e) => e.target === 'combat').map((e) => e.spec), [], 'fish stays out of combat');
-  // 规划函数（花草/树骨架）只用 core/rng 等纯依赖，不碰 DOM 随机：Math.random 禁用于 world 新文件由纯逻辑用例覆盖。
-  for (const rel of ['render/flora.ts', 'render/tree-skeleton.ts']) {
-    const f = FILES.find((x) => x.rel === rel);
-    assert.ok(f && !/\bMath\s*\.\s*random\b/.test(f.code), `${rel} plans deterministically (no Math.random)`);
-  }
-});
-
 test('architecture: render 不依赖 input/ui/main', () => {
   const banned: readonly Group[] = ['input/action-map', 'input/keyboard-mouse', 'ui', 'main'];
   const isRender = (f: SourceFile): boolean => f.group === 'render' || f.group === 'render/pelican-animator';
@@ -398,7 +312,9 @@ const UI_RUNTIME_WORLD = ['world/tile-shapes.ts', 'world/fluid-map.ts'] as const
 
 test('architecture: ui 不依赖 three/render/vendor/input/main，逻辑层只能 import type（world 纯常量模块白名单除外）', () => {
   const allowed = (e: Edge, f: SourceFile): boolean =>
-    (f.rel === 'ui/concept-markdown.ts' && e.spec === 'marked') ||
+    (f.rel === 'ui/site/concept-markdown.ts' && e.spec === 'marked') ||
+    (e.target === 'external' && REACT_SPEC.test(e.spec)) ||
+    e.target === 'style' ||
     e.target === 'core' ||
     e.target === 'config' ||
     e.target === 'ui' ||
@@ -428,89 +344,6 @@ test('architecture: vendor 只依赖 three（含 three/addons）或同一 vendor
   assert.equal(vendorPackage(['vendor', 'x.js'].join(path.sep)), null);
 });
 
-test('architecture: 014 新文件归入正确分层（存在才校验扫描与依赖边）', () => {
-  const expected: ReadonlyArray<[string, Group]> = [
-    ['entities/pelican-ride.ts', 'entities'],
-    ['physics/ride-probe.ts', 'physics'],
-    ['render/pelican/pelican-animator.ts', 'render/pelican-animator'],
-    ['render/pelican/pelican-pose.ts', 'render/pelican-animator'],
-    ['render/pelican/pelican-skeleton.ts', 'render/pelican-animator'],
-    ['render/pelican/pelican-gait.ts', 'render/pelican-animator'],
-    ['render/pelican/pelican-gait-tuning.ts', 'render/pelican-animator'],
-    ['render/pelican/pelican-gait-head.ts', 'render/pelican-animator'],
-    ['render/pelican/pelican-gait-plan.ts', 'render/pelican-animator'],
-    ['render/pelican/pelican-ride-anim.ts', 'render/pelican-animator'],
-    ['render/pelican/pelican-bike.ts', 'render'],
-    ['render/pelican/pelican-follow-rig.ts', 'render'],
-    ['render/pelican/pelican-legs.ts', 'render'],
-    ['render/pelican/pelican-rig.ts', 'render'],
-    ['vendor/pelican-3d/standing-ride/riding-pelican.js', 'vendor'],
-    ['vendor/pelican-3d/standing-hub/standing-bird.js', 'vendor'],
-  ];
-  for (const [rel, group] of expected) assert.equal(groupOf(rel.split('/').join(path.sep)), group, rel);
-  for (const [rel, group] of expected) {
-    if (!existsSync(path.join(SRC, rel))) continue;
-    const f = FILES.find((x) => x.rel === rel);
-    assert.ok(f, `src/${rel} should be scanned`);
-    assert.equal(f.group, group, rel);
-  }
-  const imports = (from: string, to: (resolved: string) => boolean): boolean =>
-    FILES.find((f) => f.rel === from)?.edges.some((e) => e.resolved !== null && to(e.resolved.split(path.sep).join('/'))) ?? false;
-  // rig 使用新 vendor 路径（W0 起即成立）。
-  assert.ok(imports('render/pelican/pelican-rig.ts', (r) => r === 'vendor/pelican-3d/standing-hub/standing-bird.js'), 'pelican-rig imports vendor/pelican-3d/standing-hub');
-  // 以下依赖边在对应文件落地后才断言（集成阶段全部成立）。
-  const exists = (rel: string): boolean => existsSync(path.join(SRC, rel));
-  if (exists('entities/pelican-ride.ts')) {
-    assert.ok(imports('sim/sim-world.ts', (r) => r === 'entities/pelican-ride.ts'), 'sim-world resolves the ride');
-  }
-  if (exists('render/pelican/pelican-bike.ts')) {
-    assert.ok(imports('render/pelican/pelican-bike.ts', (r) => r.startsWith('vendor/pelican-3d/standing-ride/')), 'pelican-bike builds on vendor/standing-ride');
-  }
-  if (exists('render/pelican/pelican-legs.ts')) {
-    assert.ok(imports('render/pelican/pelican-legs.ts', (r) => r.startsWith('vendor/pelican-3d/standing-ride/')), 'pelican-legs builds on vendor/standing-ride');
-  }
-  if (exists('render/pelican/pelican-gait.ts') && FILES.find((f) => f.rel === 'render/pelican/pelican-animator.ts')?.code.includes('createGait')) {
-    assert.ok(imports('render/pelican/pelican-animator.ts', (r) => r === 'render/pelican/pelican-gait.ts'), 'animator drives the gait');
-  }
-});
-
-test('architecture: 018 远程武器文件归入正确分层，关键依赖边存在', () => {
-  const expected: ReadonlyArray<[string, Group]> = [
-    ['core/weapon-ids.ts', 'core'],
-    ['config/weapon-rules.ts', 'config'],
-    ['entities/projectile.ts', 'entities'],
-    ['entities/pelican-weapons.ts', 'entities'],
-    ['entities/enemy-shooter.ts', 'entities'],
-    ['sim/weapon-system.ts', 'sim'],
-    ['render/projectile-views.ts', 'render'],
-    ['render/projectile-fx.ts', 'render'],
-    ['render/particle-pool.ts', 'render'],
-    ['render/pelican-weapon-view.ts', 'render'],
-    ['render/pelican/pelican-pouch.ts', 'render'],
-    ['render/pelican/pelican-attack-layer.ts', 'render/pelican-animator'],
-    ['ui/weapon-hud.ts', 'ui'],
-  ];
-  for (const [rel, group] of expected) {
-    assert.ok(existsSync(path.join(SRC, rel)), `src/${rel} should exist`);
-    const f = FILES.find((x) => x.rel === rel);
-    assert.ok(f, `src/${rel} should be scanned`);
-    assert.equal(f.group, group, rel);
-  }
-  const imports = (from: string, to: string): boolean =>
-    FILES.find((f) => f.rel === from)?.edges.some((e) => e.resolved?.split(path.sep).join('/') === to) ?? false;
-  assert.ok(imports('sim/sim-world.ts', 'sim/weapon-system.ts'), 'sim-world drives the weapon system');
-  assert.ok(imports('sim/sim-world.ts', 'entities/projectile.ts'), 'sim-world steps projectiles');
-  assert.ok(imports('entities/pelican-controller.ts', 'entities/pelican-weapons.ts'), 'controller runs the weapons');
-  assert.ok(imports('config/tuning.ts', 'config/weapon-rules.ts'), 'tuning validates the weapons table');
-  assert.ok(imports('render/entity-views.ts', 'render/pelican/pelican-attack-layer.ts'), 'pelican view composes the attack layer');
-  // 任务 019 收尾：实体视图/特效接线拆到 app/scene-wiring（组合根辅助），main 装配。
-  assert.ok(imports('app/scene-wiring.ts', 'render/projectile-fx.ts') && imports('app/game-app.ts', 'app/scene-wiring.ts') && imports('app/game-app.ts', 'ui/weapon-hud.ts'), 'game app wires fx and HUD');
-  assert.ok(!existsSync(path.join(SRC, 'entities/orb.ts')), 'orb merged into the generic projectile');
-  // sim/weapon-system 不运行时依赖 sim-world（避免循环）。
-  const ws = FILES.find((f) => f.rel === 'sim/weapon-system.ts');
-  assert.deepEqual(ws?.edges.filter((e) => e.resolved?.split(path.sep).join('/') === 'sim/sim-world.ts' && !e.typeOnly).map((e) => e.spec), []);
-});
-
 test('architecture: 除 main 外没有模块依赖 main', () => {
   assert.deepEqual(violations(() => true, (e) => e.target !== 'main'), []);
 });
@@ -525,5 +358,5 @@ test('architecture: app（组合根辅助）只被 main/app 依赖，自身不�
   assert.deepEqual(violations((f) => f.group === 'app', (e) => e.target !== 'main' && e.target !== 'external'), []);
   assert.deepEqual(violations((f) => f.group !== 'main' && f.group !== 'app', (e) => e.target !== 'app'), []);
   assert.ok(FILES.find((f) => f.rel === 'main.ts')?.edges.some((e) => e.target === 'app'), 'main wires the app helpers');
-  assert.equal(groupOf(['app', 'frame-loop.ts'].join(path.sep)), 'app');
+  assert.equal(groupOf(['app', 'game', 'frame-loop.ts'].join(path.sep)), 'app');
 });

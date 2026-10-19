@@ -1,7 +1,7 @@
 import type { GrassyAction, GrassyMotionState } from '../../config/grassy.ts';
 import type { Tuning } from '../../config/tuning.ts';
 import type { Entity } from '../../entities/entity.ts';
-import { rideProgress } from '../entity-views.ts';
+import { rideProgress } from '../character/entity-views.ts';
 import { animateGrassy } from './grassy-animator.ts';
 import { animateGrassyCombat } from './grassy-combat-animator.ts';
 import type { GrassyRig } from './grassy-rig.ts';

@@ -7,12 +7,12 @@ import assert from 'node:assert/strict';
 import * as THREE from 'three';
 
 import { DEFAULT_LIGHTING } from '../src/config/lighting-rules.ts';
-import { createCaveWallMaterial } from '../src/render/cave-wall-view.ts';
-import { LIGHT_MAP_PROGRAM_TAG, LM_TERRAIN_ALBEDO, LM_TERRAIN_HI, LM_TERRAIN_LO, LM_TERRAIN_LUM_HI, LM_TERRAIN_LUM_LO, TERRAIN_LUMA, createWorldLight, injectLightMap, terrainDarkShade } from '../src/render/light-texture.ts';
-import type { LightMapUniforms } from '../src/render/light-texture.ts';
-import type { RGB3 } from '../src/render/light-texture.ts';
-import { createTileMaterial } from '../src/render/tile-material.ts';
-import { generateTileTextures } from '../src/render/tile-textures.ts';
+import { createCaveWallMaterial } from '../src/render/decor/cave-wall-view.ts';
+import { LIGHT_MAP_PROGRAM_TAG, LM_TERRAIN_ALBEDO, LM_TERRAIN_HI, LM_TERRAIN_LO, LM_TERRAIN_LUM_HI, LM_TERRAIN_LUM_LO, TERRAIN_LUMA, createWorldLight, injectLightMap, terrainDarkShade } from '../src/render/stage/light-texture.ts';
+import type { LightMapUniforms } from '../src/render/stage/light-texture.ts';
+import type { RGB3 } from '../src/render/stage/light-texture.ts';
+import { createTileMaterial } from '../src/render/tile/tile-material.ts';
+import { generateTileTextures } from '../src/render/tile/tile-textures.ts';
 import { createFluidMap } from '../src/world/fluid-map.ts';
 import { createTileMap } from '../src/world/tile-map.ts';
 import { DEFAULT_TILES } from '../src/world/tile-types.ts';

@@ -3,8 +3,9 @@ import type { GLTF } from 'three/addons/loaders/GLTFLoader.js';
 import { clone } from 'three/addons/utils/SkeletonUtils.js';
 import { D1_ACTIONS, D1_ANIMATED_MODELS, type D1AnimatedVariant, type D1Shading, GRASSY_HEIGHT, type D1Action } from '../../config/grassy.ts';
 import { createD1Material, createD1OutlineMaterial, d1EyeControl, prepareD1Model } from './d1-anime-material.ts';
-import { characterModelPath, characterTextureTier, loadCharacterModel, type TextureTier } from '../character-model.ts';
-import { disposeModelResources } from '../model-resources.ts';
+import type { TextureTier } from '../../config/app-mode.ts';
+import { characterModelPath, characterTextureTier, loadCharacterModel } from '../character/character-model.ts';
+import { disposeModelResources } from '../character/model-resources.ts';
 import { installD1SphericalEyes } from './d1-spherical-eyes.ts';
 
 interface D1Asset {
