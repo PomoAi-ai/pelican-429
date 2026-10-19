@@ -205,7 +205,7 @@
 
 此前 `natural-rock-wireframe-draft.png` 是初步讨论图；本页正式线框图与上述坐标表用于本轮后续评审。正式接入游戏时，游戏与资源展示场应使用同一套资源和生成函数，不从资料脚本另建展示专用资产。
 
-依据：[深度定义](depth-definitions.md)、[砖块形态](tile-shape-definitions.md)、[自然资源空间](natural-spatial-definitions.md)、[矿脉定义](natural-ore-definitions.md)、[自然资源总览](natural-resource-definitions.md)。本轮完成线框、基础概念页与透视组合演示；主线、自由世界地形生成、采集和存档未修改。独立散石、采矿与脱落物的玩法状态仍按上文区分。
+依据：[深度定义](depth-definitions.md)、[砖块形态](tile-shape-definitions.md)、[自然资源空间](natural-spatial-definitions.md)、[矿脉定义](natural-ore-definitions.md)、[自然资源总览](natural-resource-definitions.md)。本轮完成线框、基础概念页与透视组合演示；主线、主世界地形生成、采集和存档未修改。独立散石、采矿与脱落物的玩法状态仍按上文区分。
 
 ## 透视图与交互演示
 

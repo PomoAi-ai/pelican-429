@@ -26,4 +26,4 @@
 
 [自由探索深渊 ↗](../?mode=game&level=facility&scene=abyss)
 
-  [自然自由世界 ↗](../?mode=game)[场景组合与形态对照 ↗](../?mode=lab)[主线试玩 ↗](../?mode=story)
+  [自然主世界 ↗](../?mode=game)[场景组合与形态对照 ↗](../?mode=lab)[主线试玩 ↗](../?mode=story)

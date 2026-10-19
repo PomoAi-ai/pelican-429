@@ -273,7 +273,7 @@ table.keys tr.diff td:nth-child(3){background:#FFF4DE}
 
   <!-- 电网详情：展开在电网段下方 -->
   <div id="power-panel" class="panel col ov ov-grid" style="top:86px;width:440px;max-height:calc(100% - 110px);overflow:auto;padding:16px 18px;gap:10px;font-size:14px">
-    <div class="row" style="justify-content:space-between"><b style="font-size:17px">电网 · 自由世界</b></div>
+    <div class="row" style="justify-content:space-between"><b style="font-size:17px">电网 · 主世界</b></div>
     <div class="row" style="gap:8px;background:#FBE7DD;color:var(--warn);border-radius:8px;padding:8px 10px;font-weight:500">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true" style="flex-shrink:0"><path d="M12 3 2 20h20z"/><path d="M12 10v4M12 17v.5"/></svg>
       按当前用电，今夜约 03:20 储能耗尽，照明和 NPC 房屋先断电
@@ -334,7 +334,7 @@ table.keys tr.diff td:nth-child(3){background:#FFF4DE}
   <!-- 全地图：横向一端海洋一端雪山，城区在中间；纵向浮岛 → 地表 → 浅层土石 → 洞穴 -->
   <div class="a ov ov-map" style="inset:0;background:rgba(19,35,63,.94);padding:20px 24px">
     <div class="col" style="height:100%;gap:12px;color:var(--pearl)">
-      <div class="row" style="justify-content:space-between"><b style="font-size:22px">地图 · 自由世界</b><button class="icon-btn" data-go="close" aria-label="关闭（M / Esc）"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+      <div class="row" style="justify-content:space-between"><b style="font-size:22px">地图 · 主世界</b><button class="icon-btn" data-go="close" aria-label="关闭（M / Esc）"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
       <div id="world-map" style="position:relative;flex:1 1 auto;min-height:0;display:grid;grid-template-columns:repeat(8,minmax(0,1fr));border:2px solid var(--navy);border-radius:12px;overflow:hidden"></div>
       <div class="row" style="gap:8px 22px;font-size:13px;flex-wrap:wrap">
         <span class="row" style="gap:6px"><i style="width:12px;height:12px;background:#E7B85C;border-radius:3px"></i>家 / 据点</span>
@@ -443,7 +443,7 @@ const NOTES = {
     <li>靠近或进入房间时，房间上方显示检查结果；不合格的直接写原因（例如最近的储能 71 格，超过 64）。窗口够宽时右侧能看到建造中的房间。</li>
     <li>断电后城区：AI 类 NPC 头顶显示 429，商店和终端暂停营业。</li></ul>`,
   map: `<h2>全地图（M）</h2><ul>
-    <li>一张自由世界：横向一端海洋，一端雪山，城区在中间；纵向是天空浮岛、地表、浅层土石、洞穴层。</li>
+    <li>一张主世界：横向一端海洋，一端雪山，城区在中间；纵向是天空浮岛、地表、浅层土石、洞穴层。</li>
     <li>没去过的地方盖着暗色，只露出地形名字。</li>
     <li>标出家、据点、电网覆盖、无人机和你自己。时间照常走，M 或 Esc 关闭。</li></ul>`,
   keys: `<h2>键位总览（H）</h2><ul>
