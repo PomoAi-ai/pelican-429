@@ -27,7 +27,7 @@ const SAVE_DELAY = 1;
 /** 离城区右端多少格内提示去原野。 */
 const WILDS_HINT = 12;
 
-export interface CityFeatureOptions {
+interface CityFeatureOptions {
   readonly world: SimWorld;
   readonly stage: Stage<StageRenderer>;
   readonly cameraRig: CameraRig;

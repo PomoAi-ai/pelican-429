@@ -8,13 +8,13 @@ import { linkReleased } from './release.ts';
 import { GITHUB_ICON, X_ICON } from './site-navigation.tsx';
 import './homepage.css';
 
-export interface HomePageOptions {
+interface HomePageOptions {
   readonly hasSave: boolean;
   /** 打开角色外观编辑器；编辑器关闭或打开失败时调用 done，按钮恢复可用。 */
   onCustomize(done: () => void): void;
 }
 
-export interface HomePageView {
+interface HomePageView {
   /** 首屏容器：.home-hero-art 承载实时场景，.home-hero-score 承载乐谱带。 */
   readonly hero: HTMLElement;
   /** 开始按需加载下方图片（滚到附近才取图）。 */

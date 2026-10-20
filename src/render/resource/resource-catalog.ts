@@ -45,7 +45,7 @@ interface ResourceActions {
   aquatic: BedKind | FloatKind | MoteKind;
   cave: CaveDecorKind;
 }
-export type ResourceEntry = { [K in keyof ResourceActions]: ShowcaseEntry<K> & { readonly action: ResourceActions[K] } }[keyof ResourceActions];
+type ResourceEntry = { [K in keyof ResourceActions]: ShowcaseEntry<K> & { readonly action: ResourceActions[K] } }[keyof ResourceActions];
 
 function variants<K extends string>(kinds: readonly K[], labels: Record<K, string>): Array<readonly [K, string]> {
   return kinds.map((kind) => [kind, labels[kind]]);
@@ -83,7 +83,7 @@ const resources = [
   resource('door', variants(BUILDING_KIT_VARIANTS.door, { closed: '关闭状态', open: '开启状态', 'lintel-closed': '一体门楣 · 关闭', 'lintel-open': '一体门楣 · 开启' })),
   resource('solar', variants(BUILDING_KIT_VARIANTS.solar, { left: '向左受光', level: '水平面板', right: '向右受光' })),
 ];
-export const RESOURCE_ENTRIES: readonly ResourceEntry[] = resources.flatMap((r) => r.entries).map((entry) => entry.actor === 'climber' ? { ...entry, description: PLANT_ATTACHMENT_DESCRIPTIONS[entry.action] } : entry);
+const RESOURCE_ENTRIES: readonly ResourceEntry[] = resources.flatMap((r) => r.entries).map((entry) => entry.actor === 'climber' ? { ...entry, description: PLANT_ATTACHMENT_DESCRIPTIONS[entry.action] } : entry);
 export const RESOURCE_CATALOG: ShowcaseCatalog = {
   mode: 'resources', title: '场景资源展示场', entries: RESOURCE_ENTRIES, subjects: resources.map((r) => r.subject), maxCards: MAX_SHOWCASE_CARDS,
   demos: [{

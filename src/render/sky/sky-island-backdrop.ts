@@ -6,9 +6,9 @@
 import * as THREE from 'three';
 import { hash01 } from '../../core/rng.ts';
 
-export const BACKDROP_ISLANDS = Object.freeze({ COUNT_PER_1000: 6, Z_NEAR: -95, Z_FAR: -150, RISE: [34, 58] as const, WIDTH: [14, 26] as const });
+const BACKDROP_ISLANDS = Object.freeze({ COUNT_PER_1000: 6, Z_NEAR: -95, Z_FAR: -150, RISE: [34, 58] as const, WIDTH: [14, 26] as const });
 
-export interface BackdropInput {
+interface BackdropInput {
   readonly width: number;
   /** 每列地表（厚实心）高度。 */
   readonly surface: ArrayLike<number>;
@@ -17,7 +17,7 @@ export interface BackdropInput {
   readonly haze?: string;
 }
 
-export function planBackdropIslands(input: BackdropInput): Array<{ x: number; y: number; z: number; w: number; seed: number }> {
+function planBackdropIslands(input: BackdropInput): Array<{ x: number; y: number; z: number; w: number; seed: number }> {
   const { width, surface, seed } = input;
   if (!(Number.isInteger(width) && width > 0) || surface.length !== width) throw new Error(`sky-island-backdrop: invalid width ${width} / surface ${surface.length}`);
   const B = BACKDROP_ISLANDS;
@@ -41,7 +41,7 @@ export function planBackdropIslands(input: BackdropInput): Array<{ x: number; y:
 }
 
 /** 剪影轮廓：平顶（带树丛鼓包）+ 倒锥底（噪声），扇形三角化；顶点色顶部偏绿、底部偏暗，整体按 haze 混色。 */
-export function buildBackdropGeometry(input: BackdropInput): THREE.BufferGeometry {
+function buildBackdropGeometry(input: BackdropInput): THREE.BufferGeometry {
   const plan = planBackdropIslands(input);
   const haze = new THREE.Color(input.haze ?? '#cfe3ea');
   const pos: number[] = [];
@@ -83,7 +83,7 @@ export function buildBackdropGeometry(input: BackdropInput): THREE.BufferGeometr
   return g;
 }
 
-export interface SkyIslandBackdrop {
+interface SkyIslandBackdrop {
   readonly mesh: THREE.Mesh;
   readonly count: number;
   dispose(): void;

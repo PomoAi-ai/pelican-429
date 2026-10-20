@@ -12,14 +12,14 @@ import { SHAPE_FULL, SHAPE_HALF, SHAPE_SLOPE_L, SHAPE_SLOPE_R } from './tile-sha
 /** 闭区间 [lo, hi]（列）。 */
 export type ColumnSpan = readonly [number, number];
 
-export interface SlopeOptions {
+interface SlopeOptions {
   /** 不放形状的列区间（含两端）：出生区、湖/池及两岸、渔屋占地 ±1。 */
   readonly exclude: readonly ColumnSpan[];
   readonly slopeChance: number;
   readonly halfChance: number;
 }
 
-export interface SlopeTileIds {
+interface SlopeTileIds {
   readonly air: number;
   /** 可以被削成斜坡/半砖的地表方块 id（solid）。 */
   readonly groundIds: readonly number[];

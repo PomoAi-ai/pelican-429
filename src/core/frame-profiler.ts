@@ -5,7 +5,7 @@
  * 只在 ?debug 下创建；正式模式不构造、不计时。core 层不读实时时钟：时钟 now 由调用方注入（main 传 performance.now）。
  */
 
-export interface RenderCounts {
+interface RenderCounts {
   readonly calls: number;
   readonly triangles: number;
 }
@@ -29,7 +29,7 @@ export interface FrameProfiler {
   snapshot(): PerfSnapshot;
 }
 
-export interface FrameProfilerOptions {
+interface FrameProfilerOptions {
   /** 统计窗口（帧，默认 60）。 */
   readonly windowSize?: number;
   /** 毫秒时钟（必填）。 */
@@ -123,7 +123,7 @@ export type GpuTimings = 'unsupported' | {
   readonly segments: Readonly<Record<string, number>>;
 };
 
-export interface FrameTimeStats {
+interface FrameTimeStats {
   readonly p50: number;
   readonly p95: number;
   readonly p99: number;

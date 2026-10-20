@@ -6,7 +6,7 @@
  */
 import * as THREE from 'three';
 
-export interface ParticleSpec {
+interface ParticleSpec {
   x: number;
   y: number;
   z: number;

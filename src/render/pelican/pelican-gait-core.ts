@@ -14,7 +14,7 @@ import type { Shape, StepPlan } from './pelican-gait-plan.ts';
 /** Ground height at world x (null: unknown, treated as flat at the body's y); null: flat everywhere. */
 export type GroundAt = ((x: number) => number | null) | null;
 
-export interface FootState {
+interface FootState {
   stance: boolean;
   /** World sole position and world slope angle of the planted foot / swing start. */
   x: number;
@@ -42,7 +42,7 @@ export interface FootState {
 }
 
 /** Body motion of the current step, shared by crouch, reach checks and the frame. */
-export interface GaitBody {
+interface GaitBody {
   bob: number;
   lean: number;
   roll: number;
@@ -56,7 +56,7 @@ export interface GaitBody {
 }
 
 /** The last sub-step's plan, read by the swing placement and the frame. */
-export interface StepContext {
+interface StepContext {
   height: number;
   fold: number;
   grade: number;
@@ -119,7 +119,7 @@ const SWING_DROP = 0.35;
 /** Share of the waddle (roll, sway, twist, tail wag) given up on a 45° slope, where the uphill leg has little room to fold. */
 const SLOPE_WADDLE_CUT = 0.7;
 /** Share of the stride cap given up on a 45° slope (a long step up a steep slope would lift the foot above the hip). */
-export const SLOPE_STRIDE_CUT = 0.4;
+const SLOPE_STRIDE_CUT = 0.4;
 /** A planted leg folded below this share of its length (on steep slopes) is lifted early. */
 const FOLD_LIFT = MIN_EXTENSION + 0.02;
 
@@ -238,7 +238,7 @@ export function bodyMotion(g: GaitCore, grade: number): void {
 /** Foot splay of `side` at the current gait weight. */
 export const footYaw = (g: GaitCore, side: 1 | -1): number => g.geo.footYaw[side] * lerp(1, g.t.gaitYawScale, g.weight);
 /** Toes-up share `age` s after landing: slapped down flat over slapTime. */
-export const slapUp = (t: PelicanGaitTuning, age: number): number => (age < t.slapTime ? 1 - smoothstep(age / t.slapTime) : 0);
+const slapUp = (t: PelicanGaitTuning, age: number): number => (age < t.slapTime ? 1 - smoothstep(age / t.slapTime) : 0);
 /** Toe pitch of a planted foot: landed toes up, slapped down flat over slapTime. */
 export const stancePitch = (g: GaitCore, foot: FootState): number => plain(-g.t.toeLift * foot.slapLift * slapUp(g.t, foot.landAge));
 

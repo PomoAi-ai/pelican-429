@@ -6,7 +6,7 @@ import {
 } from '../../config/intro.ts';
 
 /** IntroAudio 提供的调度入口：节点经 keep/track 登记，暂停时统一停止与断开。 */
-export interface StoryAudioHost {
+interface StoryAudioHost {
   readonly accompaniment: 'original' | 'finale';
   readonly context: AudioContext;
   readonly noise: AudioBuffer;

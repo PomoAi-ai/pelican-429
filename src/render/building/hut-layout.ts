@@ -17,7 +17,6 @@ export type BedHeight = (x: number) => number;
 
 /** 屋顶板竖直厚度（瓦面层 + 檐板层）。 */
 export const HUT_ROOF_THICKNESS = 0.8;
-export const ROOF_SHINGLE = 0.55;
 /** 背墙厚度 = 背景墙标准厚度。 */
 export const HUT_BACK_WALL_DEPTH = DEFINITION_DEPTH.wall;
 /** 背墙正面（板条正面）贴格子背面，衬底在其后。 */
@@ -42,7 +41,7 @@ export const PILE_SINK = 0.25;
 /** 门扇宽度与梯子占位（窗避开它们）。 */
 export const DOOR_LEAF = 0.72;
 export const DOOR_LEAF_CLEAR = DOOR_LEAF + 0.03;
-export const LADDER_CLEAR = 0.55;
+const LADDER_CLEAR = 0.55;
 /** 估算水位：栈桥板底下方的距离（湖面紧贴栈桥下）。 */
 export const WATERLINE_BELOW_DECK = 0.75;
 

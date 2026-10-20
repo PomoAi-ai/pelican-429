@@ -13,7 +13,7 @@ import { glslFloat as f } from './wind.ts';
 
 type ShaftTuning = LightingTuning['shafts'];
 
-export interface ShaftAnchor {
+interface ShaftAnchor {
   /** 光束顶端（世界）。 */
   readonly topX: number;
   readonly topY: number;
@@ -27,7 +27,7 @@ export interface ShaftAnchor {
 }
 
 /** 32 位整数哈希 → [0,1)。 */
-export function hash01(n: number): number {
+function hash01(n: number): number {
   let h = Math.imul((n | 0) ^ 0x9e3779b9, 0x85ebca6b);
   h ^= h >>> 13;
   h = Math.imul(h, 0xc2b2ae35);
@@ -135,7 +135,7 @@ const FRAGMENT = /* glsl */ `
   }`;
 
 /** 上窄（0.6）下宽（1.4）的单位梯形：顶边中点在原点，向 -y 延伸 1；uv.y 顶 1 底 0。 */
-export function createShaftGeometry(): THREE.BufferGeometry {
+function createShaftGeometry(): THREE.BufferGeometry {
   const g = new THREE.BufferGeometry();
   g.setAttribute('position', new THREE.Float32BufferAttribute([-0.3, 0, 0, 0.3, 0, 0, -0.7, -1, 0, 0.7, -1, 0], 3));
   g.setAttribute('uv', new THREE.Float32BufferAttribute([0, 1, 1, 1, 0, 0, 1, 0], 2));
@@ -143,7 +143,7 @@ export function createShaftGeometry(): THREE.BufferGeometry {
   return g;
 }
 
-export interface LightShaftsInput {
+interface LightShaftsInput {
   readonly trees: readonly TreeInstance[];
   readonly ground: Int16Array;
   readonly lighting: LightingTuning;

@@ -25,7 +25,7 @@ import { gameHost } from '../../ui/hud/mobile-game-viewport.ts';
 import type { SettingsPanel } from '../../ui/panels/settings-panel.tsx';
 import { RELEASE } from '../../ui/site/release.ts';
 
-export interface StartupSettings {
+interface StartupSettings {
   readonly store: SettingsStore;
   readonly loaded: LoadedSettings;
 }
@@ -63,7 +63,7 @@ export function loadStartupSettings(params: URLSearchParams, defaultPrecip: Prec
   return { store, loaded: loadSettings({ store, defaults, params }) };
 }
 
-export interface SettingsWiringInput {
+interface SettingsWiringInput {
   readonly chapter: boolean;
   readonly gm: boolean;
   readonly sceneBar: boolean;
@@ -83,7 +83,7 @@ export interface SettingsWiringInput {
   readonly onCharacter: () => void;
 }
 
-export interface SettingsWiring {
+interface SettingsWiring {
   readonly runtime: SettingsRuntime;
   readonly settings: SettingsController;
   readonly settingsPanel: SettingsPanel;

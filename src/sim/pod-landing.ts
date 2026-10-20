@@ -19,9 +19,9 @@ export interface PodLanding {
 }
 
 /** 开门后玩家无法操作，角色自动向左走出舱门。 */
-export const POD_WALK_INPUT: PelicanInput = { ...NEUTRAL_INPUT, moveX: -1 };
+const POD_WALK_INPUT: PelicanInput = { ...NEUTRAL_INPUT, moveX: -1 };
 /** 确认返回后玩家无法操作，角色自动向右走进舱门。 */
-export const POD_BOARD_INPUT: PelicanInput = { ...NEUTRAL_INPUT, moveX: 1 };
+const POD_BOARD_INPUT: PelicanInput = { ...NEUTRAL_INPUT, moveX: 1 };
 
 /** 已停好、开着门的舱：时间线停在末尾，起飞时倒放。 */
 export function parkedPod(plan: LandingPodPlan, step: number): PodLanding {
@@ -55,13 +55,13 @@ export function podAltitude(landing: PodLanding, ticks: number): number {
 }
 
 /** carry：下降、触地与开门期间身体随舱；walk：向左走出舱门；done：抵达出口，交还控制。 */
-export function podLandingPhase(landing: PodLanding, body: Body): 'carry' | 'walk' | 'done' {
+function podLandingPhase(landing: PodLanding, body: Body): 'carry' | 'walk' | 'done' {
   if (landing.ticks < landing.descentTicks + landing.settleTicks + landing.doorTicks) return 'carry';
   return body.x > landing.exitX ? 'walk' : 'done';
 }
 
 /** 舱内阶段的一个 tick：调用方先存 prev。 */
-export function carryInPod(landing: PodLanding, body: Body): void {
+function carryInPod(landing: PodLanding, body: Body): void {
   landing.ticks++;
   body.y = landing.ground + podAltitude(landing, landing.ticks);
 }
@@ -73,7 +73,7 @@ export function podTakeoffPhase(pod: PodLanding, body: Body): 'walk' | 'carry' |
 }
 
 /** 起飞的一个 tick：调用方先存 prev；身体对准舱轴坐进座位。 */
-export function liftInPod(pod: PodLanding, body: Body): void {
+function liftInPod(pod: PodLanding, body: Body): void {
   pod.ticks--;
   body.x = pod.x;
   body.y = pod.ground + podAltitude(pod, pod.ticks);

@@ -13,7 +13,7 @@ import { onLanguageChange } from '../model/language.ts';
 
 export type HomesteadTerminal = 'compute' | 'robot';
 
-export interface HomesteadHudOptions {
+interface HomesteadHudOptions {
   readonly state: () => HomesteadState;
   readonly terminal: () => HomesteadTerminal | null;
   readonly canSleep: () => boolean;
@@ -30,7 +30,7 @@ export interface HomesteadHudOptions {
   readonly onClose: () => void;
 }
 
-export interface HomesteadHud {
+interface HomesteadHud {
   readonly open: boolean;
   readonly commanding: boolean;
   command(tool: 'chop' | 'dig' | 'build'): void;

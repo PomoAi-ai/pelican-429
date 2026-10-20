@@ -17,7 +17,7 @@ import type { TileMap } from './tile-map.ts';
 import { SUBCELLS } from './tile-shapes.ts';
 
 /** 树冠遮光椭圆（格坐标）。 */
-export interface CanopyRegion {
+interface CanopyRegion {
   readonly cx: number;
   readonly cy: number;
   readonly rx: number;

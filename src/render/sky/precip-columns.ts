@@ -17,9 +17,9 @@ import { TILE_BRANCH } from '../../world/tile-types.ts';
 import type { TileQuery } from '../../world/tile-map.ts';
 
 /** 视为水面的最小子格水量（0..255；更薄的水膜不算水面）。 */
-export const PRECIP_WATER_MIN = 8;
+const PRECIP_WATER_MIN = 8;
 
-export interface PrecipColumnSource {
+interface PrecipColumnSource {
   readonly map: TileQuery;
   /** 格子水（FluidMap 满足）。 */
   readonly fluid: Pick<FluidQuery, 'width' | 'height' | 'subHeight' | 'subAt' | 'subTopAt'>;
@@ -28,7 +28,7 @@ export interface PrecipColumnSource {
   readonly desertFactor: number;
 }
 
-export interface PrecipColumn {
+interface PrecipColumn {
   readonly roof: number;
   readonly stop: number;
   readonly snow: number;
@@ -76,7 +76,7 @@ function blockTop(map: TileQuery, tx: number, ty: number): number {
   return top;
 }
 
-export function computePrecipColumn(src: PrecipColumnSource, tx: number): PrecipColumn {
+function computePrecipColumn(src: PrecipColumnSource, tx: number): PrecipColumn {
   const top = roofTop(src.map, tx);
   const roof = top > 0 ? top - 1 + blockTop(src.map, tx, top - 1) : top;
   const w = waterTop(src.fluid, tx, top);

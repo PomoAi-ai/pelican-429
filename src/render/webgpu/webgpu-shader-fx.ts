@@ -52,7 +52,7 @@ const projectionYY = n(cameraProjectionMatrix.element(int(1)).y);
 /** projectionMatrix * modelViewMatrix * vec4( p, 1.0 )。 */
 const clipOf = (p: N): N => n(cameraProjectionMatrix.mul(modelViewMatrix).mul(vec4(p, 1)));
 
-/** 洞穴滴水与萤火虫（render/cave-fx pointMaterial）：点径 = aSize * uScale / 深度，圆形软边。 */
+/** 洞穴滴水与萤火虫（render/fx/cave-fx pointMaterial）：点径 = aSize * uScale / 深度，圆形软边。 */
 const caveFxPoints: ShaderConversion = ({ uniform }) => {
   const mv = n(modelViewMatrix.mul(vec4(position, 1)));
   const size = n(attribute('aSize', 'float')).mul(uniform('uScale')).div(max(CAVE_FX_SHADER.minDepth, mv.z.negate()));
@@ -261,7 +261,7 @@ const grassyOverloadShockwave: ShaderConversion = ({ uniform }) => {
   return { color: n(color) };
 };
 
-/** 光子虫尾焰（render/photon-projectile-view exhaustMaterial）。 */
+/** 光子虫尾焰（render/fx/photon-projectile-view exhaustMaterial）。 */
 const photonExhaust: ShaderConversion = () => {
   const E = PHOTON_EXHAUST_SHADER;
   const vUv = n(uv());
@@ -292,7 +292,7 @@ const npcArrivalColumn: ShaderConversion = ({ uniform }) => {
   return { color: n(vec4(mix(uniform('color'), vec3(K.white), rays.mul(K.whiteMix)), alpha)) };
 };
 
-/** 无人机腹部尾焰（render/drone-energy createDroneExhaust）：值噪声撕开的外鞘 + 白热核心 + 下行能量环。 */
+/** 无人机腹部尾焰（render/character/drone-energy createDroneExhaust）：值噪声撕开的外鞘 + 白热核心 + 下行能量环。 */
 const droneExhaust: ShaderConversion = ({ uniform }) => {
   const D = DRONE_EXHAUST_SHADER;
   // 平面向下张开成锥形光束（GLSL 的 SPREAD define）。

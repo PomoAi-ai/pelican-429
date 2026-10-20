@@ -25,10 +25,10 @@ const SALT_BRANCH = 0xb4a7;
 const SALT_POOL = 0x9001;
 
 /** datum / 下界包络的斜率；洞室连线坡度上限；隧道噪声包络。三者之和 + 噪声斜率 ≤ TUNNEL_SLOPE（见 validate 注释）。 */
-export const DATUM_SLOPE = 0.4;
-export const LINK_SLOPE = 0.45;
+const DATUM_SLOPE = 0.4;
+const LINK_SLOPE = 0.45;
 /** 入口斜坡每列下降的行数。 */
-export const ENTRANCE_DROP = 1;
+const ENTRANCE_DROP = 1;
 /** 露天段：坡面之上剩余顶板 < 该行数时整列挖开。 */
 const LIP_MIN = 2;
 /** 斜坡最长列数（超过即放弃该候选）。 */
@@ -38,7 +38,7 @@ export const NEAR_SLACK = 6;
 /** 地图左右边缘保留的实心列。 */
 const EDGE_KEEP = 3;
 
-export interface CaveNetworkInput {
+interface CaveNetworkInput {
   /** 地表顶边（入口露天段会原地降低）。 */
   readonly ground: Int32Array;
   readonly width: number;

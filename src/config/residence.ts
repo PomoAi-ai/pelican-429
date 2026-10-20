@@ -8,9 +8,9 @@ export type ResidenceVariant = 'original' | 'harbor';
 export const RESIDENCE_MATERIALS = { ceramic: '暖白岩板块', alloy: '深蓝合金块', ashlar: '米黄色方石块',
   grass: '草地土块', dirt: '泥土块', stone: '石块', sand: '沙块', sandstone: '砂岩块', timber: '木料块' } as const;
 export type ResidenceMaterial = keyof typeof RESIDENCE_MATERIALS;
-export type ResidenceFurniture = 'bed' | 'pendant' | 'workstation' | 'depot' | 'dock' | 'battery'
+type ResidenceFurniture = 'bed' | 'pendant' | 'workstation' | 'depot' | 'dock' | 'battery'
   | 'terminal-compute' | 'terminal-robot' | 'solar' | 'table' | 'chair' | 'shelf' | 'plant';
-export type ResidenceFixture = 'trim-straight' | 'trim-corner' | 'trim-cap' | 'eave-light' | 'wall-light'
+type ResidenceFixture = 'trim-straight' | 'trim-corner' | 'trim-cap' | 'eave-light' | 'wall-light'
   | 'bollard-light' | 'energy-column' | 'planter' | 'railing';
 
 interface ResourceBase {
@@ -78,7 +78,7 @@ export const RESIDENCE_RESOURCES: readonly ResidenceResource[] = [
 ];
 
 /** 灯具光源相对构件左下角的位置；intensity、radius 即渲染端点光（decay 2）的强度与截止距离，光场按同一衰减计算。 */
-export interface ResidenceLight {
+interface ResidenceLight {
   readonly color: number;
   readonly intensity: number;
   readonly radius: number;
@@ -120,7 +120,7 @@ export const RESIDENCE_SUN = AI_CITY_SUN;
 /** 城区并入格子世界：住宅坐标 + CITY_ORIGIN = 格子坐标，住宅世界左下角落在格 (0,0)。 */
 export const CITY_ORIGIN = { x: -WORLD_MIN_X, y: -RESIDENCE_WORLD.minY } as const;
 /** 飞行头顶上限比建造上限高 28 格：建到上限的楼顶上方仍有飞行与俯瞰的空间；地图顶再留出飞行的 ceilingMargin。 */
-export const CITY_FLIGHT_HEADROOM = 28;
+const CITY_FLIGHT_HEADROOM = 28;
 export const CITY_MAP = {
   width: RESIDENCE_WORLD.width,
   height: RESIDENCE_WORLD.height + CITY_ORIGIN.y + CITY_FLIGHT_HEADROOM + PLAYER_FLIGHT.ceilingMargin,
@@ -130,7 +130,7 @@ export const CITY_MAP = {
  * 资源在格子世界的落点：实体砖与平台是块（实体的瓦片 key 即材质名，平台为 platform-材质），墙与窗进墙层
  * （窗的墙标识就是资源 id），能量门与太阳能板是特殊构件，其余家具与装饰是摆放物件。
  */
-export type ResidenceTarget = 'piece' | 'wall' | 'special' | 'object';
+type ResidenceTarget = 'piece' | 'wall' | 'special' | 'object';
 export function residenceTarget(resource: ResidenceResource): ResidenceTarget {
   if (resource.kind === 'solid' || resource.kind === 'platform') return 'piece';
   if (resource.kind === 'wall' || resource.kind === 'glazing') return 'wall';

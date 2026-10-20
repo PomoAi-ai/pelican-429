@@ -14,7 +14,7 @@ import './scene-workspace.css';
 type WeatherKey = keyof SceneWeatherSettings;
 
 /** 场景世界持有天气；原野改由游戏设置持有，写入经 set 持久化。 */
-export interface SceneWeatherModel<P extends SceneWeatherPreset> {
+interface SceneWeatherModel<P extends SceneWeatherPreset> {
   readonly presets: readonly P[];
   readonly weather: P;
   readonly weatherConfig: Readonly<SceneWeatherSettings>;

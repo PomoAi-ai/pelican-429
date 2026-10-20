@@ -26,7 +26,7 @@ export const DEPTH_FLAT: DepthScheme = {
 };
 
 /** 世界自己的覆盖表：未给出的项沿用方案 G。 */
-export function depthScheme(overrides: { readonly distance?: Partial<Record<BackdropLayerId, number>>; readonly foregroundSink?: number }): DepthScheme {
+function depthScheme(overrides: { readonly distance?: Partial<Record<BackdropLayerId, number>>; readonly foregroundSink?: number }): DepthScheme {
   return { ...DEPTH_G, ...overrides, distance: { ...DEPTH_G.distance, ...overrides.distance } };
 }
 

@@ -25,14 +25,14 @@ const SALT_MESA = 0x3e5a;
 const SALT_LAYER = 0x5a7d;
 
 /** 一段沙漠的选址（地形尚未改写）。 */
-export interface DesertSpan {
+interface DesertSpan {
   readonly x0: number;
   readonly x1: number;
   readonly lo: number;
   readonly hi: number;
 }
 
-export interface DesertPlanInput {
+interface DesertPlanInput {
   readonly ground: Int32Array;
   /** 全部水体（湖 + 高处小水池，按 x0 升序，与 bodies 下标一致）。 */
   readonly bodies: readonly LakeInfo[];
@@ -43,13 +43,13 @@ export interface DesertPlanInput {
   readonly cfg: WorldgenTuning;
 }
 
-export interface DesertPlan {
+interface DesertPlan {
   readonly spans: readonly DesertSpan[];
   /** 被沙漠移除的水体下标（bodies 中）。 */
   readonly removed: ReadonlySet<number>;
 }
 
-export interface DesertTileIds {
+interface DesertTileIds {
   readonly grass: number;
   readonly dirt: number;
   readonly stone: number;
@@ -338,7 +338,7 @@ export function inMesa(d: DesertInfo, x: number): boolean {
 }
 
 /** 列 x 的沙层厚度（核心非台地列），∈ SAND_DEPTH。 */
-export function desertSandDepth(x: number, seed: number): number {
+function desertSandDepth(x: number, seed: number): number {
   const t = valueNoise1D(x / 9, (seed ^ SALT_LAYER) >>> 0) * 0.5 + 0.5;
   return pickInt(Math.min(0.999999, Math.max(0, t)), DESERT_RULES.SAND_DEPTH.min, DESERT_RULES.SAND_DEPTH.max);
 }
@@ -381,7 +381,7 @@ function sideSandDepths(d: DesertInfo, west: boolean, seed: number, existing: (x
 }
 
 /** 过渡带列的沙层厚度（不计已有沙；核心与外扩范围外返回 0），见 sideSandDepths。 */
-export function transitionSandDepth(d: DesertInfo, x: number, seed: number): number {
+function transitionSandDepth(d: DesertInfo, x: number, seed: number): number {
   if (x < d.lo || x > d.hi || (x >= d.x0 && x <= d.x1)) return 0;
   const { cols, depth } = sideSandDepths(d, x < d.x0, seed, () => 0);
   return depth[cols.indexOf(x)] as number;

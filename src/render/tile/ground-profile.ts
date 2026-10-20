@@ -19,7 +19,7 @@ import { CONVEX_RADIUS, HALF_CONVEX_RADIUS, FILLET_RADIUS, TILE_TRANSITIONS, con
 
 export type GroundProfile = (x: number) => number;
 
-export interface GroundProfileOptions {
+interface GroundProfileOptions {
   /** 湖（湖床台阶做平滑 S 形过渡；与瓦片视图的 lakes 选项一致）。 */
   readonly lakes?: readonly LakeSpan[];
 }

@@ -65,16 +65,16 @@ export class FloraBuilder {
 }
 
 export const rnd = (salt: number, i: number, k: number): number => hash01(i, k, salt);
-export const smooth = (t: number): number => t * t * (3 - 2 * t);
+const smooth = (t: number): number => t * t * (3 - 2 * t);
 export const C = (hex: string): THREE.Color => new THREE.Color(hex);
 
 export const WHITE = C('#ffffff');
 export const PETAL_BASE = C('#e6e6e6');
-export const STEM = C('#3f7a2c');
+const STEM = C('#3f7a2c');
 export const LEAF = C('#3b7a2e');
 export const LEAF_LIGHT = C('#6aa845');
 
-export interface BladeSpec {
+interface BladeSpec {
   readonly x: number;
   readonly z: number;
   readonly h: number;
@@ -139,7 +139,7 @@ export function curvedStem(base: V3, h: number, bx: number, bz: number, segs = 3
 }
 
 /** 基生叶：从根部斜伸出的披针形叶（4 三角形），aPetal 0。 */
-export function basalLeaf(b: FloraBuilder, yaw: number, len: number, w: number, lift: number, dark = LEAF, light = LEAF_LIGHT): void {
+function basalLeaf(b: FloraBuilder, yaw: number, len: number, w: number, lift: number, dark = LEAF, light = LEAF_LIGHT): void {
   const dx = Math.cos(yaw);
   const dz = Math.sin(yaw) * 0.6;
   const px = -dz;
@@ -179,7 +179,7 @@ export function disc(b: FloraBuilder, at: (r: number, a: number, lift?: number) 
 }
 
 /** 花簇里一根花茎的布局（局部坐标，根在 y=0）。 */
-export interface ClumpStem {
+interface ClumpStem {
   readonly x: number;
   readonly z: number;
   /** 花茎高（花头所在高度）。 */

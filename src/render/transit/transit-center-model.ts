@@ -23,7 +23,7 @@ export interface TransitVisual {
 }
 
 type Point = readonly [number, number, number];
-export type Profile = readonly (readonly [number, number])[];
+type Profile = readonly (readonly [number, number])[];
 
 function palette() {
   return {
@@ -108,7 +108,7 @@ export function profileSection(profile: Profile, bottom: number, top: number, of
     [profileRadiusAt(profile, top) + offset, top]];
 }
 
-export function profilePoint(profile: Profile, y: number, angle: number, offset = 0): Point {
+function profilePoint(profile: Profile, y: number, angle: number, offset = 0): Point {
   const radius = profileRadiusAt(profile, y) + offset;
   return [Math.sin(angle) * radius, y, Math.cos(angle) * radius];
 }
@@ -117,7 +117,7 @@ function hullSection(bottom: number, top: number, offset = 0): Profile {
   return profileSection(TRANSIT_HULL_PROFILE, bottom, top, offset);
 }
 
-export function solidShell(parent: THREE.Object3D, name: string, profile: Profile, start: number, length: number,
+function solidShell(parent: THREE.Object3D, name: string, profile: Profile, start: number, length: number,
   thickness: number, material: THREE.Material) {
   const segments = Math.ceil(length * 28), stride = segments + 1, layerSize = profile.length * stride;
   const vertices: number[] = [], uvs: number[] = [], indices: number[] = [];
@@ -213,14 +213,14 @@ function hullDetails(rocket: THREE.Group, p: Palette): void {
   for (let i = 0; i < 5; i++) box(rocket, 'ascent telemetry light', [-.22, 11.8 + i * .25, radius + .045], [.42, .06, .025], p.cyan, .015);
 }
 
-export interface PressureHatchSpec {
+interface PressureHatchSpec {
   floor: number; height: number; angleStart: number; angleEnd: number;
   /** 开门时门板绕轴滑过的角度；正值滑向 angleStart 一侧，负值滑向 angleEnd 一侧。 */
   slideAngle: number;
 }
 
 /** 剖面上的弧形压力门：门框、导轨、滑门与读卡器；门板开合由调用方设 door.rotation.y = -(1 - 闭合度) * slideAngle。 */
-export function createPressureHatch(parent: THREE.Object3D, p: Palette, profile: Profile, spec: PressureHatchSpec) {
+function createPressureHatch(parent: THREE.Object3D, p: Palette, profile: Profile, spec: PressureHatchSpec) {
   const { floor, height, angleStart, angleEnd, slideAngle } = spec;
   const top = floor + height, arc = angleEnd - angleStart, slide = Math.abs(slideAngle);
   const section = (bottom: number, upper: number, offset: number) => profileSection(profile, bottom, upper, offset);

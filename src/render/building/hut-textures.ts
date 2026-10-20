@@ -16,7 +16,7 @@ import { mulberry32 } from '../../core/rng.ts';
 import type { Rng } from '../../core/rng.ts';
 
 export const HUT_TEXTURE_LAYERS = ['plain', 'wood', 'shingle', 'stone', 'weave', 'endGrain'] as const;
-export type HutTextureLayer = (typeof HUT_TEXTURE_LAYERS)[number];
+type HutTextureLayer = (typeof HUT_TEXTURE_LAYERS)[number];
 export const HUT_TEXTURE_SIZE = 128;
 /** 纹理灰度均值（着色器除以它得到 ≈1 的乘子）。 */
 export const HUT_TEXTURE_MEAN = 0.8;

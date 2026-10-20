@@ -1,6 +1,5 @@
 import type { IntroLanguage } from '../../config/intro-language.ts';
 import type { IntroEdition } from '../../config/intro-editions.ts';
-import { INTRO_WORDS } from '../../config/intro.ts';
 import type { IntroImages } from './intro-story.ts';
 
 export interface EditionFrame {
@@ -39,11 +38,4 @@ export function room(frame: EditionFrame, opacity: number): void {
   const {ctx,width:w,height:h,images}=frame;
   const scale=Math.min(w/1672,h/941)*.975;
   ctx.save(); ctx.globalAlpha*=opacity; ctx.drawImage(images.night,(w-1672*scale)/2,(h-941*scale)/2,1672*scale,941*scale); ctx.restore();
-}
-export function modelAt(progress: number): (typeof INTRO_WORDS)[number] {
-  const score = Math.max(5, progress * 32);
-  return INTRO_WORDS.findLast((entry) => entry.at <= score)!;
-}
-export function modelColor(family: string): string {
-  return family === 'language' ? '#80cdb2' : family === 'code' ? '#e9a272' : family === 'senses' ? '#9ea8ff' : '#b5c986';
 }

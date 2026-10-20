@@ -50,7 +50,7 @@ export function advanceAttack(a: AttackInstance): boolean {
   return !attackFinished(a);
 }
 
-export function attackFinished(a: AttackInstance): boolean {
+function attackFinished(a: AttackInstance): boolean {
   return a.elapsed >= attackTotalTicks(a.def);
 }
 

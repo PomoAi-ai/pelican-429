@@ -73,8 +73,8 @@ export const PELICAN_PARTS = Object.freeze({
 export const WING_PIVOT: Readonly<Vec3> = Object.freeze([0.1, 2.5, 0.4]) as Readonly<Vec3>;
 /** Tip of the near folded wing in bird space at depth 1: sets the line the wing spreads across. */
 const WING_TIP: Vec3 = [-1.909, 1.4615, 0.2899];
-export const WING_OPEN_MAX = (80 * Math.PI) / 180;
-export const WING_LIFT_MAX = (55 * Math.PI) / 180;
+const WING_OPEN_MAX = (80 * Math.PI) / 180;
+const WING_LIFT_MAX = (55 * Math.PI) / 180;
 /** Wing beat stroke in the side plane at pose.wingBeat = +1 (upstroke) and −1 (downstroke). */
 export const WING_BEAT_UP = (110 * Math.PI) / 180;
 export const WING_BEAT_DOWN = (40 * Math.PI) / 180;
@@ -82,22 +82,22 @@ export const WING_BEAT_DOWN = (40 * Math.PI) / 180;
  * The shoulder heaves with the stroke: up by WING_BEAT_RAISE and back (−X, behind the head) by WING_BEAT_BACK
  * at beat +1, down by WING_BEAT_DROP at beat −1.
  */
-export const WING_BEAT_RAISE = 0.6;
-export const WING_BEAT_BACK = 0.4;
-export const WING_BEAT_DROP = 0.55;
+const WING_BEAT_RAISE = 0.6;
+const WING_BEAT_BACK = 0.4;
+const WING_BEAT_DROP = 0.55;
 /** The spread wing slides out from the body by this much at full opening. */
 const WING_SHIFT = 0.25;
 /** Walking thigh share of the leg (DESIGN.md §3: thighShare 0.45). */
-export const LEG_THIGH_SHARE = 0.45;
+const LEG_THIGH_SHARE = 0.45;
 const EYE_CLOSED_SCALE = 0.1;
 /** Jaw hinge in bird space: just ahead of the bill root on the mouth line. */
 export const JAW_PIVOT: Readonly<Vec3> = Object.freeze([0.3, 4.265, 0]) as Readonly<Vec3>;
 /** Jaw opening at pose.jaw = 1 (beyond ~35° the jaw would cut into the scarf). */
-export const JAW_OPEN_MAX = (28 * Math.PI) / 180;
+const JAW_OPEN_MAX = (28 * Math.PI) / 180;
 /** Full inhale: upper-body tilt back (radians), lift (model units) and wing raise/spread (radians). */
-export const BREATH_LEAN = (1 * Math.PI) / 180;
-export const BREATH_RISE = 0.02;
-export const BREATH_WING = (1.5 * Math.PI) / 180;
+const BREATH_LEAN = (1 * Math.PI) / 180;
+const BREATH_RISE = 0.02;
+const BREATH_WING = (1.5 * Math.PI) / 180;
 const UNIT_TOLERANCE = 1e-9;
 /** The ride rig of the bicycle (pelican-3d short, the low 0.6 bike). */
 const RIDE_RIG = RIDE_RIGS.short;
@@ -108,7 +108,7 @@ const SPLAT_SPREAD = 0.5;
 /** The wings reach their ride swing by this multiple of seat (at seat 0.5 they follow the bike's wing path alone). */
 const WING_RIDE_GAIN = 2;
 
-export interface PelicanParts {
+interface PelicanParts {
   upper: THREE.Object3D[];
   wings: Record<Side, THREE.Object3D[]>;
   legs: Record<Side, THREE.Object3D[]>;
@@ -212,7 +212,7 @@ export function collectPelicanParts(group: THREE.Group): PelicanParts {
   };
 }
 
-export interface PelicanRigDiagnostics {
+interface PelicanRigDiagnostics {
   scale: number;
   /** The vendored bird's own diagnostics (bounds at unit scale, before centring). */
   bird: StandingBirdDiagnostics;
@@ -326,7 +326,7 @@ function buildJaw(group: THREE.Group, upperInner: THREE.Group, centerOffset: Vec
   return { setOpen, diagnostics };
 }
 
-export interface PelicanRigOptions {
+interface PelicanRigOptions {
   /** World units per model unit (tuning.render.pelicanScale). */
   scale: number;
   /** Walking knee bend in [−1, 1] (default DEFAULT_PELICAN_GAIT_TUNING.kneeDirection, −1: backward like a bird). */

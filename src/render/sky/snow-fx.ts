@@ -12,7 +12,7 @@ import { FADE_FRACTION, PRECIP_BOX_GLSL } from './rain-fx.ts';
 import type { PrecipCamera } from './rain-fx.ts';
 import { glslFloat as f } from './wind.ts';
 
-export interface SnowFrame {
+interface SnowFrame {
   readonly time: number;
   readonly camera: PrecipCamera;
   /** 密度 [0,1]、雪花半径（格）、下落量、漂移量、大片雪花比例 [0,1]、亮度。 */

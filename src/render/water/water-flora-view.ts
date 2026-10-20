@@ -80,7 +80,7 @@ export interface WaterFloraView {
 }
 
 /** 给材质挂接每实例透明度 aFade（链式 onBeforeCompile）；材质设为透明、不写深度。 */
-export function addInstanceFade(material: THREE.MeshStandardMaterial, label: string): THREE.MeshStandardMaterial {
+function addInstanceFade(material: THREE.MeshStandardMaterial, label: string): THREE.MeshStandardMaterial {
   const prev = material.onBeforeCompile;
   const baseKey = material.customProgramCacheKey();
   material.transparent = true;

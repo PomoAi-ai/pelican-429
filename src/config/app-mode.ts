@@ -1,8 +1,8 @@
-export const RELEASE_MODES: readonly string[] = ['index', 'about', 'story', 'game', 'intro', 'controls', 'concepts', 'sounds', 'resources', 'showcase'];
+const RELEASE_MODES: readonly string[] = ['index', 'about', 'story', 'game', 'intro', 'controls', 'concepts', 'sounds', 'resources', 'showcase'];
 
 const APP_MODES = ['index', 'catalog', 'about', 'concepts', 'story', 'game', 'homestead', 'showcase', 'compare', 'resources', 'lab', 'intro', 'sounds', 'controls',
   'render-lab', 'hair-gallery', 'maglev'] as const;
-export type AppMode = typeof APP_MODES[number];
+type AppMode = typeof APP_MODES[number];
 
 export function parseAppMode(params: URLSearchParams, release: boolean): AppMode {
   const mode = params.get('mode') ?? (params.has('level') || params.has('seed') ? 'game' : 'index');

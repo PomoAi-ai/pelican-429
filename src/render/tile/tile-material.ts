@@ -22,9 +22,6 @@ import { ORGANIC_GLSL, glslConstants } from './tile-organic.ts';
 import { CONVEX_RADIUS, HALF_CONVEX_RADIUS, FILLET_RADIUS } from './tile-transitions.ts';
 import { addNodePatch } from '../stage/node-patches.ts';
 
-/** 带自定义 defines 的材质视图。 */
-export type TileMaterialDefines = THREE.Material & { defines?: Record<string, string> };
-
 /** aShape 打包的位权（整数，float 精确表示）。 */
 export const SHAPE_PACK = Object.freeze({ ORGANIC: 8, MUD: 16, REF: 32 });
 
@@ -139,7 +136,7 @@ export function injectAfter(source: string, include: string, code: string, label
   return source.replace(token, `${token}\n${code}`);
 }
 
-export function createTileTextureArray(tex: TileTextureData): THREE.DataArrayTexture {
+function createTileTextureArray(tex: TileTextureData): THREE.DataArrayTexture {
   const { data, size, layers } = tex;
   if (data.length !== layers * size * size * 4) {
     throw new Error(`tile-material: texture data length ${data.length} does not match ${layers}×${size}²×4`);

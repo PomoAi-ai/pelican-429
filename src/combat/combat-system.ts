@@ -30,7 +30,7 @@ export interface Health {
   guard?: Guard;
 }
 
-export interface Guard {
+interface Guard {
   readonly rule: GuardRule;
   poiseDamage: number;
   poiseStartTick: number;

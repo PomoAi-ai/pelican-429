@@ -24,7 +24,7 @@ export interface HutPlan {
   readonly lake: number;
 }
 
-export interface HutTileIds {
+interface HutTileIds {
   readonly air: number;
   readonly timber: number;
   readonly roof: number;
@@ -50,13 +50,13 @@ export const HUT_YARD_COLUMNS = HUT_DOOR_APRON + 14;
  * 都要站在平地上）。门前空地（HUT_DOOR_APRON 列）之外的院子列只要求 ground ∈ [level−HUT_YARD_SLACK, level+HUT_YARD_SLACK]。
  */
 export const HUT_YARD_FLAT = 6;
-export const HUT_YARD_SLACK = 2;
+const HUT_YARD_SLACK = 2;
 
 /**
  * 首轮（SITE_SLACK / HUT_YARD_SLACK）放不下 hutCount 座时，第二轮把两者都放宽这么多行再试（压平幅度更大，仍受 FLATTEN_REACH 收敛约束）。
  * 只在首轮失败时生效：首轮能放下的世界不变。
  */
-export const HUT_FALLBACK_SLACK = 2;
+const HUT_FALLBACK_SLACK = 2;
 
 /** 屋顶（含屋檐）的列区间。 */
 export function hutRoofSpan(x0: number): ColumnSpan {

@@ -25,7 +25,7 @@ export const PRECIP_SNOW_UP: readonly [number, number] = [0.12, 0.55];
 export const PRECIP_SNOW_CAP = { base: 0.1, gain: 0.3, above: 0.12 } as const;
 export const PRECIP_SNOW_ROUGH = 0.92;
 /** 雪色（线性 RGB，略带冷蓝，不是纯白：色调映射后不过曝）。 */
-export const PRECIP_SNOW_COLOR = '#e6edf5';
+const PRECIP_SNOW_COLOR = '#e6edf5';
 
 export interface PrecipUniforms {
   readonly uPrCols: THREE.IUniform<THREE.Texture>;
@@ -96,7 +96,7 @@ const VERTEX = [
   '}',
 ].join('\n');
 
-export const PRECIP_SURFACE_PARS = [
+const PRECIP_SURFACE_PARS = [
   VERTEX_PARS,
   PRECIP_COLUMN_GLSL,
   'uniform float uPrWet;',

@@ -22,7 +22,7 @@ const SKY_ENV_INTERVAL_MS = 1000;
 const luminance = (color: THREE.Color): number => .2126 * color.r + .7152 * color.g + .0722 * color.b;
 const WHITE = new THREE.Color(1, 1, 1);
 
-export interface DaylightOptions {
+interface DaylightOptions {
   readonly stage: Stage<StageRenderer>;
   readonly look: DaylightLook;
   readonly clock: Readonly<GameTime>;

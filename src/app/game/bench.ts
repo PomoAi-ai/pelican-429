@@ -22,8 +22,8 @@ import type { SimWorld } from '../../sim/sim-world.ts';
 import type { LevelData } from '../../world/level.ts';
 import { pourAtWorld } from './debug-tools.ts';
 
-export const BENCH_SCENES = ['forest', 'cave', 'water', 'flight', 'particles'] as const;
-export type BenchScene = (typeof BENCH_SCENES)[number];
+const BENCH_SCENES = ['forest', 'cave', 'water', 'flight', 'particles'] as const;
+type BenchScene = (typeof BENCH_SCENES)[number];
 
 /** 森林、洞穴密集区、湖面、原野入口（飞行与粒子从这里出发）；区域 id 见 world/free-world-regions。 */
 const REGIONS: Readonly<Record<BenchScene, string>> = { forest: 'forest', cave: 'cave-0', water: 'lake-0', flight: 'wilds', particles: 'wilds' };
@@ -52,7 +52,7 @@ export function parseBench(params: URLSearchParams): BenchScene | null {
 
 export const benchRegion = (scene: BenchScene): string => REGIONS[scene];
 
-export interface BenchDeps {
+interface BenchDeps {
   readonly scene: BenchScene;
   readonly seed: number;
   readonly size: FreeWorldSize;

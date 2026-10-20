@@ -10,32 +10,12 @@ body .hud-status { top: calc(var(--dev-nav-height) + 44px); }
 .minimap { transform: translateY(var(--dev-nav-height)); }
 .perf-panel { transform: translateY(var(--dev-nav-height)); }
 .minimap-big-hint { margin-top: var(--dev-nav-height); }
-.entry-content { max-width: 1136px; margin: 0 auto; padding: clamp(40px, 9vh, 100px) 32px 32px; }
-.entry-eyebrow { color: #b8df9d; font: 11px/1.6 ui-monospace, monospace; letter-spacing: 3px; }
-.entry-content h1 { margin: 18px 0 12px; font-size: clamp(28px, 4vw, 46px); font-weight: 550; letter-spacing: 2px; }
-.entry-intro { color: #a3b5b8; font-size: 14px; line-height: 1.8; }
-.entry-links { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 22px; margin-top: 36px; }
-.entry-card { overflow: hidden; border: 1px solid #354740; border-radius: 14px; background: #18272a; color: #eef3eb; text-decoration: none; transition: border-color 150ms, transform 150ms; }
-.entry-card:hover { border-color: #b8df9d; transform: translateY(-4px); }
-.entry-card:focus-visible, #dev-navigation a:focus-visible { outline: 2px solid #b8df9d; outline-offset: 2px; }
-.entry-card img { display: block; width: 100%; aspect-ratio: 28 / 18; object-fit: cover; }
-.entry-card > div { padding: 22px; }
-.entry-number { font: 10px/1.5 ui-monospace, monospace; color: #b8df9d; letter-spacing: 2px; }
-.entry-card h2 { display: flex; justify-content: space-between; margin: 12px 0; font-size: 22px; font-weight: 550; }
-.entry-card h2 span { color: #b8df9d; }
-.entry-card p { margin: 0; color: #a3b5b8; font-size: 13px; line-height: 1.9; }
-.entry-footnote { margin-top: 28px; color: #83999e; font-size: 11px; }
+#dev-navigation a:focus-visible { outline: 2px solid #b8df9d; outline-offset: 2px; }
 .dev-world-position { display: flex; align-items: center; gap: 8px; margin-left: auto; color: #a3b5b8; font-size: 11px; white-space: nowrap; }
 .dev-world-position select { max-width: 190px; padding: 5px 8px; border: 1px solid #526747; border-radius: 6px; color: #d9e8d0; background: #1c2d25; font: inherit; cursor: pointer; }
 .dev-world-position select:focus-visible { outline: 2px solid #b8df9d; outline-offset: 2px; }
 .sc-sidebar-bottom .sc-home-link { display: block; margin: 10px 0 0; }
 @media (max-width: 700px) {
-  .entry-content { padding: 30px 20px; }
-  .entry-links { grid-template-columns: 1fr; gap: 18px; margin-top: 24px; }
-  .entry-card { display: grid; grid-template-columns: 34% 1fr; }
-  .entry-card img { height: 100%; aspect-ratio: auto; object-fit: cover; }
-  .entry-card > div { padding: 18px; }
-  .entry-card h2 { font-size: 18px; }
   .dev-world-position > span { display: none; }
   .dev-world-position select { max-width: 148px; }
 }
@@ -118,7 +98,6 @@ body:has(#game-navigation[open]):has(.scene-toolbar-overlay) { --dev-nav-height:
 #dev-navigation .site-language { margin-left: 0; padding: 0 28px 0 12px; border-color: #ffffff2e; border-radius: 10px; color: #cfd8dd; background-color: transparent; background-position: right 12px center; font-size: 14px; }
 #dev-navigation .site-language:hover { color: #fff; background-color: #ffffff10; }
 
-
 #dev-navigation:is(:has(.dev-world-position), :has(.site-subnav)) { padding-bottom: 44px; }
 /* 二级栏：同类页面平铺成一行，当前页下划线高亮；分段之间画竖线。窄屏横向滚动，不换行。 */
 .site-subnav { position: absolute; left: 0; right: 0; bottom: 0; display: flex; align-items: center; gap: 2px; height: 44px; padding: 0 8px; overflow-x: auto; scrollbar-width: none; border-top: 1px solid #ffffff12; background: #0c1418; font-size: 14px; }
@@ -154,7 +133,6 @@ body:has(#game-navigation[open]):has(.scene-toolbar-overlay) { --dev-nav-height:
   #dev-navigation[data-context=home] .home-brand > span:not(.home-brand-mark) { display: none; }
 }
 
-
 #dev-navigation:not([data-context=home]) :is(a, button, select, .home-social) { border: 0; border-radius: 6px; background-color: transparent; }
 #dev-navigation:not([data-context=home]) .home-play-control { border-radius: 6px; }
 #dev-navigation:not([data-context=home]) .home-nav > :is(a, button, select):hover, #dev-navigation:not([data-context=home]) .home-social > :is(a, button):hover { color: #fff; background-color: #ffffff14; }
@@ -165,9 +143,7 @@ body:has(#game-navigation[open]):has(.scene-toolbar-overlay) { --dev-nav-height:
 
 .restart-confirm { box-sizing: border-box; width: min(440px, calc(100vw - 32px)); padding: 28px; border: 1px solid #d6ed8d55; border-radius: 18px; color: #f2f1e8; background: #0e1b26; box-shadow: 0 24px 80px #0009; }
 .restart-confirm::backdrop { background: #03090dcc; backdrop-filter: blur(8px); }
-.restart-confirm-eyebrow { margin: 0 0 16px; color: #d6ed8d; font: 11px/1.5 ui-monospace, monospace; letter-spacing: 2px; }
 .restart-confirm h2 { margin: 0 0 14px; font-size: 24px; }
-.restart-confirm #restart-confirm-description { color: #a7b6c0; font-size: 14px; line-height: 1.8; }
 .restart-confirm-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 28px; }
 .restart-confirm button { min-width: 0; height: 44px; padding: 0 12px; border: 1px solid #ffffff33; border-radius: 9px; background: #ffffff08; color: #f2f1e8; font: inherit; font-size: 14px; cursor: pointer; }
 .restart-confirm .restart-confirm-accept { border-color: #d6ed8d; background: #d6ed8d; color: #10180f; font-weight: 700; }

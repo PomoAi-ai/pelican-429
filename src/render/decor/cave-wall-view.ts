@@ -18,9 +18,9 @@ import { DEFINITION_DEPTH } from '../../config/definition-kit.ts';
 import { BLOCK_BACK_Z } from '../tile/tile-geometry.ts';
 import { addNodePatch } from '../stage/node-patches.ts';
 
-export const CAVE_WALL_BAND = 64;
-export const CAVE_WALL_Z = BLOCK_BACK_Z - DEFINITION_DEPTH.wall;
-export const CAVE_WALL_PROGRAM_KEY = 'cave-wall-room-image-v1';
+const CAVE_WALL_BAND = 64;
+const CAVE_WALL_Z = BLOCK_BACK_Z - DEFINITION_DEPTH.wall;
+const CAVE_WALL_PROGRAM_KEY = 'cave-wall-room-image-v1';
 
 /** 墙格：被挖空的有顶洞穴格。 */
 export function isCarvedWall(mask: Uint8Array, i: number): boolean {

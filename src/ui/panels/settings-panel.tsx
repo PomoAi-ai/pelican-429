@@ -16,7 +16,7 @@ import { createStore, type Store } from '../react/store.ts';
 import { useLanguage } from '../react/use-language.ts';
 import './settings-panel.css';
 
-export interface SettingsPanelOptions {
+interface SettingsPanelOptions {
   readonly chapter: boolean;
   readonly gm: boolean;
   /** 页面已挂公共场景工具条（天气与世界种子在条上）。 */

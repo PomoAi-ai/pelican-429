@@ -20,7 +20,7 @@ const FREE_CHASE_TICKS = 480;
 const FREE_LOST_SIGHT_TICKS = 90;
 const FREE_REARM_TICKS = 180;
 
-export interface EnemyTarget extends Vec2 { readonly vx: number; readonly vy: number }
+interface EnemyTarget extends Vec2 { readonly vx: number; readonly vy: number }
 
 export interface EnemyData {
   readonly kind: EnemyKind;

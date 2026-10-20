@@ -3,7 +3,6 @@ import { attachStage, WEBGL_STAGE_BACKEND } from '../../render/stage/stage.ts';
 import { drawFinaleScore } from '../../render/intro/intro-finale.ts';
 import { createHoleGravity } from './home-gravity.ts';
 import { createFacilityPresentation, frameFacilityCamera } from '../facility/facility-presentation.ts';
-import type { createFacilityEnvironment } from '../facility/facility-environment.ts';
 import type { PageContext } from '../shell/page-context.ts';
 import { pageRenderer } from '../shell/page-renderer.ts';
 import { createViewLoop } from '../shell/view-loop.ts';

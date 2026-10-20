@@ -32,7 +32,7 @@ import { bufferHumanSkill, updateHumanCombat } from './human-combat.ts';
 
 export type { PelicanState } from './entity.ts';
 
-export type AttackSource = 'keyboard' | 'mouse';
+type AttackSource = 'keyboard' | 'mouse';
 
 /** 单 tick 的输入意图（sim 层以 InputFrame 名义再导出）。 */
 export interface PelicanInput {
@@ -81,7 +81,6 @@ export const NEUTRAL_INPUT: PelicanInput = Object.freeze({
 });
 
 const RUN_THRESHOLD = 0.1;
-const MIN_AIM_LENGTH = 1e-3;
 
 function requirePelican(e: Entity): PelicanData {
   if (!e.pelican) throw new Error(`pelican-controller: entity ${e.id} (${e.kind}) has no pelican component`);

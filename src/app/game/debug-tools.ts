@@ -14,7 +14,7 @@ import { SUBCELLS } from '../../world/tile-shapes.ts';
 import type { TileQuery } from '../../world/tile-map.ts';
 
 /** 地图内容哈希（FNV-1a over 每格全部块的材料、形态与加深 + 当前水量），供 ?debug 下比较同种子两次加载是否一致。 */
-export function mapHash(map: TileQuery, fluidCells: Uint8Array): string {
+function mapHash(map: TileQuery, fluidCells: Uint8Array): string {
   let h = 0x811c9dc5;
   for (let ty = 0; ty < map.height; ty++) {
     for (let tx = 0; tx < map.width; tx++) {
@@ -37,7 +37,7 @@ export interface PourState {
   readonly active: boolean;
 }
 
-export const NO_POUR: PourState = Object.freeze({ active: false });
+const NO_POUR: PourState = Object.freeze({ active: false });
 
 /** ?debug：按 V 循环天气 微风 → 大风 → 自动（平滑过渡）；监听器移除登记到 disposers。 */
 function installDebugWind(worldViews: WorldViews, disposers: Array<() => void>): void {
@@ -128,7 +128,7 @@ export function pourAtWorld(world: SimWorld, level: LevelData, at: Vec2 | null):
   pourFluid(world, x, y, TILE_FLUID);
 }
 
-export interface DebugHandles {
+interface DebugHandles {
   readonly world: SimWorld;
   readonly stage: unknown;
   readonly views: unknown;

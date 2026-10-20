@@ -51,7 +51,7 @@ export const FINALE_QUESTION_TYPING = .6;
 export const FINALE_CODE_TIMES = keystrokes(FINALE_CUES.motif, .07);
 export const FINALE_RETRY_TIMES = keystrokes(FINALE_CUES.retry, .05);
 
-export interface LineageEntry {
+interface LineageEntry {
   readonly at: number;
   readonly name: string;
   readonly year: string;
@@ -93,7 +93,7 @@ export const tokenLabel = (tokens: number): string =>
  * 网关 v0.2.6 合入采票注入后两小时内撤回。
  * u 是它在第二声部上的位置，避开主旋律名字所在的段和正中的雷击大字。
  */
-export interface UndertoneEntry {
+interface UndertoneEntry {
   readonly at: number;
   readonly text: string;
   /** 伏笔在攀升后半悄悄爬上谱；罪证被闪电砸上谱、随谱带坠落；翻转在高潮落成满血。 */

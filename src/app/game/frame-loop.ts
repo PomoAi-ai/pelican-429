@@ -55,7 +55,7 @@ export interface GameFeature {
   update(view: Readonly<Rect>, time: number, frameDt: number): void;
 }
 
-export interface FrameLoopDeps {
+interface FrameLoopDeps {
   readonly world: SimWorld;
   readonly level: LevelData;
   readonly stage: Stage<StageRenderer>;
@@ -92,7 +92,7 @@ export interface FrameLoopDeps {
   readonly features: readonly GameFeature[];
 }
 
-export interface FrameLoop {
+interface FrameLoop {
   /** 一帧（不含 rAF 调度）；now = rAF 时间戳（ms）。返回本帧时长（秒，已夹到 maxFrameTime），宿主据此推进世界时钟。 */
   frame(now: number): number;
   /** 重置帧时钟（首帧前调用，避免把初始化耗时算进第一帧）。 */

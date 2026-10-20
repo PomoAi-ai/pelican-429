@@ -110,7 +110,7 @@ export function dummyShooting(world: SimWorld): boolean {
 }
 
 /** 张嘴吞判定框（世界坐标，按朝向镜像）。 */
-export function gulpBox(e: Entity, world: SimWorld): Rect {
+function gulpBox(e: Entity, world: SimWorld): Rect {
   const box = world.tuning.weapons.swallow.box;
   const b = e.body;
   const x = e.facing > 0 ? b.x + box.x : b.x - box.x - box.w;
@@ -201,7 +201,7 @@ export function resolveWeaponInteractions(world: SimWorld): void {
 }
 
 /** 命中结算前记录会让目标变湿的投射物（hitIds 长度快照）。 */
-export interface WetMark {
+interface WetMark {
   readonly hitIds: readonly number[];
   readonly from: number;
   readonly ticks: number;

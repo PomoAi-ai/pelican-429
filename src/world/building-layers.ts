@@ -48,7 +48,7 @@ export interface WallPlacement extends Footprint {
 }
 
 /** 物件灯：颜色为 sRGB 0xRRGGBB，offset 相对锚点，z 为离后墙前方的深度偏移；光场按 intensity 与 radius 洪泛。 */
-export interface ObjectLight {
+interface ObjectLight {
   readonly color: number;
   readonly intensity: number;
   readonly radius: number;
@@ -80,7 +80,7 @@ export interface BuildingLayers {
   onChange(listener: BuildingChangeListener): () => void;
 }
 
-export type BuildingChangeListener = (x0: number, y0: number, x1: number, y1: number) => void;
+type BuildingChangeListener = (x0: number, y0: number, x1: number, y1: number) => void;
 
 /** 碰撞与表现只读的部分。 */
 export type BuildingQuery = Pick<BuildingLayers, 'wallAt' | 'objectsAt' | 'walls' | 'objects' | 'onChange'>;

@@ -11,7 +11,7 @@ import { mulberry32 } from '../../core/rng.ts';
 import type { Rng } from '../../core/rng.ts';
 import { TREE_FRONT_MAX, TREE_Z } from '../tree/tree-skeleton.ts';
 
-export interface PetalFxOptions {
+interface PetalFxOptions {
   /** 花瓣网格挂到的父节点。 */
   readonly scene: THREE.Object3D;
   /** 池容量（默认 160）。 */

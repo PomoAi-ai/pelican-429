@@ -24,10 +24,10 @@ const SCAN_SECONDS = 30;
 const LAYOUT_REACH = 40;
 
 export type MarkBlock = RouteBlock | 'zone' | 'enemy' | 'level' | 'buried' | 'reach';
-export type Mark =
+type Mark =
   | { readonly id: number; readonly kind: 'tree'; readonly treeId: number; blocked: MarkBlock | null }
   | { readonly id: number; readonly kind: 'tile'; readonly tx: number; readonly ty: number; blocked: MarkBlock | null };
-export interface Site { readonly id: number; readonly kind: HomesteadBuild; readonly x: number; readonly y: number; progress: number; blocked: MarkBlock | null }
+interface Site { readonly id: number; readonly kind: HomesteadBuild; readonly x: number; readonly y: number; progress: number; blocked: MarkBlock | null }
 type Task = { readonly kind: 'mark'; readonly mark: Mark } | { readonly kind: 'site'; readonly site: Site };
 
 export type DroneStatus = 'docked' | 'charging' | 'flying' | 'working' | 'returning' | 'stalled' | 'retreat' | 'full' | 'blocked';
@@ -53,7 +53,7 @@ export interface Drone {
 
 /** x 为左列，y 为地表顶边。 */
 export interface Spot { readonly x: number; readonly y: number; readonly width: number }
-export interface HomesteadFacilities {
+interface HomesteadFacilities {
   /** 小屋占的列与屋顶底边；屋里不能放太阳能板。 */
   readonly home: { readonly x0: number; readonly x1: number; readonly roofY: number };
   readonly dock: Spot;
@@ -67,7 +67,7 @@ export interface HomesteadFacilities {
   readonly depots: Spot[];
 }
 
-export interface Milestones { marked: boolean; unloaded: boolean; built: boolean; night: boolean; settled: boolean }
+interface Milestones { marked: boolean; unloaded: boolean; built: boolean; night: boolean; settled: boolean }
 
 export interface HomesteadState {
   readonly economy: Homestead;
@@ -109,7 +109,7 @@ export interface HomesteadSnapshot {
   readonly milestones: Milestones;
 }
 
-export const zoneOf = (x: number): number => Math.floor(x / HOMESTEAD.zoneWidth);
+const zoneOf = (x: number): number => Math.floor(x / HOMESTEAD.zoneWidth);
 const topSurface = (world: SimWorld, tx: number): number => surfaceBelow(world.map, world.fluid, tx, world.map.height)!;
 const liveEnemies = (world: SimWorld) => world.entities.filter(e => e.enemy && !e.removed && e.health!.hp > 0);
 

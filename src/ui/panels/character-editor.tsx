@@ -17,7 +17,7 @@ export interface CharacterPreview {
   setEquipmentVisible(visible: boolean): void;
   dispose(): void;
 }
-export interface CharacterEditorOptions {
+interface CharacterEditorOptions {
   appearance: CharacterAppearance;
   onApply(value: CharacterAppearance): void | Promise<void>;
   createPreview(parent: HTMLElement, initial: CharacterAppearance, onError: (error: unknown) => void): Promise<CharacterPreview>;

@@ -5,7 +5,7 @@ import { FOLLOW_DRONE } from '../../config/follow-drone.ts';
 export type DroneGroundAt = (x: number, referenceY: number) => number | null;
 /** 模型 root 在 (x, y) 时车身是否压进墙体。 */
 export type DroneBlocked = (x: number, y: number) => boolean;
-export interface DroneLocomotion {
+interface DroneLocomotion {
   x: number;
   y: number;
   flying: boolean;

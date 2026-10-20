@@ -36,9 +36,9 @@ export const ROUND_RINGS = 4;
 export const WALL_RINGS = 4;
 
 /** 边序：0 左 1 右 2 下 3 上。 */
-export type EdgeIndex = 0 | 1 | 2 | 3;
+type EdgeIndex = 0 | 1 | 2 | 3;
 
-export interface ReliefRing {
+interface ReliefRing {
   /** 环所在 z。 */
   readonly z: number;
   /** 写入 aVert.z 的编码：[0,1] 滚圆（sinφ），(1,2] 侧壁（1 + u）。 */

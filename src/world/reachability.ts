@@ -18,7 +18,7 @@ export interface ReachOptions {
   readonly allow?: (tx: number, ty: number) => boolean;
 }
 
-export interface ReachResult {
+interface ReachResult {
   /** 可达站立格数量。 */
   readonly count: number;
   has(tx: number, ty: number): boolean;
@@ -54,7 +54,7 @@ export function reachableCells(map: TileQuery, start: { readonly x: number; read
 }
 
 /** 多起点版 reachableCells（021：洞穴自检从全部入口一次 BFS）：任一起点可达即算可达；起点不可站立即抛。 */
-export function reachableFrom(map: TileQuery, starts: ReadonlyArray<{ readonly x: number; readonly y: number }>, opts: ReachOptions): ReachResult {
+function reachableFrom(map: TileQuery, starts: ReadonlyArray<{ readonly x: number; readonly y: number }>, opts: ReachOptions): ReachResult {
   checkInt('maxRise', opts.maxRise, 0);
   checkInt('maxGap', opts.maxGap, 0);
   checkInt('clearance', opts.clearance, 1);

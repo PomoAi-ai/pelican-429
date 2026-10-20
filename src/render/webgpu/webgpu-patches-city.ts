@@ -24,7 +24,7 @@ function afterColor(material: NodeMaterial, fn: (rgb: N) => N): void {
   };
 }
 
-// ---- 自然建材 natural-building（render/building-material：替换 map_fragment）----
+// ---- 自然建材 natural-building（render/building/building-material：替换 map_fragment）----
 
 const naturalBuilding: Translate<'natural-building'> = (material, { grass, period }, source) => {
   const { map } = source as THREE.MeshStandardMaterial;
@@ -38,7 +38,7 @@ const naturalBuilding: Translate<'natural-building'> = (material, { grass, perio
   material.colorNode = vec4(materialReference('color', 'color'), 1).mul(terrain);
 };
 
-// ---- 家具布纹 furniture-fabric（render/definition-furniture）----
+// ---- 家具布纹 furniture-fabric（render/building/definition-furniture）----
 
 const furnitureFabric: Translate<'furniture-fabric'> = (material) => {
   const p = varying(positionGeometry);
@@ -47,7 +47,7 @@ const furnitureFabric: Translate<'furniture-fabric'> = (material) => {
   afterColor(material, (rgb) => rgb.mul(weave.mul(0.025).add(1)));
 };
 
-// ---- AI 城建材 ai-city-finish（render/ai-city-architecture createAiCityMaterial）----
+// ---- AI 城建材 ai-city-finish（render/city/ai-city-architecture createAiCityMaterial）----
 
 const finishHash = (q: N): N => {
   const p = fract(q.mul(0.1031));
@@ -124,7 +124,7 @@ const aiCityFinish: Translate<'ai-city-finish'> = (material, { finish, variation
   });
 };
 
-// ---- 能量门溶解 gate-dissolve（render/ai-city-architecture createDoorEnergy）----
+// ---- 能量门溶解 gate-dissolve（render/city/ai-city-architecture createDoorEnergy）----
 
 const gateDissolve: Translate<'gate-dissolve'> = (material, { dissolve }, source) => {
   // GLSL vGatePosition = modelMatrix * transformed（门的网格都不实例化，即 positionWorld）。
@@ -146,7 +146,7 @@ const gateDissolve: Translate<'gate-dissolve'> = (material, { dissolve }, source
   };
 };
 
-// ---- 港口岸景雾 harbor-shore-haze（render/harbor-shore：整段替换 fog_fragment）----
+// ---- 港口岸景雾 harbor-shore-haze（render/city/harbor-shore：整段替换 fog_fragment）----
 
 const harborShoreHaze: Translate<'harbor-shore-haze'> = (material, { near, color, halfDistance }, source) => {
   // GLSL 里先挂的补丁先替换掉 fog_fragment；depth-haze 的翻译整段改写 setupFog，两者并存时无法按登记顺序还原，直接报错。

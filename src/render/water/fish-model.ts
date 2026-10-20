@@ -4,7 +4,7 @@ import { FISH_SPECIES, type FishSpeciesId } from '../../config/fish-appearance.t
 
 type V3 = readonly [number, number, number];
 
-export interface FishModel {
+interface FishModel {
   readonly position: Float32Array;
   readonly color: Float32Array;
   readonly body: Float32Array;

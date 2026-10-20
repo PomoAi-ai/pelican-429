@@ -6,7 +6,7 @@
 import type { TreeShapeKind } from '../../config/worldgen-rules.ts';
 
 export type BarkTone = 'brown' | 'dark' | 'sakura' | 'birch' | 'grey' | 'palm';
-export type FoliageTone = 'leaf' | 'blossom' | 'none';
+type FoliageTone = 'leaf' | 'blossom' | 'none';
 /**
  * 生长方式：
  * - crown：主干到分叉点，分叉出若干主枝通向冠顶叶团与两侧叶团，再递归补细枝（oak/broad/sakura/willow）；
@@ -16,7 +16,7 @@ export type FoliageTone = 'leaf' | 'blossom' | 'none';
  * - birch：主干直通冠顶，沿上段交替斜上短枝，窄椭圆冠；
  * - dead：秃枝，平台是粗横枝。
  */
-export type TreeStyle = 'crown' | 'pine' | 'bush' | 'palm' | 'birch' | 'dead';
+type TreeStyle = 'crown' | 'pine' | 'bush' | 'palm' | 'birch' | 'dead';
 
 export interface Span {
   readonly min: number;

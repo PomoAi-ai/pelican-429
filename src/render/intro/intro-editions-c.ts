@@ -1,4 +1,4 @@
-import { backdrop, clamp, glow, line, MONO, room, SANS, seeded, SERIF, smooth, TAU, text, type EditionFrame } from './intro-edition-shared.ts';
+import { backdrop, clamp, glow, line, MONO, room, seeded, SERIF, smooth, TAU, text, type EditionFrame } from './intro-edition-shared.ts';
 import { CLAUDE_MODELS, claudeMilestoneAt } from '../../config/intro-models.ts';
 
 const mix = (a: number, b: number, p: number): number => a + (b - a) * p;

@@ -16,7 +16,7 @@ import { createCartoonFishKit, createFishVariantRelay } from './cartoon-fish.ts'
 import type { CartoonFish, FishVariantRelay } from './cartoon-fish.ts';
 import { createFishShotPool } from './fish-shot-view.ts';
 import { createGlowTexture } from './orb-view.ts';
-import type { EntityView, EntityViewFactory } from '../stage/view-registry.ts';
+import type { EntityViewFactory } from '../stage/view-registry.ts';
 import { createPhotonProjectileViews } from './photon-projectile-view.ts';
 import { createDronePayloadViews } from './drone-payload-view.ts';
 import { addNodePatch } from '../stage/node-patches.ts';
@@ -98,7 +98,7 @@ function applyJelly(material: THREE.Material, uniforms: JellyUniforms): void {
 /** 一条鱼模型（卡通鱼，共享几何/材质，身长 1、朝 +X）。 */
 export type FishModel = CartoonFish;
 
-export interface ProjectileViews {
+interface ProjectileViews {
   /** 注册到 view-registry 的工厂（按 kind）。 */
   readonly factories: Readonly<Partial<Record<EntityKind, EntityViewFactory>>>;
   /** 新建一条鱼模型（落地蹦跳特效复用同一套几何/材质；随 dispose 统一释放）。variant 见 FISH_VARIANTS。 */

@@ -50,17 +50,14 @@
 .scene-toolbar [data-scene-title] { flex: none; order: -1; margin-right: 6px; white-space: nowrap; }
 /* 设置块贴住右端，中间控件在它下方横向滚动，世界与天气控制始终可见；阴影盖住工具条右内边距，滚动内容不从右缘露出。 */
 .scene-toolbar .scene-world-settings { position: sticky; right: 0; z-index: 1; flex: none; order: 2; align-self: stretch; gap: 10px; padding-left: 8px; margin-left: auto; background: #142126; box-shadow: 12px 0 #142126; }
-:is(.scene-workspace, .scene-page) .scene-toolbar :is(button, select, summary, .room-preview-status, .resource-inspection-variant, .room-preview-group, .scene-game-overlay-tools, .ctl-toggle-group) { flex-shrink: 0; white-space: nowrap; }
+:is(.scene-workspace, .scene-page) .scene-toolbar :is(button, select, summary, .room-preview-status, .resource-inspection-variant, .room-preview-group, .ctl-toggle-group) { flex-shrink: 0; white-space: nowrap; }
 /* 视角预设是一组按钮，间距与工具条上其他按钮一致。 */
 :is(.scene-workspace, .scene-page) .scene-toolbar .ctl-toggle-group { gap: 6px; }
 :is(.scene-workspace, .scene-page) .room-preview-toolbar :is(.ctl-toggle, [data-play-view])[aria-pressed='true'] { color: #c4e8a6; border-color: #7b9f66; background: #30452e; }
 :is(.scene-workspace, .scene-page) .scene-toolbar :is(button, select) { min-height: 32px; padding: 5px 7px; font-size: 12px; }
 :is(.scene-workspace, .scene-page) .scene-toolbar .room-preview-status { margin: 0; font-size: 11px; }
 :is(.scene-workspace, .scene-page) .scene-toolbar .scene-world-settings[hidden] { display: none; }
-:is(.scene-workspace, .scene-page) .scene-toolbar :is(.world-controls-panel, .scene-weather-panel, .city-layer-controls > div) { position: fixed; z-index: 40; top: calc(var(--site-nav-height) + 58px); right: 12px; left: auto; margin: 0; max-height: calc(100dvh - var(--site-nav-height) - 82px); overflow-y: auto; box-shadow: 0 12px 32px #0007; }
-:is(.scene-workspace, .scene-page) .scene-toolbar .city-layer-controls > div { width: min(280px, calc(100vw - 24px)); min-width: 0; padding: 12px; border: 1px solid #45616a; border-radius: 10px; background: #17252a; color: #dce6e8; }
-:is(.scene-workspace, .scene-page) .scene-toolbar .city-layer-controls label { white-space: nowrap; }
-
+:is(.scene-workspace, .scene-page) .scene-toolbar :is(.world-controls-panel, .scene-weather-panel) { position: fixed; z-index: 40; top: calc(var(--site-nav-height) + 58px); right: 12px; left: auto; margin: 0; max-height: calc(100dvh - var(--site-nav-height) - 82px); overflow-y: auto; box-shadow: 0 12px 32px #0007; }
 
 /* 收起顶部：侧栏与工具条让出画面；工具条只收成零高、不移出网格，场景行不错位。 */
 body:has(#game-navigation:not([open])) :is(.scene-directory, .scene-workspace-main > .scene-world-toolbar) { display: none; }

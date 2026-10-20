@@ -15,7 +15,7 @@ import { mulberry32 } from '../../core/rng.ts';
 import type { Rng } from '../../core/rng.ts';
 
 export const BARK_TEXTURE_SIZE = 128;
-export const LEAF_TILE = 128;
+const LEAF_TILE = 128;
 export const LEAF_ATLAS_W = LEAF_TILE * 4;
 export const LEAF_ATLAS_H = LEAF_TILE * 2;
 /** 叶卡 UV 的内缩像素（避免 mip 采样串到相邻块）。 */

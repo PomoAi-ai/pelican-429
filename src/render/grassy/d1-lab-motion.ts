@@ -6,7 +6,7 @@ import type { createD1LabGaits } from './d1-lab-gait.ts';
 const CROSSFADE_SECONDS = .2;
 const FRAME_SECONDS = 1 / 30;
 
-export type D1LabGait = 'original' | 'smooth';
+type D1LabGait = 'original' | 'smooth';
 
 /** 实验页的播放时钟；保留原始动作，步态候选仅存在于当前实例。 */
 export function createD1LabMotion(rig: ReturnType<typeof createD1Rig>, resetMotion: () => void, clips: ReturnType<typeof createD1LabGaits> | null) {

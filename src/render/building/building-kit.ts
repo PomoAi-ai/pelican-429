@@ -4,7 +4,7 @@ import { BUILDING_KIT } from '../../config/building-kit.ts';
 import { BLOCK_BACK_Z, BLOCK_FRONT_Z } from '../tile/tile-geometry.ts';
 import type { BuildingKitKind, BuildingKitVariant, SolarDepth } from '../../config/building-kit.ts';
 
-export interface BuildingKitView {
+interface BuildingKitView {
   readonly root: THREE.Group;
   update(time: number, solarAngle?: number): void;
   dispose(): void;

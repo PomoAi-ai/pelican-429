@@ -20,12 +20,12 @@ import { cobwebGeometry, crystalGeometry, mossGeometry, mushroomGeometry, stalac
 import { injectAfter } from '../tile/tile-material.ts';
 import { addNodePatch } from '../stage/node-patches.ts';
 
-export const CAVE_DECOR_BAND = 32;
+const CAVE_DECOR_BAND = 32;
 export const CAVE_DECOR_Z_MIN = -0.9;
 export const CAVE_DECOR_Z_MAX = -0.45;
 /** 每带实例上限（超出即抛）。 */
-export const CAVE_DECOR_BAND_BUDGET = 900;
-export const CAVE_DECOR_PROGRAM_KEY = 'cave-decor-v1';
+const CAVE_DECOR_BAND_BUDGET = 900;
+const CAVE_DECOR_PROGRAM_KEY = 'cave-decor-v1';
 
 export const CAVE_DECOR_KINDS = [
   'stalagmite0', 'stalagmite1', 'stalagmite2', 'stalagmite3',
@@ -64,7 +64,7 @@ export interface CaveDecorItem {
 }
 
 /** 规划比例（每格哈希阈值）。 */
-export const CAVE_DECOR_RULES = Object.freeze({
+const CAVE_DECOR_RULES = Object.freeze({
   STALAGMITE: 0.07,
   MOSS: 0.1,
   STALACTITE: 0.16,
@@ -176,7 +176,7 @@ export function caveDecorMatrix(d: CaveDecorItem, out: THREE.Matrix4): THREE.Mat
 }
 
 /** 全局 BatchedMesh：各种类几何一次加入，带加载/卸载时增删实例。 */
-export interface PartBatch<K extends string> {
+interface PartBatch<K extends string> {
   readonly mesh: THREE.BatchedMesh;
   add(items: ReadonlyArray<{ readonly kind: K }>, matrix: (i: number, out: THREE.Matrix4) => THREE.Matrix4): number[];
   remove(ids: readonly number[]): void;

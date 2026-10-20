@@ -47,7 +47,7 @@
 .home-button-ghost:hover { background: #ffffff10; }
 .home-button-secondary > span[aria-hidden], .home-button-primary > span[aria-hidden] { font-size: 13px; }
 .home-hero-note { margin: 18px 0 0; color: #9fb0bb; font-size: 13px; letter-spacing: 0.5px; }
-/* 序章的乐谱带：由 app/home-hero.ts 实时绘制，screen 混合叠在场景上，上缘与左右淡出。 */
+/* 序章的乐谱带：由 app/site/home-hero.ts 实时绘制，screen 混合叠在场景上，上缘与左右淡出。 */
 .home-hero-score { position: absolute; z-index: -1; left: 0; bottom: 0; width: 100%; height: clamp(160px, 24vh, 260px); mix-blend-mode: screen; pointer-events: none; -webkit-mask-image: linear-gradient(transparent, #000 35%), linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent); -webkit-mask-composite: source-in; mask-image: linear-gradient(transparent, #000 35%), linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent); mask-composite: intersect; }
 .home-scroll-cue { position: absolute; left: 50%; bottom: 28px; width: 26px; height: 42px; margin-left: -13px; border: 2px solid #ffffff60; border-radius: 14px; }
 .home-hero-contact { align-self: end; justify-self: end; margin: 0 var(--home-gutter) 120px 0; width: 280px; padding: 18px; border-radius: 20px; border: 1px solid #ffffff2e; background: #08111ab8; backdrop-filter: blur(14px) saturate(1.3); -webkit-backdrop-filter: blur(14px) saturate(1.3); box-shadow: 0 30px 60px -24px #000000b0; }
@@ -235,4 +235,3 @@
 #dev-index a { color: inherit; text-decoration: none; }
 #dev-index a:focus-visible { outline: 2px solid var(--home-accent); outline-offset: 5px; }
 #dev-index h1 { margin: 16px 0; font-size: clamp(36px, 5vw, 64px); }
-.dev-catalog-description { max-width: 680px; color: var(--home-muted); font-size: 16px; line-height: 1.9; }

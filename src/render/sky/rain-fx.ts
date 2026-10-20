@@ -54,7 +54,7 @@ export interface PrecipCamera {
 }
 
 /** 每帧参数（precip-view 由控制器视觉向量换算）。 */
-export interface RainFrame {
+interface RainFrame {
   readonly time: number;
   readonly view: Readonly<Rect>;
   readonly camera: PrecipCamera;
@@ -325,7 +325,7 @@ export interface RainFx {
   dispose(): void;
 }
 
-export interface RainFxOptions {
+interface RainFxOptions {
   readonly rules: PrecipTuning;
   readonly emitters: Float32Array;
 }

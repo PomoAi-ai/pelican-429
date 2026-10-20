@@ -35,7 +35,7 @@ export interface BodyOptions {
 }
 
 /** 自动踏阶最多一格；向下吸附仍限半格，避免走下悬崖时瞬间落地。 */
-export const MAX_STEP = 1;
+const MAX_STEP = 1;
 
 function checkStep(name: string, v: number, max: number): number {
   if (typeof v !== 'number' || !Number.isFinite(v) || v < 0 || v > max) {

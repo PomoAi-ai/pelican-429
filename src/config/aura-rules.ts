@@ -1,6 +1,6 @@
 /**
  * 鹈鹕自带微光（021 追加，类似 Terraria 玩家在暗处仍能看清自己周围）的集中调参与校验（config 层；fail-fast）。
- * 渲染层 render/pelican-aura 按所在位置的环境光照图亮度反向淡入：环境亮度 ≥ DARK_START 时不起作用，≤ DARK_FULL 时全强度，
+ * 渲染层 render/pelican/pelican-aura 按所在位置的环境光照图亮度反向淡入：环境亮度 ≥ DARK_START 时不起作用，≤ DARK_FULL 时全强度，
  * 之间 smoothstep；强度按指数平滑过渡（时间常数 FADE_TIME，进出洞口约 0.5 s）。水下用 WATER_* （略弱、偏青）。
  * 修复轮 B：光色暖白略偏黄（原 [1,.9,.74] 照在偏紫洞壁上泛粉）；背景墙（洞壁背板）只接收 wallReceive 倍，以鹈鹕与近地面为主。
  */

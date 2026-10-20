@@ -43,9 +43,9 @@ export const WATER_FILM_HEIGHT = 0.04;
 export const WAVE_FULL_DEPTH = 0.15;
 /** 顶面向后延伸：湖中段后沿 z（只比背板/方块略深），距岸 WATER_TOP_TAPER 格内按 sqrt 渐收到背板 z（湖面后沿呈圆弧，不是直角）。 */
 export const WATER_TOP_BACK_Z = WATER_BACK_Z - 0.3;
-export const WATER_TOP_TAPER = 1.5;
+const WATER_TOP_TAPER = 1.5;
 /** 深度着色（aWater.x）向上扫描的最大格数（再深按此封顶，着色已饱和）。 */
-export const WATER_SHADE_SCAN = 12;
+const WATER_SHADE_SCAN = 12;
 /** 背板每深一格变暗的比例与下限。 */
 const BACK_DARKEN_PER_CELL = 0.1;
 const BACK_DARKEN_MIN = 0.35;
@@ -55,7 +55,7 @@ export const WATER_DEPTH_CAP = Math.ceil((1 - BACK_DARKEN_MIN) / BACK_DARKEN_PER
 if (WATER_DEPTH_CAP >= CHUNK_SIZE) throw new Error(`water-view: WATER_DEPTH_CAP ${WATER_DEPTH_CAP} must be < CHUNK_SIZE ${CHUNK_SIZE}`);
 if (WATER_SHADE_SCAN >= CHUNK_SIZE || WATER_TOP_TAPER >= CHUNK_SIZE) throw new Error('water-view: WATER_SHADE_SCAN / WATER_TOP_TAPER must be < CHUNK_SIZE');
 
-export interface WaterViewOptions {
+interface WaterViewOptions {
   readonly marginChunks?: number;
   readonly keepChunks?: number;
   readonly maxBuildsPerFrame?: number;
@@ -65,7 +65,7 @@ export interface WaterViewOptions {
   readonly palette?: WaterPaletteName;
 }
 
-export interface WaterView {
+interface WaterView {
   readonly root: THREE.Group;
   /** 推进波动时间并按视野流式构建/重建；返回本次构建 + 重建的区块数。 */
   update(view: Readonly<Rect>, time: number): number;

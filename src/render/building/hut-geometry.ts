@@ -39,7 +39,7 @@ export type { BedHeight } from './hut-layout.ts';
 export { HUT_SWAY_PARTS } from './hut-sway.ts';
 export type { HutSwayPart } from './hut-sway.ts';
 
-export type HutPart = 'backWall' | 'roof' | 'roofTrim' | 'facade' | 'foundation' | 'doorFrame' | 'window' | 'interior' | 'chimney' | 'piles' | 'deck' | 'props';
+type HutPart = 'backWall' | 'roof' | 'roofTrim' | 'facade' | 'foundation' | 'doorFrame' | 'window' | 'interior' | 'chimney' | 'piles' | 'deck' | 'props';
 export const HUT_PARTS: readonly HutPart[] = Object.freeze(['backWall', 'roof', 'roofTrim', 'facade', 'foundation', 'doorFrame', 'window', 'interior', 'chimney', 'piles', 'deck', 'props'] as const);
 
 // ---------- 湖床 ----------

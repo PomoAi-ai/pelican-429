@@ -156,11 +156,3 @@ export function noise3(x: number, y: number, z: number, seed: number): number {
   const x11 = lerp(h(ix, iy + 1, iz + 1), h(ix + 1, iy + 1, iz + 1), fx);
   return lerp(lerp(x00, x10, fy), lerp(x01, x11, fy), fz);
 }
-
-/** 平移/缩放/绕 y 旋转一个仅含 position(+index) 的几何（原地，返回同一几何）。 */
-export function place(g: THREE.BufferGeometry, at: V3, scale: V3 = [1, 1, 1], yaw = 0): THREE.BufferGeometry {
-  g.scale(scale[0], scale[1], scale[2]);
-  if (yaw !== 0) g.rotateY(yaw);
-  g.translate(at[0], at[1], at[2]);
-  return g;
-}

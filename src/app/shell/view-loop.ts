@@ -6,7 +6,7 @@
  */
 import { VIEW_MAX_DT } from './frame-clock.ts';
 
-export interface ViewLoop {
+interface ViewLoop {
   /** 开始或恢复；恢复后第一帧的 dt 为 0，停顿不计入。重复调用无效果。 */
   start(): void;
   /** 停止；可再次 start。 */

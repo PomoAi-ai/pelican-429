@@ -6,7 +6,7 @@ import type { GpuTimings, PerfSnapshot } from '../../core/frame-profiler.ts';
 import { t } from '../../config/i18n.ts';
 import { onLanguageChange } from '../model/language.ts';
 
-export const PANEL_REFRESH_MS = 250;
+const PANEL_REFRESH_MS = 250;
 
 const fmtCount = (n: number): string => (n >= 1e6 ? `${(n / 1e6).toFixed(2)}M` : n >= 1e3 ? `${(n / 1e3).toFixed(1)}k` : String(Math.round(n)));
 

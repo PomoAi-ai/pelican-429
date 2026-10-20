@@ -15,7 +15,7 @@ import { footOffset, solveKnee } from './pelican-skeleton.ts';
 const SIDES: readonly Side[] = [1, -1];
 
 /** The bird parts one leg needs, all inside the bird group. */
-export interface PelicanLegPart {
+interface PelicanLegPart {
   /** standing-shin-±1: hidden; the bent leg reuses its material and sits in its parent's frame (bird space). */
   shin: THREE.Mesh;
   /** Hidden for good with the shin (shin-drawn-edge-±1-±1). */
@@ -30,7 +30,7 @@ export interface PelicanLegPart {
 
 export type PelicanLegParts = Record<Side, PelicanLegPart>;
 
-export interface PelicanLegsOptions {
+interface PelicanLegsOptions {
   /** Ankle above the sole origin along the foot's up axis (model units, ≥ 0). */
   ankleHeight: number;
   /** Ride rig whose leg profile the tubes use (default RIDE_RIGS.short, the low bicycle). */
@@ -38,7 +38,7 @@ export interface PelicanLegsOptions {
 }
 
 /** One leg's joints in bird space: the IK runs here (solveKnee), the foot takes its orientation from `foot`. */
-export interface PelicanLegJoints {
+interface PelicanLegJoints {
   hip: Vec3;
   ankle: Vec3;
   thigh: number;
@@ -52,7 +52,7 @@ export interface PelicanLegJoints {
   minExtension?: number;
 }
 
-export interface PelicanLegDiagnostics {
+interface PelicanLegDiagnostics {
   hip: Vec3;
   knee: Vec3;
   /** The ankle actually reached (the target pulled onto the reachable shell when clamped). */

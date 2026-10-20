@@ -7,7 +7,7 @@ import { loadCharacterModel } from '../character/character-model.ts';
 import { disposeModelResources } from '../character/model-resources.ts';
 import { createHairSway } from '../character/hair-sway.ts';
 
-export const FACE_TARGETS: Record<FaceParameter, string> = {
+const FACE_TARGETS: Record<FaceParameter, string> = {
   faceWidth: 'FaceWidth', faceLength: 'FaceLength', jawWidth: 'JawWidth', chinLength: 'ChinLength',
   eyeSize: 'EyeSize', eyeSpacing: 'EyeSpacing', noseSize: 'NoseSize', mouthWidth: 'MouthWidth',
 };

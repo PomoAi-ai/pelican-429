@@ -13,7 +13,7 @@ import { hash01 } from '../../core/rng.ts';
 import type { DesertInfo } from '../../world/level.ts';
 import { createTumbleweedGeometry } from '../decor/desert-geometry.ts';
 
-export const TUMBLEWEED_MAX = 6;
+const TUMBLEWEED_MAX = 6;
 export const TUMBLEWEED_RULES = Object.freeze({
   /** 生成所需的最小风（|windSway|）；低于 minWind × fadeBelow 开始消失。 */
   minWind: 0.55,
@@ -47,7 +47,7 @@ export interface TumbleweedFrame {
   ground(x: number): number;
 }
 
-export interface TumbleweedState {
+interface TumbleweedState {
   readonly active: boolean;
   readonly x: number;
   readonly y: number;

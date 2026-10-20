@@ -30,7 +30,7 @@ def _resize_tile(array, size):
 
 def fabric_sample(size, kind):
     """Keep the reference's local yarn pattern while removing its broad lighting."""
-    path = Path(__file__).resolve().parents[2] / 'public/characters/human/history/turnaround-master-v2/front.png'
+    path = Path(__file__).resolve().parents[2] / 'public/characters/human/turnaround-master-v2/front.png'
     image = bpy.data.images.load(str(path), check_existing=False)
     image.colorspace_settings.name = 'Non-Color'
     width, height = image.size

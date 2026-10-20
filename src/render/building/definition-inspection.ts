@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import type { DefinitionGridCell } from './definition-kit.ts';
 
-export interface DefinitionInspection {
+interface DefinitionInspection {
   setWireframe(enabled: boolean): void;
   setLines(visible: boolean): void;
   setTranslucent(enabled: boolean): void;

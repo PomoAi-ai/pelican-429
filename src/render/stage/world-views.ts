@@ -75,7 +75,7 @@ import type { WindUniformName, WindUniformValues } from '../sky/wind.ts';
 
 type WaterView = ReturnType<typeof createWaterView>;
 
-export interface WorldViewsInput {
+interface WorldViewsInput {
   readonly caveBackground: THREE.Texture | null;
   /** 图片背景自带远岛时关闭程序剪影。 */
   readonly islandBackdrop?: boolean;
@@ -108,7 +108,7 @@ export interface WorldViewsInput {
 }
 
 /** 风吹天气句柄（main 的调试键 V 与 ?debug 暴露）。 */
-export interface WeatherHandle {
+interface WeatherHandle {
   readonly wind: WindController;
   readonly fx: WeatherFx;
   readonly enabled: boolean;
@@ -116,13 +116,13 @@ export interface WeatherHandle {
   setEnabled(on: boolean): void;
 }
 
-export interface FloraStats {
+interface FloraStats {
   /** 已加载区块内的花草实例总数与按物种计数。 */
   readonly instances: number;
   readonly species: Readonly<Record<string, number>>;
 }
 
-export interface WorldViewStats {
+interface WorldViewStats {
   readonly fish: { readonly total: number; readonly swim: number; readonly flee: number; readonly stranded: number };
   readonly structures: number;
   readonly weeds: number;
@@ -204,7 +204,7 @@ export function floraStats(tilesRoot: THREE.Object3D): FloraStats {
 }
 
 /** 已加载瓦片区块里的地被实例统计（网格名 tiles-cover-<cx>-<cy>，userData.coverCounts 按种类）。 */
-export function coverStats(tilesRoot: THREE.Object3D): FloraStats {
+function coverStats(tilesRoot: THREE.Object3D): FloraStats {
   const species: Record<string, number> = {};
   let instances = 0;
   tilesRoot.traverse((node) => {

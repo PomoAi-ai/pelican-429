@@ -168,4 +168,3 @@ export function createSceneToolbar(title: string) {
     dispose(): void { events.abort(); controls.dispose(); root.remove(); },
   };
 }
-export type SceneToolbar = ReturnType<typeof createSceneToolbar>;

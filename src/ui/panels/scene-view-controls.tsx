@@ -9,10 +9,10 @@ import './scene-workspace.css';
 /** 视角预设的偏航与俯仰（度）：城区、瓦片场景与演示舞台共用。 */
 export const SCENE_VIEW_ANGLES = { front: [0, 0], angle: [13, 9], top: [0, 78] } as const;
 export type SceneViewAngle = keyof typeof SCENE_VIEW_ANGLES;
-export type SceneViewAction = SceneViewAngle | 'playView' | 'camera' | 'play';
+type SceneViewAction = SceneViewAngle | 'playView' | 'camera' | 'play';
 
 /** 按钮只显示场景报来的状态；游玩与镜头的真实状态由场景持有。 */
-export interface SceneViewState {
+interface SceneViewState {
   preset: SceneViewAngle | null;
   following: boolean;
   playing: boolean;

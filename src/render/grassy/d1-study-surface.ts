@@ -4,7 +4,7 @@ import { D1_EYE_SOCKET_MATERIAL } from './d1-spherical-eyes.ts';
 
 export type StudySurface = 'skin' | 'face' | 'hair' | 'cloth';
 export type StudySource = THREE.MeshToonMaterial;
-export type StudyShader = Parameters<THREE.Material['onBeforeCompile']>[0];
+type StudyShader = Parameters<THREE.Material['onBeforeCompile']>[0];
 
 const SURFACES: Readonly<Record<string, StudySurface>> = {
   Body: 'skin', 'Neck source-color transition': 'skin', model: 'face',

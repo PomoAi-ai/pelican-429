@@ -31,16 +31,16 @@ import { t } from '../../config/i18n.ts';
 import { onLanguageChange } from '../model/language.ts';
 import type { BigMapLimits, BigMapView, MinimapRaster, MinimapSource, WorldRect } from '../model/minimap-model.ts';
 
-export interface MinimapSourceLive extends MinimapSource {
+interface MinimapSourceLive extends MinimapSource {
   readonly tiles: MinimapSource['tiles'] & Pick<TileMap, 'onChange' | 'onMaskChange'>;
 }
 
-export interface MinimapPoint {
+interface MinimapPoint {
   readonly x: number;
   readonly y: number;
 }
 
-export interface MinimapFrame {
+interface MinimapFrame {
   /** 玩家标记中心（世界坐标）与朝向。 */
   readonly player: MinimapPoint & { readonly facing: 1 | -1 };
   /** 其它标记（如训练假人）。 */
@@ -49,7 +49,7 @@ export interface MinimapFrame {
   readonly dt: number;
 }
 
-export interface MinimapOptions {
+interface MinimapOptions {
   /** 小地图/大地图元素挂载点（通常 document.body）。 */
   readonly parent: HTMLElement;
   readonly source: MinimapSourceLive;

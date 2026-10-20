@@ -38,7 +38,7 @@ export function supportPosition(s: Entity, alpha: number): { x: number; y: numbe
  * 支撑体在世界 x 处的视觉顶面高度（sx/sy 为其插值脚底）：训练假人按 dummyTopAt（平顶 + 圆角），其他实体为平顶；
  * 超出其水平范围返回 null。
  */
-export function supportTopAt(s: Entity, sx: number, sy: number, worldX: number, tuning: Tuning): number | null {
+export function supportTopAt(s: Entity, sx: number, sy: number, worldX: number): number | null {
   const b = s.body;
   if (s.kind === 'trainingDummy') {
     const top = dummyTopAt(worldX - sx, b.halfWidth, b.height);
@@ -48,14 +48,14 @@ export function supportTopAt(s: Entity, sx: number, sy: number, worldX: number, 
 }
 
 /** 前方障碍收集范围（相对脚底，格）：身后少量、身前 reach；竖直 [below, above]。 */
-export interface ObstacleRegion {
+interface ObstacleRegion {
   readonly back: number;
   readonly reach: number;
   readonly below: number;
   readonly above: number;
 }
 
-export const BEAK_OBSTACLE_REGION: ObstacleRegion = Object.freeze({ back: 0.2, reach: 2, below: 0.6, above: 3.6 });
+const BEAK_OBSTACLE_REGION: ObstacleRegion = Object.freeze({ back: 0.2, reach: 2, below: 0.6, above: 3.6 });
 
 /**
  * 收集 e（插值脚底 x/y）朝向一侧 region 内的障碍盒到 out（先清空）：

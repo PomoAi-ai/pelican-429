@@ -22,7 +22,7 @@ export interface WorldComposition {
   readonly baseY: number;
 }
 
-export const COMPOSITION_JOIN = 6;
+const COMPOSITION_JOIN = 6;
 const SALT_COMPOSITION = 0x63a90f;
 const overlaps = (a: number, b: number, span: ColumnSpan): boolean => b >= span[0] && a <= span[1];
 

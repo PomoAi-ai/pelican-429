@@ -13,11 +13,11 @@ import { ORGANIC_ARC_MID_MAX } from './tile-organic.ts';
 import { tileLayerIndex } from './tile-textures.ts';
 import type { TileTextureLayer } from './tile-textures.ts';
 
-export type TransitionStyle = 'blend' | 'fringe' | 'smooth' | 'hard';
-export type ContourStyle = Extract<TransitionStyle, 'smooth' | 'hard'>;
-export type EdgeSide = 'left' | 'right' | 'bottom' | 'top';
+type TransitionStyle = 'blend' | 'fringe' | 'smooth' | 'hard';
+type ContourStyle = Extract<TransitionStyle, 'smooth' | 'hard'>;
+type EdgeSide = 'left' | 'right' | 'bottom' | 'top';
 
-export type PairTransition =
+type PairTransition =
   | { readonly style: 'hard' }
   /** width：分界摆幅（格，(0, .35]）；scale：沿边的噪声频率（每格周期数，> 0）。 */
   | { readonly style: 'blend'; readonly width: number; readonly scale: number }
@@ -42,13 +42,13 @@ export interface TransitionTable {
 }
 
 /** 空气（及不渲染瓦片、水、薄板对方块而言）在规则表中的名字。 */
-export const AIR_KEY = 'air';
+const AIR_KEY = 'air';
 export const CONVEX_RADIUS = 0.4;
 /** 半砖只有半格高，圆角随高度缩小，避免削掉大部分可站立顶面。 */
 export const HALF_CONVEX_RADIUS = CONVEX_RADIUS * 0.5;
 export const FILLET_RADIUS = 0.4;
 export const MAX_CONTOUR_DEVIATION = 0.25;
-export const MAX_BLEND_WIDTH = 0.35;
+const MAX_BLEND_WIDTH = 0.35;
 
 export const TILE_TRANSITIONS: TransitionTable = Object.freeze({
   default: Object.freeze({ style: 'hard' }),
@@ -143,7 +143,7 @@ export function contourStyle(t: TransitionTable, key: string): ContourStyle {
 // ---------- 邻接掩码与角形状（marching-squares 式） ----------
 
 /** 8 邻域位序：左 右 下 上 左下 右下 右上 左上（bit 0..7）。 */
-export const NEIGHBOUR_OFFSETS: ReadonlyArray<readonly [number, number]> = Object.freeze([
+const NEIGHBOUR_OFFSETS: ReadonlyArray<readonly [number, number]> = Object.freeze([
   [-1, 0],
   [1, 0],
   [0, -1],
@@ -154,7 +154,7 @@ export const NEIGHBOUR_OFFSETS: ReadonlyArray<readonly [number, number]> = Objec
   [-1, 1],
 ]);
 /** 角序：0 左下、1 右下、2 右上、3 左上；每角相邻的两条边（边序 0 左 1 右 2 下 3 上）与对角邻居位。 */
-export const CORNER_EDGES: ReadonlyArray<readonly [number, number]> = Object.freeze([
+const CORNER_EDGES: ReadonlyArray<readonly [number, number]> = Object.freeze([
   [0, 2],
   [1, 2],
   [1, 3],

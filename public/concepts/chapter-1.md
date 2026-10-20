@@ -151,7 +151,7 @@
 
 | 内容 | 位置 |
 | --- | --- |
-| 序章 | `app/intro-app.ts`、`config/intro-finale.ts` |
+| 序章 | `app/intro/intro-app.ts`、`config/intro-finale.ts` |
 | 黑洞落地演出（需移到种子世界出生点并加长，加入光子现身） | `sim/sim-world.ts` 的 `beginBlackholeArrival` |
 | 光子伙伴渲染与动作 | `render/luma/`、`config/luma.ts` |
 | Tibo 首领与击败后变身演出 | `entities/boss.ts`、`sim/mainline.ts` |

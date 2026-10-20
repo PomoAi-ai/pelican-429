@@ -20,7 +20,7 @@ import type { ColumnSpan } from './slopes.ts';
 import { pickHomeHut } from './spawn-home.ts';
 import { HUT_DOOR_APRON, HUT_YARD_COLUMNS, hutRoofSpan } from './structures.ts';
 
-export interface CaveStageInput {
+interface CaveStageInput {
   readonly grid: Uint16Array;
   readonly shapes: Uint8Array;
   readonly ground: Int32Array;
@@ -37,7 +37,7 @@ export interface CaveStageInput {
   readonly ids: { readonly air: number; readonly floorIds: readonly number[] };
 }
 
-export interface CaveStage {
+interface CaveStage {
   readonly network: CaveNetwork;
   /** 挖掉的实心格数与洞底斜坡数。 */
   readonly carved: number;
@@ -73,7 +73,7 @@ export function carveCaveStage(input: CaveStageInput): CaveStage {
   return { network, carved: carved + headroom.cells, slopes: placed - headroom.slopesRemoved };
 }
 
-export interface FloaterStageInput {
+interface FloaterStageInput {
   readonly grid: Uint16Array;
   readonly shapes: Uint8Array;
   readonly ground: Int32Array;
@@ -96,7 +96,7 @@ export interface FloaterStageInput {
   readonly ids: FloaterTileIds;
 }
 
-export interface FloaterStage {
+interface FloaterStage {
   readonly plans: readonly FloaterPlan[];
   /** 浮空块瓦片掩码（行主序）。 */
   readonly mask: Uint8Array;
@@ -173,7 +173,7 @@ export function floaterStage(input: FloaterStageInput): FloaterStage {
   return { plans, mask, treeExclude };
 }
 
-export interface FinishedFloaters {
+interface FinishedFloaters {
   readonly trees: readonly TreeInstance[];
   readonly islands: readonly SkyIsland[];
 }

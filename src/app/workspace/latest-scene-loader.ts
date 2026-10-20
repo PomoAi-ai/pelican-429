@@ -1,4 +1,4 @@
-export interface SceneLoadRequest<T> {
+interface SceneLoadRequest<T> {
   readonly value: T;
   readonly signal: AbortSignal;
   onDispose(cleanup: () => void): void;

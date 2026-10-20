@@ -10,10 +10,10 @@ import type { TileQuery } from './tile-map.ts';
 /** 碰撞容差：贴边、共点不算重叠。 */
 export const COLLISION_EPS = 1e-4;
 
-export type Polygon = readonly DefinitionPoint[];
+type Polygon = readonly DefinitionPoint[];
 
 /** 一次查询的结果：多边形顶点按 (ox, oy) 平移到世界坐标。调用方复用同一对象，热路径不分配。 */
-export interface CollisionShapes {
+interface CollisionShapes {
   solidCount: number;
   readonly points: Polygon[];
   readonly ox: number[];
@@ -46,7 +46,7 @@ export function pushSolid(out: CollisionShapes, points: Polygon, ox: number, oy:
   out.steppable[i] = steppable;
 }
 
-export function pushSupport(out: CollisionShapes, left: number, right: number, top: number): void {
+function pushSupport(out: CollisionShapes, left: number, right: number, top: number): void {
   const i = out.supportCount++;
   out.left[i] = left;
   out.right[i] = right;
@@ -57,7 +57,7 @@ export function pushSupport(out: CollisionShapes, left: number, right: number, t
 const UNIT = pieceShapePolygon(0);
 
 /** sectionInto 的输出：带内截面在另一轴上的 [lo,hi]，以及多边形在带所在轴上的范围 [min,max]。 */
-export interface Section {
+interface Section {
   lo: number;
   hi: number;
   min: number;

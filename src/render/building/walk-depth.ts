@@ -37,7 +37,7 @@ export function walkDepth(obstacles: Iterable<WalkObstacle>, x: number, y: numbe
 }
 
 /** 家具深 1 贴格子背面（Z=[−1,0]）；吊灯不落地、不让位；后置的花槽与设备柱同家具；路灯柱在人物平面上，让到 +.75。 */
-export function walkObstacleOf(resource: ResidenceResource, object: PlacedObject): WalkObstacle | null {
+function walkObstacleOf(resource: ResidenceResource, object: PlacedObject): WalkObstacle | null {
   const at = (centerZ: number, frontZ: number, top: number | null): WalkObstacle =>
     ({ x: object.x, y: object.y, width: object.width, height: object.height, centerZ, frontZ, top });
   if (resource.kind === 'furniture') return resource.furniture === 'pendant' ? null : at(-.5, 0, object.standTop === null ? null : object.y + object.standTop);

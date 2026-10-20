@@ -31,7 +31,7 @@ import { ANTIALIAS_MODES } from '../../config/lighting-rules.ts';
 import type { AntialiasMode, LightingQuality, LightingTuning } from '../../config/lighting-rules.ts';
 import type { GpuTimer } from './gpu-timer.ts';
 
-export interface PassPlan {
+interface PassPlan {
   readonly ao: boolean;
   readonly bloom: boolean;
   readonly shafts: boolean;
@@ -86,7 +86,7 @@ export interface GradeUniforms {
  * 输出 + 色彩分级（一次全屏）：HDR 场景（+ 地面反射）+ bloom → 色调映射 → sRGB（OutputShader 同式，defines 由 OutputPass 维护）
  * → 显示空间：乘 AO → 白平衡 tint → 饱和度 → 对比度 → 暗角。
  */
-export const GRADE_FRAGMENT = /* glsl */ `
+const GRADE_FRAGMENT = /* glsl */ `
   precision highp float;
   uniform sampler2D tDiffuse;
   uniform sampler2D tBloom;
@@ -454,7 +454,7 @@ export interface PostFxInput {
   readonly antialias?: AntialiasMode;
 }
 
-/** 舞台使用的后期接口；WebGL 实现见 createPostFx，WebGPU 实现见 app/webgpu-post-fx。 */
+/** 舞台使用的后期接口；WebGL 实现见 createPostFx，WebGPU 实现见 render/webgpu/webgpu-post-fx。 */
 export interface PostFx {
   /** 当前抗锯齿方式（setAntialias 运行时切换）。 */
   readonly antialias: AntialiasMode;
@@ -482,7 +482,7 @@ export interface PostFx {
   dispose(): void;
 }
 
-export interface WebGLPostFx extends PostFx {
+interface WebGLPostFx extends PostFx {
   readonly composer: EffectComposer;
   /** 场景渲染目标（HalfFloat + 深度纹理；msaa 模式多重采样，每帧唯一一次 resolve）。 */
   readonly sceneTarget: THREE.WebGLRenderTarget;

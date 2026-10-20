@@ -13,7 +13,7 @@ export const FINALE_MUSIC_END = (FINALE_DURATION + INTRO_DURATION - 20) * FINALE
 const story = (seconds: number): number => seconds + FINALE_DURATION - 20;
 
 /** 音源、包络、暂停和定位由播放器管理，这里只编排真实拍点。 */
-export interface FinalePlayer {
+interface FinalePlayer {
   note(at: number, duration: number, frequency: number, instrument: Instrument, volume: number, pan: number): void;
   /** 音高从 from 滑到 to（Hz），音量随之线性消失；只在升调点之前使用。 */
   glide(at: number, duration: number, from: number, to: number, instrument: Instrument, volume: number, pan: number): void;

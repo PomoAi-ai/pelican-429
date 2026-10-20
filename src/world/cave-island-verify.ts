@@ -26,11 +26,11 @@ import { entranceRideBlock } from './cave-features.ts';
 import { tileCollision } from './collision-geometry.ts';
 
 /** 洞内连通：鹈鹕身体 1 列 × 3 行（身高 2.5），翅膀飞行（不受起跳高度限制）。 */
-export const CAVE_BODY_ROWS = 3;
+const CAVE_BODY_ROWS = 3;
 /** 入口斜坡走路可达（台阶 ≤ 1 行、净空 3 行；斜坡形状下即为可走/骑的坡）。 */
-export const WALK_RAMP = { maxRise: 1, maxGap: 1, clearance: 3 } as const;
+const WALK_RAMP = { maxRise: 1, maxGap: 1, clearance: 3 } as const;
 
-export interface CaveIslandVerifyInput {
+interface CaveIslandVerifyInput {
   readonly map: TileMap;
   readonly fluid: FluidMap;
   readonly spawn: Vec2;

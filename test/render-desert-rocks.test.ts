@@ -8,7 +8,6 @@ import { DESERT_KINDS, DESERT_NATIVE_HEIGHT, createDesertParts, createTumbleweed
 import { createFloraEnv } from '../src/render/flora/flora.ts';
 import { createGroundProfile } from '../src/render/tile/ground-profile.ts';
 import { ROCK_KINDS, createRockParts } from '../src/render/decor/rock-geometry.ts';
-import { groundSurface } from '../src/render/stage/stage.ts';
 import { BIG_ROCKS, DESERT_DECOR_RULES, ROCK_BIG_GAP, ROCK_TRUNK_CLEAR, ROCK_Z, SAND_ROCKS, SKIRT_ROCKS, SMALL_ROCKS, planDesertDecor, planRocks, rockGroupInstances } from '../src/render/decor/surface-decor.ts';
 import type { DecorEnv } from '../src/render/decor/surface-decor.ts';
 import { SURFACE_DECOR_BAND, createDecorEnv, createSurfaceDecorView, levelGroundColumns } from '../src/render/decor/surface-decor-view.ts';

@@ -12,21 +12,21 @@ import type { CameraShot } from './camera-intro.ts';
 import type { Rect, Vec2 } from '../../core/math.ts';
 
 /** 注视点比角色脚底高出的基础距离；实际再加 tuning.camera.framingOffsetY（见 focusHeight）。 */
-export const FOCUS_HEIGHT = 2;
+const FOCUS_HEIGHT = 2;
 
 /** 注视点高出脚底的总距离 = FOCUS_HEIGHT + framingOffsetY（角色处于画面偏下，多看天空、少看地下）。 */
 export function focusHeight(tuning: Tuning): number {
   return FOCUS_HEIGHT + tuning.camera.framingOffsetY;
 }
 
-export interface Viewport {
+interface Viewport {
   readonly left: number;
   readonly top: number;
   readonly width: number;
   readonly height: number;
 }
 
-export interface CameraRigOptions {
+interface CameraRigOptions {
   readonly camera: THREE.PerspectiveCamera;
   readonly tuning: Tuning;
   /** 地图尺寸（瓦片）；minY（默认 0）为可视区域下边界，见 cameraFloorY。 */

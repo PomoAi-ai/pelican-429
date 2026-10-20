@@ -131,7 +131,7 @@ export interface LightRect {
 }
 
 /** 一个已计算条带：子格 [x0, x0+width) 全高，行主序（行宽 width）。 */
-export interface LightStrip {
+interface LightStrip {
   readonly x0: number;
   readonly width: number;
   readonly sky: Uint8Array;
@@ -144,7 +144,7 @@ export interface LightStrip {
 }
 
 /** 分摊预算：sync 按它把重算分到多帧。 */
-export interface LightBudget {
+interface LightBudget {
   /** 镜头中心（子格 x）：待算工作按离它的距离先后处理。 */
   readonly focus: number;
   /** 本次必须算完的条带 [s0, s1)（镜头可见范围），不受预算限制。 */
@@ -189,7 +189,7 @@ const union = (a: LightRect, b: LightRect): LightRect => ({
   x0: Math.min(a.x0, b.x0), y0: Math.min(a.y0, b.y0), x1: Math.max(a.x1, b.x1), y1: Math.max(a.y1, b.y1) });
 
 /** 灯光穿出一个实心子格时保留的比例：1 格薄墙另一侧剩二三成、2 格以下不足一成。 */
-export const LAMP_SOLID_PASS = .72;
+const LAMP_SOLID_PASS = .72;
 /** 穿出实心子格时路径代价额外加的子格数：让绕行通常优于穿墙，又不至于让薄墙完全不透。 */
 const LAMP_SOLID_COST = 3;
 /** 灯光最多穿出的实心子格数：第 12 个（3 格）透过率已低于 2%，3 格厚墙另一侧为 0。 */

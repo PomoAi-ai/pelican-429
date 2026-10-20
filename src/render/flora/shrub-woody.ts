@@ -25,10 +25,10 @@ const ZB = -0.62;
 /** 叶团 z 向扁度：灌木整株留在身体区之后，冠团保持扁。 */
 const Z_SQUASH = 0.6;
 /** 每个冠团的三角形上限（变体图集里每实例都要跑全图集顶点，保持小）。 */
-export const SHRUB_CLUMP_MAX_TRIS = 200;
+const SHRUB_CLUMP_MAX_TRIS = 200;
 const FILL_GRAY = 0.72;
 
-export interface Lobe {
+interface Lobe {
   readonly x: number;
   readonly y: number;
   readonly z?: number;
@@ -37,7 +37,7 @@ export interface Lobe {
   readonly sy?: number;
 }
 
-export interface Dots {
+interface Dots {
   readonly colors: readonly string[];
   readonly n: number;
   readonly r: number;
@@ -45,13 +45,13 @@ export interface Dots {
   readonly cluster: number;
 }
 
-export interface Twig {
+interface Twig {
   readonly path: ReadonlyArray<readonly [number, number, number]>;
   readonly r0: number;
   readonly r1: number;
 }
 
-export interface WoodySpec {
+interface WoodySpec {
   readonly salt: number;
   readonly leaf: string;
   readonly tile: LeafTile;
@@ -194,7 +194,7 @@ export function buildWoody(spec: WoodySpec): THREE.BufferGeometry {
 const L = LEAF_COLORS;
 
 /** 木本种的造型（本体坐标：根在原点，冠底贴近 y≈.05，收进草里）。 */
-export type WoodyKind = 'hedge' | 'azalea' | 'berry' | 'sapling' | 'rose' | 'buckthorn';
+type WoodyKind = 'hedge' | 'azalea' | 'berry' | 'sapling' | 'rose' | 'buckthorn';
 
 export const WOODY_SPECS: Readonly<Record<WoodyKind, WoodySpec>> = Object.freeze({
   hedge: {

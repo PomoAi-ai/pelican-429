@@ -61,16 +61,12 @@ export const ORGANIC_PARAMS = Object.freeze({
   HASH_X: 0x9e3779b1,
 });
 
-export type OrganicParam = keyof typeof ORGANIC_PARAMS;
 const P = ORGANIC_PARAMS;
 
 // 旧名（保持既有导入可用）。
 export const ORGANIC_TOP_AMP = P.ORG_TOP;
 export const ORGANIC_SIDE_AMP = P.ORG_SIDE;
-export const ORGANIC_ARC_TAPER = P.ORG_ARC_TAPER;
 export const INTERLOCK_JAG = P.JAG_AMP;
-export const SPECK_RANGE = P.SPECK_RANGE;
-export const SEAM_AO_WIDTH = P.SEAM_AO_WIDTH;
 export const SEAM_AO_STRENGTH = P.SEAM_AO_STRENGTH;
 export const MACRO_AMP = P.MACRO_AMP;
 
@@ -117,11 +113,6 @@ export function edgeNoise(x: number, y: number): number {
 /** 顶边（未位移顶线上的点 (x,y)）的竖直位移。 */
 export function organicTopOffset(x: number, y: number): number {
   return P.ORG_TOP * edgeNoise(x, y);
-}
-
-/** 侧/底边沿外法线的位移。 */
-export function organicSideOffset(x: number, y: number): number {
-  return P.ORG_SIDE * edgeNoise(x, y);
 }
 
 /** 平滑位移 |D| 处顶边起伏的收窄系数 ∈ [0,1]：|D| + 系数·ORG_TOP ≤ ORG_DEV_LIMIT。 */
@@ -171,7 +162,7 @@ export function interlockSigned(i: number, dist: number, F: number): number {
 }
 
 /** 分界附近的对方材质碎块：s ∈ (0, SPECK_RANGE) 且斑点噪声超过随 s 升高的阈值。 */
-export function speckle(s: number, wx: number, wy: number): boolean {
+function speckle(s: number, wx: number, wy: number): boolean {
   if (!(s > 0 && s < P.SPECK_RANGE)) return false;
   return organicNoise2(wx * P.SPECK_FREQ, wy * P.SPECK_FREQ, P.SALT_SPECK) > P.SPECK_BASE + P.SPECK_SLOPE * (s / P.SPECK_RANGE);
 }
@@ -206,7 +197,7 @@ export function grassHang(edgeX: number, cellY: number, distSide: number, wx: nu
 }
 
 /** 圆角弧上 s ∈ [0,1] 处的起伏幅度（两端分别等于相邻两边的幅度）。 */
-export function organicArcAmp(ampStart: number, ampEnd: number, s: number): number {
+function organicArcAmp(ampStart: number, ampEnd: number, s: number): number {
   return (ampStart + (ampEnd - ampStart) * s) * (1 - P.ORG_ARC_TAPER * Math.sin(Math.PI * s));
 }
 

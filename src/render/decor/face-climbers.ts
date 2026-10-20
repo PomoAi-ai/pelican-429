@@ -21,7 +21,7 @@ import { addVariantCollapse, createVariantBatch, mergeIndexedVariants } from '..
 
 export const CLIMBER_Z = BLOCK_FRONT_Z;
 /** 地表攀附从草皮下缘起长：草边垂草带（grassSide）约在顶线下 .3–.56。 */
-export const CLIMBER_FRINGE = 0.42;
+const CLIMBER_FRINGE = 0.42;
 
 /**
  * 变体（每类 ≥ 3 个确定性变体）：
@@ -29,7 +29,7 @@ export const CLIMBER_FRINGE = 0.42;
  * - mat*：横向苔毯（自原点向下挂，宽 1.6–2.9、高约 .45，边缘碎裂，含 1–2 个小叶团给出体积）；patch*：小苔斑；
  * - sprig*：小叶簇/蕨丛（.3–.6）；accent*：小花与嫩叶点缀（粉花 / 乳白花 / 嫩黄绿叶）。
  */
-export const CLIMBER_VARIANTS = [
+const CLIMBER_VARIANTS = [
   'up0', 'up1', 'up2', 'diag0', 'diag1', 'diag2', 'hang0', 'hang1', 'hang2', 'mat0', 'mat1', 'mat2',
   'patch0', 'patch1', 'sprig0', 'sprig1', 'sprig2', 'accent0', 'accent1', 'accent2',
   'bottomMoss0', 'bottomVine0', 'bottomFlower0',
@@ -50,12 +50,12 @@ const IVY: Readonly<Record<IvyVariant, { readonly len: number; readonly dir: 1 |
   hang2: { len: 3, dir: -1, lean: 0.04, spread: 0.22 },
 };
 
-export const CLIMBER_SETS = {
+const CLIMBER_SETS = {
   attachment: ['mat0', 'patch0', 'diag0', 'hang0', 'bottomMoss0', 'bottomVine0', 'bottomFlower0'],
   island: ['up0', 'up1', 'up2', 'diag0', 'diag1', 'diag2', 'hang0', 'hang1', 'mat0', 'mat1', 'mat2', 'patch0', 'patch1', 'sprig0', 'sprig1', 'sprig2', 'accent0', 'accent1', 'accent2'],
   ground: ['diag0', 'diag1', 'diag2', 'hang0', 'hang1', 'hang2', 'mat0', 'mat1', 'mat2', 'sprig0', 'sprig1', 'sprig2', 'accent0', 'accent1', 'accent2'],
 } as const satisfies Record<string, readonly ClimberVariant[]>;
-export type ClimberSet = keyof typeof CLIMBER_SETS;
+type ClimberSet = keyof typeof CLIMBER_SETS;
 
 export interface ClimberInstance {
   readonly variant: ClimberVariant;
@@ -82,7 +82,7 @@ export function fitIvy(kinds: readonly IvyVariant[], want: number, max: number):
 const TINT_DEEP = [0.74, 0.84, 0.74] as const;
 const TINT_FRESH = [1.12, 1.12, 0.8] as const;
 /** 实例乘色：k 0 → 深苔、.5 → 原色、1 → 嫩黄绿；shade 整体压暗（靠下、靠内更深）。 */
-export function climberTint(k: number, shade: number): readonly [number, number, number] {
+function climberTint(k: number, shade: number): readonly [number, number, number] {
   const c = (i: 0 | 1 | 2): number => (k < 0.5 ? TINT_DEEP[i] + (1 - TINT_DEEP[i]) * k * 2 : 1 + (TINT_FRESH[i] - 1) * (k - 0.5) * 2) * shade;
   return [c(0), c(1), c(2)];
 }

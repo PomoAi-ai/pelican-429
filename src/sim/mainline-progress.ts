@@ -16,7 +16,7 @@ interface ActorProgress extends Vec2 {
   readonly facing: 1 | -1;
 }
 
-export interface PlayerProgress extends ActorProgress {
+interface PlayerProgress extends ActorProgress {
   readonly form: PlayerForm;
   readonly riding: boolean;
   readonly flightTicks: number;
@@ -27,12 +27,12 @@ export interface PlayerProgress extends ActorProgress {
   readonly photonCooldownTicks: number;
 }
 
-export interface EnemyProgress extends ActorProgress {
+interface EnemyProgress extends ActorProgress {
   readonly kind: EnemyKind;
   readonly home: Readonly<Vec2>;
 }
 
-export interface BossProgress extends ActorProgress {
+interface BossProgress extends ActorProgress {
   readonly kind: NpcKind;
   readonly healAvailable: boolean;
 }

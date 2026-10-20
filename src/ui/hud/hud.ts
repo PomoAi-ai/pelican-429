@@ -21,13 +21,13 @@ export interface ScreenPoint {
 /** 世界坐标（z=0 平面）→ HUD 坐标；在相机后方/不可见时返回 null。 */
 export type WorldToScreen = (x: number, y: number) => ScreenPoint | null;
 
-export interface HudStats {
+interface HudStats {
   readonly fps: number;
   readonly tick: number;
   readonly droppedTicks: number;
 }
 
-export interface HudFrame {
+interface HudFrame {
   readonly entities: readonly Entity[];
   readonly headSubmerged: boolean;
   readonly alpha: number;
@@ -37,7 +37,7 @@ export interface HudFrame {
   readonly playerId: number;
 }
 
-export interface HudOptions {
+interface HudOptions {
   /** 光球冷却总 tick（tuning.attacks.orb.cooldownTicks，整数 ≥ 0；0 = 无冷却，指示常满）；提供时显示光球冷却指示。 */
   readonly orbCooldownTicks?: number;
 }
@@ -79,7 +79,7 @@ export const HINTS_AFTER_INPUT = 4;
 const BAR_SMOOTH_RATE = 14;
 
 /** 飞行能量低于该比例时能量条变红。 */
-export const FLIGHT_LOW_RATIO = 0.25;
+const FLIGHT_LOW_RATIO = 0.25;
 
 const POPUP_LIFETIME = 0.9;
 const POPUP_RISE = 1.2;

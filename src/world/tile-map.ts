@@ -35,9 +35,9 @@ export interface TilePiece {
 }
 
 /** 主块 id 变化时触发；同格附加块的增删不改变主块 id，不触发。 */
-export type TileChangeListener = (tx: number, ty: number, prevId: number, nextId: number) => void;
+type TileChangeListener = (tx: number, ty: number, prevId: number, nextId: number) => void;
 /** solidMask 或 platformMask 变化时触发（含 setShape 与附加块增删）；load 整图替换不触发。 */
-export type MaskChangeListener = (tx: number, ty: number) => void;
+type MaskChangeListener = (tx: number, ty: number) => void;
 
 /** 只读查询接口（物理、渲染使用）。 */
 export interface TileQuery {

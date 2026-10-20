@@ -17,7 +17,7 @@ import { clock } from '../model/clock.ts';
 import { linkReleased } from '../site/release.ts';
 
 export interface GameHudWorld { readonly time: Readonly<GameTime>; readonly weather?: SceneWeatherMode }
-export interface GameHudOptions {
+interface GameHudOptions {
   readonly canvas: HTMLElement;
   readonly workOrders?: { readonly state: HomesteadState; readonly command: (tool: 'chop' | 'dig' | 'build') => void };
   readonly updateDrone: (index: number, x: number, y: number, dt: number, talking: boolean, flying: boolean, groundAngle: number, groundHeight: number | null, depth?: number) => void;
@@ -32,7 +32,7 @@ export interface GameHudOptions {
   /** 家园用 Tab 进指挥模式，传 false 让出 Tab。 */
   readonly tabOpensDrone?: boolean;
 }
-export type DroneEscort = { readonly hidden: true } | { readonly hidden: false; readonly x: number; readonly ground: number; readonly depth: number };
+type DroneEscort = { readonly hidden: true } | { readonly hidden: false; readonly x: number; readonly ground: number; readonly depth: number };
 export interface GameHud {
   update(entity: Entity, dt: number): void;
   attachMap(el: HTMLElement): void;

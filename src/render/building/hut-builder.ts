@@ -17,9 +17,9 @@ export type V2 = readonly [number, number];
 
 /** 纹理层（与 hut-textures HUT_TEXTURE_LAYERS 顺序一致）。 */
 export const HUT_LAYER = Object.freeze({ plain: 0, wood: 1, shingle: 2, stone: 3, weave: 4, endGrain: 5 });
-export type HutLayer = keyof typeof HUT_LAYER;
+type HutLayer = keyof typeof HUT_LAYER;
 
-export interface Skin {
+interface Skin {
   readonly layer: HutLayer;
   /** 世界单位 → 纹理周期数。 */
   readonly scale: number;
@@ -28,7 +28,7 @@ export interface Skin {
 }
 
 /** 随风摆动：挂点 y 与每单位下垂距离的权重（aSway = clamp((hingeY − y)·perUnit + base, 0, 1.5)）。 */
-export interface Sway {
+interface Sway {
   readonly hingeY: number;
   readonly perUnit: number;
   readonly base?: number;
@@ -316,7 +316,7 @@ export class PartBuilder {
   }
 }
 
-export const HUT_ATTRIBUTES = Object.freeze(['position', 'normal', 'color', 'aHutUv', 'aSway', 'aGlow'] as const);
+const HUT_ATTRIBUTES = Object.freeze(['position', 'normal', 'color', 'aHutUv', 'aSway', 'aGlow'] as const);
 
 /** 合并多个 PartBuilder 几何（属性集合须为 HUT_ATTRIBUTES）；输入几何随后释放。 */
 export function mergeHutGeometries(parts: Iterable<THREE.BufferGeometry>): THREE.BufferGeometry {
@@ -345,13 +345,13 @@ export function mergeHutGeometries(parts: Iterable<THREE.BufferGeometry>): THREE
   return out;
 }
 
-export function sub(a: V3, b: V3): V3 {
+function sub(a: V3, b: V3): V3 {
   return [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
 }
-export function cross(a: V3, b: V3): V3 {
+function cross(a: V3, b: V3): V3 {
   return [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
 }
-export function dot(a: V3, b: V3): number {
+function dot(a: V3, b: V3): number {
   return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
 }
 function norm(a: V3): V3 {

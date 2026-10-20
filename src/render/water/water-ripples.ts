@@ -12,21 +12,21 @@ import { WATER_WAVE_GLSL, waterWaveAt } from './water-shading.ts';
 import { sharedWindUniforms } from '../sky/wind.ts';
 import { addNodePatch } from '../stage/node-patches.ts';
 
-export const RIPPLE_CAPACITY = 64;
-export const SPLASH_CAPACITY = 120;
+const RIPPLE_CAPACITY = 64;
+const SPLASH_CAPACITY = 120;
 /** 涟漪贴水平面，侧视透视由相机决定。 */
-export const RIPPLE_Z = -0.25;
-export const RIPPLE_Z_SQUASH = 0.6;
+const RIPPLE_Z = -0.25;
+const RIPPLE_Z_SQUASH = 0.6;
 /** 鹈鹕尾迹：移动（速度 > SWIM_MOVE_SPEED）/ 静止时的发圈间隔（秒），以及“在水面”的判定（脚底距水面，格）。 */
-export const WAKE_INTERVAL_MOVING = 0.28;
-export const WAKE_INTERVAL_IDLE = 1.5;
-export const SWIM_MOVE_SPEED = 0.6;
-export const WAKE_SURFACE_RANGE = 0.5;
+const WAKE_INTERVAL_MOVING = 0.28;
+const WAKE_INTERVAL_IDLE = 1.5;
+const SWIM_MOVE_SPEED = 0.6;
+const WAKE_SURFACE_RANGE = 0.5;
 const MIN_AMOUNT = 1;
 const FILM = 0.04;
 const RIPPLE_PROGRAM_TAG = 'water-ripples-soft-wave-v2';
 
-export interface RippleSpec {
+interface RippleSpec {
   readonly x: number;
   readonly r0: number;
   readonly r1: number;
@@ -36,7 +36,7 @@ export interface RippleSpec {
   readonly delay?: number;
 }
 
-export interface WaterRippleFrame {
+interface WaterRippleFrame {
   readonly pelican: Readonly<Vec2> | null;
   readonly windAt: (x: number) => number;
 }

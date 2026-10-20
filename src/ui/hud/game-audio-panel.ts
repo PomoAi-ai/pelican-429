@@ -3,7 +3,7 @@ import { getLanguage, onLanguageChange } from '../model/language.ts';
 import { AUDIO_VOLUMES } from '../../config/game-audio.ts';
 import type { AudioChannel, GameSound } from '../../config/game-audio.ts';
 
-export type AudioStatus = 'locked' | 'playing' | 'muted' | 'paused';
+type AudioStatus = 'locked' | 'playing' | 'muted' | 'paused';
 
 const SAMPLES: readonly [GameSound, string][] = [
   ['water', '吐水'], ['fish', '鱼群轰炸'], ['dash', '振翅突进'], ['swallow', '吞弹成功'],

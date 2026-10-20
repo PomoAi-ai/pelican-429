@@ -142,7 +142,7 @@ export const cloudShadow: Translate<'cloud-shadow'> = (material, { uniforms: u }
   };
 };
 
-// ---- 景深雾 depth-haze（render/depth-haze HAZE_FRAGMENT 同式）----
+// ---- 景深雾 depth-haze（render/sky/depth-haze HAZE_FRAGMENT 同式）----
 
 export const depthHaze: Translate<'depth-haze'> = (material, _patch, source) => {
   material.setupFog = function (builder: NodeBuilder, outputNode: Node): Node {

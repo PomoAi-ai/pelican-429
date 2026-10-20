@@ -203,7 +203,7 @@ describe('站在假人头上：脚贴合、随动不打滑', () => {
   function footGaps(h: Harness): Array<number | null> {
     const d = dummy(h.w);
     return feet().map((f) => {
-      const top = supportTopAt(d, d.body.x, d.body.y, f.x, TUNING);
+      const top = supportTopAt(d, d.body.x, d.body.y, f.x);
       return top === null ? null : f.y - top;
     });
   }

@@ -14,7 +14,7 @@ export function surfaceBelow(map: TileQuery, fluid: FluidQuery, tx: number, limi
 }
 
 export type RouteBlock = 'cliff' | 'drop';
-export type DroneRoute = { readonly ok: true; readonly surface: number } | { readonly ok: false; readonly at: number; readonly reason: RouteBlock };
+type DroneRoute = { readonly ok: true; readonly surface: number } | { readonly ok: false; readonly at: number; readonly reason: RouteBlock };
 
 /** 低空无人机逐列飞行：相邻两列的地表落差不能超过 liftCap，否则高的上不去、深的下不来。 */
 export function droneRoute(map: TileQuery, fluid: FluidQuery, fromX: number, fromSurface: number, toX: number, liftCap: number): DroneRoute {

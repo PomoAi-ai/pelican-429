@@ -10,7 +10,7 @@
 import * as THREE from 'three';
 import { FISH_COLORS } from '../../config/fish-appearance.ts';
 
-export interface FishVariant {
+interface FishVariant {
   readonly name: string;
   readonly body: string;
   readonly belly: string;
@@ -63,7 +63,7 @@ export const FISH_MOTION = Object.freeze({
   alignSlow: 0.78,
 });
 
-export function validateCartoonFish(c = CARTOON_FISH, m = FISH_MOTION): void {
+function validateCartoonFish(c = CARTOON_FISH, m = FISH_MOTION): void {
   const pos = (k: string, v: number): void => {
     if (!(Number.isFinite(v) && v > 0)) throw new RangeError(`cartoon-fish: ${k} must be a positive finite number, got ${v}`);
   };

@@ -9,7 +9,7 @@
  * 树皮另有 aBark；树风（tree-wind）：aBend = (树根 x = 干心, 树根 y = baseY, 树高 = 最高顶点 − baseY, 树种柔度)，
  * aBranch = (枝组基点 x, y, 有符号枝柔度, 树种固有频率) —— 枝、细枝与所挂叶团同组（planBranchGroups）。整棵树 z 中心 TREE_Z，前沿 ≤ TREE_FRONT_MAX；每棵 ≤ TREE_TRIANGLE_BUDGET 个三角形（超出 fail-fast）。
  *
- * 地面：可传每列地面高度（stage.groundSurface）或地面轮廓函数（render/ground-profile 的 (x)=>视觉地面高度）；
+ * 地面：可传每列地面高度（stage.groundSurface）或地面轮廓函数（render/tile/ground-profile 的 (x)=>视觉地面高度）；
  * 根部、根须、根盘与主干根段的顶点按"baseY − 该处视觉地面高度"下沉，不悬空。
  */
 import * as THREE from 'three';
@@ -23,7 +23,7 @@ import { addBall, addFrond, addLeafClump, addStrand, planLeafClump } from './tre
 import type { ClumpStyle, CrownShade } from './tree-foliage.ts';
 import type { BarkTone } from './tree-kinds.ts';
 import { BARK_CHANNEL } from './tree-material.ts';
-import { planTreeSkeleton, ROOT_DEPTH, skeletonCrownBox, TREE_FRONT_MAX, TREE_Z } from './tree-skeleton.ts';
+import { planTreeSkeleton, skeletonCrownBox, TREE_Z } from './tree-skeleton.ts';
 import { planBranchGroups, planPlatformGroups, TREE_WIND } from './tree-wind.ts';
 import type { BranchGroup, BranchGroups } from './tree-wind.ts';
 import type { Limb, TreeSkeleton, Vec3 } from './tree-skeleton.ts';
@@ -33,8 +33,8 @@ import type { LeafTile } from './tree-textures.ts';
 export { ROOT_DEPTH, TOP_LIFT, TREE_FRONT_MAX, TREE_Z } from './tree-skeleton.ts';
 
 /** 每列实心地面顶边 y（下标 = 列号），如 stage.groundSurface 的结果。 */
-export type GroundHeights = ArrayLike<number>;
-/** 每列高度或视觉地面轮廓（render/ground-profile 的 createGroundProfile：世界 x → 地面高度，含斜坡/圆角/填角）。 */
+type GroundHeights = ArrayLike<number>;
+/** 每列高度或视觉地面轮廓（render/tile/ground-profile 的 createGroundProfile：世界 x → 地面高度，含斜坡/圆角/填角）。 */
 export type TreeGround = GroundHeights | GroundProfile;
 
 /** 单棵树三角形预算（树皮 + 叶）。 */
@@ -49,7 +49,7 @@ export interface TreeGeometry {
   /** 叶网格（叶材质；团块 + 叶卡 + 垂丝 + 羽叶 + 椰子 + 根盘）。 */
   readonly leaf: THREE.BufferGeometry;
   readonly triangles: number;
-  /** 站立随动（render/tree-ride）：整棵树的 aBend 与每格平台瓦片的 aBranch（与着色器同一组参数）。 */
+  /** 站立随动（render/tree/tree-ride）：整棵树的 aBend 与每格平台瓦片的 aBranch（与着色器同一组参数）。 */
   readonly ride: TreeRideRig;
 }
 
@@ -64,7 +64,7 @@ export interface TreeRideTile {
   readonly branch: readonly [number, number, number, number];
 }
 
-export interface TreeRideRig {
+interface TreeRideRig {
   readonly treeId: number;
   readonly tiles: readonly TreeRideTile[];
 }
@@ -350,7 +350,7 @@ function uniformStations(total: number, step: number, minSeg = 2): number[] {
 const arc = (r: number, d: number): number => r - Math.sqrt(Math.max(0, r * r - d * d));
 
 /**
- * x 处的视觉地面高度（由每列高度推导；有 TileMap 时优先用 render/ground-profile 的 createGroundProfile，含斜坡）：所在列地面（树所在列取 tree.baseY），在列边缘按邻列高低叠加
+ * x 处的视觉地面高度（由每列高度推导；有 TileMap 时优先用 render/tile/ground-profile 的 createGroundProfile，含斜坡）：所在列地面（树所在列取 tree.baseY），在列边缘按邻列高低叠加
  * 外凸圆角（邻列低：向下弯）或内凹填角（邻列高：向上弯）。越界列按边缘列延伸。
  */
 export function visualGroundAt(ground: GroundHeights, tree: TreeInstance, x: number): number {

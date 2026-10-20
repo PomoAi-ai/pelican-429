@@ -80,7 +80,7 @@ export function fishTailPhase0(seed: number): number {
   return ((seed % 1000) / 1000) * Math.PI * 2;
 }
 
-export interface FishViewOptions {
+interface FishViewOptions {
   /** 实例上限（默认容纳初始完整鱼群，至少预留 64）；鱼数超过即抛。 */
   readonly capacity?: number;
   readonly modelView?: () => { yaw: number; pitch: number };

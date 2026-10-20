@@ -139,17 +139,17 @@ export interface PelicanAnimGeometry {
 }
 
 /** Rest ride channel: standing, no bike. */
-export function restRidePose(): PelicanRidePose {
+function restRidePose(): PelicanRidePose {
   return { seat: 0, hop: 0, bikeScale: 0, crankAngle: 0, wheelAngle: 0, tilt: 0, lift: 0 };
 }
 
 /** Rest follow-through: everything still. */
-export function restFollowPose(): PelicanFollowPose {
+function restFollowPose(): PelicanFollowPose {
   return { head: 0, headShift: [0, 0, 0], tail: 0, tailYaw: 0, scarf: 0, cap: 0, wingSwing: [0, 0], footSplat: [0, 0] };
 }
 
 /** Rest foot target of one side: the bird's own standing ankle and splay on flat ground. */
-export function restFootTarget(side: Side, geometry: PelicanAnimGeometry): PelicanFootTarget {
+function restFootTarget(side: Side, geometry: PelicanAnimGeometry): PelicanFootTarget {
   return { ankle: [...geometry.ankles[side]] as Vec3, pitch: 0, yaw: geometry.footYaw[side], ground: 0 };
 }
 

@@ -119,4 +119,3 @@ export function createWorkspaceWeather(stage: Stage, clock: Readonly<GameTime>, 
     },
   };
 }
-export type WorkspaceWeather = ReturnType<typeof createWorkspaceWeather>;

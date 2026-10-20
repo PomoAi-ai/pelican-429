@@ -105,8 +105,8 @@ def export(objects):
               'static': True, 'glbBytes': path.stat().st_size,
               'glb': str(path.relative_to(ROOT)),
               'blend': str((SOURCE / 'grassy-reference-fit.blend').relative_to(ROOT)),
-              'references': ['public/characters/human/history/turnaround-master-v2/front.png',
-                             'public/characters/human/history/turnaround-master-v2/right.png']}
+              'references': ['public/characters/human/turnaround-master-v2/front.png',
+                             'public/characters/human/turnaround-master-v2/right.png']}
     landmarks = json.loads((SOURCE / 'fit-evidence/landmark-report.json').read_text())
     report['fitEvidence'] = {
         'directory': str((SOURCE / 'fit-evidence').relative_to(ROOT)),

@@ -11,8 +11,7 @@ import { hash01 } from '../core/rng.ts';
 
 export const PRECIP_MODES = ['manual', 'auto'] as const;
 export type PrecipMode = (typeof PRECIP_MODES)[number];
-export const PRECIP_INTENSITIES = ['light', 'medium', 'heavy'] as const;
-export type PrecipIntensity = (typeof PRECIP_INTENSITIES)[number];
+const PRECIP_INTENSITIES = ['light', 'medium', 'heavy'] as const;
 export const PRECIP_LEVELS = ['none', ...PRECIP_INTENSITIES] as const;
 export type PrecipLevel = (typeof PRECIP_LEVELS)[number];
 export interface PrecipState {
@@ -23,7 +22,7 @@ export interface PrecipState {
 export const PRECIP_DEBUG_CYCLE: readonly PrecipMode[] = PRECIP_MODES;
 
 /** 按强度取值的三元组。 */
-export interface PrecipTri {
+interface PrecipTri {
   readonly light: number;
   readonly medium: number;
   readonly heavy: number;
@@ -134,7 +133,7 @@ export function isPrecipMode(v: unknown): v is PrecipMode {
   return typeof v === 'string' && (PRECIP_MODES as readonly string[]).includes(v);
 }
 
-export function isPrecipLevel(v: unknown): v is PrecipLevel {
+function isPrecipLevel(v: unknown): v is PrecipLevel {
   return typeof v === 'string' && (PRECIP_LEVELS as readonly string[]).includes(v);
 }
 

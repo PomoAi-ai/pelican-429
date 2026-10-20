@@ -15,7 +15,7 @@ import * as THREE from 'three';
 import { SHAPE_HALF, SHAPE_SLOPE_L, SHAPE_SLOPE_R, shapeTopAt } from '../../world/tile-shapes.ts';
 import type { TileShape } from '../../world/tile-shapes.ts';
 import { DEFINITION_DEPTH } from '../../config/definition-kit.ts';
-import { CONVEX_RADIUS, FILLET_RADIUS } from './tile-transitions.ts';
+import { FILLET_RADIUS } from './tile-transitions.ts';
 import { reliefRings } from './tile-relief.ts';
 
 /** 格子前面与背面（depth-definitions：格子深 2，Z=[−1,+1]）；背面承接树根，水背板同一深度。 */
@@ -28,10 +28,10 @@ export const BLOCK_BEVEL = 0.06;
 export const ARC_SEGMENTS = 4;
 
 export const KIND_FRONT = 0;
-export const KIND_BEVEL = 1;
+const KIND_BEVEL = 1;
 export const KIND_WALL = 2;
 export const KIND_BACK = 3;
-export const KIND_FILLET = 4;
+const KIND_FILLET = 4;
 /** 斜坡的斜面（着色器用顶面纹理层、xz 采样）。 */
 export const KIND_SLOPE_TOP = 5;
 
@@ -101,7 +101,7 @@ function profile(hx: number, hy: number, segments: number): ProfilePoint[] {
  * 前面扇形 + 前沿滚圆环（tile-relief：ROUND_RINGS 段，kind 倒角）+ 侧壁环（WALL_RINGS 段，kind 侧壁）+ 背面。
  * 每个轮廓点在每个环上一个共享顶点（法线 = 外法线·sinφ + z·cosφ）；aVert.z 为环编码（着色器解出内缩比例与后收深度）。
  */
-export function createProfileGeometry(height: number, back: number, segments = 1, zf = BLOCK_FRONT_Z): THREE.BufferGeometry {
+function createProfileGeometry(height: number, back: number, segments = 1, zf = BLOCK_FRONT_Z): THREE.BufferGeometry {
   if (!(height > 0 && height <= 1)) throw new Error(`tile-geometry: invalid height ${height}`);
   if (!(Number.isInteger(segments) && segments >= 1)) throw new Error(`tile-geometry: invalid edge segments ${segments}`);
   const rings = reliefRings(zf, back);
@@ -240,11 +240,8 @@ export function createFilletGeometry(radius = FILLET_RADIUS, back = BLOCK_BACK_Z
   return b.build();
 }
 
-/** 圆角半径（供测试/着色器共用）。 */
-export const ROUND_RADIUS = CONVEX_RADIUS;
-
 /** 斜坡截面（逆时针，格内局部坐标 x,y ∈ [−.5,.5]）；半砖见 createHalfGeometry。 */
-export function shapeProfile(shape: TileShape): ReadonlyArray<readonly [number, number]> {
+function shapeProfile(shape: TileShape): ReadonlyArray<readonly [number, number]> {
   switch (shape) {
     case SHAPE_SLOPE_R:
       return [[-0.5, -0.5], [0.5, -0.5], [0.5, 0.5]];

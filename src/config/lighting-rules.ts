@@ -17,10 +17,10 @@ export type LightingQuality = (typeof LIGHTING_QUALITIES)[number];
 export const ANTIALIAS_MODES = ['smaa', 'msaa'] as const;
 export type AntialiasMode = (typeof ANTIALIAS_MODES)[number];
 
-export const TONE_MAPPINGS = ['aces', 'agx', 'neutral'] as const;
+const TONE_MAPPINGS = ['aces', 'agx', 'neutral'] as const;
 export type ToneMappingName = (typeof TONE_MAPPINGS)[number];
 
-export const SHADOW_TYPES = ['pcf', 'pcfsoft', 'vsm'] as const;
+const SHADOW_TYPES = ['pcf', 'pcfsoft', 'vsm'] as const;
 export type ShadowTypeName = (typeof SHADOW_TYPES)[number];
 
 export interface Direction3 {
@@ -30,7 +30,7 @@ export interface Direction3 {
 }
 
 /** 泰拉瑞亚式瓦片光照（world/light-field，按 1/4 子格）：天空光自上照入，经每格介质按比例衰减传播。 */
-export interface LightMapTuning {
+interface LightMapTuning {
   /** 光离开该介质格进入邻格时乘的比例 (0,1)：空气 / 实心 / 水 / 树冠 / 单向平台。 */
   readonly airDecay: number;
   readonly solidDecay: number;

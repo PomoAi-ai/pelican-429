@@ -39,7 +39,7 @@ export interface SimEnvironment {
 }
 
 /** 环境命令与推进所需的最小世界接口（SimWorld 满足）。 */
-export interface EnvironmentHost {
+interface EnvironmentHost {
   readonly playerId: number;
   readonly env: SimEnvironment;
   readonly tick: number;
@@ -84,7 +84,7 @@ function resizeTornadoes(world: EnvironmentHost): void {
 }
 
 /** tick 对应的模拟时刻（秒）。 */
-export function simTime(world: Pick<EnvironmentHost, 'tick' | 'tuning'>): number {
+function simTime(world: Pick<EnvironmentHost, 'tick' | 'tuning'>): number {
   return world.tick * world.tuning.sim.step;
 }
 

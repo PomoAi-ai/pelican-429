@@ -1,4 +1,4 @@
-/** Copy written by src/app: loading phases, scene toolbars, perspective layouts, transit and residence pages. `{n}` / `{name}` are filled in by the caller. */
+/** Copy written by src/app: loading phases, scene toolbars, perspective layouts, the transit station and city building. `{n}` / `{name}` are filled in by the caller. */
 import { RESIDENCE_SEGMENT_WIDTH, RESIDENCE_SEGMENTS } from '../residence.ts';
 
 // Perspective definition layouts (app/perspective/definition-*): section titles, descriptions and item lists.
@@ -248,11 +248,8 @@ const WORKSPACE: Record<string, string> = {
   '场景加载被切断，点“重新加载”再来一次': 'Scene loading was cut off. Click “Reload” to try again.',
   // Workspace phases and scene toolbars.
   '加载场景程序': 'Loading scene code', '准备着色器与首帧': 'Preparing shaders and first frame',
-  '加载主角与原野角色': 'Loading the hero and wilds characters', '装配原野背景与机房': 'Assembling the wilds backdrop and facility',
-  '加载主角与机房角色': 'Loading the hero and facility characters', '装配机房背景与设施': 'Assembling the facility backdrop and equipment',
   '游玩中': 'Playing', '回到起点': 'Back to start', '建筑自由场地': 'Free building yard',
-  'A / D 移动 · 空格跳跃 / 飞行 · S 下穿 · F 变身 · R 骑行 · J / 右键 / 1 / 2 技能': 'A / D move · Space jump / fly · S drop through · F transform · R ride · J / right-click / 1 / 2 skills',
-  '地图 M': 'Map M', 'M 打开或关闭地图': 'M opens or closes the map', '性能': 'Performance', '⌘⌥Z / Ctrl+Alt+Z 展开性能': '⌘⌥Z / Ctrl+Alt+Z shows performance',
+  '地图 M': 'Map M', 'M 打开或关闭地图': 'M opens or closes the map', '性能': 'Performance',
 };
 
 // Residence, homestead and transit (app/residence, app/homestead, app/transit).
@@ -290,7 +287,6 @@ const PLACES: Record<string, string> = {
   // Residence pages and build mode.
   '主世界 · 城区': 'Main world · City', '主世界 · 原野': 'Main world · Wilds', '建造与游玩': 'Build and play',
   '原野入口': 'Wilds entrance',
-  '选择资源 · 左键放置 / 拆除 · 中键旋转 · 右键平移 · 滚轮缩放': 'Choose an asset · Left-click place / remove · Middle-click rotate · Right-click pan · Scroll zoom',
   '本机独立存档 · 修改后自动保存': 'Saved on this device · Changes save automatically', '旧住宅存档不再兼容，已丢弃；城区从默认布局开始。': 'The old residence save is no longer compatible and was discarded; the city starts from the default layout.', '已保存到本机': 'Saved on this device',
   '未保存：{error}。当前布局仍保留，请重试保存。': 'Not saved: {error}. The current layout is kept; try saving again.',
   '{n} 个构件': '{n} pieces', '占位 {w} × {h} 格。': 'Occupies {w} × {h} tiles. ',
@@ -299,7 +295,7 @@ const PLACES: Record<string, string> = {
   '结束建造': 'Finish building', '建造': 'Build', '加载角色': 'Loading character',
   '装配城市与空中交通': 'Assembling the city and air traffic',
   '这里没有当前层的构件': 'No piece on the current layer here', '继续向右进入原野 →': 'Keep going right into the wilds →',
-  // Build results from sim/residence and world/building-layers; `已放置{name}` / `已拆除{name}` are split by the residence page.
+  // Build results from sim/building and world/building-layers; `已放置{name}` / `已拆除{name}` are split by app/residence/residence-text.
   '只有实体砖可以使用加深规格': 'Only solid blocks can use the deep size', '此构件需要对齐整格': 'This piece must align to whole tiles',
   '此构件需要对齐半格': 'This piece must align to half tiles', '超出住宅建造范围': 'Outside the residence build area',
   '这里是交通中心用地，不能建造': 'This is transit hub land; building is not allowed', '不能建入不可编辑的基础底面': 'Cannot build into the fixed foundation',
@@ -307,7 +303,6 @@ const PLACES: Record<string, string> = {
   '该格位已有背景墙，先拆除背景墙才能放置加深格。': 'This tile has a background wall; remove it before placing a deep block.',
   '位置已被地下格子占用，请先挖除': 'An underground tile is here; dig it out first', '位置已被构件占用，请先拆除': 'A piece is already here; remove it first',
   '会挡住人物，请先离开该位置': 'This would block the character; move away first', '可以放置': 'Can place',
-  '该地下格子已不存在': 'That underground tile no longer exists', '已挖除米黄色方石块': 'Dug out a beige ashlar block',
   '该构件已不存在': 'That piece no longer exists', '这不是能量门': 'This is not an energy door', '人物还在门中，不能关闭': 'The character is in the doorway; it cannot close',
   '能量门已开启': 'Energy door opened', '能量门已关闭': 'Energy door closed', '已放置{name}': 'Placed {name}', '已拆除{name}': 'Removed {name}', '已替换为{name}': 'Replaced with {name}',
   // Residence travel segments (config/residence.ts RESIDENCE_SEGMENTS labels).
@@ -321,7 +316,7 @@ const PAGES: Record<string, string> = {
   '构建地形': 'Building terrain', '装配环境': 'Assembling the environment', '准备场景画面': 'Preparing the scene',
   '连接随行助手': 'Connecting the companion drone', '只能在城区建造': 'Building is only available in the city',
   '主线 1 · 山体算力堡垒': 'Story 1 · Mountain Compute Fortress', '家园概念版本': 'Homestead concept', '自由预览': 'Free exploration',
-  '潮汐之城': 'Tidal city', '小型': 'Small', '中型': 'Medium', '大型': 'Large',
+  '小型': 'Small', '中型': 'Medium', '大型': 'Large',
   // Showcase status lines.
   '静态模型，尚未绑定': 'Static model, not yet rigged', '共享游戏模型': 'Shared game model', '标尺 · 1 格 = 1 世界单位': 'Ruler · 1 tile = 1 world unit',
   'The Model Router': 'The Model Router', 'The Reset Master': 'The Reset Master',

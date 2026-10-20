@@ -29,12 +29,12 @@ export const WAVE_WIND_CAP = 1.6;
 export const WATER_EDGE_WIDTH = 0.08;
 export const WATER_UNDER_WIDTH = 0.16;
 /** 焦散在近水面带内淡入的深度区间（格）。 */
-export const CAUSTIC_FADE_IN: readonly [number, number] = [0.15, 0.5];
+const CAUSTIC_FADE_IN: readonly [number, number] = [0.15, 0.5];
 /** 天空可见度：水面上方一格的环境光照（[0,1]）在 [LO, HI] 间 smoothstep（洞内发光物最亮 125/255 ≈ .49 < LO；开阔水面 1）。 */
 export const WATER_SKY_LO = 0.55;
 export const WATER_SKY_HI = 0.8;
 
-export const WATER_PROGRAM_KEYS = Object.freeze({ front: 'water-front-v2', back: 'water-back-v2' });
+const WATER_PROGRAM_KEYS = Object.freeze({ front: 'water-front-v2', back: 'water-back-v2' });
 
 /** 风对波幅的放大系数（≥ 1，随 |sway| 单调不减，封顶）。 */
 export function waveWindGain(sway: number): number {
@@ -96,7 +96,7 @@ export const WATER_WAVE_GLSL = [
   '}',
 ].join('\n');
 
-export const WATER_VERTEX_PARS = [
+const WATER_VERTEX_PARS = [
   'attribute float aSurface;',
   'attribute vec4 aWater;',
   'uniform float uTime;',
@@ -106,13 +106,13 @@ export const WATER_VERTEX_PARS = [
 ].join('\n');
 
 /** 紧跟 begin_vertex：第一行是波动（测试按此结构断言）。 */
-export const WATER_VERTEX = [
+const WATER_VERTEX = [
   'transformed.y += aSurface * waterWaveY( transformed.x, uTime );',
   'vWater = aWater;',
   'vWaterWorld = ( modelMatrix * vec4( transformed, 1.0 ) ).xyz;',
 ].join('\n');
 
-export const WATER_FRAGMENT_PARS = /* glsl */ `
+const WATER_FRAGMENT_PARS = /* glsl */ `
 uniform float uTime;
 uniform vec3 uShallow;
 uniform vec3 uDeep;
@@ -235,7 +235,7 @@ export interface WaterPaletteUniforms {
   readonly uCausticDepth: THREE.IUniform<number>;
 }
 
-export interface WaterMaterials {
+interface WaterMaterials {
   readonly front: THREE.MeshStandardMaterial;
   readonly back: THREE.MeshStandardMaterial;
   readonly uniforms: WaterPaletteUniforms;

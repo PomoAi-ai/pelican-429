@@ -142,7 +142,7 @@ function addPlatforms({ kit, label }: SectionBuilder): void {
   });
 }
 
-export interface RoomDefinition {
+interface RoomDefinition {
   id: string;
   title: string;
   description: string;

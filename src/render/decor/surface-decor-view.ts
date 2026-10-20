@@ -28,12 +28,12 @@ import type { RockKind } from './rock-geometry.ts';
 
 export const SURFACE_DECOR_BAND = 32;
 /** 视野 x 方向外扩（最宽大石半宽 + 余量）。 */
-export const SURFACE_DECOR_PAD = 3;
+const SURFACE_DECOR_PAD = 3;
 /** 每带实例上限（超出即抛）。 */
-export const SURFACE_DECOR_BAND_BUDGET = 600;
+const SURFACE_DECOR_BAND_BUDGET = 600;
 
-export interface SurfaceDecorViewOptions {
-  /** 视觉地面轮廓（render/ground-profile）。 */
+interface SurfaceDecorViewOptions {
+  /** 视觉地面轮廓（render/tile/ground-profile）。 */
   readonly ground: (x: number) => number;
   /** 每列"厚实心"地表高度（与地面轮廓同源；缺省 levelGroundColumns(level)）—— 天空浮岛、洞穴、悬空薄块、屋顶不算地表。 */
   readonly columns?: ArrayLike<number>;
@@ -162,7 +162,7 @@ export function decorMatrix<K extends string>(d: DecorInstance<K>, nativeWidth: 
 }
 
 /** 一类装饰的全局批：各种类几何一次加入，带加载/卸载时增删实例。 */
-export interface DecorBatch<K extends string> {
+interface DecorBatch<K extends string> {
   readonly mesh: THREE.BatchedMesh;
   /** 加入一带的实例，返回实例 id 与按种类计数。 */
   add(plan: readonly DecorInstance<K>[]): { readonly ids: number[]; readonly counts: Readonly<Record<string, number>> };

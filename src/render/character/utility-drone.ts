@@ -39,7 +39,7 @@ const UP = new THREE.Vector3(0, 1, 0);
 const FORWARD = new THREE.Vector3(1, 0, 0);
 const DEPTH = new THREE.Vector3(0, 0, 1);
 
-export interface UtilityDronePose {
+interface UtilityDronePose {
   readonly flying: boolean;
   readonly groundAngle: number;
   readonly groundHeight: number | null;

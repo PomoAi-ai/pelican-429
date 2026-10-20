@@ -16,7 +16,7 @@ export const BED_EDGE = 0.5;
 
 const RANGE = WATER_DEPTH_MAX - WATER_DEPTH_MIN;
 
-export interface WaterDepthInput {
+interface WaterDepthInput {
   readonly width: number;
   readonly height: number;
   /** 逻辑格水量与格内水面（FluidMap 满足）。 */
@@ -26,7 +26,7 @@ export interface WaterDepthInput {
   readonly threshold: number;
 }
 
-export function encodeWaterDepth(d: number): number {
+function encodeWaterDepth(d: number): number {
   const c = Math.min(WATER_DEPTH_MAX, Math.max(WATER_DEPTH_MIN, d));
   return Math.round(((c - WATER_DEPTH_MIN) / RANGE) * 255);
 }

@@ -10,10 +10,10 @@ import type { GameAction } from '../config/keybindings.ts';
 import type { Vec2 } from '../core/math.ts';
 import type { InputFrame } from '../sim/sim-world.ts';
 
-export type InputSource = 'keyboard' | 'mouse';
+type InputSource = 'keyboard' | 'mouse';
 
 /** 界面动作帧（每渲染帧取一次，与模拟 tick 无关）。 */
-export interface UiInputFrame {
+interface UiInputFrame {
   /** 大地图开关（M）按下锁存。 */
   readonly mapPressed: boolean;
   /** 操作提示开关（H）按下锁存。 */

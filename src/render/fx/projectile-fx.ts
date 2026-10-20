@@ -25,7 +25,7 @@ import type { FishModel } from './projectile-views.ts';
 import { createWingDashFx } from './wing-dash-fx.ts';
 
 export const DROP_CAPACITY = 900;
-export const SPARK_CAPACITY = 1200;
+const SPARK_CAPACITY = 1200;
 export const FLOPPER_CAPACITY = 12;
 export const STAR_CAPACITY = 12;
 const FX_Z = 0.2;
@@ -37,9 +37,9 @@ const ORB = '#ffc45c';
 /** 鱼侧躺时身体半高（身长倍数）：状态 y 是贴地点，渲染中心抬高这么多。 */
 const FISH_HALF_HEIGHT = 0.2;
 /** “啪”星形冲击：命中/消失的大小（格）、寿命（s）、外/内星颜色。 */
-export const SPLAT_STAR = Object.freeze({ hitSize: 0.62, poofSize: 0.4, life: 0.32, outer: '#fff27a', inner: '#ff9d2e', points: 8, innerRatio: 0.45 });
+const SPLAT_STAR = Object.freeze({ hitSize: 0.62, poofSize: 0.4, life: 0.32, outer: '#fff27a', inner: '#ff9d2e', points: 8, innerRatio: 0.45 });
 
-export interface ProjectileFxOptions {
+interface ProjectileFxOptions {
   readonly scene: THREE.Object3D;
   readonly tuning: Tuning;
   /** 地形（鱼蹦跳找地面/撞墙）；缺省时鱼在结束点原地蹦。 */

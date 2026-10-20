@@ -1,6 +1,6 @@
 import { FINALE_DURATION } from './intro-finale.ts';
 
-export type IntroEditionId = 'melody' | 'world' | 'jazz' | 'relay' | 'tides' | 'compiler' | 'cosmos' | 'dialogue' | 'fugue' | 'dream' | 'finale';
+type IntroEditionId = 'melody' | 'world' | 'jazz' | 'relay' | 'tides' | 'compiler' | 'cosmos' | 'dialogue' | 'fugue' | 'dream' | 'finale';
 export type IntroInstrument = 'mallet' | 'piano' | 'glass' | 'bass';
 
 export interface IntroEdition {

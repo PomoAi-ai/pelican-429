@@ -31,7 +31,7 @@ interface Flash {
   active: boolean;
 }
 
-export interface OrbFx {
+interface OrbFx {
   handleEvents(events: readonly SimEvent[]): void;
   /** dt：本帧时长（秒）。 */
   update(dt: number): void;

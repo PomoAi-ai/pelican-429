@@ -13,7 +13,7 @@ import type { N, ShaderConversion } from './webgpu-shader-nodes.ts';
 const n = (node: unknown): N => node as N;
 const rgb = (c: readonly number[]): N => n(vec3(c[0] as number, c[1] as number, c[2] as number));
 
-/** 线缆流光带（render/facility-signals flowingRibbon）。 */
+/** 线缆流光带（render/facility/facility-signals flowingRibbon）。 */
 const signalsRibbon: ShaderConversion = ({ uniform }) => {
   const R = SIGNAL_RIBBON_SHADER;
   const vUv = n(uv());
@@ -25,7 +25,7 @@ const signalsRibbon: ShaderConversion = ({ uniform }) => {
   return { color: n(vec4(uniform('color'), energy)) };
 };
 
-/** 冷却液液面（render/facility-coolant SURFACE_FRAGMENT）。 */
+/** 冷却液液面（render/facility/facility-coolant SURFACE_FRAGMENT）。 */
 const coolantSurface: ShaderConversion = ({ uniform }) => {
   const S = COOLANT_SURFACE_SHADER;
   const vUv = n(uv());
@@ -48,7 +48,7 @@ const coolantSurface: ShaderConversion = ({ uniform }) => {
   return { color: n(color) };
 };
 
-// ---- 黑洞 facility-blackhole（render/facility-blackhole BLACKHOLE_FRAGMENT）----
+// ---- 黑洞 facility-blackhole（render/facility/facility-blackhole BLACKHOLE_FRAGMENT）----
 
 const B = BLACKHOLE_SHADER;
 const F = B.filaments;
@@ -195,7 +195,7 @@ const blackhole: ShaderConversion = ({ uniform }) => {
   return { color: n(color) };
 };
 
-/** 飞行跑车离子尾喷（render/flying-roadster-view createIonJets）。 */
+/** 飞行跑车离子尾喷（render/character/flying-roadster-view createIonJets）。 */
 const roadsterIonJet: ShaderConversion = ({ uniform }) => {
   const J = ROADSTER_JET_SHADER;
   const vUv = n(uv());
@@ -216,7 +216,7 @@ const roadsterIonJet: ShaderConversion = ({ uniform }) => {
   return { color: n(Fn(() => vec4(color, alpha))()) };
 };
 
-/** 工作站能量球外壳（render/workstation-display globeDisplay）。 */
+/** 工作站能量球外壳（render/residence/workstation-display globeDisplay）。 */
 const workstationOrbShell: ShaderConversion = ({ uniform }) => {
   const O = ORB_SHELL_SHADER;
   const vNormal = n(varying(normalize(modelNormalMatrix.mul(normalGeometry))));

@@ -27,15 +27,15 @@ import type { GroundProfile } from '../tile/ground-profile.ts';
 import type { LakeSpan } from '../tile/surface-smooth.ts';
 import { MeshBuilder, concatGeometries } from '../tree/tree-builder.ts';
 
-export const SKY_ISLAND_Z = Object.freeze({ LUMP_MIN: -0.75, LUMP_MAX: 0.15, ROOT_MIN: 0.56, ROOT_MAX: 0.7, MIST: -1.3 });
-export const ROOT_VARIANTS = 12;
+const SKY_ISLAND_Z = Object.freeze({ LUMP_MIN: -0.75, LUMP_MAX: 0.15, ROOT_MIN: 0.56, ROOT_MAX: 0.7, MIST: -1.3 });
+const ROOT_VARIANTS = 12;
 
 /**
  * 与树木共用叶团、叶簇纹理、柳丝与叶卡；三种生长轮廓各有四个确定性变体（v % 4 = 变体序号）：
  * 0 贴岩苔团（顺岩根向下 1–3 团，深苔绿）；1 根部叶丛（小而偏向一侧，压住岩缝）；2 垂藤（细茎 + 成串叶卡，长短错落）。
  * 原点 = 岛底挂点，向下为负 y。
  */
-export function createRootParts(): THREE.BufferGeometry[] {
+function createRootParts(): THREE.BufferGeometry[] {
   const out: THREE.BufferGeometry[] = [];
   for (let v = 0; v < ROOT_VARIANTS; v++) {
     const b = new MeshBuilder(false);
@@ -134,7 +134,7 @@ const place = (x: number, y: number, z: number, sx: number, sy: number, sz: numb
   return new THREE.Matrix4().compose(_p.set(x, y, z), _q, _s.set(sx, sy, sz));
 };
 
-export interface RootInstance {
+interface RootInstance {
   readonly variant: number;
   readonly x: number;
   readonly y: number;
@@ -325,7 +325,7 @@ function partGeometries(): Map<string, THREE.BufferGeometry> {
 }
 
 /** 岛下薄雾：每个大岛一片竖向渐隐面片（顶 α .22 → 底 0），小块更淡更矮。 */
-export function buildMistGeometry(islands: readonly SkyIsland[]): THREE.BufferGeometry | null {
+function buildMistGeometry(islands: readonly SkyIsland[]): THREE.BufferGeometry | null {
   const pos: number[] = [];
   const col: number[] = [];
   const idx: number[] = [];

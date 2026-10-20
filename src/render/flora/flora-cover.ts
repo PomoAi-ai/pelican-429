@@ -44,16 +44,16 @@ export const COVER_CHUNK_BUDGET = 3200;
  * 地被实例的 z 范围：装饰带之后再向前铺到 COVER_Z_FRONT（草顶前沿滚圆区，根部按 coverTopDrop 下沉贴住滚圆面），
  * 填满镜头下最显眼的草顶前缘；z 分布按 COVER_Z_FRONT_BIAS 偏向前方（后方多被草丛遮住）。
  */
-export const COVER_Z_FRONT = BLOCK_FRONT_Z - 0.1;
-export const COVER_Z_FRONT_BIAS = 0.6;
+const COVER_Z_FRONT = BLOCK_FRONT_Z - 0.1;
+const COVER_Z_FRONT_BIAS = 0.6;
 export const COVER_Z: readonly [number, number] = [GROUND_DECOR_Z_MIN + 0.02, COVER_Z_FRONT];
 /** 台阶外沿长垂苔的基础概率与树荫加成。 */
-export const COVER_DRAPE_CHANCE = 0.15;
-export const COVER_DRAPE_SHADE_GAIN = 0.5;
+const COVER_DRAPE_CHANCE = 0.15;
+const COVER_DRAPE_SHADE_GAIN = 0.5;
 /** 风摆幅度（格，叶尖）。 */
-export const COVER_WIND_AMPLITUDE = 0.035;
+const COVER_WIND_AMPLITUDE = 0.035;
 
-export interface CoverRule {
+interface CoverRule {
   readonly density: number;
   readonly ground: Readonly<Record<CoverGround, number>>;
   /** 树荫增益（负 = 树下变少）；λ 乘 max(0, 1 + shadeGain·shade)。 */
@@ -86,7 +86,7 @@ export const COVER_RULES: Readonly<Record<CoverKind, CoverRule>> = Object.freeze
 });
 
 /** 几何本体高（格），与 cover-geometry 一致；校验 size 上限用。 */
-export const COVER_NATIVE_HEIGHT: Readonly<Record<CoverKind, number>> = Object.freeze({
+const COVER_NATIVE_HEIGHT: Readonly<Record<CoverKind, number>> = Object.freeze({
   moss: 0.1,
   clover: 0.1,
   fiddlehead: 0.16,
@@ -155,22 +155,22 @@ const NO_ENV: FloraEnv = Object.freeze({ waterDistance: () => Infinity, shade: (
  * 地被成片掩码（所有种类共用）：低频噪声 v ∈ [0,1]，v < threshold 的格子不长地被（片间留出草地空白），
  * 片内按 (v − threshold)/(1 − threshold) 渐强、再乘 gain（补偿掩码带走的平均量）。
  */
-export const COVER_PATCH = Object.freeze({ scale: 4.5, salt: 1597, threshold: 0.42, gain: 1.6 });
+const COVER_PATCH = Object.freeze({ scale: 4.5, salt: 1597, threshold: 0.42, gain: 1.6 });
 if (!(COVER_PATCH.scale > 0 && COVER_PATCH.threshold >= 0 && COVER_PATCH.threshold < 1 && COVER_PATCH.gain > 0)) throw new Error('flora-cover: invalid COVER_PATCH');
 
-export function coverPatch(tx: number): number {
+function coverPatch(tx: number): number {
   const v = clamp01(0.5 + 1.1 * fbm1D(tx / COVER_PATCH.scale, COVER_PATCH.salt, 2, 0.5));
   return COVER_PATCH.gain * clamp01((v - COVER_PATCH.threshold) / (1 - COVER_PATCH.threshold));
 }
 
-export function coverCommunity(kind: CoverKind, tx: number): number {
+function coverCommunity(kind: CoverKind, tx: number): number {
   const r = COVER_RULES[kind];
   const v = clamp01(0.5 + 0.9 * fbm1D(tx / r.scale, r.salt, 2, 0.5));
   return r.floor + (1 - r.floor) * v;
 }
 
 /** 生长点上各种类的期望株数（drape 另算）。 */
-export function coverLambdas(site: CoverSite, env: FloraEnv = NO_ENV): Map<CoverKind, number> {
+function coverLambdas(site: CoverSite, env: FloraEnv = NO_ENV): Map<CoverKind, number> {
   const shade = clamp01(env.shade(site.tx, site.ty));
   const sloped = site.shape !== SHAPE_FULL;
   const out = new Map<CoverKind, number>();
@@ -284,7 +284,7 @@ const _p = new THREE.Vector3();
 const _s = new THREE.Vector3();
 const _c = new THREE.Color();
 
-export function coverMatrix(c: CoverInstance, out: THREE.Matrix4): THREE.Matrix4 {
+function coverMatrix(c: CoverInstance, out: THREE.Matrix4): THREE.Matrix4 {
   // 垂苔朝向只取 0/π（沿外凸圆角翻下）；其余 yaw 后按坡倾斜。
   _e.set(0, c.yaw, c.tilt, 'ZYX');
   _q.setFromEuler(_e);

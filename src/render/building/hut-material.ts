@@ -21,7 +21,7 @@ const SMOKE = Object.freeze({ rate: 0.08, rise: 4.5, r0: 0.09, r1: 0.42, drift: 
 /** 随风部件：顺风偏移 / 本地摆幅（每单位 aSway）。 */
 const SWAY = Object.freeze({ lean: 0.2, flutter: 0.045 });
 
-export interface HutMaterials {
+interface HutMaterials {
   readonly solid: THREE.MeshStandardMaterial;
   readonly sway: THREE.MeshStandardMaterial;
   readonly smoke: THREE.MeshStandardMaterial;

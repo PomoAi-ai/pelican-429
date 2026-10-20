@@ -31,19 +31,19 @@ export type ShrubKind = (typeof SHRUB_KINDS)[number];
 export const SHRUB_HEIGHT_RANGE: readonly [number, number] = [0.8, 3];
 /** 灌木 z（背景一层）与 z 向最大半厚（世界格；冠团 z 缩放上限）。 */
 export const SHRUB_Z: readonly [number, number] = [BLOCK_BACK_Z + 0.2, GROUND_DECOR_Z_MIN + 0.22];
-export const SHRUB_MAX_DEPTH = 0.45;
+const SHRUB_MAX_DEPTH = 0.45;
 /** 每区块实例上限（超出即抛）。 */
 export const SHRUB_CHUNK_BUDGET = 400;
 /** 近水范围（格，自湖岸沙滩外缘起算）。 */
-export const SHRUB_SHORE_RANGE = 4;
+const SHRUB_SHORE_RANGE = 4;
 const SHORE_SAND = 2;
 /** 林缘范围（格）：树荫外这么远内仍算"林缘/树间"。 */
-export const SHRUB_EDGE_RANGE = 5;
+const SHRUB_EDGE_RANGE = 5;
 /** 根部下沉（格，冠底贴地不悬空）。 */
 export const SHRUB_SINK = 0.08;
 /** 草地扰动对灌木的倍数（乘 aSway：叶团 .15、叶卡 .25、草本叶梢 1）。 */
 export const SHRUB_DISTURB_SCALE = 1.6;
-export const SHRUB_PROGRAM_KEY = 'shrub-leaf-v1';
+const SHRUB_PROGRAM_KEY = 'shrub-leaf-v1';
 
 /** 几何本体高（格），与 shrub-geometry 一致。 */
 export const SHRUB_NATIVE_HEIGHT: Readonly<Record<ShrubKind, number>> = Object.freeze({
@@ -59,7 +59,7 @@ export const SHRUB_NATIVE_HEIGHT: Readonly<Record<ShrubKind, number>> = Object.f
   buckthorn: 1.14,
 });
 
-export interface ShrubRule {
+interface ShrubRule {
   readonly density: number;
   readonly habitat: Readonly<{ open: number; edge: number; wood: number; shore: number }>;
   readonly ground: Readonly<Record<CoverGround, number>>;
@@ -126,7 +126,7 @@ const clamp01 = (v: number): number => Math.min(1, Math.max(0, v));
 const NO_ENV: FloraEnv = Object.freeze({ waterDistance: () => Infinity, shade: () => 0 });
 
 /** 生境分量（纯函数）。 */
-export function shrubHabitat(site: CoverSite, env: FloraEnv): { open: number; edge: number; wood: number; shore: number } {
+function shrubHabitat(site: CoverSite, env: FloraEnv): { open: number; edge: number; wood: number; shore: number } {
   const s = clamp01(env.shade(site.tx, site.ty));
   // 树荫只覆盖冠下；"林缘/树间" = 附近 SHRUB_EDGE_RANGE 格内有树荫（随距离衰减）而本格不全荫。
   let near = 0;
@@ -141,7 +141,7 @@ export function shrubHabitat(site: CoverSite, env: FloraEnv): { open: number; ed
 }
 
 /** 各种类在生长点的期望株数。 */
-export function shrubLambdas(site: CoverSite, env: FloraEnv = NO_ENV): Map<ShrubKind, number> {
+function shrubLambdas(site: CoverSite, env: FloraEnv = NO_ENV): Map<ShrubKind, number> {
   const h = shrubHabitat(site, env);
   const out = new Map<ShrubKind, number>();
   for (const k of SHRUB_KINDS) {

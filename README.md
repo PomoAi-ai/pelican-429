@@ -40,7 +40,7 @@
 | --- | --- |
 | [进入游戏](https://pelican429.pomoai.vip/?mode=story) | 序章与主线试玩；从黑洞前哨进入山体堡垒，迎战 Tibo 与 Sam |
 | [观看序章](https://pelican429.pomoai.vip/?mode=intro&opening=finale) | AGI 降智风暴，建议佩戴耳机 |
-| [自由世界](https://pelican429.pomoai.vip/?mode=game) | 种子生成的瓦片世界 |
+| [主世界](https://pelican429.pomoai.vip/?mode=game) | 从 AI 城区出发：左侧星舰交通中心，向右走进按种子生成的原野 |
 
 <details>
 <summary><b>更多场景与开发入口</b></summary>
@@ -51,12 +51,12 @@
 | 场景展示 · 02 算力大教堂 | [打开](https://pelican429.pomoai.vip/?mode=game&level=facility&scene=cathedral) | 自由探索 |
 | 场景展示 · 03 光纤深渊 | [打开](https://pelican429.pomoai.vip/?mode=game&level=facility&scene=abyss) | 自由探索 |
 | 机房预览 | [本地打开](http://127.0.0.1:5174/?mode=game&level=facility&scene=fortress&cam=free) | 开发版自由镜头：拖动环视、滚轮缩放 |
-| 自由世界 | [打开](https://pelican429.pomoai.vip/?mode=game) | 种子生成的瓦片世界 |
+| 主世界 | [打开](https://pelican429.pomoai.vip/?mode=game) | AI 城区；原野入口为 `?mode=game&free=1` |
 | 手机操控 | [打开](https://pelican429.pomoai.vip/?mode=controls&level=test) | 桌面浏览器也强制手机布局 |
 | 角色展示场 | [本地打开](http://127.0.0.1:5174/?mode=showcase) | 角色、动作与地上地下对照 |
 | 场景资源 | [本地打开](http://127.0.0.1:5174/?mode=resources) | 瓦片、花草、树木与建筑 |
 | 声音目录 | [本地打开](http://127.0.0.1:5174/?mode=sounds) | 环境声与音效 |
-| 场景功能展示 | [本地打开](http://127.0.0.1:5174/?mode=lab) | 瓦片形状与材质拼接 |
+| 场景功能展示 | [本地打开](http://127.0.0.1:5174/?mode=lab) | 自由搭建场、星舰着陆测试与场景组合 |
 
 </details>
 
@@ -132,7 +132,7 @@ npm run build       # 精简正式版，输出 dist/
 
 仓库通过 [Publish GitHub Pages](.github/workflows/pages.yml) 工作流构建发布。推送到 `main` 会触发部署，也可手动运行该工作流；CI 只安装依赖、构建和发布，不运行测试。网站部署与 GitHub Release 公告是独立步骤。
 
-默认构建仅发布首页、序章、主线、自由世界和手机操控所需资源：9 个 512 KTX2 compact 角色模型、运行场景贴图与页面图片。原始高清模型、历史版本、制作参考图和其他画质档位留在仓库与本地；在线导航不提供开发展示入口。需要完整静态版本时显式运行 `npm run build:full`，输出到独立的 `dist-full/`，不会覆盖正式版产物。后续新增运行资源时同步更新 `vite.config.ts` 中的发布清单。
+默认构建仅发布首页、序章、主线、主世界和手机操控所需资源：9 个 512 KTX2 compact 角色模型、运行场景贴图与页面图片。原始高清模型、历史版本、制作参考图和其他画质档位留在仓库与本地；在线导航不提供开发展示入口。需要完整静态版本时显式运行 `npm run build:full`，输出到独立的 `dist-full/`，不会覆盖正式版产物。后续新增运行资源时同步更新 `vite.config.ts` 中的发布清单。
 
 Vite 使用相对 base，导航与静态资源也使用相对路径，可部署到仓库子目录或域名根目录；查询参数入口无需服务端路由重写。部署后需核对正式域名的页面与资源版本，必要时刷新 CDN 缓存。
 

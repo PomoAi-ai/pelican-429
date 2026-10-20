@@ -16,7 +16,7 @@ import type { CaveInfo } from '../../world/level.ts';
 import type { TileQuery } from '../../world/tile-map.ts';
 import { glslFloat as f } from '../sky/wind.ts';
 
-export const CAVE_FX_RULES = Object.freeze({
+const CAVE_FX_RULES = Object.freeze({
   /** 顶棚格成为滴水点的比例。 */
   DRIP_SITE: 0.06,
   /** 每个滴水点两次滴落的间隔（秒）。 */
@@ -57,7 +57,7 @@ interface Ripple {
 }
 
 /** 滴水点（确定性）：洞穴网络空气格、上方为实心、下方 ≥ 3 格空气。 */
-export function planDripSites(map: TileQuery, caves: CaveInfo, water: Pick<FluidQuery, 'amountAt'>): Array<{ x: number; y: number; floorY: number; water: boolean }> {
+function planDripSites(map: TileQuery, caves: CaveInfo, water: Pick<FluidQuery, 'amountAt'>): Array<{ x: number; y: number; floorY: number; water: boolean }> {
   const { width, height } = map;
   const out: Array<{ x: number; y: number; floorY: number; water: boolean }> = [];
   for (let y = 2; y < height - 1; y++) {

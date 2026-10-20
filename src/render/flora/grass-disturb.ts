@@ -16,9 +16,9 @@ export const DISTURB_Y_STRETCH = 1.6;
 /** 倒伏位移对应的下沉比例。 */
 export const DISTURB_SINK = 0.45;
 
-export type DisturbEnvelope = 'spring' | 'steady';
+type DisturbEnvelope = 'spring' | 'steady';
 
-export interface DisturbProfile {
+interface DisturbProfile {
   readonly radius: number;
   /** 叶尖最大横向位移（格）。 */
   readonly strength: number;
@@ -79,7 +79,7 @@ const fail = (what: string, v: unknown): never => {
   throw new Error(`grass-disturb: invalid ${what} ${String(v)}`);
 };
 
-export function validateProfile(name: string, p: DisturbProfile): void {
+function validateProfile(name: string, p: DisturbProfile): void {
   if (!(p.radius > 0 && Number.isFinite(p.radius))) fail(`${name}.radius`, p.radius);
   if (!(p.strength >= 0 && p.strength < 2)) fail(`${name}.strength`, p.strength);
   if (p.envelope === 'spring') {
@@ -106,7 +106,7 @@ export function validateGrassDisturb(t: typeof GRASS_DISTURB): void {
 }
 validateGrassDisturb(GRASS_DISTURB);
 
-export interface DisturbSource {
+interface DisturbSource {
   readonly x: number;
   readonly y: number;
   /** 方向倒伏的方向（±1，radial 时忽略）。 */
@@ -139,7 +139,7 @@ export function disturbEnvelope(src: Pick<DisturbSource, 'profile' | 't0' | 'hol
 }
 
 /** 源是否已结束（可回收）。 */
-export function disturbExpired(src: DisturbSource, time: number): boolean {
+function disturbExpired(src: DisturbSource, time: number): boolean {
   return src.profile.envelope === 'steady' ? time > src.holdUntil + src.profile.fade : time - src.t0 >= src.profile.duration;
 }
 
@@ -177,7 +177,7 @@ const smoothstep = (e0: number, e1: number, x: number): number => {
 };
 
 /** JS 镜像：世界点 w 处的位移（x 横向，y 下沉；与 DISTURB_GLSL 同式）。 */
-export function disturbOffsetAt(sources: readonly DisturbSource[], w: Vec2, time: number): Vec2 {
+function disturbOffsetAt(sources: readonly DisturbSource[], w: Vec2, time: number): Vec2 {
   let ox = 0;
   for (const s of sources.slice(-DISTURB_MAX_SOURCES)) {
     const amp = s.profile.strength * s.gain * disturbEnvelope(s, time);

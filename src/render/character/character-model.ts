@@ -8,7 +8,6 @@ import { acquireKtx2Loader } from '../stage/ktx2-loader.ts';
 let renderer: StageRenderer | null = null;
 type TextureSession = ReturnType<typeof acquireKtx2Loader> & { pending: number; retired: boolean };
 let textureSession: TextureSession | null = null;
-const preloaded = new Map<string, Promise<ArrayBuffer>>();
 
 /**
  * 页主渲染器绑定 KTX2 转码能力，返回解绑函数。次级渲染器（缩略图、编辑器预览、序章离屏画面）不绑定，
@@ -22,7 +21,6 @@ export function bindCharacterTextures(value: StageRenderer): () => void {
     if (renderer !== value) return;
     retireTextureSession();
     renderer = null;
-    preloaded.clear();
   };
 }
 
@@ -54,16 +52,6 @@ export function characterModelPath(source: string, tier: TextureTier): string {
   return tier === 'web' ? webModelPath(source) : ktxModelPath(source);
 }
 
-/** 序章没有 WebGL 上下文，先缓存字节；进入游戏后使用真实设备能力解码。 */
-export async function preloadCharacterModel(source: string, tier: TextureTier = characterTextureTier()): Promise<void> {
-  const path = characterModelPath(source, tier);
-  if (!preloaded.has(path)) preloaded.set(path, fetch(path).then(response => {
-    if (!response.ok) throw new Error(`角色资源加载失败：${path} (${response.status})`);
-    return response.arrayBuffer();
-  }));
-  await preloaded.get(path)!;
-}
-
 export async function loadCharacterModel(source: string, tier: TextureTier = characterTextureTier()) {
   const path = characterModelPath(source, tier);
   const loader = new GLTFLoader().setMeshoptDecoder(MeshoptDecoder);
@@ -71,11 +59,7 @@ export async function loadCharacterModel(source: string, tier: TextureTier = cha
   if (session) { session.pending++; loader.setKTX2Loader(session.loader); }
   try {
     const decoderReady = session ? session.loader.init() : Promise.resolve();
-    const bytes = preloaded.get(path);
-    preloaded.delete(path);
-    const model = bytes
-      ? bytes.then(data => loader.parseAsync(data, new URL('.', new URL(path, location.href)).href))
-      : loader.loadAsync(path);
+    const model = loader.loadAsync(path);
     // 清理必须等待下载与转码都结算，提前终止 Worker 会让正在加载的 Promise 永远悬空。
     const [result, decoder] = await Promise.allSettled([model, decoderReady]);
     if (result.status === 'rejected') throw result.reason;

@@ -1,5 +1,5 @@
 /**
- * WebGPU 后期（?renderer=webgpu，随 webgpu-stage 分块加载）：three/webgpu PostProcessing + TSL，链路与 render/post-fx（WebGL）一致：
+ * WebGPU 后期（?renderer=webgpu，随 webgpu-stage 分块加载）：three/webgpu PostProcessing + TSL，链路与 render/stage/post-fx（WebGL）一致：
  * 场景 pass（HDR + 深度）→ [AO 预处理：AO 分辨率的视空间法线 → GTAO → 泊松降噪] → [Bloom 降分辨率]
  * → 调色输出（与 GRADE_FRAGMENT 逐行对应：引力透镜 → 地面反射 → bloom 相加 → 色调映射 → sRGB → 乘 AO、tint/饱和/对比/暗角）→ [SMAA → 画布]。
  * - 画质 / 抗锯齿 / 反射开关变化时重建输出节点图：不在图里的 TSL 节点不执行，low 不付 AO/bloom 的开销。场景 pass、AO、bloom 节点只建一次。
@@ -367,7 +367,7 @@ export function createWebGpuPostFx(input: PostFxInput & { readonly renderer: Web
     setGravityLens(lens) {
       gravityLens = lens;
     },
-    // WebGPU 时间戳只给整帧总计（见 render/gpu-timer），没有按 pass 的分段。
+    // WebGPU 时间戳只给整帧总计（见 render/stage/gpu-timer），没有按 pass 的分段。
     setGpuTimer() {},
     render() {
       if (disposed) throw new Error('webgpu-post-fx: render after dispose');

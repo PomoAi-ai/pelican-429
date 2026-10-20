@@ -18,7 +18,7 @@ import type { CityState } from '../../sim/city.ts';
 import { setCitySunAngle, type SimWorld } from '../../sim/sim-world.ts';
 import type { GameFeature } from '../game/frame-loop.ts';
 
-export interface CityPresentationInput {
+interface CityPresentationInput {
   readonly stage: Stage<StageRenderer>;
   readonly world: SimWorld;
   readonly city: CityState;

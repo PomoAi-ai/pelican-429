@@ -81,7 +81,7 @@ export interface OrbTuning extends ProjectileDef, WeaponTimeline {
 }
 
 /** 格子液体模拟。 */
-export interface FluidTuning {
+interface FluidTuning {
   /** 每多少 sim tick 推进一次液体（整数 >= 1）。 */
   readonly stepInterval: number;
   /** 单次推进最多处理的活跃格数（超出延后）。 */

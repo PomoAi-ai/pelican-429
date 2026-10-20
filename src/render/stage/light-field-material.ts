@@ -135,7 +135,7 @@ export interface LightMapUniforms {
 }
 
 /** 片元声明 + 采样函数（LM_DYN_MAX 由 define 提供）。 */
-export const LIGHT_MAP_FRAGMENT_PARS = /* glsl */ `
+const LIGHT_MAP_FRAGMENT_PARS = /* glsl */ `
 ${LIGHT_FIELD_ATLAS_GLSL}
 uniform float uLightMin;
 uniform vec4 uDynLights[LM_DYN_MAX];
@@ -213,11 +213,11 @@ vec3 lmWaterTint(vec3 w) {
 }
 `;
 
-export const LIGHT_MAP_VERTEX_PARS = /* glsl */ `
+const LIGHT_MAP_VERTEX_PARS = /* glsl */ `
 varying vec3 vLmWorld;
 `;
 
-export const LIGHT_MAP_VERTEX = /* glsl */ `
+const LIGHT_MAP_VERTEX = /* glsl */ `
 {
   vec4 lmWorld = vec4(transformed, 1.0);
   #ifdef USE_BATCHING
@@ -302,7 +302,7 @@ export function isLightMappable(material: THREE.Material): boolean {
   return Boolean(m.isMeshStandardMaterial || m.isMeshBasicMaterial || m.isMeshLambertMaterial || m.isMeshPhongMaterial || m.isMeshToonMaterial || m.isMeshMatcapMaterial);
 }
 
-export interface WorldLightInput {
+interface WorldLightInput {
   readonly map: TileMap;
   readonly fluid: FluidMap;
   readonly trees: readonly TreeInstance[];

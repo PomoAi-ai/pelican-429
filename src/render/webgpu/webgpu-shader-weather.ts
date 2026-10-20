@@ -17,7 +17,7 @@ const n = (node: unknown): N => node as N;
 /** GLSL mod( a, b ) = a - b * floor( a / b )（WGSL 的 % 对负数截断，不同）。 */
 const glslMod = (a: N, b: N | number): N => a.sub(floor(a.div(b)).mul(b));
 
-/** 风线（render/weather-fx LINE_VERTEX / LINE_FRAGMENT）：沿弧描画出现、尾部消失，aLine = (头部进度, 透明度)。 */
+/** 风线（render/sky/weather-fx LINE_VERTEX / LINE_FRAGMENT）：沿弧描画出现、尾部消失，aLine = (头部进度, 透明度)。 */
 const weatherLines: ShaderConversion = ({ uniform }) => {
   const aU = n(attribute('aU', 'float'));
   const line = n(attribute('aLine', 'vec2'));
@@ -28,7 +28,7 @@ const weatherLines: ShaderConversion = ({ uniform }) => {
   return { color: vec4(uniform('uColor'), vAlpha.mul(uniform('uOpacity'))) as unknown as N };
 };
 
-/** 团块云（render/weather-fx CLOUD_VERTEX / CLOUD_FRAGMENT）。 */
+/** 团块云（render/sky/weather-fx CLOUD_VERTEX / CLOUD_FRAGMENT）。 */
 const weatherClouds: ShaderConversion = ({ uniform }) => {
   const C = CLOUD_SHADER;
   const vUv = n(uv());
@@ -58,7 +58,7 @@ const weatherClouds: ShaderConversion = ({ uniform }) => {
   return { color: n(color) };
 };
 
-// ---- 降水公共部分（render/precip-surface PRECIP_COLUMN_GLSL、render/rain-fx PRECIP_BOX_GLSL）----
+// ---- 降水公共部分（render/sky/precip-surface PRECIP_COLUMN_GLSL、render/sky/rain-fx PRECIP_BOX_GLSL）----
 
 /** precipColumn( x )：列数据 (roof, stop, 雪量系数, 是否水面)；顶点阶段采样，显式 0 级。 */
 function precipColumn({ uniform, texture }: ShaderInputs): (x: N) => N {

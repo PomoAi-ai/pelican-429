@@ -11,7 +11,7 @@ import type { TileQuery } from '../../world/tile-map.ts';
 import { bedHeightFromMap, buildHutGeometry, buildHutSwayGeometry, hutSmokeOrigin } from './hut-geometry.ts';
 import { buildSmokeGeometry, createHutMaterials } from './hut-material.ts';
 
-export interface StructureViewOptions {
+interface StructureViewOptions {
   /** 关卡地图：用于推导栈桥桩下的湖床高度。 */
   readonly map: TileQuery;
 }

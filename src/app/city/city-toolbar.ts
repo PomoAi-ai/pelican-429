@@ -29,7 +29,7 @@ export function createBuildButton(feature: CityFeature | null, busy: () => boole
   return { element, dispose: onLanguageChange(sync) };
 }
 
-export interface CityTravelOptions {
+interface CityTravelOptions {
   readonly world: SimWorld;
   readonly city: CityState;
   readonly feature: CityFeature;

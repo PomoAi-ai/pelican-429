@@ -33,7 +33,7 @@ export interface Rect {
   readonly y1: number;
 }
 
-export interface BarPlacement {
+interface BarPlacement {
   /** 血条底边中点（世界坐标）。 */
   readonly x: number;
   readonly y: number;

@@ -5,7 +5,6 @@
 .hud-panel { position: relative; box-sizing: border-box; pointer-events: auto; }
 .hud-panel button { font: inherit; color: inherit; cursor: pointer; text-shadow: inherit; }
 .hud-muted { color: var(--hud-muted); }
-.hud-warn { color: var(--hud-warn); }
 .hud-ok { color: var(--hud-ok); }
 .hud-num { font-family: var(--hud-num-font); font-weight: 600; font-variant-numeric: tabular-nums; }
 .hud-key { display: inline-flex; align-items: center; justify-content: center; min-width: 20px; height: 20px; padding: 0 5px; border: 1px solid #ffffff40; border-radius: 4px; background: #ffffff14; color: #fff; font: 600 11px var(--hud-num-font); text-shadow: none; white-space: nowrap; }
@@ -79,19 +78,6 @@
 .hud-bubble button { display: flex; align-items: center; gap: 10px; min-height: 36px; padding: 0 8px; border: 0; border-radius: 6px; background: transparent; font-size: 14px; text-align: left; }
 .hud-bubble button .hud-muted { font-size: 11px; }
 .hud-bubble button:hover, .hud-bubble button:focus-visible { background: #ffffff1a; outline: none; }
-
-/* 指派：顶部横幅与格子标记 */
-.hud-banner { position: absolute; z-index: 4; left: 50%; top: calc(var(--dev-nav-height, 0px) + 150px); transform: translateX(-50%); display: flex; align-items: center; gap: 8px; padding: 5px 6px 5px 16px; border: 1px solid var(--hud-edge); border-radius: 999px; background: var(--hud-skin); color: var(--hud-ink); font: 13px var(--hud-font); text-shadow: var(--hud-text-shadow); white-space: nowrap; pointer-events: none; }
-.hud-banner[hidden] { display: none; }
-.hud-banner button { min-height: 26px; margin-left: 4px; padding: 0 12px; border: 0; border-radius: 999px; background: #ffffff26; color: #fff; font: 600 12px var(--hud-font); cursor: pointer; pointer-events: auto; }
-.hud-banner button:hover { background: #ffffff40; }
-[data-hud-tool] { cursor: crosshair; }
-.hud-marks { position: absolute; inset: 0; z-index: 1; overflow: hidden; pointer-events: none; }
-.hud-mark { position: absolute; left: 0; top: 0; will-change: transform; contain: layout style; box-sizing: border-box; border: 2px dashed var(--hud-gold); background: #e0a94029; }
-.hud-mark[data-kind=build] { border-color: var(--hud-led); background: #45d2f224; }
-.hud-mark[hidden] { display: none; }
-.hud-mark span { position: absolute; left: -2px; top: -20px; padding: 0 6px; border-radius: 4px; background: #0a1220cc; color: var(--hud-gold); font: 600 11px/18px var(--hud-font); white-space: nowrap; }
-.hud-mark[data-kind=build] span { color: #8eeaff; }
 
 /* 物品面板 */
 .hud-inventory { position: absolute; inset: 0; z-index: 8; background: #000000a6; pointer-events: auto; }

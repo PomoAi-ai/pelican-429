@@ -9,7 +9,7 @@
 import type { BindingLookup } from '../config/keybindings.ts';
 import type { ActionTracker } from './action-map.ts';
 
-export interface PointerState {
+interface PointerState {
   clientX: number;
   clientY: number;
   /** 指针当前是否位于画布内。 */
@@ -27,7 +27,7 @@ export interface VisibilitySource extends EventTarget {
   readonly visibilityState: string;
 }
 
-export interface KeyboardMouseOptions {
+interface KeyboardMouseOptions {
   /** 键盘与全局鼠标松开/移动事件的监听目标（通常为 window）。 */
   readonly target: EventTarget;
   readonly canvas: PointerSurface;

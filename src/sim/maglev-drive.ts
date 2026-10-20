@@ -10,7 +10,7 @@ export interface MaglevDriveInput {
   brake: boolean;
 }
 
-export interface MaglevDriveBounds {
+interface MaglevDriveBounds {
   trackLength: number;
   trainLength: number;
 }

@@ -8,7 +8,7 @@ import { DEFINITION_DEPTH } from '../../config/definition-kit.ts';
 import { createDefinitionKit } from './definition-kit.ts';
 import { createWaterView, WATER_FRONT_Z, WATER_TOP_BACK_Z } from '../water/water-view.ts';
 
-export interface DefinitionLiquid {
+interface DefinitionLiquid {
   readonly root: THREE.Group;
   readonly solids: DefinitionSolid[];
   readonly width: number;

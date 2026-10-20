@@ -23,11 +23,11 @@ const HOME_SPAWN_ORDER: readonly number[] = [1, 0, 2];
 /** 假人与出生点的最小间距（列）。 */
 export const HOME_SPAWN_DUMMY_GAP = 4;
 /** 假人地表与渔屋地板的最大高差。 */
-export const HOME_DUMMY_MAX_RISE = 6;
+const HOME_DUMMY_MAX_RISE = 6;
 /** 假人占位（比 worldgen-verify SPAWN_BODY 更宽：两侧邻列都不能高过假人脚底，站得平稳）。 */
 const BODY = { halfWidth: 0.6, height: 2.5 } as const;
 
-export interface HomeSpawn {
+interface HomeSpawn {
   readonly hut: FishingHut;
   readonly spawn: Vec2;
   readonly facing: 1 | -1;

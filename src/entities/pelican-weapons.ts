@@ -18,10 +18,10 @@ export interface Mouthful {
   readonly count: number;
 }
 
-export type WeaponBlockReason = 'empty';
+type WeaponBlockReason = 'empty';
 
 /** 由 updateWeapons 写入、stepSim 补上实体 id 推入 world.events 的事件请求。 */
-export type WeaponEventRequest =
+type WeaponEventRequest =
   | { readonly type: 'weaponBlocked'; readonly weapon: WeaponId; readonly reason: WeaponBlockReason }
   | { readonly type: 'fishCaught'; readonly x: number; readonly y: number; readonly count: number; readonly via: 'mouth' | 'peck' | 'skim' };
 
@@ -87,7 +87,7 @@ export function timelineLength(t: WeaponTimeline): number {
 }
 
 /** 档位对应的光球定义（1 档 = attacks.orb 本身）。 */
-export function orbDefForLevel(tuning: Tuning, level: number): ProjectileDef {
+function orbDefForLevel(tuning: Tuning, level: number): ProjectileDef {
   const o = tuning.weapons.orb;
   const i = level - 1;
   if (!Number.isInteger(level) || i < 0 || i >= o.radiusScale.length) throw new Error(`orbDefForLevel: level must be 1..${o.radiusScale.length}, got ${level}`);
@@ -101,25 +101,25 @@ export function orbDefForLevel(tuning: Tuning, level: number): ProjectileDef {
 }
 
 /** 吞下的能量聚合为一颗光球，数量决定体积，累计伤害决定威力。 */
-export function returnDef(tuning: Tuning, m: Mouthful): ProjectileDef {
+function returnDef(tuning: Tuning, m: Mouthful): ProjectileDef {
   const orb = orbDefForLevel(tuning, m.count);
   return { ...orb, damage: m.def.damage * tuning.weapons.swallow.returnScale,
     speed: Math.max(orb.speed, tuning.weapons.swallow.returnMinSpeed) };
 }
 
 /** 嘴（出弹点）相对脚底中点、朝 +X：骑行用 bike.muzzle，否则 attacks.orb.muzzle。 */
-export function mouthMuzzle(p: PelicanData, tuning: Tuning): Readonly<Vec2> {
+function mouthMuzzle(p: PelicanData, tuning: Tuning): Readonly<Vec2> {
   return p.ride.mode === 'riding' ? tuning.player.bike.muzzle : tuning.attacks.orb.muzzle;
 }
 
 /** 嘴的世界坐标（按当前朝向）。 */
-export function mouthPoint(e: Entity, p: PelicanData, tuning: Tuning): Vec2 {
+function mouthPoint(e: Entity, p: PelicanData, tuning: Tuning): Vec2 {
   const m = mouthMuzzle(p, tuning);
   return { x: e.body.x + m.x * e.facing, y: e.body.y + m.y };
 }
 
 /** 嘴部吐射和吞弹均不在进行中。 */
-export function weaponIdle(p: PelicanData): boolean {
+function weaponIdle(p: PelicanData): boolean {
   return p.shotTicks < 0 && p.weapon.gulpTicks === 0;
 }
 
@@ -238,7 +238,7 @@ function block(p: PelicanData, weapon: WeaponId, reason: WeaponBlockReason): voi
   p.weapon.events.push({ type: 'weaponBlocked', weapon, reason });
 }
 
-export interface WeaponInput {
+interface WeaponInput {
   readonly shootHeld: boolean;
   readonly skill1Held: boolean;
   readonly aim: Vec2 | null;

@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { Menu as Base } from '@base-ui/react/menu';
 import './controls.css';
 
-export interface MenuItem<V> { value: V; label: ReactNode }
+interface MenuItem<V> { value: V; label: ReactNode }
 
 /** 单选菜单（语言选择等）：触发按钮显示当前项，选中后关闭。 */
 export function Menu<V>({ label, value, items, onValueChange, className = 'ctl-menu-trigger' }: {

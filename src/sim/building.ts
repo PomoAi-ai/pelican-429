@@ -16,7 +16,7 @@ import { PIECE_SHAPE_IDS, PLATFORM_VARIANTS, pieceShapeCode, platformOutline, pl
 import { TILE_PAVING } from '../world/tile-types.ts';
 
 export interface BuildingResult { readonly ok: boolean; readonly message: string }
-export type BuildingBody = Pick<Body, 'x' | 'y' | 'halfWidth' | 'height'>;
+type BuildingBody = Pick<Body, 'x' | 'y' | 'halfWidth' | 'height'>;
 
 /**
  * 建造场地：[minX,maxX)×[bottom,top) 可建，bottom 以下是不可编辑的底面；
@@ -52,7 +52,7 @@ export interface BuildingState {
   revision: number;
 }
 
-export type BuildingTarget =
+type BuildingTarget =
   | { readonly kind: 'piece'; readonly tx: number; readonly ty: number; readonly piece: TilePiece }
   | { readonly kind: 'wall'; readonly wall: WallPlacement }
   | { readonly kind: 'object'; readonly object: PlacedObject }
@@ -84,7 +84,7 @@ export function createBuildingState(map: TileMap, site: BuildingSite, sunAngle: 
 }
 
 /** 能量门几何：门楣恒在，关闭时加半格厚的门板（光场按 solids 顺序把第二块当门板）。 */
-export function doorGeometry(resource: ResidenceResource, x: number, y: number, open: boolean): SpecialPartGeometry {
+function doorGeometry(resource: ResidenceResource, x: number, y: number, open: boolean): SpecialPartGeometry {
   if (resource.kind !== 'door') throw new Error(`doorGeometry: ${resource.id} is not a door`);
   const left = x + (resource.side === 'left' ? .5 : 0);
   return { solids: [rectangle(left, y + 3.5, .5, .5).points, ...open ? [] : [rectangle(left, y, .5, 3.5).points]], supports: [] };

@@ -44,7 +44,7 @@ const smooth = (value: number) => {
   return p * p * (3 - 2 * p);
 };
 
-export interface TransitStationInput {
+interface TransitStationInput {
   readonly stage: Stage<StageRenderer>;
   readonly world: SimWorld;
   readonly station: TransitStation;

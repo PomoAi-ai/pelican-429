@@ -12,7 +12,7 @@
  * 风摆：叶层 aSway × 两层正弦（uTreeTime 由 update(view, time) 推进）+ 枝/主弯曲（tree-wind，全局风 uWeatherTime）；
  * 网格的 customDepthMaterial 用同样注入的深度材质，树影随树摆动。
  * blossomEmitters()：已上屏桶内樱花的叶团包围盒（樱花花瓣 petal-fx 的发射区）。
- * rideAt(tx, ty)：已上屏树的平台瓦片 → (树, 枝组) 只读索引（站立随动 render/tree-ride；逻辑层瓦片不变），随桶上屏/卸载增删。
+ * rideAt(tx, ty)：已上屏树的平台瓦片 → (树, 枝组) 只读索引（站立随动 render/tree/tree-ride；逻辑层瓦片不变），随桶上屏/卸载增删。
  */
 import * as THREE from 'three';
 import type { Rect } from '../../core/math.ts';
@@ -26,7 +26,7 @@ import type { TreeMaterials } from './tree-material.ts';
 import { planTreeSkeleton, skeletonCrownBox } from './tree-skeleton.ts';
 
 /** 视野 x 方向外扩（覆盖最宽树冠的半宽）。 */
-export const TREE_VIEW_PAD = 5;
+const TREE_VIEW_PAD = 5;
 /** 每帧预加载构建预算（毫秒，按 TREE_BUILD_COST 计数近似）。 */
 export const TREE_FRAME_BUDGET_MS = 4;
 /**
@@ -46,9 +46,9 @@ export const TREE_BUILD_COST: Readonly<Record<TreeKind, number>> = Object.freeze
   dead: 1.2,
 });
 /** 桶合并上屏的耗时估计（每棵树，TypedArray 拼接）。 */
-export const TREE_MERGE_COST = 0.2;
+const TREE_MERGE_COST = 0.2;
 
-export interface TreeViewOptions {
+interface TreeViewOptions {
   /** 每桶列数（默认 CHUNK_SIZE）。 */
   readonly bucketWidth?: number;
   /** 视野外预加载的桶数（默认 2）。 */
@@ -59,12 +59,12 @@ export interface TreeViewOptions {
   readonly maxBuildMsPerFrame?: number;
   /**
    * 地面：每列实心地面高度（stage.groundSurface，长度须覆盖所有树列）或视觉地面轮廓函数
-   * （render/ground-profile 的 createGroundProfile）；提供时根盘贴合台阶/坑边/斜坡。
+   * （render/tile/ground-profile 的 createGroundProfile）；提供时根盘贴合台阶/坑边/斜坡。
    */
   readonly ground?: TreeGround;
 }
 
-export interface TreeViewStats {
+interface TreeViewStats {
   /** 已上屏的桶数。 */
   readonly loadedBuckets: number;
   /** 余量范围内尚未构建的树数（含半成品桶的剩余树）。 */

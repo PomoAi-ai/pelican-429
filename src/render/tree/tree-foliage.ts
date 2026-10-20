@@ -24,9 +24,9 @@ const Z_FRONT = TREE_FRONT_MAX - 0.02;
 const SWAY_BLOB = 0.15;
 const SWAY_CARD = 0.25;
 
-export type BlobShape = 'ellipsoid' | 'cone';
+type BlobShape = 'ellipsoid' | 'cone';
 
-export interface LeafBlob {
+interface LeafBlob {
   readonly x: number;
   readonly y: number;
   readonly z: number;
@@ -42,7 +42,7 @@ export interface LeafBlob {
   readonly phase: number;
 }
 
-export interface LeafCard {
+interface LeafCard {
   readonly x: number;
   readonly y: number;
   readonly z: number;
@@ -59,7 +59,7 @@ export interface LeafCard {
   readonly accent: 'none' | 'light' | 'deep';
 }
 
-export interface LeafClumpPlan {
+interface LeafClumpPlan {
   readonly blobs: readonly LeafBlob[];
   readonly cards: readonly LeafCard[];
 }

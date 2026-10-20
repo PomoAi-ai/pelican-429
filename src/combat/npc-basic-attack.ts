@@ -19,8 +19,8 @@ export function samBasicPulseLaunch(position: Vec2, target: Vec2) {
   return { x, y, dirX: Math.cos(angle), dirY: Math.sin(angle) };
 }
 
-export const TIBO_BASIC_ACTIVE_SECONDS = .12;
-export const TIBO_BASIC_HITBOX = { x: .55, y: .15, w: 1.3, h: 1.7 } as const;
+const TIBO_BASIC_ACTIVE_SECONDS = .12;
+const TIBO_BASIC_HITBOX = { x: .55, y: .15, w: 1.3, h: 1.7 } as const;
 
 export function tiboBasicAttack(step: number): AttackDef {
   const action = npcAction('tibo', 'attack');

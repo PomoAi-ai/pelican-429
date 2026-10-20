@@ -48,7 +48,7 @@ export interface SandDustFrame {
   ground(x: number): number;
 }
 
-export interface DustDevilState {
+interface DustDevilState {
   readonly active: boolean;
   readonly x: number;
   readonly height: number;

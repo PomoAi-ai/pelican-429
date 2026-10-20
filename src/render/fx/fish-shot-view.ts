@@ -49,7 +49,7 @@ interface Slot {
   roll: number;
 }
 
-export interface FishShotPool {
+interface FishShotPool {
   acquire(entity: Entity): EntityView;
   /** 该实体 id 的鱼用的配色（最近记住的；没见过的 id 视为新出手的鱼，从接力取）。 */
   variantOf(id: number): number;

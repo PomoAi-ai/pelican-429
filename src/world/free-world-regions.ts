@@ -2,7 +2,7 @@ import type { Vec2 } from '../core/math.ts';
 import { FACILITY_CHAPTERS, FACILITY_SCENES } from '../config/facility-scenes.ts';
 import type { LevelData } from './level.ts';
 
-export interface FreeWorldRegion {
+interface FreeWorldRegion {
   readonly id: string;
   readonly label: string;
   readonly labelEn: string;

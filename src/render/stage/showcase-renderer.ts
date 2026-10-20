@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { FullScreenQuad } from 'three/addons/postprocessing/Pass.js';
 
 /** 把离屏渲染好的画面（已色调映射与 sRGB 编码）原样复制到画布的一块区域。 */
-export interface ShowcaseCompositor {
+interface ShowcaseCompositor {
   /** rect 与 clip 是画布内的 CSS 像素坐标（左上为原点）；clip 外的部分不画。 */
   draw(texture: THREE.Texture, rect: DOMRectReadOnly, clip: DOMRectReadOnly): void;
   dispose(): void;
@@ -41,7 +41,7 @@ export function createShowcaseCompositor(renderer: THREE.WebGLRenderer): Showcas
   };
 }
 
-export interface ShowcaseRenderer extends ShowcaseCompositor {
+interface ShowcaseRenderer extends ShowcaseCompositor {
   readonly renderer: THREE.WebGLRenderer;
   begin(): void;
 }

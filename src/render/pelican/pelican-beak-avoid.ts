@@ -11,8 +11,8 @@ import type { PelicanAnimGeometry, PelicanPose, Vec3 } from './pelican-pose.ts';
 import { NECK_PIVOT } from './pelican-pose.ts';
 import { bodyPoint, worldFromBird } from './pelican-skeleton.ts';
 
-/** Axis-aligned world box (structurally the same as render/entity-surroundings ObstacleBox). */
-export interface AvoidBox {
+/** Axis-aligned world box (structurally the same as render/character/entity-surroundings ObstacleBox). */
+interface AvoidBox {
   readonly x0: number;
   readonly x1: number;
   readonly y0: number;
@@ -30,7 +30,7 @@ export interface BeakAvoidInput {
   pecking: boolean;
 }
 
-export interface BeakAvoidTuning {
+interface BeakAvoidTuning {
   /** Clearance kept between the bill and an obstacle (world units). */
   gap: number;
   /** Full gesture (s = 1): upper-body lean back (radians), head pitch up (radians), neck pull (model units, −x / +y). */
@@ -57,7 +57,7 @@ export const DEFAULT_BEAK_AVOID: Readonly<BeakAvoidTuning> = Object.freeze({
  * Bill sample points at rest, relative to the feet midpoint facing +X in world units (rig.diagnostics.mouth
  * frame): the tip and the mouth centre, plus the seated mouth offset (world) applied by ride.seat.
  */
-export interface BeakAvoidGeometry {
+interface BeakAvoidGeometry {
   tip: Readonly<Vec3>;
   center: Readonly<Vec3>;
   /** Mouth offset when fully seated on the bike (world units, facing +X): bike.muzzle − standing muzzle. */
@@ -74,7 +74,7 @@ function fail(key: string, value: unknown): never {
   throw new RangeError(`Pelican beak avoid ${key} must be a finite number in range, got ${String(value)}.`);
 }
 
-export function validateBeakAvoidTuning(t: BeakAvoidTuning): void {
+function validateBeakAvoidTuning(t: BeakAvoidTuning): void {
   for (const [k, v] of Object.entries(t)) if (typeof v !== 'number' || !Number.isFinite(v)) fail(`tuning.${k}`, v);
   if (!(t.gap >= 0)) fail('tuning.gap', t.gap);
   if (!(t.release > 0) || !(t.peckRelease > 0)) fail('tuning.release/peckRelease', `${t.release}/${t.peckRelease}`);
@@ -87,7 +87,7 @@ const clampAbs = (v: number, limit: number): number => {
   return c === 0 ? 0 : c;
 };
 
-export interface PelicanBeakAvoid {
+interface PelicanBeakAvoid {
   /** Adds the avoidance gesture to `pose` in place; returns the gesture amount s ∈ [0, 1]. Throws on invalid input. */
   apply(pose: PelicanPose, input: BeakAvoidInput, frameDt: number): number;
   /** World positions of the bill samples (tip first) for `pose` (diagnostics and tests). */

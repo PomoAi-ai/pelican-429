@@ -14,7 +14,7 @@ import type { StageRenderer } from '../stage/stage.ts';
 import { createHills, type HillsOptions } from './backdrop-hills.ts';
 
 /** 近景单独渲染用的相机层（层 1 已被训练假人血条占用）。 */
-export const FOREGROUND_LAYER = 2;
+const FOREGROUND_LAYER = 2;
 const FOREGROUND_BIT = 1 << FOREGROUND_LAYER;
 /** 高斯 σ 为画面高度的 0.24%，近景压暗到 82%。 */
 const BLUR_SIGMA = .0024;
@@ -61,7 +61,7 @@ export interface StageBackdrop extends Backdrop {
   dispose(): void;
 }
 
-export interface BackdropStage {
+interface BackdropStage {
   readonly renderer: StageRenderer;
   readonly scene: THREE.Scene;
   readonly camera: THREE.PerspectiveCamera;

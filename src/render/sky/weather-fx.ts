@@ -16,7 +16,7 @@ import type { Rng } from '../../core/rng.ts';
 import type { WindController } from '../../world/wind.ts';
 import { glslFloat as f } from './wind.ts';
 
-export interface WeatherFxOptions {
+interface WeatherFxOptions {
   readonly scene: THREE.Object3D;
   readonly weather: WeatherTuning;
   /** 全局风控制器（调用方每帧先 wind.update(t)，再 fx.update）。 */
@@ -27,7 +27,7 @@ export interface WeatherFxOptions {
   readonly rng?: Rng;
 }
 
-export interface WeatherFxMeshes {
+interface WeatherFxMeshes {
   readonly lines: THREE.InstancedMesh;
   readonly debris: THREE.InstancedMesh;
   readonly clouds: THREE.InstancedMesh;

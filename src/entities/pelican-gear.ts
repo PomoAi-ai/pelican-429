@@ -21,7 +21,7 @@ export function updateMoveGear(p: PelicanData, b: Body, moveX: -1 | 0 | 1, runHe
 }
 
 /** 当前档位的最高水平速度：飞过之后按跑速。 */
-export function gearTopSpeed(p: PelicanData, cfg: PlayerTuning): number {
+function gearTopSpeed(p: PelicanData, cfg: PlayerTuning): number {
   return p.moveGear === 'run' || p.flownThisAir || p.flightMode === 'fly' ? cfg.runSpeed : cfg.walkSpeed;
 }
 

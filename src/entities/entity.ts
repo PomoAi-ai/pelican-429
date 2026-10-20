@@ -41,7 +41,7 @@ export type EntityKind = 'pelican' | 'trainingDummy' | 'healthPack' | EnemyKind 
 /** 鹈鹕表现状态（渲染层 animator 依赖该字面量集合，勿随意改名）。 */
 export type PelicanState = 'idle' | 'run' | 'jump' | 'fall' | 'attack' | 'fly' | 'glide' | 'swim';
 
-export type FlightMode = 'none' | 'fly' | 'glide';
+type FlightMode = 'none' | 'fly' | 'glide';
 
 /** 发射请求：鹈鹕武器/敌方射击在意图阶段写入，由 stepSim 在意图循环后统一消费生成投射物（任务 018）。 */
 export interface ProjectileRequest {
@@ -115,7 +115,7 @@ export interface ProjectileData {
   targetId?: number;
 }
 
-export type MoveGear = 'walk' | 'run';
+type MoveGear = 'walk' | 'run';
 
 export interface PelicanData {
   humanCombat: HumanCombatData;

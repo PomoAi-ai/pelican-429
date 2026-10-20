@@ -100,7 +100,7 @@ export function styleLevel(t: PelicanGaitTuning, speed: number, mode: GaitMode |
 }
 
 /** Speed level (speed / cadenceSpeedRef) at which the speed-driven beat reaches walkModeCadence. */
-export function walkBeatLevel(t: PelicanGaitTuning): number {
+function walkBeatLevel(t: PelicanGaitTuning): number {
   return ((t.walkModeCadence - t.cadenceMin) / (t.cadenceMax - t.cadenceMin || 1)) ** (1 / t.cadenceCurve);
 }
 

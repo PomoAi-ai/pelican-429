@@ -3,7 +3,7 @@ import type { ResidenceMaterial } from '../../config/residence.ts';
 import { generateTileTextures, tileLayerIndex, TILE_TEXTURE_PERIOD, type TileTextureData } from '../tile/tile-textures.ts';
 import { addNodePatch } from '../stage/node-patches.ts';
 
-export type NaturalBuildingMaterial = Exclude<ResidenceMaterial, 'ceramic' | 'alloy' | 'ashlar'>;
+type NaturalBuildingMaterial = Exclude<ResidenceMaterial, 'ceramic' | 'alloy' | 'ashlar'>;
 const layers = { grass: 'dirt', dirt: 'dirt', stone: 'stone', sand: 'sand', sandstone: 'sandstone', timber: 'planks' } as const;
 
 let textureData: TileTextureData | undefined;

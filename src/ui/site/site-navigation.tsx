@@ -8,7 +8,7 @@ import { LanguagePicker } from './language-picker.tsx';
 import './navigation.css';
 import './homepage.css';
 
-export interface SiteNavigationOptions {
+interface SiteNavigationOptions {
   readonly mode: string;
   /** 整页游戏：导航收进抽屉且默认收起，点画面再收起。 */
   readonly playing: boolean;

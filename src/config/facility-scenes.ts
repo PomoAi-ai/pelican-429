@@ -1,14 +1,5 @@
 import { FORTRESS_CHASM } from './facility-structure.ts';
 
-export interface FacilityShot {
-  readonly label: string;
-  readonly caption: string;
-  readonly x: number;
-  readonly y: number;
-  readonly width: number;
-  readonly height: number;
-}
-
 export const FACILITY_SCENES = {
   fortress: {
     name: '山体算力堡垒', number: '01', subtitle: '黑洞前哨 · 三层机房 · 屋顶冷却阵列',

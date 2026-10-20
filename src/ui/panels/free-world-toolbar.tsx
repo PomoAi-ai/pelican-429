@@ -8,7 +8,7 @@ import { createStore, type Store } from '../react/store.ts';
 import { useLanguage } from '../react/use-language.ts';
 import './free-world.css';
 
-export interface FreeWorldToolbarOptions {
+interface FreeWorldToolbarOptions {
   seed: number;
   size: FreeWorldSize;
   gm: boolean;

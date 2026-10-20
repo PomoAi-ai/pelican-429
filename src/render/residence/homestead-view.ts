@@ -16,9 +16,9 @@ import type { TreeInstance } from '../../world/level.ts';
 import { caption } from '../npc/npc-effects.ts';
 import type { UtilityDroneFleet, UtilityDroneRig } from '../character/utility-drone.ts';
 
-export interface HomesteadGhost { readonly x: number; readonly y: number; readonly width: number; readonly height: number; readonly valid: boolean }
+interface HomesteadGhost { readonly x: number; readonly y: number; readonly width: number; readonly height: number; readonly valid: boolean }
 
-export interface HomesteadView {
+interface HomesteadView {
   /** focus 为玩家位置；commanding 时标出附近还没清场的区域。 */
   update(state: HomesteadState, time: number, focus: WorkstationPlayer, commanding: boolean): void;
   setGhost(ghost: HomesteadGhost | null): void;

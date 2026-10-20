@@ -110,14 +110,14 @@ export function tileColor(key: string): Rgb {
 }
 
 /** 格内子像素 (fx, fyUp ∈ (0,1)，fyUp 从格底向上) 所在 1/4 子格是否在掩码（solidMask | platformMask）内。 */
-export function tileCovers(mask: number, fx: number, fyUp: number): boolean {
+function tileCovers(mask: number, fx: number, fyUp: number): boolean {
   return (mask & (1 << (Math.floor(fyUp * SUBCELLS) * SUBCELLS + Math.floor(fx * SUBCELLS)))) !== 0;
 }
 
 // ---------------------------------------------------------------- 栅格
 
 export const MINIMAP_TILE_PX = 4;
-export const MINIMAP_CHUNK_TILES = 16;
+const MINIMAP_CHUNK_TILES = 16;
 
 export interface MinimapSource {
   readonly tiles: Pick<TileMap, 'width' | 'height' | 'registry' | 'get' | 'solidMask' | 'platformMask'>;
@@ -130,7 +130,7 @@ export interface MinimapSource {
   readonly islands?: ReadonlyArray<Pick<SkyIsland, 'x0' | 'x1' | 'bottom'>>;
 }
 
-export interface MinimapRasterOptions {
+interface MinimapRasterOptions {
   /** 每格像素数（整数 1..8，默认 4）。 */
   readonly tilePx?: number;
   /** 增量重绘区块边长（格，整数 ≥ 1，默认 16）。 */
@@ -142,7 +142,7 @@ export interface MinimapRasterOptions {
 }
 
 /** 栅格像素矩形（行 0 = 世界顶部）。 */
-export interface PixelRect {
+interface PixelRect {
   readonly x: number;
   readonly y: number;
   readonly w: number;
@@ -193,7 +193,7 @@ function treeBounds(t: TreeInstance): TreeHit {
 }
 
 /** 世界点 (wx, wy) 处的树色（冠优先于干）；不在树上返回 null。 */
-export function treeColorAt(t: TreeInstance, wx: number, wy: number): Rgb | null {
+function treeColorAt(t: TreeInstance, wx: number, wy: number): Rgb | null {
   const canopy = CANOPY_COLORS[t.kind];
   if (canopy === undefined) throw new Error(`minimap: no canopy color for tree kind '${t.kind}'`);
   const topY = t.baseY + t.trunkHeight;
@@ -491,7 +491,7 @@ export interface WorldRect {
   readonly height: number;
 }
 
-export interface FollowViewInput {
+interface FollowViewInput {
   readonly centerX: number;
   readonly centerY: number;
   /** 视窗像素尺寸（CSS px）。 */
@@ -535,7 +535,7 @@ export function viewToWorld(rect: WorldRect, scale: number, px: number, py: numb
   return { x: rect.left + px / scale, y: rect.top - py / scale };
 }
 
-export interface Blit {
+interface Blit {
   readonly sx: number;
   readonly sy: number;
   readonly sw: number;
@@ -585,7 +585,7 @@ export interface BigMapLimits {
 /** 大地图最大放大倍数（相对适配）。 */
 export const BIG_MAP_MAX_SCALE = 16;
 /** 适配时四周留白比例。 */
-export const BIG_MAP_MARGIN = 0.05;
+const BIG_MAP_MARGIN = 0.05;
 
 function checkLimits(l: BigMapLimits): void {
   checkPositive('worldW', l.worldW);

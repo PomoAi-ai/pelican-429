@@ -42,7 +42,6 @@ export interface GameSettings {
 }
 
 export type SettingKey = keyof GameSettings;
-export type NumericSettingKey = { [K in SettingKey]: GameSettings[K] extends number ? K : never }[SettingKey];
 
 export const SETTING_GROUPS = Object.freeze([
   { id: 'graphics', title: '画面' },
@@ -50,7 +49,7 @@ export const SETTING_GROUPS = Object.freeze([
   { id: 'water', title: '水' },
   { id: 'debug', title: '调试' },
 ] as const);
-export type SettingGroupId = (typeof SETTING_GROUPS)[number]['id'];
+type SettingGroupId = (typeof SETTING_GROUPS)[number]['id'];
 
 export interface SettingOption<V> {
   readonly value: V;
@@ -158,13 +157,13 @@ function parseParam<K extends SettingKey>(def: SettingDef<K>, raw: string): Game
   return hit.value;
 }
 
-export interface ResolveSettingsInput {
+interface ResolveSettingsInput {
   readonly defaults: GameSettings;
   readonly saved: Partial<GameSettings>;
   readonly params: ParamSource;
 }
 
-export interface ResolvedSettings {
+interface ResolvedSettings {
   readonly settings: GameSettings;
   /** 由网址参数决定的项。 */
   readonly fromUrl: ReadonlySet<SettingKey>;
@@ -189,7 +188,7 @@ export function resolveSettings(input: ResolveSettingsInput): ResolvedSettings {
 
 export const SETTINGS_STORAGE_KEY = 'pelican-vs-ai.settings.v1';
 
-export interface StoredSettings {
+interface StoredSettings {
   /** 清理后的保存值（只含合法项）。 */
   readonly values: Partial<GameSettings>;
   /** 给玩家看的提示（非法/未知/损坏的保存项已清除）。 */

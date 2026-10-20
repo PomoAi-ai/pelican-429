@@ -8,9 +8,9 @@
 import { FOLLOW_LIMITS, MAX_SQUASH } from './pelican-pose.ts';
 import type { PelicanPose } from './pelican-pose.ts';
 
-export type SpitWeapon = 'water' | 'fish' | 'orb' | 'swallow';
+type SpitWeapon = 'water' | 'fish' | 'orb' | 'swallow';
 /** idle; windup/hold/close of a spit timeline; charge (orb held); gulp (mouth wide open); full (pouch holds something). */
-export type SpitPhase = 'idle' | 'windup' | 'hold' | 'close' | 'charge' | 'gulp' | 'full';
+type SpitPhase = 'idle' | 'windup' | 'hold' | 'close' | 'charge' | 'gulp' | 'full';
 /** What shows through the pouch skin. */
 export type PouchContent = 'none' | 'water' | 'fish' | 'orb' | 'enemy' | 'gold';
 
@@ -39,7 +39,7 @@ export interface PouchState {
   tailOut: number;
 }
 
-export interface PelicanAttackLayerTuning {
+interface PelicanAttackLayerTuning {
   /** Easing rate (1/s) of every channel. */
   rate: number;
   /** Windup: neck pull-back (model units, −x), head raise (radians), body lean back, pouch swell. */
@@ -54,7 +54,7 @@ export interface PelicanAttackLayerTuning {
   puffSquash: number;
 }
 
-export const DEFAULT_PELICAN_ATTACK_LAYER: Readonly<PelicanAttackLayerTuning> = Object.freeze({
+const DEFAULT_PELICAN_ATTACK_LAYER: Readonly<PelicanAttackLayerTuning> = Object.freeze({
   rate: 22,
   pullBack: 0.26,
   pullHead: 0.18,
@@ -79,7 +79,7 @@ function fail(key: string, rule: string, value: unknown): never {
   throw new RangeError(`Pelican attack layer ${key} ${rule}, got ${String(value)}.`);
 }
 
-export function validatePelicanAttackLayerTuning(t: PelicanAttackLayerTuning): void {
+function validatePelicanAttackLayerTuning(t: PelicanAttackLayerTuning): void {
   for (const [k, v] of Object.entries(t)) if (typeof v !== 'number' || !Number.isFinite(v)) fail(`tuning.${k}`, 'must be a finite number', v);
   if (!(t.rate > 0)) fail('tuning.rate', 'must be positive', t.rate);
   if (Math.abs(t.pullBack) > FOLLOW_LIMITS.headShift || Math.abs(t.thrust) > FOLLOW_LIMITS.headShift) fail('tuning.pullBack/thrust', `must be within ±${FOLLOW_LIMITS.headShift}`, `${t.pullBack}/${t.thrust}`);
@@ -207,7 +207,7 @@ function targetsOf(i: PelicanSpitInput, t: PelicanAttackLayerTuning, time: numbe
   return out;
 }
 
-export interface PelicanAttackLayer {
+interface PelicanAttackLayer {
   /** Adds the spit motion to `pose` in place and returns the pouch channel. Throws on invalid input. */
   apply(pose: PelicanPose, input: PelicanSpitInput, frameDt: number): PouchState;
 }

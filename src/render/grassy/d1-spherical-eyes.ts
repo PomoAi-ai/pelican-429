@@ -1,9 +1,9 @@
 import * as THREE from 'three';
 import { injectAfter } from '../tile/tile-material.ts';
 
-export const D1_SPHERICAL_EYE_MATERIAL = 'D1 spherical eye';
+const D1_SPHERICAL_EYE_MATERIAL = 'D1 spherical eye';
 export const D1_EYELID_MATERIAL = 'D1 eyelid';
-export const D1_EYELASH_MATERIAL = 'D1 eyelash';
+const D1_EYELASH_MATERIAL = 'D1 eyelash';
 export const D1_EYE_SOCKET_MATERIAL = 'D1 eye socket skin';
 
 export function isD1SphericalEyeSurface(material: THREE.Material): boolean {

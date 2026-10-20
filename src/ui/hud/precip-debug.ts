@@ -5,7 +5,7 @@
 import { PRECIP_DEBUG_CYCLE } from '../../config/precip-rules.ts';
 import type { PrecipMode } from '../../config/precip-rules.ts';
 
-export const PRECIP_DEBUG_KEY = 'KeyN';
+const PRECIP_DEBUG_KEY = 'KeyN';
 
 /** 循环中的下一个模式（不在循环表中即抛）。 */
 export function nextPrecipMode(current: PrecipMode): PrecipMode {

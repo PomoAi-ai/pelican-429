@@ -33,7 +33,7 @@ export const APPEARANCE_COLORS = [
 ] as const;
 export type FaceParameter = typeof FACE_PARAMETERS[number]['id'];
 export type HairId = typeof HAIR_STYLES[number]['id'];
-export type OutfitId = typeof OUTFIT_STYLES[number]['id'];
+type OutfitId = typeof OUTFIT_STYLES[number]['id'];
 export interface CharacterAppearance {
   version: 1;
   body: 'male' | 'female';

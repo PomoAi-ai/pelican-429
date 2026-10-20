@@ -21,16 +21,16 @@ export const WEED_MIN_HEIGHT = 0.6;
 export const WEED_MAX_HEIGHT = 2.5;
 export const WEED_HEADROOM = 0.4;
 /** 每个湖床格的株数上限（按哈希 0..该值）。 */
-export const WEEDS_PER_CELL_MAX = 2;
+const WEEDS_PER_CELL_MAX = 2;
 /** 根部水量低于该值即收拢；收拢后的 y 缩放比例；收拢/舒展速率（1/秒，指数逼近）。 */
 export const WEED_DRY_AMOUNT = 64;
 export const WEED_DRY_SCALE = 0.3;
 const WEED_COLLAPSE_RATE = 4;
 
-export type WeedForm = 'ribbon' | 'round';
-export const WEED_FORMS: readonly WeedForm[] = ['ribbon', 'round'];
+type WeedForm = 'ribbon' | 'round';
+const WEED_FORMS: readonly WeedForm[] = ['ribbon', 'round'];
 
-export interface WeedInstance {
+interface WeedInstance {
   readonly form: WeedForm;
   readonly lake: number;
   readonly x: number;
@@ -64,7 +64,7 @@ export function bedAt(map: TileQuery, tx: number, level: number, fx: number): { 
 /** 视觉湖床与碰撞湖床相差超过该值（格）时不采用视觉高度（不是同一表面）。 */
 const GROUND_SNAP_MAX = 0.6;
 
-/** 规划水草（纯函数、确定性；按湖、列、株序输出）；groundAt（可选，render/ground-profile）给出平滑后的视觉湖床，根部贴它（不悬空于平滑削低处）。 */
+/** 规划水草（纯函数、确定性；按湖、列、株序输出）；groundAt（可选，render/tile/ground-profile）给出平滑后的视觉湖床，根部贴它（不悬空于平滑削低处）。 */
 export function planWaterWeeds(lakes: readonly LakeInfo[], map: TileQuery, groundAt?: (x: number) => number): WeedInstance[] {
   if (!lakes) throw new Error('water-weeds: lakes are required');
   if (!map) throw new Error('water-weeds: map is required');

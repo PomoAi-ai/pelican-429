@@ -32,7 +32,7 @@ export function shotPhaseProgress(shotTicks: number, t: WeaponTimeline): { phase
 }
 
 /** 嘴囊含物的显示内容。 */
-export function mouthfulContent(m: Mouthful | null): PouchContent {
+function mouthfulContent(m: Mouthful | null): PouchContent {
   if (!m) return 'none';
   if (m.source === 'fish' || m.source === 'fishShot') return 'fish';
   if (m.source === 'enemyShot') return 'enemy';

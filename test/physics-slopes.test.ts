@@ -11,7 +11,7 @@ import { moveAndCollide, overlapsSolid, standingOnPlatformOnly, terrainHeightAt 
 import { COLLISION_EPS } from '../src/world/collision-geometry.ts';
 import { createTileMap, type TileMap } from '../src/world/tile-map.ts';
 import { DEFAULT_TILES, TILE_PLATFORM, TILE_STONE } from '../src/world/tile-types.ts';
-import { SHAPE_HALF, SHAPE_SLOPE_R, pieceShapeCode, platformVariantCode } from '../src/world/tile-shapes.ts';
+import { pieceShapeCode, platformVariantCode } from '../src/world/tile-shapes.ts';
 import type { DefinitionPlatformWidth } from '../src/config/definition-kit.ts';
 import { HUMAN_BODY_HEIGHT } from '../src/config/player-form.ts';
 import { TRANSIT, TRANSIT_HULL_COLLIDER } from '../src/config/transit.ts';

@@ -25,7 +25,7 @@ const SHADOW_HALF_EXTENT_MIN = 14;
 export const SKY_TOP = '#8ec9e8';
 export const SKY_BOTTOM = '#f4ecd6';
 
-/** 游戏页可经 ?renderer=webgpu 换用 WebGPURenderer（见 app/webgpu-stage）；其他页面只用 WebGL。 */
+/** 游戏页可经 ?renderer=webgpu 换用 WebGPURenderer（见 render/webgpu/webgpu-stage）；其他页面只用 WebGL。 */
 export type StageRenderer = THREE.WebGLRenderer | WebGPURenderer;
 
 export interface Stage<R extends StageRenderer = THREE.WebGLRenderer> {
@@ -178,7 +178,7 @@ const RENDERER_PRESETS: Readonly<Record<RendererPreset, { readonly alpha: boolea
   thumbnail: { alpha: true, antialias: true },
 };
 
-export interface RendererParameters {
+interface RendererParameters {
   readonly alpha: boolean;
   readonly antialias: boolean;
   readonly powerPreference: 'high-performance';
@@ -236,7 +236,7 @@ export function createStageView(renderer: THREE.WebGLRenderer, tuning: Tuning, o
   return createStageViewWith(renderer, tuning, options, WEBGL_STAGE_BACKEND);
 }
 
-export function createStageViewWith<R extends StageRenderer>(renderer: R, tuning: Tuning, options: StageOptions, backend: StageBackend<R>): Stage<R> {
+function createStageViewWith<R extends StageRenderer>(renderer: R, tuning: Tuning, options: StageOptions, backend: StageBackend<R>): Stage<R> {
   const r = tuning.render;
   const l = r.lighting;
   let quality = options.quality;

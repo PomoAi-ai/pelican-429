@@ -113,7 +113,7 @@ function formDiscard({ humanMix, human }: Patch<'npc-form-fade'>): N {
 
 const npcFormFade: Translate<'npc-form-fade'> = (material, patch) => addDiscard(material, formDiscard(patch));
 
-// ---- 传送溶解 teleport-dissolve（render/teleport-effect）----
+// ---- 传送溶解 teleport-dissolve（render/fx/teleport-effect）----
 
 /** 同 GLSL：4 像素一格的随机阈值（screenCoordinate y 向下，格子图样上下翻转）。 */
 function teleportDiscard({ amount }: Patch<'teleport-dissolve'>): N {
@@ -132,7 +132,7 @@ const teleportDissolve: Translate<'teleport-dissolve'> = (material, patch) => {
   };
 };
 
-// ---- 水弹果冻 water-jelly（render/projectile-views JELLY_VERTEX / JELLY_FRAGMENT 同式）----
+// ---- 水弹果冻 water-jelly（render/fx/projectile-views JELLY_VERTEX / JELLY_FRAGMENT 同式）----
 
 const waterJelly: Translate<'water-jelly'> = (material, { uniforms: u }, source) => {
   if (!source.transparent) throw new Error(`webgpu-patches-characters: water-jelly 改写 alpha，材质 '${materialLabel(source)}' 必须透明`);
@@ -156,7 +156,7 @@ const waterJelly: Translate<'water-jelly'> = (material, { uniforms: u }, source)
   });
 };
 
-// ---- 鱼尾 fish-tail（render/fish-view：begin_vertex 行波摆尾，实例变换之前）----
+// ---- 鱼尾 fish-tail（render/water/fish-view：begin_vertex 行波摆尾，实例变换之前）----
 
 const fishTail: Translate<'fish-tail'> = (material, { wagY, wagZ }) => {
   deformBeforeInstance(material, () => {

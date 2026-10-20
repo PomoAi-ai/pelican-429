@@ -22,7 +22,7 @@ import { islandSkyPass } from '../../world/sky-islands.ts';
 import { cityLightRules } from '../../world/light-field-tiles.ts';
 import { SUBCELLS } from '../../world/tile-shapes.ts';
 
-export interface ShaftsWiring {
+interface ShaftsWiring {
   readonly shafts: LightShafts;
   /** 切换画质：后期 pass + 光束开关（low 关闭光束）。 */
   readonly setQuality: (quality: LightingQuality) => void;

@@ -82,10 +82,10 @@ export const FLORA_SLOPE_TILT = 0.6;
 /** 外凸圆角一侧收进的宽度（圆角在该处下沉 < .02 格）。 */
 export const FLORA_ROUND_INSET = CONVEX_RADIUS * 0.7;
 
-export type FloraBiome = 'meadow' | 'sea' | 'prairie' | 'wood';
+type FloraBiome = 'meadow' | 'sea' | 'prairie' | 'wood';
 type Affinity = Readonly<Record<FloraBiome, number>>;
 
-export interface FloraRule {
+interface FloraRule {
   /** 群落噪声尺度（格）与盐值。 */
   readonly scale: number;
   readonly salt: number;
@@ -247,13 +247,13 @@ const smoothstep = (a: number, b: number, v: number): number => {
 };
 
 /** 物种群落值 ∈ [0,1]（列 tx 处；两倍频值噪声，拉伸对比度）。 */
-export function floraCommunity(species: FloraSpecies, tx: number): number {
+function floraCommunity(species: FloraSpecies, tx: number): number {
   const r = FLORA_RULES[species];
   return clamp01(0.5 + 0.85 * fbm1D(tx / r.scale, r.salt, 2, 0.45));
 }
 
 /** 列 tx 的群系权重（和为 1）：花海 / 混合草甸 / 高草原 / 林下。 */
-export function floraBiomes(tx: number): Readonly<Record<FloraBiome, number>> {
+function floraBiomes(tx: number): Readonly<Record<FloraBiome, number>> {
   const a = clamp01(0.5 + 0.9 * fbm1D(tx / 46, 7001, 3, 0.5));
   const b = clamp01(0.5 + 0.9 * fbm1D(tx / 33, 7013, 2, 0.5));
   const sea = smoothstep(0.6, 0.72, a);
@@ -508,14 +508,14 @@ export function createFloraGeometries(): FloraGeometries {
   });
 }
 
-export interface WindOptions {
+interface WindOptions {
   /** 摆幅（格，叶尖处）；默认 .06。 */
   readonly amplitude?: number;
   /** 时间频率倍数；默认 1。 */
   readonly speed?: number;
   /** 全局风（render/wind 的 windSway）对本材质的倍数；默认 1（水草在水下取小值）。 */
   readonly windScale?: number;
-  /** 草地扰动场（render/grass-disturb：啄击/光球/落地/骑车）对本材质的倍数；默认 1。 */
+  /** 草地扰动场（render/flora/grass-disturb：啄击/光球/落地/骑车）对本材质的倍数；默认 1。 */
   readonly disturbScale?: number;
   readonly name?: string;
 }

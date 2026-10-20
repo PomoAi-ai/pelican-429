@@ -70,7 +70,7 @@ export const SHOWCASE_ACTORS: ReadonlyArray<{ id: ShowcaseActor; name: string; i
 const entries = (actor: ShowcaseActor, group: string, rows: ReadonlyArray<readonly [string, string, string, number]>): ShowcaseEntry[] =>
   rows.map(([action, label, description, seconds]) => ({ id: `${actor}.${action}`, actor, action, label, group, description, seconds }));
 
-export const SHOWCASE_ENTRIES: readonly ShowcaseEntry[] = [
+const SHOWCASE_ENTRIES: readonly ShowcaseEntry[] = [
   ...entries('flyingRoadster', '载具动作', [
     ['idle', '静止检查', '三轮着地，检查白色车漆、金属、玻璃与灯带', 5],
     ['takeoff', '垂直起飞', '底部升力喷口启动，整块尾喷向下，三轮保持外露', 5],

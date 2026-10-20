@@ -49,12 +49,12 @@ export function createGlowTexture(size = 64): THREE.DataTexture {
   return tex;
 }
 
-export interface OrbViewsOptions {
+interface OrbViewsOptions {
   readonly tuning: Tuning;
   readonly scene: THREE.Object3D;
 }
 
-export interface OrbViews {
+interface OrbViews {
   /** 注册到 view-registry 的 'orb' 工厂。 */
   readonly factory: EntityViewFactory;
   /** 每帧在 views.sync 之后调用：把固定光源池分配给离玩家最近的光球。 */

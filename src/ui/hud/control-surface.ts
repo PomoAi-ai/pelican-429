@@ -11,7 +11,7 @@ export interface ControlSurface {
   dispose(): void;
 }
 
-export interface ControlSurfaceOptions {
+interface ControlSurfaceOptions {
   readonly canvas: HTMLCanvasElement;
   readonly onZoom: (zoom: number) => void;
   readonly navigation: HTMLDetailsElement;

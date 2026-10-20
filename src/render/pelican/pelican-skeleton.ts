@@ -18,12 +18,12 @@ export const RIDE_MIN_EXTENSION = 0.5;
  */
 export const POLE_TURN_EXTENSION = 0.9;
 /** Tucked legs (jump/fall/swim) at lift 1 span this share of the leg. */
-export const TUCK_EXTENSION = 0.62;
+const TUCK_EXTENSION = 0.62;
 
-export type Quat = [number, number, number, number];
+type Quat = [number, number, number, number];
 
 /** Pose fields that move the upper body (and with it the hips). */
-export interface UpperPose {
+interface UpperPose {
   bob: number;
   crouch: number;
   lean: number;
@@ -35,7 +35,7 @@ export interface UpperPose {
   squash: number;
 }
 
-export interface HipPose extends UpperPose {
+interface HipPose extends UpperPose {
   hipShift: [number, number];
 }
 
@@ -50,7 +50,7 @@ function checkPoint(p: Vec3, name: string): void {
 }
 
 /** Index of a side in [near, far] pairs. */
-export const sideIndex = (side: Side): 0 | 1 => (side === 1 ? 0 : 1);
+const sideIndex = (side: Side): 0 | 1 => (side === 1 ? 0 : 1);
 
 /** Upper-body scale (x, y, z) for a squash: y = squash, x = z = 1/√squash (volume kept). Throws unless squash > 0. */
 export function squashScale(squash: number): Vec3 {
@@ -130,7 +130,7 @@ export function kneePole(side: Side, seat: number, kneeDirection: number): Vec3 
   return [Math.cos(theta), 0, side * Math.sin(theta)];
 }
 
-export interface KneeSolution {
+interface KneeSolution {
   knee: Vec3;
   /** The ankle actually reached: the target, or the target pulled onto the reachable shell when clamped. */
   ankle: Vec3;

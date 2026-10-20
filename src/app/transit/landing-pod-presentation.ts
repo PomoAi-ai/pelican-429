@@ -28,7 +28,7 @@ export function createCorridorStartupLoading(): Pick<ReturnType<typeof createSce
   };
 }
 
-export interface LandingPodPresentationOptions {
+interface LandingPodPresentationOptions {
   readonly stage: Stage<StageRenderer>;
   readonly world: SimWorld;
   readonly landing: PodLanding;

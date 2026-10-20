@@ -14,7 +14,7 @@ import type { SkillAimKind } from './skill-touch.ts';
 import { t } from '../../config/i18n.ts';
 import { onLanguageChange } from '../model/language.ts';
 
-export const TOAST_SECONDS = 1.2;
+const TOAST_SECONDS = 1.2;
 const TOAST_FADE = 0.25;
 export const PELICAN_SKILL_SLOTS = [
   { key: '右键', name: '鱼群轰炸', cooldown: PELICAN_SKILLS.fishCooldownTicks },
@@ -29,9 +29,9 @@ const HUMAN_SLOTS = [
   { key: '2', name: '服务器超载', action: 'server_overload' },
 ] as const;
 
-export interface WeaponHudOptions { readonly weapons: WeaponsTuning; readonly onTransform: () => void; readonly onSkill: (action: GameAction) => void; readonly project: WorldToScreen }
-export interface MobileSkillCast { readonly action: GameAction; readonly direction: Vec2 | null }
-export interface WeaponHudFrame {
+interface WeaponHudOptions { readonly weapons: WeaponsTuning; readonly onTransform: () => void; readonly onSkill: (action: GameAction) => void; readonly project: WorldToScreen }
+interface MobileSkillCast { readonly action: GameAction; readonly direction: Vec2 | null }
+interface WeaponHudFrame {
   readonly entities: readonly Entity[];
   readonly playerId: number;
   readonly frameDt: number;

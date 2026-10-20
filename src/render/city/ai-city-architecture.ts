@@ -5,9 +5,9 @@ import { createDaisyGeometry, createFernGeometry, createShrubGeometry, createWee
 import { createParticleCloud } from '../grassy/grassy-particles.ts';
 import { addNodePatch } from '../stage/node-patches.ts';
 
-export type AiCityBuildingMaterial = 'ceramic' | 'alloy' | 'ashlar';
+type AiCityBuildingMaterial = 'ceramic' | 'alloy' | 'ashlar';
 export type AiCityMaterial = AiCityBuildingMaterial | 'wall' | 'gold' | 'dark' | 'steel' | 'cyan' | 'warm' | 'glass' | 'soil';
-export type AiCityFixtureKind = 'trim-straight' | 'trim-corner' | 'trim-cap' | 'eave-light' | 'wall-light'
+type AiCityFixtureKind = 'trim-straight' | 'trim-corner' | 'trim-cap' | 'eave-light' | 'wall-light'
   | 'bollard-light' | 'energy-column' | 'planter' | 'railing';
 
 const FINISHES: Record<AiCityMaterial, THREE.MeshPhysicalMaterialParameters> = {
@@ -100,13 +100,13 @@ export function createAiCityMaterial(kind: AiCityMaterial): THREE.MeshStandardMa
   return material;
 }
 
-export interface AiCityArchitectureView {
+interface AiCityArchitectureView {
   readonly root: THREE.Group;
   update(time: number): void;
   dispose(): void;
 }
 
-export interface AiCityDoorView extends AiCityArchitectureView {
+interface AiCityDoorView extends AiCityArchitectureView {
   setOpen(open: boolean): void;
 }
 

@@ -84,7 +84,7 @@ export const ROCK_SIZE = Object.freeze({
   arch: Object.freeze([3.2, 4] as const),
 });
 /** 半埋比例（按高度）。 */
-export const ROCK_SINK = Object.freeze({ small: 0.15, mid: 0.12, big: 0.2 });
+const ROCK_SINK = Object.freeze({ small: 0.15, mid: 0.12, big: 0.2 });
 /** 大石离树干的最小列距。 */
 export const ROCK_TRUNK_CLEAR = 3;
 /** 大石之间的最小列距（成片的大石会挡视线）。 */
@@ -123,7 +123,7 @@ const GREY_TINTS = [0xffffff, 0xece8e0, 0xdfe4ea, 0xf2e6d6, 0xd8d8d2] as const;
 const SAND_TINTS = [0xffffff, 0xf4e2cc, 0xffe8d0, 0xe8d0b8] as const;
 
 /** 岩石生境（第三轮）：决定色调与青苔量。 */
-export type RockHabitat = 'meadow' | 'wood' | 'shore' | 'desert';
+type RockHabitat = 'meadow' | 'wood' | 'shore' | 'desert';
 /** 各生境的实例色（乘顶点色）与青苔倍率：林地青灰多苔、湖岸偏深、草地浅灰（暖/冷）少苔、沙漠砂岩无苔。 */
 export const ROCK_HABITAT = Object.freeze({
   meadow: Object.freeze({ tints: Object.freeze([0xffffff, 0xfff6ea, 0xf0f4fa, 0xfaf2e4, 0xeeeeea] as const), moss: 0.45 }),
@@ -155,7 +155,7 @@ const shoreness = (env: DecorEnv, x: number): number => {
 const community = (x: number): number => clamp01(0.45 + 0.9 * fbm1D(x / 13, ROCK_SALT + 1, 2, 0.5));
 
 /** 列 x 作为岩石组中心的生境伯努利概率（不含栅格保底；纯函数，测试用）。 */
-export function rockLambda(env: DecorEnv, x: number): number {
+function rockLambda(env: DecorEnv, x: number): number {
   const g = env.ground(x);
   if (g === 'none' || env.blocked(x)) return 0;
   const R = ROCK_GROUP;
@@ -183,7 +183,7 @@ function groupable(env: DecorEnv, x: number): boolean {
 }
 
 /** 列 x 是否为岩石组中心（未分大小；纯函数）。 */
-export function rockGroupAt(env: DecorEnv, x: number): boolean {
+function rockGroupAt(env: DecorEnv, x: number): boolean {
   if (!groupable(env, x)) return false;
   return latticePick(env, x) || hash01(x, 0, ROCK_SALT) < rockLambda(env, x);
 }
@@ -381,7 +381,7 @@ function planGroup(env: DecorEnv, x: number, kind: RockKind, out: RockInstance[]
 }
 
 /** 前景散石概率（每列）。 */
-export function scatterLambda(env: DecorEnv, x: number): number {
+function scatterLambda(env: DecorEnv, x: number): number {
   if (env.ground(x) === 'none' || env.blocked(x)) return 0;
   const R = ROCK_GROUP;
   const mesa = isDesertCol(env, x) && (env.foot(x) || env.relief(x) >= 2) ? R.mesaRubble : 0;

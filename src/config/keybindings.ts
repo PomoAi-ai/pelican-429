@@ -20,7 +20,7 @@ export const PLAY_ACTIONS: readonly GameAction[] = Object.freeze(GAME_ACTIONS.fi
 /** 技能动作（右键与数字 1..3 直接释放）。 */
 export const SKILL_ACTIONS: readonly GameAction[] = Object.freeze(['skill1', 'skill2', 'skill3', 'skill4'] as const);
 
-export type Binding = { readonly device: 'key'; readonly code: string } | { readonly device: 'mouse'; readonly button: number };
+type Binding = { readonly device: 'key'; readonly code: string } | { readonly device: 'mouse'; readonly button: number };
 
 export type Bindings = Readonly<Record<GameAction, readonly Binding[]>>;
 

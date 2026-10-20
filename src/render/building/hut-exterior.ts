@@ -380,7 +380,7 @@ function buildFacadeWindow(ctx: HutCtx, b: PartBuilder): void {
 }
 
 /** 玻璃反光：两条斜向高光带（白天天空反光）。 */
-export function glassShine(b: PartBuilder, x0: number, x1: number, y0: number, y1: number, z: number): void {
+function glassShine(b: PartBuilder, x0: number, x1: number, y0: number, y1: number, z: number): void {
   const shine = color(C.glassShine);
   const w = x1 - x0;
   const h = y1 - y0;
@@ -620,7 +620,7 @@ export function buildWindows(ctx: HutCtx, b: PartBuilder): void {
 // ---------- 烟囱 ----------
 
 /** 烟囱位置：背湖一侧的坡上；返回 x 范围、底与顶。 */
-export function chimneySpan(ctx: HutCtx): { xa: number; xb: number; yb: number; yt: number; z0: number; z1: number } {
+function chimneySpan(ctx: HutCtx): { xa: number; xb: number; yb: number; yt: number; z0: number; z1: number } {
   const { hut } = ctx;
   const awayLeft = hut.lakeSide === 1;
   const xa = awayLeft ? hut.roofX0 + 1.7 : hut.roofX1 + 1 - 2.4;

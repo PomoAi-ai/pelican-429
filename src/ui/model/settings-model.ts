@@ -70,7 +70,7 @@ export function createLocalSettingsStore(storage: () => Pick<Storage, 'getItem' 
   };
 }
 
-export interface LoadSettingsInput {
+interface LoadSettingsInput {
   readonly store: SettingsStore;
   readonly defaults: GameSettings;
   readonly params: ParamSource;
@@ -112,11 +112,11 @@ export function loadSettings(input: LoadSettingsInput): LoadedSettings {
 }
 
 /** 固定步长推进器所需的最小接口（core/fixed-step 满足）。 */
-export interface SimStepper {
+interface SimStepper {
   advance(elapsed: number, onTick: () => void): number;
 }
 
-export interface SettingsControllerOptions {
+interface SettingsControllerOptions {
   readonly runtime: SettingsRuntime;
   readonly store: SettingsStore;
   readonly saved: Partial<GameSettings>;

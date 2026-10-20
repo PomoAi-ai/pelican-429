@@ -158,7 +158,7 @@ export interface PelicanViewOptions {
   readonly actors?: () => readonly Entity[];
   /** 吐鱼配色接力（projectile-views.fishRelay）：嘴里露出的鱼与随后飞出的鱼同色；缺省时嘴里的鱼用默认配色。 */
   readonly fishRelay?: FishVariantRelay;
-  /** 树平台随动（015 追加，render/tree-ride）：站在摇动的树冠/树枝平台上时整体随树平移并微倾；缺省不随动。 */
+  /** 树平台随动（015 追加，render/tree/tree-ride）：站在摇动的树冠/树枝平台上时整体随树平移并微倾；缺省不随动。 */
   readonly treeRide?: TreeRideQuery;
 }
 
@@ -207,7 +207,7 @@ export function createPelicanViewFactory(options: PelicanViewOptions): EntityVie
     let probeY = 0;
     const worldGround = (wx: number): number | null => {
       if (support) {
-        const top = supportTopAt(support, supportX, supportY, wx, tuning);
+        const top = supportTopAt(support, supportX, supportY, wx);
         if (top !== null) return top;
       }
       return terrain ? terrainHeightAt(terrain, wx, probeY + GAIT_PROBE_UP, GAIT_PROBE_DEPTH) : null;
@@ -303,7 +303,7 @@ const MAX_TILT = 0.35;
 const DUMMY_WET_COLOR = '#6f5a3a';
 const WET_FADE_TICKS = 40;
 
-export interface DummyViewOptions {
+interface DummyViewOptions {
   readonly tuning: Tuning;
   /** 地形查询（可选）：提供时启用斜坡脚底偏移。 */
   readonly terrain?: TileQuery;

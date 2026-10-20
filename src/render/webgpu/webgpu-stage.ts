@@ -1,7 +1,7 @@
 /**
  * WebGPU 舞台（?renderer=webgpu，游戏页按需动态加载，不进 WebGL 首包）：WebGPURenderer + 与 WebGL 相同的场景、灯光、阴影拟合与远景。
  * 后期由 webgpu-post-fx（TSL）实现，抗锯齿在后期链里（SMAA 或场景 pass 多重采样），画布本身不多重采样；
- * 开启时间戳查询（trackTimestamp），GPU 计时与动态分辨率见 render/gpu-timer。登记了节点补丁的 onBeforeCompile 补丁由 webgpu-materials 翻译成节点，
+ * 开启时间戳查询（trackTimestamp），GPU 计时与动态分辨率见 render/stage/gpu-timer。登记了节点补丁的 onBeforeCompile 补丁由 webgpu-materials 翻译成节点，
  * 未登记的补丁、没有节点版本的 ShaderMaterial 在 WebGPU 下不生效，由 reportMaterialInventory 列出剩余项。
  */
 import * as THREE from 'three';
@@ -48,7 +48,7 @@ export async function createWebGpuStage(container: HTMLElement, tuning: Tuning, 
   return stage;
 }
 
-export interface MaterialInventoryRow {
+interface MaterialInventoryRow {
   readonly type: string;
   readonly name: string;
   /**

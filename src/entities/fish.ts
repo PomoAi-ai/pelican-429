@@ -45,7 +45,7 @@ export interface FishSchool {
   readonly fish: Fish[];
 }
 
-export type FishPhysics = Tuning['physics'];
+type FishPhysics = Tuning['physics'];
 
 /** 前探距离（瓦片）。 */
 const LOOKAHEAD = 0.6;

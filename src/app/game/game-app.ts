@@ -184,7 +184,7 @@ export async function start(run: GameRun, page: PageContext, story: StorySave | 
   const entry = city ? cityEntry(params, city) : null;
   const startLevel = inspected !== undefined ? { ...level, spawn: { x: inspected.x0 + 1.5, y: inspected.baseY }, spawnFacing: undefined }
     : entry !== null ? { ...level, spawn: entry } : level;
-  // 设置：网址参数（非法即抛）> localStorage 保存值（非法项清除并提示）> 调参默认（见 app/settings-wiring）。
+  // 设置：网址参数（非法即抛）> localStorage 保存值（非法项清除并提示）> 调参默认（见 app/game/settings-wiring）。
   const startup = loadStartupSettings(params, freeWorld ? 'auto' : undefined);
   const appearance = createCharacterAppearanceStore(window.localStorage);
   // 机房预览采用场景环境，不继承沙盒的天气和训练假人设置。

@@ -9,14 +9,14 @@
 import type { AuraTuning } from '../../config/aura-rules.ts';
 import { validateAuraTuning } from '../../config/aura-rules.ts';
 
-export interface AuraState {
+interface AuraState {
   /** 当前强度 [0,1]（中心亮度）。 */
   readonly strength: number;
   /** 当前光色（线性 RGB）。 */
   readonly color: readonly [number, number, number];
 }
 
-export interface PelicanAura {
+interface PelicanAura {
   readonly state: AuraState;
   /** 推进 dt 秒：ambient = 环境光照图亮度 [0,1]，inWater = 鹈鹕在水中。返回新状态。 */
   update(dt: number, ambient: number, inWater: boolean): AuraState;

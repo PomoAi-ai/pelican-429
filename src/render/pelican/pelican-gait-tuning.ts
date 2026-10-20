@@ -313,7 +313,7 @@ export function stanceFlex(t: PelicanGaitTuning, level: number): number {
 }
 
 /** Lowest duty while the feet are world-locked: a walk keeps a short double support (never a flight). */
-export const LOCKED_DUTY_FLOOR = 0.52;
+const LOCKED_DUTY_FLOOR = 0.52;
 
 /** Lowest duty at `speed`: LOCKED_DUTY_FLOOR while the feet are world-locked, easing to dutyMin with the slip allowance. */
 export function dutyFloor(t: PelicanGaitTuning, speed: number): number {

@@ -35,7 +35,7 @@ export interface DefinitionWorldData {
   readonly solar: readonly Vec2[];
 }
 
-export interface DefinitionWorld {
+interface DefinitionWorld {
   readonly level: LevelData;
   /** 地图坐标 = 布局坐标 + offset。 */
   readonly offset: Vec2;

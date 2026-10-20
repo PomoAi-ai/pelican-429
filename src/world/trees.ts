@@ -1,6 +1,6 @@
 /**
  * 卡通树的逻辑规划（纯函数、确定性）：按栖息地（TREE_HABITATS）选树种、按 TREE_SHAPES 抽尺寸，计算可站立平台并写入 branch 单向瓦片。
- * 冠团布局的唯一数据源：每个平台 = 一个冠团（或粗横枝）的顶面，crownPads 给出其视觉范围与顶面；渲染层（render/tree-skeleton）
+ * 冠团布局的唯一数据源：每个平台 = 一个冠团（或粗横枝）的顶面，crownPads 给出其视觉范围与顶面；渲染层（render/tree/tree-skeleton）
  * 只按 crownPads 摆放冠团与其下的补团，不另起可站外观的叶团。坐标约定同 TileMap：y 向上，单位瓦片。
  */
 import { DESERT_RULES, PLATFORM_CLEARANCE, SIDE_PAD_MIN_ROW, TREE_HABITATS, TREE_KINDS, TREE_SHAPES, platformRow } from '../config/worldgen-rules.ts';
@@ -160,14 +160,14 @@ export function treeHabitat(topId: number, lakeDist: number, sandId: number, des
 }
 
 /** placeTrees 使用的瓦片 id（默认内置注册表）。 */
-export interface TreeTileIds {
+interface TreeTileIds {
   readonly air: number;
   readonly grass: number;
   readonly sand: number;
   readonly branch: number;
 }
 
-export const DEFAULT_TREE_TILE_IDS: TreeTileIds = Object.freeze({ air: TILE_AIR, grass: TILE_GRASS, sand: TILE_SAND, branch: TILE_BRANCH });
+const DEFAULT_TREE_TILE_IDS: TreeTileIds = Object.freeze({ air: TILE_AIR, grass: TILE_GRASS, sand: TILE_SAND, branch: TILE_BRANCH });
 
 /** 平台格及其上方净空格均为空气（且在图内）。 */
 export function platformFits(grid: Uint16Array, width: number, height: number, p: TreePlatform, air: number): boolean {

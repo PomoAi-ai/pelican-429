@@ -13,7 +13,7 @@ import type { FloraSpecies } from './flora.ts';
 import { GRASS_DISTURB } from './grass-disturb.ts';
 
 export const CUTTABLE_FLORA: ReadonlySet<FloraSpecies> = new Set<FloraSpecies>(['turf', 'tuft', 'tallgrass', 'reed', 'clover', 'daisy', 'poppy', 'bluebell', 'dandelion', 'sunflower', 'lavender', 'fern']);
-export const CUTTABLE_COVER: ReadonlySet<CoverKind> = new Set<CoverKind>(['clover', 'fiddlehead', 'sprout', 'rosette', 'seedling']);
+const CUTTABLE_COVER: ReadonlySet<CoverKind> = new Set<CoverKind>(['clover', 'fiddlehead', 'sprout', 'rosette', 'seedling']);
 /** 草皮割后保留更多（整格草带，割太短会露出光秃顶面）。 */
 const TURF_KEEP = 0.7;
 /** 开花物种：碎屑带花瓣色。 */

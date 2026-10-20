@@ -341,8 +341,8 @@ export function createVineGeometry(inset: number, radius: number): THREE.BufferG
 }
 
 /** 蝴蝶的悬停高度（局部 y，着色器在此基础上叠加飞行轨迹）与飞行包围半径。 */
-export const BUTTERFLY_HOVER = 0.75;
-export const BUTTERFLY_RANGE = 1.6;
+const BUTTERFLY_HOVER = 0.75;
+const BUTTERFLY_RANGE = 1.6;
 const BUTTERFLY_BODY = C('#2a2220');
 
 /**

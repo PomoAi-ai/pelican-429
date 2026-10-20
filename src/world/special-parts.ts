@@ -4,7 +4,7 @@
  */
 import type { DefinitionPoint } from '../config/definition-kit.ts';
 
-export type SpecialPartKind = 'door' | 'solar' | 'hull' | 'elevator' | 'deck';
+type SpecialPartKind = 'door' | 'solar' | 'hull' | 'elevator' | 'deck';
 
 /** 单向承托顶线 [left,right] @ top。 */
 export interface SupportSurface {
@@ -18,7 +18,7 @@ export interface SpecialPartGeometry {
   readonly supports: readonly SupportSurface[];
 }
 
-export interface SpecialPart extends SpecialPartGeometry {
+interface SpecialPart extends SpecialPartGeometry {
   readonly id: number;
   readonly kind: SpecialPartKind;
 }
@@ -35,7 +35,7 @@ export interface SpecialParts {
   onChange(listener: SpecialPartsListener): () => void;
 }
 
-export type SpecialPartsListener = (kind: SpecialPartKind, x0: number, y0: number, x1: number, y1: number) => void;
+type SpecialPartsListener = (kind: SpecialPartKind, x0: number, y0: number, x1: number, y1: number) => void;
 
 /** 碰撞与表现只读的部分。 */
 export type SpecialPartsQuery = Pick<SpecialParts, 'query' | 'all' | 'onChange'>;

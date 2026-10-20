@@ -23,7 +23,7 @@ export interface CameraTuning {
    */
   readonly framingOffsetY: number;
   /**
-   * 开场取景（出生在渔屋门外时，见 render/camera-intro）：开局拉远/上移让整座渔屋与鹈鹕同框，停留 hold 秒
+   * 开场取景（出生在渔屋门外时，见 render/stage/camera-intro）：开局拉远/上移让整座渔屋与鹈鹕同框，停留 hold 秒
    * （玩家一有输入立即结束停留）后 blend 秒平滑过渡到正常跟随；margin（≥1）为取景框四周放大倍数。
    */
   readonly intro: { readonly hold: number; readonly blend: number; readonly margin: number };

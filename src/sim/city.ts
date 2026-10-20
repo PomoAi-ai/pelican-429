@@ -26,7 +26,7 @@ import {
 import { addTransitStation, type TransitStation } from './transit.ts';
 
 /** 建造界面提交的命令：放置（格子坐标）或拆除一件构件。 */
-export type CityBuildCommand =
+type CityBuildCommand =
   | { readonly kind: 'place'; readonly resourceId: string; readonly x: number; readonly y: number; readonly depthMode: DefinitionDepthMode }
   | { readonly kind: 'remove'; readonly item: BuildingItem };
 

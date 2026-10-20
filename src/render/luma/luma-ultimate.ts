@@ -8,7 +8,7 @@ const CHARGE_SECONDS = PHOTON_ULTIMATE.chargeTicks * TUNING.sim.step;
 const ACTIVE_SECONDS = PHOTON_ULTIMATE.activeTicks * TUNING.sim.step;
 const STAR_COUNT = 24;
 
-export interface LumaUltimate {
+interface LumaUltimate {
   start(x: number, y: number): void;
   burst(x: number, y: number, radius: number): void;
   update(dt: number, emitter: THREE.Vector3): void;

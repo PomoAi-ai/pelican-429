@@ -1,7 +1,7 @@
 import type { CatalogEntry, CatalogGroup } from './catalog.ts';
 
 // 24 款换装角色与古典角色的条目由各自目录里的定义 JSON 生成（public 下运行时读取），数据只维护一份。
-export interface RosterCharacter {
+interface RosterCharacter {
   readonly id: string; readonly name: string; readonly season: string; readonly body: string; readonly bodyDefinition: string;
   readonly hair: string; readonly face: string; readonly outfit: string; readonly shoes: string; readonly palette: string;
   readonly material: string; readonly viewChecks: string; readonly art: string;
@@ -14,7 +14,7 @@ export interface RosterDefinitions {
   readonly characters: readonly RosterCharacter[];
 }
 /** 旧稿（猪八戒、沙和尚、唐三藏）已否决，没有画稿文件，只留档，不进目录。 */
-export interface ClassicsCharacter {
+interface ClassicsCharacter {
   readonly id: string; readonly name: string; readonly english: string; readonly body: string; readonly definition: string;
   readonly art?: string; readonly ruler?: string; readonly measuredFrontHeads?: number | null; readonly measurementNote?: string;
 }

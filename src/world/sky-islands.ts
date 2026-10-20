@@ -42,7 +42,7 @@ export interface FloaterTileIds {
   readonly branch: number;
 }
 
-export interface IslandPlanInput {
+interface IslandPlanInput {
   readonly ground: Int32Array;
   readonly width: number;
   readonly height: number;
@@ -133,7 +133,7 @@ export function planSkyIslands(input: IslandPlanInput): FloaterPlan[] {
   return out.sort((a, b) => a.x0 - b.x0);
 }
 
-export interface IsletPlanInput {
+interface IsletPlanInput {
   readonly ground: Int32Array;
   readonly width: number;
   readonly seed: number;
@@ -342,7 +342,7 @@ export function stampFloaters(grid: Uint16Array, shapes: Uint8Array, width: numb
 }
 
 /** 大岛两端做斜坡的列下标：左半外侧（i-1）更低或 i 为最外列；右半同理。相邻列落差须为 1（否则抛）。 */
-export function islandSlopeColumns(p: FloaterPlan): number[] {
+function islandSlopeColumns(p: FloaterPlan): number[] {
   const w = p.x1 - p.x0 + 1;
   const out: number[] = [];
   for (let i = 0; i < w; i++) {

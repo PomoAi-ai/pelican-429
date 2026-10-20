@@ -131,7 +131,7 @@ export interface SimWorld {
   readonly env: SimEnvironment;
 }
 
-export interface SimWorldOptions {
+interface SimWorldOptions {
   readonly level: LevelData;
   readonly playerForm?: PlayerForm;
   /** 缺省为 TUNING；创建时校验。 */
@@ -216,7 +216,7 @@ export function addEntity(world: SimWorld, make: (id: number) => Entity): Entity
   return e;
 }
 
-export function getEntity(world: SimWorld, id: number): Entity | undefined {
+function getEntity(world: SimWorld, id: number): Entity | undefined {
   return world.entities.find((e) => e.id === id);
 }
 
@@ -263,7 +263,7 @@ export function beginPodTakeoff(world: SimWorld, pod: PodLanding): void {
   else world.podTakeoff = pod;
 }
 
-export type With<K extends keyof Entity> = Entity & Required<Pick<Entity, K>>;
+type With<K extends keyof Entity> = Entity & Required<Pick<Entity, K>>;
 
 /** 按组件筛选实体（miniplex 风格）。 */
 export function query<K extends keyof Entity>(world: SimWorld, ...components: K[]): With<K>[] {

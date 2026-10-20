@@ -1,15 +1,13 @@
 /**
  * English copy for the homepage and the asset gallery page.
  * Keys are exact DOM text fragments: text split by <br> or inline elements is keyed per piece.
- * Names already translated in showcase-language.ts (characters, skills) are left to that dictionary.
+ * Names already translated in i18n/showcase.ts (characters, skills) are left to that dictionary.
  */
 export const HOME_ENGLISH: Record<string, string> = {
   '鹈鹕 429 · 从一场降智风暴开始': 'Pelican 429 · It began with a brain-drain storm',
-  '资源展示 · 鹈鹕 429': 'Asset gallery · Pelican 429',
   '鹈鹕 429': 'Pelican 429', '鹈鹕 429 首页': 'Pelican 429 home',
 
   // Header and hero
-  '基础概念定义': 'Basic concepts',
   '透视': 'Perspective',
   '原画资料库': 'Concept art library',
   '一场越过边界的冒险': 'An adventure beyond the boundary',
@@ -130,6 +128,6 @@ export const HOME_ENGLISH: Record<string, string> = {
   '主线制作中，下一段旅程正在发生。': 'The main story is in development; the next journey is already underway.',
 
   // Asset gallery page
-  '返回首页': 'Back to home', '资源展示导航': 'Asset gallery navigation',
+  '返回首页': 'Back to home',
   '声音目录': 'Sound library',
 };

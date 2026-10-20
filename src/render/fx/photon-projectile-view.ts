@@ -5,8 +5,8 @@ import { lerp } from '../../core/math.ts';
 import { createParticleCloud } from '../grassy/grassy-particles.ts';
 import { glslFloat as f } from '../sky/wind.ts';
 
-export type PhotonShape = 'bug' | 'wheel';
-export const PHOTON_COLORS = ['#68dfff', '#b293ff', '#ffdc80'] as const;
+type PhotonShape = 'bug' | 'wheel';
+const PHOTON_COLORS = ['#68dfff', '#b293ff', '#ffdc80'] as const;
 /** 尾焰着色器：外鞘宽度随 uv.y 张开、核心宽度比、合成权重、渐入长度、颜色，WebGPU 节点版本同表。 */
 export const PHOTON_EXHAUST_SHADER = {
   width: { base: 0.16, grow: 0.7 },
@@ -38,7 +38,7 @@ function rod(x: number, y: number, length: number, angle: number, radius = 0.032
 }
 
 /** 漫游群与真实追踪弹共享同一组实体模型。 */
-export function createPhotonModelKit() {
+function createPhotonModelKit() {
   const wheelParts: THREE.BufferGeometry[] = [new THREE.TorusGeometry(0.49, 0.055, 8, 40), new THREE.TorusGeometry(0.42, 0.018, 5, 40), sphere(0, 0, 0, 0.11, 0.11, 0.10)];
   for (let i = 0; i < 8; i++) {
     const a = i * Math.PI / 4;

@@ -58,9 +58,9 @@ import {
 } from './tile-transitions.ts';
 import type { CellClass, CellTransition, TransitionTable } from './tile-transitions.ts';
 
-export type TileShape = 'block' | 'slab';
+type TileShape = 'block' | 'slab';
 
-export interface TileLook {
+interface TileLook {
   readonly shape: TileShape;
   /** 侧（正面底材）/顶/底面纹理层。草皮类的侧面底材为 bottom（泥土），草边由过渡规则的装饰带绘制。 */
   readonly side: TileTextureLayer;
@@ -69,9 +69,6 @@ export interface TileLook {
   /** 草皮类：暴露时长草叶；被覆盖时顶按 bottom 层显示。 */
   readonly tufts?: boolean;
 }
-
-/** @deprecated 旧名，等同 TileLook。 */
-export type TileAppearance = TileLook;
 
 /** 按瓦片 key 定义外观；null 表示不渲染。注册表中每个 key 都必须在此出现。 */
 export const TILE_APPEARANCE: Readonly<Record<string, TileLook | null>> = Object.freeze({
@@ -101,11 +98,11 @@ export const TILE_APPEARANCE: Readonly<Record<string, TileLook | null>> = Object
 
 export const SLAB_HEIGHT = 0.25;
 /** 八格纹理周期下每格 32 像素，游戏与预览使用同一默认档。 */
-export const TILE_TEXTURE_SIZE = 256;
+const TILE_TEXTURE_SIZE = 256;
 /** 首帧之后每帧区块构建/重建的实测耗时预算（毫秒）：与树（4ms 估计）、水面共处一帧，留出渲染余量。 */
 const TILE_FRAME_BUDGET_MS = 3;
 
-export interface TileViewOptions {
+interface TileViewOptions {
   /** 512 保留原始纹理生成精度，供近景对照。 */
   readonly textureSize?: 256 | 512;
   /** 视野外预加载的区块圈数（默认 1）。 */
@@ -486,7 +483,7 @@ const CLIMB_ROWS = 4;
  * 以及这些行里左右邻格为空（台阶、悬崖、外凸边）的行数。
  */
 function climberSite(ctx: TileViewCtx, tx: number, ty: number, shape: WorldShape, top: Hermite): ClimberSite {
-  const { map, byId, cells } = ctx;
+  const { map, cells } = ctx;
   let bottom = ty;
   let sideL = 0;
   let sideR = 0;

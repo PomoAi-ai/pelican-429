@@ -136,7 +136,7 @@ const BARK_NORMAL = [
   '}',
 ].join('\n');
 
-export interface LeafMaterialOptions {
+interface LeafMaterialOptions {
   readonly name?: string;
   readonly cacheKey?: string;
   /** 追加到顶点着色器 common 之后的声明 / 风摆之后的语句（如灌木的草地扰动）。 */

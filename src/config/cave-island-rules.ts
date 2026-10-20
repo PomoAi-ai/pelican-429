@@ -3,7 +3,7 @@
  * 坐标约定同 TileMap：y 向上，单位瓦片；"深度" = 地表顶边 ground[x] − 1 − ty（该格之上的实心行数）。
  */
 
-export interface IntSpan {
+interface IntSpan {
   readonly min: number;
   readonly max: number;
 }
@@ -113,7 +113,7 @@ export const CAVE_RULES: CaveRules = Object.freeze({
  * 至少一个岛中心距出生点 NEAR 列；岛与岛（含两侧）至少隔 GAP 列；距渔屋屋顶 HUT_CLEAR 列；顶面之上留 SKY_KEEP 行（树 + 余量）。
  * 地面树不种在岛两侧 TREE_CLEAR 列以内（避免树冠与岛底冲突）；岛上树 TREES（宽岛才能放更多）。
  */
-export interface IslandRules {
+interface IslandRules {
   readonly COUNT: IntSpan;
   readonly WIDTH: IntSpan;
   readonly HEIGHT: IntSpan;
@@ -160,7 +160,7 @@ export const ISLAND_RULES: IslandRules = Object.freeze({
  * 禁放：出生点 SPAWN_CLEAR 列内、渔屋屋顶 ± HUT_CLEAR、洞口 ± ENTRANCE_CLEAR、大浮空岛列 ± ISLAND_CLEAR；湖上方只保留 LAKE_KEEP 比例。
  * 块与块（含链内）至少隔 GAP 列；地面树不种在块两侧 TREE_CLEAR 列以内。
  */
-export interface IsletRules {
+interface IsletRules {
   readonly WIDTH: IntSpan;
   readonly THICK: IntSpan;
   readonly HEIGHT: IntSpan;
@@ -255,7 +255,7 @@ export function validateIsletRules(r: IsletRules, jumpRows = 4): void {
 }
 
 /** 飞行参数（与 tuning.player.flight 同名字段）。 */
-export interface FlightRiseInput {
+interface FlightRiseInput {
   readonly maxTicks: number;
   readonly riseSpeed: number;
   readonly riseAccel: number;
@@ -288,7 +288,7 @@ export function rampRideClearance(h: number, halfWidth: number): number {
 }
 
 /** validateCaveIslandTuning 的输入（取自 Tuning；config 层不反向依赖 tuning.ts）。 */
-export interface CaveIslandTuningInput {
+interface CaveIslandTuningInput {
   readonly halfWidth: number;
   readonly rideHeight: number;
   /** 车头一 tick 内的前探距离：bike.bumperReach + bike.speed × sim.step。 */
@@ -380,7 +380,7 @@ export function validateCaveRules(r: CaveRules): void {
 }
 
 /** 浮空岛规则自洽：高度/宽度/深度范围、离地净空能放下最浅的倒锥、比例合法。 */
-export function validateIslandRules(r: IslandRules): void {
+function validateIslandRules(r: IslandRules): void {
   const p = 'ISLAND_RULES';
   span(`${p}.COUNT`, r.COUNT, 1);
   span(`${p}.WIDTH`, r.WIDTH, 6);

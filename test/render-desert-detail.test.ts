@@ -18,7 +18,6 @@ import {
   ROCK_LANDMARK,
   ROCK_Z,
   SAND_ROCKS,
-  SKIRT_ROCKS,
   SMALL_ROCKS,
   planLandmarks,
   planRocks,

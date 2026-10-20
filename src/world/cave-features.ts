@@ -18,14 +18,14 @@ import { ceilingClear, probeObstacle } from './ride-clearance.ts';
 import type { TileQuery } from './tile-map.ts';
 
 /** 坡道地面查找只需碰撞类型与单块形状：世界生成中途的网格与生成后的 TileMap 都满足。 */
-export type RideGrid = Pick<TileQuery, 'collisionAt' | 'shapeAt'>;
+type RideGrid = Pick<TileQuery, 'collisionAt' | 'shapeAt'>;
 
 const SALT_GLOW = 0x6107;
 
 /** 骑行包络（= CAVE_RULES.RIDE）：车身半宽、骑行高、车头前探距离、地面跟踪台阶。 */
-export type RideEnvelope = CaveRules['RIDE'];
+type RideEnvelope = CaveRules['RIDE'];
 
-export interface CaveGridIds {
+interface CaveGridIds {
   readonly air: number;
   /** 可削成斜坡的洞底方块 id（实心）。 */
   readonly floorIds: readonly number[];
@@ -109,7 +109,7 @@ export function placeEntranceRamps(grid: Uint16Array, shapes: Uint8Array, entran
 
 /** 坡道上不可骑处：车身中心 x、脚底 y、失败的检查（box = ceilingClear 车身净空，probe = probeObstacle 车头前探），
  * 以及挡住的那块实心 (tx, ty)（坡道设计地面之下的不可修，ty = −1）。 */
-export interface RideBlock {
+interface RideBlock {
   readonly x: number;
   readonly y: number;
   readonly check: 'box' | 'probe';

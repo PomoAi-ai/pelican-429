@@ -31,7 +31,7 @@ function fromVertex<T>(value: T | null, what: string, material: NodeMaterial): T
   return value;
 }
 
-// ---- 地表岩石 surface-rocks（render/rock-material 同式）----
+// ---- 地表岩石 surface-rocks（render/decor/rock-material 同式）----
 
 const ROCK_WGSL = /* wgsl */ `
 ${Object.entries(ROCK_SHADER_PARAMS)
@@ -138,7 +138,7 @@ const surfaceRocks: Translate<'surface-rocks'> = (material) => {
   };
 };
 
-// ---- 洞穴装饰发光 cave-decor-glow（render/cave-decor-view createCaveDecorMaterial 同式）----
+// ---- 洞穴装饰发光 cave-decor-glow（render/decor/cave-decor-view createCaveDecorMaterial 同式）----
 
 const caveDecorGlow: Translate<'cave-decor-glow'> = (nodeMaterial, { time }) => {
   const material = nodeMaterial as LitNodeMaterial;
@@ -164,7 +164,7 @@ const caveDecorGlow: Translate<'cave-decor-glow'> = (nodeMaterial, { time }) => 
   };
 };
 
-// ---- 洞穴背景墙 cave-wall（render/cave-wall-view FRAGMENT_COLOR 同式）----
+// ---- 洞穴背景墙 cave-wall（render/decor/cave-wall-view FRAGMENT_COLOR 同式）----
 
 const CAVE_WALL_NOISE_FN = /* wgsl */ `
 fn cwNoise( p: vec2f ) -> f32 {
@@ -203,7 +203,7 @@ const caveWall: Translate<'cave-wall'> = (material, { uniforms: u }) => {
   };
 };
 
-// ---- 机房后墙 facility-wall（render/facility-wall-material 同式：贴图按屏幕构图采样）----
+// ---- 机房后墙 facility-wall（render/facility/facility-wall-material 同式：贴图按屏幕构图采样）----
 
 const facilityWall: Translate<'facility-wall'> = (nodeMaterial, { background }) => {
   const material = nodeMaterial as LitNodeMaterial;
@@ -222,7 +222,7 @@ const facilityWall: Translate<'facility-wall'> = (nodeMaterial, { background }) 
   material.emissiveNode = materialReference('emissive', 'color').mul(materialReference('emissiveIntensity', 'float')).mul(tex.rgb);
 };
 
-// ---- 渔屋 hut-texture / hut-smoke（render/hut-material 同式）----
+// ---- 渔屋 hut-texture / hut-smoke（render/building/hut-material 同式）----
 
 const hutTexture: Translate<'hut-texture'> = (nodeMaterial, { texture: tex, wind, sway }) => {
   const material = nodeMaterial as LitNodeMaterial;

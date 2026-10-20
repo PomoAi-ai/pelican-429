@@ -15,8 +15,8 @@ import { SKY_BOTTOM, SKY_TOP } from '../stage/stage.ts';
 import { glslFloat } from './wind.ts';
 
 /** 雾幕与闪电的深度（z，负值在世界后方：近山 −18 之前、远山 −40 之后）。 */
-export const VEIL_Z = -12;
-export const BOLT_Z = -46;
+const VEIL_Z = -12;
+const BOLT_Z = -46;
 const BOLT_SEGMENTS = 16;
 const BOLT_BRANCH = 7;
 
@@ -58,7 +58,7 @@ export interface PrecipSkyLook {
 }
 
 /** 雪在当前降水中的占比（雨雪都为 0 时为 0）。 */
-export function snowShare(v: PrecipVisual): number {
+function snowShare(v: PrecipVisual): number {
   const sum = v.rain + v.snow;
   return sum > 1e-4 ? v.snow / sum : 0;
 }
@@ -120,7 +120,7 @@ export interface PrecipSkyTargets {
   readonly clouds?: { setOvercast(amount: number, gray: number): void } | null;
 }
 
-export interface PrecipSkyFrame {
+interface PrecipSkyFrame {
   readonly visual: PrecipVisual;
   readonly lightning: LightningSample;
   readonly camera: PrecipCamera;

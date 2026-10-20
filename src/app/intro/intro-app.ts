@@ -20,7 +20,7 @@ import '../../ui/panels/story.css';
 
 type PlayState = 'ready' | 'starting' | 'playing' | 'paused' | 'entering' | 'disposed';
 
-export interface StoryIntro {
+interface StoryIntro {
   readonly ready: () => Promise<void>;
   readonly enter: (onReady: () => Promise<void>) => Promise<void>;
 }

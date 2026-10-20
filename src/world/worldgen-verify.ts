@@ -30,13 +30,13 @@ export const SPAWN_BODY = { halfWidth: 0.4, height: 2.5 } as const;
 /** 走/小跳（保守）。 */
 export const WALK_REACH = { maxRise: 1, maxGap: 1, clearance: 3 } as const;
 /** 起跳（jumpHeight 4.2 → 4 行）。 */
-export const JUMP_REACH = { maxRise: 4, maxGap: 3, clearance: 3 } as const;
+const JUMP_REACH = { maxRise: 4, maxGap: 3, clearance: 3 } as const;
 /** 飞行（翅膀）：足够从地面升到屋檐之上。 */
-export const FLIGHT_REACH = { maxRise: HUT_RULES.WALL_HEIGHT + 2, maxGap: 3, clearance: 3 } as const;
+const FLIGHT_REACH = { maxRise: HUT_RULES.WALL_HEIGHT + 2, maxGap: 3, clearance: 3 } as const;
 /** 渔屋可达性搜索窗口：[x0 − HUT_REACH_PAD, x1 + HUT_REACH_PAD]。 */
-export const HUT_REACH_PAD = 6;
+const HUT_REACH_PAD = 6;
 
-export interface VerifyIds {
+interface VerifyIds {
   readonly grass: number;
   readonly dirt: number;
   readonly stone: number;
@@ -330,7 +330,7 @@ function verifyCompositions(v: VerifyInput, where: string): void {
  */
 function verifyDeserts(v: VerifyInput, where: string, spawnLo: number, spawnHi: number): void {
   const R = DESERT_RULES;
-  const { map, fluid, ground, ids } = v;
+  const { map, ground, ids } = v;
   const width = map.width;
   const ds = v.deserts;
   // 021：洞口列（地表已降低成斜坡）不按沙层/台阶规则检查；洞穴水潭不算沙漠里的水；浮空岛上的树不算沙漠树。

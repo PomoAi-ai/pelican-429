@@ -1,6 +1,6 @@
 export type DefinitionPoint = readonly [number, number];
 
-export interface TileShapeDefinition {
+interface TileShapeDefinition {
   readonly id: string;
   readonly label: string;
   readonly points: readonly DefinitionPoint[];

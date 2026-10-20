@@ -19,7 +19,7 @@ import type { HitSource } from '../combat/combat-system.ts';
 import type { Entity, ProjectileData, ProjectileRequest } from './entity.ts';
 
 /** 投射物最大下落速度（瓦片/秒）：抛物线弹的终端速度。 */
-export const PROJECTILE_MAX_FALL = 40;
+const PROJECTILE_MAX_FALL = 40;
 /** 判定“在水里”时取中心下方这么一小段（瓦片）。 */
 const WATER_PROBE = 1e-3;
 const BARRAGE_GROUPS: Partial<Record<ProjectileKind, string>> = {
@@ -27,7 +27,7 @@ const BARRAGE_GROUPS: Partial<Record<ProjectileKind, string>> = {
   fishShot: 'fish', enemyShot: 'enemy',
 };
 
-export function requireProjectile(e: Entity): ProjectileData {
+function requireProjectile(e: Entity): ProjectileData {
   if (!e.projectile) throw new Error(`projectile: entity ${e.id} (${e.kind}) has no projectile component`);
   return e.projectile;
 }
@@ -231,9 +231,4 @@ export function retireSpentProjectile(e: Entity, events: EventQueue<SimEvent>): 
 export function swallowProjectile(e: Entity, events: EventQueue<SimEvent>): void {
   if (e.removed) throw new Error(`swallowProjectile: ${e.kind} ${e.id} is already removed`);
   end(e, 'swallowed', events);
-}
-
-/** 投射物实体的 kind 集合（view-registry/HUD 判别用）。 */
-export function isProjectileKind(kind: string): kind is ProjectileKind {
-  return kind === 'orb' || kind === 'waterShot' || kind === 'fishShot' || kind === 'enemyShot' || kind === 'photonBug' || kind === 'photonWheel' || kind === 'codexShot' || kind === 'bugShot' || kind === 'droneBomb' || kind === 'droneThermite';
 }

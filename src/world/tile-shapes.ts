@@ -97,7 +97,7 @@ export function pieceShapePolygon(code: number): readonly DefinitionPoint[] {
   return SHAPE_POLYGONS[code]!;
 }
 
-export interface PlatformVariant {
+interface PlatformVariant {
   readonly width: DefinitionPlatformWidth;
   /** 承托顶面相对格底：1 = 整砖顶齐，.5 = 半砖顶齐。 */
   readonly top: 1 | 0.5;
@@ -109,7 +109,7 @@ export const PLATFORM_VARIANTS: readonly PlatformVariant[] = Object.freeze(
 );
 
 /** 平台薄板厚度（platform-definitions §2）：占位按顶面向下 0.2 格检查重叠。 */
-export const PLATFORM_THICKNESS = 0.2;
+const PLATFORM_THICKNESS = 0.2;
 
 export function isPlatformVariant(v: number): boolean {
   return Number.isInteger(v) && v >= 0 && v < PLATFORM_VARIANTS.length;

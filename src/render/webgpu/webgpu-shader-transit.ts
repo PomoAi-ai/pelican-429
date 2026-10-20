@@ -33,7 +33,7 @@ function noise(p: N): N {
   return n(mix(mix(hash(i), hash(i.add(vec2(1, 0))), f.x), mix(hash(i.add(vec2(0, 1))), hash(i.add(vec2(1, 1))), f.x), f.y));
 }
 
-/** 发射喷焰（render/transit-exhaust createPlume）；PLUME_CORE 版本只写深度，丢掉非核心片元。 */
+/** 发射喷焰（render/transit/transit-exhaust createPlume）；PLUME_CORE 版本只写深度，丢掉非核心片元。 */
 const plume: ShaderConversion = ({ uniform, source }) => {
   const P = PLUME_SHADER;
   const uTime = uniform('uTime'), uPower = uniform('uPower'), uLength = uniform('uLength');
@@ -99,7 +99,7 @@ const plume: ShaderConversion = ({ uniform, source }) => {
   return { color: n(color) };
 };
 
-/** 巡航尾流（render/transit-exhaust createCruiseExhaust）：沿喷管轴的截面，0 核心、1 外鞘、2 马赫环。 */
+/** 巡航尾流（render/transit/transit-exhaust createCruiseExhaust）：沿喷管轴的截面，0 核心、1 外鞘、2 马赫环。 */
 const cruiseExhaust: ShaderConversion = ({ uniform }) => {
   const X = CRUISE_SHADER;
   const uTime = uniform('uTime');
@@ -157,7 +157,7 @@ const cruiseExhaust: ShaderConversion = ({ uniform }) => {
   return { vertex, color: n(color) };
 };
 
-/** 喷管喉部（render/transit-center-model createEngines）：发射时为平坦白热，巡航时为分层喉部。 */
+/** 喷管喉部（render/transit/transit-center-model createEngines）：发射时为平坦白热，巡航时为分层喉部。 */
 const engineCore: ShaderConversion = ({ uniform }) => {
   const E = ENGINE_CORE_SHADER;
   const uEmissive = uniform('uEmissive'), uLayered = uniform('uLayered'), uTime = uniform('uTime'), uSeed = uniform('uSeed');
@@ -174,7 +174,7 @@ const engineCore: ShaderConversion = ({ uniform }) => {
   return { color: n(vec4(mix(max(uEmissive, rgb(E.idle)), layered, uLayered), 1)) };
 };
 
-/** 跃迁光柱（render/transit-center-fx createLightTrail）。 */
+/** 跃迁光柱（render/transit/transit-center-fx createLightTrail）。 */
 const lightTrail: ShaderConversion = ({ uniform }) => {
   const T = LIGHT_TRAIL_SHADER;
   const uOpacity = uniform('uOpacity'), uTime = uniform('uTime');
@@ -211,7 +211,7 @@ function wallNoise(p: N, period: number): N {
 }
 
 /**
- * 时间走廊（render/transit-time-corridor createTimeCorridorMaterial）：全屏背景，GLSL 的两个 for 循环次数固定，按 JS 展开。
+ * 时间走廊（render/transit/transit-time-corridor createTimeCorridorMaterial）：全屏背景，GLSL 的两个 for 循环次数固定，按 JS 展开。
  * uPixel 换成当前渲染目标像素高度算出的 2 / viewportHeight（WebGPU 侧 onBeforeRender 写入的是逻辑像素）。
  */
 const timeCorridor: ShaderConversion = ({ uniform }) => {
@@ -352,7 +352,7 @@ const timeCorridor: ShaderConversion = ({ uniform }) => {
   return { vertex, color: n(color) };
 };
 
-/** 抵达白光（render/transit-time-corridor 的 flashMaterial）。 */
+/** 抵达白光（render/transit/transit-time-corridor 的 flashMaterial）。 */
 const arrivalFlash: ShaderConversion = ({ uniform }) => ({
   vertex: n(vec4(positionGeometry.xy, 0, 1)),
   color: n(vec4(rgb(C.flash), uniform('uOpacity'))),
@@ -382,7 +382,7 @@ function lightNumber(light: THREE.PointLight, key: 'distance' | 'decay'): N {
 }
 
 /**
- * 发射台蒸汽云（render/transit-pad-cloud）：billboard 片元重建折叠表面，写 gl_FragDepth。
+ * 发射台蒸汽云（render/transit/transit-pad-cloud）：billboard 片元重建折叠表面，写 gl_FragDepth。
  * 光照按 GLSL 的 ambient / hemisphere / directional / point 四个循环逐灯展开：编译时从 builder.lightsNode 取场景灯光
  * （灯光组合变化时 three 会重新编译），灯的颜色、方向、位置按 WebGL 的视空间约定每帧更新。CLOUD_CORE 版本只写深度。
  */

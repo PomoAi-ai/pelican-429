@@ -7,7 +7,7 @@ export const MODEL_ROUTING_MODELS = [
   { name: 'GPT-4o mini', color: '#ffca64' },
 ] as const;
 
-export interface ModelRoutingTarget {
+interface ModelRoutingTarget {
   readonly box: Readonly<Rect>;
   readonly dodge: boolean;
 }

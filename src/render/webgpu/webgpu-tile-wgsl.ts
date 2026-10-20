@@ -1,5 +1,5 @@
 /**
- * 方块材质（render/tile-material）的 WGSL 版本，供 WebGPU 节点材质使用：函数与 GLSL 注入代码逐个对应（同名、同式），
+ * 方块材质（render/tile/tile-material）的 WGSL 版本，供 WebGPU 节点材质使用：函数与 GLSL 注入代码逐个对应（同名、同式），
  * 常量由同一份 TILE_SHADER_PARAMS / ORGANIC_PARAMS / RELIEF_PARAMS 表生成。GLSL 里的全局 attribute/varying
  * 在这里是 var<private>，由入口函数先写入，函数体因此能与 GLSL 对照。与 GLSL 的差别只在语法：
  * 三元式 → select / if，向量分量赋值改写为整体赋值，纹理数组层号按 GLSL 规则取整，纹理与采样器作为参数传入。

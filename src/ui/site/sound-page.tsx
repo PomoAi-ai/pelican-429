@@ -6,19 +6,19 @@ import { createStore, type Store } from '../react/store.ts';
 import { useLanguage } from '../react/use-language.ts';
 import './sound-gallery.css';
 
-export interface SoundItem { readonly title: string; readonly group: string; readonly hint: string }
-export type SoundStatus =
+interface SoundItem { readonly title: string; readonly group: string; readonly hint: string }
+type SoundStatus =
   | { readonly kind: 'idle' | 'stopped' }
   | { readonly kind: 'playing'; readonly title: string }
   | { readonly kind: 'failed'; readonly message: string };
-export interface SoundPageState {
+interface SoundPageState {
   /** 正在播放的条目下标。 */
   readonly active: number | null;
   readonly status: SoundStatus;
   /** 黑洞声需要距离滑杆。 */
   readonly distance: boolean;
 }
-export interface SoundPageOptions {
+interface SoundPageOptions {
   readonly items: readonly SoundItem[];
   onPlay(index: number): void;
   onStop(): void;

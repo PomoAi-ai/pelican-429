@@ -3,7 +3,7 @@ import type { ShowcaseCard, ShowcaseCatalog } from '../../config/showcase.ts';
 
 type Actor = Pick<ShowcaseCard, 'entryId' | 'facing' | 'playing' | 'modelYaw' | 'modelPitch' | 'speed' | 'loop'> & Partial<Pick<ShowcaseCard, 'd1Variant' | 'd1HairVisible' | 'd1Shading'>>;
 export interface CharacterStageView { zoom: number; angle: number; environment: ShowcaseCard['environment'] }
-export interface CharacterStageLocation extends CharacterStageView { cards: Actor[] }
+interface CharacterStageLocation extends CharacterStageView { cards: Actor[] }
 export const CHARACTER_STAGE_PARAMS = ['stageActor', 'stageZoom', 'stageAngle', 'stageEnvironment'] as const;
 
 /** URL 只保存对比所需的角色和镜头，不反序列化任意卡片状态。 */

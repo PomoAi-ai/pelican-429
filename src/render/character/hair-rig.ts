@@ -4,7 +4,7 @@ import type { GLTF } from 'three/addons/loaders/GLTFLoader.js';
 import { loadCharacterModel } from './character-model.ts';
 import { HAIR_MODEL_PATHS } from '../../config/web-models.ts';
 
-export type HairProfile = keyof typeof HAIR_MODEL_PATHS;
+type HairProfile = keyof typeof HAIR_MODEL_PATHS;
 type HairRegion = 'front' | 'crown' | 'rear';
 interface HairStrand {
   mid: string;
@@ -19,7 +19,7 @@ export interface HairAsset {
   readonly bounds: THREE.Box3;
   dispose(): void;
 }
-export interface HairRig {
+interface HairRig {
   readonly object: THREE.Group;
   update(energy: number, forward: number, lift: number, dt: number): void;
   dispose(): void;
@@ -47,7 +47,7 @@ function disposeHairScene(scene: THREE.Group): void {
 }
 
 /** 独立资产是唯一发骨来源；文件缺字段或混入动态发帽时立即拒绝。 */
-export function readHairAsset(gltf: GLTF, path: string): HairAsset {
+function readHairAsset(gltf: GLTF, path: string): HairAsset {
   const { scene, animations } = gltf;
   try {
     const root = scene.getObjectByName('HairRoot');

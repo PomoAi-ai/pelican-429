@@ -84,7 +84,7 @@ export function planTerrainCompositionTree(left: number, baseY: number, seed: nu
   return planTree('broad', left + 10, baseY + 2, mulberry32(seed), id);
 }
 
-export interface TerrainCompositionLevel {
+interface TerrainCompositionLevel {
   readonly level: LevelData;
   readonly groundY: number;
   /** 地面顶列高不包含地下石顶或树平台，可直接传给正式 WorldViews。 */

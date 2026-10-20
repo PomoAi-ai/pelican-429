@@ -38,7 +38,7 @@ function requireChunk(src: string, chunk: string, stage: string, name: string): 
   if (!src.includes(chunk)) throw new Error(`cloud-shadow: ${stage} shader of material '${name}' lacks '${chunk}' (three changed or another injection removed it)`);
 }
 
-export interface CloudShadowPatcher {
+interface CloudShadowPatcher {
   /** 已挂接的材质数。 */
   readonly patched: number;
   /** 挂接单个材质（幂等）；不可挂接返回 false。 */

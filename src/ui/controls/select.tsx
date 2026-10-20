@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { Select as Base } from '@base-ui/react/select';
 import './controls.css';
 
-export interface SelectItem<V> { value: V; label: ReactNode }
+interface SelectItem<V> { value: V; label: ReactNode }
 
 /** 下拉选择，取代原生 select；value 总有一项被选中。 */
 export function Select<V>({ label, value, items, onValueChange, disabled }: {

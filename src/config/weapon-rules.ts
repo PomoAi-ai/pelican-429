@@ -5,15 +5,15 @@
  */
 import type { Rect, Vec2 } from '../core/math.ts';
 import { PROJECTILE_KINDS } from '../core/weapon-ids.ts';
-import type { ProjectileKind, WeaponId } from '../core/weapon-ids.ts';
+import type { ProjectileKind } from '../core/weapon-ids.ts';
 import type { HitDefTuning } from './tuning.ts';
 
 export { PROJECTILE_KINDS, WEAPON_IDS } from '../core/weapon-ids.ts';
 export type { ProjectileKind, WeaponId } from '../core/weapon-ids.ts';
 
 /** straight 直线（无重力）/ arc 抛物线 / bounce 抛物线 + 落地弹跳。 */
-export const TRAJECTORIES = ['straight', 'arc', 'bounce'] as const;
-export type Trajectory = (typeof TRAJECTORIES)[number];
+const TRAJECTORIES = ['straight', 'arc', 'bounce'] as const;
+type Trajectory = (typeof TRAJECTORIES)[number];
 
 /** 通用投射物定义（命中参数 + 弹道）。 */
 export interface ProjectileDef extends HitDefTuning {
@@ -55,7 +55,7 @@ export interface WeaponTimeline {
   readonly bufferWindow: number;
 }
 
-export interface WeaponInfo {
+interface WeaponInfo {
   /** HUD 名字。 */
   readonly name: string;
   /** HUD 图标字（单个汉字，画在圆形色块里）。 */
@@ -63,7 +63,7 @@ export interface WeaponInfo {
 }
 
 /** 吐水普攻：资源“水量”（整数单位）。 */
-export interface WaterWeaponTuning extends WeaponInfo, WeaponTimeline {
+interface WaterWeaponTuning extends WeaponInfo, WeaponTimeline {
   readonly projectile: ProjectileDef;
   readonly capacity: number;
   /** 每发消耗。 */
@@ -77,7 +77,7 @@ export interface WaterWeaponTuning extends WeaponInfo, WeaponTimeline {
 }
 
 /** 鱼群轰炸及水中捕鱼参数；技能释放不消耗鱼库存。 */
-export interface FishWeaponTuning extends WeaponInfo, WeaponTimeline {
+interface FishWeaponTuning extends WeaponInfo, WeaponTimeline {
   readonly projectile: ProjectileDef;
   readonly capacity: number;
   /** 开局存量。 */
@@ -89,7 +89,7 @@ export interface FishWeaponTuning extends WeaponInfo, WeaponTimeline {
 }
 
 /** 聚合反吐光球：弹体沿用 attacks.orb，三档对应吞入数量。 */
-export interface OrbWeaponTuning extends WeaponInfo {
+interface OrbWeaponTuning extends WeaponInfo {
   readonly radiusScale: readonly number[];
   readonly damageScale: readonly number[];
   readonly knockbackScale: readonly number[];
@@ -97,7 +97,7 @@ export interface OrbWeaponTuning extends WeaponInfo {
 }
 
 /** 吞弹反击：张大嘴的吞判定窗与返还加成。 */
-export interface SwallowWeaponTuning extends WeaponInfo, WeaponTimeline {
+interface SwallowWeaponTuning extends WeaponInfo, WeaponTimeline {
   /** 张嘴吞判定持续 tick。 */
   readonly gulpTicks: number;
   /** 吞判定框（相对脚底中点、朝 +X）。 */
@@ -109,12 +109,12 @@ export interface SwallowWeaponTuning extends WeaponInfo, WeaponTimeline {
 }
 
 /** 掠水：空中、未入水，脚底下方 height 格内有水即算贴水面飞行。 */
-export interface SkimTuning {
+interface SkimTuning {
   readonly height: number;
 }
 
 /** 通用敌方射击（训练假人“射击模式”，未来怪物复用）。 */
-export interface ShooterTuning {
+interface ShooterTuning {
   /** 射击周期 tick 与开启后首发延迟。 */
   readonly periodTicks: number;
   readonly firstDelayTicks: number;
@@ -335,7 +335,7 @@ function validateInfo(path: string, w: WeaponInfo): void {
   if (typeof w.icon !== 'string' || [...w.icon].length !== 1) fail(`${path}.icon`, 'must be a single character', w.icon);
 }
 
-export function validateWeaponTimeline(path: string, t: WeaponTimeline): void {
+function validateWeaponTimeline(path: string, t: WeaponTimeline): void {
   int(`${path}.windupTicks`, t.windupTicks, 0);
   int(`${path}.mouthHoldTicks`, t.mouthHoldTicks, 0);
   int(`${path}.mouthCloseTicks`, t.mouthCloseTicks, 0);

@@ -1,6 +1,6 @@
 /** 固定步长累加器：逻辑以 step 秒为单位推进，与渲染帧率解耦。 */
 
-export interface FixedStepperOptions {
+interface FixedStepperOptions {
   /** 逻辑步长（秒），如 1/60。 */
   step: number;
   /** 单帧最多计入的真实时长（秒），防止切后台回来后“死亡螺旋”。 */
@@ -9,7 +9,7 @@ export interface FixedStepperOptions {
   maxTicksPerFrame: number;
 }
 
-export interface FixedStepperStats {
+interface FixedStepperStats {
   ticks: number;
   droppedTicks: number;
   clampedFrames: number;

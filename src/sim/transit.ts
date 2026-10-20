@@ -13,7 +13,7 @@ import type { SpecialPartGeometry, SpecialParts } from '../world/special-parts.t
 type TimedPhase = keyof typeof TRANSIT_PHASE_SECONDS;
 export type TransitPhase = 'ground' | 'cabin' | 'complete' | TimedPhase;
 /** 界面下达的命令：开舱进入、发射、下舱。 */
-export type TransitRequest = 'enter' | 'launch' | 'cancel';
+type TransitRequest = 'enter' | 'launch' | 'cancel';
 
 export interface TransitState {
   phase: TransitPhase;

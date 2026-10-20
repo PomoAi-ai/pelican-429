@@ -19,7 +19,7 @@ import { saveHomestead } from './homestead-save.ts';
 /** 定时存档间隔（现实秒）；页面隐藏与离开时另外立即保存。 */
 const SAVE_SECONDS = 20;
 
-export interface HomesteadFeatureOptions {
+interface HomesteadFeatureOptions {
   readonly world: SimWorld;
   readonly droneFleet: UtilityDroneFleet;
   readonly stage: Stage<StageRenderer>;
@@ -31,7 +31,7 @@ export interface HomesteadFeatureOptions {
   readonly seed: number;
 }
 
-export interface HomesteadFeature {
+interface HomesteadFeature {
   readonly open: boolean;
   command(tool: 'chop' | 'dig' | 'build'): void;
   update(frameDt: number): void;

@@ -24,8 +24,8 @@ import { ZERO_HERMITE, organicNoise2 } from './tile-organic.ts';
 import type { Hermite } from './tile-organic.ts';
 
 /** 核半宽基值与噪声微变幅度（格）：≈ 坡+平交替周期，阶梯坡几乎完全合并成直坡。 */
-export const SMOOTH_WIDTH = 1.6;
-export const SMOOTH_WIDTH_VAR = 0.2;
+const SMOOTH_WIDTH = 1.6;
+const SMOOTH_WIDTH_VAR = 0.2;
 const SMOOTH_WIDTH_FREQ = 0.31;
 const SMOOTH_WIDTH_SALT = 1709;
 /** 折角处（格边界）平滑偏差上限（格）；三角核下孤立折角偏差 = Δ·W/6。 */
@@ -271,12 +271,12 @@ export interface LakeSpan {
 }
 
 /** (tx,ty) 是否在某个湖的水面以下（格顶低于水面）且列在湖区间内。 */
-export function inLakeBed(lakes: readonly LakeSpan[], tx: number, ty: number): boolean {
+function inLakeBed(lakes: readonly LakeSpan[], tx: number, ty: number): boolean {
   for (const l of lakes) if (tx >= l.x0 && tx <= l.x1 && ty + 1 < l.level) return true;
   return false;
 }
 
-export interface MapSurfaceSource {
+interface MapSurfaceSource {
   readonly width: number;
   readonly height: number;
   get(tx: number, ty: number): number;
@@ -305,9 +305,4 @@ export function createMapSurfaceQuery(
     },
     lakeBed: (tx, ty) => lakes.length > 0 && inLakeBed(lakes, tx, ty),
   };
-}
-
-/** 碰撞顶线斜率（形状）。 */
-export function shapeSlope(shape: TileShape): number {
-  return shape === SHAPE_SLOPE_R ? 1 : shape === SHAPE_SLOPE_L ? -1 : 0;
 }

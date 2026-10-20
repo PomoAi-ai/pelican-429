@@ -22,7 +22,7 @@ import type { Rng } from '../../core/rng.ts';
 /** 爆点/光球离视觉地面超过该值（格）视为不触地。 */
 const GROUND_CONTACT = 1.5;
 
-export interface GrassInteractionOptions {
+interface GrassInteractionOptions {
   readonly scene: THREE.Object3D;
   /** tile-view.root（花草/地被所在）。 */
   readonly tilesRoot: THREE.Object3D;

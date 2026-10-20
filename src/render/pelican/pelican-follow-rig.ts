@@ -16,23 +16,23 @@ import type { PelicanFollowPose, Vec3 } from './pelican-pose.ts';
 
 export { NECK_PIVOT } from './pelican-pose.ts';
 /** Skin weights rise from the body (0) to the head (1) between these heights (bird space, smoothstep). */
-export const NECK_BLEND: Readonly<[number, number]> = Object.freeze([3.2, 3.75]) as Readonly<[number, number]>;
+const NECK_BLEND: Readonly<[number, number]> = Object.freeze([3.2, 3.75]) as Readonly<[number, number]>;
 /** Tail root and scarf knot in bird space. */
-export const TAIL_PIVOT: Readonly<Vec3> = Object.freeze([-1.15, 1.45, 0]) as Readonly<Vec3>;
-export const SCARF_PIVOT: Readonly<Vec3> = Object.freeze([-0.26, 3.23, 0.05]) as Readonly<Vec3>;
+const TAIL_PIVOT: Readonly<Vec3> = Object.freeze([-1.15, 1.45, 0]) as Readonly<Vec3>;
+const SCARF_PIVOT: Readonly<Vec3> = Object.freeze([-0.26, 3.23, 0.05]) as Readonly<Vec3>;
 
 /** Meshes that bend with the neck (skinned). */
-export const SKINNED_PARTS = Object.freeze(['standing-white-body', 'body-contour-neck-back', 'body-contour-neck-front']);
+const SKINNED_PARTS = Object.freeze(['standing-white-body', 'body-contour-neck-back', 'body-contour-neck-front']);
 /** Rigid parts carried by the head bone (the jaw hinge group is built by the rig before this runs). */
-export const HEAD_PARTS = Object.freeze([
+const HEAD_PARTS = Object.freeze([
   'standing-pouch', 'pouch-contour-1', 'pouch-contour-root', 'bill-gloss', 'mouth-line-1', 'mouth-line--1',
   'standing-eye-1', 'standing-eye--1', 'standing-cheek-1', 'standing-cheek--1', 'standing-cap-assembly',
   'body-contour-forehead', 'pelican-jaw-pivot',
 ]);
-export const TAIL_PARTS = Object.freeze(['standing-tail-0', 'standing-tail-1', 'standing-tail-2', 'standing-tail-flat-silhouette', 'tail-ink-outline']);
+const TAIL_PARTS = Object.freeze(['standing-tail-0', 'standing-tail-1', 'standing-tail-2', 'standing-tail-flat-silhouette', 'tail-ink-outline']);
 export const SCARF_PARTS = Object.freeze(['scarf-upper-tail', 'scarf-upper-tail-drawn-outline', 'scarf-lower-tail', 'scarf-lower-tail-drawn-outline']);
 
-export interface PelicanFollowRig {
+interface PelicanFollowRig {
   /**
    * Poses the pivots. follow.headShift is in bird space: `upperRotation` and `upperScale` (the upper pivot's
    * quaternion and scale, already set for this pose) carry it into the body frame the head bone lives in.

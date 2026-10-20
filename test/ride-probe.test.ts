@@ -3,7 +3,6 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
 import { TUNING } from '../src/config/tuning.ts';
-import { createRideProbe } from '../src/physics/ride-probe.ts';
 import { tileCollision } from '../src/world/collision-geometry.ts';
 import * as clearance from '../src/world/ride-clearance.ts';
 import { LEVEL_LEGEND, parseLevel } from '../src/world/test-level.ts';

@@ -39,7 +39,7 @@ export const FISH_FLOP = Object.freeze({
   maxAirTime: 3,
 });
 
-export type FlopPhase = 'idle' | 'splat' | 'air' | 'land' | 'rest' | 'dive' | 'poof';
+type FlopPhase = 'idle' | 'splat' | 'air' | 'land' | 'rest' | 'dive' | 'poof';
 /** stepFlop 的本帧信号：渲染层据此放水花/星星。 */
 export type FlopSignal = 'none' | 'rebound' | 'landed' | 'entered' | 'poofed' | 'done';
 
@@ -52,7 +52,7 @@ export interface FlopEnv {
   solidAt(x: number, y: number): boolean;
 }
 
-export interface WaterTarget {
+interface WaterTarget {
   readonly x: number;
   readonly surface: number;
 }
@@ -86,7 +86,7 @@ export function createFlopState(): FlopState {
 }
 
 /** 列 tx 在 [yLo, yHi] 内的水面高度（最高一格有水且其上方无水）；没有返回 null。 */
-export function waterSurfaceInColumn(env: FlopEnv, tx: number, yLo: number, yHi: number): number | null {
+function waterSurfaceInColumn(env: FlopEnv, tx: number, yLo: number, yHi: number): number | null {
   const min = FISH_FLOP.waterMin;
   for (let ty = Math.floor(yHi); ty >= Math.floor(yLo); ty--) {
     const a = env.waterAt(tx, ty);
@@ -117,7 +117,7 @@ export function findWaterTarget(env: FlopEnv, x: number, groundY: number, prefer
   return null;
 }
 
-export interface FlopStart {
+interface FlopStart {
   readonly x: number;
   readonly y: number;
   readonly vx: number;

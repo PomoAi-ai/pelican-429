@@ -11,7 +11,7 @@ import { addNodePatch } from '../stage/node-patches.ts';
 export type FurnitureKind = 'bed' | 'pendant' | 'workstation' | 'depot' | 'dock' | 'battery'
   | 'terminal-compute' | 'terminal-robot' | 'solar' | 'table' | 'chair' | 'shelf' | 'plant';
 
-export interface FurnitureView {
+interface FurnitureView {
   readonly root: THREE.Group;
   update?(time: number, solarAngle: number | undefined, player: WorkstationPlayer | null): void;
   dispose(): void;
@@ -20,7 +20,7 @@ export interface FurnitureView {
 /** 座面与桌面作为落脚面，屏幕、靠背及全息图不会把人物托到装饰顶端。 */
 export const FURNITURE_STAND_TOP: Partial<Record<FurnitureKind, number>> = { bed: .85, chair: 1, workstation: 1.49 };
 
-export type ChairFacing = 'front' | 'left' | 'right';
+type ChairFacing = 'front' | 'left' | 'right';
 export interface FurnitureOptions {
   readonly solarVariant?: SolarVariant;
   readonly solarDepth?: SolarDepth;

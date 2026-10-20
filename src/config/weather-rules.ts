@@ -23,7 +23,7 @@ export type WindDirection = (typeof WIND_DIRECTIONS)[number];
 export const WIND_DEBUG_CYCLE: readonly WindMode[] = ['breeze', 'storm', 'auto'];
 
 /** 按天气等级插值的一对数值（breeze = L 0，storm = L 1）。 */
-export interface WeatherRange {
+interface WeatherRange {
   readonly breeze: number;
   readonly storm: number;
 }

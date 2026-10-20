@@ -2,7 +2,7 @@
 import type { ProjectileEndReason, ProjectileKind, WeaponId } from './weapon-ids.ts';
 
 /** 玩家已完成瞬移，相机在同一渲染帧切到落点。 */
-export interface TeleportedEvent {
+interface TeleportedEvent {
   readonly type: 'teleported';
   readonly id: number;
   readonly x: number;
@@ -10,7 +10,7 @@ export interface TeleportedEvent {
 }
 
 /** 动作实际起手或释放；在命中结算清理动作之前记录。 */
-export interface CombatActionEvent {
+interface CombatActionEvent {
   readonly type: 'combatAction';
   readonly id: number;
   readonly action: string;
@@ -33,7 +33,7 @@ export interface HitEvent {
 }
 
 /** 攻击实际接触目标，但被受击免伤期挡下；不算伤害命中。 */
-export interface DamageImmuneEvent {
+interface DamageImmuneEvent {
   readonly type: 'damageImmune';
   readonly targetId: number;
   readonly x: number;
@@ -46,7 +46,7 @@ export interface DummyResetEvent {
 }
 
 /** 拾取血包后实际恢复的生命值（已按生命上限截断）。 */
-export interface HealEvent {
+interface HealEvent {
   readonly type: 'heal';
   readonly id: number;
   readonly amount: number;
@@ -54,20 +54,20 @@ export interface HealEvent {
   readonly y: number;
 }
 
-export interface TransformBlockedEvent {
+interface TransformBlockedEvent {
   readonly type: 'transformBlocked';
   readonly id: number;
   readonly reason: 'space' | 'story';
 }
 
-export interface PhotonUltimateStartedEvent {
+interface PhotonUltimateStartedEvent {
   readonly type: 'photonUltimateStarted';
   readonly id: number;
   readonly x: number;
   readonly y: number;
 }
 
-export interface PhotonUltimateBurstEvent {
+interface PhotonUltimateBurstEvent {
   readonly type: 'photonUltimateBurst';
   readonly id: number;
   readonly x: number;
@@ -109,7 +109,7 @@ export interface ProjectileImpactEvent {
 }
 
 /** 弹跳弹落地反弹。 */
-export interface ProjectileBounceEvent {
+interface ProjectileBounceEvent {
   readonly type: 'projectileBounce';
   readonly kind: ProjectileKind;
   readonly id: number;
@@ -121,7 +121,7 @@ export interface ProjectileBounceEvent {
 }
 
 /** 按下射击但不能出手：没资源 / 骑车禁用。 */
-export interface WeaponBlockedEvent {
+interface WeaponBlockedEvent {
   readonly type: 'weaponBlocked';
   readonly id: number;
   readonly weapon: WeaponId;
@@ -129,7 +129,7 @@ export interface WeaponBlockedEvent {
 }
 
 /** 吞弹反吐：吞下了来袭投射物或小鱼。 */
-export interface SwallowedEvent {
+interface SwallowedEvent {
   readonly type: 'swallowed';
   /** 鹈鹕实体 id。 */
   readonly id: number;
@@ -139,7 +139,7 @@ export interface SwallowedEvent {
 }
 
 /** 捕到鱼（吐鱼弹药 +1）：嘴边 / 啄 / 掠水兜到。 */
-export interface FishCaughtEvent {
+interface FishCaughtEvent {
   readonly type: 'fishCaught';
   readonly id: number;
   readonly x: number;
@@ -150,7 +150,7 @@ export interface FishCaughtEvent {
 }
 
 /** 实体入水/出水（渲染水花）。 */
-export interface SplashEvent {
+interface SplashEvent {
   readonly type: 'splash';
   /** 实体 id。 */
   readonly id: number;

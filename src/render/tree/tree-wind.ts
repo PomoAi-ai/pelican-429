@@ -24,7 +24,7 @@ import type { Limb, TreeSkeleton, Vec3 } from './tree-skeleton.ts';
 /** 风场采样：位置 x 在时刻 t 的 windSway（= dirX · strength，render/wind）。 */
 export type SwayFn = (x: number, t: number) => number;
 
-export interface TreeWindParams {
+interface TreeWindParams {
   /** 主弯曲柔度（每单位风的梢部偏移 / 树高）。 */
   readonly flex: number;
   /** 固有频率（Hz，0.2–0.6）。 */
@@ -35,7 +35,7 @@ export interface TreeWindParams {
   readonly hang: number;
 }
 
-export interface ShrubWindParams {
+interface ShrubWindParams {
   readonly flex: number;
   readonly freq: number;
 }
@@ -111,7 +111,7 @@ export function validateTreeWind(trees: Readonly<Record<TreeKind, TreeWindParams
 
 validateTreeWind(TREE_WIND, SHRUB_WIND);
 
-export interface BendOptions {
+interface BendOptions {
   /** false：只取倾倒 + 回弹（测试阵风传播用），默认 true。 */
   readonly swing?: boolean;
 }
@@ -271,7 +271,7 @@ export function planBranchGroups(sk: TreeSkeleton, params: TreeWindParams): Bran
 }
 
 /** 一格可站平台瓦片（逻辑层 branch 瓦片，列 tx、行 ty）所在的枝组；null = 随主干（只受主弯曲）。 */
-export interface PlatformTileGroup {
+interface PlatformTileGroup {
   readonly tx: number;
   readonly ty: number;
   readonly group: BranchGroup | null;

@@ -337,9 +337,3 @@ export function shrineGeometry(): THREE.BufferGeometry {
   b.lathe([[0.0, 0.55], [0.2, 0.82], [0.0, 1.18]], 4, 0, 0, (t) => lerpC(C('#7fe8ff'), C('#e8fbff'), t), () => 1, 0x54);
   return b.build();
 }
-
-/** 三角形数（测试/预算）。 */
-export function partTriangles(g: THREE.BufferGeometry): number {
-  if (!g.index) throw new Error('cave-geometry: geometry without index');
-  return g.index.count / 3;
-}

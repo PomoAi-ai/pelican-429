@@ -3,7 +3,7 @@ import { Toggle } from '@base-ui/react/toggle';
 import { ToggleGroup as Base } from '@base-ui/react/toggle-group';
 import './controls.css';
 
-export interface ToggleOption<V> { value: V; label: ReactNode }
+interface ToggleOption<V> { value: V; label: ReactNode }
 
 /** 分段切换：总有一项按下。设置项的值可能是布尔或数字，Base UI 只收字符串，所以内部用下标作值。 */
 export function ToggleGroup<V>({ label, value, options, onValueChange, disabled }: {

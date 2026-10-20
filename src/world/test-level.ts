@@ -13,7 +13,7 @@ import type { TileShape } from './tile-shapes.ts';
 import { DEFAULT_TILES } from './tile-types.ts';
 import type { TileRegistry } from './tile-types.ts';
 
-export interface LegendEntry {
+interface LegendEntry {
   /** 瓦片 key（见 tile-types）。 */
   readonly tile: string;
   readonly marker?: 'spawn' | 'dummy';
@@ -25,13 +25,10 @@ export interface LegendEntry {
 
 export type LevelLegend = Readonly<Record<string, LegendEntry>>;
 
-export interface LevelSource {
+interface LevelSource {
   readonly rows: readonly string[];
   readonly legend: LevelLegend;
 }
-
-/** 兼容旧名：解析结果即 LevelData（seed 为 null）。 */
-export type ParsedLevel = LevelData;
 
 export const LEVEL_LEGEND: LevelLegend = Object.freeze({
   '.': { tile: 'air' },

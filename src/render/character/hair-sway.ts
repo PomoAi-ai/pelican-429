@@ -2,7 +2,7 @@ import * as THREE from 'three';
 
 const REGIONS = ['Front', 'Crown', 'Rear'] as const;
 
-export interface HairGuide {
+interface HairGuide {
   readonly root: readonly [number, number, number];
   readonly tip: readonly [number, number, number];
   readonly radius: number;

@@ -1,15 +1,12 @@
 /**
  * 地被层与水生小植物的几何（FloraBuilder：aTip 风摆权重、aPetal=1 乘实例色）。全部是小几何（每种几十个三角形），
  * 由 variant-atlas 合并成图集；局部原点 = 根部（地面/湖床/水面），y 向上。
- * 地被（高 ≤ COVER_GEOMETRY_MAX_HEIGHT）：苔藓垫、三叶草丛、卷曲幼蕨、莲座叶、小野草芽、地衣斑、碎石旁小苗、落叶枯枝、台阶垂苔。
+ * 地被（本体高 ≤ 0.16 格）：苔藓垫、三叶草丛、卷曲幼蕨、莲座叶、小野草芽、地衣斑、碎石旁小苗、落叶枯枝、台阶垂苔。
  * 形状内部随机只用 core/rng 的整数哈希（确定性）。
  */
 import type * as THREE from 'three';
 import { C, FloraBuilder, LEAF, LEAF_LIGHT, blade, rnd, rosette, stem } from './flora-builder.ts';
 import type { V3 } from './flora-builder.ts';
-
-/** 地被几何的本体高度上限（格；实例缩放 ≤ COVER 规则上限后仍 ≤ .2）。 */
-export const COVER_GEOMETRY_MAX_HEIGHT = 0.16;
 
 /** 平躺叶片（菱形近椭圆 4 三角形）：中心 (cx,y,cz)，沿 yaw 方向长 len、宽 w，中段上拱 arch。 */
 export function flatLeaf(b: FloraBuilder, c: V3, yaw: number, len: number, w: number, arch: number, base: THREE.Color, tipC: THREE.Color, tip: number, petal: number): void {

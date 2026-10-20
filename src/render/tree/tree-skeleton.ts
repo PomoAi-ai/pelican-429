@@ -86,7 +86,7 @@ export interface Frond {
   readonly width: number;
 }
 
-export interface Fruit {
+interface Fruit {
   readonly x: number;
   readonly y: number;
   readonly z: number;
@@ -392,7 +392,7 @@ function connectTops(ctx: Ctx, fork: Vec3, tops: readonly LeafCluster[], rm: num
 }
 
 /** 一簇叶：枝端主团 + 一个朝外上方的卫星团（预算允许时），都受冠顶/冠宽约束。 */
-function clump(ctx: Ctx, x: number, y: number, z: number, r: number, minY: number): void {
+function clump(ctx: Ctx, x: number, y: number, z: number, r: number): void {
   const c = addCluster(ctx, x, y, z, r, CLUSTER_SX, ctx.tpl.clusterSy, null);
   if (c && ctx.rng() < 0.85) tipTwig(ctx, c, 0);
 }
@@ -452,7 +452,7 @@ function fillCrown(ctx: Ctx, hosts: readonly Limb[], minY: number): void {
     if (!host || ctx.clusters.length >= MAX_CLUSTERS) return;
     const z = clusterZ(rng, r);
     if (!addLimb(ctx, bent(host.p, v(x, y, z), 0.1, 0.05, 3), host.r * 0.75, host.r * 0.4, Math.max(2, host.depth + 1))) return;
-    clump(ctx, x, y, z, r, minY);
+    clump(ctx, x, y, z, r);
   }
 }
 

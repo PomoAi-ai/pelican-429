@@ -13,7 +13,6 @@ import {
   C,
   DECK_THICKNESS,
   DOOR_LEAF_CLEAR,
-  FACADE_Z,
   HUT_PROP_Z_MAX,
   HUT_ROOF_THICKNESS,
   PILE_SINK,
@@ -77,7 +76,7 @@ export function buildInterior(ctx: HutCtx, b: PartBuilder): void {
   const lb = hut.loftX1 + 1;
   const bedX0 = left ? la + 0.2 : lb - 2.0;
   buildBed(ctx, b, bedX0, bedX0 + 1.8, hut.loftY + 1);
-  buildPainting(ctx, b, (la + lb) / 2, hut.loftY + 3.15);
+  buildPainting(b, (la + lb) / 2, hut.loftY + 3.15);
   // 开放区：桌椅、海图、搁架。
   const [fx0, fx1] = openSpan(hut);
   const cx = (fx0 + fx1) / 2;
@@ -149,7 +148,7 @@ function buildBed(ctx: HutCtx, b: PartBuilder, x0: number, x1: number, y: number
   b.ball([x0 + 0.27, y + 0.48, ZM], 0.16, color(C.pillow), 3, 6, 0.55);
 }
 
-function buildPainting(ctx: HutCtx, b: PartBuilder, cx: number, cy: number): void {
+function buildPainting(b: PartBuilder, cx: number, cy: number): void {
   const w = 0.55;
   const h = 0.36;
   const z = WALL_Z + 0.01;
@@ -588,7 +587,7 @@ export function fishShape(b: PartBuilder, cx: number, cy: number, len: number, z
   );
 }
 
-export function rect(x0: number, x1: number, y0: number, y1: number): V2[] {
+function rect(x0: number, x1: number, y0: number, y1: number): V2[] {
   return [
     [x0, y0],
     [x1, y0],

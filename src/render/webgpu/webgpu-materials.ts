@@ -1,5 +1,5 @@
 /**
- * WebGPU 节点材质接入：包装 renderer.library.fromMaterial —— three 把普通材质复制成节点材质后，按 render/node-patches 登记的顺序
+ * WebGPU 节点材质接入：包装 renderer.library.fromMaterial —— three 把普通材质复制成节点材质后，按 render/stage/node-patches 登记的顺序
  * 把 onBeforeCompile 补丁翻译成节点（WebGPURenderer 忽略 onBeforeCompile）。翻译函数按主题分在 webgpu-light-map、webgpu-patches-*，这里汇总成表。
  * - 不缓存节点材质：three 每次构建渲染对象（新物体、材质 version 变化）都重新复制原材质，复制件的属性因此与原材质同步；
  *   翻译只在构建时运行，开销与 three 自身的复制相同。
@@ -205,7 +205,7 @@ const tileLayers: Translate<'tile-layers'> = (material, { texture: tiles }) => {
   };
 };
 
-// ---- 植被：共享风场与草地扰动（render/wind WIND_GLSL、render/grass-disturb DISTURB_GLSL 同式）----
+// ---- 植被：共享风场与草地扰动（render/wind WIND_GLSL、render/flora/grass-disturb DISTURB_GLSL 同式）----
 
 /** grassDisturb( w ) → 世界空间叶尖位移。 */
 function grassDisturb(u: DisturbUniforms, w: N): N {
@@ -306,7 +306,7 @@ const floraWind: Translate<'flora-wind'> = (material, { wind, disturb, uniforms:
   material.normalNode = normalViewGeometry;
 };
 
-// ---- 变体塌缩 variant-collapse（render/variant-atlas 同式）----
+// ---- 变体塌缩 variant-collapse（render/flora/variant-atlas 同式）----
 
 const variantCollapse: Translate<'variant-collapse'> = (material) => {
   deformBeforeInstance(material, (_M, builder) => {
@@ -317,13 +317,13 @@ const variantCollapse: Translate<'variant-collapse'> = (material) => {
   });
 };
 
-// ---- 每实例透明度 instance-fade（render/water-flora-view addInstanceFade：diffuseColor.a *= aFade）----
+// ---- 每实例透明度 instance-fade（render/water/water-flora-view addInstanceFade：diffuseColor.a *= aFade）----
 
 const instanceFade: Translate<'instance-fade'> = (material) => {
   material.opacityNode = materialOpacity.mul(attribute('aFade', 'float'));
 };
 
-// ---- 树风 tree-wind（render/tree-material 叶层颤动 + render/tree-wind 枝弯曲、主弯曲同式）----
+// ---- 树风 tree-wind（render/tree/tree-material 叶层颤动 + render/tree/tree-wind 枝弯曲、主弯曲同式）----
 
 const LW = LEAF_WIND;
 const K = TREE_BEND;
@@ -382,7 +382,7 @@ const treeShadowWind: ShadowTranslate<'tree-shadow-wind'> = ({ wind, time }) => 
   },
 });
 
-/** 灌木草地扰动 shrub-disturb（render/flora-shrubs SHRUB_DISTURB_BODY：aSway × 扰动，世界空间 → 局部）。 */
+/** 灌木草地扰动 shrub-disturb（render/flora/flora-shrubs SHRUB_DISTURB_BODY：aSway × 扰动，世界空间 → 局部）。 */
 const shrubDisturb: Translate<'shrub-disturb'> = (material, { disturb, scale }) => {
   deformBeforeInstance(material, (M) => {
     if (M === null) return;
@@ -391,7 +391,7 @@ const shrubDisturb: Translate<'shrub-disturb'> = (material, { disturb, scale }) 
   });
 };
 
-// ---- 树皮 tree-bark（render/tree-material BARK_MAP / BARK_NORMAL 同式）----
+// ---- 树皮 tree-bark（render/tree/tree-material BARK_MAP / BARK_NORMAL 同式）----
 
 const treeBark: Translate<'tree-bark'> = (material, { bump }, source) => {
   const { map } = source as THREE.MeshStandardMaterial;

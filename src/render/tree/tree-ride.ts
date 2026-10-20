@@ -30,7 +30,7 @@ export interface TreeRideWind {
   readonly sway: SwayFn;
 }
 
-export interface TreeRideSample {
+interface TreeRideSample {
   readonly treeId: number;
   readonly dx: number;
   readonly dy: number;
@@ -43,7 +43,7 @@ export interface TreeRideQuery {
   sample(x: number, y: number, halfWidth: number): TreeRideSample | null;
 }
 
-export type TreeRideLookup = (tx: number, ty: number) => TreeRideTile | null;
+type TreeRideLookup = (tx: number, ty: number) => TreeRideTile | null;
 
 const clamp = (v: number, lo: number, hi: number): number => Math.min(hi, Math.max(lo, v));
 
@@ -72,7 +72,7 @@ export function createTreeRideQuery(lookup: TreeRideLookup, wind: () => TreeRide
   };
 }
 
-export interface TreeRideOffset {
+interface TreeRideOffset {
   readonly x: number;
   readonly y: number;
   readonly tilt: number;
@@ -80,7 +80,7 @@ export interface TreeRideOffset {
   readonly weight: number;
 }
 
-export interface RideBody {
+interface RideBody {
   readonly onGround: boolean;
   readonly halfWidth: number;
 }

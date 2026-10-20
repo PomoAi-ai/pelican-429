@@ -21,8 +21,8 @@ export const ROOF_COURSES_PER_TILE = 3;
 /** 每排沿 z 至少几片木瓦（构建时校验）。 */
 export const ROOF_SHINGLES_MIN_PER_COURSE = 3;
 /** 封檐板厚度：木瓦/屋面板止于 HUT_ROOF_Z_MAX − 该值。 */
-export const ROOF_BARGE_DEPTH = 0.08;
-export const ROOF_FRONT_Z = HUT_ROOF_Z_MAX - ROOF_BARGE_DEPTH;
+const ROOF_BARGE_DEPTH = 0.08;
+const ROOF_FRONT_Z = HUT_ROOF_Z_MAX - ROOF_BARGE_DEPTH;
 
 const SQ = Math.SQRT1_2;
 /** 屋面板上表面在坡线下的竖直距离（瓦缝里露出的是它）。 */

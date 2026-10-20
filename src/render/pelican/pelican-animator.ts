@@ -21,7 +21,7 @@ import type { PelicanRideAnimTuning, RideAnimRide } from './pelican-ride-anim.ts
 import { hipPoint, tuckAnkle } from './pelican-skeleton.ts';
 
 export type PelicanAnimState = 'idle' | 'run' | 'jump' | 'fall' | 'attack' | 'fly' | 'glide' | 'swim';
-export type PelicanAttackPhase = 'startup' | 'active' | 'recovery';
+type PelicanAttackPhase = 'startup' | 'active' | 'recovery';
 export type PelicanShotPhase = 'windup' | 'hold' | 'close';
 
 export interface PelicanAnimInput {
@@ -217,7 +217,7 @@ function positive(value: unknown, key: string): number {
   return v;
 }
 
-export function validatePelicanAnimTuning(t: PelicanAnimTuning): void {
+function validatePelicanAnimTuning(t: PelicanAnimTuning): void {
   validatePelicanGaitTuning(t);
   positive(t.stride, 'tuning.stride');
   positive(t.breathPeriod, 'tuning.breathPeriod');
@@ -315,12 +315,12 @@ const SWAY_HZ_A = 0.23;
 const SWAY_HZ_B = 0.37;
 
 /** Breath depth in [0, 1] at `time`: eased inhale over `inhale` of the period, eased (slower) exhale after. */
-export function breathCurve(time: number, period: number, inhale: number): number {
+function breathCurve(time: number, period: number, inhale: number): number {
   const u = (((time / period) % 1) + 1) % 1;
   return u < inhale ? smooth(u / inhale) : 1 - smooth((u - inhale) / (1 - inhale));
 }
 
-export interface PelicanAnimator {
+interface PelicanAnimator {
   update(input: PelicanAnimInput, frameDt: number): PelicanPose;
   /** Current gait phase (cycles, grows with time while walking). */
   stepPhase(): number;

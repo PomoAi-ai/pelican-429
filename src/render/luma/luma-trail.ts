@@ -21,7 +21,7 @@ export const LUMA_TRAIL_SHADER = {
 const T = LUMA_TRAIL_SHADER;
 const vec3 = (c: readonly number[]): string => `vec3(${c.map(f).join(', ')})`;
 
-export interface LumaTrail {
+interface LumaTrail {
   update(worldPosition: THREE.Vector3, dt: number): void;
   reset(): void;
   dispose(): void;

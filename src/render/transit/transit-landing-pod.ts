@@ -178,10 +178,10 @@ export function createPodBody(surface: ReturnType<typeof createTransitSurface>, 
 }
 
 /** Player pose while the pod owns it: interpolated body x/y, cabin-floor lift above the body, depth and yaw relative to facing left. */
-export interface PodCarry { readonly x: number; readonly y: number; readonly lift: number; readonly z: number; readonly yaw: number }
+interface PodCarry { readonly x: number; readonly y: number; readonly lift: number; readonly z: number; readonly yaw: number }
 
 /** The level and the city both step a PodLanding at the sim rate; each poses its own player object from the carry pose. */
-export interface LandingPodHost {
+interface LandingPodHost {
   /** Null once control is handed back. */
   landing(): PodLanding | null;
   /** True once the player has confirmed boarding the parked pod to leave; the pod's timeline then runs backwards. */

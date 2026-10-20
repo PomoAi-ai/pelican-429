@@ -20,7 +20,7 @@ const objectives: Record<MainlinePhase, string> = {
   restored: '算力恢复 · 前沿模型重新开放',
 };
 
-export interface StoryHud extends FacilityChapterHud {
+interface StoryHud extends FacilityChapterHud {
   readonly open: boolean;
 }
 

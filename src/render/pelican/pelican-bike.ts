@@ -18,7 +18,7 @@ import { MAX_BIKE_SCALE } from './pelican-pose.ts';
 import type { Side, Vec3 } from './pelican-pose.ts';
 
 /** One leg on its pedal, in bird space (except `pedal`, which is in the ride frame). */
-export interface BikeLegTarget {
+interface BikeLegTarget {
   side: Side;
   hip: Vec3;
   /** Forward-bending knee from pelican-3d's two-bone IK (consistent with hip/ankle for a rigid seat matrix). */
@@ -36,7 +36,7 @@ export interface BikeLegTarget {
 }
 
 /** Pivot transform of a game-rig wing pivot (position in the upper body's frame, quaternion [x, y, z, w]). */
-export interface BikeWingPose {
+interface BikeWingPose {
   position: Vec3;
   quaternion: [number, number, number, number];
 }
@@ -84,7 +84,7 @@ export interface PelicanBike {
   dispose(): void;
 }
 
-export interface PelicanBikeOptions {
+interface PelicanBikeOptions {
   /** The game rig's near wing pivot in bird space (the far wing mirrors z). */
   wingPivot: Vec3;
 }

@@ -1,6 +1,6 @@
 /**
  * 材质补丁的节点描述：每个 onBeforeCompile 补丁旁登记一条同一补丁所需的数据（共享 uniform 对象、纹理、选项），不含 TSL。
- * WebGPU 舞台（app/webgpu-materials）按登记顺序把它们翻译成节点材质；WebGL 路径只登记不读取。
+ * WebGPU 舞台（render/webgpu/webgpu-materials）按登记顺序把它们翻译成节点材质；WebGL 路径只登记不读取。
  */
 import type * as THREE from 'three';
 import type { DisturbUniforms } from '../flora/grass-disturb.ts';
@@ -11,7 +11,7 @@ import type { WindUniforms } from '../sky/wind.ts';
 
 type Scalar = THREE.IUniform<number>;
 export type JellyUniforms = Readonly<Record<'uJellyTime' | 'uJellyAmp' | 'uJellyFreq' | 'uJellySpeed', Scalar>>;
-export interface CaveWallUniforms {
+interface CaveWallUniforms {
   readonly uWallRooms: THREE.IUniform<THREE.DataTexture>;
   readonly uWallImage: THREE.IUniform<THREE.Texture | null>;
   readonly uWallMask: THREE.IUniform<THREE.DataTexture>;

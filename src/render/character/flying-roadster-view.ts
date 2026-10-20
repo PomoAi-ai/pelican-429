@@ -141,7 +141,7 @@ function createIonJets(model: THREE.Group) {
   };
 }
 
-export interface FlyingRoadsterPose {
+interface FlyingRoadsterPose {
   readonly lift: number;
   readonly cruise: number;
   readonly canopy: number;

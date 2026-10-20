@@ -16,11 +16,11 @@ export interface HillsOptions {
   readonly haze?: HillsHaze;
 }
 
-export interface HillsHaze extends Readonly<LightingTuning['haze']> {
+interface HillsHaze extends Readonly<LightingTuning['haze']> {
   readonly cameraDistance: number;
 }
 
-export type HillLayer = 'near' | 'middle' | 'far';
+type HillLayer = 'near' | 'middle' | 'far';
 
 export interface Hills {
   readonly root: THREE.Group;

@@ -86,7 +86,7 @@ export const TREE_KINDS: readonly TreeShapeKind[] = Object.freeze(['oak', 'broad
 /** 树干半径上限（瓦片）：树中心 z=−0.7 时树干后沿不越过方块顶面后沿太多（见 013 DESIGN 2.6）。 */
 export const TRUNK_RADIUS_MAX = 0.4;
 
-export interface IntRange {
+interface IntRange {
   readonly min: number;
   readonly max: number;
 }
@@ -265,7 +265,7 @@ export type TreeHabitat = 'meadow' | 'shore' | 'sand' | 'desert';
 export const TREE_HABITAT_KINDS: readonly TreeHabitat[] = Object.freeze(['meadow', 'shore', 'sand', 'desert'] as const);
 
 /** 某栖息地的树种权重（未列出 = 0；列出的必须 > 0，总和为 1）。按 TREE_KINDS 顺序累加以保证确定性。 */
-export type HabitatWeights = Readonly<Partial<Record<TreeShapeKind, number>>>;
+type HabitatWeights = Readonly<Partial<Record<TreeShapeKind, number>>>;
 
 export const TREE_HABITATS: Readonly<Record<TreeHabitat, HabitatWeights>> = Object.freeze({
   meadow: Object.freeze({ oak: 0.26, broad: 0.16, pine: 0.16, bush: 0.12, sakura: 0.1, birch: 0.12, dead: 0.08 }),
@@ -285,7 +285,7 @@ export const TREE_HABITATS: Readonly<Record<TreeHabitat, HabitatWeights>> = Obje
  * 台地：每段至多 MESA_MAX 个（概率 MESA_CHANCE），宽 MESA_WIDTH、比基线高 MESA_RISE；一侧为每列落差 2 的小悬崖，另一侧每列 1 的缓坡；顶面砂岩。
  * 树：沙漠内候选列再乘 TREE_FACTOR（更稀疏）。
  */
-export interface DesertRules {
+interface DesertRules {
   readonly COUNT_MIN: number;
   readonly COUNT_MAX: number;
   readonly CORE_MIN: number;

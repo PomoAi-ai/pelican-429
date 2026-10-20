@@ -4,14 +4,14 @@ import { validateProjectileDef } from './weapon-rules.ts';
 import type { ProjectileDef } from './weapon-rules.ts';
 
 export type EnemyKind = 'omi' | 'lineHound' | 'watchWasp' | 'loadmaster';
-export interface EnemySkill extends AttackTuning {
+interface EnemySkill extends AttackTuning {
   readonly name: string;
   readonly mode: 'melee' | 'dash' | 'pounce' | 'slam' | 'bomb' | 'thermite';
   readonly range: number;
   readonly speed: number;
   readonly jumpSpeed: number;
 }
-export interface EnemyRule {
+interface EnemyRule {
   readonly name: string;
   readonly height: number;
   readonly halfWidth: number;

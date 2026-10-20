@@ -42,14 +42,14 @@ export interface PrecipVisual {
   readonly snowCap: number;
 }
 
-export type PrecipVisualKey = keyof PrecipVisual;
+type PrecipVisualKey = keyof PrecipVisual;
 export const PRECIP_VISUAL_KEYS: readonly PrecipVisualKey[] = Object.freeze([
   'rain', 'rainSpeed', 'rainLength', 'rainWidth', 'splash', 'drip', 'snow', 'flakeSize', 'flakeSpeed',
   'overcast', 'dim', 'fog', 'cool', 'lightning', 'wetRate', 'wetCap', 'snowRate', 'snowCap',
 ] as const);
 
 /** 下落量取模周期（格）。 */
-export const FALL_WRAP = 4096;
+const FALL_WRAP = 4096;
 /** 单帧积分步长上限（秒；卡顿帧不让湿润/积雪/下落量跳变）。 */
 const MAX_DT = 0.25;
 
@@ -82,7 +82,7 @@ export function precipVisualOf(p: PrecipTuning, s: PrecipState, power: PrecipPow
   };
 }
 
-export function lerpVisual(a: PrecipVisual, b: PrecipVisual, k: number): PrecipVisual {
+function lerpVisual(a: PrecipVisual, b: PrecipVisual, k: number): PrecipVisual {
   const out = {} as Record<PrecipVisualKey, number>;
   for (const key of PRECIP_VISUAL_KEYS) out[key] = a[key] + (b[key] - a[key]) * k;
   return out;
@@ -140,7 +140,7 @@ export interface PrecipController {
 }
 
 /** 积分量向 cap 逼近：低于 cap 以 rate 增长，高于 cap 以 decay 回落。 */
-export function approach(v: number, cap: number, rate: number, decay: number, dt: number): number {
+function approach(v: number, cap: number, rate: number, decay: number, dt: number): number {
   if (v < cap) return Math.min(cap, v + rate * dt);
   return Math.max(cap, v - decay * dt);
 }

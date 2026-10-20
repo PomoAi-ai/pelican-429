@@ -6,7 +6,7 @@
 import * as THREE from 'three';
 import { hash01 } from '../../core/rng.ts';
 
-export interface CellSilhouetteOptions {
+interface CellSilhouetteOptions {
   /** 每列地表高度（groundSurface），长度即地图宽度。 */
   readonly surface: Int16Array;
   /** 取样列的错位（格）。 */
@@ -29,7 +29,7 @@ const SEAM = .05;
 /** 衬底与格面的明暗（乘材质色）。 */
 const BACKING_SHADE = .8;
 
-export interface CellSilhouette {
+interface CellSilhouette {
   readonly root: THREE.Group;
   readonly material: THREE.MeshBasicMaterial;
   dispose(): void;

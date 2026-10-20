@@ -33,7 +33,7 @@ import type { FluidMap } from './fluid-map.ts';
 import { FLUID_FULL } from './fluid-map.ts';
 import { SUBCELLS } from './tile-shapes.ts';
 
-export interface FluidSimConfig {
+interface FluidSimConfig {
   /** 单步最多处理的活跃格数（整数 ≥ 1）。 */
   readonly maxCellsPerStep: number;
   /** 侧向流动所需的最小水量（整数 2..255）。 */
@@ -164,7 +164,7 @@ function balanceRow(f: FluidMap, i: number, ty: number, residual: number, marks:
   return writes;
 }
 
-export interface FluidStepResult {
+interface FluidStepResult {
   /** 本步处理的活跃格数。 */
   readonly processed: number;
   /** 发生写入的次数（邻格流入 + 本格写回）。 */

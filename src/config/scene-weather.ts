@@ -18,7 +18,7 @@ export function sceneWeatherPatch(preset: SceneWeatherPreset): Partial<SceneWeat
 
 /** 原野天空来自区域原画，没有单独的阴天表现。 */
 export const WILDS_WEATHER_PRESETS = ['auto', 'clear', 'rain', 'storm', 'snow'] as const satisfies readonly SceneWeatherPreset[];
-export type WildsWeatherPreset = (typeof WILDS_WEATHER_PRESETS)[number];
+type WildsWeatherPreset = (typeof WILDS_WEATHER_PRESETS)[number];
 
 /** 原野天气保存在游戏设置里，高亮的预设从当前雨雪推出。 */
 export function wildsWeatherPreset(settings: Pick<SceneWeatherSettings, 'precip' | 'rain' | 'snow'>): WildsWeatherPreset {

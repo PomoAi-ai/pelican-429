@@ -30,7 +30,7 @@ const HAIRS = [
 
 type Hair = typeof HAIRS[number];
 export type HairStyle = Hair['key'];
-export type BlenderHairStyle = Extract<Hair, { blender: true }>['key'];
+type BlenderHairStyle = Extract<Hair, { blender: true }>['key'];
 
 export const HAIR_ASSETS = Object.fromEntries(HAIRS.map(hair => [hair.key, hair.asset])) as Record<HairStyle, string>;
 export const HAIR_LABELS = Object.fromEntries(HAIRS.map(hair => [hair.key, hair.label])) as Record<HairStyle, string>;

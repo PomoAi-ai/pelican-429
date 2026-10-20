@@ -15,7 +15,7 @@ export const BLADE_SEGMENTS = 4;
 export const TUFT_BLADES = 14;
 /** 草皮：每格草叶数与 z 行数（行内沿 x 分层抖动，铺满一格）。 */
 export const TURF_BLADES = 30;
-export const TURF_ROWS = 3;
+const TURF_ROWS = 3;
 const TURF_SEGMENTS = 3;
 
 const GRASS_ROOT = C('#2c5f22');

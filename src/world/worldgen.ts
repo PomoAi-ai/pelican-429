@@ -31,7 +31,7 @@ import { carveCaveStage, finishCaves, finishFloaters, floaterStage, homeColumn }
 import { compositionSpan, placeWorldCompositions, stampCompositionTrees } from './worldgen-compositions.ts';
 import type { WorldComposition } from './worldgen-compositions.ts';
 
-export interface WorldStats {
+interface WorldStats {
   /** 各方块 key 的数量（含 air）。 */
   readonly counts: Readonly<Record<string, number>>;
   /** 湖泊数（不含高处小水池）。 */
@@ -57,7 +57,7 @@ export interface WorldStats {
   readonly islets: number;
 }
 
-export interface CaveStats {
+interface CaveStats {
   readonly carved: number;
   readonly slopes: number;
   readonly rooms: number;
@@ -67,7 +67,7 @@ export interface CaveStats {
 }
 
 /** 一段水体：列 [x0,x1]（含两端）中 ground[x] < level 的格子 ty∈[ground[x], level) 注满水。 */
-export interface Lake {
+interface Lake {
   readonly x0: number;
   readonly x1: number;
   /** 水面顶边 y。 */
@@ -369,8 +369,8 @@ function pickInt(u: number, min: number, max: number): number {
  * 在地表谷底（等高段两侧均更高，取段中点）挖湖（hash01 < lakeChance、湖心间距 ≥ lakeMinGap、湖与湖不相交、避开 [noLo,noHi]）。
  * 一个都没有时在禁区外最低处以最大半宽/深度强制挖一个；仍失败即抛。原地修改 ground。
  */
-export function carveLakes(ground: Int32Array, seed: number, cfg: WorldgenTuning, noLo: number, noHi: number): Lake[] {
-  const { width, maxStep } = cfg;
+function carveLakes(ground: Int32Array, seed: number, cfg: WorldgenTuning, noLo: number, noHi: number): Lake[] {
+  const { width } = cfg;
   const salt = (seed ^ SALT_LAKE) >>> 0;
   const lakes: Lake[] = [];
   let lastC = Number.NEGATIVE_INFINITY;

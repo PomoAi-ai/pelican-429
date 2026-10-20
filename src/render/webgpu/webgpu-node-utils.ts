@@ -122,7 +122,7 @@ export function preInstance(builder: NodeBuilder): { readonly M: N | null; apply
   return { M: null, apply() {} };
 }
 
-export type Deform = (M: N | null, builder: NodeBuilder) => void;
+type Deform = (M: N | null, builder: NodeBuilder) => void;
 /**
  * 在实例/批次变换之前改写 positionLocal（同 GLSL begin_vertex 后改 transformed）；同一材质的多个变形按登记顺序执行。
  * 只用于不蒙皮、无变形目标的网格（这里替换了整个 setupPosition），蒙皮/变形目标网格直接抛错。

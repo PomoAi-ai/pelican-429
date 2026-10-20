@@ -13,7 +13,7 @@ import { hash01 } from '../../core/rng.ts';
 import type { V3 } from '../flora/flora-builder.ts';
 import { noise3 } from './solid-geometry.ts';
 
-export interface StrataSpec {
+interface StrataSpec {
   /** 层数（≥ 2）。 */
   readonly layers: number;
   /** 层间凹槽深度（占水平半宽比例）。 */
@@ -22,7 +22,7 @@ export interface StrataSpec {
   readonly shift: number;
 }
 
-export interface CrackSpec {
+interface CrackSpec {
   /** 缝深（格）与半宽（格）。 */
   readonly depth: number;
   readonly width: number;
@@ -161,7 +161,7 @@ export function block(spec: BlockSpec): THREE.BufferGeometry {
   return placeShape(g, spec.at, spec.yaw, spec.tilt);
 }
 
-export interface BlobSpec {
+interface BlobSpec {
   readonly at: V3;
   /** 半径（x, y, z）。 */
   readonly r: V3;
@@ -213,7 +213,7 @@ export function blob(b: BlobSpec): THREE.BufferGeometry {
 }
 
 /** 绕 z 倾斜、绕 y 转、再平移（原地）。 */
-export function placeShape(g: THREE.BufferGeometry, at: V3 = [0, 0, 0], yaw = 0, tilt = 0): THREE.BufferGeometry {
+function placeShape(g: THREE.BufferGeometry, at: V3 = [0, 0, 0], yaw = 0, tilt = 0): THREE.BufferGeometry {
   if (tilt !== 0) g.rotateZ(tilt);
   if (yaw !== 0) g.rotateY(yaw);
   g.translate(at[0], at[1], at[2]);

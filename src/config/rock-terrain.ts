@@ -16,13 +16,13 @@ export interface RockTerrainCell {
   readonly layers: readonly RockTerrainLayer[];
 }
 
-export const ROCK_IN_SOIL_OUTLINE: readonly DefinitionPoint[] = [
+const ROCK_IN_SOIL_OUTLINE: readonly DefinitionPoint[] = [
   [.18, .24], [.42, .15], [.76, .19], [.85, .47], [.72, .79], [.39, .85], [.15, .62],
 ];
 
 const ISLAND_ROCK_RIDGE: readonly DefinitionPoint[] = [[0, .12], [.18, .35], [.48, .58], [.78, .43], [1, .16]];
 
-export interface RockTerrainScene {
+interface RockTerrainScene {
   readonly id: string;
   readonly title: string;
   readonly description: string;

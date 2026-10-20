@@ -15,7 +15,7 @@ import type { Rect } from '../../core/math.ts';
 import { CHUNK_SIZE } from '../../world/tile-map.ts';
 import type { ChunkCoord } from '../../world/tile-map.ts';
 
-export interface ChunkStreamerOptions {
+interface ChunkStreamerOptions {
   /** 错误信息前缀（调用方模块名）。 */
   readonly label: string;
   readonly chunksX: number;
@@ -33,7 +33,7 @@ export interface ChunkStreamerOptions {
   clear(cx: number, cy: number): void;
 }
 
-export interface ChunkStreamer {
+interface ChunkStreamer {
   update(view: Readonly<Rect> | undefined, dirty: readonly ChunkCoord[]): number;
   readonly loaded: number;
   /** 余量范围内仍未加载的区块数 + 顺延的脏区块数。 */

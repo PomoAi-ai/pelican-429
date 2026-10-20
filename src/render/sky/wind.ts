@@ -97,7 +97,7 @@ export function uniformSwayAt(u: WindUniformValues, x: number, t: number): numbe
 }
 
 /** 新建一组 uniform 对象（初值 = 静风、参数安全）。 */
-export function createWindUniforms(): WindUniforms {
+function createWindUniforms(): WindUniforms {
   const u = {} as Record<WindUniformName, { value: number }>;
   for (const n of WIND_UNIFORM_NAMES) u[n] = { value: 0 };
   u.uWindSign.value = 1;

@@ -15,13 +15,13 @@ export interface WindState {
   readonly scale: number;
 }
 
-export interface WindGlobal {
+interface WindGlobal {
   readonly dirX: number;
   readonly base: number;
   readonly gustAmp: number;
 }
 
-export interface WindSample {
+interface WindSample {
   /** 水平风向分量（符号 = 主风向）。 */
   readonly dirX: number;
   /** 风强（≥ 0）。 */

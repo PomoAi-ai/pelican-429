@@ -21,16 +21,16 @@ export const FLOAT_KINDS = ['duckweed', 'lilypad', 'lilyflower', 'frogbit', 'lea
 export type FloatKind = (typeof FLOAT_KINDS)[number];
 export const MOTE_KINDS = ['thread', 'flake', 'speck'] as const;
 export type MoteKind = (typeof MOTE_KINDS)[number];
-export type BedMaterial = 'sand' | 'soft' | 'stone';
+type BedMaterial = 'sand' | 'soft' | 'stone';
 
 /** 湖底矮水草的高度总范围（格）。 */
 export const BED_HEIGHT_RANGE: readonly [number, number] = [0.1, 0.8];
 /** 每湖床列的株数上限。 */
-export const BED_PER_CELL_MAX = 5;
+const BED_PER_CELL_MAX = 5;
 /** 水下风摆（同 water-weeds：全局风 ×.35）。 */
 export const AQUATIC_WIND = Object.freeze({ amplitude: 0.16, speed: 0.45, windScale: 0.35 });
 
-export interface BedRule {
+interface BedRule {
   readonly density: number;
   /** 适生水深窗口（格，根部到水面）。 */
   readonly depth: readonly [number, number];
@@ -49,7 +49,7 @@ export const BED_RULES: Readonly<Record<BedKind, BedRule>> = Object.freeze({
   algaeStone: { density: 0.5, depth: [0.3, 99], height: [0.12, 0.16], bed: bm(1, 0.3, 1.5), palette: [0xffffff, 0xe8e4d8, 0xd8dcd0] },
 });
 
-export interface FloatRule {
+interface FloatRule {
   /** 每水面列期望株数（湖心、上风侧）。 */
   readonly density: number;
   /** 近岸增益（距岸 FLOAT_SHORE_RANGE 格内线性增到 1）与背风侧增益。 */
@@ -70,35 +70,35 @@ export const FLOAT_RULES: Readonly<Record<FloatKind, FloatRule>> = Object.freeze
 });
 
 /** 近岸范围（格）；每湖漂浮物总数上限 = span × FLOAT_MAX_PER_CELL（鹈鹕游泳可读性）。 */
-export const FLOAT_SHORE_RANGE = 3;
-export const FLOAT_MAX_PER_CELL = 0.9;
+const FLOAT_SHORE_RANGE = 3;
+const FLOAT_MAX_PER_CELL = 0.9;
 /** 漂浮物 z 范围：背板前到 FLOAT_Z_FRONT（不铺到鹈鹕前方太多），按 z 偏向后方（指数 FLOAT_Z_BACK_BIAS）。 */
-export const FLOAT_Z_FRONT = 0.15;
-export const FLOAT_Z_BACK_BIAS = 1.6;
+const FLOAT_Z_FRONT = 0.15;
+const FLOAT_Z_BACK_BIAS = 1.6;
 export const FLOAT_Z: readonly [number, number] = [WATER_BACK_Z + 0.15, FLOAT_Z_FRONT];
 /** 漂移：每单位风（wind.sway）每秒漂移的格数；系留摆幅（格）与频率（rad/s）。 */
 export const FLOAT_DRIFT_WIND = 0.12;
-export const FLOAT_TETHER_SWAY = 0.08;
-export const FLOAT_TETHER_FREQ = 0.35;
+const FLOAT_TETHER_SWAY = 0.08;
+const FLOAT_TETHER_FREQ = 0.35;
 /** 湖两端渐隐带宽（格；回绕处缩放到 0，不突跳）。 */
-export const FLOAT_EDGE_FADE = 0.45;
+const FLOAT_EDGE_FADE = 0.45;
 /** 漂浮物离水面高度（格）。 */
 export const FLOAT_LIFT = 0.012;
 /** 鹈鹕排斥：半径、推开速率、回流速率（1/秒，指数逼近）、竖直判定窗（鹈鹕脚底相对水面）。 */
 export const FLOAT_REPEL_RADIUS = 1.0;
-export const FLOAT_PUSH_RATE = 9;
-export const FLOAT_RETURN_RATE = 0.35;
-export const FLOAT_REPEL_ABOVE = 0.6;
-export const FLOAT_REPEL_BELOW = 2.2;
+const FLOAT_PUSH_RATE = 9;
+const FLOAT_RETURN_RATE = 0.35;
+const FLOAT_REPEL_ABOVE = 0.6;
+const FLOAT_REPEL_BELOW = 2.2;
 
 /** 悬浮物：每（列·格水深）期望数、每湖上限、漂移速度（格/秒）、透明度上限、渐隐深度（格）。 */
-export const MOTE_DENSITY = 0.12;
-export const MOTE_MAX_PER_LAKE = 50;
+const MOTE_DENSITY = 0.12;
+const MOTE_MAX_PER_LAKE = 50;
 export const MOTE_DRIFT = 0.06;
 export const MOTE_ALPHA = 0.55;
 export const MOTE_FADE_DEPTH = 3.5;
-export const MOTE_WEIGHTS: Readonly<Record<MoteKind, number>> = Object.freeze({ thread: 0.3, flake: 0.35, speck: 0.35 });
-export const MOTE_Z: readonly [number, number] = [WATER_BACK_Z + 0.2, Math.min(0.25, WATER_FRONT_Z - 0.1)];
+const MOTE_WEIGHTS: Readonly<Record<MoteKind, number>> = Object.freeze({ thread: 0.3, flake: 0.35, speck: 0.35 });
+const MOTE_Z: readonly [number, number] = [WATER_BACK_Z + 0.2, Math.min(0.25, WATER_FRONT_Z - 0.1)];
 
 const fail = (what: string, v: unknown): never => {
   throw new Error(`water-flora: invalid ${what} ${String(v)}`);
@@ -108,7 +108,7 @@ const nonNeg = (what: string, v: number): void => {
 };
 
 /** 调参校验（加载时执行；非法即抛）。 */
-export function validateWaterFloraTuning(): void {
+function validateWaterFloraTuning(): void {
   for (const k of BED_KINDS) {
     const r = BED_RULES[k];
     nonNeg(`bed.${k}.density`, r.density);

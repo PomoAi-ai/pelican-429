@@ -25,8 +25,8 @@ import type { SnowFx } from './snow-fx.ts';
 import type { WorldViews } from '../stage/world-views.ts';
 
 /** 表面注入补挂间隔（帧；首帧即挂）与列数据刷新间隔（帧）、刷新外扩列数。 */
-export const PRECIP_PATCH_FRAMES = 30;
-export const PRECIP_COLUMN_FRAMES = 15;
+const PRECIP_PATCH_FRAMES = 30;
+const PRECIP_COLUMN_FRAMES = 15;
 const COLUMN_MARGIN = 12;
 
 /** 需要湿润/积雪的世界视图子树：地表瓦片（含花草）、树、渔屋、地表装饰、浮空岛（水面/水草/洞穴/特效不挂）。 */
@@ -34,7 +34,7 @@ export function precipSurfaceRoots(views: Pick<WorldViews, 'tiles' | 'trees' | '
   return [views.tiles.root, views.trees.root, views.structures.root, views.decor.root, views.skyIslands.root];
 }
 
-export interface PrecipViewInput {
+interface PrecipViewInput {
   readonly scene: THREE.Object3D;
   readonly columns: PrecipColumns;
   /** 滴水发射点（rain-fx planDripEmitters）。 */
@@ -56,7 +56,7 @@ export function levelPrecipSource(level: Pick<LevelData, 'map' | 'fluid' | 'dese
   return { columns, drips: planDripEmitters(level.map, (tx) => columns.at(tx).roof, level.trees, rules.rain.dripMax, rules.seed) };
 }
 
-export interface PrecipStats {
+interface PrecipStats {
   readonly target: PrecipState;
   readonly streaks: number;
   readonly splashes: number;

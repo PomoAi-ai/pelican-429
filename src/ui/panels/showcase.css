@@ -165,22 +165,14 @@
 .sc-resource-controls input[type=number] { width: 95px; min-width: 0; padding: 5px 7px; background: #10191e; color: var(--sc-text); border: 1px solid var(--sc-line); border-radius: 6px; }
 .sc-resource-controls { padding-bottom: 7px; border-bottom: 1px solid var(--sc-line); }
 
-.sc-resource-browser { background: var(--sc-bg); padding: 0 30px 12px; flex-shrink: 0; }
-.sc-catalog-entries { display: flex; flex-wrap: wrap; gap: 5px; max-height: 80px; overflow: auto; }
 .sc-resource-detail { color: var(--sc-muted); font-size: 11px; margin: 6px 0; }
-.sc-resource-card .sc-actions { max-height: 118px; overflow-y: auto; }
 .sc-lab-controls { border-top: 1px solid var(--sc-line); padding-top: 9px; }
-@media (max-width: 700px) { .sc-resource-browser { padding: 0 12px 10px; } }
 
 .sc-demo-directory { padding: 0 16px 20px; }
 .showcase-app .sc-demo-choice { width: 100%; white-space: normal; text-align: left; padding: 14px; margin-bottom: 10px; }
 .sc-demo-choice strong, .sc-demo-choice span { display: block; }
 .sc-demo-choice span { font-size: 11px; color: var(--sc-muted); margin-top: 6px; line-height: 1.6; }
-.sc-card-caption { padding: 6px 12px; margin: 0; font-size: 11px; background: var(--sc-panel); color: var(--sc-accent); }
 
-.sc-composition-game { flex-shrink: 0; padding: 4px 7px; color: var(--sc-accent); font-size: 11px; text-decoration: none; border: 1px solid #435c44; border-radius: 5px; }
-.sc-composition-game:hover { background: #293c2e; }
-.sc-composition-game:focus-visible { outline: 2px solid var(--sc-accent); outline-offset: 3px; }
 .sc-viewport[role=button] { cursor: grab; }
 .sc-viewport[role=button]:active { cursor: grabbing; }
 .sc-camera-hint { position: absolute; bottom: 7px; right: 8px; padding: 3px 7px; border-radius: 5px; background: #142126bd; color: #e2eddf; font-size: 9px; pointer-events: none; }

@@ -1,5 +1,5 @@
 /**
- * WebGPU 水面与降水补丁（render/water-shading、water-ripples、precip-surface 的 GLSL 同式）：
+ * WebGPU 水面与降水补丁（render/water/water-shading、water-ripples、precip-surface 的 GLSL 同式）：
  * - 波动在 begin_vertex（实例/批次变换之前）：deformBeforeInstance；
  * - 水面片元在 color_fragment 覆盖 diffuseColor（setupDiffuseColor 之后），湖面明暗在 opaque_fragment 前乘 outgoingLight（setupLighting）；
  * - 降水湿润/积雪在 emissivemap_fragment 前改反照率与粗糙度（beforeLighting：法线已扰动、受光计算之前）。
@@ -145,7 +145,7 @@ const waterSurface: Translate<'water-surface'> = (material, { wind, time, palett
 
 const waterWave: Translate<'water-wave'> = (material, { wind, time }) => waveVertex(material, wind, time);
 
-// ---- water-ripples（render/water-ripples ringMaterial 同式；InstancedMesh）----
+// ---- water-ripples（render/water/water-ripples ringMaterial 同式；InstancedMesh）----
 
 const waterRipples: Translate<'water-ripples'> = (material, { wind, time }) => {
   const wave = waterWaveY(wind);

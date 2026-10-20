@@ -12,7 +12,7 @@ import { shared } from './webgpu-node-utils.ts';
 export type N = ReturnType<typeof float>;
 
 /** 一种 ShaderMaterial 的节点版本：vertex = gl_Position（缺省为 three 的模型-视图-投影），color = gl_FragColor，depth = gl_FragDepth。 */
-export interface ShaderNodes {
+interface ShaderNodes {
   readonly vertex?: N;
   readonly color: N;
   /** gl_FragDepth（WebGPU 深度范围 [0,1]）。 */

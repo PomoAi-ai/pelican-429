@@ -15,9 +15,9 @@ export interface EntityView {
 
 export type EntityViewFactory = (e: Entity) => EntityView;
 
-export type ViewFactories = Partial<Readonly<Record<EntityKind, EntityViewFactory>>>;
+type ViewFactories = Partial<Readonly<Record<EntityKind, EntityViewFactory>>>;
 
-export interface ViewRegistry {
+interface ViewRegistry {
   /** view：镜头可视矩形；给出时范围外的敌人视图移出场景且不同步，缺省全部同步。 */
   sync(entities: readonly Entity[], alpha: number, frameDt: number, view?: Readonly<Rect>): void;
   get(id: number): EntityView | undefined;

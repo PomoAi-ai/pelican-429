@@ -20,18 +20,6 @@
 .concepts-markdown pre { overflow-x: auto; padding: 16px; background: var(--home-surface); border-radius: 8px; }
 .concepts-copy a, .concepts-reading-guide a { color: var(--home-accent); font-size: 13px; }
 .concepts-anchor { display: block; scroll-margin-top: 24px; }
-.concepts-figure { margin: 20px 0 0; overflow: hidden; border: 1px solid var(--home-line); border-radius: 10px; background: var(--home-surface); }
-.concepts-figure img { display: block; width: 100%; height: auto; }
-.concepts-figure figcaption { padding: 0 16px; }
-.concepts-figure + h3 { margin-top: 28px; }
-.concepts-definitions { margin: 0; }
-.concepts-definitions > div { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 20px; padding: 18px 0; border-bottom: 1px solid var(--home-line); }
-.concepts-definitions dt { font-size: 14px; line-height: 1.7; }
-.concepts-definitions dd { margin: 0; }
-.concepts-definitions strong { color: var(--home-accent); font-size: 16px; }
-.concepts-definitions dd p { margin: 6px 0 0; }
-.concepts-note { padding: 16px 20px; border-left: 3px solid var(--home-accent); background: var(--home-surface); }
-.concepts-originals { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
 .concepts-page .help-index { max-height: calc(100dvh - 64px); overflow-y: auto; overscroll-behavior: contain; }
 /* 材料库目录：库 → 构件类别 → 具体资源；尺寸和形状留在正文。 */
 .concepts-nav-group { border-top: 1px solid var(--home-line); }
@@ -58,19 +46,11 @@
 .concepts-toc-toggle { display: none; }
 .concepts-page code { overflow-wrap: anywhere; font-size: 12px; }
 .concepts-markdown :is(h2, h3, h4, span[id]) { scroll-margin-top: 24px; }
-.concepts-system-document { min-width: 0; scroll-margin-top: 32px; }
 .concepts-copy { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; margin: 0 0 12px; }
 .concepts-copy button { min-height: 32px; padding: 4px 10px; border: 1px solid var(--home-line); border-radius: 6px; background: var(--home-surface); color: var(--home-accent); font: 13px/1.5 system-ui, sans-serif; cursor: pointer; }
 .concepts-copy button:hover { background: var(--home-surface-2); }
 .concepts-copy button:disabled { opacity: 0.6; cursor: wait; }
 .concepts-copy span { color: var(--home-muted); font: 12px/1.6 system-ui, sans-serif; }
-.concepts-system-document > h2 { padding-top: 32px; margin-top: 36px; border-top: 1px solid var(--home-line); scroll-margin-top: 32px; }
-.concepts-system-document > h3 { margin-top: 28px; }
-.concepts-system-document :is(li, blockquote) { color: var(--home-muted); font-size: 14px; line-height: 1.85; }
-.concepts-system-document li + li { margin-top: 6px; }
-.concepts-system-document ul, .concepts-system-document ol { padding-left: 24px; }
-.concepts-note > p:first-child { margin-top: 0; }
-.concepts-note > p:last-child { margin-bottom: 0; }
 .concepts-table-scroll { max-width: 100%; overflow-x: auto; margin: 20px 0; }
 .concepts-table-scroll table { width: 100%; border-collapse: collapse; font-size: 13px; line-height: 1.7; }
 .concepts-table-scroll :is(th, td) { min-width: 96px; padding: 12px; border: 1px solid var(--home-line); text-align: left; vertical-align: top; }
@@ -150,7 +130,6 @@
   .concepts-page .help-index { position: sticky; display: grid; max-height: calc(100dvh - 64px); overflow-y: auto; }
   .concepts-page .help-index p { display: block; }
   .concepts-nav-group[open] { display: block; }
-  .concepts-definitions > div { grid-template-columns: 1fr; gap: 6px; }
 }
 @media (max-width: 640px) {
   .help-page.concepts-page { padding: 12px; }
@@ -161,8 +140,6 @@
   .concepts-page .help-index p { display: block; }
   .concepts-page .concepts-nav-group[open] { display: block; }
   .concepts-toc-toggle { position: fixed; z-index: 6; right: 16px; bottom: 16px; display: block; height: 44px; padding: 0 18px; border: 1px solid var(--home-accent); border-radius: 22px; background: var(--home-surface); color: var(--home-accent); font: 14px system-ui, sans-serif; box-shadow: 0 8px 24px #0008; cursor: pointer; }
-  .concepts-definitions > div { grid-template-columns: 1fr; gap: 6px; }
-  .concepts-originals { gap: 10px; }
   .help-page { padding: 44px 20px 28px; }
   .help-hero { grid-template-columns: 1fr; gap: 16px; padding-bottom: 28px; }
   .help-hero img { aspect-ratio: 2.4; }

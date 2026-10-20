@@ -3,11 +3,6 @@ import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { RESIDENCE_WORLD, RESIDENCE_SEGMENT_WIDTH } from '../../config/residence.ts';
 import { AI_CITY_LAYERS } from '../../config/ai-city-look.ts';
 
-/** 轨道与列车采样同一条世界曲线，跨园区分段时位置和切线连续。 */
-export function aiCityRailPoint(x: number): THREE.Vector3 {
-  return new THREE.Vector3(x, 7.2 + Math.sin(x * Math.PI / 128) * .7, -34 + Math.sin(x * Math.PI / 128) * 2);
-}
-
 type VehicleMaterial = 'hull' | 'glass' | 'light';
 
 export function createVehicleTemplates(materials: Record<VehicleMaterial, THREE.Material>) {

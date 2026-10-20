@@ -5,14 +5,14 @@ import { createStore, type Store } from '../react/store.ts';
 import { useLanguage } from '../react/use-language.ts';
 import '../panels/scene-workspace.css';
 
-export interface SceneDirectoryEntry {
+interface SceneDirectoryEntry {
   readonly id: string;
   readonly title: string;
   readonly href: string;
   readonly section: 'scenes' | 'perspectives';
 }
 
-export interface SceneWorkspaceShell {
+interface SceneWorkspaceShell {
   readonly root: HTMLElement;
   /** 场景工具条插在这里的最前面。 */
   readonly main: HTMLElement;

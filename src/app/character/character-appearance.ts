@@ -1,6 +1,6 @@
 import { DEFAULT_CHARACTER_APPEARANCE, parseCharacterAppearance, type CharacterAppearance } from '../../config/character-appearance.ts';
 
-export const CHARACTER_APPEARANCE_STORAGE_KEY = 'pelican-character-appearance';
+const CHARACTER_APPEARANCE_STORAGE_KEY = 'pelican-character-appearance';
 
 /** 保存成功后再发布新外观；配额错误不能让游戏和已保存角色分叉。 */
 export function createCharacterAppearanceStore(storage: Pick<Storage, 'getItem' | 'setItem'>) {

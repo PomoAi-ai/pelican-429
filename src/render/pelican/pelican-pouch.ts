@@ -6,15 +6,15 @@
 // the skin (emissive, which the light-map keeps). Nothing in the rig or vendor is changed: the mesh only joins
 // the jaw group and is released by dispose().
 // A live fish (state.wriggle) shows two ways: lumps run back and forth over the sac skin, and the cartoon fish
-// (render/cartoon-fish.ts) sits in the bill with its tail poking out of the tip (state.tailOut), flapping.
+// (render/fx/cartoon-fish.ts) sits in the bill with its tail poking out of the tip (state.tailOut), flapping.
 import * as THREE from 'three';
 import { createCartoonFishKit, fishWiggle } from '../fx/cartoon-fish.ts';
 import type { CartoonFish, FishPose, FishVariantRelay } from '../fx/cartoon-fish.ts';
 import type { PouchContent, PouchState } from './pelican-attack-layer.ts';
 
 /** Bird-space sac at rest: centre and radii (inside the painted pouch). */
-export const POUCH_CENTER: Readonly<[number, number, number]> = Object.freeze([1.3, 3.86, 0]) as Readonly<[number, number, number]>;
-export const POUCH_RADII: Readonly<[number, number, number]> = Object.freeze([0.82, 0.34, 0.4]) as Readonly<[number, number, number]>;
+const POUCH_CENTER: Readonly<[number, number, number]> = Object.freeze([1.3, 3.86, 0]) as Readonly<[number, number, number]>;
+const POUCH_RADII: Readonly<[number, number, number]> = Object.freeze([0.82, 0.34, 0.4]) as Readonly<[number, number, number]>;
 /** Mouth line height the sac hangs from. */
 const POUCH_TOP = 4.2;
 /** Swelling per unit bulge: length, depth, width. */
@@ -32,9 +32,9 @@ const TINT: Readonly<Record<PouchContent, { color: string; mix: number; emissive
 /** The fish in the bill: length (bird units), tilt of its axis (radians, nose down into the sac), tail-tip travel. */
 export const MOUTH_FISH = Object.freeze({ length: 1.1, tilt: 0.5, tipIn: -0.25, tipOut: 0.32, wiggle: 1.8 });
 /** Lumps of the fish fighting inside: radius (bird units, at wriggle 1), sweep (radians around the sac bottom), rate (rad/s). */
-export const POUCH_LUMP = Object.freeze({ radius: 0.27, sweep: 0.95, rate: 8.5 });
+const POUCH_LUMP = Object.freeze({ radius: 0.27, sweep: 0.95, rate: 8.5 });
 
-export interface PelicanPouch {
+interface PelicanPouch {
   readonly mesh: THREE.Mesh;
   /** Bumps on the sac (visible while a fish wriggles inside). */
   readonly lumps: readonly THREE.Mesh[];
