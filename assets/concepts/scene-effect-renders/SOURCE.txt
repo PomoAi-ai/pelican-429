@@ -6,7 +6,7 @@ valley-v1-scale-wrong.png：首版，人物约 1.3 格，已按比例要求补�
 *-v2.png：补写比例后六场景同批生成。人物仍约 1.6–2 格、画面约 13 格宽，未达 3.1 格 / 28 格规范；效果图仅作美术氛围参考，不作尺寸依据。
 
 2026-10-13 现代科幻 · 两层房间＋远景：scifi-two-storey-{a-garden-day,b-clean-coast,c-garden-dusk}.png。
-draw_layout_guide.py 先按真实镜头（FOV30°、距 30 格）用 Pillow 画构图底图 layout-guide-two-storey.png：房屋按 docs/room-layout-definitions.md「两层房屋透视」11×13、门洞 3＋上沿 1、2×2 窗、通口平台 2/4/6；人物占位 3.1 格；背景格子 Z=-7/-16，前景 Z=+3 下沉 1 格。
+draw_layout_guide.py 先按真实镜头（FOV30°、距 30 格）用 Pillow 画构图底图 layout-guide-two-storey.png：房屋按 public/concepts/room-layout-definitions.md「两层房屋透视」11×13、门洞 3＋上沿 1、2×2 窗、通口平台 2/4/6；人物占位 3.1 格；背景格子 Z=-7/-16，前景 Z=+3 下沉 1 格。
 gpt-image-2.5 images edit，输入：底图、男女主统一标尺图、已选风格「白蓝科技世界」「花园城区」；提示词 scifi-two-storey-common.txt＋各变体。
 人物约 3.1 格、房屋与底图比例一致；背景墙板尺寸、个别平台和窗尺寸与底图有出入，仅作风格效果图。
 
@@ -14,7 +14,7 @@ gpt-image-2.5 images edit，输入：底图、男女主统一标尺图、已选�
 同一张 layout-guide-two-storey.png 构图底图＋男女主统一标尺图，不再输入已选风格图；提示词 post-ai-common.txt＋各风格文件。gpt-image-2.5 images edit，2560×1440 high。
 
 2026-10-13 半砖两层房间 · 后 AI 时代八风格：post-ai-half-{1-ocean-city … 8-academy-spring}.png。
-底图 layout-guide-half-brick.png（draw_layout_guide.py half）：按 docs/room-layout-definitions.md「半砖层间组合」②上半砖 C，侧墙 K/L 0.5 宽，底板/楼板/顶板半砖，总高 12，一层净高 5.5、二层 5；其余同整砖底图。
+底图 layout-guide-half-brick.png（draw_layout_guide.py half）：按 public/concepts/room-layout-definitions.md「半砖层间组合」②上半砖 C，侧墙 K/L 0.5 宽，底板/楼板/顶板半砖，总高 12，一层净高 5.5、二层 5；其余同整砖底图。
 提示词 post-ai-half-common.txt＋half-*.txt；gpt-image-2.5 images edit，2560×1440 high。
 
 2026-10-13 半砖两层房间 · 城市八风格：post-ai-half-{09-dubai,10-new-york,11-singapore,12-tokyo,13-shanghai,14-shenzhen,15-seoul,16-paris}.png。
@@ -31,7 +31,7 @@ gpt-image-2.5 images edit，输入：底图、男女主统一标尺图、已选�
 2026-10-13 AI 城市 V1：post-ai-aicity-*.png，一座原创后 AI 城市的八个城区。
 输入：半砖底图、男女主标尺、已确认风格「白蓝科技世界」「花园城区」。提示词＝融合规则 fusion-common.txt＋城市设定 ai-city-bible.txt（统一建筑语言、算力尖塔地标、AI 基础设施去反乌托邦化）＋各城区 aicity-*.txt。
 
-2026-10-13 AI 城市 · 能量门：aicity-door-*.png。用户指定门型 public/art-library/homestead-components/energy-door-sealed-edge.png。
+2026-10-13 AI 城市 · 能量门：aicity-door-*.png。用户指定门型 public/catalog/homestead-components/energy-door-sealed-edge.png。
 以 post-ai-aicity-*.png 为底、能量门图为参考，door-mask.png 只开放左墙两处门洞做局部重绘；提示词 energy-door-edit.txt。资源库 ai-city-v1 已替换为能量门版，原版保留在本目录。
 注意：CPA 通道实际返回 1672×941，未按请求的 2560×1440 输出；本目录所有 gpt-image-2.5 结果均为此尺寸。
 

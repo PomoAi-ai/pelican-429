@@ -6,7 +6,7 @@ import * as THREE from 'three';
 import { DEFAULT_LIGHTING } from '../src/config/lighting-rules.ts';
 import { DEFAULT_WATER_PALETTE, WATER_PALETTES, WATER_PALETTE_NAMES, resolveWaterPalette, validateWaterPalette, waterPalette } from '../src/config/water-palettes.ts';
 import type { WaterPalette } from '../src/config/water-palettes.ts';
-import { createWorldLight } from '../src/render/stage/light-texture.ts';
+import { createWorldLight } from '../src/render/stage/light-field-material.ts';
 import { createWaterRipples, rippleShape } from '../src/render/water/water-ripples.ts';
 import {
   WAVE_WIND_CAP,

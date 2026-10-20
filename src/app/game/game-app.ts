@@ -17,7 +17,7 @@ import { placePlayer, teleportPlayer } from '../../sim/player-teleport.ts';
 import { createActionTracker } from '../../input/action-map.ts';
 import { bindKeyboardMouse } from '../../input/keyboard-mouse.ts';
 import type { KeyboardMouseBinding } from '../../input/keyboard-mouse.ts';
-import { createStage } from '../../render/stage/stage.ts';
+import { attachStage, WEBGL_STAGE_BACKEND } from '../../render/stage/stage.ts';
 import type { Stage, StageRenderer } from '../../render/stage/stage.ts';
 import { createGpuTimer } from '../../render/stage/gpu-timer.ts';
 import { createResolutionGovernor } from '../../core/resolution-governor.ts';
@@ -29,16 +29,14 @@ import { createCharacterAppearanceStore } from '../character/character-appearanc
 import { openSavedCharacterEditor } from '../character/open-character-editor.ts';
 import { loadEnemyAsset, disposeEnemyAssets } from '../../render/character/enemy-rig.ts';
 import { createFreeWorldBackground } from '../../render/sky/free-world-background.ts';
-import { createFlyingRoadster } from '../../entities/flying-roadster.ts';
-import { loadFlyingRoadsterAsset, disposeFlyingRoadsterAsset } from '../../render/character/flying-roadster-view.ts';
-import { createFreeWorldDaylight, type FreeWorldDaylight } from '../../render/sky/free-world-daylight.ts';
+import { createDaylight, type Daylight } from '../../render/sky/daylight.ts';
 import { loadInteriorBackgroundTexture, loadInteriorBackgroundTextures } from '../../render/stage/free-world-interior-textures.ts';
 import { createWorldViews } from '../../render/stage/world-views.ts';
 import { warmUpStage } from '../../render/stage/warm-up.ts';
-import { createLandingPod } from '../../render/transit/transit-landing-pod.ts';
-import { LANDING_POD, landingPodPlan, TRANSIT, TRANSIT_HATCH } from '../../config/transit.ts';
+import { LANDING_POD, landingPodPlan, TRANSIT, TRANSIT_HATCH, TRANSIT_LANDING } from '../../config/transit.ts';
 import { createPodReturnPrompt } from '../../ui/hud/pod-return-prompt.ts';
-import { createReturnCorridorOverlay, RETURN_CORRIDOR_BASE } from '../transit/return-corridor-overlay.ts';
+import { createCorridorStartupLoading, createLandingPodPresentation } from '../transit/landing-pod-presentation.ts';
+import { createTransitStation } from '../transit/transit-station.ts';
 import { createHud } from '../../ui/hud/hud.ts';
 import { createControlSurface } from '../../ui/hud/control-surface.ts';
 import { gameHost, replaceGameLocation } from '../../ui/hud/mobile-game-viewport.ts';
@@ -48,12 +46,22 @@ import { createGameHud } from '../../ui/hud/game-hud.ts';
 import { createFollowDroneBodies } from './follow-drone-bodies.ts';
 import { createPerfPanel } from '../../ui/hud/perf-panel.ts';
 import { createWorldCompositionNavigation } from '../../ui/hud/world-composition-navigation.ts';
-import { loadGameLevel } from './game-level.ts';
+import { loadGameLevel, parseGameLaunch } from './game-level.ts';
 import { exposeDebug, installDebugKeys } from './debug-tools.ts';
 import { createFrameLoop } from './frame-loop.ts';
 import { BENCH_SAMPLES, benchRegion, createBench, parseBench } from './bench.ts';
 import { createWorldLighting, installLightShafts } from './lighting-wiring.ts';
 import { createEnvironmentViews, facilityWeather } from './precip-wiring.ts';
+import { levelGroundColumns } from '../../render/decor/surface-decor-view.ts';
+import { AI_CITY_HARBOR_LOOK, AI_CITY_RESIDENCE_LOOK, BUILDING_SCENE_TUNING, WILDS_LOOK } from '../../config/ai-city-look.ts';
+import { CITY_DEPTH } from '../../config/depth-layers.ts';
+import { CITY_LANDING_EXIT } from '../../sim/city.ts';
+import { loadCity } from '../city/city-save.ts';
+import { createCityPresentation } from '../city/city-presentation.ts';
+import { createCityFeature } from '../city/city-feature.ts';
+import { createBuildButton, createCityTravelToolbar } from '../city/city-toolbar.ts';
+import { cityEntry, launchFlightFromUrl } from '../city/city-launch.ts';
+import type { GameFeature } from './frame-loop.ts';
 import { createEntityViews, createGameCamera, createProjector } from './game-wiring.ts';
 import { createSettingsWiring, loadStartupSettings } from './settings-wiring.ts';
 import { FACILITY_CHAPTERS, FACILITY_SCENES } from '../../config/facility-scenes.ts';
@@ -83,9 +91,12 @@ import { FREE_WORLD_SIZES } from '../../config/free-world.ts';
 import { initializeHomestead } from '../../sim/homestead.ts';
 import { clearHomesteadSave, loadHomesteadSave } from '../homestead/homestead-save.ts';
 import { createHomesteadFeature } from '../homestead/homestead-feature.ts';
-import { createSceneLoading } from '../workspace/scene-loading.ts';
-import { createHarborPresentation } from './harbor-presentation.ts';
+import { createSceneLoading } from '../shell/scene-loading.ts';
+import { createSceneMapButton } from '../../ui/hud/scene-map-button.ts';
 import { readPageParams, type PageContext } from '../shell/page-context.ts';
+import type { GameRun } from './game-mount.ts';
+import { pageRenderer } from '../shell/page-renderer.ts';
+import { parseDevCamera } from '../../config/app-mode.ts';
 import '../../ui/hud/boss-arena.css';
 import '../../ui/hud/facility-chapter.css';
 import '../../ui/hud/hud.css';
@@ -101,50 +112,28 @@ function requireElement<T extends HTMLElement>(id: string): T {
 
 /** 主线定时存档间隔；阶段切换、页面隐藏与离开时另外立即保存。 */
 const STORY_SAVE_SECONDS = 10;
-const RETURN_FADE_SECONDS = 1.2;
-
-export interface GameStartupPresentation {
-  readonly params: URLSearchParams;
-  progress(phase: string, completed?: number, total?: number): void;
-  error(error: unknown): void;
-  /** 全部玩法和界面就绪且已绘制后，等待外部过渡揭幕。 */
-  ready(): Promise<void>;
-}
-
-/** 一次挂载的运行状态：失败或离开页面时停止循环并逆序释放 disposers。 */
-interface GameRun {
-  stopped: boolean;
-  readonly disposers: Array<() => void>;
-  persistBeforeExit: (() => void) | null;
-  /** 启动加载画面；首帧出现后置空，之后的运行时错误交给页面。 */
-  startupLoading: ReturnType<typeof createSceneLoading> | null;
-  /** 外部过渡揭幕前由它显示启动错误。 */
-  presentation: GameStartupPresentation | null;
-  fail(error: unknown): void;
-}
 
 const nextFrame = (): Promise<number> => new Promise((resolve) => requestAnimationFrame(resolve));
 
-async function start(run: GameRun, app: HTMLElement, story: StorySave | undefined, newStory: boolean, onReady: (() => Promise<void>) | undefined,
-  presentation: GameStartupPresentation | undefined): Promise<void> {
+/** 一次游戏挂载的启动与运行（失败处理在 game-mount）。 */
+export async function start(run: GameRun, page: PageContext, story: StorySave | undefined, newStory: boolean, onReady: (() => Promise<void>) | undefined): Promise<void> {
+  const app = page.root;
   performance.mark('game:startup-start');
   let storyDestination = story?.destination ?? 'fortress';
   validateTuning(TUNING);
   validateBindings(DEFAULT_BINDINGS);
   const lookup = buildBindingLookup(DEFAULT_BINDINGS);
-  const params = presentation?.params ?? (story ? new URLSearchParams(story.destination === 'fortress' ? 'level=facility&scene=fortress' : '') : new URLSearchParams(location.search));
+  const params = story ? new URLSearchParams(story.destination === 'fortress' ? 'level=facility&scene=fortress' : '') : new URLSearchParams(location.search);
 
   const hudRoot = requireElement<HTMLDivElement>('hud');
   const loading = requireElement<HTMLDivElement>('loading');
   // 有序章时由序章画面遮挡；否则用场景加载画面替换静态启动屏。
-  if (onReady === undefined && presentation === undefined) {
-    run.startupLoading = createSceneLoading(document.body, () => location.reload());
-    run.startupLoading.show(t('鹈鹕 429'), 'PELICAN 429', 4);
+  if (onReady === undefined && params.get('landing') === '1') run.startupLoading = createCorridorStartupLoading();
+  else if (onReady === undefined) {
+    const sceneLoading = run.startupLoading = createSceneLoading(document.body, () => location.reload());
+    sceneLoading.show(t('鹈鹕 429'), 'PELICAN 429', 4);
   }
-  const progress = (phase: string, completed?: number, total?: number): void => {
-    if (presentation) presentation.progress(phase, completed, total);
-    else run.startupLoading?.progress(phase, completed, total);
-  };
+  const progress = (phase: string, completed?: number, total?: number): void => run.startupLoading?.progress(phase, completed, total);
   progress(t('构建地形'));
   loading.hidden = true;
   // 等两帧，让加载层或序章保留画面先绘制，再做同步构建。
@@ -152,16 +141,22 @@ async function start(run: GameRun, app: HTMLElement, story: StorySave | undefine
   await nextFrame();
   if (run.stopped) return;
 
-  const { level, ground, compositions, chapter } = loadGameLevel(params);
+  // 城区（主世界默认入口与原版住宅）读本机存档；其余世界由网址生成。
+  const cityVariant = story ? null : parseGameLaunch(params).city;
+  const citySave = cityVariant === null ? null : loadCity(window.localStorage, cityVariant);
+  const city = citySave?.world.city ?? null;
+  const { level, ground, compositions, chapter } = citySave
+    ? { level: citySave.world.level, ground: levelGroundColumns(citySave.world.level), compositions: [], chapter: null }
+    : loadGameLevel(params);
   performance.mark('game:level-ready');
   const bossArena = params.get('level') === 'boss-arena';
-  const harbor = params.get('level') === 'harbor';
-  const freeWorld = story?.destination === 'free' || (!story && (params.get('level') === null || (params.get('level') === 'facility' && params.get('free') === '1')));
+  const freeWorld = city === null && (story?.destination === 'free' || (!story && params.get('level') === null));
   // 家园概念版本建在主世界地形上，但不使用主世界的工具条和网址改写。
-  const homesteadMode = !story && params.get('mode') === 'homestead';
+  const homesteadMode = !story && city === null && params.get('mode') === 'homestead';
+  const harborCity = city?.variant === 'harbor';
   const mainWorld = parseMainWorldParams(params);
   const { seed, size } = mainWorld;
-  const gm = freeWorld && mainWorld.gm;
+  const gm = (freeWorld || harborCity) && mainWorld.gm;
   // parseBench 保证基准只在原野运行、不带其他定位参数。
   const benchScene = parseBench(params);
   const rendererParam = params.get('renderer');
@@ -171,38 +166,40 @@ async function start(run: GameRun, app: HTMLElement, story: StorySave | undefine
   const regions = chapter === null && freeWorld ? freeWorldRegions(level, ground) : [];
   const destination = regions.find(item => item.id === region);
   if (freeWorld && chapter === null && !destination) throw new Error(`当前世界不存在区域：${region}`);
-  const tuning = chapter === null ? TUNING : facilityGameTuning();
+  const tuning = city ? BUILDING_SCENE_TUNING : chapter === null ? TUNING : facilityGameTuning();
   const syncTitle = (): void => {
     document.title = story?.destination === 'fortress' ? t('主线 1 · 山体算力堡垒')
+      : harborCity ? `${t('主世界 · 城区')} · ${t('鹈鹕 429')}`
+      : city ? `${t('AI 住宅')} · ${t('建造与游玩')}`
       : homesteadMode ? `${t('家园概念版本')} · ${t('鹈鹕 429')}`
-      : freeWorld ? `${t('主世界')} · ${t(FREE_WORLD_SIZES[size].label)} · ${t('鹈鹕 429')}`
+      : freeWorld ? `${t('主世界 · 原野')} · ${t(FREE_WORLD_SIZES[size].label)} · ${t('鹈鹕 429')}`
       : chapter !== null ? `${t(FACILITY_SCENES[chapter].name, 'facility')} · ${t('自由预览')}`
       : bossArena ? `${t('Boss 场')} · ${t('鹈鹕 429')}`
-      : harbor ? `${t('潮汐之城')} · ${t('鹈鹕 429')}`
       : `${t('测试关卡')} · ${t('鹈鹕 429')}`;
   };
   const inspect = params.get('inspect');
   const inspected = inspect === null ? undefined : compositions.find((item) => String(item.x0) === inspect);
   if (inspect !== null && inspected === undefined) throw new Error(`当前世界不存在地形定位点：${inspect}`);
   // 保留地图原出生点；重载创建全新的角色状态，检查起点不触发渔屋开场取景。
-  const startLevel = inspected === undefined ? level : { ...level, spawn: { x: inspected.x0 + 1.5, y: inspected.baseY }, spawnFacing: undefined };
+  const entry = city ? cityEntry(params, city) : null;
+  const startLevel = inspected !== undefined ? { ...level, spawn: { x: inspected.x0 + 1.5, y: inspected.baseY }, spawnFacing: undefined }
+    : entry !== null ? { ...level, spawn: entry } : level;
   // 设置：网址参数（非法即抛）> localStorage 保存值（非法项清除并提示）> 调参默认（见 app/settings-wiring）。
   const startup = loadStartupSettings(params, freeWorld ? 'auto' : undefined);
   const appearance = createCharacterAppearanceStore(window.localStorage);
   // 机房预览采用场景环境，不继承沙盒的天气和训练假人设置。
-  const sceneSettings = bossArena || harbor ? {
+  const sceneSettings = bossArena ? {
     ...startup.loaded.settings, wind: 'calm' as const, precip: 'manual' as const, rain: 'none' as const, snow: 'none' as const,
     tornado: false, tileGrid: false, mapTeleport: false, dummyShoot: false, minimapVisible: false,
   } : chapter === null ? startup.loaded.settings : {
     ...startup.loaded.settings, ...facilityWeather(chapter), tornado: false,
     tileGrid: false, mapTeleport: false, dummyShoot: false,
   };
-  const initial = freeWorld ? { ...sceneSettings,
+  const initial = freeWorld || harborCity ? { ...sceneSettings,
     mapTeleport: gm,
     tileGrid: gm && sceneSettings.tileGrid, dummyShoot: gm && sceneSettings.dummyShoot,
   } : sceneSettings;
-  const world = createSimWorld({ level: startLevel, freeWorldWeather: freeWorld ? { level, ground } : undefined, playerForm: 'human', tuning: TUNING, weather: { ...TUNING.render.weather, direction: initial.windDirection === 'right' ? 1 : -1 }, windMode: initial.wind });
-  if (harbor) world.entities.push(createFlyingRoadster(world.nextId++, { x: level.spawn.x + 5, y: level.spawn.y + .8 }, world.tuning));
+  const world = createSimWorld({ level: startLevel, freeWorldWeather: freeWorld ? { level, ground } : undefined, playerForm: 'human', tuning: TUNING, weather: { ...TUNING.render.weather, direction: initial.windDirection === 'right' ? 1 : -1 }, windMode: initial.wind, ...city ? { city } : {} });
   if (bossArena) initializeBossArena(world);
   if (freeWorld) {
     if (destination && region !== 'wilds') {
@@ -225,9 +222,20 @@ async function start(run: GameRun, app: HTMLElement, story: StorySave | undefine
   // 从交通中心抵达的关卡改由着陆舱开场；直接访问时舱已停在出生点旁。两种情况都能再登舱返回主世界，主线不提供。
   // landing=1 供着陆测试场直接重放同一开场。
   const landingValue = params.get('landing');
-  if (landingValue !== null && (landingValue !== '1' || chapter === null)) throw new Error(`未知着陆开关：${landingValue}（仅机房关卡可用 landing=1）`);
-  const podPlan = chapter !== null && !story ? landingPodPlan(FACILITY_CHAPTERS[chapter].spawn, LANDING_POD.altitude[chapter], matchMedia('(prefers-reduced-motion: reduce)').matches) : null;
-  if (podPlan !== null && (presentation || landingValue === '1')) beginPodLanding(world, podPlan);
+  if (landingValue !== null && (landingValue !== '1' || chapter === null && !harborCity)) throw new Error(`未知着陆开关：${landingValue}（仅机房关卡与主世界城区可用 landing=1）`);
+  const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const podPlan = chapter !== null && !story ? landingPodPlan(FACILITY_CHAPTERS[chapter].spawn, LANDING_POD.altitude[chapter], reducedMotion) : null;
+  // 从机房坐着陆舱回到城区：舱降在交通中心用地出口。
+  const cityLanding = harborCity && landingValue === '1' ? landingPodPlan(CITY_LANDING_EXIT, TRANSIT_LANDING.altitude, reducedMotion) : null;
+  if (cityLanding !== null) beginPodLanding(world, cityLanding);
+  if (landingValue === '1') {
+    // 开场只播一次：留在网址里会在走回城区或刷新时重放。
+    const next = new URLSearchParams(location.search);
+    next.delete('landing');
+    replaceGameLocation(`${location.pathname}?${next}`);
+  }
+  launchFlightFromUrl(params, world);
+  if (podPlan !== null && landingValue === '1') beginPodLanding(world, podPlan);
   else if (story?.destination === 'fortress'
     ? newStory
     : chapter === 'fortress' || freeWorld && region === 'fortress') beginBlackholeArrival(world);
@@ -242,22 +250,27 @@ async function start(run: GameRun, app: HTMLElement, story: StorySave | undefine
   setTornadoPower(world, initial.tornadoPower);
   setTornadoCount(world, initial.tornadoCount);
   setTornado(world, initial.tornado);
+  run.startupRetryable = true;
   const webgpu = rendererParam === 'webgpu' ? await import('../../render/webgpu/webgpu-stage.ts') : null;
+  // 开发镜头带着轨道控制器，只在 cam=free 时加载；取值已由入口校验。
+  const devCameraModule = parseDevCamera(params, false) ? await import('./dev-camera.ts') : null;
   const stageOptions = { quality: initial.quality, antialias: initial.antialias };
-  const stage: Stage<StageRenderer> = webgpu ? await webgpu.createWebGpuStage(app, tuning, stageOptions) : createStage(app, tuning, stageOptions, readPageParams().debug);
+  const stage: Stage<StageRenderer> = webgpu
+    ? await webgpu.createWebGpuStage(app, tuning, stageOptions, readPageParams().debug)
+    : attachStage(app, pageRenderer(page, 'game', tuning), tuning, stageOptions, WEBGL_STAGE_BACKEND);
   if (run.stopped) { stage.dispose(); return; }
   const disposers = run.disposers;
   disposers.push(() => level.fluid.dispose(), () => stage.dispose());
+  // 背景层：方案 G（城区用城区层距表）。普通关卡挂种子远山，按“厚实心”地表取均值（悬空平台不抬高）；原野的背景格子由原野背景挂入。
+  stage.addBackdrop(city ? { scheme: CITY_DEPTH } : chapter === null && !freeWorld ? { hills: { width: level.map.width, surface: ground } } : {});
   disposers.push(disposeGrassyAssets);
   disposers.push(disposeEnemyAssets);
-  if (harbor) disposers.push(disposeFlyingRoadsterAsset);
   disposers.push(disposePreloadedFortressTextures);
   if (world.mainline || freeWorld || bossArena) disposers.push(disposeNpcAssets);
   const models: Promise<unknown>[] = [loadGrassyAsset('game'), ...[...new Set(world.entities.flatMap((entity) => entity.enemy ? [entity.enemy.kind] : []))].map(kind => loadEnemyAsset(kind)),
     ...(freeWorld ? [loadNpcAsset('sam', 'human'), loadNpcAsset('tibo', 'human')] : world.mainline || bossArena ? [loadNpcAsset('tibo', 'monster'), loadNpcAsset('sam', 'monster')] : []),
     ...(world.mainline ? [loadNpcAsset('sam', 'human')] : []),
-    ...(bossArena ? [loadNpcAsset('sam', 'human'), loadNpcAsset('tibo', 'human')] : []),
-    ...(harbor ? [loadFlyingRoadsterAsset()] : [])];
+    ...(bossArena ? [loadNpcAsset('sam', 'human'), loadNpcAsset('tibo', 'human')] : [])];
   let modelsLoaded = 0;
   progress(t('加载角色'), 0, models.length);
   const modelsReady = Promise.all(models.map(model => model.then(() => progress(t('加载角色'), ++modelsLoaded, models.length))));
@@ -288,7 +301,6 @@ async function start(run: GameRun, app: HTMLElement, story: StorySave | undefine
       if (level.facilities) await modelsReady;
       if (run.stopped) return null;
       return level.facilities ? createFreeWorldFacilities(stage, level.facilities, interiors!)
-        : harbor ? createHarborPresentation(stage, level)
         : chapter === null ? null : createFacilityPresentation(stage, chapter);
     }).then(facility => {
       if (facility !== null) {
@@ -308,20 +320,16 @@ async function start(run: GameRun, app: HTMLElement, story: StorySave | undefine
   }
   await nextFrame();
   if (run.stopped) return;
-  // 远山按“厚实心”地表取均值（悬空平台不抬高）；021：有顶洞穴格（网络 + 入口有顶段）当实心，洞穴列地表仍是洞顶之上的真实地表，浮空岛与地面隔空气不算地表。
-  if (chapter === null && !freeWorld && !harbor) stage.addBackdrop({ width: level.map.width, height: level.map.height, surface: ground });
 
   // 地形视图（瓦片/花草、树、水面、水草、渔屋、小鱼、花瓣；树在鹈鹕后方，根贴视觉地面轮廓）；相机就位后按可视范围首帧加载。
   // 风吹天气与水体色板取自设置（见上）。
   const waterPaletteName = initial.water;
   progress(t('装配环境'));
-  const worldViews = createWorldViews({ islandBackdrop: !freeWorld && !harbor, caveBackground, scene: stage.scene, level, fish: world.fish, ground, weather: world.env.wind.rules, wind: world.env.wind, tornadoes: () => world.env.tornadoes, cameraDistance: tuning.camera.distance, pelican: () => getPlayer(world).body, actors: () => world.entities, waterPalette: waterPaletteName, felledTrees: world.homestead?.felled,
+  const worldViews = createWorldViews({ islandBackdrop: !freeWorld, caveBackground, scene: stage.scene, level, fish: world.fish, ground, weather: world.env.wind.rules, wind: world.env.wind, tornadoes: () => world.env.tornadoes, cameraDistance: tuning.camera.distance, pelican: () => getPlayer(world).body, actors: () => world.entities, waterPalette: waterPaletteName, felledTrees: world.homestead?.felled, ...city ? { city } : {},
     terrainTextureSize: readPageParams().textures === 'original' ? 512 : 256 });
   // 区域图片已包含远处云层，避免旧卡通云片覆盖真实背景；风与降水仍照常更新。
-  if (freeWorld) worldViews.weather.fx.meshes.clouds.visible = false;
-  if (chapter !== null || harbor) worldViews.weather.setEnabled(false);
-  // 独立河岸的石材立面与平台由同一场景资源绘制，碰撞继续读取原瓦片。
-  if (harbor) worldViews.tiles.root.visible = false;
+  if (freeWorld || city) worldViews.weather.fx.meshes.clouds.visible = false;
+  if (chapter !== null) worldViews.weather.setEnabled(false);
   disposers.push(() => worldViews.dispose());
   await nextFrame();
   if (run.stopped) return;
@@ -350,48 +358,59 @@ async function start(run: GameRun, app: HTMLElement, story: StorySave | undefine
   const { worldLight } = lighting;
 
   const canvas = stage.canvas;
-  const cameraRig = createGameCamera(stage, startLevel, getPlayer(world), tuning, chapter === null ? undefined : 0);
+  const cameraRig = createGameCamera(stage, startLevel, getPlayer(world), tuning, chapter === null && !city ? undefined : 0);
   if (freeWorld && region !== 'wilds') {
     const player = getPlayer(world);
     cameraRig.snapTo(player.body.x, player.body.y, player.facing);
   }
+  const devCamera = devCameraModule && devCameraModule.createDevCamera(stage, cameraRig, tuning);
+  if (devCamera !== null) disposers.push(devCamera.dispose);
   // 主世界原野与城区、其他场景共用同一条场景工具条，昼夜跟随它的世界时间；家园沿用自己的经济时钟。
-  const sceneBar = freeWorld && !homesteadMode ? createSceneToolbar(t('主世界')) : null;
+  const sceneBar = freeWorld && !homesteadMode || city ? createSceneToolbar(t(city?.variant === 'original' ? 'AI 住宅' : '主世界')) : null;
   if (sceneBar !== null) disposers.push(sceneBar.dispose);
   const clock = world.homestead ? world.homestead.economy : sceneBar?.time;
-  // 昼夜：日月星在预热前加入场景，随首帧一起编译上传。
-  let daylight: FreeWorldDaylight | null = null;
+  // 昼夜：日月星在预热前加入场景，随首帧一起编译上传；建在降水层之前，降水层记下的调色已是城区大气的。
+  let daylight: Daylight | null = null;
   if (clock) {
-    if (!background) throw new Error('game-app: free-world daylight requires the free-world background');
-    daylight = createFreeWorldDaylight({ stage, background, shafts, clouds: worldViews.weather.fx, clock });
+    if (!city && !background) throw new Error('game-app: free-world daylight requires the free-world background');
+    const look = city ? (harborCity ? AI_CITY_HARBOR_LOOK : AI_CITY_RESIDENCE_LOOK) : WILDS_LOOK;
+    daylight = createDaylight({ stage, look, clock, openSky: background ? () => background.environment.sky : () => 1 });
     disposers.push(daylight.dispose);
   }
   // 022 降水视图（雨雪粒子/天色/湿润积雪）：与世界视图同帧同节奏更新。
-  const env = createEnvironmentViews(stage, level, world, worldViews, cameraRig, disposers, background, daylight);
+  const env = createEnvironmentViews(stage, level, world, worldViews, devCamera ?? cameraRig, disposers, background, daylight, shafts);
   env.update(0, 0, 0);
   shafts.update(cameraRig.visibleRect(2), 0);
-  const lander = pod ? createLandingPod(stage, pod, {
-    landing: () => world.podLanding, takeoff: () => world.podTakeoff !== null,
-    body: () => getPlayer(world).body, step: world.tuning.sim.step, planeZ: 0, cameraDistance: tuning.camera.distance,
-    carry(pose) {
-      // The view's outer group rotates about the world origin, so it shifts back by the rotated body x to pivot about the body.
-      const player = views.get(world.playerId)!.object;
-      if (pose === null) { player.position.set(0, 0, 0); player.rotation.y = 0; return; }
-      player.rotation.y = pose.yaw;
-      player.position.set(pose.x * (1 - Math.cos(pose.yaw)), pose.lift, pose.z + pose.x * Math.sin(pose.yaw));
-    },
-  }) : null;
-  if (lander !== null) disposers.push(() => lander.dispose());
-  // 返程穿梭层趁加载时隐藏着建好：新建渲染器会卡一两秒，留到飞走那一刻会把急加速冻住。
-  const corridor = pod ? createReturnCorridorOverlay(document.body, false) : null;
-  if (corridor !== null) disposers.push(() => corridor.hide(0));
+  // 城区表现（住宅环境、建筑光场着色）。
+  const cityPresentation = city ? await createCityPresentation({ stage, world, city, worldViews, worldLight, precip: env.precipView, daylight: daylight!,
+    signal: page.signal, progress: (completed, total) => progress(t('装配城市与空中交通'), completed, total) }) : null;
+  if (cityPresentation !== null) {
+    if (run.stopped) { cityPresentation.dispose(); return; }
+    disposers.push(cityPresentation.dispose);
+    cityPresentation.update(cameraRig.visibleRect(), 0, 0);
+  }
+  // 交通中心模型在预热前进场；交互回调用到的设置与输入在下方装配，只在游戏循环开始后触发。
+  const transit = city?.transit ?? null;
+  const transitStation = transit !== null && cityPresentation !== null ? createTransitStation({ stage, world, station: transit, signal: page.signal,
+    playerView: () => views.get(world.playerId)!.object, blocked: () => settings.open || minimap.bigMapOpen || world.podLanding !== null,
+    releaseInput: () => tracker.releaseAll(), leaveCity: cityPresentation.leave, reportError: run.fail }) : null;
+  if (transitStation !== null) disposers.push(transitStation.dispose);
+  // 乘梯、登舱与发射期间交通中心接管镜头，不能建造或快速旅行。
+  const transitBusy = (): boolean => transit !== null && transit.state.phase !== 'ground';
+  const landing = pod ?? (cityLanding && world.podLanding);
+  const podView = landing ? createLandingPodPresentation({ stage, world, landing, returnable: pod !== null, playerView: () => views.get(world.playerId)!.object,
+    cameraDistance: tuning.camera.distance, params, releaseInput: () => tracker.releaseAll() }) : null;
+  if (podView !== null) disposers.push(podView.dispose);
+  const lander = podView?.lander ?? null;
 
   // 首帧同步一次再撤掉加载层，避免闪出空场景。
   performance.mark('game:scene-ready');
   views.sync(world.entities, 0, 0);
   lander?.update(0, 0, 0);
+  // 交通中心要摆玩家视图，首帧同步之后才有。
+  transitStation?.update(cameraRig.visibleRect(), 0, 0);
   orbs.update(world.entities, 0);
-  worldLight.update(stage.scene, 0);
+  worldLight.update(stage.scene, 0, (devCamera ?? cameraRig).visibleRect());
   // 已有 Boss 在场时它的点光源已计入，后登场者的材质按同样的灯光数编译，无需再单独显示。
   const lightGroups = [...facility?.root.children.filter(child => !child.visible) ?? [], ...(world.mainline?.bossId === null ? bossGroups : [])];
   progress(t('准备场景画面'));
@@ -457,7 +476,7 @@ async function start(run: GameRun, app: HTMLElement, story: StorySave | undefine
     window.removeEventListener('blur', resetSkillInput);
     document.removeEventListener('visibilitychange', hideSkillInput);
   });
-  const controls = createControlSurface(document.body, {
+  const controls = createControlSurface(document.body, { map: sceneBar === null,
     canvas,
     onZoom: zoom => cameraRig.setZoom(zoom),
     navigation,
@@ -534,7 +553,7 @@ async function start(run: GameRun, app: HTMLElement, story: StorySave | undefine
 
   // 设置面板（Esc / O 或右上角齿轮）：打开时暂停模拟（渲染继续），各项切换即时生效。
   let characterEditor: ReturnType<typeof openSavedCharacterEditor> | null = null;
-  const { runtime, settings, settingsPanel } = createSettingsWiring({ startup, stage, world, worldViews, worldLight, perfPanel, tileGrid, minimap, hud, tracker, setQuality, seed: freeWorld ? seed : level.seed, disposers, chapter: chapter !== null, gm: freeWorld ? gm : chapter === null && !bossArena,
+  const { runtime, settings, settingsPanel } = createSettingsWiring({ startup, sceneBar: sceneBar !== null, stage, world, worldViews, worldLight, perfPanel, tileGrid, minimap, hud, tracker, setQuality, seed: freeWorld ? seed : level.seed, disposers, chapter: chapter !== null, gm: freeWorld || harborCity ? gm : chapter === null && !bossArena,
     onCharacter: () => {
       tracker.releaseAll();
       characterEditor = openSavedCharacterEditor(appearance, () => { characterEditor = null; tracker.releaseAll(); });
@@ -543,49 +562,47 @@ async function start(run: GameRun, app: HTMLElement, story: StorySave | undefine
   disposers.push(() => characterEditor?.dispose());
   let pendingTravel: { id: string; teleport: TeleportState } | null = null;
   let travelToolbar: ReturnType<typeof createFreeWorldToolbar> | null = null;
-  if (freeWorld && !homesteadMode) {
+  // 原野工具条与开发镜头共用一条工具条，叠在站点导航下方，随导航抽屉一起收起。
+  const bar = sceneBar !== null || devCamera !== null ? document.createElement('header') : null;
+  if (bar !== null) {
+    const page = document.createElement('div');
+    page.className = 'scene-page';
+    bar.className = 'scene-toolbar-overlay scene-toolbar';
+    page.append(bar);
+    document.body.append(page);
+    disposers.push(() => page.remove());
+  }
+  // 城区建造：建造时世界在 stepSim 内冻结，放置与拆除是下一 tick 应用的命令。
+  const cityFeature = city ? createCityFeature({ world, stage, cameraRig, releaseInput: () => { tracker.releaseAll(); weaponHud.resetInput(); }, discarded: citySave!.discarded }) : null;
+  if (cityFeature !== null) disposers.push(cityFeature.dispose);
+  if (sceneBar !== null) {
     const rebuild = (nextSeed: number, nextGm: boolean, nextRegion: string, nextSize = size): void => {
       tracker.releaseAll();
       gameHost().location.assign(`${location.pathname}${freeWorldSearch(location.search, nextSeed, nextGm, nextRegion, nextSize)}`);
     };
     // 基准网址保持原样，刷新即可重跑同一场景。
-    if (benchScene === null) replaceGameLocation(`${location.pathname}${freeWorldSearch(location.search, seed, gm, region, size)}`);
+    if (freeWorld && benchScene === null) replaceGameLocation(`${location.pathname}${freeWorldSearch(location.search, seed, gm, region, size)}`);
     // 城区一侧只用于工具条跳转，网址 region 参数仍只接受原野区域；主线原野不列出，避免跳出主线。
-    const citySide = story ? [] : [{ id: 'city', label: '城区', labelEn: 'City' }, { id: 'transit', label: '星舰交通中心', labelEn: 'Starship transit' }] as const;
-    const build = document.createElement('button');
-    build.type = 'button';
-    build.disabled = true;
-    const mapButton = document.createElement('button');
-    mapButton.type = 'button';
-    mapButton.addEventListener('click', () => minimap.toggleBigMap());
-    const syncExtra = (): void => {
-      build.textContent = t('建造');
-      build.title = t('只能在城区建造');
-      mapButton.textContent = t('地图 M');
-      mapButton.title = t('M 打开或关闭地图');
-      sceneBar!.setTitle(t('主世界'));
-    };
-    syncExtra();
-    disposers.push(onLanguageChange(syncExtra));
-    // 原野没有场景宿主，工具条叠在站点导航下方，随导航抽屉一起收起。
-    const page = document.createElement('div');
-    page.className = 'scene-page';
-    const bar = document.createElement('header');
-    bar.className = 'scene-toolbar-overlay';
-    page.append(bar);
-    document.body.append(page);
-    disposers.push(() => page.remove());
-    sceneBar!.attach(bar);
-    bar.append(build, mapButton);
+    const citySide = story ? [] : [{ id: 'city', label: '城区', labelEn: 'City' }, { id: 'transit', label: '星舰交通中心', labelEn: 'Starship transit hub' }] as const;
+    const build = createBuildButton(cityFeature, () => world.podLanding !== null || transitBusy());
+    disposers.push(build.dispose, onLanguageChange(() => sceneBar.setTitle(t(city?.variant === 'original' ? 'AI 住宅' : '主世界'))));
+    sceneBar.attach(bar!);
+    const mapEvents = new AbortController();
+    disposers.push(() => mapEvents.abort());
+    bar!.append(build.element, createSceneMapButton(minimap, () => canvas.focus(), mapEvents.signal));
     // 原野天气保存在游戏设置里，与设置面板同一份。
-    const weatherControls = createSceneWeatherControls(sceneBar!.settings, {
+    const weatherControls = createSceneWeatherControls(sceneBar.settings, {
       presets: WILDS_WEATHER_PRESETS,
       get weather() { return wildsWeatherPreset(settings.current()); },
       get weatherConfig() { return settings.current(); },
       set(patch) { for (const key of Object.keys(patch) as (keyof typeof patch)[]) settings.set(key, patch[key]!); },
     });
     disposers.push(weatherControls.dispose);
-    const toolbar = travelToolbar = createFreeWorldToolbar(bar, {
+    // 原版住宅没有世界工具条。
+    const toolbar = travelToolbar = !freeWorld && !harborCity ? null : harborCity ? createCityTravelToolbar(bar!, {
+      world, city: city!, feature: cityFeature!, seed, gm, size, busy: () => world.podLanding !== null || transitBusy(),
+      toWilds: (next, nextSize) => rebuild(next, gm, 'wilds', nextSize), releaseInput: () => tracker.releaseAll(), focusGame: () => canvas.focus(),
+    }) : createFreeWorldToolbar(bar!, {
       seed, gm, gmHint: 'reload', region, size, regions: [...citySide, ...regions],
       onSeed: (next, nextSize) => rebuild(next, gm, 'wilds', nextSize),
       onGm: enabled => rebuild(seed, enabled, region),
@@ -600,7 +617,7 @@ async function start(run: GameRun, app: HTMLElement, story: StorySave | undefine
         void background!.prepare(target.position.x, target.position.y).then(() => {
           if (run.stopped || request !== travelRequest) return;
           const position = teleportPlayer(world, target.position);
-          if (position === null) { toolbar.setRegion(region); return; }
+          if (position === null) { toolbar!.setRegion(region); return; }
           tracker.releaseAll();
           cameraRig.skipIntro();
           pendingTravel = { id, teleport: getPlayer(world).teleport! };
@@ -608,12 +625,12 @@ async function start(run: GameRun, app: HTMLElement, story: StorySave | undefine
         }).catch(run.fail);
         return true;
       },
-      onSettings: () => settings.setOpen(true),
       onFocus: () => tracker.releaseAll(),
       onFocusGame: () => canvas.focus(),
     });
-    disposers.push(() => toolbar.dispose());
+    if (toolbar !== null) disposers.push(() => toolbar.dispose());
   }
+  devCamera?.attach(bar!, () => getPlayer(world), startLevel.spawn, () => { tracker.releaseAll(); stepper.reset(); });
   progress(t('连接随行助手'));
   const droneFleet = createUtilityDroneFleet(stage.scene, stage.createPmrem());
   if (run.stopped) { droneFleet.dispose(); return; }
@@ -636,7 +653,8 @@ async function start(run: GameRun, app: HTMLElement, story: StorySave | undefine
   const bench = benchScene === null ? null : createBench({ scene: benchScene, seed, size, region, origin: destination!.position, world, level, ground, tracker, stage,
     projectileFx, gpu, prof, settings: () => settings.current(), time: sceneBar!.time });
   const loop = createFrameLoop({ world, level, stage, cameraRig, tracker, controls, input, stepper, pour, entityViews, luma, worldViews, env, shafts, lighting, hud, weaponHud, gameHud, minimap, settings, settingsPanel, perfPanel, prof, gpu, bench,
-    resolution: bench === null ? createResolutionGovernor(TUNING.render.lighting.dynamicResolution, stage.renderer.getPixelRatio()) : null, facility, lander, chapterHud, audio });
+    resolution: bench === null ? createResolutionGovernor(TUNING.render.lighting.dynamicResolution, stage.renderer.getPixelRatio()) : null, facility, lander, chapterHud, audio, devCamera,
+    features: [cityPresentation, cityFeature, transitStation].filter((feature): feature is GameFeature & { dispose(): void } => feature !== null) });
   const arenaHud = bossArena ? createBossArenaHud(document.body, world, kind => {
     tracker.releaseAll();
     summonArenaBoss(world, kind);
@@ -674,6 +692,7 @@ async function start(run: GameRun, app: HTMLElement, story: StorySave | undefine
   let savedTick = world.tick;
   const persist = (): void => {
     homestead?.persist();
+    cityFeature?.persist();
     if (!world.mainline) return;
     const checkpoint = mainlineCheckpoint(world);
     saveStory(window.localStorage, checkpoint, storyDestination, storyDestination === 'fortress' ? captureMainlineProgress(world) : undefined);
@@ -688,7 +707,7 @@ async function start(run: GameRun, app: HTMLElement, story: StorySave | undefine
   document.addEventListener('visibilitychange', visibility);
   disposers.push(() => { run.persistBeforeExit = null; document.removeEventListener('visibilitychange', visibility); });
 
-  let rafId = 0, leavingWilds = false, returning = false;
+  let rafId = 0, leavingWilds = false;
   disposers.push(() => cancelAnimationFrame(rafId));
   const frame = (now: number): void => {
     if (run.stopped) return;
@@ -715,20 +734,7 @@ async function start(run: GameRun, app: HTMLElement, story: StorySave | undefine
       }
       npcDialogue?.update();
       podPrompt?.update();
-      // 着陆舱升到下降起始高度后急加速飞走即离开关卡，城区沿用同一份种子、规模与 GM，再由着陆舱降落在交通中心旁。
-      if (corridor !== null && !returning && lander!.launched()) {
-        returning = true;
-        tracker.releaseAll();
-        const city = new URLSearchParams({ mode: 'game', landing: '1' });
-        for (const key of ['seed', 'size', 'gm']) {
-          const value = params.get(key);
-          if (value !== null) city.set(key, value);
-        }
-        // 舱急加速冲出画面时淡入温和版穿梭画面再跳转，城区页以同一画面开场，加载完成后揭幕。
-        corridor.show(RETURN_FADE_SECONDS);
-        gameHost().document.body.style.background = RETURN_CORRIDOR_BASE;
-        window.setTimeout(() => gameHost().location.assign(`${location.pathname}?${city}`), RETURN_FADE_SECONDS * 1000);
-      }
+      podView?.update();
       // The wilds open onto the city at their left wall; spawn sits a few tiles in, so only a deliberate walk out returns.
       const traveller = getPlayer(world).body;
       if (freeWorld && !story && !homesteadMode && !leavingWilds && traveller.x - traveller.halfWidth < .05) {
@@ -747,49 +753,7 @@ async function start(run: GameRun, app: HTMLElement, story: StorySave | undefine
   if (debug) exposeDebug({ world, stage, views, cameraRig, tracker, stepper, level, worldViews, orbs, orbFx, projectileFx, weaponHud, shafts, worldLight, setQuality, setAntialias: runtime.setAntialias, settings, minimap, precip: env.precipView });
 
   tracker.releaseAll();
-  if (presentation) {
-    progress(t('准备抵达'));
-    const now = performance.now();
-    loop.resetClock(now);
-    loop.frame(now);
-    await presentation.ready();
-    if (run.stopped) return;
-    run.presentation = null;
-    tracker.releaseAll();
-  }
   if (!storyHud?.open) canvas.focus();
   loop.resetClock(performance.now());
   rafId = requestAnimationFrame(frame);
-}
-
-export async function mountGame(ctx: PageContext, story?: StorySave, newStory = false, onReady?: () => Promise<void>,
-  presentation?: GameStartupPresentation): Promise<void> {
-  const stop = (): void => {
-    run.stopped = true;
-    for (const dispose of run.disposers.splice(0).reverse()) dispose();
-  };
-  const run: GameRun = {
-    stopped: false, disposers: [], persistBeforeExit: null, startupLoading: null, presentation: presentation ?? null,
-    fail(err) {
-      try {
-        stop();
-      } catch (disposeErr) {
-        console.error('cleanup after failure also failed', disposeErr);
-      }
-      // 启动失败留在加载画面上显示中断并提供“重新加载”。
-      if (run.presentation) { console.error(err); run.presentation.error(err); }
-      else if (run.startupLoading) { console.error(err); run.startupLoading.error(err); }
-      else ctx.reportError(err);
-      document.getElementById('loading')!.hidden = true;
-    },
-  };
-  ctx.onDispose(() => {
-    try { run.persistBeforeExit?.(); } catch (error) { run.fail(error); return; }
-    stop();
-  });
-  // 事件回调里的异常没有调用方接住：同样停止游戏并显示错误。
-  window.addEventListener('error', (e) => run.fail(e.error ?? e.message), { signal: ctx.signal });
-  window.addEventListener('unhandledrejection', (e) => run.fail(e.reason), { signal: ctx.signal });
-  try { await start(run, ctx.root, story, newStory, onReady, presentation); }
-  catch (error) { run.fail(error); throw error; }
 }

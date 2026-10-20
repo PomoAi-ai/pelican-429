@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import type { WaterPaletteName } from '../../config/water-palettes.ts';
-import type { DefinitionCollider } from '../../physics/definition-collision.ts';
+import type { DefinitionSolid } from '../../sim/definition-world.ts';
 import { createFluidMap, FLUID_FULL } from '../../world/fluid-map.ts';
 import { createTileMap } from '../../world/tile-map.ts';
 import { DEFAULT_TILES, TILE_STONE } from '../../world/tile-types.ts';
@@ -10,7 +10,7 @@ import { createWaterView, WATER_FRONT_Z, WATER_TOP_BACK_Z } from '../water/water
 
 export interface DefinitionLiquid {
   readonly root: THREE.Group;
-  readonly solids: DefinitionCollider[];
+  readonly solids: DefinitionSolid[];
   readonly width: number;
   readonly height: number;
   readonly playerX: number;

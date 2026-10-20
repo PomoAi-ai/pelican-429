@@ -21,7 +21,7 @@ import { DISTURB_GLSL, sharedDisturbUniforms } from './grass-disturb.ts';
 import { addNodePatch } from '../stage/node-patches.ts';
 import { createBambooGeometry, createCattailGeometry, createMarramGeometry, createTallFernGeometry, herbToLeafGeometry } from './shrub-geometry.ts';
 import { WOODY_SPECS, buildWoody } from './shrub-woody.ts';
-import { BLOCK_BACK_Z, GROUND_DECOR_Z_MIN } from '../tile/tile-geometry.ts';
+import { BLOCK_BACK_Z, GROUND_DECOR_Z_MAX, GROUND_DECOR_Z_MIN } from '../tile/tile-geometry.ts';
 import { createLeafMaterial } from '../tree/tree-material.ts';
 import { addVariantCollapse, createVariantBatch, mergeIndexedVariants } from './variant-atlas.ts';
 
@@ -105,7 +105,8 @@ export function validateShrubRules(rules: Readonly<Record<ShrubKind, ShrubRule>>
     if (r.palette.length === 0) fail(`${k}.palette`, '[]');
     if (!(SHRUB_NATIVE_HEIGHT[k] > 0)) fail(`${k}.nativeHeight`, SHRUB_NATIVE_HEIGHT[k]);
   }
-  if (!(SHRUB_Z[0] < SHRUB_Z[1] && SHRUB_Z[1] < GROUND_DECOR_Z_MIN + 0.5)) fail('SHRUB_Z', SHRUB_Z.join('..'));
+  // 灌木只在地表装饰带的后半。
+  if (!(SHRUB_Z[0] < SHRUB_Z[1] && SHRUB_Z[1] < (GROUND_DECOR_Z_MIN + GROUND_DECOR_Z_MAX) / 2)) fail('SHRUB_Z', SHRUB_Z.join('..'));
   if (!(SHRUB_MAX_DEPTH > 0 && SHRUB_CHUNK_BUDGET > 0 && SHRUB_SHORE_RANGE > 0)) fail('shrub limits', `${SHRUB_MAX_DEPTH}/${SHRUB_CHUNK_BUDGET}/${SHRUB_SHORE_RANGE}`);
 }
 validateShrubRules(SHRUB_RULES);

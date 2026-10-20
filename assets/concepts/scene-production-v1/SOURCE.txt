@@ -16,10 +16,10 @@
 - public/concepts/core-coordinates.md：FOV30°、距离30格、+Z平视；XY玩法；实体深2、前后沿各额外0.5。
 - public/concepts/depth-definitions.md：至少两层背景格子与多层远景。
 - public/concepts/character-ruler-standard.md：有发赤脚基础版3.1格；3.3头身设计目标；角色只等比缩放。
-- public/concepts/depth-layer-trial/README.md：当前景深G展示方案；其中层距不当作已全量同步到游戏的声明。
+- assets/concepts/depth-layer-trial/README.md：当前景深G展示方案；其中层距不当作已全量同步到游戏的声明。
 
 图像输入：
-1. public/art-library/d1-seven/character-seven-views-slim-legs-v1.png：角色外观与着色参考。
+1. public/catalog/d1-seven/character-seven-views-slim-legs-v1.png：角色外观与着色参考。
 2. assets/concepts/garden-city-tiles/assembled-scene.png：既有建筑材质、色彩与花园科技方向参考；不继承旧尺寸。
 
 构件板索引：

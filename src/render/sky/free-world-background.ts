@@ -5,8 +5,19 @@ import { createBackgroundRegions, type BackgroundWeights } from '../../world/fre
 import { acquireKtx2Loader } from '../stage/ktx2-loader.ts';
 import { createFacilitySky } from '../facility/facility-sky.ts';
 import type { Stage, StageRenderer } from '../stage/stage.ts';
+import { createCellSilhouette } from '../backdrop/cell-silhouette.ts';
+import { depthHazeAmount } from './depth-haze.ts';
 
 type FortressTextures = Parameters<typeof createFacilitySky>[0];
+
+/** 背景格子①②：原野没有专门绘制的背景格子，取地形派生的变暗剪影，不另做美术又与地表呼应；两层错位、平滑度与抬高不同，轮廓彼此错开。 */
+const SILHOUETTES = [
+  { layer: 'background-near', shift: 23, smooth: 3, lift: 1, seed: 0x5e1 },
+  { layer: 'background-far', shift: -41, smooth: 8, lift: 4, seed: 0x5e2 },
+] as const;
+/** 剪影底色（压暗的草地土色），向区域色偏 35%，再按层距混入天光雾色。 */
+const SILHOUETTE_BASE = new THREE.Color('#41584a');
+const SILHOUETTE_HAZE = new THREE.Color('#b9d0de');
 
 /** 单层横幅仅在边界重叠；累计 alpha 保持混合后覆盖率为 1，不露出暗底。 */
 export function createFreeWorldBackground(stage: Stage<StageRenderer>, level: LevelData, ground: Int16Array, loadFortress: () => Promise<FortressTextures>, interiors: { cathedral: THREE.Texture; abyss: THREE.Texture }) {
@@ -35,6 +46,13 @@ export function createFreeWorldBackground(stage: Stage<StageRenderer>, level: Le
   // 昼夜色由调用方写入，只作用于露天主题；默认白色时与无昼夜一致。
   const paint = new THREE.Color(1, 1, 1);
   const colors = Object.fromEntries(Object.entries(FREE_WORLD_BACKGROUNDS).map(([id, value]) => [id, new THREE.Color(value.tint)])) as Record<FreeWorldBackground, THREE.Color>;
+  const backdrop = stage.backdrop;
+  if (!backdrop) throw new Error('free-world-background: stage.addBackdrop must run first');
+  const silhouettes = SILHOUETTES.map(({ layer, ...options }) => {
+    const silhouette = createCellSilhouette({ surface: ground, ...options });
+    backdrop.layers[layer].add(silhouette.root);
+    return { silhouette, haze: depthHazeAmount(backdrop.scheme.distance[layer]) };
+  });
 
   const ensure = (theme: FreeWorldBackground): Promise<void> => {
     let request = pending.get(theme);
@@ -98,6 +116,9 @@ export function createFreeWorldBackground(stage: Stage<StageRenderer>, level: Le
     prepare,
     setWeather(brightness: number) {
       for (const [theme, mesh] of layers) mesh.material.color.setRGB(1, 1, 1).lerp(paint, FREE_WORLD_BACKGROUNDS[theme].sky).multiplyScalar(brightness);
+      for (const { silhouette, haze } of silhouettes) {
+        silhouette.material.color.copy(SILHOUETTE_BASE).lerp(environment.tint, .35).lerp(SILHOUETTE_HAZE, haze).multiply(paint).multiplyScalar(brightness);
+      }
     },
     update(x: number, y: number, dt: number) {
       if (failure !== undefined) throw failure;
@@ -140,6 +161,11 @@ export function createFreeWorldBackground(stage: Stage<StageRenderer>, level: Le
       const surface = ground[Math.max(0, Math.min(ground.length - 1, Math.floor(x)))]!;
       // ponytail: 全屏单一露天系数，洞口约 8 格过渡；需要逐像素时给光照图加天空光通道。
       environment.sky *= THREE.MathUtils.smoothstep(y - surface, -12, -4);
+      // 剪影只在露天可见：洞穴里背景格子层留空。
+      for (const { silhouette } of silhouettes) {
+        silhouette.material.opacity = environment.sky;
+        silhouette.root.visible = environment.sky > 0;
+      }
       let cumulative = 0;
       let order = -20;
       // 背景板朝向相机，放在视线与玩法平面交点后 121 格：正视时与原先 z=-121 的平面重合，斜视、俯视也铺满视野；掠射角限幅免得越过远裁面。
@@ -199,6 +225,7 @@ export function createFreeWorldBackground(stage: Stage<StageRenderer>, level: Le
         if (theme !== 'cathedral' && theme !== 'abyss' && theme !== 'fortress') mesh.material.map!.dispose();
         mesh.material.dispose();
       }
+      for (const { silhouette } of silhouettes) silhouette.dispose();
       fortress?.view.dispose();
       fortress?.target.dispose();
       geometry.dispose();

@@ -98,7 +98,7 @@ function inWater(e: Entity, fluid: FluidQuery | null): boolean {
   const c = projectileCenter(e);
   const tx = Math.floor(c.x);
   if (tx < 0 || tx >= fluid.width) return false;
-  return waterSpanInColumn(fluid, tx, c.y - WATER_PROBE, c.y) > 0;
+  return waterSpanInColumn(fluid, c.x, c.y - WATER_PROBE, c.y) > 0;
 }
 
 /** 水检查：出过水之后再入水 → 结束。返回是否结束。 */

@@ -18,7 +18,7 @@ import { createPelicanRig } from '../src/render/pelican/pelican-rig.ts';
 import { fillSpitInput, mouthTimeline } from '../src/render/pelican/pelican-weapon-view.ts';
 import { createProjectileViews } from '../src/render/fx/projectile-views.ts';
 import { DROP_CAPACITY, createProjectileFx } from '../src/render/fx/projectile-fx.ts';
-import { isLightMappable } from '../src/render/stage/light-texture.ts';
+import { isLightMappable } from '../src/render/stage/light-field-material.ts';
 import { createWeaponHud } from '../src/ui/hud/weapon-hud.ts';
 import { setLanguage } from '../src/ui/model/language.ts';
 import { FakeElement, withFakeDocument } from './helpers/fake-dom.ts';

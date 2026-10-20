@@ -52,7 +52,8 @@ export function drawFacilityMapBase(ctx: CanvasRenderingContext2D, source: Minim
   }
   ctx.fillStyle = '#24748a';
   for (let y = 0; y < height; y++) for (let x = 0; x < width; x++) {
-    if (source.fluid.cells[y * width + x]! > 0) box(x, y, 1, source.fluid.cells[y * width + x]! / 255);
+    const top = source.fluid.surfaceAt(x, y);
+    if (top > 0) box(x, y, 1, top);
   }
   if (chapter === 'fortress') {
     const pool = FORTRESS_COOLANT;

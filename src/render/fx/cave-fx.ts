@@ -11,6 +11,7 @@ import type { Rect } from '../../core/math.ts';
 import { hash01, mulberry32 } from '../../core/rng.ts';
 import type { Rng } from '../../core/rng.ts';
 import { CAVE_CELL } from '../../world/level.ts';
+import type { FluidQuery } from '../../world/fluid-map.ts';
 import type { CaveInfo } from '../../world/level.ts';
 import type { TileQuery } from '../../world/tile-map.ts';
 import { glslFloat as f } from '../sky/wind.ts';
@@ -56,7 +57,7 @@ interface Ripple {
 }
 
 /** 滴水点（确定性）：洞穴网络空气格、上方为实心、下方 ≥ 3 格空气。 */
-export function planDripSites(map: TileQuery, caves: CaveInfo, water: Uint8Array): Array<{ x: number; y: number; floorY: number; water: boolean }> {
+export function planDripSites(map: TileQuery, caves: CaveInfo, water: Pick<FluidQuery, 'amountAt'>): Array<{ x: number; y: number; floorY: number; water: boolean }> {
   const { width, height } = map;
   const out: Array<{ x: number; y: number; floorY: number; water: boolean }> = [];
   for (let y = 2; y < height - 1; y++) {
@@ -65,9 +66,9 @@ export function planDripSites(map: TileQuery, caves: CaveInfo, water: Uint8Array
       if (caves.mask[i] !== CAVE_CELL || map.collisionAt(x, y) === 'solid' || map.collisionAt(x, y + 1) !== 'solid') continue;
       if (hash01(x, y, 0xd217) >= CAVE_FX_RULES.DRIP_SITE) continue;
       let f = y;
-      while (f > 0 && map.collisionAt(x, f - 1) !== 'solid' && (water[(f - 1) * width + x] as number) === 0) f--;
+      while (f > 0 && map.collisionAt(x, f - 1) !== 'solid' && water.amountAt(x, f - 1) === 0) f--;
       if (y - f < 3) continue;
-      const wet = f > 0 && (water[(f - 1) * width + x] as number) > 0;
+      const wet = f > 0 && water.amountAt(x, f - 1) > 0;
       out.push({ x: x + 0.3 + 0.4 * hash01(x, y, 0xd218), y: y + 1, floorY: f, water: wet });
     }
   }
@@ -108,7 +109,7 @@ function pointMaterial(): THREE.ShaderMaterial {
   });
 }
 
-export function createCaveFx(map: TileQuery, caves: CaveInfo, water: Uint8Array, seed = 0x1ce): CaveFx {
+export function createCaveFx(map: TileQuery, caves: CaveInfo, water: Pick<FluidQuery, 'amountAt'>, seed = 0x1ce): CaveFx {
   const R = CAVE_FX_RULES;
   const rng: Rng = mulberry32(seed >>> 0);
   const sites: DripSite[] = planDripSites(map, caves, water).map((s) => ({ ...s, next: R.DRIP_INTERVAL[0] + rng() * R.DRIP_INTERVAL[1] }));

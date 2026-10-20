@@ -1,11 +1,12 @@
 import { TUNING } from '../../config/tuning.ts';
-import { createStage } from '../../render/stage/stage.ts';
+import { attachStage, WEBGL_STAGE_BACKEND } from '../../render/stage/stage.ts';
 import { drawFinaleScore } from '../../render/intro/intro-finale.ts';
 import { createHoleGravity } from './home-gravity.ts';
 import { createFacilityPresentation, frameFacilityCamera } from '../facility/facility-presentation.ts';
 import type { createFacilityEnvironment } from '../facility/facility-environment.ts';
-import { readPageParams, type PageContext } from '../shell/page-context.ts';
-import { VIEW_MAX_DT } from '../shell/frame-clock.ts';
+import type { PageContext } from '../shell/page-context.ts';
+import { pageRenderer } from '../shell/page-renderer.ts';
+import { createViewLoop } from '../shell/view-loop.ts';
 
 /** 首页取景（世界坐标）：左侧被标题覆盖，镜头右移让黑洞（x≈36）和鹈鹕落在标题右侧。 */
 const HERO_VIEW = { x: 46, y: 27, height: 38 };
@@ -33,7 +34,7 @@ const NOTE_GAP = 0.06;
  */
 export async function mountHomeHero(page: PageContext): Promise<void> {
   const hero = page.root;
-  const stage = createStage(hero.querySelector<HTMLElement>('.home-hero-art')!, TUNING, { quality: 'high', antialias: 'smaa' }, readPageParams().debug);
+  const stage = attachStage(hero.querySelector<HTMLElement>('.home-hero-art')!, pageRenderer(page, 'game', TUNING), TUNING, { quality: 'high', antialias: 'smaa' }, WEBGL_STAGE_BACKEND);
   // 背景画面只供观看，不进入 Tab 顺序。
   stage.canvas.tabIndex = -1;
   stage.canvas.setAttribute('aria-hidden', 'true');
@@ -62,9 +63,7 @@ export async function mountHomeHero(page: PageContext): Promise<void> {
   const gravity = createHoleGravity(hero, stage);
   const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
   let visible = false;
-  let frame = 0;
   let time = 0;
-  let previous = performance.now();
 
   const drawScore = (dt: number): void => {
     // 手机布局隐藏乐谱带。
@@ -131,30 +130,23 @@ export async function mountHomeHero(page: PageContext): Promise<void> {
   stage.render();
   hero.classList.add('home-hero-ready');
 
-  const draw = (now: number): void => {
-    try {
-      // 重新进入视口时，排队中的 rAF 时间戳可能早于刚重置的时钟。
-      const dt = Math.min(Math.max((now - previous) / 1000, 0), VIEW_MAX_DT);
-      previous = now;
-      time += dt;
-      const view = frameFacilityCamera(stage, HERO_VIEW.x, HERO_VIEW.y, HERO_VIEW.height);
-      // 环境尚在加载时，黑洞和乐谱已经可以播放。
-      if (environment !== null) environment.update(view, time, dt);
-      facility.update(time);
-      stage.render();
-      gravity(dt, time);
-      drawScore(dt);
-      if (visible && !document.hidden && !still) frame = requestAnimationFrame(draw);
-    } catch (error) {
-      page.reportError(error);
-    }
-  };
+  const loop = createViewLoop(dt => {
+    time += dt;
+    const view = frameFacilityCamera(stage, HERO_VIEW.x, HERO_VIEW.y, HERO_VIEW.height);
+    // 环境尚在加载时，黑洞和乐谱已经可以播放。
+    if (environment !== null) environment.update(view, time, dt);
+    facility.update(time);
+    stage.render();
+    gravity(dt, time);
+    drawScore(dt);
+    // 减少动态效果时每次只画一帧。
+    if (still) loop.stop();
+  }, page.reportError);
+  page.onDispose(loop.stop);
 
   const schedule = (): void => {
-    cancelAnimationFrame(frame);
-    if (!visible || document.hidden) return;
-    previous = performance.now();
-    frame = requestAnimationFrame(draw);
+    if (visible && !document.hidden) loop.start();
+    else loop.stop();
   };
   document.addEventListener('visibilitychange', schedule, { signal: page.signal });
   new IntersectionObserver(([entry]) => {

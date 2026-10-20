@@ -17,7 +17,7 @@ import * as THREE from 'three';
 import { TILE_TEXTURE_PERIOD, tileLayerIndex } from './tile-textures.ts';
 import type { TileTextureData } from './tile-textures.ts';
 import { BLOCK_BACK_Z, BLOCK_BEVEL, BLOCK_FRONT_Z, FILLET_RING_BASE } from './tile-geometry.ts';
-import { RELIEF_GLSL, RELIEF_PARAMS } from './tile-relief.ts';
+import { RELIEF_GLSL, RELIEF_PARAMS, taperStart } from './tile-relief.ts';
 import { ORGANIC_GLSL, glslConstants } from './tile-organic.ts';
 import { CONVEX_RADIUS, HALF_CONVEX_RADIUS, FILLET_RADIUS } from './tile-transitions.ts';
 import { addNodePatch } from '../stage/node-patches.ts';
@@ -94,11 +94,11 @@ export const TILE_SHADER_PARAMS = Object.freeze({
   SALT_FRINGE_JAG: 63,
   SALT_MUD: 131,
   SALT_MUD_GRAIN: 137,
-  /** 方块正面 z、侧壁环长度（滚圆结束 → 背面）、填角 aVert.x 环编码偏移（tile-relief / tile-geometry）。 */
+  /** 方块正面 z、侧壁后收段长度（后收起点 → 背面）、填角 aVert.x 环编码偏移（tile-relief / tile-geometry）。 */
   TILE_FRONT_Z: BLOCK_FRONT_Z,
   /** 顶/底面纹理 LOD 偏置（负 = 更清晰）。 */
   TOP_LOD_BIAS: -0.7,
-  RELIEF_WALL_LEN: BLOCK_FRONT_Z - RELIEF_PARAMS.FRONT_ROUND_DEPTH - BLOCK_BACK_Z,
+  RELIEF_WALL_LEN: taperStart(BLOCK_FRONT_Z) - BLOCK_BACK_Z,
   FILLET_RING_BASE,
   /**
    * 020 沙面细化（沙层，正面靠近平滑顶线一带 + 顶面）：沙丘迎风坡亮 / 背风坡暗（按平滑顶线斜率，盛行风向 +x 与 world/desert 沙丘剖面一致），
@@ -699,7 +699,7 @@ export function createTileMaterial(tex: TileTextureData): THREE.MeshStandardMate
   const texture = createTileTextureArray(tex);
   const material = new THREE.MeshStandardMaterial({ color: '#ffffff', roughness: 0.95, metalness: 0, envMapIntensity: 0.35 });
   material.name = 'tile-layers';
-  // 地形材质：光照图暗部反照率收敛（render/light-texture lmTerrain）。
+  // 地形材质：光照图暗部反照率收敛（render/stage/light-field-material lmTerrain）。
   material.userData.terrainDark = true;
   const label = 'tile-material';
   material.onBeforeCompile = (shader) => {

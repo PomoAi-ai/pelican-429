@@ -21,7 +21,7 @@ import type { CoverInstance, CoverKind, CoverSite } from '../src/render/flora/fl
 import { siteTopY } from '../src/render/flora/flora.ts';
 import type { FloraEnv } from '../src/render/flora/flora.ts';
 import { createCloudShadowPatcher, CLOUD_SHADOW_PROGRAM_TAG } from '../src/render/sky/cloud-shadow.ts';
-import { isLightMappable } from '../src/render/stage/light-texture.ts';
+import { isLightMappable } from '../src/render/stage/light-field-material.ts';
 import { createTileView } from '../src/render/tile/tile-view.ts';
 import { VARIANT_PROGRAM_TAG, addVariantCollapse, createVariantBatch, mergeVariants, variantInstanceGeometry, variantYRange } from '../src/render/flora/variant-atlas.ts';
 import { sharedWindUniforms } from '../src/render/sky/wind.ts';
@@ -95,7 +95,7 @@ describe('flora-cover：地被物种与生境', () => {
       assert.ok(c.z >= COVER_Z[0] && c.z <= COVER_Z[1]);
     }
     assert.equal(coverTopDrop(0), 0, 'no drop behind the front rounding');
-    assert.ok(coverTopDrop(0.4) > 0 && coverTopDrop(0.4) < 0.06);
+    assert.ok(coverTopDrop(COVER_Z[1]) > 0 && coverTopDrop(COVER_Z[1]) < 0.06);
   });
 
   test('高度上限：每种几何本体高 × 最大缩放 ≤ COVER_MAX_HEIGHT（.2 格）', () => {

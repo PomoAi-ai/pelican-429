@@ -2,7 +2,7 @@
  * 降水天色（任务 022）：按控制器视觉向量调舞台 —— 主光/补光/边缘光/环境光变暗、阴影变淡、天空渐变重绘为阴天灰/雪天冷白、
  * 调色降饱和/偏冷、weather-fx 云更多更灰、远景雾幕（1 个半透明平面，z = VEIL_Z，盖住远山/云/远景剪影，世界几何在其前方不受影响）、
  * 大雨闪电（全屏提亮 = 光照与天色瞬时提亮；远处闪电形状 = 1 个加色折线带网格，只在闪光期间可见，形状按闪电编号确定性生成，画在云前）。
- * 基础值缺省在创建时记录；调用方可传入 targets.base 每帧改写（昼夜驱动），降水层仍是唯一写灯光的一方。
+ * 基础值缺省在创建时记录；调用方可传入 targets.base 每帧改写（昼夜驱动，含天空渐变底色），降水层仍是唯一写灯光与天空渐变的一方。
  * 每帧按 precipSkyLook（纯函数，可测）重设，降水为 none 时恢复原值；dispose 恢复创建时的灯光。
  */
 import * as THREE from 'three';
@@ -65,13 +65,14 @@ export function snowShare(v: PrecipVisual): number {
 
 const clamp01 = (x: number): number => Math.min(1, Math.max(0, x));
 
-export function precipSkyLook(v: PrecipVisual, flash: number): PrecipSkyLook {
+/** sky：晴天渐变底色与天空亮度（阴天云色随之压暗，夜里不会是一片亮灰）。 */
+export function precipSkyLook(v: PrecipVisual, flash: number, sky: Pick<PrecipSkyBase, 'skyTop' | 'skyBottom' | 'sky'>): PrecipSkyLook {
   if (!(Number.isFinite(flash) && flash >= 0 && flash <= 1)) throw new Error(`precip-sky: flash must be in [0,1], got ${flash}`);
   const share = snowShare(v);
   const oc = clamp01(v.overcast);
   const dim = clamp01(v.dim);
-  const top = new THREE.Color(SKY_TOP).lerp(PALETTE.rainTop.clone().lerp(PALETTE.snowTop, share), oc).lerp(PALETTE.flash, 0.7 * flash);
-  const bottom = new THREE.Color(SKY_BOTTOM).lerp(PALETTE.rainBottom.clone().lerp(PALETTE.snowBottom, share), oc).lerp(PALETTE.flash, 0.5 * flash);
+  const top = sky.skyTop.clone().lerp(PALETTE.rainTop.clone().lerp(PALETTE.snowTop, share).multiplyScalar(sky.sky), oc).lerp(PALETTE.flash, 0.7 * flash);
+  const bottom = sky.skyBottom.clone().lerp(PALETTE.rainBottom.clone().lerp(PALETTE.snowBottom, share).multiplyScalar(sky.sky), oc).lerp(PALETTE.flash, 0.5 * flash);
   return {
     key: (1 - dim) * (1 + 0.4 * flash),
     hemi: 1 - 0.5 * dim + 1.8 * flash,
@@ -90,15 +91,19 @@ export function precipSkyLook(v: PrecipVisual, flash: number): PrecipSkyLook {
   };
 }
 
-/** 降水层乘天气之前的基础灯光；sky 为天空亮度，压暗雾幕与雨雪粒子。 */
+/** 降水层乘天气之前的基础灯光与晴天天空渐变；sky 为天空亮度，压暗雾幕、雨雪粒子与阴天云色。 */
 export interface PrecipSkyBase {
   key: number;
   readonly keyColor: THREE.Color;
   hemi: number;
   readonly hemiSky: THREE.Color;
+  readonly hemiGround: THREE.Color;
   rim: number;
+  readonly rimColor: THREE.Color;
   env: number;
   sky: number;
+  readonly skyTop: THREE.Color;
+  readonly skyBottom: THREE.Color;
 }
 
 export interface PrecipSkyTargets {
@@ -179,12 +184,16 @@ export function createPrecipSky(targets: PrecipSkyTargets, seed: number): Precip
     keyColor: keyLight.color.clone(),
     hemi: hemiLight.intensity,
     hemiSky: hemiLight.color.clone(),
+    hemiGround: hemiLight.groundColor.clone(),
     rim: rimLight.intensity,
+    rimColor: rimLight.color.clone(),
     env: scene.environmentIntensity,
     shadow: keyLight.shadow.intensity,
     saturation: targets.grade?.uSaturation.value ?? 1,
     tint: targets.grade?.uTint.value.clone() ?? null,
     sky: 1,
+    skyTop: new THREE.Color(SKY_TOP),
+    skyBottom: new THREE.Color(SKY_BOTTOM),
   };
   // 调用方传入时每帧读取；创建时快照仍保留，供 dispose 恢复原灯光。
   const lit: PrecipSkyBase = targets.base ?? base;
@@ -278,7 +287,7 @@ export function createPrecipSky(targets: PrecipSkyTargets, seed: number): Precip
     },
     update(fr) {
       if (disposed) throw new Error('precip-sky: update after dispose');
-      const l = precipSkyLook(fr.visual, fr.lightning.flash);
+      const l = precipSkyLook(fr.visual, fr.lightning.flash, lit);
       look = { ...l, particle: l.particle * lit.sky };
       const region = targets.region;
       const light = region?.light ?? 1;
@@ -286,8 +295,10 @@ export function createPrecipSky(targets: PrecipSkyTargets, seed: number): Precip
       keyLight.color.copy(lit.keyColor).lerp(PALETTE.cool, 0.5 * l.cloudAmount);
       hemiLight.intensity = lit.hemi * l.hemi * light;
       hemiLight.color.copy(lit.hemiSky).lerp(PALETTE.coolSky, l.cool);
+      hemiLight.groundColor.copy(lit.hemiGround);
       if (region) { keyLight.color.multiply(region.tint); hemiLight.color.multiply(region.tint); }
       rimLight.intensity = lit.rim * l.rim * light;
+      rimLight.color.copy(lit.rimColor);
       scene.environmentIntensity = lit.env * l.env * light;
       keyLight.shadow.intensity = base.shadow * l.shadow;
       const g = targets.grade;
@@ -328,7 +339,9 @@ export function createPrecipSky(targets: PrecipSkyTargets, seed: number): Precip
       keyLight.color.copy(base.keyColor);
       hemiLight.intensity = base.hemi;
       hemiLight.color.copy(base.hemiSky);
+      hemiLight.groundColor.copy(base.hemiGround);
       rimLight.intensity = base.rim;
+      rimLight.color.copy(base.rimColor);
       scene.environmentIntensity = base.env;
       keyLight.shadow.intensity = base.shadow;
       root.removeFromParent();

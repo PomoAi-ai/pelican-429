@@ -2,8 +2,8 @@
   "status": "candidate",
   "title": "Grassy 男主角 · 蓝白金冒险装",
   "method": "built-in image_gen",
-  "source": "public/art-library/core-cast/grassy-human-redesign.png",
-  "styleReference": "public/art-library/d1-equipped/slim-legs-front-right-v1.png",
+  "source": "public/catalog/core-cast/grassy-human-redesign.png",
+  "styleReference": "public/catalog/d1-equipped/slim-legs-front-right-v1.png",
   "targetHeads": 3.3,
   "frontVisibleHairOutline": {
     "crownY": 22,

@@ -2,17 +2,21 @@ import * as THREE from 'three';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { AI_CITY_LOOK, AI_CITY_SUN } from '../../config/ai-city-look.ts';
 import { getResidenceResource } from '../../config/residence.ts';
-import { createResidenceView } from '../residence/residence-view.ts';
+import { TUNING } from '../../config/tuning.ts';
+import { createBuildingPreview } from '../building/building-layer-view.ts';
+import { createRenderer, WEBGL_STAGE_BACKEND } from '../stage/stage.ts';
 
-/** 用游戏资源生成静态预览；不保留动画循环或另一份模型。 */
+/**
+ * 用游戏资源生成静态预览；不保留动画循环或另一份模型。次级渲染器不绑定角色贴图；
+ * 只画已在主画面编译过的建筑着色器，不开着色器错误检查。
+ */
 export function createResourceThumbnailRenderer(width = 160) {
-  const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+  const renderer = createRenderer('thumbnail', TUNING, false);
   renderer.setSize(width, width * 3 / 4);
-  renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = AI_CITY_LOOK.exposure;
+  renderer.toneMappingExposure = AI_CITY_LOOK.atmosphere.exposure;
   const scene = new THREE.Scene();
   const room = new RoomEnvironment();
-  const pmrem = new THREE.PMREMGenerator(renderer);
+  const pmrem = WEBGL_STAGE_BACKEND.pmrem(renderer);
   const environment = pmrem.fromScene(room, .04);
   room.dispose(); pmrem.dispose();
   scene.environment = environment.texture;
@@ -23,12 +27,12 @@ export function createResourceThumbnailRenderer(width = 160) {
   scene.add(sun);
   const camera = new THREE.PerspectiveCamera(32, 4 / 3, .01, 100);
   const surfaceCamera = new THREE.OrthographicCamera(-.42, .42, .315, -.315, .01, 100);
-  let previousView: ReturnType<typeof createResidenceView> | undefined;
+  let previousView: ReturnType<typeof createBuildingPreview> | undefined;
   const render = (resourceId: string, surface: boolean): string => {
-    const view = createResidenceView({ placements: [{ id: 1, resourceId, x: 0, y: 0, open: false }], nextId: 2, revision: 0 });
+    const view = createBuildingPreview(resourceId, 'normal');
     scene.add(view.root);
     try {
-      view.update(0, null);
+      view.update(0);
       const box = new THREE.Box3().setFromObject(view.root);
       const resource = getResidenceResource(resourceId);
       if (!surface && resource.kind === 'solid') box.union(new THREE.Box3(new THREE.Vector3(0, 0, -1), new THREE.Vector3(1, 1, 1)));

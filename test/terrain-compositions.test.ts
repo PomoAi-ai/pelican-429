@@ -5,7 +5,7 @@ import { TUNING } from '../src/config/tuning.ts';
 import { bodyRect, createBody } from '../src/physics/body.ts';
 import { moveAndCollide, overlapsSolid } from '../src/physics/tile-collision.ts';
 import { createTerrainCompositionLevel } from '../src/world/terrain-compositions.ts';
-import { stepFluid } from '../src/world/fluid-sim.ts';
+import { advanceFluid } from '../src/world/fluid-sim.ts';
 
 const DT = 1 / 60;
 const playerAt = (x: number, y: number) => createBody({ x, y, halfWidth: TUNING.player.halfWidth, height: TUNING.player.height, stepUp: TUNING.player.stepUp, groundSnap: TUNING.player.groundSnap });
@@ -106,19 +106,22 @@ test('地下不同树高的全部平台都能容纳站立角色，不穿入石�
   }
 });
 
-test('浅水盆在液体模拟后保持水量和盆内范围，水不穿入地形', () => {
+test('浅水盆在液体模拟后保持水量和盆内范围，水只占空子格', () => {
   const { level } = createTerrainCompositionLevel('pond', 431, 'sand', 'surface');
   try {
     const mass = level.fluid.totalMass();
     assert.ok(mass > 0);
-    for (let tick = 0; tick < 120; tick++) stepFluid(level.fluid, { maxCellsPerStep: 4096, minSpread: 2 }, tick);
+    for (let tick = 0; tick < 120; tick++) advanceFluid(level.fluid, { maxCellsPerStep: 4096, minSpread: 2 }, tick);
     assert.equal(level.fluid.totalMass(), mass);
     assert.equal(level.fluid.lostMass, 0);
     const lake = level.lakes[0]!;
     for (let y = 0; y < level.map.height; y++) for (let x = 0; x < level.map.width; x++) {
       if (level.fluid.amountAt(x, y) === 0) continue;
-      assert.ok(x >= lake.x0 && x <= lake.x1 && y < lake.level, `leak at ${x},${y}`);
-      assert.notEqual(level.map.collisionAt(x, y), 'solid');
+      // 岸边斜坡/半砖格的空子格也会进水。
+      const bank = level.map.solidMask(x, y) !== 0 && x >= lake.x0 - 1 && x <= lake.x1 + 1;
+      assert.ok(((x >= lake.x0 && x <= lake.x1) || bank) && y < lake.level, `leak at ${x},${y}`);
     }
+    const { cells, solid } = level.fluid;
+    for (let i = 0; i < cells.length; i++) if (solid[i] === 1) assert.equal(cells[i], 0, `water in solid subcell ${i}`);
   } finally { level.fluid.dispose(); }
 });

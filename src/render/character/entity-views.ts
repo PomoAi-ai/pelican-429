@@ -1,6 +1,6 @@
 /**
  * 具体实体视图：鹈鹕（复用预构建的 rig + animator）与训练假人（简化几何 + 受击闪白/倾斜）。
- * 位置插值：lerp(prev, cur, alpha)，脚底为原点，z=0。
+ * 位置插值：lerp(prev, cur, alpha)，脚底为原点；鹈鹕的 z 按建筑层让位（walk-depth），训练假人 z=0。
  * 斜坡脚底偏移（可选 terrain）：碰撞盒在斜坡上由角支撑、悬在坡面之上，模型按中心列地面高度下沉（同泰拉瑞亚 gfxOffY）。
  */
 import * as THREE from 'three';
@@ -10,9 +10,10 @@ import { attackPhase } from '../../combat/attacks.ts';
 import type { AttackInstance, AttackPhase } from '../../combat/attacks.ts';
 import type { Entity, RideData } from '../../entities/entity.ts';
 import type { Body } from '../../physics/body.ts';
-import { COLLISION_EPS, terrainHeightAt } from '../../physics/tile-collision.ts';
+import { terrainHeightAt } from '../../physics/tile-collision.ts';
+import { COLLISION_EPS } from '../../world/collision-geometry.ts';
 import type { TileQuery } from '../../world/tile-map.ts';
-import { SHAPE_FULL } from '../../world/tile-shapes.ts';
+import { FULL_MASK } from '../../world/tile-shapes.ts';
 import { createPelicanAnimator, DEFAULT_PELICAN_ANIM_TUNING } from '../pelican/pelican-animator.ts';
 import type { PelicanAnimInput, PelicanAnimTuning } from '../pelican/pelican-animator.ts';
 import type { PelicanRig } from '../pelican/pelican-rig.ts';
@@ -28,6 +29,7 @@ import { collectObstacleBoxes, supportOf, supportPosition, supportTopAt } from '
 import type { ObstacleBox } from './entity-surroundings.ts';
 import { createDummyBodyGeometry, DUMMY_POST_HEIGHT } from './dummy-shape.ts';
 import { createTreeRideFollower } from '../tree/tree-ride.ts';
+import { createBuildingWalkDepth } from '../building/walk-depth.ts';
 import type { TreeRideQuery } from '../tree/tree-ride.ts';
 
 export { shotPhaseProgress } from '../pelican/pelican-weapon-view.ts';
@@ -112,8 +114,9 @@ export function slopeSinkOffset(terrain: TileQuery | undefined, x: number, y: nu
   if (!terrain || !onGround || slopeSink === 0) return 0;
   const ground = terrainHeightAt(terrain, x, y + SINK_PROBE);
   if (ground === null) return 0;
-  // 低侧整砖不是斜坡，按它下沉会让台阶边缘的脚陷进高侧砖面。
-  if (terrain.shapeAt(Math.floor(x), Math.ceil(ground) - 1) === SHAPE_FULL) return 0;
+  // 低侧整砖（以及平台、空气）不是斜坡，按它下沉会让台阶边缘的脚陷进高侧砖面。
+  const mask = terrain.solidMask(Math.floor(x), Math.ceil(ground) - 1);
+  if (mask === 0 || mask === FULL_MASK) return 0;
   return clamp(ground - y, -halfWidth, 0) * slopeSink;
 }
 
@@ -216,6 +219,8 @@ export function createPelicanViewFactory(options: PelicanViewOptions): EntityVie
         }
       : null;
     const footSink = createFootSink(options.terrain, tuning.render.slopeSink, entity.body);
+    const walkDepth = terrain ? createBuildingWalkDepth(terrain.building) : null;
+    let walkZ = walkDepth ? walkDepth(entity.body.x, entity.body.y) : 0;
     // 根节点整体随树平移/倾斜：姿态（步态锁地的脚、骑车）都在根局部系，脚与地面采样随同一位移，贴着摇动的树枝。
     const treeRide = createTreeRideFollower(options.treeRide);
     let lastX: number | null = null;
@@ -247,7 +252,8 @@ export function createPelicanViewFactory(options: PelicanViewOptions): EntityVie
         const y = lerp(b.prevY, b.y, alpha);
         const renderY = y + footSink(b, x, y, frameDt);
         const ride = treeRide(b, x, y, frameDt);
-        rig.root.position.set(x + ride.x, renderY + ride.y, 0);
+        if (walkDepth) walkZ = damp(walkZ, walkDepth(x, y), 12, frameDt);
+        rig.root.position.set(x + ride.x, renderY + ride.y, walkZ);
         rig.root.rotation.z = ride.tilt;
         const actors = actorsOf();
         support = supportOf(e, actors);

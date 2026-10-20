@@ -8,17 +8,12 @@ import { TUNING, type Tuning } from '../../config/tuning.ts';
 import { createFixedStepper } from '../../core/fixed-step.ts';
 import { damp } from '../../core/math.ts';
 import { getSkillWaitTicks } from '../../entities/skill-wait.ts';
-import type { Entity } from '../../entities/entity.ts';
-import type { PelicanInput } from '../../entities/pelican-controller.ts';
 import { createActionTracker } from '../../input/action-map.ts';
 import { bindKeyboardMouse, type KeyboardMouseBinding } from '../../input/keyboard-mouse.ts';
-import { savePrev, type Body } from '../../physics/body.ts';
-import { definitionGroundAt, type DefinitionCollision } from '../../physics/definition-collision.ts';
-import type { SolarPanelState } from '../../physics/solar-panel.ts';
+import { terrainHeightAt } from '../../physics/tile-collision.ts';
 import { createCameraRig } from '../../render/stage/camera-rig.ts';
-import type { LandingPod } from '../../render/transit/transit-landing-pod.ts';
-import { carryInPod, placeInPod, podLandingPhase, POD_WALK_INPUT, type PodLanding } from '../../sim/pod-landing.ts';
-import type { LandingPodPlan } from '../../config/transit.ts';
+import { placePlayer } from '../../sim/player-teleport.ts';
+import { getPlayer, stepSim, type SimWorld } from '../../sim/sim-world.ts';
 import { DEFAULT_PELICAN_ANIM_TUNING } from '../../render/pelican/pelican-animator.ts';
 import { createGrassyPlayerAnimator } from '../../render/grassy/grassy-player-animator.ts';
 import { createGrassyProjectileViews } from '../../render/grassy/grassy-projectile-view.ts';
@@ -30,7 +25,6 @@ import { createGameHud, type GameHudWorld } from '../../ui/hud/game-hud.ts';
 import type { WorldToScreen } from '../../ui/hud/hud.ts';
 import { createWeaponHud } from '../../ui/hud/weapon-hud.ts';
 import type { SceneSection } from './definition-scene-layout.ts';
-import { createPerspectivePlayer } from './perspective-player.ts';
 // 原生 HUD 的样式由装配它的入口引入（index.html 不再全局外链）。
 import '../../ui/hud/hud.css';
 import '../../ui/hud/control-surface.css';
@@ -46,35 +40,33 @@ export function tiltCamera(camera: THREE.PerspectiveCamera, target: THREE.Vector
   camera.updateMatrixWorld();
 }
 
+/** 页内走动的角色跑游戏模拟（world 由检视页按布局写成的格子世界创建）；bounds 为布局范围（地图坐标）。 */
 export function createPerspectiveControls(app: HTMLElement, stage: Stage, droneFleet: UtilityDroneFleet, orbit: OrbitControls,
-  rig: GrassyRig, collision: DefinitionCollision, bounds: THREE.Box3, initial: SceneSection, viewAngles: readonly [number, number], solarPanels: readonly SolarPanelState[], unlimitedFlight = true,
+  rig: GrassyRig, world: SimWorld, bounds: THREE.Box3, initial: SceneSection, viewAngles: readonly [number, number],
   // onMode 把游玩与跟随状态交给宿主的暂停与镜头按钮显示；按钮由宿主持有，点击后回调 setPlaying / setFollowing。
-  options: { cameraMode: 'game' | 'inspection'; tuning: Tuning; onMode: (playing: boolean, following: boolean) => void; applyForce?: (body: Body, dt: number) => void; airWind?: (body: Body) => number; carriers?: readonly Entity[]; world?: GameHudWorld; steer?: (frame: PelicanInput, body: Body) => PelicanInput; lander?: () => LandingPod | null }) {
-  const world = { width: Math.ceil(bounds.max.x + 1), height: Math.ceil(bounds.max.y + 8) };
+  options: { cameraMode: 'game' | 'inspection'; tuning: Tuning; onMode: (playing: boolean, following: boolean) => void; hudWorld?: GameHudWorld }) {
   protectPlayer(rig.root);
-  const player = createPerspectivePlayer(collision, { x: initial.playerX, y: initial.playerY }, world, solarPanels, unlimitedFlight, options);
+  const entity = getPlayer(world);
   const stepper = createFixedStepper(TUNING.sim);
   const tracker = createActionTracker();
   const lookup = buildBindingLookup(DEFAULT_BINDINGS);
   const projectileViews = createGrassyProjectileViews();
-  const carriers = options.carriers ?? [];
   const projectiles = createViewRegistry(stage.scene, { codexShot: projectileViews.factory, bugShot: projectileViews.factory, flyingRoadster: createFlyingRoadsterView });
+  const shots = () => world.entities.filter(e => e.projectile !== undefined || e.flyingRoadster !== undefined);
   const follow = createCameraRig({ camera: stage.camera, tuning: options.tuning,
-    bounds: { ...world, minX: bounds.min.x, minY: Math.min(0, bounds.min.y), width: bounds.max.x - bounds.min.x + 1 },
+    bounds: { height: Math.ceil(bounds.max.y + 8), minX: bounds.min.x, minY: Math.min(0, bounds.min.y), width: bounds.max.x - bounds.min.x + 1 },
     viewport: () => stage.canvas.getBoundingClientRect() });
   const mode = app.querySelector<HTMLElement>('[data-mode]')!;
   const hint = app.querySelector<HTMLElement>('.room-preview-hint')!;
   const skillButtons = [...app.querySelectorAll<HTMLButtonElement>('[data-skill]')];
   const hudRoot = app.querySelector<HTMLElement>('.room-preview-hud')!;
-  const animator = createGrassyPlayerAnimator(rig, player.entity, { tuning: TUNING, windAt: () => 0 });
+  const animator = createGrassyPlayerAnimator(rig, entity, { tuning: TUNING, windAt: () => 0 });
   let binding: KeyboardMouseBinding | null = null;
   let buttonCast = false;
   let current = initial;
   let playing = true;
   let following = true;
   let angles = viewAngles;
-  let landing: PodLanding | null = null;
-  let elapsed = 0;
   const castSkill = (action: GameAction): void => {
     buttonCast = true;
     tracker.press(action, 'keyboard', 'skill-button');
@@ -102,16 +94,15 @@ export function createPerspectiveControls(app: HTMLElement, stage: Stage, droneF
       const depth = escortDepth ?? (current.walkZ ? current.walkZ(x, !flying && groundHeight !== null ? groundHeight : y - 0.34) : 0);
       droneFleet.updateFollower(index, x, y, dt, talking, flying, groundAngle, groundHeight, depth);
     },
-    droneEscort: index => options.lander?.()?.droneEscort(index),
-    groundAt: (x, y) => definitionGroundAt(collision, x, y),
-    // 透视场景是多边形碰撞，没有墙体格；车顶平台在这里不提供。
+    groundAt: (x, y) => terrainHeightAt(world.map, x, y + 0.3, 2.8, true) ?? terrainHeightAt(world.map, x, y + 2.5, 2.2, true),
+    // 检视页没有跟随机实体挡路。
     droneBlocked: () => false,
-    canvas: stage.canvas, project, world: options.world,
+    canvas: stage.canvas, project, world: options.hudWorld,
     blocked: () => !playing,
   });
   const updateHud = (frameDt: number): void => weaponHud.update({
-    entities: [player.entity], playerId: player.entity.id, frameDt,
-    skillWaitTicks: [0, 1, 2, 3].map(index => getSkillWaitTicks(player.entity, index, TUNING, 0, 0)),
+    entities: [entity], playerId: entity.id, frameDt,
+    skillWaitTicks: [0, 1, 2, 3].map(index => getSkillWaitTicks(entity, index, TUNING, 0, 0)),
     photonCooldownTicks: 0, photonChargeTicks: 0, photonActiveTicks: 0, transformUnlocked: false,
   });
   updateHud(0);
@@ -134,19 +125,19 @@ export function createPerspectiveControls(app: HTMLElement, stage: Stage, droneF
     orbit.mouseButtons.MIDDLE = playing ? THREE.MOUSE.ROTATE : THREE.MOUSE.DOLLY;
     orbit.mouseButtons.RIGHT = playing ? null : THREE.MOUSE.PAN;
     options.onMode(playing, following);
-    mode.textContent = `${t(playing ? '游玩中' : '已暂停')} · ${t(following ? '跟随镜头' : '自由镜头')}`;
+    mode.textContent = `${t(playing ? '游玩中' : '已暂停')} · ${t(following ? '游玩视角' : '自由镜头')}`;
     for (const skill of skillButtons) skill.disabled = !playing;
     hudRoot.inert = !playing;
     hint.textContent = t(playing
       ? following ? 'A / D 移动 · 按住空格无限飞行 · 松开滑翔 / S 下降 · R 上下车 · J / 右键 / 1 / 2 技能 · 中键旋转 · 滚轮缩放'
         : '正常游玩中 · 按住空格无限飞行 · S 下降 · R 上下车 · 中键旋转 · Shift + 中键平移 · 滚轮缩放 · 技能照常释放'
       : following ? '玩法已暂停 · 可切换自由镜头检查场景' : '玩法已暂停 · 左键旋转 · 右键平移 · 滚轮缩放');
-    if (!unlimitedFlight && playing) hint.textContent = t('A / D 移动 · 空格跳跃 / 飞行 · S 下穿平台 · 能量门自动感应 · 中键调整镜头');
+    if (!world.unlimitedFlight && playing) hint.textContent = t('A / D 移动 · 空格跳跃 / 飞行 · S 下穿平台 · 能量门自动感应 · 中键调整镜头');
   };
   const setFollowing = (enabled: boolean): void => {
     following = enabled;
     syncMode();
-    if (following) { follow.snapTo(player.entity.body.x, player.entity.body.y, player.entity.facing); aim(); }
+    if (following) { follow.snapTo(entity.body.x, entity.body.y, entity.facing); aim(); }
     if (playing) stage.canvas.focus({ preventScroll: true });
   };
   const setPlaying = (enabled: boolean): void => {
@@ -171,13 +162,19 @@ export function createPerspectiveControls(app: HTMLElement, stage: Stage, droneF
     castSkill(skill);
   };
   for (const skill of skillButtons) skill.addEventListener('click', releaseSkill);
+  // 传送不经过技能起手：直接安置并清掉飞行中的弹体与未处理的事件。
+  const teleport = (x: number, y: number): void => {
+    if (placePlayer(world, { x, y }) === null) throw new Error(`perspective-controls: no room for the player near (${x}, ${y})`);
+    for (const e of world.entities) if (e.projectile) e.removed = true;
+    world.events.drain();
+  };
   // 目录与滑杆使用方向键时不驱动角色；keyup 仍由游戏输入在捕获阶段释放。
   const stopKey = (event: Event): void => { if (event.target !== stage.canvas) event.stopPropagation(); };
   app.addEventListener('keydown', stopKey);
 
   return {
     hud,
-    get body() { return player.entity.body; },
+    get body() { return entity.body; },
     get playing(): boolean { return playing; },
     get following(): boolean { return following; },
     setPlaying,
@@ -187,23 +184,18 @@ export function createPerspectiveControls(app: HTMLElement, stage: Stage, droneF
     setViewAngles(value: readonly [number, number]): void { angles = value; setFollowing(true); },
     select(section: SceneSection): void {
       current = section;
-      player.teleport(section.playerX, section.playerY);
-      rig.root.position.set(section.playerX, section.playerY, section.walkZ ? section.walkZ(section.playerX, section.playerY) : 0);
-      rig.root.rotation.y = player.entity.facing * Math.PI / 2;
-      projectiles.sync([...carriers, ...player.projectiles], 0, 0);
-      animator.reset(player.entity);
-      animator.update(player.entity, 0, 0);
+      teleport(section.playerX, section.playerY);
+      const { x, y } = entity.body;
+      rig.root.position.set(x, y, section.walkZ ? section.walkZ(x, y) : 0);
+      rig.root.rotation.y = entity.facing * Math.PI / 2;
+      projectiles.sync(shots(), 0, 0);
+      animator.reset(entity);
+      animator.update(entity, 0, 0);
       updateHud(0);
       setPlaying(playing);
       setFollowing(following);
     },
     observe(): void { setFollowing(false); },
-    /** Seats the player in the arrival pod; input stays locked until it has walked out to the plan's exit. */
-    land(plan: LandingPodPlan): void {
-      landing = placeInPod(player.entity, plan, TUNING.sim.step);
-      animator.reset(player.entity);
-    },
-    get landing(): PodLanding | null { return landing; },
     update(dt: number): void {
       if (!playing) return;
       const alpha = stepper.advance(dt, () => {
@@ -211,21 +203,13 @@ export function createPerspectiveControls(app: HTMLElement, stage: Stage, droneF
         const aimPoint = pointer.inside ? follow.screenToWorld(pointer.clientX, pointer.clientY, { x: 0, y: 0 }) : null;
         const frame = tracker.consume(buttonCast ? null : aimPoint);
         buttonCast = false;
-        const body = player.entity.body;
-        // Keys pressed during the landing are consumed and dropped.
-        const phase = landing === null ? 'done' : podLandingPhase(landing, body);
-        if (phase === 'carry') { savePrev(body); carryInPod(landing!, body); }
-        else if (phase === 'walk') player.step(POD_WALK_INPUT);
-        else {
-          landing = null;
-          player.step(options.steer ? options.steer(frame, body) : frame);
-        }
-        if (body.y < bounds.min.y - 6) {
-          player.teleport(current.playerX, current.playerY);
-          animator.reset(player.entity);
+        // 检视页只演示人形，不变身。
+        stepSim(world, { ...frame, transformPressed: false });
+        if (entity.body.y < bounds.min.y - 6) {
+          teleport(current.playerX, current.playerY);
+          animator.reset(entity);
         }
       });
-      const entity = player.entity;
       const body = entity.body;
       const x = THREE.MathUtils.lerp(body.prevX, body.x, alpha);
       const y = THREE.MathUtils.lerp(body.prevY, body.y, alpha);
@@ -236,13 +220,10 @@ export function createPerspectiveControls(app: HTMLElement, stage: Stage, droneF
         rig.root.rotation.y = damp(rig.root.rotation.y, entity.facing * Math.PI / 2, DEFAULT_PELICAN_ANIM_TUNING.yawRate, dt);
       }
       animator.update(entity, alpha, dt);
-      elapsed += dt;
-      const pod = options.lander?.();
-      pod?.update(alpha, elapsed, dt);
-      projectiles.sync([...carriers, ...player.projectiles], alpha, dt);
-      weaponHud.handleEvents(player.events.drain());
+      projectiles.sync(shots(), alpha, dt);
+      weaponHud.handleEvents(world.events.drain());
       // 相机先就位再投影 HUD，跟随物不落后一帧。
-      if (following) { follow.update(x, y, entity.facing, dt, pod?.closeup()); aim(); }
+      if (following) { follow.update(x, y, entity.facing, dt); aim(); }
       updateHud(dt);
       hud.update(entity, dt);
     },

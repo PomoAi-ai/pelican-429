@@ -25,7 +25,7 @@ import { CONVEX_RADIUS, EDGE_EXPOSED_FRINGE, FILLET_RADIUS, TILE_TRANSITIONS, co
 import { ORGANIC_TOP_AMP, hermiteAt, organicTopOffset, smoothTopY } from '../src/render/tile/tile-organic.ts';
 import { SHAPE_FULL, SHAPE_HALF, SHAPE_SLOPE_L, SHAPE_SLOPE_R, shapeTopAt } from '../src/world/tile-shapes.ts';
 import { L } from './helpers/render-fixtures.ts';
-import { ROUND_RINGS, WALL_RINGS } from '../src/render/tile/tile-relief.ts';
+import { reliefRings } from '../src/render/tile/tile-relief.ts';
 import { slopeLevel } from './helpers/slope-fixtures.ts';
 
 describe('地面厚度常量', () => {
@@ -156,7 +156,7 @@ describe('斜坡几何（半砖见 render-relief-steps）', () => {
       const lowTags = new Set<number>();
       for (let i = 0; i < pos.count; i++) if (vert.getW(i) === KIND_FRONT && Math.abs(pos.getX(i) - lowX) < 1e-9 && Math.abs(pos.getY(i) + 0.5) < 1e-9) lowTags.add(vert.getX(i));
       assert.deepEqual([...lowTags].sort(), [-1, SHAPE_TOP_VERTEX], 'low corner split into bottom/top vertices');
-      assert.equal(slopeVerts, 2 * EDGE_SEGMENTS * (ROUND_RINGS + WALL_RINGS + 1), 'slope face subdivided for the organic outline and relief rings');
+      assert.equal(slopeVerts, 2 * EDGE_SEGMENTS * reliefRings(BLOCK_FRONT_Z, BLOCK_BACK_Z).length, 'slope face subdivided for the organic outline and relief rings');
       // 顶线逐点：前面最高点 = shapeTopAt。
       for (const fx of [0, 0.25, 0.5, 0.75, 1]) {
         let top = -Infinity;

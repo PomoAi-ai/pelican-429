@@ -44,7 +44,7 @@ export const COVER_CHUNK_BUDGET = 3200;
  * 地被实例的 z 范围：装饰带之后再向前铺到 COVER_Z_FRONT（草顶前沿滚圆区，根部按 coverTopDrop 下沉贴住滚圆面），
  * 填满镜头下最显眼的草顶前缘；z 分布按 COVER_Z_FRONT_BIAS 偏向前方（后方多被草丛遮住）。
  */
-export const COVER_Z_FRONT = 0.4;
+export const COVER_Z_FRONT = BLOCK_FRONT_Z - 0.1;
 export const COVER_Z_FRONT_BIAS = 0.6;
 export const COVER_Z: readonly [number, number] = [GROUND_DECOR_Z_MIN + 0.02, COVER_Z_FRONT];
 /** 台阶外沿长垂苔的基础概率与树荫加成。 */

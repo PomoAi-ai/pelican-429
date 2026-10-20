@@ -11,7 +11,7 @@ import type { WorldgenTuning } from '../config/worldgen-rules.ts';
 import type { Vec2 } from '../core/math.ts';
 import { fbm1D, hash01, valueNoise1D } from '../core/rng.ts';
 import { planFishSpawns } from './fish-spawns.ts';
-import { FLUID_FULL, createFluidMap } from './fluid-map.ts';
+import { createFluidMap, fillWaterBody } from './fluid-map.ts';
 import type { FluidMap } from './fluid-map.ts';
 import { computeSurface } from './level.ts';
 import type { DesertInfo, FishSpawn, FishingHut, LakeInfo, LevelData, TreeInstance, TreeKind } from './level.ts';
@@ -20,8 +20,8 @@ import type { ColumnSpan, SlopeCounts } from './slopes.ts';
 import { planHomeSpawn, pickHomeHut, HOME_DUMMY_MAX } from './spawn-home.ts';
 import { HUT_DOOR_APRON, hutRoofSpan, planFishingHuts, stampFishingHut } from './structures.ts';
 import type { HutPlan } from './structures.ts';
-import { SHAPE_FULL } from './tile-shapes.ts';
-import { createTileMap } from './tile-map.ts';
+import { FULL_MASK, SHAPE_FULL } from './tile-shapes.ts';
+import { createTileMap, type TileMap } from './tile-map.ts';
 import { placeTrees } from './trees.ts';
 import { DEFAULT_TILES, TILE_AIR } from './tile-types.ts';
 import type { TileRegistry } from './tile-types.ts';
@@ -36,7 +36,7 @@ export interface WorldStats {
   readonly counts: Readonly<Record<string, number>>;
   /** 湖泊数（不含高处小水池）。 */
   readonly lakes: number;
-  /** 有水的格子数（生成时均为满格 FLUID_FULL）。 */
+  /** 有水的格子数（湖、池内为满格；岸边部分实心格只灌与水连通的空子格）。 */
   readonly waterCells: number;
   readonly trees: number;
   readonly treeKinds: Readonly<Record<TreeKind, number>>;
@@ -517,17 +517,15 @@ function placeSand(grid: Uint16Array, ground: Int32Array, lakes: readonly Lake[]
   }
 }
 
-/** 按 ground 把湖/池注满水（只写非实心格）；返回注水格数。 */
-function fillWater(fluid: FluidMap, ground: Int32Array, bodies: readonly Lake[]): number {
+/** 按 ground 把湖/池注满水（部分实心格只灌空子格，整格实心跳过，岸边斜坡/半砖的连通空子格一并灌满）；返回注水格数。 */
+function fillWater(map: TileMap, fluid: FluidMap, ground: Int32Array, bodies: readonly Lake[]): number {
   let cells = 0;
   for (const l of bodies) {
+    const body: Array<readonly [number, number]> = [];
     for (let x = l.x0; x <= l.x1; x++) {
-      for (let ty = ground[x] as number; ty < l.level; ty++) {
-        if (fluid.solid[ty * fluid.width + x] === 1) continue;
-        fluid.set(x, ty, FLUID_FULL);
-        cells++;
-      }
+      for (let ty = ground[x] as number; ty < l.level; ty++) if (map.solidMask(x, ty) !== FULL_MASK) body.push([x, ty]);
     }
+    cells += fillWaterBody(fluid, body);
   }
   return cells;
 }
@@ -683,7 +681,7 @@ export function generateWorld(seed: number, cfg: WorldgenTuning, registry: TileR
   map.load(grid, shapes);
   // TileMap.load 不触发 onChange，故在装载之后创建液体图。
   const fluid = createFluidMap(map);
-  const lakeWater = fillWater(fluid, ground, bodies);
+  const lakeWater = fillWater(map, fluid, ground, bodies);
   const { caves, waterCells: caveWater } = finishCaves(grid, ground, fluid, caveStage.network, width, height, ids.air, seed);
   const waterCells = lakeWater + caveWater;
   const fishSpawns: FishSpawn[] = planFishSpawns(bodies, ground, seed, cfg);

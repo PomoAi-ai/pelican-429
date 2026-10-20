@@ -14,6 +14,7 @@ import { t } from '../../config/i18n.ts';
 import { canFullscreen, isFullscreen, onFullscreenChange, toggleFullscreen } from '../../ui/hud/fullscreen.ts';
 import type { createIntroFortress } from './intro-fortress.ts';
 import type { PageContext } from '../shell/page-context.ts';
+import { createViewLoop } from '../shell/view-loop.ts';
 import '../../ui/hud/intro.css';
 import '../../ui/panels/story.css';
 
@@ -136,7 +137,8 @@ class IntroPlayer {
   private language: IntroLanguage = getLanguage();
   private width = 0;
   private height = 0;
-  private raf = 0;
+  // 播放时间取自音频时钟，循环只负责逐帧绘制。
+  private readonly loop = createViewLoop(() => this.frame(), (error) => this.fail(error));
   private lastInteraction = performance.now();
   private images: IntroImages | null = null;
   private fortress: Awaited<ReturnType<typeof createIntroFortress>> | null = null;
@@ -238,7 +240,7 @@ class IntroPlayer {
     this.resizeObserver.observe(this.stage);
     this.resize();
     this.requestPlay(0);
-    this.raf = requestAnimationFrame(() => this.frame());
+    this.loop.start();
   }
 
   private wakeControls(): void {
@@ -396,33 +398,30 @@ class IntroPlayer {
   }
 
   private frame(): void {
-    if (this.state === 'disposed' || this.state === 'entering') return;
-    try {
-      if (this.state === 'playing') {
-        this.time = this.audio!.getTime();
-        const end = editionPlaybackTime(INTRO_DURATION, this.edition);
-        if (this.time >= end) {
-          this.pause();
-          this.time = end;
-          // 终版播完直接进入游戏；历史版本停在结尾，留在目录里继续挑选。
-          if (this.edition.id === 'finale') {
-            this.chapter.querySelector('a')!.click();
-            if (this.story) return;
-          }
+    if (this.state === 'disposed' || this.state === 'entering') { this.loop.stop(); return; }
+    if (this.state === 'playing') {
+      this.time = this.audio!.getTime();
+      const end = editionPlaybackTime(INTRO_DURATION, this.edition);
+      if (this.time >= end) {
+        this.pause();
+        this.time = end;
+        // 终版播完直接进入游戏；历史版本停在结尾，留在目录里继续挑选。
+        if (this.edition.id === 'finale') {
+          this.chapter.querySelector('a')!.click();
+          if (this.story) { this.loop.stop(); return; }
         }
       }
-      const preview = this.state === 'ready' || this.state === 'starting';
-      const seconds = preview ? this.edition.duration * (this.edition.id === 'finale' ? .8 : .43) : this.time;
-      const storyTime = editionStoryTime(seconds, this.edition);
-      if (this.fortress) {
-        if (storyTime >= introSceneAt('world')) this.fortress.render(storyTime, this.width, Math.max(1, this.height - 96));
-        drawEditionIntro(this.ctx, seconds,
-          this.images!, this.fortress.canvas, this.width, this.height, this.edition, true, this.language);
-      }
-      this.updateProgress();
-      this.stage.classList.toggle('intro-controls-idle', this.state === 'playing' && performance.now() - this.lastInteraction > 3000);
-      this.raf = requestAnimationFrame(() => this.frame());
-    } catch (error) { this.fail(error); }
+    }
+    const preview = this.state === 'ready' || this.state === 'starting';
+    const seconds = preview ? this.edition.duration * (this.edition.id === 'finale' ? .8 : .43) : this.time;
+    const storyTime = editionStoryTime(seconds, this.edition);
+    if (this.fortress) {
+      if (storyTime >= introSceneAt('world')) this.fortress.render(storyTime, this.width, Math.max(1, this.height - 96));
+      drawEditionIntro(this.ctx, seconds,
+        this.images!, this.fortress.canvas, this.width, this.height, this.edition, true, this.language);
+    }
+    this.updateProgress();
+    this.stage.classList.toggle('intro-controls-idle', this.state === 'playing' && performance.now() - this.lastInteraction > 3000);
   }
 
   private fail(error: unknown): void {
@@ -460,7 +459,7 @@ class IntroPlayer {
 
   private releaseResources(): Promise<void> {
     if (this.released) return this.released;
-    cancelAnimationFrame(this.raf);
+    this.loop.stop();
     this.events.abort();
     this.resizeObserver.disconnect();
     this.fortress?.dispose();

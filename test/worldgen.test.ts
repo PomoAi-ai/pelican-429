@@ -8,6 +8,7 @@ import type { WorldgenTuning } from '../src/config/tuning.ts';
 import { TREE_HABITATS, TREE_HABITAT_KINDS, TREE_KINDS, TREE_SHAPES, WORLDGEN_RULES, platformRow } from '../src/config/worldgen-rules.ts';
 import { fbm1D, hash01, hashU32, mulberry32, randInt, valueNoise1D, valueNoise2D } from '../src/core/rng.ts';
 import { generateWorld } from '../src/world/worldgen.ts';
+import { generateFreeWorld } from '../src/world/free-world.ts';
 import type { GeneratedWorld } from '../src/world/worldgen.ts';
 import { pickTreeKind, placeTrees, planTree } from '../src/world/trees.ts';
 import type { TreeKind } from '../src/world/level.ts';
@@ -48,11 +49,11 @@ function inHut(w: GeneratedWorld, tx: number): boolean {
   return w.structures.some((h) => (tx >= h.roofX0 && tx <= h.roofX1) || (tx >= h.pierX0 && tx <= h.pierX1));
 }
 
-/** 有地表水（湖/小水池）的列；021 地下水潭（洞穴格里的水）不算。 */
+/** 有地表水（湖/小水池）的列；021 地下水潭（洞穴格里的水）与岸边部分实心格里的水不算。 */
 function waterColumns(w: GeneratedWorld): Set<number> {
   const cols = new Set<number>();
   for (let ty = 0; ty < w.fluid.height; ty++) {
-    for (let tx = 0; tx < w.fluid.width; tx++) if (w.fluid.amountAt(tx, ty) > 0 && !isCave(w, tx, ty)) cols.add(tx);
+    for (let tx = 0; tx < w.fluid.width; tx++) if (w.fluid.amountAt(tx, ty) > 0 && w.map.solidMask(tx, ty) === 0 && !isCave(w, tx, ty)) cols.add(tx);
   }
   return cols;
 }
@@ -182,6 +183,30 @@ describe('world/worldgen', () => {
     assert.notEqual(JSON.stringify(other.trees), JSON.stringify(world.trees));
   });
 
+  // 期望值是默认生成配置下的已知结果：存储层或单块写入的改动不得改变生成世界；有意调整生成规则时需重算。
+  const FIXED_WORLDS = [
+    { name: '世界', level: () => world, hash: '17459819', spawn: { x: 55.5, y: 49 }, dummies: [{ x: 59.5, y: 49 }] },
+    { name: '原野小型 wilds 入口', level: () => generateFreeWorld(429, 'small', 'wilds'), hash: '98465281', spawn: { x: 2.5, y: 54 }, dummies: [] },
+    { name: '原野小型 hut 入口', level: () => generateFreeWorld(429, 'small', 'hut'), hash: '79130aed', spawn: { x: 37.5, y: 51 }, dummies: [] },
+  ];
+  for (const fixed of FIXED_WORLDS) {
+    test(`固定种子${fixed.name}逐格材料与形状、出生点与假人保持不变`, () => {
+      const { map, spawn, dummies } = fixed.level();
+      let h = 0x811c9dc5;
+      for (let ty = 0; ty < map.height; ty++) {
+        for (let tx = 0; tx < map.width; tx++) {
+          h ^= map.get(tx, ty);
+          h = Math.imul(h, 0x01000193) >>> 0;
+          h ^= map.shapeAt(tx, ty);
+          h = Math.imul(h, 0x01000193) >>> 0;
+        }
+      }
+      assert.equal(h.toString(16), fixed.hash);
+      assert.deepEqual(spawn, fixed.spawn);
+      assert.deepEqual(dummies, fixed.dummies);
+    });
+  }
+
   test('只有地表：≥3 种非空气方块、无 wood/leaves/copper、地表下全实心、地表之上只有树平台与渔屋', () => {
     const counts = world.stats.counts;
     const kinds = Object.entries(counts).filter(([k, n]) => k !== 'air' && n > 0).map(([k]) => k);
@@ -217,6 +242,11 @@ describe('world/worldgen', () => {
         const a = world.fluid.amountAt(tx, ty);
         if (a === 0) continue;
         water++;
+        if (world.map.solidMask(tx, ty) !== 0) {
+          // 岸边斜坡/半砖：只灌与水连通的空子格，紧挨着水体。
+          assert.ok([[-1, 0], [1, 0], [0, 1]].some(([dx, dy]) => world.fluid.amountAt(tx + dx!, ty + dy!) > 0), `bank water at (${tx},${ty}) away from any body`);
+          continue;
+        }
         if (isCave(world, tx, ty)) continue; // 021 地下水潭：见 cave-island 测试
         assert.equal(a, 255, `partial water at (${tx},${ty})`);
         assert.notEqual(world.map.collisionAt(tx, ty), 'solid', `water in solid at (${tx},${ty})`);
@@ -230,7 +260,6 @@ describe('world/worldgen', () => {
       }
     }
     assert.equal(water, world.stats.waterCells);
-    assert.equal(world.fluid.totalMass(), water * 255);
     for (const tx of waterColumns(world)) {
       const pond = world.compositions.some((c) => c.kind === 'pond' && tx >= c.x0 && tx <= c.x1);
       assert.equal(world.map.get(tx, (ground[tx] as number) - 1), pond ? TILE_GRASS : sand, `lake bed at column ${tx}`);
@@ -340,9 +369,8 @@ describe('world/worldgen', () => {
     assert.ok(w.stats.waterCells > world.stats.waterCells, `${w.stats.waterCells} vs ${world.stats.waterCells}`);
     const sx = Math.floor(CFG.width / 2);
     for (const tx of waterColumns(w)) assert.ok(Math.abs(tx - sx) > CFG.spawnHalfWidth + WORLDGEN_RULES.SPAWN_RAMP, `water at ${tx}`);
-    for (let ty = 0; ty < w.fluid.height; ty++) {
-      for (let tx = 0; tx < w.fluid.width; tx++) if (w.fluid.amountAt(tx, ty) > 0) assert.notEqual(w.map.collisionAt(tx, ty), 'solid');
-    }
+    // 水只在空子格（岸边斜坡/半砖格只灌空出的部分）。
+    for (let i = 0; i < w.fluid.cells.length; i++) if (w.fluid.solid[i] === 1) assert.equal(w.fluid.cells[i], 0);
   });
 
   test('perchedPools：每个高处小水池至少一侧岸在水位行不是实心（溢口未被结构后平整填平；seed 16/139/197 曾被填平）', () => {

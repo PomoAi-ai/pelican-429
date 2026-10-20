@@ -5,7 +5,7 @@ import type { GLTF } from 'three/addons/loaders/GLTFLoader.js';
 import { clone } from 'three/addons/utils/SkeletonUtils.js';
 import { ENEMY_RULES } from '../../config/enemy-rules.ts';
 import type { EnemyKind } from '../../config/enemy-rules.ts';
-import { ENEMY_MODEL_DIRS } from '../../config/enemy-models.ts';
+import { enemyModelPath } from '../../config/enemy-models.ts';
 import { DRONE_APPEARANCES } from '../../config/drone-appearance.ts';
 
 const ACTIONS = ['idle', 'move', 'skill1', 'skill2', 'hit'] as const;
@@ -35,7 +35,7 @@ function disposeScene(scene: THREE.Group): void {
 }
 
 function readAsset(kind: EnemyKind, gltf: GLTF): EnemyAsset {
-  const path = `${ENEMY_MODEL_DIRS[kind]}/model.glb`;
+  const path = enemyModelPath(kind);
   try {
     const clips = {} as EnemyAsset['clips'];
     for (const name of ACTIONS) {
@@ -45,7 +45,7 @@ function readAsset(kind: EnemyKind, gltf: GLTF): EnemyAsset {
       }
       clips[name] = clip;
     }
-    if (kind === 'gatekeeper') {
+    if (kind === 'omi') {
       for (const name of ['head', 'eye']) {
         if (!(gltf.scene.getObjectByName(name) instanceof THREE.Bone)) throw new Error(`${path} 缺少注视骨骼：${name}`);
       }
@@ -67,7 +67,7 @@ export function loadEnemyAsset(kind: EnemyKind, tier: TextureTier = characterTex
   const key: EnemyAssetKey = `${kind}:${tier}`;
   let pending = loading.get(key);
   if (!pending) {
-    pending = loadCharacterModel(`${ENEMY_MODEL_DIRS[kind]}/model.glb`, tier).then((gltf) => {
+    pending = loadCharacterModel(enemyModelPath(kind), tier).then((gltf) => {
       if (loading.get(key) !== pending) { disposeScene(gltf.scene); return; }
       assets.set(key, readAsset(kind, gltf));
     });
@@ -103,7 +103,7 @@ function shareSkeletons(model: THREE.Object3D): void {
 /** GLB 几何与纹理由缓存持有，独立材质使受击闪光不会影响同类敌人。 */
 export function createEnemyRig(kind: EnemyKind, appearanceIndex = 0, tier: TextureTier = characterTextureTier()) {
   const asset = assets.get(`${kind}:${tier}`);
-  if (!asset) throw new Error(`${ENEMY_RULES[kind].name} 尚未加载：${ENEMY_MODEL_DIRS[kind]}/model.glb`);
+  if (!asset) throw new Error(`${ENEMY_RULES[kind].name} 尚未加载：${enemyModelPath(kind)}`);
   const model = clone(asset.scene) as THREE.Group;
   shareSkeletons(model);
   const root = new THREE.Group();
@@ -139,7 +139,7 @@ export function createEnemyRig(kind: EnemyKind, appearanceIndex = 0, tier: Textu
   }
   // 从静止骨架读取朝向；Blender 骨局部轴不等于 glTF 的 Y 向上坐标。
   root.updateWorldMatrix(true, true);
-  const gaze = kind === 'gatekeeper' ? ['head', 'eye'].map((name) => {
+  const gaze = kind === 'omi' ? ['head', 'eye'].map((name) => {
     const bone = model.getObjectByName(name)!;
     return { bone, rest: bone.getWorldQuaternion(new THREE.Quaternion()), animated: bone.quaternion.clone() };
   }) : [];

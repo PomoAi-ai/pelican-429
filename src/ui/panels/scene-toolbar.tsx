@@ -66,7 +66,7 @@ function WorldControls({ store, actions }: { store: Store<WorldView>; actions: W
             onValueChange={(day) => actions.setDate(c.season, day)} />
         </div>
         <div className="world-cycle-row">
-          <button type="button" aria-pressed={view.playing} onClick={actions.toggleRunning}>{view.playing ? t('暂停') : t('继续')}</button>
+          <button type="button" aria-pressed={view.playing} onClick={actions.toggleRunning}>{view.playing ? t('暂停时间') : t('继续时间')}</button>
           <label>{t('倍率')} <Select label={t('时间倍率')} value={view.speed}
             items={SPEEDS.map((speed) => ({ value: speed, label: `×${speed}` }))} onValueChange={actions.setSpeed} /></label>
         </div>

@@ -10,7 +10,7 @@ import numpy as np
 from PIL import Image, ImageDraw
 import ruler_standard as std
 
-ROOT = Path(__file__).resolve().parents[3] / 'public/art-library/roster-24'
+ROOT = Path(__file__).resolve().parents[3] / 'public/catalog/roster-24'
 LABELS = ['正面 FRONT', '右侧 RIGHT', '背面 BACK', '前 45° FRONT 45']
 MARKS = ['发冠', '下巴', '肩线', '腰线', '膝线']
 # 读图值（原图像素 y，正面）：发冠, 下巴, 肩线, 腰线, 膝线。

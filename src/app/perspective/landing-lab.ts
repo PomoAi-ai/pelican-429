@@ -26,7 +26,7 @@ export function mountLandingLab(context: SceneMountContext): void {
   const land = (): void => play(t('正在着陆'), select.value === 'main-world' ? './?mode=game&landing=1' : `./?mode=game&level=facility&scene=${select.value}&landing=1`);
   select.addEventListener('change', () => { flight.disabled = takeoff.disabled = select.value === 'main-world'; }, { signal: context.signal });
   flight.addEventListener('click', () => {
-    play(t('正在飞行'), `./?mode=game&level=transit&flight=${select.value}`);
+    play(t('正在飞行'), `./?mode=game&from=transit&flight=${select.value}`);
   }, { signal: context.signal });
   page.querySelector('[data-landing]')!.addEventListener('click', land, { signal: context.signal });
   // 关卡里出生点旁就停着开门的舱，走到舱门前确认即可起飞返回主世界。

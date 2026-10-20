@@ -1,7 +1,6 @@
 import { clamp } from '../core/math.ts';
 import type { Vec2 } from '../core/math.ts';
-import { roofTop } from './sky-exposure.ts';
-import type { TileQuery } from './tile-map.ts';
+import { roofTop, type ExposureMap } from './sky-exposure.ts';
 
 export const TORNADO_RULES = Object.freeze({ height: 18, radius: 5, lift: 180, pull: 45, swirl: 24, maxSpeed: 16 });
 
@@ -18,12 +17,12 @@ export interface TornadoState {
 
 export const tornadoSize = (power: number): number => 0.7 + 0.3 * power;
 
-export function createTornado(map: TileQuery, originX: number, power: number, phase: number): TornadoState {
+export function createTornado(map: ExposureMap, originX: number, power: number, phase: number): TornadoState {
   const x = clamp(originX + (3 + power) * Math.cos(phase), 0.5, map.width - 0.5);
   return { originX, phase, power, x, y: roofTop(map, Math.floor(x)), age: 0, strength: 0 };
 }
 
-export function stepTornado(state: TornadoState, map: TileQuery, dt: number): void {
+export function stepTornado(state: TornadoState, map: ExposureMap, dt: number): void {
   state.age += dt;
   state.strength = Math.min(1, state.age);
   state.x = clamp(state.originX + (3 + state.power) * Math.cos(state.age * (0.45 + state.power * 0.15) + state.phase), 0.5, map.width - 0.5);

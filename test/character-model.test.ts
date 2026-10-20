@@ -7,7 +7,7 @@ import { KTX2Loader } from 'three/addons/loaders/KTX2Loader.js';
 import { WEB_MODEL_SOURCES } from '../src/config/web-models.ts';
 import { ENEMY_RULES } from '../src/config/enemy-rules.ts';
 import type { TextureTier } from '../src/config/app-mode.ts';
-import { configureCharacterTextures, disposeCharacterTextures, loadCharacterModel } from '../src/render/character/character-model.ts';
+import { bindCharacterTextures, loadCharacterModel } from '../src/render/character/character-model.ts';
 import { createEnemyRig, disposeEnemyAssets, loadEnemyAsset } from '../src/render/character/enemy-rig.ts';
 import { createFacilityPresentation, disposePreloadedFortressTextures, preloadFortressTextures } from '../src/app/facility/facility-presentation.ts';
 import type { Stage } from '../src/render/stage/stage.ts';
@@ -73,8 +73,9 @@ test('堡垒预加载字节供两个渲染器独立转码，失败后等待同�
 test('角色和堡垒共用同一渲染器的转码器，角色退出不打断尚未完成的背景加载', async (t) => {
   const location = Object.getOwnPropertyDescriptor(globalThis, 'location');
   Object.defineProperty(globalThis, 'location', { configurable: true, value: new URL('http://localhost/') });
+  let unbind = (): void => {};
   t.after(() => {
-    disposeCharacterTextures();
+    unbind();
     disposePreloadedFortressTextures();
     if (location) Object.defineProperty(globalThis, 'location', location);
     else Reflect.deleteProperty(globalThis, 'location');
@@ -94,13 +95,13 @@ test('角色和堡垒共用同一渲染器的转码器，角色退出不打断�
   });
   t.mock.method(GLTFLoader.prototype, 'loadAsync', () => model.promise);
   const renderer = {} as WebGLRenderer;
-  configureCharacterTextures(renderer);
+  unbind = bindCharacterTextures(renderer);
   const character = loadCharacterModel(WEB_MODEL_SOURCES[0]!);
   const facility = assert.rejects(createFacilityPresentation({ renderer } as Stage, 'fortress'), /background failure/);
   await new Promise(resolve => setImmediate(resolve));
   assert.equal(created.length, 1);
   assert.equal(background.length, 4);
-  disposeCharacterTextures();
+  unbind();
   model.resolve(gltf);
   await character;
   assert.deepEqual(released, [], '角色会话结束后背景仍然持有转码器');
@@ -112,8 +113,9 @@ test('角色和堡垒共用同一渲染器的转码器，角色退出不打断�
 test('退出时等待旧模型加载结算再释放转码器，不影响新场景加载', async (t) => {
   const location = Object.getOwnPropertyDescriptor(globalThis, 'location');
   Object.defineProperty(globalThis, 'location', { configurable: true, value: new URL('http://localhost/?textures=ktx2') });
+  let unbind = (): void => {};
   t.after(() => {
-    disposeCharacterTextures();
+    unbind();
     if (location) Object.defineProperty(globalThis, 'location', location);
     else Reflect.deleteProperty(globalThis, 'location');
   });
@@ -136,12 +138,12 @@ test('退出时等待旧模型加载结算再释放转码器，不影响新场�
   t.mock.method(GLTFLoader.prototype, 'loadAsync', () => downloads++ === 0 ? oldModel.promise : newModel.promise);
   const renderer = {} as WebGLRenderer;
 
-  configureCharacterTextures(renderer);
+  unbind = bindCharacterTextures(renderer);
   const previous = loadCharacterModel(WEB_MODEL_SOURCES[0]!);
-  disposeCharacterTextures();
+  unbind();
   assert.deepEqual(disposed, [], '退出不能终止仍在加载的转码器');
 
-  configureCharacterTextures({} as WebGLRenderer);
+  unbind = bindCharacterTextures({} as WebGLRenderer);
   const current = loadCharacterModel(WEB_MODEL_SOURCES[0]!);
   oldModel.resolve(gltf);
   await Promise.resolve();
@@ -154,7 +156,7 @@ test('退出时等待旧模型加载结算再释放转码器，不影响新场�
   newModel.resolve(gltf);
   assert.equal(await current, gltf);
   assert.deepEqual(disposed, [decoders[0]], '新场景继续拥有其转码器');
-  disposeCharacterTextures();
+  unbind();
   assert.deepEqual(disposed, decoders);
 });
 
@@ -162,10 +164,11 @@ test('同时加载同一角色的多个贴图档位，缓存与实例不会串�
   const location = Object.getOwnPropertyDescriptor(globalThis, 'location');
   Object.defineProperty(globalThis, 'location', { configurable: true, value: new URL('http://localhost/') });
   const rigs: ReturnType<typeof createEnemyRig>[] = [];
+  let unbind = (): void => {};
   t.after(() => {
     for (const rig of rigs) rig.dispose();
     disposeEnemyAssets();
-    disposeCharacterTextures();
+    unbind();
     if (location) Object.defineProperty(globalThis, 'location', location);
     else Reflect.deleteProperty(globalThis, 'location');
   });
@@ -187,7 +190,7 @@ test('同时加载同一角色的多个贴图档位，缓存与实例不会串�
     );
     return gltf;
   });
-  configureCharacterTextures({} as WebGLRenderer);
+  unbind = bindCharacterTextures({} as WebGLRenderer);
   const variants: Array<[TextureTier, string]> = [
     ['original', './characters/enemies/line-hound/model.glb'],
     ['web-1k', './characters/enemies/line-hound/model.web-1k.glb'],
@@ -215,8 +218,9 @@ test('同时加载同一角色的多个贴图档位，缓存与实例不会串�
   ]);
 });
 
-test('首页切换渲染器时新模型使用新转码器，旧请求完成后才释放旧会话', async (t) => {
-  t.after(disposeCharacterTextures);
+test('整页交接时后绑定的渲染器接管：新模型用新转码器，旧页解绑不影响新会话，旧请求完成后才释放旧会话', async (t) => {
+  let unbind = (): void => {};
+  t.after(() => unbind());
   const gltf = await new GLTFLoader().parseAsync(JSON.stringify({ asset: { version: '2.0' }, scene: 0, scenes: [{}] }), '');
   const pending = [deferred<GLTF>(), deferred<GLTF>()];
   const renderers = [{} as WebGLRenderer, {} as WebGLRenderer];
@@ -231,10 +235,11 @@ test('首页切换渲染器时新模型使用新转码器，旧请求完成后�
   t.mock.method(GLTFLoader.prototype, 'loadAsync', function (this: GLTFLoader) {
     requested.push(this.ktx2Loader!); return pending[requested.length - 1]!.promise;
   });
-  configureCharacterTextures(renderers[0]!);
+  const unbindOld = bindCharacterTextures(renderers[0]!);
   const old = loadCharacterModel(WEB_MODEL_SOURCES[0]!, 'ktx2');
-  configureCharacterTextures(renderers[1]!);
+  unbind = bindCharacterTextures(renderers[1]!);
   const current = loadCharacterModel(WEB_MODEL_SOURCES[0]!, 'ktx2');
+  unbindOld();
   assert.equal(routes.get(requested[0]!), renderers[0]);
   assert.equal(routes.get(requested[1]!), renderers[1]);
   assert.notEqual(requested[0], requested[1], '两个 WebGL 上下文必须分别检测压缩纹理能力');
@@ -242,8 +247,8 @@ test('首页切换渲染器时新模型使用新转码器，旧请求完成后�
   pending[0]!.resolve(gltf); await old;
   assert.deepEqual(released, [requested[0]]);
   pending[1]!.resolve(gltf); await current;
-  assert.deepEqual(released, [requested[0]], '新会话保留供后续模型复用');
-  disposeCharacterTextures();
+  assert.deepEqual(released, [requested[0]], '旧页解绑后新会话仍保留，供后续模型复用');
+  unbind();
   assert.deepEqual(released, requested);
 });
 
@@ -268,7 +273,7 @@ test('已退出的定制资源请求延迟失败时不删除新场景的加载�
 });
 
 test('D1 短发实验沿用批准身体尺度，未声明或缩放身体的资源仍拒绝', async (t) => {
-  t.after(() => { disposeD1Assets(); disposeCharacterTextures(); });
+  t.after(() => { disposeD1Assets(); });
   t.mock.method(GLTFLoader.prototype, 'loadAsync', async (path: string) => {
     const gltf = await new GLTFLoader().parseAsync(JSON.stringify({ asset: { version: '2.0' }, scene: 0, scenes: [{}] }), '');
     if (path !== 'unmarked.glb') gltf.scene.userData.d1ScaleReference = 'approved-outfit-body';
@@ -297,7 +302,7 @@ test('D1 短发实验沿用批准身体尺度，未声明或缩放身体的资�
 
 test('D1 三档与贴图缓存独立，复制实例不串用模型或头发开关', async (t) => {
   const rigs: ReturnType<typeof createD1Rig>[] = [];
-  t.after(() => { for (const rig of rigs) rig.dispose(); disposeD1Assets(); disposeCharacterTextures(); });
+  t.after(() => { for (const rig of rigs) rig.dispose(); disposeD1Assets(); });
   const requested: string[] = [];
   const gates = new Map<string, Promise<void>>();
   const disposed: string[] = [];

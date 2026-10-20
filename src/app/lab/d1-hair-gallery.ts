@@ -1,21 +1,44 @@
 import * as THREE from 'three';
 import { TUNING } from '../../config/tuning.ts';
-import { createStageRenderer } from '../../render/stage/stage.ts';
-import { disposeCharacterTextures, loadCharacterModel } from '../../render/character/character-model.ts';
+import { loadCharacterModel } from '../../render/character/character-model.ts';
 import { disposeModelResources } from '../../render/character/model-resources.ts';
 import { createD1HairGameStage } from '../../render/grassy/d1-hair-game-stage.ts';
 import { createD1Rig, disposeD1Asset, loadD1Asset } from '../../render/grassy/d1-rig.ts';
 import { applyD1LabLooks, D1_LAB_VERSIONS, type D1LabVersion } from '../../render/grassy/d1-lab-looks.ts';
 import { contourD1LabHair } from '../../render/grassy/d1-lab-hair-contour.ts';
 import { HAIR_ASSETS, HAIR_LABELS, hairTitle, isBlenderHair, type HairStyle } from './d1-lab-hair-catalog.ts';
-import { createPageContext, readPageParams, type PageContext } from '../shell/page-context.ts';
+import type { PageContext } from '../shell/page-context.ts';
+import { pageRenderer } from '../shell/page-renderer.ts';
+import { createStudioLights } from '../../render/stage/light-presets.ts';
+import '../../ui/lab/d1-hair-gallery.css';
+
+const TEMPLATE = `
+<header class="hair-header">
+  <div><p>PELICAN 429 / HAIR COLLECTION</p><h1>全部头发预览</h1></div>
+</header>
+<nav class="hair-toolbar" aria-label="预览设置">
+  <div class="hair-control"><span>统一渲染</span><div id="hair-looks" class="hair-buttons" role="group" aria-label="渲染风格"></div></div>
+  <div class="hair-control"><span>光照环境</span><div id="hair-environments" class="hair-buttons" role="group" aria-label="光照环境">
+    <button type="button" data-environment="game" aria-pressed="true">游戏日光 · 展示场同款</button>
+    <button type="button" data-environment="studio" aria-pressed="false">检查棚光</button>
+  </div></div>
+  <div class="hair-control"><span>统一视角</span><div id="hair-angles" class="hair-buttons" role="group" aria-label="查看角度">
+    <button type="button" data-angle="0" aria-pressed="true">正面</button>
+    <button type="button" data-angle="45" aria-pressed="false">45°</button>
+    <button type="button" data-angle="90" aria-pressed="false">侧面</button>
+    <button type="button" data-angle="180" aria-pressed="false">背面</button>
+  </div></div>
+  <p id="hair-status" role="status">正在读取头发目录…</p>
+</nav>
+<main id="hair-gallery" class="hair-grid" aria-label="全部头发"></main>
+`;
 
 type Model = {
   scene: THREE.Scene;
   rig: ReturnType<typeof createD1Rig>;
   look: ReturnType<typeof applyD1LabLooks>;
   fit: ReturnType<typeof contourD1LabHair> | null;
-  lights: THREE.DirectionalLight[];
+  lights: ReturnType<typeof createStudioLights>;
   used: number;
 };
 type Card = {
@@ -31,18 +54,16 @@ type Card = {
   error: boolean;
 };
 
-const gallery = document.querySelector<HTMLElement>('#hair-gallery')!;
-const lookControls = document.querySelector<HTMLElement>('#hair-looks')!;
-const environmentControls = document.querySelector<HTMLElement>('#hair-environments')!;
-const requestedEnvironment = new URLSearchParams(location.search).get('environment') ?? 'game';
+// 页面元素在挂载时由模板生成后取得。
+let gallery: HTMLElement;
+let lookControls: HTMLElement;
+let environmentControls: HTMLElement;
+let angleControls: HTMLElement;
+let status: HTMLElement;
+let toolbar: HTMLElement;
 let environment: 'game' | 'studio' = 'game';
 let gameStage: ReturnType<typeof createD1HairGameStage>;
-
-const angleControls = document.querySelector<HTMLElement>('#hair-angles')!;
-const status = document.querySelector<HTMLElement>('#hair-status')!;
-const toolbar = document.querySelector<HTMLElement>('.hair-toolbar')!;
 const versions = D1_LAB_VERSIONS;
-const requestedVersion = new URLSearchParams(location.search).get('version') ?? 'v2';
 const cards: Card[] = [];
 const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, .1, 80);
 const target = new THREE.Vector3(0, 2.64, 0);
@@ -60,8 +81,8 @@ let visible: Card[] = [];
 let sphericalEyeAsset: THREE.Object3D | undefined;
 
 function previewUrl(hair: HairStyle): string {
-  const url = new URL('./render-lab.html', location.href);
-  url.search = new URLSearchParams({ hair, version, framing: 'head', angle: String(theta * 180 / Math.PI), projection: 'orthographic' }).toString();
+  const url = new URL('./', location.href);
+  url.search = new URLSearchParams({ mode: 'render-lab', hair, version, framing: 'head', angle: String(theta * 180 / Math.PI), projection: 'orthographic' }).toString();
   return url.href;
 }
 
@@ -121,7 +142,7 @@ function render(save: boolean): void {
     updateCamera(rect.width / rect.height);
     renderer.setViewport(rect.left, innerHeight - rect.bottom, rect.width, rect.height);
     renderer.setScissor(left, innerHeight - bottom, width, height);
-    renderer.shadowMap.needsUpdate = model.lights[0]!.shadow.needsUpdate;
+    renderer.shadowMap.needsUpdate = model.lights.key.shadow.needsUpdate;
     if (environment === 'game') {
       gameStage.render(model.rig.root, camera, target, rect, new DOMRect(left, top, width, height));
     } else {
@@ -158,7 +179,7 @@ function release(card: Card): void {
   model.look.dispose();
   model.fit?.dispose();
   model.rig.dispose();
-  for (const light of model.lights) light.dispose();
+  model.lights.dispose();
   model.scene.clear();
   card.model = null;
   card.loading.hidden = !card.snapshot.hidden;
@@ -190,22 +211,12 @@ function createModel(card: Card): Model {
     rig.update(0);
     const scene = new THREE.Scene();
     scene.background = new THREE.Color('#e4dfd6');
-    const key = new THREE.DirectionalLight('#fff3e5', 3);
-    key.position.set(Math.sin(-35 * Math.PI / 180) * 4, 6, Math.cos(-35 * Math.PI / 180) * 4);
-    key.target.position.set(0, 1.5, 0);
-    key.castShadow = true;
-    key.shadow.mapSize.set(1024, 1024);
-    key.shadow.autoUpdate = false;
-    key.shadow.needsUpdate = true;
-    Object.assign(key.shadow.camera, { left: -4, right: 4, top: 4, bottom: -4, near: .1, far: 16 });
-    key.shadow.normalBias = .025;
-    key.shadow.bias = -.00008;
-    const rim = new THREE.DirectionalLight('#e6eeff', .65);
-    rim.position.set(3, 4, -4);
-    const fill = new THREE.DirectionalLight('#fff1e6', 1.8);
-    fill.position.set(-1, 3, 6);
-    scene.add(rig.root, key, key.target, rim, fill, new THREE.HemisphereLight('#e7ecf5', '#b7aaa0', 1.5));
-    return { scene, rig, look, fit, lights: [key, rim, fill], used: ++sequence };
+    // 每张卡片一套灯，阴影图只在换风格、换环境时重画。
+    const lights = createStudioLights(1024);
+    lights.key.shadow.autoUpdate = false;
+    lights.key.shadow.needsUpdate = true;
+    scene.add(rig.root, ...lights.objects);
+    return { scene, rig, look, fit, lights, used: ++sequence };
   } catch (error) {
     look?.dispose();
     fit?.dispose();
@@ -332,19 +343,28 @@ function addCard(hair: HairStyle): void {
 }
 
 export function mountD1HairGallery(ctx: PageContext): void {
+  document.getElementById('loading')!.hidden = true;
+  document.title = 'D1 · 全部头发预览';
+  ctx.root.innerHTML = TEMPLATE;
+  gallery = document.querySelector<HTMLElement>('#hair-gallery')!;
+  lookControls = document.querySelector<HTMLElement>('#hair-looks')!;
+  environmentControls = document.querySelector<HTMLElement>('#hair-environments')!;
+  angleControls = document.querySelector<HTMLElement>('#hair-angles')!;
+  status = document.querySelector<HTMLElement>('#hair-status')!;
+  toolbar = document.querySelector<HTMLElement>('.hair-toolbar')!;
+  const params = new URLSearchParams(location.search);
+  const requestedVersion = params.get('version') ?? 'v2';
+  const requestedEnvironment = params.get('environment') ?? 'game';
   const selected = versions.find(candidate => candidate.id === requestedVersion);
   if (!selected) throw new Error(`未知渲染风格：${requestedVersion}`);
   version = selected.id;
   if (requestedEnvironment !== 'game' && requestedEnvironment !== 'studio') throw new Error(`未知光照环境：${requestedEnvironment}`);
   environment = requestedEnvironment;
-  renderer = createStageRenderer(TUNING, readPageParams().debug, { alpha: true, antialias: true });
+  renderer = pageRenderer(ctx, 'studio', TUNING);
   renderer.setPixelRatio(environment === 'game' ? Math.min(devicePixelRatio, TUNING.render.lighting.maxPixelRatio) : 1);
   renderer.setClearColor(0, 0);
   renderer.setSize(innerWidth, innerHeight);
-  renderer.toneMapping = THREE.NeutralToneMapping;
-  renderer.shadowMap.enabled = true;
   renderer.shadowMap.autoUpdate = false;
-  renderer.shadowMap.type = THREE.PCFShadowMap;
   renderer.domElement.className = 'hair-renderer';
   renderer.domElement.setAttribute('aria-hidden', 'true');
   ctx.root.append(renderer.domElement);
@@ -361,7 +381,7 @@ export function mountD1HairGallery(ctx: PageContext): void {
       for (const sibling of lookControls.querySelectorAll('button')) sibling.setAttribute('aria-pressed', String(sibling === button));
       for (const card of cards) if (card.model) {
         card.model.look.setVersion(version);
-        card.model.lights[0]!.shadow.needsUpdate = true;
+        card.model.lights.key.shadow.needsUpdate = true;
       }
       invalidateSnapshots();
       const url = new URL(location.href);
@@ -379,7 +399,7 @@ export function mountD1HairGallery(ctx: PageContext): void {
       for (const sibling of environmentControls.querySelectorAll('button')) sibling.setAttribute('aria-pressed', String(sibling === button));
       renderer.setPixelRatio(environment === 'game' ? Math.min(devicePixelRatio, TUNING.render.lighting.maxPixelRatio) : 1);
       renderer.setSize(innerWidth, innerHeight);
-      for (const card of cards) if (card.model) card.model.lights[0]!.shadow.needsUpdate = true;
+      for (const card of cards) if (card.model) card.model.lights.key.shadow.needsUpdate = true;
       invalidateSnapshots();
       const url = new URL(location.href);
       url.searchParams.set('environment', environment);
@@ -413,17 +433,9 @@ export function mountD1HairGallery(ctx: PageContext): void {
     for (const card of cards) if (card.model) release(card);
     if (sphericalEyeAsset) disposeModelResources(sphericalEyeAsset);
     gameStage.dispose();
-    disposeCharacterTextures();
-    renderer.dispose();
+    renderer.domElement.remove();
   });
   status.textContent = `共 ${cards.length} 款 · 拖动同步旋转 · Ctrl + 滚轮同步缩放 · 滚轮正常浏览 · 宽屏最多 5 列`;
   requestRender();
 }
 
-const page = createPageContext(document.body, error => {
-  status.setAttribute('role', 'alert');
-  status.classList.add('hair-error');
-  status.textContent = `无法显示头发预览：${error instanceof Error ? error.message : String(error)}`;
-});
-try { mountD1HairGallery(page.context); }
-catch (error) { page.dispose(); page.context.reportError(error); }

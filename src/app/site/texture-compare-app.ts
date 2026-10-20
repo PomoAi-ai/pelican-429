@@ -3,7 +3,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { TUNING } from '../../config/tuning.ts';
 import { GRASSY_ANIMATED_MODELS, GRASSY_HEIGHT } from '../../config/grassy.ts';
 import { NPCS, npcModel, type NpcKind, type NpcForm } from '../../config/npc.ts';
-import { ENEMY_KINDS, ENEMY_MODEL_DIRS } from '../../config/enemy-models.ts';
+import { ENEMY_KINDS, enemyModelPath } from '../../config/enemy-models.ts';
 import { ENEMY_RULES, type EnemyKind } from '../../config/enemy-rules.ts';
 import type { TextureTier } from '../../config/app-mode.ts';
 import { createShowcaseRenderer } from '../../render/stage/showcase-renderer.ts';
@@ -14,8 +14,9 @@ import { animateGrassy } from '../../render/grassy/grassy-animator.ts';
 import { loadNpcAsset, createNpcRig, disposeNpcAssets } from '../../render/npc/npc-rig.ts';
 import { animateNpc } from '../../render/npc/npc-animator.ts';
 import { loadEnemyAsset, createEnemyRig, disposeEnemyAssets } from '../../render/character/enemy-rig.ts';
-import { readPageParams, type PageContext } from '../shell/page-context.ts';
-import { VIEW_MAX_DT } from '../shell/frame-clock.ts';
+import type { PageContext } from '../shell/page-context.ts';
+import { pageRenderer } from '../shell/page-renderer.ts';
+import { createViewLoop } from '../shell/view-loop.ts';
 import { t } from '../../config/i18n.ts';
 import '../../ui/site/texture-compare.css';
 
@@ -39,7 +40,7 @@ const subjects = (): Subject[] => [
     npc, form, source: npcModel(npc, form).path, height: NPCS[npc].visualHeight,
   }))),
   ...ENEMY_KINDS.map(enemy => ({ id: enemy, label: t(ENEMY_RULES[enemy].name), kind: 'enemy' as const, enemy,
-    source: `${ENEMY_MODEL_DIRS[enemy]}/model.glb`, height: ENEMY_RULES[enemy].height })),
+    source: enemyModelPath(enemy), height: ENEMY_RULES[enemy].height })),
 ];
 const REPORTS = [
   new URL('../../../assets/characters/web-1k-models-report.json', import.meta.url),
@@ -111,7 +112,7 @@ export async function mountTextureCompare(ctx: PageContext): Promise<void> {
   for (const [value, label] of [['idle', '待机'], ['walk', '行走'], ['run', '跑步']] as const) {
     const option = element(actionSelect, 'option', t(label)); option.value = value;
   }
-  const play = element(toolbar, 'button', t('播放动作')); play.type = 'button'; play.setAttribute('aria-pressed', 'false');
+  const play = element(toolbar, 'button', t('播放动画')); play.type = 'button'; play.setAttribute('aria-pressed', 'false');
   const timeLabel = element(toolbar, 'label', t('动作时间'));
   const seek = element(timeLabel, 'input'); seek.type = 'range'; seek.min = '0'; seek.max = '1'; seek.step = '.001'; seek.value = '0'; seek.setAttribute('aria-label', t('同步动作时间'));
   const zoomLabel = element(toolbar, 'label', t('拉近倍率'));
@@ -131,7 +132,7 @@ export async function mountTextureCompare(ctx: PageContext): Promise<void> {
     return { tier, card, viewport, stats, detail, width: 0, height: 0 };
   });
   element(page, 'p', t('勾选模型数据压缩，可在相同 KTX2 贴图下比较顶点、法线、UV 和动画数据压缩前后。面数、骨骼和动作保留；只降低数值精度，不代表绘制量或顶点显存降低。纹理预算不含渲染目标和驱动开销。'), 'tc-footnote');
-  const host = createShowcaseRenderer(parent, readPageParams().debug);
+  const host = createShowcaseRenderer(parent, pageRenderer(ctx, 'game', TUNING));
   const stages = panels.map(() => {
     const stage = createStageView(host.renderer, TUNING, { quality: 'low', antialias: 'smaa' });
     stage.scene.background = new THREE.Color('#aeb9b3'); stage.camera.near = .01;
@@ -144,7 +145,7 @@ export async function mountTextureCompare(ctx: PageContext): Promise<void> {
   });
   let actors: Preview[] = [];
   let subject = SUBJECTS.find(item => item.id === subjectSelect.value)!;
-  let playing = false, seconds = 0, dirty = true, stopped = false, ready = false, raf = 0, last = 0;
+  let playing = false, seconds = 0, dirty = true, stopped = false, ready = false;
   let baseDistance = 1;
   const onScroll = (): void => { dirty = true; };
   const target = new THREE.Vector3();
@@ -177,12 +178,12 @@ export async function mountTextureCompare(ctx: PageContext): Promise<void> {
     offset.subVectors(camera.position, controls[0]!.target).normalize().multiplyScalar(baseDistance / Number(zoom.value));
     camera.position.copy(controls[0]!.target).add(offset); synchronize();
   });
-  const pause = () => { playing = false; play.textContent = t('播放动作'); play.setAttribute('aria-pressed', 'false'); };
-  play.addEventListener('click', () => { playing = !playing; play.textContent = t(playing ? '暂停动作' : '播放动作'); play.setAttribute('aria-pressed', String(playing)); dirty = true; });
+  const pause = () => { playing = false; play.textContent = t('播放动画'); play.setAttribute('aria-pressed', 'false'); };
+  play.addEventListener('click', () => { playing = !playing; play.textContent = t(playing ? '暂停动画' : '播放动画'); play.setAttribute('aria-pressed', String(playing)); dirty = true; });
   seek.addEventListener('input', () => { pause(); seconds = Number(seek.value); dirty = true; });
   actionSelect.addEventListener('change', () => { seconds = 0; seek.max = String(actors[0]!.duration(action())); seek.value = '0'; dirty = true; });
   const dispose = (): void => {
-    if (stopped) return; stopped = true; cancelAnimationFrame(raf);
+    if (stopped) return; stopped = true; loop.stop();
     for (const control of controls) control.dispose();
     observer.disconnect();
     for (const actor of actors) actor.dispose();
@@ -193,6 +194,7 @@ export async function mountTextureCompare(ctx: PageContext): Promise<void> {
     parent.removeEventListener('scroll', onScroll);
   };
   const fail = (error: unknown): void => { dispose(); ctx.reportError(error); };
+  const loop = createViewLoop(dt => frame(dt), fail);
   const observer = new ResizeObserver(() => { dirty = true; }); observer.observe(grid);
   ctx.onDispose(dispose);
   const reports = await Promise.all(REPORTS.map(async url => {
@@ -265,37 +267,32 @@ export async function mountTextureCompare(ctx: PageContext): Promise<void> {
   };
   subjectSelect.addEventListener('change', () => { void load().catch(fail); });
   compact.addEventListener('change', () => { void load(true).catch(fail); });
-  const frame = (now: number): void => {
-    if (stopped) return;
-    const dt = Math.min((now - last) / 1000, VIEW_MAX_DT); last = now;
+  const frame = (dt: number): void => {
     if (ready && !document.hidden && (dirty || playing)) {
-      try {
-        if (playing) { seconds = (seconds + dt) % actors[0]!.duration(action()); seek.value = String(seconds); }
-        host.begin();
-        const clip = grid.getBoundingClientRect();
-        panels.forEach((panel, index) => {
-          const { viewport } = panel;
-          const rect = viewport.getBoundingClientRect();
-          if (rect.right <= Math.max(0, clip.left) || rect.left >= Math.min(innerWidth, clip.right)
-            || rect.bottom <= Math.max(0, clip.top) || rect.top >= Math.min(innerHeight, clip.bottom)) return;
-          const stage = stages[index]!;
-          if (rect.width !== panel.width || rect.height !== panel.height) {
-            stage.setSize(rect.width, rect.height); panel.width = rect.width; panel.height = rect.height;
-          }
-          stage.camera.copy(camera);
-          stage.camera.aspect = rect.width / rect.height; stage.camera.updateProjectionMatrix();
-          actors[index]!.sample(action(), seconds);
-          host.draw(stage.postFx.renderTexture(), rect, clip);
-        });
-        dirty = false;
-      } catch (error) { fail(error); return; }
+      if (playing) { seconds = (seconds + dt) % actors[0]!.duration(action()); seek.value = String(seconds); }
+      host.begin();
+      const clip = grid.getBoundingClientRect();
+      panels.forEach((panel, index) => {
+        const { viewport } = panel;
+        const rect = viewport.getBoundingClientRect();
+        if (rect.right <= Math.max(0, clip.left) || rect.left >= Math.min(innerWidth, clip.right)
+          || rect.bottom <= Math.max(0, clip.top) || rect.top >= Math.min(innerHeight, clip.bottom)) return;
+        const stage = stages[index]!;
+        if (rect.width !== panel.width || rect.height !== panel.height) {
+          stage.setSize(rect.width, rect.height); panel.width = rect.width; panel.height = rect.height;
+        }
+        stage.camera.copy(camera);
+        stage.camera.aspect = rect.width / rect.height; stage.camera.updateProjectionMatrix();
+        actors[index]!.sample(action(), seconds);
+        host.draw(stage.postFx.renderTexture(), rect, clip);
+      });
+      dirty = false;
     }
-    raf = requestAnimationFrame(frame);
   };
   // 视窗滚动改变合成位置，即使暂停也要重新画一次。
   grid.addEventListener('scroll', onScroll);
   window.addEventListener('scroll', onScroll);
   parent.addEventListener('scroll', onScroll);
   await load().catch(error => { dispose(); throw error; });
-  if (!stopped) { last = performance.now(); raf = requestAnimationFrame(frame); }
+  if (!stopped) loop.start();
 }

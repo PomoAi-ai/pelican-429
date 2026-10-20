@@ -2,6 +2,7 @@
  * 降水视图装配（任务 022）：控制器（render/precip）+ 列数据（precip-columns）+ 雨（rain-fx）+ 雪（snow-fx）+ 天色（precip-sky）
  * + 表面湿润/积雪注入（precip-surface，按 PATCH_FRAMES 帧补挂新材质，与 world-views 云影同节奏）。
  * 每帧 update(view, time, dt, target, power)：target 为逻辑层降水状态（world.env.precip），time 为单调渲染时间。
+ * 列数据与滴水发射点由调用方按世界建好传入（格子世界用 precip-columns，检视页用碰撞实体顶面），视图持有并负责释放列数据。
  * draw call：雨丝 / 溅射 / 滴水 / 雪花 / 雾幕 / 闪电 各至多 1（大雨 ≤ 5，大雪 ≤ 2；无降水 0）。
  */
 import type * as THREE from 'three';
@@ -35,7 +36,10 @@ export function precipSurfaceRoots(views: Pick<WorldViews, 'tiles' | 'trees' | '
 
 export interface PrecipViewInput {
   readonly scene: THREE.Object3D;
-  readonly level: Pick<LevelData, 'map' | 'fluid' | 'deserts' | 'trees'>;
+  readonly columns: PrecipColumns;
+  /** 滴水发射点（rain-fx planDripEmitters）。 */
+  readonly drips: Float32Array;
+  /** 雨雪粒子与雾幕所用相机；调用方可以每帧改写它的位置。 */
   readonly camera: PrecipCamera;
   /** 舞台灯光/天空/调色/云（precip-sky）。 */
   readonly sky: Omit<PrecipSkyTargets, 'scene'> & { readonly scene: THREE.Scene };
@@ -44,6 +48,12 @@ export interface PrecipViewInput {
   /** 视野中心风摆（windSway），雨雪漂移用。 */
   readonly windSway: (x: number) => number;
   readonly rules?: PrecipTuning;
+}
+
+/** 格子世界的列数据与滴水发射点（树冠、悬挑下沿）。 */
+export function levelPrecipSource(level: Pick<LevelData, 'map' | 'fluid' | 'deserts' | 'trees'>, rules: PrecipTuning): Pick<PrecipViewInput, 'columns' | 'drips'> {
+  const columns = createPrecipColumns({ map: level.map, fluid: level.fluid, deserts: level.deserts, desertFactor: rules.snow.desertFactor });
+  return { columns, drips: planDripEmitters(level.map, (tx) => columns.at(tx).roof, level.trees, rules.rain.dripMax, rules.seed) };
 }
 
 export interface PrecipStats {
@@ -68,6 +78,8 @@ export interface PrecipView {
   readonly sky: PrecipSky;
   readonly surface: PrecipSurfacePatcher;
   update(view: Readonly<Rect>, time: number, dt: number, target: PrecipState, power: PrecipPower): void;
+  /** 无降水的阴天云量 [0,1]（检视页的阴天档）：与降水的云量、压暗、雾取较大值。 */
+  setOvercast(amount: number): void;
   stats(): PrecipStats;
   dispose(): void;
 }
@@ -75,20 +87,19 @@ export interface PrecipView {
 export function createPrecipView(input: PrecipViewInput): PrecipView {
   const rules = input.rules ?? DEFAULT_PRECIP;
   validatePrecipTuning(rules);
-  const { level, scene, camera } = input;
-  if (!scene || !level?.map || !level.fluid || !camera) throw new Error('precip-view: scene, level (map/fluid) and camera are required');
-  const columns = createPrecipColumns({ map: level.map, fluid: level.fluid, deserts: level.deserts, desertFactor: rules.snow.desertFactor });
+  const { columns, scene, camera } = input;
   const uniforms = sharedPrecipUniforms();
   uniforms.uPrCols.value = columns.texture;
   uniforms.uPrColsW.value = columns.width;
-  uniforms.uPrColsOrigin.value = 0;
+  uniforms.uPrColsOrigin.value = columns.origin;
   const controller = createPrecipController(rules);
-  const rain = createRainFx({ rules, emitters: planDripEmitters(level.map, (tx) => columns.at(tx).roof, level.trees, rules.rain.dripMax, rules.seed) });
+  const rain = createRainFx({ rules, emitters: input.drips });
   const snow = createSnowFx(rules);
   const sky = createPrecipSky(input.sky, rules.seed);
   const surface = createPrecipSurfacePatcher(uniforms);
   scene.add(rain.root, snow.root, sky.root);
   let frame = 0;
+  let overcast = 0;
   let disposed = false;
 
   const meshes = (): number => [rain.streaks, rain.splashes, rain.drips, snow.flakes, sky.veil, sky.bolt].filter((m) => m.visible).length;
@@ -107,7 +118,9 @@ export function createPrecipView(input: PrecipViewInput): PrecipView {
       if (frame % PRECIP_COLUMN_FRAMES === 0) columns.refresh(view.x - COLUMN_MARGIN, view.x + view.w + COLUMN_MARGIN);
       if (frame % PRECIP_PATCH_FRAMES === 0) for (const r of input.surfaces()) surface.patchTree(r);
       frame++;
-      const v = controller.visual;
+      const cv = controller.visual;
+      const v = overcast > 0
+        ? { ...cv, overcast: Math.max(cv.overcast, overcast), dim: Math.max(cv.dim, overcast * .4), fog: Math.max(cv.fog, overcast * .1) } : cv;
       uniforms.uPrWet.value = controller.wetness;
       uniforms.uPrSnow.value = controller.snowCover;
       uniforms.uPrRipple.value = Math.min(1, v.splash);
@@ -138,6 +151,9 @@ export function createPrecipView(input: PrecipViewInput): PrecipView {
         big: Math.min(1, Math.max(0, (v.snow - 0.6) / 0.4)),
         brightness: Math.min(1.2, 0.35 + 0.65 * bright),
       });
+    },
+    setOvercast(amount) {
+      overcast = amount;
     },
     stats() {
       return {

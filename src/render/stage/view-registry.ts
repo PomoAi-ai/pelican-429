@@ -29,7 +29,7 @@ export interface ViewRegistry {
  * 敌人全图常驻、数量上百且模型骨骼繁多；three 每帧遍历整棵场景图（不可见子树也做矩阵更新与阴影遍历），
  * 所以镜头外的敌人视图直接移出场景，而不是设 visible=false。
  */
-const CULLED_KINDS: ReadonlySet<EntityKind> = new Set(['gatekeeper', 'lineHound', 'watchWasp', 'loadmaster']);
+const CULLED_KINDS: ReadonlySet<EntityKind> = new Set(['omi', 'lineHound', 'watchWasp', 'loadmaster']);
 /** 移入边距（格）：盖住最大敌人的体型，进入画面前已挂回场景。 */
 const CULL_MARGIN = 4;
 /** 移出时再多留的边距（格）：在边界附近来回走不反复增删。 */

@@ -80,9 +80,9 @@ export function ConceptPage({ scroller }: { scroller: RefObject<HTMLElement | nu
           {CONCEPT_DOCUMENTS.map((entry, index) => {
             const rendered = documents[index]!;
             return (
-              <section key={entry.id} className="help-block concepts-markdown" id={entry.id} data-document={entry.file}>
+              <section key={entry.id} className="help-block concepts-markdown" id={entry.id} data-document={`${entry.id}.md`}>
                 <h2 id={rendered.titleId} dangerouslySetInnerHTML={{ __html: rendered.titleHtml }} />
-                <CopyControls title={entry.title} file={entry.file} />
+                <CopyControls title={entry.title} file={`${entry.id}.md`} />
                 <div style={{ display: 'contents' }} dangerouslySetInnerHTML={{ __html: rendered.bodyHtml }} />
               </section>
             );

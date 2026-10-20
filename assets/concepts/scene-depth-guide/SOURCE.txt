@@ -1,7 +1,7 @@
 二维玩法与三维场景概念资料，2026-10-09。
 
 液体补充（2026-10-10）：public/concepts/liquid-perspective.png，2400×2200。
-draw_liquid_perspective.py 本地Pillow精确制图；完整定义 docs/liquid-definitions.md。
+draw_liquid_perspective.py 本地Pillow精确制图；完整定义 public/concepts/liquid-definitions.md。
 图示遵循新版中间Z=[−0.5,+0.5]深1，内外各额外预留0.5、墙厚0.2；这不是现行渲染尺寸。
 主图为统一针孔透视，斜上方从内沿看水池；另附XY占格与等比例YZ剖面。池宽4、水深1.5为布局示例。
 现行依据：fluid-map.ts、fluid-sim.ts、fluid-contact.ts、player-breath.ts、water-view.ts、water-shading.ts、tile-geometry.ts。
@@ -60,19 +60,19 @@ UV_CACHE_DIR=/private/tmp/pelican-uv-cache uv run --no-project --python /private
 2026-10-10 植物、生长物与矿脉补充：
 natural-resources-perspective.png（2400×2700）、natural-resources-depth.png（2400×1430）。
 来源：assets/concepts/scene-depth-guide/draw_natural_resources.py，本地Pillow几何制图，无AI生成与外部素材。
-定义：docs/natural-resource-definitions.md；public/concepts 为原文副本，src/ui/concept-natural-resources.ts 为页面内容快照。
+定义：public/concepts/natural-resource-definitions.md；src/ui/concept-natural-resources.ts 为页面内容快照。
 统一格单位；图谱每卡按1格标尺独立放大，每卡实体与线框投影一致；YZ剖面等比例。草案尺寸与状态不代表运行时实现。
 制图检查：构件包络、相机正交基、文字画布边界；已人工检查输出图。
 重绘：UV_CACHE_DIR=/private/tmp/pelican-uv-cache uv run --no-project --python /private/tmp/pelican-scale-env/bin/python3 assets/concepts/scene-depth-guide/draw_natural_resources.py
 
 2026-10-10 逐状态补充：natural-{grass,flower,shrub,bonsai,tree,ore}-states.png，六张图共32状态；矿脉2400×1905，其余2400×2695。
-状态数据 natural-resource-states.json；绘图 draw_natural_states.py；独立原文 docs/natural-{kind}-definitions.md；build_natural_resource_documents.py 同步网页与公开文档。
+状态数据 natural-resource-states.json；绘图 draw_natural_states.py；独立原文 public/concepts/natural-{kind}-definitions.md；build_natural_resource_documents.py 同步网页与公开文档。
 每类同镜头、同比例、同锚点；盆体各状态不缩放；当前外观包络与成熟预留分开。矿脉保留原位置，部分剩3格，其中一格50%仅储量示意。
 几何包络与矿格剩余范围自检通过，六图均已目视检查。全部为新增资料草案，没有修改游戏逻辑。
 
 2026-10-10 自然资源空间定位修订：
 natural-attachments-space.png（2400×2200）、natural-flora-space.png（2400×2100）、natural-tree-space.png / natural-ore-space.png（2400×2250）。
-来源 draw_natural_space.py；本地Pillow几何透视制图，无外部图片；定义 docs/natural-spatial-definitions.md。
+来源 draw_natural_space.py；本地Pillow几何透视制图，无外部图片；定义 public/concepts/natural-spatial-definitions.md。
 青苔四形附着宿主；草花根在前上棱Z=-0.5，当前深D的枝叶范围[-0.5-D,-0.5]；同步状态数据、草花状态图、独立定义及网页。
 树高从根面量5格，根占中间一格，冠宽3深1.4；矿带5格嵌入5×4×1岩层，20→18→15实体格，矿格5→3→0，另附单格XZ剖切。
 四图已经目视核对；绘图文字边界、矿格计数断言通过。早期成熟总览保留形体历史参考，并标明旧草花位置已被替代。未修改游戏运行时。
@@ -90,7 +90,7 @@ natural-attachments-space.png（2400×2200）、natural-flora-space.png（2400×
 重新校准花卉、盆景、灌木残桩的实际宽高深及树桩0.3高度；灌木果实移到冠层表面，树状态格线与居中宿主对齐；青苔包边剖面接缝闭合，坡面藤转向低端以显示贴坡叶层。
 新增natural-shrub-bonsai-space.png（2400×2180），区分灌木冠幅和单格根部、盆底0.7、盆沿0.76与成熟预留1。
 新增natural-drooping-forms.png（2400×3200），草裙、苔须、垂藤、垂花、悬崖盆景、垂枝树六形；natural-drooping-vine-states.png（2400×2250），固定上沿支点的下垂0.2/0.6/1.5/0.3四阶段。
-下垂定义位于docs/natural-drooping-definitions.md，新增植物目录独立入口；定义发布器同步八份独立资料及两份共同资料。
+下垂定义位于public/concepts/natural-drooping-definitions.md，新增植物目录独立入口；定义发布器同步八份独立资料及两份共同资料。
 检查：draw_natural_states.py实际包络与高度断言、draw_natural_space.py下垂最低点与盆景避让承托台断言通过；当前输出已目视检查，10份公开文档与原文一致，引用图片和文档链接有效；浏览器已确认植物目录与下垂图片加载。
 本次只制作透视定义、图与页面资料；未运行游戏测试、typecheck或build，未提交或推送。
 
@@ -104,5 +104,5 @@ natural-attachments-space.png（2400×2200）、natural-flora-space.png（2400×
 新增natural-underside-forms.png和natural-underside-states.png（2400×2280），源draw_natural_underside.py。仰视展示真实底面Y=-1内部两排六个根点；苔须、垂藤、垂花三形及藤叶萌芽/生长/成熟/修剪四状态。全部本地Pillow几何制图，无外部素材。
 检查：状态包络、树/灌木前侧排除区、底面根点接触与修剪原位保留自检通过；输出图已目视复核。资料任务未运行游戏测试/typecheck/build，未修改运行时、未提交或推送。
 
-2026-10-10 坐标与术语统一（按 docs/core-coordinates.md、docs/core-glossary.md）：
+2026-10-10 坐标与术语统一（按 public/concepts/core-coordinates.md、public/concepts/core-glossary.md）：
 全部制图标注改为 +Z 朝镜头：旧 Z 值 z→−z、区间 [a,b]→[−b,−a]；内沿→前延预留、外延→后延预留；单向/跳跃/落脚/悬浮平台→平台；主角→玩家角色；实心格→地形格；坡形改用右升/左升命名。自然资源、岩石脚本内部几何仍以 −Z 为镜头侧，只在输出文字取反；building-depth.png 改几何，墙移到后延预留 Z=[−0.7,−0.5]、离镜头最远。本条之前的记录保留旧坐标写法，按 core-coordinates.md 第 4 节换算。标注“现行游戏/当前实现”的数值（自然砖 Z=[−1,+0.5]、远景 −121、洞壁 −1.01 等）未翻转。

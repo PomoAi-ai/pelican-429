@@ -2,25 +2,27 @@
  * 降水列数据（任务 022）：每列一个 RGBA float 纹素（DataTexture，宽 = 地图宽，高 1，最近邻采样），供雨雪粒子、溅射、滴水与
  * 湿润/积雪着色共用（GLSL precipColumn(x)，见 precip-surface）：
  * - R = roof：最高遮挡格顶边（world/sky-exposure；洞穴、浮空岛下、渔屋内都在其下 → 不下雨、不积雪）；
- *   该格是斜坡/半砖时取顶边 − 0.5（坡面平均高度；着色器在相邻列间线性插值后正好贴合连续斜坡）；
+ *   最高遮挡格取格心竖线上的块顶（topAt；平台取变体顶面）：斜坡/半砖为顶边 − 0.5，着色器在相邻列间线性插值后正好贴合连续斜坡；
  * - G = stop：降水落点 = max(roof, 该列水面)（雨丝/雪花落到这里消失，溅射/涟漪画在这里）；
  * - B = 雪量系数（沙漠核心 = desertFactor，过渡带线性渐变，其余 1）；
  * - A = 落点是水面（1）还是实心顶面（0）。
  * refresh(x0, x1) 只重算给定列区间（视野 ± 边距，调用方按帧节流），有变化才重新上传纹理。
  */
 import * as THREE from 'three';
+import { FLUID_FULL, type FluidQuery } from '../../world/fluid-map.ts';
 import type { DesertInfo } from '../../world/level.ts';
 import { roofTop } from '../../world/sky-exposure.ts';
-import { SHAPE_FULL } from '../../world/tile-shapes.ts';
+import { PLATFORM_VARIANTS, SUBCELLS } from '../../world/tile-shapes.ts';
+import { TILE_BRANCH } from '../../world/tile-types.ts';
 import type { TileQuery } from '../../world/tile-map.ts';
 
-/** 视为水面的最小水量（0..255；更薄的水膜不算水面）。 */
+/** 视为水面的最小子格水量（0..255；更薄的水膜不算水面）。 */
 export const PRECIP_WATER_MIN = 8;
 
 export interface PrecipColumnSource {
   readonly map: TileQuery;
-  /** 格子水（FluidMap 满足）：行主序水量 0..255。 */
-  readonly fluid: { readonly width: number; readonly height: number; readonly cells: Uint8Array };
+  /** 格子水（FluidMap 满足）。 */
+  readonly fluid: Pick<FluidQuery, 'width' | 'height' | 'subHeight' | 'subAt' | 'subTopAt'>;
   readonly deserts: readonly DesertInfo[];
   /** 沙漠核心的雪量系数 [0,1]。 */
   readonly desertFactor: number;
@@ -47,21 +49,36 @@ export function desertSnowFactor(deserts: readonly DesertInfo[], x: number, fact
   return k;
 }
 
-/** 列 tx 自 roof 起向上的连续水柱顶（无水 = roof）。 */
+/**
+ * 列 tx 格心子列上自 roof（遮挡格顶边所在行 + 1，整数）起向上的连续水柱顶（无水 = roof）。
+ * 遮挡格里没被块占的子格（斜坡、半砖上方）也可能有水：从遮挡格内越过干子格开始找。
+ */
 export function waterTop(fluid: PrecipColumnSource['fluid'], tx: number, roof: number): number {
+  const sx = tx * SUBCELLS + SUBCELLS / 2;
+  let sy = Math.max(0, (roof - 1) * SUBCELLS);
+  while (sy < roof * SUBCELLS && fluid.subAt(sx, sy) === 0) sy++;
   let top = roof;
-  for (let ty = Math.max(0, roof); ty < fluid.height; ty++) {
-    const a = fluid.cells[ty * fluid.width + tx] as number;
+  for (; sy < fluid.subHeight; sy++) {
+    const a = fluid.subAt(sx, sy);
     if (a < PRECIP_WATER_MIN) break;
-    top = ty + a / 255;
-    if (a < 255) break;
+    top = (sy + fluid.subTopAt(sx, sy)) / SUBCELLS;
+    if (a < FLUID_FULL) break;
+  }
+  return top;
+}
+
+/** 遮挡格格心竖线上最高的块顶（格内 0..1）：实体块取 topAt，平台取变体顶面。 */
+function blockTop(map: TileQuery, tx: number, ty: number): number {
+  let top = map.topAt(tx, ty, 0.5) ?? 0;
+  for (const p of map.pieces(tx, ty)) {
+    if (p.id !== TILE_BRANCH && map.registry.byId(p.id).collision === 'oneWay') top = Math.max(top, PLATFORM_VARIANTS[p.shape]!.top);
   }
   return top;
 }
 
 export function computePrecipColumn(src: PrecipColumnSource, tx: number): PrecipColumn {
   const top = roofTop(src.map, tx);
-  const roof = top > 0 && src.map.shapeAt(tx, top - 1) !== SHAPE_FULL ? top - 0.5 : top;
+  const roof = top > 0 ? top - 1 + blockTop(src.map, tx, top - 1) : top;
   const w = waterTop(src.fluid, tx, top);
   const water = w > top + 1e-3;
   return { roof, stop: water ? w : roof, snow: desertSnowFactor(src.deserts, tx, src.desertFactor), water };
@@ -69,6 +86,8 @@ export function computePrecipColumn(src: PrecipColumnSource, tx: number): Precip
 
 export interface PrecipColumns {
   readonly width: number;
+  /** 第 0 列的世界 x。 */
+  readonly origin: number;
   readonly texture: THREE.DataTexture;
   /** RGBA float，长度 width × 4。 */
   readonly data: Float32Array;
@@ -107,6 +126,7 @@ export function createPrecipColumns(src: PrecipColumnSource): PrecipColumns {
   texture.needsUpdate = true;
   return {
     width: W,
+    origin: 0,
     texture,
     data,
     at(tx) {

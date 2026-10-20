@@ -7,7 +7,14 @@ import { mulberry32 } from '../src/core/rng.ts';
 import type { Rect } from '../src/core/math.ts';
 import { bodyRect, createBody } from '../src/physics/body.ts';
 import type { Body, BodyOptions } from '../src/physics/body.ts';
-import { COLLISION_EPS, moveAndCollide, overlapsSolid, terrainHeightAt } from '../src/physics/tile-collision.ts';
+import { moveAndCollide, overlapsSolid, standingOnPlatformOnly, terrainHeightAt } from '../src/physics/tile-collision.ts';
+import { COLLISION_EPS } from '../src/world/collision-geometry.ts';
+import { createTileMap, type TileMap } from '../src/world/tile-map.ts';
+import { DEFAULT_TILES, TILE_PLATFORM, TILE_STONE } from '../src/world/tile-types.ts';
+import { SHAPE_HALF, SHAPE_SLOPE_R, pieceShapeCode, platformVariantCode } from '../src/world/tile-shapes.ts';
+import type { DefinitionPlatformWidth } from '../src/config/definition-kit.ts';
+import { HUMAN_BODY_HEIGHT } from '../src/config/player-form.ts';
+import { TRANSIT, TRANSIT_HULL_COLLIDER } from '../src/config/transit.ts';
 import { createPelicanEntity, createDummyEntity } from '../src/entities/entity.ts';
 import { LEVEL_LEGEND, TEST_LEVEL, parseLevel } from '../src/world/test-level.ts';
 import type { TileQuery } from '../src/world/tile-map.ts';
@@ -123,99 +130,24 @@ describe('Body: stepUp / groundSnap', () => {
   });
 });
 
-// ---------- 旧实现副本（012 版 tile-collision，FULL-only），用于逐位对照 ----------
+// ---------- 全整砖地图随机运动：不穿透、不嵌入、着地有真实支撑 ----------
 
-const LEGACY_EPS = 1e-4;
-function legacySpan(lo: number, hi: number): [number, number] {
-  return [Math.floor(lo + LEGACY_EPS), Math.ceil(hi - LEGACY_EPS) - 1];
-}
-function legacyColumnBlocked(map: TileQuery, tx: number, ty0: number, ty1: number): boolean {
-  for (let ty = ty0; ty <= ty1; ty++) if (map.collisionAt(tx, ty) === 'solid') return true;
-  return false;
-}
-function legacyMoveX(b: Body, map: TileQuery, dx: number): void {
-  if (dx === 0) return;
-  const [ty0, ty1] = legacySpan(b.y, b.y + b.height);
-  if (dx > 0) {
-    const oldRight = b.x + b.halfWidth;
-    const newRight = oldRight + dx;
-    for (let tx = Math.ceil(oldRight - LEGACY_EPS); tx < newRight; tx++) {
-      if (legacyColumnBlocked(map, tx, ty0, ty1)) {
-        b.x = tx - b.halfWidth;
-        b.vx = 0;
-        b.wallContact = 1;
-        return;
-      }
-    }
-  } else {
-    const oldLeft = b.x - b.halfWidth;
-    const newLeft = oldLeft + dx;
-    for (let tx = Math.floor(oldLeft + LEGACY_EPS) - 1; tx + 1 > newLeft; tx--) {
-      if (legacyColumnBlocked(map, tx, ty0, ty1)) {
-        b.x = tx + 1 + b.halfWidth;
-        b.vx = 0;
-        b.wallContact = -1;
-        return;
-      }
-    }
-  }
-  b.x += dx;
-}
-function legacyRowSupports(b: Body, map: TileQuery, ty: number, tx0: number, tx1: number): boolean {
-  for (let tx = tx0; tx <= tx1; tx++) {
-    const c = map.collisionAt(tx, ty);
-    if (c === 'solid') return true;
-    if (c === 'oneWay' && b.vy <= 0 && b.dropThroughTicks === 0) return true;
+/** 全整砖地图上的参考重叠判定：按格覆盖（含越界基岩），贴边不算。 */
+function fullTileOverlaps(r: Rect, map: TileQuery): boolean {
+  const eps = COLLISION_EPS;
+  for (let ty = Math.floor(r.y + eps); ty <= Math.ceil(r.y + r.h - eps) - 1; ty++) {
+    for (let tx = Math.floor(r.x + eps); tx <= Math.ceil(r.x + r.w - eps) - 1; tx++) if (map.collisionAt(tx, ty) === 'solid') return true;
   }
   return false;
 }
-function legacyMoveY(b: Body, map: TileQuery, dy: number): void {
-  const [tx0, tx1] = legacySpan(b.x - b.halfWidth, b.x + b.halfWidth);
-  if (dy < 0) {
-    const oldBottom = b.y;
-    const newBottom = oldBottom + dy;
-    for (let ty = Math.floor(oldBottom + LEGACY_EPS) - 1; ty + 1 > newBottom; ty--) {
-      if (legacyRowSupports(b, map, ty, tx0, tx1)) {
-        b.y = ty + 1;
-        b.vy = 0;
-        b.onGround = true;
-        return;
-      }
-    }
-    b.y = newBottom;
-  } else if (dy > 0) {
-    const oldTop = b.y + b.height;
-    const newTop = oldTop + dy;
-    for (let ty = Math.ceil(oldTop - LEGACY_EPS); ty < newTop; ty++) {
-      for (let tx = tx0; tx <= tx1; tx++) {
-        if (map.collisionAt(tx, ty) === 'solid') {
-          b.y = ty - b.height;
-          b.vy = 0;
-          return;
-        }
-      }
-    }
-    b.y = newTop - b.height;
-  } else if (b.vy <= 0) {
-    const snapped = Math.round(b.y);
-    if (Math.abs(b.y - snapped) <= LEGACY_EPS && legacyRowSupports(b, map, snapped - 1, tx0, tx1)) {
-      b.y = snapped;
-      b.onGround = true;
-    }
-  }
-}
-function legacyMoveAndCollide(b: Body, map: TileQuery, dt: number): void {
-  b.onGround = false;
-  b.wallContact = 0;
-  legacyMoveX(b, map, b.vx * dt);
-  legacyMoveY(b, map, b.vy * dt);
-  if (b.dropThroughTicks > 0) b.dropThroughTicks--;
-}
-function legacyOverlapsSolid(r: Rect, map: TileQuery): boolean {
-  const [tx0, tx1] = legacySpan(r.x, r.x + r.w);
-  const [ty0, ty1] = legacySpan(r.y, r.y + r.h);
-  for (let ty = ty0; ty <= ty1; ty++) {
-    for (let tx = tx0; tx <= tx1; tx++) if (map.collisionAt(tx, ty) === 'solid') return true;
+
+/** 着地时脚底恰在整数高度，且下方一行有身体覆盖到的实心或平台。 */
+function fullTileSupported(b: Body, map: TileQuery): boolean {
+  const eps = COLLISION_EPS;
+  const top = Math.round(b.y);
+  if (Math.abs(b.y - top) > eps) return false;
+  for (let tx = Math.floor(b.x - b.halfWidth + eps); tx <= Math.ceil(b.x + b.halfWidth - eps) - 1; tx++) {
+    if (map.collisionAt(tx, top - 1) !== 'none') return true;
   }
   return false;
 }
@@ -224,7 +156,7 @@ function snapshot(b: Body) {
   return [b.x, b.y, b.vx, b.vy, b.onGround, b.wallContact, b.dropThroughTicks];
 }
 
-describe('全 FULL 地图与旧实现逐位一致', () => {
+describe('全整砖地图随机运动', () => {
   const map = parseLevel(TEST_LEVEL.rows, TEST_LEVEL.legend).map;
   const SIZES: ReadonlyArray<[number, number]> = [
     [P.halfWidth, P.height],
@@ -234,7 +166,8 @@ describe('全 FULL 地图与旧实现逐位一致', () => {
   ];
 
   for (const snapCfg of [0, 0.5]) {
-    test(`TEST_LEVEL 2000 组随机初速/位置 × 90 tick（stepUp=groundSnap=${snapCfg}）`, () => {
+    // 求解器用模块级缓冲，两个物理体交替推进仍逐位一致，说明查询之间没有残留状态。
+    test(`TEST_LEVEL 2000 组随机初速/位置 × 90 tick 不嵌入、着地有支撑、交替推进结果一致（stepUp=groundSnap=${snapCfg}）`, () => {
       const rng = mulberry32(0x5105e + snapCfg * 10);
       let trials = 0;
       let landed = 0;
@@ -244,7 +177,7 @@ describe('全 FULL 地图与旧实现逐位一致', () => {
         const x = 1 + halfWidth + rng() * (map.width - 2 - 2 * halfWidth);
         const y = 1 + rng() * (map.height - 1 - height);
         const opts = { x, y, halfWidth, height, stepUp: snapCfg, groundSnap: snapCfg };
-        if (legacyOverlapsSolid(bodyRect(createBody(opts)), map)) continue;
+        if (fullTileOverlaps(bodyRect(createBody(opts)), map)) continue;
         trials++;
         const vx = (rng() * 2 - 1) * 40;
         const vy = (rng() * 2 - 1) * 30;
@@ -259,14 +192,18 @@ describe('全 FULL 地图与旧实现逐位一致', () => {
           else if (r < 0.08) a.dropThroughTicks = b.dropThroughTicks = 6;
           a.vy = Math.max(a.vy - G * DT, -MAX_FALL);
           b.vy = Math.max(b.vy - G * DT, -MAX_FALL);
-          legacyMoveAndCollide(a, map, DT);
+          moveAndCollide(a, map, DT);
           moveAndCollide(b, map, DT);
           assert.deepEqual(snapshot(b), snapshot(a), `trial ${trials} tick ${i}`);
-          if (b.onGround) landed++;
+          assert.equal(fullTileOverlaps(bodyRect(b), map), false, `trial ${trials} tick ${i} embedded at (${b.x},${b.y})`);
+          if (b.onGround) {
+            landed++;
+            assert.equal(fullTileSupported(b, map), true, `trial ${trials} tick ${i} grounded on air at (${b.x},${b.y})`);
+          }
           if (b.wallContact !== 0) walled++;
         }
         const rect = { x: x - 0.3 + rng(), y: y - 0.3 + rng(), w: 0.1 + rng() * 2, h: 0.1 + rng() * 2 };
-        assert.equal(overlapsSolid(rect, map), legacyOverlapsSolid(rect, map));
+        assert.equal(overlapsSolid(rect, map), fullTileOverlaps(rect, map));
       }
       assert.ok(landed > 1000 && walled > 100, `覆盖不足 landed=${landed} walled=${walled}`);
     });
@@ -590,6 +527,13 @@ describe('terrainHeightAt', () => {
     const half = mapOf(HALF_STEP);
     assert.equal(terrainHeightAt(half, 8.5, 1.5), 1.5);
     assert.equal(terrainHeightAt(half, 8.5, 1.4), null, 'yTop 在实心内部');
+    const floors = groundMap();
+    place(floors, 3, 2, 'C');
+    placePlatform(floors, 6, 2, 'full', 0.5);
+    assert.equal(terrainHeightAt(floors, 3.5, 2.2), 1, '上半砖下方的空隙里取地面');
+    assert.equal(terrainHeightAt(floors, 3.5, 3.5), 3);
+    assert.equal(terrainHeightAt(floors, 6.5, 2.8, 2, true), 2.5, '半砖顶平台');
+    assert.equal(terrainHeightAt(floors, 6.5, 2.8), 1);
     assert.throws(() => terrainHeightAt(ramp, Number.NaN, 2));
     assert.throws(() => terrainHeightAt(ramp, 2, 2, -1));
   });
@@ -675,5 +619,300 @@ describe('控制器：斜坡', () => {
     }
     assert.ok(flew, '应进入飞行');
     assert.ok(p.body.y > 4, `y=${p.body.y}`);
+  });
+});
+
+// ---------- 标准格子模型：多块同格、33 形态、平台变体、物件承托面、特殊构件 ----------
+
+/** 宽 w 高 h 的空地图，第 0 行整砖（地面顶 y=1）。 */
+function groundMap(w = 16, h = 14): TileMap {
+  const map = createTileMap(w, h, DEFAULT_TILES);
+  for (let x = 0; x < w; x++) map.set(x, 0, TILE_STONE);
+  return map;
+}
+function place(map: TileMap, tx: number, ty: number, ...shapes: string[]): void {
+  for (const id of shapes) assert.equal(map.placePiece(tx, ty, { id: TILE_STONE, shape: pieceShapeCode(id), deep: false }), true, `${id} at (${tx},${ty})`);
+}
+function placePlatform(map: TileMap, tx: number, ty: number, width: DefinitionPlatformWidth, top: 1 | 0.5): void {
+  assert.equal(map.placePiece(tx, ty, { id: TILE_PLATFORM, shape: platformVariantCode(width, top), deep: false }), true);
+}
+function smallBody(x: number, y: number, over: Partial<BodyOptions> = {}): Body {
+  return createBody({ x, y, halfWidth: 0.2, height: 1.2, stepUp: P.stepUp, groundSnap: P.groundSnap, ...over });
+}
+function settle(b: Body, map: TileQuery, ticks = 120): void {
+  for (let i = 0; i < ticks; i++) tick(b, map);
+}
+/** 每 tick 以 vx 走 n tick（含重力）。 */
+function walk(b: Body, map: TileQuery, vx: number, n: number): void {
+  for (let i = 0; i < n; i++) {
+    b.vx = vx;
+    tick(b, map);
+  }
+}
+const rect = (left: number, bottom: number, right: number, top: number): [number, number][] =>
+  [[left, bottom], [right, bottom], [right, top], [left, top]];
+
+describe('格子模型碰撞', () => {
+  test('上半砖楼板：下方空隙可走过，跳起在楼板底面顶头，楼板上站在整格顶', () => {
+    const map = groundMap();
+    for (let x = 4; x <= 8; x++) place(map, x, 2, 'C');
+    const under = smallBody(2, 1);
+    settle(under, map, 5);
+    walk(under, map, 6, 90);
+    assert.ok(under.x > 10, `楼板下被挡在 x=${under.x}`);
+    under.x = 6;
+    under.vy = 12;
+    moveAndCollide(under, map, 0.2);
+    assert.ok(Math.abs(under.y + under.height - 2.5) < 1e-9, `头顶应停在楼板底 2.5，y=${under.y}`);
+    assert.equal(under.vy, 0);
+    const above = smallBody(6, 6);
+    settle(above, map);
+    assert.equal(above.y, 3);
+  });
+
+  test('左/右半砖：挡在格中线，另一半空隙可落下、可站立', () => {
+    const map = groundMap();
+    for (let y = 1; y <= 3; y++) place(map, 5, y, 'K');
+    for (let y = 1; y <= 3; y++) place(map, 10, y, 'L');
+    const left = smallBody(8, 1);
+    settle(left, map, 5);
+    walk(left, map, -6, 60);
+    assert.ok(Math.abs(left.x - 5.7) < 1e-9, `K 右缘 5.5 + 半宽，x=${left.x}`);
+    assert.equal(left.wallContact, -1);
+    const right = smallBody(8, 1);
+    settle(right, map, 5);
+    walk(right, map, 6, 60);
+    assert.ok(Math.abs(right.x - 10.3) < 1e-9, `L 左缘 10.5 − 半宽，x=${right.x}`);
+    assert.equal(right.wallContact, 1);
+    for (const x of [5.75, 10.25]) {
+      const gap = smallBody(x, 8);
+      settle(gap, map);
+      assert.equal(gap.y, 1, `x=${x} 从半格空隙落到地面`);
+    }
+    const onTop = smallBody(5.25, 8);
+    settle(onTop, map);
+    assert.equal(onTop.y, 4, '站在左半砖柱顶');
+  });
+
+  test('半砖顶平台（j+0.5）与左右半平台：只在各自范围承托', () => {
+    const map = groundMap();
+    placePlatform(map, 3, 2, 'full', 0.5);
+    placePlatform(map, 6, 2, 'right', 1);
+    placePlatform(map, 9, 2, 'left', 0.5);
+    for (const [x, expected] of [[3.5, 2.5], [6.75, 3], [6.25, 1], [9.25, 2.5], [9.75, 1]] as const) {
+      const b = smallBody(x, 8);
+      settle(b, map);
+      assert.equal(b.y, expected, `x=${x}`);
+      assert.equal(b.onGround, true);
+      assert.equal(standingOnPlatformOnly(b, map), expected !== 1);
+    }
+    const drop = smallBody(3.5, 2.5);
+    settle(drop, map, 5);
+    drop.dropThroughTicks = 12;
+    settle(drop, map, 60);
+    assert.equal(drop.y, 1, '从半砖顶平台下穿到地面');
+  });
+
+  test('摆放物件承托面 0.85：可站立、可下穿，横向不挡', () => {
+    const map = groundMap();
+    map.building.placeObject({ objectId: 'bed', x: 4, y: 1, width: 2, height: 1, standTop: 0.85, light: null });
+    const b = smallBody(5, 6);
+    settle(b, map);
+    assert.ok(Math.abs(b.y - 1.85) < 1e-9, `y=${b.y}`);
+    assert.equal(standingOnPlatformOnly(b, map), true);
+    b.dropThroughTicks = 12;
+    settle(b, map, 60);
+    assert.equal(b.y, 1);
+    const walker = smallBody(2, 1);
+    settle(walker, map, 5);
+    walk(walker, map, 6, 60);
+    assert.ok(walker.x > 7, `物件挡住了地面行走 x=${walker.x}`);
+  });
+
+  test('控制器在物件承托面上按下+跳下穿，落回地面', () => {
+    const w = simWorld(['................', '..P.............', '################']);
+    w.map.building.placeObject({ objectId: 'bed', x: 1, y: 1, width: 3, height: 1, standTop: 0.85, light: null });
+    const p = getPlayer(w);
+    p.body.y = 3;
+    steps(w, 60);
+    assert.ok(Math.abs(p.body.y - 1.85) < 1e-9, `y=${p.body.y}`);
+    stepSim(w, input({ downHeld: true, jumpPressed: true, jumpHeld: true }));
+    assert.ok(p.body.dropThroughTicks > 0);
+    steps(w, 60);
+    assert.equal(p.body.y, 1);
+  });
+
+  test('特殊构件门挡住行走，低矮构件也不自动踏阶；移除后可通行', () => {
+    const map = groundMap();
+    const door = map.parts.add('door', { solids: [rect(6, 1, 6.2, 5)], supports: [] });
+    const b = smallBody(3, 1);
+    settle(b, map, 5);
+    walk(b, map, P.walkSpeed, 120);
+    assert.ok(Math.abs(b.x - 5.8) < 1e-9, `x=${b.x}`);
+    assert.equal(b.wallContact, 1);
+    map.parts.remove(door.id);
+    walk(b, map, P.walkSpeed, 60);
+    assert.ok(b.x > 7, `门移除后应通过 x=${b.x}`);
+
+    // 同为半格高：半砖可踏上，特殊构件只能跳上。
+    const low = groundMap();
+    place(low, 4, 1, 'B');
+    low.parts.add('hull', { solids: [rect(9, 1, 10, 1.5)], supports: [] });
+    const c = smallBody(2, 1);
+    settle(c, low, 5);
+    walk(c, low, P.walkSpeed, 240);
+    assert.ok(Math.abs(c.x - 8.8) < 1e-9, `走过半砖、停在构件前 x=${c.x}`);
+    assert.equal(c.y, 1);
+  });
+
+  test('多块同格：B+C、M+N+O+P 等同整砖，M+P 只占对角两个四分之一', () => {
+    const map = groundMap(20);
+    place(map, 5, 1, 'B', 'C');
+    place(map, 10, 1, 'M', 'N', 'O', 'P');
+    place(map, 15, 1, 'M', 'P');
+    for (const [x, expected] of [[5.5, 2], [10.5, 2], [15.25, 1.5], [15.75, 2]] as const) {
+      const b = smallBody(x, 8);
+      settle(b, map);
+      assert.equal(b.y, expected, `x=${x}`);
+    }
+    for (const wall of [5, 10]) {
+      const b = smallBody(wall - 2, 1, { stepUp: 0 });
+      settle(b, map, 5);
+      walk(b, map, 6, 60);
+      assert.ok(Math.abs(b.x - (wall - 0.2)) < 1e-9, `整格墙 ${wall}：x=${b.x}`);
+      assert.equal(overlapsSolid({ x: wall + 0.1, y: 1.6, w: 0.3, h: 0.3 }, map), true);
+    }
+    // 右下四分之一为空：矮身体从右侧钻到 M 的右缘才停。
+    const low = smallBody(18, 1, { height: 0.4, stepUp: 0 });
+    settle(low, map, 5);
+    walk(low, map, -6, 60);
+    assert.ok(Math.abs(low.x - 15.7) < 1e-9, `x=${low.x}`);
+    assert.equal(overlapsSolid({ x: 15.6, y: 1.1, w: 0.3, h: 0.3 }, map), false);
+    assert.equal(overlapsSolid({ x: 15.6, y: 1.6, w: 0.3, h: 0.3 }, map), true);
+  });
+
+  test('倒置斜面按局部底面顶头，台阶抬升不穿过低天花板', () => {
+    const map = groundMap();
+    place(map, 3, 3, 'D-U');
+    const b = smallBody(3.25, 2.8, { halfWidth: 0.05, height: 0.2, vy: 10 });
+    moveAndCollide(b, map, 0.2);
+    assert.ok(Math.abs(b.y - 3.5) < 1e-9, `底面在 x=3.3 处高 3.7，y=${b.y}`);
+    assert.equal(b.vy, 0);
+
+    const room = groundMap();
+    place(room, 5, 1, 'B');
+    for (const x of [3, 4, 5]) place(room, x, 2, 'B');
+    const tall = smallBody(2, 1, { height: 0.8 });
+    settle(tall, room, 5);
+    walk(tall, room, P.walkSpeed, 120);
+    assert.ok(Math.abs(tall.x - 4.8) < 1e-9 && tall.y === 1, `踏上台阶会顶穿天花板，应停在台阶前 x=${tall.x} y=${tall.y}`);
+    const short = smallBody(2, 1, { height: 0.4 });
+    settle(short, room, 5);
+    walk(short, room, P.walkSpeed, 120);
+    assert.equal(short.y, 1.5, '矮身体踏上台阶');
+  });
+
+  test('收尖舰体侧面不当楼梯：平台上的角色被挡住，仍站在平台上', () => {
+    const map = groundMap(30, 20);
+    map.parts.add('hull', { solids: [[[10, 1], [14, 1], [14, 6], [13.6, 9], [12, 12], [10.4, 9], [10, 6]]], supports: [] });
+    map.parts.add('deck', { solids: [], supports: [{ left: 6, right: 10.1, top: 6 }] });
+    const b = createBody({ x: 9.5, y: 6, halfWidth: 0.4, height: 2.8, stepUp: 1, groundSnap: 0.5 });
+    b.onGround = true;
+    for (let i = 0; i < 60; i++) {
+      b.vx = 4.8;
+      b.vy = -0.6;
+      moveAndCollide(b, map, DT);
+    }
+    // 舰体侧面在平台高度处略向外斜，挡住位置比 9.6 多出斜面在 EPS 内的偏移。
+    assert.ok(Math.abs(b.x - 9.6) < 1e-3, `x=${b.x}`);
+    assert.equal(b.y, 6);
+    assert.equal(b.wallContact, 1);
+    assert.equal(b.onGround, true);
+  });
+
+  test('人形角色从舰底下走过，舰体阻止顶头穿入并承托从顶部下落的角色', () => {
+    const map = groundMap(64, 32);
+    const hull = TRANSIT_HULL_COLLIDER.points.map(([x, y]): [number, number] => [x, y + 1]);
+    map.parts.add('hull', { solids: [hull], supports: [] });
+    const walker = createBody({ x: 20, y: 1, halfWidth: 0.4, height: HUMAN_BODY_HEIGHT });
+    for (let i = 0; i < 240; i++) {
+      walker.vx = 6;
+      walker.vy = -1;
+      moveAndCollide(walker, map, DT);
+    }
+    assert.ok(walker.x > 40, `${walker.x}`);
+    assert.equal(walker.y, 1);
+    const b = createBody({ x: TRANSIT.rocketX, y: 1, halfWidth: 0.4, height: 1, vy: 40 });
+    moveAndCollide(b, map, 0.5);
+    assert.ok(Math.abs(b.y + b.height - (TRANSIT.hullClearance + 1)) < 1e-9, `y=${b.y}`);
+    assert.equal(b.vy, 0);
+    b.y = TRANSIT.rocketHeight + 5;
+    b.vy = -40;
+    moveAndCollide(b, map, 0.5);
+    assert.ok(Math.abs(b.y - (TRANSIT.rocketHeight + 1)) < 1e-6, `y=${b.y}`);
+    assert.equal(b.onGround, true);
+  });
+
+  test('非整数高度的半宽承托线：上穿、下落站立、主动下穿', () => {
+    const map = groundMap();
+    map.parts.add('elevator', { solids: [], supports: [{ left: 2, right: 2.5, top: 2.25 }] });
+    const b = createBody({ x: 2.25, y: 1, halfWidth: 0.1, height: 0.5, vy: 10 });
+    moveAndCollide(b, map, 0.2);
+    assert.ok(Math.abs(b.y - 3) < 1e-9);
+    b.vy = -10;
+    moveAndCollide(b, map, 0.2);
+    assert.equal(b.y, 2.25);
+    assert.equal(standingOnPlatformOnly(b, map), true);
+    b.dropThroughTicks = 3;
+    b.vy = -3;
+    moveAndCollide(b, map, 0.2);
+    assert.ok(Math.abs(b.y - 1.65) < 1e-9);
+    assert.equal(b.dropThroughTicks, 2);
+    assert.equal(standingOnPlatformOnly(b, map), false);
+    b.x = 2.7;
+    b.y = 3;
+    b.vy = -10;
+    b.dropThroughTicks = 0;
+    moveAndCollide(b, map, 0.2);
+    assert.equal(b.y, 1, '承托线外直接落地');
+  });
+
+  test('高速移动不穿过薄墙、薄地板与薄天花板', () => {
+    const map = groundMap(16, 16);
+    map.parts.add('hull', { solids: [rect(6, 1, 6.01, 12), rect(1, 5, 12, 5.01), rect(1, 8, 12, 8.01)], supports: [] });
+    const b = createBody({ x: 3, y: 5.01, halfWidth: 0.1, height: 0.5, vx: 100 });
+    moveAndCollide(b, map, 0.1);
+    assert.ok(Math.abs(b.x - 5.9) < 1e-9);
+    assert.equal(b.vx, 0);
+    b.y = 7;
+    b.vy = -100;
+    moveAndCollide(b, map, 0.1);
+    assert.ok(Math.abs(b.y - 5.01) < 1e-9);
+    assert.equal(b.onGround, true);
+    b.vy = 100;
+    moveAndCollide(b, map, 0.1);
+    assert.ok(Math.abs(b.y - 7.5) < 1e-9);
+    assert.equal(b.vy, 0);
+  });
+
+  test('平台边缘同时踩住实体时不允许下穿；叠放的平台只穿脚下那层', () => {
+    const map = groundMap();
+    place(map, 4, 1, 'K');
+    placePlatform(map, 4, 1, 'right', 1);
+    const edge = smallBody(4.5, 2, { halfWidth: 0.1 });
+    moveAndCollide(edge, map, 0);
+    assert.equal(edge.onGround, true);
+    assert.equal(standingOnPlatformOnly(edge, map), false);
+    edge.x = 4.75;
+    assert.equal(standingOnPlatformOnly(edge, map), true);
+
+    placePlatform(map, 8, 3, 'full', 0.5);
+    placePlatform(map, 8, 2, 'full', 1);
+    const stacked = smallBody(8.5, 3.5, { vy: -3 });
+    stacked.onGround = true;
+    stacked.dropThroughTicks = 12;
+    moveAndCollide(stacked, map, 0.4);
+    assert.equal(stacked.y, 3);
+    assert.equal(stacked.onGround, true);
   });
 });

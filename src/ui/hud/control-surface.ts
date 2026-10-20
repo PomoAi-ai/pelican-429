@@ -21,6 +21,8 @@ export interface ControlSurfaceOptions {
   readonly onFocusGame: () => void;
   readonly onModeChange: (mode: ControlSurface['mode']) => void;
   readonly forceMobile: boolean;
+  /** 页面工具条没有公共“地图 M”时，由菜单提供地图入口（触屏没有 M 键）。 */
+  readonly map: boolean;
 }
 
 /** 全屏操作层；触摸只提交动作，手机瞄准由游戏自动选择目标。 */
@@ -65,7 +67,9 @@ export function createControlSurface(parent: HTMLElement, options: ControlSurfac
   const desktop = button(modes, '', '电脑 · 键鼠');
   const mobile = button(modes, '', '手机 · 横屏');
   const tools = node('div', 'control-tools', bar);
-  for (const [action, zh] of [['map', '地图'], ['help', '帮助'], ['settings', '设置']] as const) {
+  // 设置只走齿轮；地图在有公共“地图 M”的页面由工具条提供，每屏只留一个入口。
+  const menuActions = options.map ? [['map', '地图'], ['help', '帮助']] as const : [['help', '帮助']] as const;
+  for (const [action, zh] of menuActions) {
     button(tools, '', zh).addEventListener('click', () => {
       menu.open = false;
       options.onPress(action, `toolbar-${action}`);
@@ -212,12 +216,12 @@ export function createControlSurface(parent: HTMLElement, options: ControlSurfac
       failure.hidden = false;
     });
   }, { signal });
-  const home = button(bar, 'control-home', '首页 · 导航');
+  const home = button(bar, 'control-home', '站点导航');
   const zoom = createGameZoom(bar, options.canvas, options.onZoom);
   const pages = node('div', 'control-nav');
   pages.popover = 'auto';
   pages.setAttribute('role', 'navigation');
-  labels.push(() => pages.setAttribute('aria-label', t('资源导航')));
+  labels.push(() => pages.setAttribute('aria-label', t('站点导航')));
   home.popoverTargetElement = pages;
   const close = document.createElement('button');
   close.type = 'button';

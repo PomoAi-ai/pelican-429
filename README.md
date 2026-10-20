@@ -50,7 +50,7 @@
 | 场景展示 · 01 山体堡垒 | [打开](https://pelican429.pomoai.vip/?mode=game&level=facility&scene=fortress) | 自由探索 |
 | 场景展示 · 02 算力大教堂 | [打开](https://pelican429.pomoai.vip/?mode=game&level=facility&scene=cathedral) | 自由探索 |
 | 场景展示 · 03 光纤深渊 | [打开](https://pelican429.pomoai.vip/?mode=game&level=facility&scene=abyss) | 自由探索 |
-| 机房预览 | [本地打开](http://127.0.0.1:5174/?mode=facility) | 拖动平移、滚轮缩放 |
+| 机房预览 | [本地打开](http://127.0.0.1:5174/?mode=game&level=facility&scene=fortress&cam=free) | 开发版自由镜头：拖动环视、滚轮缩放 |
 | 自由世界 | [打开](https://pelican429.pomoai.vip/?mode=game) | 种子生成的瓦片世界 |
 | 手机操控 | [打开](https://pelican429.pomoai.vip/?mode=controls&level=test) | 桌面浏览器也强制手机布局 |
 | 角色展示场 | [本地打开](http://127.0.0.1:5174/?mode=showcase) | 角色、动作与地上地下对照 |

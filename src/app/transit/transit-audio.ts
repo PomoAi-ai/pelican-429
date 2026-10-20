@@ -88,14 +88,13 @@ export function createTransitAudio(signal: AbortSignal, reportError: (error: unk
   const hiss = (at: number, length: number) => voice(at, length, .28, 'noise', 0, null, 'bandpass', 3800, 1200);
   const chime = (at: number, notes: readonly number[]) => notes.forEach((note, i) => voice(at + i * .09, 1.4, .09, 'sine', note, null, 'lowpass', 6000, 3000));
 
-  let enabled = true, lastPhase: TransitPhase | null = null, nextStep = 0, lastPulse = -1, arrived = false;
-  const unlock = () => { if (enabled && context.state === 'suspended') void context.resume().catch(reportError); };
+  let lastPhase: TransitPhase | null = null, nextStep = 0, lastPulse = -1, arrived = false;
+  const unlock = () => { if (context.state === 'suspended') void context.resume().catch(reportError); };
   window.addEventListener('pointerdown', unlock, { signal });
   window.addEventListener('keydown', unlock, { signal });
-  const syncVolume = () => output.gain.setTargetAtTime(enabled && !document.hidden ? .58 : 0, context.currentTime, .04);
+  const syncVolume = () => output.gain.setTargetAtTime(document.hidden ? 0 : .58, context.currentTime, .04);
   document.addEventListener('visibilitychange', syncVolume, { signal });
   return {
-    toggle(): boolean { enabled = !enabled; syncVolume(); unlock(); return enabled; },
     update(visual: TransitVisual, time: number, phase: TransitPhase, walkSpeed: number): void {
       const now = context.currentTime, burst = Math.max(0, Math.min(1, (visual.warp - .18) / .25));
       const travelling = visual.travel >= 0;

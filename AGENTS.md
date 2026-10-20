@@ -12,7 +12,7 @@
 ## 命令
 
 ```sh
-npm run dev         # 开发服务器 127.0.0.1:5174，开发页（render-lab.html 等）同端口
+npm run dev         # 开发服务器 127.0.0.1:5174，实验页用 ?mode= 打开（如 ?mode=render-lab）
 npm run typecheck   # tsc --noEmit
 node --test test/<文件>.test.ts   # 单个测试文件，约 1 秒
 npm test            # 全量测试，约 60 秒
@@ -27,13 +27,14 @@ npm run build:full  # 含全部开发页，输出 dist-full
 - `src/core`、`src/config`：基础工具与调参。启动时由 `config/tuning.ts` 的 `validateTuning` 校验全部配置。
 - 逻辑层 `world → physics → combat → entities → sim`：只能向左依赖，不使用 three、DOM、`Date`、`Math.random`（随机数用 `core/rng.ts`），这样才能保证同一种子生成同一世界。
 - `src/render`、`src/ui`、`src/input`、`src/app`、`src/main.ts`：表现与装配。
-  - `src/app` 按子应用分目录（game、story、workspace、showcase、transit、residence…），`app/shell` 放路由与 `PageContext`；`src/render` 按主题分目录（tile、water、flora、grassy、webgpu…）。
+  - `src/app` 按子应用分目录（game、city、transit、story、workspace、showcase、lab…），`app/shell` 放路由与 `PageContext`；`src/render` 按主题分目录（tile、water、flora、grassy、webgpu…）。
   - 入口统一为 `mountX(ctx: PageContext)`，清理登记到 `ctx.onDispose`，不自行监听 `pagehide`。
   - `src/ui`：`react` 挂载与基础设施，`controls` 封装 Base UI 控件，`site` 站点页，`panels` 低频面板，`hud` 每帧更新的原生 HUD，`model` 纯逻辑（.ts），`styles` 主题与基础样式。
   - React、Base UI 与 `.tsx` 只出现在 `src/ui`。测试导入链不得触达 `.tsx`、`.css`，需要测试的逻辑放 `ui/model`。
   - 样式：`ui/styles/theme.css`、`base.css` 由 HTML link；其余 CSS 由使用它的模块 import（组件 CSS 由 .tsx，原生 HUD CSS 由装配它的 app 入口）。
 - `src/vendor/pelican-3d`：外部模型快照，不修改，由 `test/vendor-integrity.test.ts` 校验。需要适配时改包装层。
 - 分层规则由 `test/architecture.test.ts` 强制执行。
+- 结构原则见 `docs/architecture.md`：一个游戏一个实现、标准格子模型、一个渲染工厂、一个入口。
 - `task/` 下的 PLAN/REVIEW 是历史记录，其中的约束不自动适用于新任务；当前任务以用户最新的要求为准。
 
 ## 编码

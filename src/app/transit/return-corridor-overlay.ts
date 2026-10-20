@@ -1,4 +1,8 @@
 import * as THREE from 'three';
+import { TUNING } from '../../config/tuning.ts';
+import { createRenderer } from '../../render/stage/stage.ts';
+import { gameHost } from '../../ui/hud/mobile-game-viewport.ts';
+import { readPageParams } from '../shell/page-context.ts';
 import { createExhaustEmbers, updateCruiseEmbers } from '../../render/transit/transit-center-fx.ts';
 import { createPodBody } from '../../render/transit/transit-landing-pod.ts';
 import { createTimeCorridorMaterial } from '../../render/transit/transit-time-corridor.ts';
@@ -9,27 +13,34 @@ const CALM = .5;
 // 跳过走廊的入口加速段：机房页淡入时它已在巡航，城区页接着同样的巡航画面。
 const CRUISE_START = 1;
 /** 走廊着色器底色经 sRGB 编码后的颜色，两页跳转期间铺在页面上。 */
-export const RETURN_CORRIDOR_BASE = '#0d162d';
+const CORRIDOR_BASE = '#0d162d';
+/** 离开时穿梭画面淡入的时长，淡入完成才整页跳转。 */
+export const CORRIDOR_DEPART_SECONDS = 1.2;
 // Like the starship's travel shot, the camera sits on the pod axis below the heat shield looking up the corridor.
 const CAMERA_DROP = 18, FOV = 42;
 
 /**
- * 全屏穿梭层，自带画布与渲染器，跨整页跳转时两页各建一个；画面照星舰穿越镜头：同轴仰视着陆舱舱底的发热喷管、
+ * 全屏穿梭层，自带画布与渲染器（独立上下文，配置仍走渲染器工厂），跨整页跳转时两页各建一个；画面照星舰穿越镜头：同轴仰视着陆舱舱底的发热喷管、
  * 沿轴尾流、火花与环绕边光，其后是走廊。
  * shown 为 true 时立即盖满；否则先隐藏着建好渲染器并画一帧，show 时才淡入——新建 WebGL 上下文要卡顿一两秒，留在加载期间。
  */
 export function createReturnCorridorOverlay(parent: HTMLElement, shown: boolean) {
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   const root = document.createElement('div');
-  root.style.cssText = `position:fixed;inset:0;z-index:30;background:${RETURN_CORRIDOR_BASE};pointer-events:none;opacity:${shown ? 1 : 0}`;
-  root.innerHTML = '<canvas aria-hidden="true" style="display:block;width:100%;height:100%"></canvas>'
-    + '<p role="status" aria-live="polite" style="position:absolute;left:0;right:0;bottom:max(24px,env(safe-area-inset-bottom));margin:0;text-align:center;font:12px/1.6 ui-monospace,\'SF Mono\',Menlo,monospace;letter-spacing:.12em;color:#b9d4ff99"></p>';
+  root.style.cssText = `position:fixed;inset:0;z-index:30;background:${CORRIDOR_BASE};pointer-events:none;opacity:${shown ? 1 : 0}`;
+  root.innerHTML = '<p role="status" aria-live="polite" style="position:absolute;left:0;right:0;bottom:max(24px,env(safe-area-inset-bottom));margin:0;text-align:center;font:12px/1.6 ui-monospace,\'SF Mono\',Menlo,monospace;letter-spacing:.12em;color:#b9d4ff99"></p>';
   parent.append(root);
-  const canvas = root.querySelector('canvas')!;
   const status = root.querySelector('p')!;
-  const renderer = new THREE.WebGLRenderer({ canvas, antialias: false });
+  const renderer = createRenderer('game', TUNING, readPageParams().debug);
+  const canvas = renderer.domElement;
+  canvas.setAttribute('aria-hidden', 'true');
+  canvas.style.cssText = 'display:block;width:100%;height:100%';
+  root.prepend(canvas);
+  // 全屏走廊不需要高像素比与阴影；着色器按中性色调映射、曝光 1 调色。
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1));
+  renderer.shadowMap.enabled = false;
   renderer.toneMapping = THREE.NeutralToneMapping;
+  renderer.toneMappingExposure = 1;
   const material = createTimeCorridorMaterial();
   material.uniforms.uCenter!.value.set(.5, .5);
   const geometry = new THREE.PlaneGeometry(2, 2);
@@ -95,12 +106,14 @@ export function createReturnCorridorOverlay(parent: HTMLElement, shown: boolean)
   if (shown) loop(start);
   else draw(start);
   return {
-    /** 从隐藏状态淡入，穿梭画面从巡航开头播起。 */
-    show(seconds: number): void {
+    /** 从隐藏状态淡入（穿梭画面从巡航开头播起），淡入完成后整页跳转；目的页带 landing=1，以同一画面开场。 */
+    depart(href: string): void {
       start = performance.now();
       loop(start);
-      root.style.transition = `opacity ${seconds}s ease-in`;
+      root.style.transition = `opacity ${CORRIDOR_DEPART_SECONDS}s ease-in`;
       root.style.opacity = '1';
+      gameHost().document.body.style.background = CORRIDOR_BASE;
+      window.setTimeout(() => gameHost().location.assign(href), CORRIDOR_DEPART_SECONDS * 1000);
     },
     progress(phase: string, completed?: number, total?: number): void {
       status.textContent = total === undefined ? phase : `${phase} · ${completed} / ${total}`;

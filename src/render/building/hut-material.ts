@@ -5,7 +5,7 @@
  *   顺风偏移 + 本地摆动，下垂端略抬（钟摆）；
  * - smoke：烟囱烟团。几何为 HUT_SMOKE_PUFFS 个低多边形球（aPuff = 相位, 随机），网格放在烟囱口；着色器按 uWeatherTime
  *   推进年龄：上升、变大、随 windSway(烟囱 x) 顺风飘移，首尾淡入淡出（透明、不写深度、不投影）。
- * 三者都是 MeshStandardMaterial，light-texture（光照图）与 cloud-shadow（云影）按各自的链式 onBeforeCompile 自动挂接；
+ * 三者都是 MeshStandardMaterial，light-field-material（光场）与 cloud-shadow（云影）按各自的链式 onBeforeCompile 自动挂接；
  * 自发光写入 totalEmissiveRadiance，光照图不会把它压暗。
  */
 import * as THREE from 'three';

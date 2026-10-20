@@ -1,24 +1,24 @@
 /**
  * 物理体与格子水的接触：浸没比例与水中受力（纯函数，逻辑层）。
- * 单格水高：本格有水且上方格也有水 → 满格 1；否则 amount / FLUID_FULL（水贴在格子底部）。
+ * 水按 1/4 子格存储：取样竖线所在子列逐子格累加水柱（子格内水面见 FluidQuery.subTopAt），实心子格里没有水。
  */
 import type { SwimTuning } from '../config/tuning.ts';
 import type { FluidQuery } from '../world/fluid-map.ts';
-import { FLUID_FULL } from '../world/fluid-map.ts';
+import { SUBCELLS } from '../world/tile-shapes.ts';
 import type { Body } from './body.ts';
 
-/** 第 tx 列中 [y0, y1] 区间内的水柱总高度（瓦片）。 */
-export function waterSpanInColumn(f: FluidQuery, tx: number, y0: number, y1: number): number {
+/** 竖线 x 上 [y0, y1] 区间内的水柱总高度（瓦片）。 */
+export function waterSpanInColumn(f: FluidQuery, x: number, y0: number, y1: number): number {
   if (!(y1 > y0)) return 0;
-  const ty0 = Math.max(0, Math.floor(y0));
-  const ty1 = Math.min(f.height - 1, Math.ceil(y1) - 1);
+  const sx = Math.floor(x * SUBCELLS);
+  const sy0 = Math.max(0, Math.floor(y0 * SUBCELLS));
+  const sy1 = Math.min(f.subHeight - 1, Math.ceil(y1 * SUBCELLS) - 1);
   let span = 0;
-  for (let ty = ty0; ty <= ty1; ty++) {
-    const a = f.amountAt(tx, ty);
-    if (a === 0) continue;
-    const h = f.amountAt(tx, ty + 1) > 0 ? 1 : a / FLUID_FULL;
-    const lo = Math.max(y0, ty);
-    const hi = Math.min(y1, ty + h);
+  for (let sy = sy0; sy <= sy1; sy++) {
+    const top = f.subTopAt(sx, sy);
+    if (top === 0) continue;
+    const lo = Math.max(y0, sy / SUBCELLS);
+    const hi = Math.min(y1, (sy + top) / SUBCELLS);
     if (hi > lo) span += hi - lo;
   }
   return span;
@@ -30,9 +30,9 @@ export function submersion(b: Body, f: FluidQuery): number {
   const y1 = b.y + b.height;
   const off = b.halfWidth / 2;
   const sum =
-    waterSpanInColumn(f, Math.floor(b.x - off), y0, y1) +
-    waterSpanInColumn(f, Math.floor(b.x), y0, y1) +
-    waterSpanInColumn(f, Math.floor(b.x + off), y0, y1);
+    waterSpanInColumn(f, b.x - off, y0, y1) +
+    waterSpanInColumn(f, b.x, y0, y1) +
+    waterSpanInColumn(f, b.x + off, y0, y1);
   const s = sum / 3 / b.height;
   return s <= 0 ? 0 : s >= 1 ? 1 : s;
 }

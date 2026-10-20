@@ -1,5 +1,5 @@
 Precise outfit replacement on attached reference, keep EXACT same HEAD SIZE, face, hairstyle, body proportions and four view layout, do not resize head or lengthen any limbs. This is the correct approved3.3head game male. Replace only fantasy costume with everyday outfit: RED fitted cableknit crewneck sweater (hem at same waist height as existing belt), slim BLUE cuffed denim jeans with existing leg silhouette, CREAM sneakers replacing boots. Remove ALL gold embroidery and fantasy collar/accessories. Preserve exact handsome chestnut layered anime hair and amber eyes, skin, smile, all four poses and shoe sole baseline. Bright clean anime game3D illustration. White background. Fourlabels FRONT RIGHT BACK FRONT45 without D1. NO RULER, no lines, no extra insets. DO NOT shrink the head. This is a clothing-only edit; fully retain the original illustration's face/body ratio.
 
 Method: built-in image_gen; reference: grassy-human-redesign.png.
-Source: public/art-library/core-cast/grassy-human-classic-handsome.png
+Source: public/catalog/core-cast/grassy-human-classic-handsome.png
 Ruler: separate equal-spacing SVG layout, no stretching of artwork.

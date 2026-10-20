@@ -9,8 +9,8 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT/'scripts/blender_npcs'))
 from studio import setup_studio
 H = 2.6
-OUT = ROOT/'public/characters/enemies/gatekeeper'
-SOURCE = ROOT/'assets/characters/enemies/gatekeeper'
+OUT = ROOT/'public/characters/enemies/omi'
+SOURCE = ROOT/'assets/characters/enemies/omi'
 PARTS = []
 JOINTS = {'root': (0,0,0), 'pelvis': (0,0,1.02), 'chest': (0,0,1.12),
           'head': (0,0,1.76), 'eye': (0,0,2.16)}

@@ -1,0 +1,58 @@
+{
+  "schema": "grassy-reference-proportion-check.v1",
+  "source": "public/catalog/core-cast/grassy-male-tight-base.png",
+  "sourceSha256": "fccd2d3a251ee73d9f3a44134e666a05f6a5e061277917f05d3e3f386c2584a4",
+  "imageSize": [1536, 1024],
+  "method": "人工选择解剖关键点后，以 Python/Pillow 读取原图局部 RGB 像素复核轮廓；未按目标头身比反算测量点。",
+  "coordinateConvention": "图像左上角为原点，像素 y 向下。头长为无发颅顶到下巴最下轮廓，不含脖子；全高为颅顶到最低脚底轮廓。",
+  "targetHeads": 3.3,
+  "toleranceHeads": 0.08,
+  "acceptanceInterval": [3.22, 3.38],
+  "toleranceScope": "本次二维参考图的实测点估计容差，并非三维模型或所有既有角色的验收标准。",
+  "readingUncertaintyPixels": 2,
+  "views": {
+    "front": {
+      "crownY": 95,
+      "chinY": 317,
+      "soleY": 831,
+      "headPixels": 222,
+      "totalPixels": 736,
+      "ratio": 3.315315315315315,
+      "referenceRatioStatus": "point_estimate_within_tolerance",
+      "evidence": "头顶局部首行明显深色轮廓在 y95；正中下巴深色轮廓到 y317，y318 为颈部过渡；脚底深色轮廓到 y831，y832 无。"
+    },
+    "right": {
+      "crownY": 91,
+      "chinY": 312,
+      "soleY": 831,
+      "headPixels": 221,
+      "totalPixels": 740,
+      "ratio": 3.3484162895927603,
+      "referenceRatioStatus": "point_estimate_within_tolerance",
+      "evidence": "头顶首行明显深色轮廓在 y91；下巴主轮廓集中于 y311，最下轮廓到 y312，y313 无；脚底深色轮廓到 y831，y832 无。"
+    },
+    "back": {
+      "referenceRatioStatus": "not_measurable_from_chin",
+      "reason": "背面下巴不可见，未以颈根替代下巴计算头身比。"
+    },
+    "front45": {
+      "referenceRatioStatus": "not_certified",
+      "reason": "用于体积与身份参考；相机方位、透视及三维角度未经验证。"
+    }
+  },
+  "overallStatus": "front_and_right_2d_point_estimates_within_tolerance",
+  "threeDimensionalProportionsCertified": false,
+  "poseConsistencyCertified": false,
+  "textureCertified": false,
+  "clothingSeparationCertified": false,
+  "completeBodyUnderClothingCertified": false,
+  "limitations": [
+    "结果保留约正负2像素选点误差；小数仅为公式计算结果，不代表相同精度，也不证明整个误差区间均在容差内。",
+    "侧视手臂投影与躯干重叠，无法凭该视图确认三维腋下和手臂间隙；低A姿需要装配后的正侧背视图核对。",
+    "侧膝与胫骨曲线仍需三维骨位和实际屈伸检查；本图没有通过骨架或动作验证。",
+    "前45度图的肩胯、双脚和相机旋转没有经过三维相机认证。",
+    "T恤短裤是二维遮盖与体型参考，不证明服装独立，也不证明服装内部存在完整身体。",
+    "插画包含明暗，不是已验证的无光照材质贴图。",
+    "此检查未认证拓扑、头发独立性、颈部接缝、皮肤覆盖范围或游戏3.1格可见尺寸；这些需要对实际导出模型另行检查。"
+  ]
+}

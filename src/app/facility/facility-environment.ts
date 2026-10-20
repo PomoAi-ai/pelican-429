@@ -1,5 +1,5 @@
 import { TUNING } from '../../config/tuning.ts';
-import type { FacilitySceneId } from '../../config/facility-scenes.ts';
+import type { FacilityChapterId } from '../../config/facility-scenes.ts';
 import type { GrassyAnimatedVariant } from '../../config/grassy.ts';
 import { createFixedStepper } from '../../core/fixed-step.ts';
 import type { Rect } from '../../core/math.ts';
@@ -19,7 +19,7 @@ import { DEFAULT_WATER_PALETTE } from '../../config/water-palettes.ts';
 import { readPageParams } from '../shell/page-context.ts';
 
 /** grassyVariant 为 null 时只展示鹈鹕；其他档位须已通过 loadGrassyAsset 加载。 */
-export async function createFacilityEnvironment(stage: Stage, sceneId: FacilitySceneId, options: { enemies: boolean; grassyVariant: GrassyAnimatedVariant | null }) {
+export async function createFacilityEnvironment(stage: Stage, sceneId: FacilityChapterId, options: { enemies: boolean; grassyVariant: GrassyAnimatedVariant | null }) {
   const disposers: Array<() => void> = [];
   const dispose = (): void => { for (const release of disposers.splice(0).reverse()) release(); };
   try {
@@ -38,7 +38,6 @@ export async function createFacilityEnvironment(stage: Stage, sceneId: FacilityS
     disposers.push(disposeEnemyAssets);
     await Promise.all([...new Set(world.entities.flatMap((entity) => entity.enemy ? [entity.enemy.kind] : []))].map(kind => loadEnemyAsset(kind)));
     const ground = levelGroundColumns(level);
-    if (sceneId === 'original') stage.addBackdrop({ width: level.map.width, height: level.map.height, surface: ground });
     const worldViews = createWorldViews({
       caveBackground: null,
       scene: stage.scene, level, fish: world.fish, ground, wind: world.env.wind,
@@ -52,8 +51,7 @@ export async function createFacilityEnvironment(stage: Stage, sceneId: FacilityS
     const rig = createPelicanRig({ scale: TUNING.render.pelicanScale });
     disposers.push(() => rig.dispose());
     const entities = createEntityViews(stage, level, disposers, () => world.entities, worldViews.treeRide, world.env.wind, rig, options.grassyVariant);
-    const lighting = createWorldLighting(level, world, DEFAULT_WATER_PALETTE, disposers,
-      sceneId === 'original' ? TUNING.render.lighting : facilityGameTuning().render.lighting);
+    const lighting = createWorldLighting(level, world, DEFAULT_WATER_PALETTE, disposers, facilityGameTuning().render.lighting);
     const stepper = createFixedStepper(TUNING.sim);
     let frame = 0;
     return {
@@ -63,8 +61,8 @@ export async function createFacilityEnvironment(stage: Stage, sceneId: FacilityS
         worldViews.update(view, time, dt, alpha);
         precip.update(view, time, dt, world.env.precip, world.env);
         entities.views.sync(world.entities, alpha, dt, view);
+        lighting.worldLight.update(stage.scene, ++frame, view);
         lighting.updateAura(getPlayer(world), alpha, dt);
-        lighting.worldLight.update(stage.scene, ++frame);
       },
       dispose,
     };

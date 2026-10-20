@@ -4,6 +4,7 @@ import { LANDING_POD, TRANSIT, TRANSIT_HATCH, TRANSIT_LANDING, TRANSIT_PLANTER_X
 import { createTransitCenterFx } from './transit-center-fx.ts';
 import { glslShort as g, glslVec3 as v3 } from './transit-exhaust.ts';
 import { createTransitSurface } from './transit-surface.ts';
+import type { Stage, StageRenderer } from '../stage/stage.ts';
 
 export interface TransitVisual {
   elevatorY: number;
@@ -646,7 +647,7 @@ function informationTerminal(parent: THREE.Object3D, p: Palette, x: number) {
   display.rotation.x = -.14;
 }
 
-function createForecourt(root: THREE.Group, p: Palette, streetEnds: boolean): void {
+function createForecourt(root: THREE.Group, p: Palette): void {
   // Paving overhangs the walkway clamp so the runner never reaches the street end caps.
   const left = TRANSIT.walkwayMinX - TRANSIT.pavingMargin, right = TRANSIT.walkwayMaxX + TRANSIT.pavingMargin, length = right - left, middle = (left + right) / 2;
   const slabs: Point[] = [], lights: Point[] = [];
@@ -655,21 +656,10 @@ function createForecourt(root: THREE.Group, p: Palette, streetEnds: boolean): vo
   instanced(root, 'city pavement slab', new RoundedBoxGeometry(1.97, .53, 1.97, 2, .035), p.ground, slabs);
   instanced(root, 'pavement guidance light', new RoundedBoxGeometry(.65, .08, .025, 2, .008), p.cyan, lights);
   box(root, 'launch apron fascia', [middle, -.9, 4.95], [length, .74, .16], p.dark, .04);
-  // The quay wall runs below the frame so the street reads as solid ground, not a floating slab;
-  // a hosting city keeps its own underground visible instead and only gets low curbs where the paving meets it.
-  if (streetEnds) box(root, 'street quay wall', [middle, -7.3, 4.6], [length, 12, .5], p.ground, .04);
-  else for (const edge of [left, right]) {
+  // The city's underground stays visible below the paving; low curbs mark where the paving meets the city street.
+  for (const edge of [left, right]) {
     box(root, 'forecourt pier curb', [edge, .14, 4.48], [.5, .34, 1.1], p.satin, .06);
     box(root, 'forecourt pier curb light', [edge, .32, 4.48], [.52, .03, .9], p.cyan, .01);
-  }
-  if (streetEnds) for (const [edge, side] of [[left, -1], [right, 1]] as const) {
-    const x = edge - side * .45;
-    box(root, 'street end fascia', [edge + side * .08, -6.65, 1], [.16, 13.3, 8.1], p.dark, .04);
-    box(root, 'street end bulkhead', [x, .6, .8], [.9, 1.2, 7.4], p.satin, .08);
-    box(root, 'street end bulkhead light', [x, 1.22, .8], [.94, .05, 7.2], p.cyan, .015);
-    box(root, 'street end pylon', [x, 1.6, 4.3], [.9, 3.2, .7], p.dark, .1);
-    box(root, 'street end pylon light', [x, 1.6, 4.67], [.12, 2.7, .03], p.cyan, .01);
-    box(root, 'street end pylon cap', [x, 3.28, 4.3], [1.0, .16, .8], p.silver, .04);
   }
   const canopy = new THREE.Group();
   canopy.name = 'compact orbital waiting shelter';
@@ -724,10 +714,10 @@ function createLaunchFlash(rocket: THREE.Group, chargeMaterial: THREE.MeshStanda
 }
 
 /** streetEnds: false when the street continues into a surrounding scene instead of ending in bulkheads. */
-export function createTransitCenterModel(renderer: THREE.WebGLRenderer, streetEnds = true) {
+export function createTransitCenterModel(stage: Pick<Stage<StageRenderer>, 'createPmrem'>) {
   const root = new THREE.Group();
   root.name = 'orbital transit center';
-  const surface = createTransitSurface(new THREE.PMREMGenerator(renderer));
+  const surface = createTransitSurface(stage.createPmrem());
   const facilityPalette = palette(), rocketPalette = createHullPalette(surface);
   for (const material of [facilityPalette.silver, facilityPalette.satin]) {
     material.envMap = surface.environment;
@@ -735,7 +725,7 @@ export function createTransitCenterModel(renderer: THREE.WebGLRenderer, streetEn
   }
   const launchSite = new THREE.Group();
   root.add(launchSite);
-  createForecourt(launchSite, facilityPalette, streetEnds);
+  createForecourt(launchSite, facilityPalette);
   const elevator = createTower(launchSite, facilityPalette);
   const bridge = createBridge(launchSite, facilityPalette);
   const clamps = createPad(launchSite, facilityPalette);

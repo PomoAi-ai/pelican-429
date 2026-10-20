@@ -18,11 +18,7 @@ function element<T extends keyof HTMLElementTagNameMap>(tag: T, className: strin
 
 function chapterLink(parent: HTMLElement, id: FacilityChapterId, label: string) {
   const link = element('a', 'facility-chapter-link', parent);
-  const params = new URLSearchParams(location.search);
-  if (params.get('free') === '1') {
-    params.set('scene', id);
-    link.href = `./?${params}`;
-  } else link.href = `./?mode=game&level=facility&scene=${id}`;
+  link.href = `./?mode=game&level=facility&scene=${id}`;
   link.textContent = label;
   return link;
 }
@@ -60,7 +56,7 @@ export function createFacilityChapterHud(parent: HTMLElement, id: FacilityChapte
     number.textContent = `${t('场景', 'facility')} ${scene.number}`;
     title.textContent = t(scene.name, 'facility');
     description.textContent = t('场景预览 · 自由探索');
-    resetLink.textContent = t('重置位置');
+    resetLink.textContent = t('回到起点');
     if (nextLink && chapter.next) nextLink.textContent = t('下一场景 · {name} →').replace('{name}', t(FACILITY_SCENES[chapter.next].name, 'facility'));
     hints.forEach((sync) => sync());
     exit.textContent = t('出口');

@@ -13,20 +13,29 @@ import { FACILITY_CHAPTERS, parseFacilityChapter } from '../../config/facility-s
 import type { FacilityChapterId } from '../../config/facility-scenes.ts';
 import { createFacilityLevel } from '../../world/facility-level.ts';
 import { createBossArenaLevel } from '../../world/boss-arena.ts';
-import { createHarborLevel } from '../../world/harbor-level.ts';
+import { parseAppMode } from '../../config/app-mode.ts';
+import type { ResidenceVariant } from '../../config/residence.ts';
+
+/**
+ * 游戏世界的启动选择：主世界默认入口是城区（harbor，交通中心在它左侧），free=1 的主世界网址直接进原野；
+ * 家园页的住宅场景是原版住宅城区（original）；其余关卡见 loadGameLevel。发布版限制已在入口校验过。
+ */
+export function parseGameLaunch(params: URLSearchParams): { city: ResidenceVariant | null } {
+  const mode = parseAppMode(params, false);
+  if (mode === 'game' && params.get('level') === null && params.get('free') !== '1') return { city: 'harbor' };
+  return { city: mode === 'homestead' && params.get('scene') === 'residence' ? 'original' : null };
+}
 
 /** 网址是游戏关卡的输入边界；组合关卡与展示卡调用同一个世界工厂。 */
 export function loadGameLevel(params: URLSearchParams): { level: LevelData; ground: Int16Array; compositions: readonly WorldComposition[]; chapter: FacilityChapterId | null } {
   const name = params.get('level');
-  if (name === 'harbor') {
-    const level = createHarborLevel();
-    return { level, ground: levelGroundColumns(level), compositions: [], chapter: null };
-  }
+  // 原野只认 ?mode=game&free=1，带关卡的同时带 free=1 是已删除的旧别名。
+  if (name !== null && params.get('free') === '1') throw new Error(`原野网址不带 level 参数：level=${name}&free=1`);
   if (name === 'boss-arena') {
     const level = createBossArenaLevel();
     return { level, ground: levelGroundColumns(level), compositions: [], chapter: null };
   }
-  if (name === 'facility' && params.get('free') !== '1') {
+  if (name === 'facility') {
     const chapter = parseFacilityChapter(params);
     const definition = FACILITY_CHAPTERS[chapter];
     const level = { ...createFacilityLevel(chapter), spawn: definition.spawn };
@@ -36,7 +45,7 @@ export function loadGameLevel(params: URLSearchParams): { level: LevelData; grou
     const level = parseLevel(TEST_LEVEL.rows, TEST_LEVEL.legend);
     return { level, ground: levelGroundColumns(level), compositions: [], chapter: null };
   }
-  if (name !== null && name !== 'composition' && name !== 'facility') throw new Error(`未知游戏关卡：${name}（支持 test、composition、facility、boss-arena、harbor）`);
+  if (name !== null && name !== 'composition') throw new Error(`未知游戏关卡：${name}（支持 test、composition、facility、boss-arena）`);
   const rawSeed = params.get('seed');
   const seed = rawSeed === null ? TUNING.worldgen.seed : parseSeed(rawSeed);
   if (name === 'composition') {

@@ -19,8 +19,6 @@ export interface FreeWorldToolbarOptions {
   onSeed(seed: number, size: FreeWorldSize): void;
   onGm(on: boolean): void;
   onRegion(id: string): boolean;
-  /** null 表示该场景没有设置面板，不显示 GM 设置按钮。 */
-  onSettings: (() => void) | null;
   onFocus(): void;
   /** 点按钮、改下拉后把焦点还给画布，键盘立即驱动角色。 */
   onFocusGame(): void;
@@ -89,7 +87,6 @@ function FreeWorldToolbarView({ options, region: regionStore }: { options: FreeW
           options.onFocusGame();
         }}>{t('GM 工具')}</Switch>
       </span>
-      {options.onSettings && <button type="button" hidden={!gm} onClick={options.onSettings}>{t('GM 设置')}</button>}
       <span className="free-world-hint">{t('同种子与规模可复现 · 步行跨区 / 快速旅行不重置')}</span>
     </form>
   );

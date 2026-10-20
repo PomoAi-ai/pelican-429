@@ -10,6 +10,11 @@ const HAZE_FRAGMENT = /* glsl */ `
     gl_FragColor.rgb = mix(gl_FragColor.rgb, fogColor, fogFactor);
   #endif`;
 
+/** 与着色器同式的静态雾量：平面 z 上的物体（起雾点在 z=.3，场景雾 near = 镜头 z − .3），给不接受雾的环境层直接混色。 */
+export function depthHazeAmount(z: number): number {
+  return Math.min(1 - 2 ** (-Math.max(.3 - z, 0) / DEPTH_HAZE_HALF_DISTANCE), HAZE_MAX);
+}
+
 export function applyDepthHaze(material: Material): void {
   const compile = material.onBeforeCompile, key = material.customProgramCacheKey;
   material.onBeforeCompile = (shader, renderer) => {

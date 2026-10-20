@@ -1,8 +1,10 @@
-:root { font-family: Inter, "PingFang SC", "Microsoft YaHei", sans-serif; color: #243c4a; background: #dcecf2; font-synthesis: none; }
+:root { font-family: Inter, "PingFang SC", "Microsoft YaHei", sans-serif; color: #243c4a; background: #dcecf2; color-scheme: light; font-synthesis: none; }
 * { box-sizing: border-box; }
-body { margin: 0; }
-#maglev-app, #maglev-stage { position: fixed; inset: 0; }
-#maglev-stage canvas { display: block; width: 100%; height: 100%; outline: none; }
+/* 入口骨架给 body 设了站点深色，本页沿用上面的浅色。 */
+body { margin: 0; background: none; color: inherit; }
+/* 站点顶栏固定在页面顶部，场景从顶栏下方开始。 */
+#maglev-app, #maglev-stage { position: fixed; inset: var(--dev-nav-height) 0 0; }
+#maglev-stage canvas { display: block; width: 100%; height: 100%; outline: none; cursor: auto; }
 button, input, summary, a { -webkit-tap-highlight-color: transparent; }
 button { font: inherit; color: inherit; border: 1px solid #648c9c40; border-radius: 12px; padding: 12px 18px; background: #f5fbfbe8; cursor: pointer; touch-action: none; }
 button:hover { background: white; }

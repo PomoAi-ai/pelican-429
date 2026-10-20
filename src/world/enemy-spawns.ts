@@ -2,9 +2,12 @@ import { ENEMY_RULES, type EnemyKind } from '../config/enemy-rules.ts';
 import { hashU32 } from '../core/rng.ts';
 import { overlaps } from '../core/math.ts';
 import type { LevelData } from './level.ts';
-import { SHAPE_FULL } from './tile-shapes.ts';
+import { FULL_MASK, pieceMask, platformVariantCode } from './tile-shapes.ts';
 
 export type EnemySpawn = NonNullable<LevelData['enemies']>[number];
+
+/** 顶齐整宽平台的掩码；落脚格须是整格实体或这种平台。 */
+const FULL_PLATFORM = pieceMask('oneWay', platformVariantCode('full', 1));
 
 /** 出生要容纳完整身体，地面单位还要有连续落脚面，避免刚出现就卡墙或落水。 */
 export function enemySpawnFits(level: Pick<LevelData, 'map' | 'fluid' | 'lethalCoolant' | 'safeZones'>, kind: EnemyKind, x: number, y: number): boolean {
@@ -21,7 +24,7 @@ export function enemySpawnFits(level: Pick<LevelData, 'map' | 'fluid' | 'lethalC
     for (let ty = Math.floor(y); ty < Math.ceil(y + rule.height); ty++) {
       if (map.collisionAt(tx, ty) === 'solid' || fluid.amountAt(tx, ty) > 0) return false;
     }
-    if (kind !== 'watchWasp' && (map.collisionAt(tx, y - 1) === 'none' || map.shapeAt(tx, y - 1) !== SHAPE_FULL)) return false;
+    if (kind !== 'watchWasp' && map.solidMask(tx, y - 1) !== FULL_MASK && (map.platformMask(tx, y - 1) & FULL_PLATFORM) !== FULL_PLATFORM) return false;
   }
   return true;
 }
@@ -29,7 +32,7 @@ export function enemySpawnFits(level: Pick<LevelData, 'map' | 'fluid' | 'lethalC
 /** 野外每段地形有一组巡逻兵；岛屿、洞室分别布防，营地保留安全范围。 */
 export function populateWildEnemies(level: LevelData, seed: number): EnemySpawn[] {
   const out: EnemySpawn[] = [];
-  const groundKinds = ['gatekeeper', 'lineHound', 'loadmaster'] as const;
+  const groundKinds = ['omi', 'lineHound', 'loadmaster'] as const;
   const add = (kind: EnemyKind, x: number, y: number): boolean => {
     if (out.some(enemy => Math.abs(enemy.x - x) < 5 && Math.abs(enemy.y - y) < 3)
       || !enemySpawnFits(level, kind, x, y)) return false;

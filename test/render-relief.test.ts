@@ -6,28 +6,29 @@ import assert from 'node:assert/strict';
 
 import { BLOCK_BACK_Z, BLOCK_FRONT_Z, FILLET_RING_BASE, GROUND_DECOR_Z_MAX, createBlockGeometry, createFilletGeometry } from '../src/render/tile/tile-geometry.ts';
 import { TILE_SHADER_INJECTIONS, TILE_SHADER_PARAMS } from '../src/render/tile/tile-material.ts';
-import { RELIEF_PARAMS, ROUND_RINGS, WALL_RINGS, edgeInset, reliefFactors, reliefRings, sideShade, wallNormalZ } from '../src/render/tile/tile-relief.ts';
+import { RELIEF_PARAMS, ROUND_RINGS, WALL_RINGS, edgeInset, reliefFactors, reliefRings, sideShade, taperStart, wallNormalZ } from '../src/render/tile/tile-relief.ts';
 import { MAX_CONTOUR_DEVIATION } from '../src/render/tile/tile-transitions.ts';
 
 const P = RELIEF_PARAMS;
 const ZEND = BLOCK_FRONT_Z - P.FRONT_ROUND_DEPTH;
-const WALL_LEN = ZEND - BLOCK_BACK_Z;
+const START = taperStart(BLOCK_FRONT_Z);
+const WALL_LEN = START - BLOCK_BACK_Z;
 
-/** 侧/顶暴露边在任意 z 处的内缩（按几何环的插值方式：滚圆段按圆周、侧壁段线性）。 */
+/** 侧/顶暴露边在任意 z 处的内缩（按几何环的插值方式：滚圆段按圆周、直壁不变、后收段线性）。 */
 function insetAtZ(edge: 0 | 3, z: number, wobble = 0.5): number {
   let f = 0;
   let u = 0;
   if (z >= ZEND) {
     const c = Math.min(1, (z - ZEND) / P.FRONT_ROUND_DEPTH);
     f = 1 - Math.sqrt(1 - c * c);
-  } else u = (ZEND - z) / WALL_LEN;
+  } else u = Math.max(0, (START - z) / WALL_LEN);
   return edgeInset(edge, f, u, wobble, true, 0.06);
 }
 
 describe('tile-relief：环与内缩', () => {
   test('环：前沿 z=正面、编码 0、法线 +z；滚圆在 FRONT_ROUND_DEPTH 内沿四分之一圆结束（编码 1）；侧壁环编码 1+u 单调到背面', () => {
     const rings = reliefRings(BLOCK_FRONT_Z, BLOCK_BACK_Z);
-    assert.equal(rings.length, ROUND_RINGS + WALL_RINGS + 1);
+    assert.equal(rings.length, ROUND_RINGS + WALL_RINGS + (START < ZEND ? 2 : 1));
     const first = rings[0]!;
     assert.ok(first.z === BLOCK_FRONT_Z && first.code === 0 && first.nz === 1 && first.nxy === 0);
     const end = rings[ROUND_RINGS]!;
@@ -39,7 +40,7 @@ describe('tile-relief：环与内缩', () => {
       assert.ok(Math.abs((1 - f) ** 2 + (1 - depth / P.FRONT_ROUND_DEPTH) ** 2 - 1) < 1e-9, `ring at z ${r.z} lies on the quarter circle`);
     }
     for (let i = ROUND_RINGS + 1; i < rings.length; i++) {
-      assert.ok(rings[i]!.z < rings[i - 1]!.z && rings[i]!.code > rings[i - 1]!.code);
+      assert.ok(rings[i]!.z < rings[i - 1]!.z && rings[i]!.code >= rings[i - 1]!.code);
     }
     assert.equal(rings.at(-1)!.z, BLOCK_BACK_Z);
     assert.equal(rings.at(-1)!.code, 2);
@@ -62,7 +63,7 @@ describe('tile-relief：环与内缩', () => {
   test('侧壁后收：向后单调内收到 WALL_TAPER（± 起伏），法线朝后（透视下侧壁被正面遮住，不再露出立方体侧面）', () => {
     let prev = -Infinity;
     for (let k = 0; k <= 10; k++) {
-      const z = ZEND - (k / 10) * WALL_LEN;
+      const z = START - (k / 10) * WALL_LEN;
       const v = insetAtZ(0, z);
       assert.ok(v >= prev - 1e-12, `monotonic at ${z}`);
       prev = v;

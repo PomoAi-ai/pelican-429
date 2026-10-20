@@ -3,7 +3,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { TUNING } from '../../config/tuning.ts';
 import { CHARACTER_STAGE_LOOK, characterStageSunDirection, characterStageFraming } from '../../config/character-stage-look.ts';
 import type { ShowcaseCard } from '../../config/showcase.ts';
-import { createStage } from '../../render/stage/stage.ts';
+import { attachStage, WEBGL_STAGE_BACKEND } from '../../render/stage/stage.ts';
 import { createCelestialSky } from '../../render/sky/celestial-sky.ts';
 import { disposeGrassyAssets } from '../../render/grassy/grassy-rig.ts';
 import { disposeGrassyStaticAssets } from '../../render/grassy/grassy-static.ts';
@@ -21,7 +21,10 @@ import { createStageGround } from './stage-ground.ts';
 import { createStageDragControls } from './stage-drag-controls.ts';
 import type { CharacterStageView } from '../../ui/model/character-stage-location.ts';
 import { readPageParams, type PageContext } from '../shell/page-context.ts';
+import { createViewLoop } from '../shell/view-loop.ts';
+import { pageRenderer } from '../shell/page-renderer.ts';
 import { onLanguageChange, t } from '../../config/i18n.ts';
+import { undergroundInspectionLight } from '../../render/stage/light-presets.ts';
 
 /** 角色共享一个舞台和后期通道；独立实例仅持有自己的动作与视图。 */
 export function mountCharacterStage(context: PageContext, model: ShowcaseModel, returnUrl: string, view: CharacterStageView): void {
@@ -34,7 +37,7 @@ export function mountCharacterStage(context: PageContext, model: ShowcaseModel, 
     if (enabled) actor.reset();
     await actor.setSoundEnabled(enabled);
   }, view, readPageParams().textures);
-  const stage = createStage(panel.viewport, TUNING, CHARACTER_STAGE_LOOK.stage, readPageParams().debug);
+  const stage = attachStage(panel.viewport, pageRenderer(context, 'game', TUNING), TUNING, CHARACTER_STAGE_LOOK.stage, WEBGL_STAGE_BACKEND);
   stage.camera.layers.enable(DUMMY_HEALTH_LAYER);
   stage.camera.near = .05;
   stage.camera.far = 1000;
@@ -111,8 +114,7 @@ export function mountCharacterStage(context: PageContext, model: ShowcaseModel, 
   stage.canvas.addEventListener('keydown', onSceneKey);
   stage.canvas.addEventListener('pointermove', onSceneAim);
   let stopped = false;
-  let raf = 0;
-  let last = performance.now();
+  const loop = createViewLoop((elapsed, now) => frame(elapsed, now), (error) => fail(error));
   let layoutKey = '';
   const resetCamera = (): void => { panel.setZoom(1); layoutKey = ''; };
   panel.resetCamera.addEventListener('click', resetCamera);
@@ -126,7 +128,7 @@ export function mountCharacterStage(context: PageContext, model: ShowcaseModel, 
   const dispose = (): void => {
     if (stopped) return;
     stopped = true;
-    cancelAnimationFrame(raf);
+    loop.stop();
     dragControls.dispose();
     for (const { actor } of actors.values()) actor.dispose();
     actors.clear();
@@ -151,7 +153,6 @@ export function mountCharacterStage(context: PageContext, model: ShowcaseModel, 
   const onError = (event: ErrorEvent): void => fail(event.error ?? event.message);
   const onRejection = (event: PromiseRejectionEvent): void => fail(event.reason);
   const onVisibility = (): void => {
-    last = performance.now();
     if (document.hidden) {
       dragControls.cancel();
       for (const { actor } of actors.values()) void actor.setSoundEnabled?.(false);
@@ -162,122 +163,117 @@ export function mountCharacterStage(context: PageContext, model: ShowcaseModel, 
   context.onDispose(dispose);
   document.addEventListener('visibilitychange', onVisibility);
 
-  const frame = (now: number): void => {
-    if (stopped) return;
-    const elapsed = Math.min((now - last) / 1000, TUNING.sim.maxFrameTime);
-    last = now;
-    try {
-      for (const [id, item] of actors) {
-        const card = model.cards.find((item) => item.id === id);
-        if (!card) { dragControls.cancel(); item.actor.dispose(); actors.delete(id); }
-      }
-      const pending = model.cards.find((card) => actors.get(card.id)?.key !== key(card) && preparing.get(card.id) !== key(card));
-      if (pending) {
-        const requestedKey = key(pending);
-        preparing.set(pending.id, requestedKey);
-        const isCurrent = (): boolean => !stopped && model.cards.includes(pending) && key(pending) === requestedKey;
-        void createStageActor(pending, isCurrent).then(async (actor) => {
-          // 编译完成前保持“准备中”，避免下一帧重复创建；新角色的着色器同步编译曾让添加时卡住一两秒。
-          if (actor) await compileForStage(stage, actor.root);
-          if (preparing.get(pending.id) === requestedKey) preparing.delete(pending.id);
-          if (!actor) return;
-          if (!isCurrent()) { actor.dispose(); return; }
-          const previous = actors.get(pending.id);
-          // 动作只替换实例内容，沿用入场时的占位和镜头范围。
-          if (previous) { actor.root.position.copy(previous.actor.root.position); previous.actor.dispose(); }
-          actors.set(pending.id, { key: requestedKey, actor, framing: previous ? previous.framing : { ...actor.framing }, placed: previous?.placed ?? false });
-          content.add(actor.root);
-          if (!previous) layoutKey = '';
-        }).catch(fail);
-      }
-      if (!document.hidden) {
-        const rect = panel.viewport.getBoundingClientRect();
-        const nextLayout = `${model.cards.map((card) => card.id).join(',')}:${rect.width}:${rect.height}`;
-        if (nextLayout !== layoutKey) {
-          layoutKey = nextLayout;
-          let left = Infinity;
-          let right = -Infinity;
-          let height = 5;
-          for (const item of actors.values()) {
-            if (!item.placed) continue;
-            const center = item.actor.root.position.x + item.framing.x;
-            left = Math.min(left, center - item.framing.width / 2);
-            right = Math.max(right, center + item.framing.width / 2);
-          }
-          for (const card of model.cards) {
-            const item = actors.get(card.id);
-            if (!item) continue;
-            if (!item.placed) {
-              const start = right === -Infinity ? 0 : right + 2;
-              item.actor.root.position.x = start + item.framing.width / 2 - item.framing.x;
-              item.placed = true;
-              left = Math.min(left, start);
-              right = start + item.framing.width;
-            }
-            height = Math.max(height, item.framing.y + item.framing.height / 2);
-          }
-          const width = actors.size ? Math.max(5, right - left) : 5;
-          const centerX = actors.size ? (left + right) / 2 : width / 2;
-          pivot.position.x = centerX;
-          content.position.x = -centerX;
-          const { centerY, viewHeight } = characterStageFraming(height, width, stage.camera.aspect);
-          baseDistance = viewHeight / (2 * Math.tan(THREE.MathUtils.degToRad(stage.camera.fov) / 2));
-          stage.camera.position.set(centerX, centerY, baseDistance / panel.zoom);
-          stage.camera.lookAt(centerX, centerY, 0);
-          cameraControls.target.set(centerX, centerY, 0);
-          cameraControls.minDistance = baseDistance / 12;
-          cameraControls.maxDistance = baseDistance / .65;
-          cameraControls.update();
+  const frame = (elapsed: number, now: number): void => {
+    for (const [id, item] of actors) {
+      const card = model.cards.find((item) => item.id === id);
+      if (!card) { dragControls.cancel(); item.actor.dispose(); actors.delete(id); }
+    }
+    const pending = model.cards.find((card) => actors.get(card.id)?.key !== key(card) && preparing.get(card.id) !== key(card));
+    if (pending) {
+      const requestedKey = key(pending);
+      preparing.set(pending.id, requestedKey);
+      const isCurrent = (): boolean => !stopped && model.cards.includes(pending) && key(pending) === requestedKey;
+      void createStageActor(pending, isCurrent).then(async (actor) => {
+        // 编译完成前保持“准备中”，避免下一帧重复创建；新角色的着色器同步编译曾让添加时卡住一两秒。
+        if (actor) await compileForStage(stage, actor.root);
+        if (preparing.get(pending.id) === requestedKey) preparing.delete(pending.id);
+        if (!actor) return;
+        if (!isCurrent()) { actor.dispose(); return; }
+        const previous = actors.get(pending.id);
+        // 动作只替换实例内容，沿用入场时的占位和镜头范围。
+        if (previous) { actor.root.position.copy(previous.actor.root.position); previous.actor.dispose(); }
+        actors.set(pending.id, { key: requestedKey, actor, framing: previous ? previous.framing : { ...actor.framing }, placed: previous?.placed ?? false });
+        content.add(actor.root);
+        if (!previous) layoutKey = '';
+      }).catch(fail);
+    }
+    if (!document.hidden) {
+      const rect = panel.viewport.getBoundingClientRect();
+      const nextLayout = `${model.cards.map((card) => card.id).join(',')}:${rect.width}:${rect.height}`;
+      if (nextLayout !== layoutKey) {
+        layoutKey = nextLayout;
+        let left = Infinity;
+        let right = -Infinity;
+        let height = 5;
+        for (const item of actors.values()) {
+          if (!item.placed) continue;
+          const center = item.actor.root.position.x + item.framing.x;
+          left = Math.min(left, center - item.framing.width / 2);
+          right = Math.max(right, center + item.framing.width / 2);
         }
-        if (cameraZoom !== panel.zoom) {
-          stage.camera.position.z = baseDistance / panel.zoom;
-          cameraControls.update();
-        }
-        if (environment !== panel.environment) {
-          environment = panel.environment;
-          const underground = environment === 'underground';
-          stage.scene.background = new THREE.Color(underground ? '#172b3b' : CHARACTER_STAGE_LOOK.surfaceBackground);
-          stage.hemiLight.intensity = TUNING.render.hemi * (underground ? 0.65 : 1);
-          sky.root.visible = !underground;
-          stage.keyLight.intensity = underground ? 0 : sunIntensity;
-        }
-        const sunDirection = characterStageSunDirection(stage.camera.fov, stage.camera.aspect, panel.sunPosition);
-        sky.setSunDirection(sunDirection);
-        stage.setSunDirection(sunDirection);
         for (const card of model.cards) {
           const item = actors.get(card.id);
-          const view = panel.views.get(card.id)!;
-          if (!item || item.key !== key(card)) { view.update(t('正在准备预览…'), 0, true); continue; }
-          const { actor } = item;
-          if (card.playing && card.loop && actor.complete) actor.reset();
-          actor.update(elapsed);
-          if ((model.entry(card.entryId).npcForm || model.entry(card.entryId).actor === 'luma') && (item.framing.y !== actor.framing.y
-            || item.framing.width !== actor.framing.width || item.framing.height !== actor.framing.height)) {
-            Object.assign(item.framing, actor.framing);
-            layoutKey = '';
+          if (!item) continue;
+          if (!item.placed) {
+            const start = right === -Infinity ? 0 : right + 2;
+            item.actor.root.position.x = start + item.framing.width / 2 - item.framing.x;
+            item.placed = true;
+            left = Math.min(left, start);
+            right = start + item.framing.width;
           }
-          view.update(actor.status, actor.progress, !actor.ready);
+          height = Math.max(height, item.framing.y + item.framing.height / 2);
         }
-        stage.camera.updateMatrixWorld();
-        content.updateWorldMatrix(true, false);
-        groundPlane.normal.set(0, 0, 1); groundPlane.constant = 0;
-        groundPlane.applyMatrix4(content.matrixWorld);
-        groundBounds.makeEmpty();
-        for (const corner of screenCorners) {
-          raycaster.setFromCamera(corner, stage.camera);
-          // 接近地平线、射线不再交地面时，以可视远端限定流式范围。
-          if (!raycaster.ray.intersectPlane(groundPlane, groundCorner)) raycaster.ray.at(stage.camera.far, groundCorner);
-          content.worldToLocal(groundCorner);
-          groundBounds.expandByPoint(groundCorner);
-        }
-        ground.update({ x: groundBounds.min.x - 4, y: groundBounds.min.y - 4, w: groundBounds.max.x - groundBounds.min.x + 8, h: groundBounds.max.y - groundBounds.min.y + 8 }, now / 1000);
-        sky.update(stage.camera);
-        stage.render();
-        panel.setNote(t(`场景中 ${model.cards.length} 个角色 · 角度 ${angles[angleIndex]}° · 点击空白切换`));
-        loading.hidden = true;
+        const width = actors.size ? Math.max(5, right - left) : 5;
+        const centerX = actors.size ? (left + right) / 2 : width / 2;
+        pivot.position.x = centerX;
+        content.position.x = -centerX;
+        const { centerY, viewHeight } = characterStageFraming(height, width, stage.camera.aspect);
+        baseDistance = viewHeight / (2 * Math.tan(THREE.MathUtils.degToRad(stage.camera.fov) / 2));
+        stage.camera.position.set(centerX, centerY, baseDistance / panel.zoom);
+        stage.camera.lookAt(centerX, centerY, 0);
+        cameraControls.target.set(centerX, centerY, 0);
+        cameraControls.minDistance = baseDistance / 12;
+        cameraControls.maxDistance = baseDistance / .65;
+        cameraControls.update();
       }
-      raf = requestAnimationFrame(frame);
-    } catch (error) { fail(error); }
+      if (cameraZoom !== panel.zoom) {
+        stage.camera.position.z = baseDistance / panel.zoom;
+        cameraControls.update();
+      }
+      if (environment !== panel.environment) {
+        environment = panel.environment;
+        const underground = environment === 'underground';
+        const inspection = undergroundInspectionLight(TUNING);
+        stage.scene.background = underground ? inspection.background : new THREE.Color(CHARACTER_STAGE_LOOK.surfaceBackground);
+        stage.hemiLight.intensity = underground ? inspection.hemi : TUNING.render.hemi;
+        sky.root.visible = !underground;
+        stage.keyLight.intensity = underground ? inspection.key : sunIntensity;
+      }
+      const sunDirection = characterStageSunDirection(stage.camera.fov, stage.camera.aspect, panel.sunPosition);
+      sky.setSunDirection(sunDirection);
+      stage.setSunDirection(sunDirection);
+      for (const card of model.cards) {
+        const item = actors.get(card.id);
+        const view = panel.views.get(card.id)!;
+        if (!item || item.key !== key(card)) { view.update(t('正在准备预览…'), 0, true); continue; }
+        const { actor } = item;
+        if (card.playing && card.loop && actor.complete) actor.reset();
+        actor.update(elapsed);
+        if ((model.entry(card.entryId).npcForm || model.entry(card.entryId).actor === 'luma') && (item.framing.y !== actor.framing.y
+          || item.framing.width !== actor.framing.width || item.framing.height !== actor.framing.height)) {
+          Object.assign(item.framing, actor.framing);
+          layoutKey = '';
+        }
+        view.update(actor.status, actor.progress, !actor.ready);
+      }
+      stage.camera.updateMatrixWorld();
+      content.updateWorldMatrix(true, false);
+      groundPlane.normal.set(0, 0, 1); groundPlane.constant = 0;
+      groundPlane.applyMatrix4(content.matrixWorld);
+      groundBounds.makeEmpty();
+      for (const corner of screenCorners) {
+        raycaster.setFromCamera(corner, stage.camera);
+        // 接近地平线、射线不再交地面时，以可视远端限定流式范围。
+        if (!raycaster.ray.intersectPlane(groundPlane, groundCorner)) raycaster.ray.at(stage.camera.far, groundCorner);
+        content.worldToLocal(groundCorner);
+        groundBounds.expandByPoint(groundCorner);
+      }
+      ground.update({ x: groundBounds.min.x - 4, y: groundBounds.min.y - 4, w: groundBounds.max.x - groundBounds.min.x + 8, h: groundBounds.max.y - groundBounds.min.y + 8 }, now / 1000);
+      sky.update(stage.camera);
+      stage.render();
+      panel.setNote(t(`场景中 ${model.cards.length} 个角色 · 角度 ${angles[angleIndex]}° · 点击空白切换`));
+      loading.hidden = true;
+    }
   };
-  raf = requestAnimationFrame(frame);
+  loop.start();
 }

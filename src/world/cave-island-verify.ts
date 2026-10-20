@@ -23,6 +23,7 @@ import type { ColumnSpan } from './slopes.ts';
 import { hutRoofSpan } from './structures.ts';
 import type { TileMap } from './tile-map.ts';
 import { entranceRideBlock } from './cave-features.ts';
+import { tileCollision } from './collision-geometry.ts';
 
 /** 洞内连通：鹈鹕身体 1 列 × 3 行（身高 2.5），翅膀飞行（不受起跳高度限制）。 */
 export const CAVE_BODY_ROWS = 3;
@@ -107,7 +108,7 @@ export function verifyCaves(v: CaveIslandVerifyInput, where: string, cfg: Worldg
     for (let x = a; x <= b && !ok; x++) for (let ty = e.surfaceY; ty >= 0 && !ok; ty--) ok = mask[ty * width + x] === CAVE_CELL && walk.has(x, ty);
     if (!ok) throw new Error(`${where}: cave entrance at x=${e.x}: cannot walk from the mouth into the cave network`);
     // 可骑：坡道（露天段 + 有顶段）每个车身位置净空 ≥ 骑行高（同 ride-probe 口径）。
-    const block = entranceRideBlock(map, e, R.RIDE);
+    const block = entranceRideBlock(map, tileCollision(map), e, R.RIDE);
     if (block) throw new Error(`${where}: cave entrance at x=${e.x}: not rideable at (${block.x.toFixed(2)},${block.y.toFixed(2)}) (${block.check} clearance < ${R.RIDE.height}, tile (${block.tx},${block.ty}))`);
   }
   const reach = bodyFlood(
@@ -124,16 +125,16 @@ export function verifyCaves(v: CaveIslandVerifyInput, where: string, cfg: Worldg
     for (const i of p.cells) {
       const x = i % width;
       const ty = (i - x) / width;
-      if (mask[i] !== CAVE_CELL || v.fluid.cells[i] !== FLUID_FULL || ty >= p.level) throw new Error(`${where}: cave pool cell (${x},${ty}) must be a full water cave cell below level ${p.level}`);
+      if (mask[i] !== CAVE_CELL || v.fluid.amountAt(x, ty) !== FLUID_FULL || ty >= p.level) throw new Error(`${where}: cave pool cell (${x},${ty}) must be a full water cave cell below level ${p.level}`);
       for (const [nx, ny] of [[x - 1, ty], [x + 1, ty], [x, ty - 1]] as const) {
         if (ny >= p.level || map.collisionAt(nx, ny) === 'solid') continue;
-        if (v.fluid.cells[ny * width + nx] !== FLUID_FULL) throw new Error(`${where}: cave pool ${p.x0}..${p.x1} leaks at (${nx},${ny})`);
+        if (v.fluid.amountAt(nx, ny) !== FLUID_FULL) throw new Error(`${where}: cave pool ${p.x0}..${p.x1} leaks at (${nx},${ny})`);
       }
     }
   }
   for (const g of caves.glows) {
     const i = g.y * width + g.x;
-    if (g.y < 0 || g.y >= height || mask[i] !== CAVE_CELL || map.collisionAt(g.x, g.y) !== 'none' || (v.fluid.cells[i] as number) > 0) throw new Error(`${where}: cave glow ${g.kind} at (${g.x},${g.y}) is not in an open dry cave cell`);
+    if (g.y < 0 || g.y >= height || mask[i] !== CAVE_CELL || map.collisionAt(g.x, g.y) !== 'none' || v.fluid.amountAt(g.x, g.y) > 0) throw new Error(`${where}: cave glow ${g.kind} at (${g.x},${g.y}) is not in an open dry cave cell`);
     if (!(Number.isInteger(g.light) && g.light >= 1 && g.light <= 255)) throw new Error(`${where}: cave glow at (${g.x},${g.y}) has invalid light ${g.light}`);
   }
 }

@@ -1,5 +1,5 @@
 """两层房屋 + 远景构图底图：FOV30°、镜头距玩法平面 30 格的真实正面透视。
-房屋按 docs/room-layout-definitions.md「两层房屋透视」：外轮廓 11×13，每层净宽 9、净高 5，共用楼板 1，
+房屋按 public/concepts/room-layout-definitions.md「两层房屋透视」：外轮廓 11×13，每层净宽 9、净高 5，共用楼板 1，
 格子 Z=[-1,+1]，背景墙 Z=[-1.2,-1]，门洞 3＋门上沿 1，2×2 窗，2 格通口与平台 2/4/6。人物外观 3.1 格。"""
 import math
 import sys
@@ -51,7 +51,7 @@ draw(far); draw(near)
 windows = {(x, y) for x in (7, 8) for y in (1, 2, 7, 8)}
 wall, lintel = (236, 236, 230), (176, 140, 96)
 if HALF:
-    # 半砖版（docs/room-layout-definitions.md「半砖层间组合」②上半砖C）：侧墙 K/L 宽 0.5 位于 X=0.5~1、10~10.5，
+    # 半砖版（public/concepts/room-layout-definitions.md「半砖层间组合」②上半砖C）：侧墙 K/L 宽 0.5 位于 X=0.5~1、10~10.5，
     # 底板 C 占 Y=-0.5~0，层间楼板 C 占 Y=5.5~6（通口 X=4~6），顶板 B 占 Y=11~11.5；总高 12，一层净高 5.5、二层 5。
     draw([(x, y, x + 1, y + 1, -1.2, -1, (214, 222, 228)) for x in range(1, 10) for y in range(0, 11) if (x, y) not in windows])
     cells = [(x, -.5, x + 1, 0, -1, 1, wall) for x in range(1, 10)] + [(.5, -.5, 1, 0, -1, 1, wall), (10, -.5, 10.5, 0, -1, 1, wall)]
@@ -74,7 +74,7 @@ if HALF:
     for top in (2, 4):
         box(4, top - .1, 6, top, -1, 1, (214, 160, 90))
     if DOOR:
-        # 能量门模块（docs/room-layout-definitions.md）：占左墙厚度 X=0.5~1，Z=[-0.9,0.5]，高 4＝净洞 3＋门框顶 1。
+        # 能量门模块（public/concepts/room-layout-definitions.md）：占左墙厚度 X=0.5~1，Z=[-0.9,0.5]，高 4＝净洞 3＋门框顶 1。
         # 正面镜头下门面朝 +X、几乎侧对镜头：看到的是前柱与门框顶的正面，屏障只是一条收向消失点的窄面。
         frame, barrier = (246, 246, 242), (70, 150, 235)
         for base in (0, 6):

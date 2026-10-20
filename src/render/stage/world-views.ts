@@ -38,6 +38,11 @@ import { createStructureView } from '../building/structure-view.ts';
 import type { StructureView } from '../building/structure-view.ts';
 import { createTileView } from '../tile/tile-view.ts';
 import type { TileView } from '../tile/tile-view.ts';
+import { createPieceView } from '../tile/piece-view.ts';
+import type { PieceView } from '../tile/piece-view.ts';
+import { createBuildingLayerView } from '../building/building-layer-view.ts';
+import type { BuildingLayerView } from '../building/building-layer-view.ts';
+import type { CityState } from '../../sim/city.ts';
 import { createTreeView } from '../tree/tree-view.ts';
 import type { TreeView } from '../tree/tree-view.ts';
 import type { WaterPaletteName } from '../../config/water-palettes.ts';
@@ -98,6 +103,8 @@ export interface WorldViewsInput {
   readonly waterPalette?: WaterPaletteName;
   /** 已砍倒的树 id（家园模式的实时数组；缺省 = 无）：花草不再在它们下面长阴生植物。 */
   readonly felledTrees?: readonly number[];
+  /** 城区状态：门与太阳能板的视图读它（缺省 = 无城区）。 */
+  readonly city?: CityState;
 }
 
 /** 风吹天气句柄（main 的调试键 V 与 ?debug 暴露）。 */
@@ -139,6 +146,12 @@ export interface WorldViewStats {
 export interface WorldViews {
   readonly ground: GroundProfile;
   readonly tiles: TileView;
+  /** 建筑块与瓦片视图画不了的多块格（块视图）。 */
+  readonly pieces: PieceView;
+  /** 墙层、摆放物件与特殊构件。 */
+  readonly buildings: BuildingLayerView;
+  /** 自上次调用以来块视图或建筑层有没有新网格（城区光照据此重新接入材质）。 */
+  takeBuildingChanges(): boolean;
   readonly trees: TreeView;
   readonly water: WaterView;
   readonly weeds: WaterWeedView;
@@ -225,6 +238,9 @@ export function createWorldViews(input: WorldViewsInput): WorldViews {
   // 浮空岛正面的攀附由空岛视图画（向上爬的岛体版本），瓦片视图跳过岛体列。
   const onIsland = (tx: number, ty: number): boolean => level.islands.some((s) => tx >= s.x0 && tx <= s.x1 && ty >= (s.bottoms[tx - s.x0] as number) && ty < (s.tops[tx - s.x0] as number));
   const tiles = add(createTileView(level.map, { textureSize: input.terrainTextureSize, floraEnv: createFloraEnv({ lakes: level.lakes, trees: level.trees, felled: input.felledTrees, deserts: level.deserts, rockClear: rockGrassClearance(decorEnv) }), lakes: level.lakes, bareAir: covered, noClimbers: onIsland }));
+  const pieces = add(createPieceView(level.map));
+  const buildings = add(createBuildingLayerView(level.map, input.city?.building ?? null));
+  let buildingChanged = true;
   // 021：岛上树的根盘贴岛顶（树视图用岛感知轮廓；其余视图仍用真实地表）。
   const trees = add(createTreeView(level.trees, { ground: islandGroundProfile(level.map, level.islands, groundColumns, ground, level.lakes) }));
   const water = add(createWaterView(level.fluid, input.waterPalette ? { palette: input.waterPalette } : {}));
@@ -241,8 +257,8 @@ export function createWorldViews(input: WorldViewsInput): WorldViews {
   scene.add(dust.mesh);
   disposers.push(() => dust.dispose());
   const caveWall = add(createCaveWallView(level.map, level.caves, input.caveBackground));
-  const caveDecor = add(createCaveDecorView(level.map, level.caves, level.fluid.cells));
-  const caveFx = add(createCaveFx(level.map, level.caves, level.fluid.cells, level.seed ?? 0));
+  const caveDecor = add(createCaveDecorView(level.map, level.caves, level.fluid));
+  const caveFx = add(createCaveFx(level.map, level.caves, level.fluid, level.seed ?? 0));
   const skyIslands = add(createSkyIslandView(level.islands));
   const islandBackdrop = input.islandBackdrop !== false && level.islands.length > 0
     ? createSkyIslandBackdrop({ width: level.map.width, surface: groundColumns, seed: (level.seed ?? 0) ^ 0xb4c, haze: '#cfe3ea' }) : null;
@@ -291,6 +307,13 @@ export function createWorldViews(input: WorldViewsInput): WorldViews {
   return {
     ground,
     tiles,
+    pieces,
+    buildings,
+    takeBuildingChanges() {
+      const changed = buildingChanged;
+      buildingChanged = false;
+      return changed;
+    },
     trees,
     water,
     weeds,
@@ -327,6 +350,9 @@ export function createWorldViews(input: WorldViewsInput): WorldViews {
       rideWindState.t = values.uWeatherTime;
       tiles.update(view);
       tiles.setTime(time);
+      if (pieces.update(view) > 0) buildingChanged = true;
+      const actors = input.actors?.() ?? [];
+      if (buildings.update(time, actors.find((actor) => actor.pelican !== undefined)?.body ?? null)) buildingChanged = true;
       trees.update(view, time);
       decor.update(view, time);
       water.update(view, time);
@@ -334,7 +360,6 @@ export function createWorldViews(input: WorldViewsInput): WorldViews {
       const pelican = input.pelican?.() ?? null;
       waterFlora.update(view, time, dt, { fluid: level.fluid, windAt: windSway, pelican });
       ripples.update(time, dt, { pelican, windAt: windSway });
-      const actors = input.actors?.() ?? [];
       breath.update(actors.find((actor) => actor.pelican !== undefined), dt, alpha);
       grass.update(actors, time, dt, windSway);
       fish.update(alpha, time);

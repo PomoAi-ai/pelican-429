@@ -96,7 +96,8 @@ function shingle(b: PartBuilder, sl: Slope, sLip: number, sTop: number, hLip: nu
   const out: V3 = [-sl.side * SQ, SQ, 0];
   const down: V3 = [-up[0], -up[1], 0];
   const zs = LIP_U.map((u) => z0 + (z1 - z0) * u);
-  const lipS = LIP_U.map((u, i) => sLip + round * (LIP_ROUND[i] as number) + skew * (u - 0.5));
+  // 窄瓦的倒圆小于歪斜量，下沿可能越过檐口线：夹在坡起点上。
+  const lipS = LIP_U.map((u, i) => Math.max(0, sLip + round * (LIP_ROUND[i] as number) + skew * (u - 0.5)));
   const midS = (i: number): number => lipS[i] as number + (sTop - (lipS[i] as number)) * SHINGLE_MID_T;
   const hMid = hLip - SHINGLE_MID_DIP;
   const lip = zs.map((z, i) => sl.at(lipS[i] as number, hLip, z));

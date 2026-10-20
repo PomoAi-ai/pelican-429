@@ -1,4 +1,5 @@
-import { createTileRideProbe } from '../physics/ride-probe.ts';
+import { createRideProbe } from '../physics/ride-probe.ts';
+import { tileCollision } from '../world/collision-geometry.ts';
 import { createFreeWorldWeather } from '../world/free-world-weather.ts';
 import { HUMAN_BODY_HEIGHT } from '../config/player-form.ts';
 import type { PlayerForm } from '../config/player-form.ts';
@@ -20,6 +21,11 @@ import { mainlineTransformUnlocked, restoreMainlinePlayer, stepMainline, stepMai
 import type { MainlineState } from './mainline.ts';
 import { stepHomesteadWorld } from './homestead.ts';
 import type { HomesteadState } from './homestead.ts';
+import { stepCity, stepCityBuild } from './city.ts';
+import type { CityState } from './city.ts';
+import { solarGeometry, stepSolarParts, type SolarItem } from './building.ts';
+import type { SolarPanelState } from '../physics/solar-panel.ts';
+import { steerTransit, stepTransitFreeze } from './transit.ts';
 import { jumpVelocity, validateTuning, TUNING } from '../config/tuning.ts';
 import { stepPhotonUltimate, steerPhotonProjectiles } from './photon-system.ts';
 import { cancelPlayerTransform, stepPlayerTransform } from './player-transform.ts';
@@ -27,7 +33,7 @@ import { stepPlayerTeleport } from './player-teleport.ts';
 import { teleportLocksMovement } from '../entities/teleport.ts';
 import type { Tuning } from '../config/tuning.ts';
 import type { LandingPodPlan } from '../config/transit.ts';
-import { carryInPod, liftInPod, placeInPod, POD_BOARD_INPUT, podLandingPhase, podTakeoffPhase, POD_WALK_INPUT, type PodLanding } from './pod-landing.ts';
+import { placeInPod, stepPodFreeze, type PodLanding } from './pod-landing.ts';
 import { isDaytime } from '../core/calendar.ts';
 import { EventQueue } from '../core/events.ts';
 import { hash01, hashU32 } from '../core/rng.ts';
@@ -36,7 +42,8 @@ import type { Vec2 } from '../core/math.ts';
 import type { LevelData } from '../world/level.ts';
 import type { TileMap } from '../world/tile-map.ts';
 import type { FluidMap } from '../world/fluid-map.ts';
-import { stepFluid } from '../world/fluid-sim.ts';
+import { advanceFluid } from '../world/fluid-sim.ts';
+import { SUBCELLS } from '../world/tile-shapes.ts';
 import { TORNADO_RULES, tornadoForce } from '../world/tornado.ts';
 import { clamp, overlaps, rectCenter, rectIntersection } from '../core/math.ts';
 import { submersion } from '../physics/fluid-contact.ts';
@@ -86,6 +93,12 @@ export interface SimWorld {
   mainline?: MainlineState;
   /** 家园概念版本：经济、无人机与标记；只在 homestead 模式启用。 */
   homestead?: HomesteadState;
+  /** 城区：建造状态、门与太阳能板；只在城区世界存在。 */
+  readonly city?: CityState;
+  /** 开发选项（检视页）：玩家飞行推进不耗尽。 */
+  readonly unlimitedFlight: boolean;
+  /** 城区以外摆放的太阳能板（检视页）：与城区同一踩踏与追光规则。 */
+  readonly solar: readonly SolarItem[];
   tick: number;
   hitstopTicks: number;
   /** 玩家死亡后的重生等待；等待期间不接收角色输入。 */
@@ -130,6 +143,12 @@ export interface SimWorldOptions {
   readonly precipState?: PrecipState;
   readonly weather?: WeatherTuning;
   readonly windMode?: WindMode;
+  /** 城区世界的建造状态（与 level.map 同一张地图，sim/city 的 createCity / restoreCity 产出）。 */
+  readonly city?: CityState;
+  /** 开发选项（检视页）：玩家飞行推进不耗尽。 */
+  readonly unlimitedFlight?: boolean;
+  /** 城区以外的太阳能板（检视页），创建时登记为特殊构件。 */
+  readonly solar?: readonly SolarPanelState[];
 }
 
 function createPlayer(id: number, position: Vec2, tuning: Tuning, form: PlayerForm): Entity {
@@ -185,6 +204,9 @@ export function createSimWorld(options: SimWorldOptions): SimWorld {
     spawnForm,
     nextId,
     env,
+    ...options.city ? { city: options.city } : {},
+    unlimitedFlight: options.unlimitedFlight ?? false,
+    solar: (options.solar ?? []).map(panel => ({ panel, partId: level.map.parts.add('solar', solarGeometry(panel)).id })),
   };
 }
 
@@ -202,6 +224,17 @@ export function getPlayer(world: SimWorld): Entity {
   const p = getEntity(world, world.playerId);
   if (!p) throw new Error(`sim: player entity ${world.playerId} missing`);
   return p;
+}
+
+/** 命令：城区太阳能板无人踩时追随的角度，装配层按世界时间的太阳方向每帧下达，下一 tick 由 stepSim 应用。 */
+export function setCitySunAngle(world: SimWorld, angle: number): void {
+  if (!world.city) throw new Error('setCitySunAngle: this world has no city');
+  world.city.sunCommand = angle;
+}
+
+/** 检视页太阳能板无人踩时追随的角度（环境命令）。 */
+export function trackSolarSun(world: SimWorld, angle: number): void {
+  for (const { panel } of world.solar) panel.sunAngle = angle;
 }
 
 /** 装配层仅在黑洞新开场调用，保留地面出生点供死亡重生使用。 */
@@ -238,8 +271,8 @@ export function query<K extends keyof Entity>(world: SimWorld, ...components: K[
 }
 
 /**
- * 调试倒水：世界坐标 (x,y) → 格，从该格起向上逐格 add（每格封顶 255），直到倒完、遇实心或到顶。
- * 返回实际倒入量。越界或 amount 非非负整数即抛。
+ * 调试倒水：世界坐标 (x,y) 所在格的 4 列子格，从 y 所在子格行起逐行向上加水（每子格封顶 FLUID_FULL），
+ * 直到倒完、整行子格都是实心或到顶。amount 以子格水量计（一整格满水 = 16 × FLUID_FULL）。返回实际倒入量。越界或 amount 非非负整数即抛。
  */
 export function pourFluid(world: SimWorld, x: number, y: number, amount: number): number {
   const f = world.fluid;
@@ -250,9 +283,14 @@ export function pourFluid(world: SimWorld, x: number, y: number, amount: number)
     throw new Error(`pourFluid: (${x},${y}) is outside the ${f.width}×${f.height} world`);
   }
   let left = amount;
-  for (let cy = ty; left > 0 && cy < f.height; cy++) {
-    if (f.solid[cy * f.width + tx] === 1) break;
-    left -= f.add(tx, cy, left);
+  for (let sy = Math.floor(y * SUBCELLS); left > 0 && sy < f.subHeight; sy++) {
+    let open = false;
+    for (let sx = tx * SUBCELLS; left > 0 && sx < (tx + 1) * SUBCELLS; sx++) {
+      if (f.solid[sy * f.subWidth + sx] === 1) continue;
+      open = true;
+      left -= f.addSub(sx, sy, left);
+    }
+    if (!open) break;
   }
   return amount - left;
 }
@@ -481,7 +519,7 @@ function dropHealthPack(world: SimWorld, position: Vec2, healAmount: number, max
 
 export function stepSim(world: SimWorld, input: InputFrame): void {
   const { tuning, map, entities, fluid } = world;
-  const rideProbe = createTileRideProbe(map);
+  const rideProbe = createRideProbe(tileCollision(map));
   const dt = tuning.sim.step;
   if (world.bossArena && stepBossArena(world)) {
     for (const entity of entities) savePrev(entity.body);
@@ -502,55 +540,20 @@ export function stepSim(world: SimWorld, input: InputFrame): void {
     world.tick++;
     return;
   }
-  const landing = world.podLanding;
-  if (landing) {
-    const player = getPlayer(world);
-    const phase = podLandingPhase(landing, player.body);
-    if (phase !== 'done') {
-      // 走出阶段玩家无法操作，世界像舱内阶段一样冻结，只推进步行，避免被敌人攻击。
-      for (const entity of entities) savePrev(entity.body);
-      for (const fish of world.fish.fish) savePrev(fish.body);
-      if (phase === 'carry') carryInPod(landing, player.body);
-      else {
-        updatePelican(player, POD_WALK_INPUT, map, tuning, dt, fluid, 0, rideProbe);
-        moveAndCollide(player.body, map, dt);
-        resolvePelicanState(player);
-      }
-      world.tick++;
-      return;
-    }
-    world.podLanding = null;
-  }
-  const boarding = world.podBoarding;
-  if (boarding) {
-    const player = getPlayer(world);
-    if (player.body.x > boarding.exitX) {
-      for (const entity of entities) savePrev(entity.body);
-      for (const fish of world.fish.fish) savePrev(fish.body);
-      updatePelican(player, POD_WALK_INPUT, map, tuning, dt, fluid, 0, rideProbe);
-      moveAndCollide(player.body, map, dt);
-      resolvePelicanState(player);
-      world.tick++;
-      return;
-    }
-    world.podBoarding = null;
-    world.podTakeoff = boarding;
-  }
-  const takeoff = world.podTakeoff;
-  if (takeoff) {
-    const player = getPlayer(world);
-    const phase = podTakeoffPhase(takeoff, player.body);
-    for (const entity of entities) savePrev(entity.body);
-    for (const fish of world.fish.fish) savePrev(fish.body);
-    if (phase === 'carry') liftInPod(takeoff, player.body);
-    else if (phase === 'walk') {
-      updatePelican(player, POD_BOARD_INPUT, map, tuning, dt, fluid, 0, rideProbe);
-      moveAndCollide(player.body, map, dt);
-      resolvePelicanState(player);
-    }
+  if (stepPodFreeze(world, getPlayer(world), rideProbe)) {
     world.tick++;
     return;
   }
+  if (world.city && stepCityBuild(world.city, entities, world.fish.fish, getPlayer(world).body)) {
+    world.tick++;
+    return;
+  }
+  const transit = world.city?.transit;
+  if (transit && stepTransitFreeze(transit, map.parts, entities, world.fish.fish, getPlayer(world), dt)) {
+    world.tick++;
+    return;
+  }
+  if (transit) input = steerTransit(transit, getPlayer(world).body, input);
   if (!mainlineTransformUnlocked(world)) {
     if (input.transformPressed) world.events.push({ type: 'transformBlocked', id: world.playerId, reason: 'story' });
     input = { ...input, transformPressed: false };
@@ -599,7 +602,7 @@ export function stepSim(world: SimWorld, input: InputFrame): void {
   stepEnvironment(world);
 
   const interval = tuning.fluid.stepInterval;
-  if (world.tick % interval === 0) stepFluid(fluid, tuning.fluid, (world.tick / interval) | 0);
+  if (world.tick % interval === 0) advanceFluid(fluid, tuning.fluid, (world.tick / interval) | 0);
 
   for (const e of entities) {
     if (e.removed) continue;
@@ -609,6 +612,7 @@ export function stepSim(world: SimWorld, input: InputFrame): void {
       const wind = world.env.wind;
       const airWind = entityExposed(map, e) ? wind.sway(e.body.x) * tuning.player.airWindSpeed * Math.max(0, wind.state.scale - 1) : 0;
       updatePelican(e, e.id === world.playerId ? playerInput : NEUTRAL_INPUT, map, tuning, dt, fluid, airWind, rideProbe);
+      if (world.unlimitedFlight && e.id === world.playerId) e.pelican.flightTicks = e.pelican.flightMaxTicks;
       pushSplash(world, e, wasInWater);
     } else if (e.boss) {
       const player = getPlayer(world);
@@ -690,6 +694,9 @@ export function stepSim(world: SimWorld, input: InputFrame): void {
       }
     }
   }
+  // 门与太阳能板改变碰撞，只在移动之后按 tick 推进；门的开合下一 tick 生效。
+  if (world.city) stepCity(world.city, getPlayer(world).body, dt);
+  stepSolarParts(map.parts, world.solar, getPlayer(world).body, dt);
   if (applyEnvironmentalDamage(world)) {
     world.tick++;
     return;

@@ -34,6 +34,15 @@ export type N = ReturnType<typeof float>;
 
 export const materialLabel = (m: THREE.Material): string => m.name || m.type;
 
+/**
+ * three 只在原材质上带节点时，才让共用该材质的每个网格每次渲染都刷新 uniform（NodeMaterialObserver.containsNode 查的是原材质）；
+ * 否则每次渲染只有第一个网格上传，其余停在建立时的值。补丁与 ShaderMaterial 转换都读外部 uniform，原材质上挂一个节点标记。
+ */
+const LIVE_UNIFORMS = float(0);
+export function refreshEveryRender(source: THREE.Material): void {
+  Object.assign(source, { liveUniforms: LIVE_UNIFORMS });
+}
+
 const uniformNodes = new WeakMap<THREE.IUniform, N>();
 /** 共享 IUniform → uniform 节点（每次渲染读取 IUniform.value）。 */
 export function shared(u: THREE.IUniform, type?: string): N {

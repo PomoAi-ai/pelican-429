@@ -11,6 +11,7 @@ import type { InputFrame } from '../../sim/sim-world.ts';
 import { createNpcWorld } from './npc-world.ts';
 import { BossScore } from '../audio/boss-audio.ts';
 import { t } from '../../config/i18n.ts';
+import { undergroundInspectionLight } from '../../render/stage/light-presets.ts';
 
 /** 模型尺寸、材质和动作由游戏共享资源提供，展示场只控制取景与播放时间。 */
 export function createNpcShowcaseSession(renderer: THREE.WebGLRenderer, card: ShowcaseCard, caveBackground: THREE.Texture) {
@@ -25,7 +26,7 @@ export function createNpcShowcaseSession(renderer: THREE.WebGLRenderer, card: Sh
   let world = createNpcWorld(stage, environment, caveBackground);
   stage.addBackdrop(world.backdrop);
   const sky = stage.scene.background;
-  const undergroundBackground = new THREE.Color('#111c27');
+  const inspection = undergroundInspectionLight(TUNING);
   const screen = new THREE.Vector3();
   let time = 0;
   let revision = card.revision;
@@ -85,7 +86,7 @@ export function createNpcShowcaseSession(renderer: THREE.WebGLRenderer, card: Sh
       environment = card.environment;
       world = createNpcWorld(stage, environment, caveBackground);
     }
-    stage.scene.background = environment === 'underground' ? undergroundBackground : sky;
+    stage.scene.background = environment === 'underground' ? inspection.background : sky;
     sample(0);
   }
   show();
@@ -158,8 +159,8 @@ export function createNpcShowcaseSession(renderer: THREE.WebGLRenderer, card: Sh
       const darken = rig ? rig.effects.darken : 0;
       const underground = card.environment === 'underground';
       stage.scene.backgroundIntensity = 1 - darken * .85;
-      stage.hemiLight.intensity = TUNING.render.hemi * (underground ? 0.65 : 1) * (1 - darken * 0.75);
-      stage.keyLight.intensity = TUNING.render.keyLight * (1 - darken * 0.8);
+      stage.hemiLight.intensity = (underground ? inspection.hemi : TUNING.render.hemi) * (1 - darken * 0.75);
+      stage.keyLight.intensity = (underground ? inspection.key : TUNING.render.keyLight) * (1 - darken * 0.8);
       const halfWidth = viewHeight * stage.camera.aspect / 2;
       world.update({ x: centerX - halfWidth - 2, y: centerY - viewHeight / 2 - 2, w: halfWidth * 2 + 4, h: viewHeight + 4 }, time, dt);
       renderer.setScissorTest(false);

@@ -6,6 +6,7 @@ import { createStageView } from '../../render/stage/stage.ts';
 import type { InputFrame } from '../../sim/sim-world.ts';
 import { createLumaActor } from './stage-actor.ts';
 import { t } from '../../config/i18n.ts';
+import { undergroundInspectionLight } from '../../render/stage/light-presets.ts';
 
 /** 角色形状与动作来自共享资产，这里只负责检视环境、镜头和播放时间。 */
 export function createLumaShowcaseSession(renderer: THREE.WebGLRenderer, card: ShowcaseCard) {
@@ -26,10 +27,11 @@ export function createLumaShowcaseSession(renderer: THREE.WebGLRenderer, card: S
 
   function configureEnvironment(): void {
     const underground = card.environment === 'underground';
-    stage.scene.background = new THREE.Color(underground ? '#0c1b2a' : '#9ab4bd');
+    const inspection = undergroundInspectionLight(TUNING);
+    stage.scene.background = underground ? inspection.background : new THREE.Color('#9ab4bd');
     floorMaterial.color.set(underground ? '#233443' : '#728d91');
-    stage.hemiLight.intensity = TUNING.render.hemi * (underground ? 0.25 : 0.8);
-    stage.keyLight.intensity = TUNING.render.keyLight * (underground ? 0.3 : 1);
+    stage.hemiLight.intensity = underground ? inspection.hemi : TUNING.render.hemi * 0.8;
+    stage.keyLight.intensity = underground ? inspection.key : TUNING.render.keyLight;
   }
   configureEnvironment();
 

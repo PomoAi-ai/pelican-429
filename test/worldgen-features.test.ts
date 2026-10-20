@@ -476,12 +476,12 @@ describe('world/worldgen-verify：新断言', () => {
     const bank = lake.x0 - 1;
     const shapes = base.shapes.slice();
     shapes[((g[bank] as number) - 1) * CFG.width + bank] = SHAPE_HALF;
-    const fakeMap = { ...world.map, shapeAt: (tx: number, ty: number) => shapes[ty * CFG.width + tx] as 0 };
+    const fakeMap = { ...world.map, pieces: (tx: number, ty: number) => world.map.pieces(tx, ty).map((p) => ({ ...p, shape: shapes[ty * CFG.width + tx]! })) };
     assert.throws(() => verifyWorld({ ...base, shapes, map: fakeMap }, 42, CFG), /seed=42.*lake\/pool/);
     const sx = Math.floor(CFG.width / 2); // 中央草甸（原出生区）
     const spawnShapes = base.shapes.slice();
     spawnShapes[((world.surface[sx] as number) - 1) * CFG.width + sx] = SHAPE_SLOPE_R;
-    const spawnMap = { ...world.map, shapeAt: (tx: number, ty: number) => spawnShapes[ty * CFG.width + tx] as 0 };
+    const spawnMap = { ...world.map, pieces: (tx: number, ty: number) => world.map.pieces(tx, ty).map((p) => ({ ...p, shape: spawnShapes[ty * CFG.width + tx]! })) };
     assert.throws(() => verifyWorld({ ...base, shapes: spawnShapes, map: spawnMap }, 42, CFG), /seed=42.*spawn zone/);
   });
 

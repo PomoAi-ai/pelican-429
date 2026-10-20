@@ -41,20 +41,9 @@ export const FACILITY_SCENES = {
       { label: '网络核心', caption: 'InfiniBand 交换矩阵 · 控制设施', x: 143, y: 68, width: 65, height: 72 },
     ],
   },
-  original: {
-    name: '基础机房', number: '00', subtitle: '山林中的算力中心 · 初版场景',
-    width: 116, height: 48, floorY: 10,
-    overview: { label: '全景', caption: '山林与算力中心', x: 58, y: 18, width: 124, height: 44 },
-    shots: [
-      { label: '林地溪流', caption: '林地接近', x: 20, y: 17, width: 43, height: 21 },
-      { label: '机房外围', caption: '门禁与冷却设施', x: 44, y: 17, width: 34, height: 21 },
-      { label: '服务器大厅', caption: '服务器与检修栈道', x: 70, y: 17, width: 40, height: 21 },
-      { label: 'GB300 核心', caption: '重型算力核心', x: 94, y: 17, width: 29, height: 21 },
-    ],
-  },
 } as const;
 
-export type FacilityChapterId = Exclude<FacilitySceneId, 'original'>;
+export type FacilityChapterId = keyof typeof FACILITY_SCENES;
 
 export const FACILITY_CHAPTERS: Readonly<Record<FacilityChapterId, {
   readonly spawn: { readonly x: number; readonly y: number };
@@ -68,18 +57,13 @@ export const FACILITY_CHAPTERS: Readonly<Record<FacilityChapterId, {
 
 export function parseFacilityChapter(params: URLSearchParams): FacilityChapterId {
   const value = params.get('scene') ?? 'fortress';
-  if (!Object.hasOwn(FACILITY_CHAPTERS, value)) throw new Error(`未知可玩机房章节：${value}`);
+  const chapters = Object.keys(FACILITY_CHAPTERS).join('、');
+  // 原版机房场景随旧装配删除，旧网址明确报错并给出新网址。
+  if (value === 'original') throw new Error(`机房原版场景（scene=original）已移除，请改用 ?mode=game&level=facility&scene=<章节>（${chapters}）`);
+  if (!Object.hasOwn(FACILITY_CHAPTERS, value)) throw new Error(`未知可玩机房章节：${value}（支持 ${chapters}）`);
   return value as FacilityChapterId;
 }
 
-export type FacilitySceneId = keyof typeof FACILITY_SCENES;
-export const FACILITY_SCENE_IDS: readonly FacilitySceneId[] = ['fortress', 'cathedral', 'abyss', 'original'];
-
-export function parseFacilityScene(params: URLSearchParams): FacilitySceneId {
-  const value = params.get('scene') ?? 'fortress';
-  if (!Object.hasOwn(FACILITY_SCENES, value)) throw new Error(`未知机房场景：${value}`);
-  return value as FacilitySceneId;
-}
 
 /** 玩家平面的踏板：[左端、右端（不含）、脚底高度、深度位置、踏板深度]。 */
 export const FACILITY_PLATFORMS = {

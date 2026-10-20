@@ -2,8 +2,8 @@ import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { DEFINITION_DEPTH, DEFINITION_TILE_DEPTH, TILE_SHAPE_DEFINITIONS, WALL_POLYGONS } from '../../config/definition-kit.ts';
 import type { DefinitionDepthMode, DefinitionPoint, DefinitionPlatformWidth, DefinitionWindowKind } from '../../config/definition-kit.ts';
-import { createDefinitionDepthOccupancy, type DefinitionDepthPlacement } from '../../sim/definition-depth.ts';
-import type { DefinitionCollider, DefinitionPlatform } from '../../physics/definition-collision.ts';
+import { createDefinitionDepthOccupancy, type DefinitionDepthPlacement } from '../../world/building-layers.ts';
+import type { DefinitionPlatformLine, DefinitionSolid } from '../../sim/definition-world.ts';
 import type { RockTerrainCell } from '../../config/rock-terrain.ts';
 import { createDefinitionTerrain } from './definition-terrain.ts';
 import type { ResidenceMaterial } from '../../config/residence.ts';
@@ -21,8 +21,9 @@ export interface DefinitionGridCell {
 
 export interface DefinitionKit {
   readonly root: THREE.Group;
-  readonly solids: DefinitionCollider[];
-  readonly platforms: DefinitionPlatform[];
+  /** 玩法数据（布局坐标），由 sim/definition-world 写成格子世界。 */
+  readonly solids: DefinitionSolid[];
+  readonly platforms: DefinitionPlatformLine[];
   solid(shapeId: string, x: number, y: number, material?: ResidenceMaterial, depthMode?: DefinitionDepthMode, span?: number): void;
   terrain(cells: readonly RockTerrainCell[], textures: TileTextureData): void;
   wall(id: string, x: number, y: number): void;
@@ -34,6 +35,28 @@ export interface DefinitionKit {
 }
 
 const rectangle = (w: number, h: number): DefinitionPoint[] => [[0, 0], [w, 0], [w, h], [0, h]];
+
+/** 一件定义构件的网格模板：几何与材质仍归 kit，offset 相对绘制原点（定义坐标）。实例化绘制用。 */
+export interface DefinitionTemplateMesh {
+  readonly geometry: THREE.BufferGeometry;
+  readonly material: THREE.Material;
+  readonly offset: THREE.Vector3;
+  readonly castShadow: boolean;
+  readonly renderOrder: number;
+}
+
+/** 在原点 (x,y) 用 draw 画一件构件并取出新增网格成模板；网格从 kit.root 移走，几何与材质随 kit 释放。 */
+export function captureDefinitionTemplate(kit: DefinitionKit, x: number, y: number, draw: () => void): DefinitionTemplateMesh[] {
+  const before = kit.root.children.length;
+  draw();
+  const added = kit.root.children.slice(before);
+  for (const child of added) child.removeFromParent();
+  return added.map(child => {
+    if (!(child instanceof THREE.Mesh) || Array.isArray(child.material)) throw new Error('definition-kit: template part must be a single-material mesh');
+    return { geometry: child.geometry, material: child.material, offset: child.position.clone().sub(new THREE.Vector3(x, y, 0)),
+      castShadow: child.castShadow, renderOrder: child.renderOrder };
+  });
+}
 
 function shapePath(points: readonly DefinitionPoint[]): THREE.Shape {
   return new THREE.Shape(points.map(([x, y]) => new THREE.Vector2(x, y)));
@@ -102,8 +125,8 @@ const WALL_Z = DEFINITION_DEPTH.tile / 2;
 
 export function createDefinitionKit({ style = 'definition' }: { style?: 'definition' | 'ai-city' } = {}): DefinitionKit {
   const root = new THREE.Group();
-  const solids: DefinitionCollider[] = [];
-  const platforms: DefinitionPlatform[] = [];
+  const solids: DefinitionSolid[] = [];
+  const platforms: DefinitionPlatformLine[] = [];
   const terrainViews: ReturnType<typeof createDefinitionTerrain>[] = [];
   root.name = 'definition-kit';
   const grid: DefinitionGridCell[] = [];
@@ -231,7 +254,10 @@ export function createDefinitionKit({ style = 'definition' }: { style?: 'definit
       const body = Math.max(depth, WALL_Z + DEFINITION_DEPTH.wall - front);
       const definition = TILE_SHAPE_DEFINITIONS.find(({ id }) => id === shapeId)!;
       const points = definition.points.map(([px, py]): DefinitionPoint => [px * span, py]);
-      solids.push({ points: points.map(([px, py]) => [x + px, y + py]) });
+      // 跨格的整排方石按格拆成同形态的块（只有横向均匀的 A/B/C 会跨格）。
+      for (let column = 0; column < span; column++) {
+        solids.push({ points: definition.points.map(([px, py]) => [x + column + px, y + py]), tile: material, deep: depthMode === 'deep' });
+      }
       const architectural = material === 'ceramic' || material === 'alloy' || material === 'ashlar';
       // 逐块色差、粗糙度与纹理相位由材质按构件原点生成，同材共用一份材质。
       const surface = !architectural ? (natural ??= createNaturalBuildingMaterials()).get(material)
@@ -265,10 +291,10 @@ export function createDefinitionKit({ style = 'definition' }: { style?: 'definit
       }
     },
     terrain(cells, textures) {
-      for (const { shape, x, y } of cells) {
+      for (const { shape, x, y, layers } of cells) {
         gridCells(x, y, 1, 1, TILE_FRONT, DEFINITION_DEPTH.tile, 'solid');
         const definition = TILE_SHAPE_DEFINITIONS.find(item => item.id === shape)!;
-        solids.push({ points: definition.points.map(([px, py]) => [x + px, y + py]) });
+        solids.push({ points: definition.points.map(([px, py]) => [x + px, y + py]), tile: layers[0]!.material, deep: false });
       }
       const view = createDefinitionTerrain(cells, textures);
       terrainViews.push(view);
@@ -310,7 +336,7 @@ export function createDefinitionKit({ style = 'definition' }: { style?: 'definit
       if (!hung) floatingCells.add(cell);
       const depth = hung ? WALL_Z - front : DEFINITION_DEPTH.platform;
       gridCells(x, Math.ceil(top) - 1, 1, 1, front, depth, 'solid');
-      platforms.push({ left, right: left + w, top });
+      platforms.push({ left, right: left + w, top, tile: `${material}platform` });
       if (city) {
         box(material === 'ceramic' ? platformCeramic : platformMaterial, w, .165, depth - .01, left, top - .2, front + .01);
         box(material === 'ceramic' ? platformTop : platformMaterial, w - .025, .035, depth - .025, left + .0125, top - .035, front + .0125);
@@ -320,7 +346,7 @@ export function createDefinitionKit({ style = 'definition' }: { style?: 'definit
     door(side, x, y, openingHeight) {
       gridCells(x, y, 1, 4, TILE_FRONT, DEFINITION_DEPTH.tile, 'solid');
       const left = x + (side === 'left' ? 0 : .5);
-      solids.push({ points: rectangle(.5, 4 - openingHeight).map(([px, py]) => [left + px, y + openingHeight + py]) });
+      solids.push({ points: rectangle(.5, 4 - openingHeight).map(([px, py]) => [left + px, y + openingHeight + py]), tile: 'ceramic', deep: false });
       // 两根门柱在前后沿，保证沿 X 通行时没有横跨洞口的门槛。
       for (const z of [TILE_FRONT, WALL_Z - .1]) box(doorMaterial, .12, openingHeight, .1, left + (side === 'left' ? 0 : .38), y, z);
       box(doorMaterial, .5, 4 - openingHeight, DEFINITION_DEPTH.tile, left, y + openingHeight, TILE_FRONT);

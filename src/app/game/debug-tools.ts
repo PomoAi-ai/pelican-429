@@ -8,18 +8,22 @@ import { dummyShooting, pourFluid, setDummyShooting, setPrecipMode } from '../..
 import type { SimWorld } from '../../sim/sim-world.ts';
 import type { WorldViews } from '../../render/stage/world-views.ts';
 import { installPrecipDebugKey } from '../../ui/hud/precip-debug.ts';
+import { FLUID_FULL } from '../../world/fluid-map.ts';
 import type { LevelData } from '../../world/level.ts';
+import { SUBCELLS } from '../../world/tile-shapes.ts';
 import type { TileQuery } from '../../world/tile-map.ts';
 
-/** 地图内容哈希（FNV-1a over tile ids + 形状通道 + 当前水量），供 ?debug 下比较同种子两次加载是否一致。 */
+/** 地图内容哈希（FNV-1a over 每格全部块的材料、形态与加深 + 当前水量），供 ?debug 下比较同种子两次加载是否一致。 */
 export function mapHash(map: TileQuery, fluidCells: Uint8Array): string {
   let h = 0x811c9dc5;
   for (let ty = 0; ty < map.height; ty++) {
     for (let tx = 0; tx < map.width; tx++) {
-      h ^= map.get(tx, ty);
-      h = Math.imul(h, 0x01000193);
-      h ^= map.shapeAt(tx, ty);
-      h = Math.imul(h, 0x01000193);
+      for (const piece of map.pieces(tx, ty)) {
+        h ^= piece.id;
+        h = Math.imul(h, 0x01000193);
+        h ^= piece.shape | (piece.deep ? 0x80 : 0);
+        h = Math.imul(h, 0x01000193);
+      }
     }
   }
   for (let i = 0; i < fluidCells.length; i++) {
@@ -113,13 +117,15 @@ export function installDebugKeys(debug: boolean, canvas: HTMLCanvasElement, worl
   return pour;
 }
 
+const TILE_FLUID = SUBCELLS * SUBCELLS * FLUID_FULL;
+
 /** 在世界坐标 at（夹到地图内）倒一满格水；at 为 null（指针不在世界平面上）则不倒。 */
 export function pourAtWorld(world: SimWorld, level: LevelData, at: Vec2 | null): void {
   if (!at) return;
   const EDGE = 1e-3;
   const x = Math.min(Math.max(at.x, 0), level.map.width - EDGE);
   const y = Math.min(Math.max(at.y, 0), level.map.height - EDGE);
-  pourFluid(world, x, y, 255);
+  pourFluid(world, x, y, TILE_FLUID);
 }
 
 export interface DebugHandles {

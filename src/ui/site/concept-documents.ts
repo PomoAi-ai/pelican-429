@@ -1,232 +1,199 @@
-/** Navigation only; all concept prose lives in public/concepts/*.md. */
+/** Navigation only; all concept prose lives in public/concepts/<id>.md. */
 export interface ConceptDocument {
   readonly id: string;
   readonly title: string;
   readonly group: string;
-  readonly file: string;
 }
 
 export const CONCEPT_DOCUMENTS: readonly ConceptDocument[] = [
   {
     "id": "core-glossary",
     "title": "基础术语表",
-    "group": "资源基础",
-    "file": "core-glossary.md"
+    "group": "资源基础"
   },
   {
     "id": "resource-classification",
     "title": "资源分类与命名",
-    "group": "资源基础",
-    "file": "resource-classification.md"
+    "group": "资源基础"
   },
   {
     "id": "core-coordinates",
     "title": "坐标与尺度约定",
-    "group": "资源基础",
-    "file": "core-coordinates.md"
+    "group": "资源基础"
   },
   {
     "id": "material-library",
     "title": "材料与构件库",
-    "group": "材料与构件库",
-    "file": "material-library.md"
+    "group": "材料与构件库"
   },
   {
-    "id": "concept-overview",
+    "id": "world-overview",
     "title": "世界设定与适用范围",
-    "group": "基础设定",
-    "file": "world-overview.md"
+    "group": "基础设定"
   },
   {
-    "id": "concept-scale",
+    "id": "character-ruler-standard",
     "title": "角色标尺标准",
-    "group": "基础设定",
-    "file": "character-ruler-standard.md"
+    "group": "基础设定"
   },
   {
-    "id": "concept-character",
+    "id": "character-proportions",
     "title": "玩家角色、伙伴与人物比例",
-    "group": "基础设定",
-    "file": "character-proportions.md"
+    "group": "基础设定"
   },
   {
-    "id": "concept-scene",
+    "id": "scene-composition",
     "title": "场景由哪些部分组成",
-    "group": "基础设定",
-    "file": "scene-composition.md"
+    "group": "基础设定"
   },
   {
-    "id": "concept-time",
+    "id": "world-time",
     "title": "时间、历法与日月",
-    "group": "基础设定",
-    "file": "world-time.md"
+    "group": "基础设定"
   },
   {
-    "id": "concept-tiles",
+    "id": "terrain-combinations",
     "title": "地形瓦片与组合",
-    "group": "基础设定",
-    "file": "terrain-combinations.md"
+    "group": "基础设定"
   },
   {
-    "id": "concept-regions",
+    "id": "world-regions",
     "title": "自然区域与算力设施",
-    "group": "基础设定",
-    "file": "world-regions.md"
+    "group": "基础设定"
   },
   {
-    "id": "concept-sources",
+    "id": "artwork-sources",
     "title": "原图与设定资料来源",
-    "group": "基础设定",
-    "file": "artwork-sources.md"
+    "group": "基础设定"
   },
   {
-    "id": "building-depth",
+    "id": "depth-definitions",
     "title": "深度定义与线框透视说明",
-    "group": "场景与建筑",
-    "file": "depth-definitions.md"
+    "group": "场景与建筑"
   },
   {
-    "id": "concept-liquids",
+    "id": "liquid-definitions",
     "title": "液体定义与水体透视",
-    "group": "场景与建筑",
-    "file": "liquid-definitions.md"
+    "group": "场景与建筑"
   },
   {
-    "id": "liquid-display",
+    "id": "liquid-display-definitions",
     "title": "液体透视展示",
-    "group": "场景与建筑",
-    "file": "liquid-display-definitions.md"
+    "group": "场景与建筑"
   },
   {
-    "id": "concept-building",
+    "id": "building-overview",
     "title": "建筑与格子定义 · 新规则",
-    "group": "场景与建筑",
-    "file": "building-overview.md"
+    "group": "场景与建筑"
   },
   {
-    "id": "building-walls",
+    "id": "wall-window-definitions",
     "title": "背景墙形态与窗口定义",
-    "group": "场景与建筑",
-    "file": "wall-window-definitions.md"
+    "group": "场景与建筑"
   },
   {
-    "id": "building-shapes",
+    "id": "tile-shape-definitions",
     "title": "格子形态与支持范围定义",
-    "group": "场景与建筑",
-    "file": "tile-shape-definitions.md"
+    "group": "场景与建筑"
   },
   {
-    "id": "building-joins",
+    "id": "tile-connections",
     "title": "03 格子互相结合方式",
-    "group": "场景与建筑",
-    "file": "tile-connections.md"
+    "group": "场景与建筑"
   },
   {
-    "id": "building-platforms",
+    "id": "platform-definitions",
     "title": "平台定义",
-    "group": "场景与建筑",
-    "file": "platform-definitions.md"
+    "group": "场景与建筑"
   },
   {
-    "id": "building-house",
+    "id": "room-layout-definitions",
     "title": "单间房屋布置说明",
-    "group": "场景与建筑",
-    "file": "room-layout-definitions.md"
+    "group": "场景与建筑"
   },
   {
-    "id": "building-door",
+    "id": "door-definitions",
     "title": "门组件与深蓝合金能量门",
-    "group": "场景与建筑",
-    "file": "door-definitions.md"
+    "group": "场景与建筑"
   },
   {
-    "id": "building-furniture",
+    "id": "furniture-definitions",
     "title": "当前家具与设施定义",
-    "group": "场景与建筑",
-    "file": "furniture-definitions.md"
+    "group": "场景与建筑"
   },
   {
     "id": "building-legacy",
     "title": "旧实现与历史图对照",
-    "group": "历史资料",
-    "file": "building-legacy.md"
+    "group": "历史资料"
   },
   {
-    "id": "natural-resources",
+    "id": "natural-resource-definitions",
     "title": "植物、生长物与矿脉定义",
-    "group": "自然资源",
-    "file": "natural-resource-definitions.md"
+    "group": "自然资源"
   },
   {
-    "id": "natural-space",
+    "id": "natural-spatial-definitions",
     "title": "自然资源：附着位置、前沿、树木占格与矿脉剖面",
-    "group": "自然资源",
-    "file": "natural-spatial-definitions.md"
+    "group": "自然资源"
   },
   {
-    "id": "natural-grass",
+    "id": "natural-grass-definitions",
     "title": "地被与草丛：整格覆盖与逐状态透视",
-    "group": "自然资源",
-    "file": "natural-grass-definitions.md"
+    "group": "自然资源"
   },
   {
-    "id": "natural-flower",
+    "id": "natural-flower-definitions",
     "title": "花卉与草本：各阶段独立定义与透视图",
-    "group": "自然资源",
-    "file": "natural-flower-definitions.md"
+    "group": "自然资源"
   },
   {
-    "id": "natural-shrub",
+    "id": "natural-shrub-definitions",
     "title": "灌木与野果丛：各阶段独立定义与透视图",
-    "group": "自然资源",
-    "file": "natural-shrub-definitions.md"
+    "group": "自然资源"
   },
   {
-    "id": "natural-bonsai",
+    "id": "natural-bonsai-definitions",
     "title": "盆景与盆栽：各阶段独立定义与透视图",
-    "group": "自然资源",
-    "file": "natural-bonsai-definitions.md"
+    "group": "自然资源"
   },
   {
-    "id": "natural-tree",
+    "id": "natural-tree-definitions",
     "title": "树木：物种、冠团平台、空间与生长定义",
-    "group": "自然资源",
-    "file": "natural-tree-definitions.md"
+    "group": "自然资源"
   },
   {
-    "id": "natural-vine",
+    "id": "natural-vine-definitions",
     "title": "藤蔓与贴面植物：正面、背面和绕边透视",
-    "group": "自然资源",
-    "file": "natural-vine-definitions.md"
+    "group": "自然资源"
   },
   {
-    "id": "natural-drooping",
+    "id": "natural-drooping-definitions",
     "title": "下垂植物：草裙、苔须、垂藤、垂花、悬崖盆景与垂枝树",
-    "group": "自然资源",
-    "file": "natural-drooping-definitions.md"
+    "group": "自然资源"
   },
   {
-    "id": "natural-rock",
+    "id": "natural-rock-definitions",
     "title": "岩土地形组合与岩石占格定义",
-    "group": "自然资源",
-    "file": "natural-rock-definitions.md"
+    "group": "自然资源"
   },
   {
-    "id": "natural-ore",
+    "id": "natural-ore-definitions",
     "title": "矿脉：各阶段独立定义与透视图",
-    "group": "自然资源",
-    "file": "natural-ore-definitions.md"
+    "group": "自然资源"
   },
   {
-    "id": "concept-economy",
+    "id": "economy",
     "title": "经济与生存系统设计",
-    "group": "系统设定",
-    "file": "economy.md"
+    "group": "系统设定"
   },
   {
-    "id": "concept-ui",
+    "id": "ui-controls",
     "title": "界面与操作",
-    "group": "系统设定",
-    "file": "ui-controls.md"
+    "group": "系统设定"
+  },
+  {
+    "id": "chapter-1",
+    "title": "第一章 · 拯救 GPT-6 Astra",
+    "group": "剧情设计"
   }
 ];

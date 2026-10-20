@@ -13,6 +13,7 @@ import { createCloudShadowPatcher, CLOUD_SHADOW_PROGRAM_TAG } from '../src/rende
 import { createPrecipColumns, desertSnowFactor, waterTop } from '../src/render/sky/precip-columns.ts';
 import { PRECIP_VISUAL_KEYS, createPrecipController, lightningAt, precipVisualOf } from '../src/render/sky/precip.ts';
 import { precipSkyLook, boltPolyline } from '../src/render/sky/precip-sky.ts';
+import { SKY_BOTTOM, SKY_TOP } from '../src/render/stage/stage.ts';
 import {
   PRECIP_PROGRAM_TAG,
   PRECIP_SURFACE_FRAGMENT,
@@ -22,10 +23,9 @@ import {
   snowAmountAt,
   wetFactorAt,
 } from '../src/render/sky/precip-surface.ts';
-import { createPrecipView, precipSurfaceRoots } from '../src/render/sky/precip-view.ts';
+import { createPrecipView, levelPrecipSource, precipSurfaceRoots } from '../src/render/sky/precip-view.ts';
 import { createRainFx, planDripEmitters } from '../src/render/sky/rain-fx.ts';
 import { createSnowFx } from '../src/render/sky/snow-fx.ts';
-import { residenceWeatherRoofs } from '../src/render/residence/residence-weather.ts';
 import { createWeatherFx } from '../src/render/sky/weather-fx.ts';
 import { createWindController } from '../src/world/wind.ts';
 import type { DesertInfo, TreeInstance } from '../src/world/level.ts';
@@ -228,16 +228,6 @@ describe('闪电（确定性，只在大雨）', () => {
 });
 
 describe('列数据（雨被遮挡 / 水面 / 沙漠）', () => {
-  test('住宅负坐标的半砖屋顶遮雨，拆除后降水落到地面', () => {
-    const ground = { points: [[-3, 0], [3, 0], [3, 1.5], [-3, 1.5]] as const };
-    const roof = { points: [[-2, 5], [-1, 5], [-1, 5.5], [-2, 5.5]] as const };
-    const covered = residenceWeatherRoofs([ground, roof], -3, 6);
-    assert.equal(covered[1], 5.5);
-    assert.equal(covered[0], 1.5);
-    assert.equal(covered[2], 1.5);
-    const open = residenceWeatherRoofs([ground], -3, 6);
-    assert.equal(open[1], 1.5);
-  });
   test('roof = 最高遮挡格顶边；悬挑下方不是落点；水面列 stop = 水面且标记水；refresh 只在变化时标记更新', () => {
     const { map, fluid } = flatWorld();
     for (let x = 10; x < 15; x++) map.set(x, 14, TILE_STONE); // 浮空块/屋顶
@@ -251,7 +241,8 @@ describe('列数据（雨被遮挡 / 水面 / 沙漠）', () => {
     const lake = cols.at(22);
     assert.equal(lake.roof, 5);
     assert.ok(lake.water && Math.abs(lake.stop - 7) < 1e-6, `lake stop ${lake.stop}`);
-    assert.ok(Math.abs(cols.at(20).stop - (7 + 128 / 255)) < 1e-5);
+    // 水位 128/255：两行子格满水，第三行只剩 2 单位（低于 PRECIP_WATER_MIN，不算水面）。
+    assert.equal(cols.at(20).stop, 7.5);
     assert.equal(waterTop(fluid, 3, 8), 8);
     cols.texture.needsUpdate = false;
     const v0 = cols.texture.version;
@@ -420,7 +411,7 @@ describe('GPU 粒子（CPU 不逐粒子更新）与 draw call 上限', () => {
     tiles.add(new THREE.Mesh(new THREE.BoxGeometry(), new THREE.MeshStandardMaterial()));
     const pv = createPrecipView({
       scene,
-      level: { map, fluid, deserts: [], trees: [] },
+      ...levelPrecipSource({ map, fluid, deserts: [], trees: [] }, DEFAULT_PRECIP),
       camera: CAMERA,
       sky: { scene, keyLight, hemiLight, rimLight },
       surfaces: () => [tiles],
@@ -458,20 +449,21 @@ describe('GPU 粒子（CPU 不逐粒子更新）与 draw call 上限', () => {
 });
 
 describe('天色与云量', () => {
+  const DAY_SKY = { skyTop: new THREE.Color(SKY_TOP), skyBottom: new THREE.Color(SKY_BOTTOM), sky: 1 };
   test('大雨更暗更灰、雾更重；雪偏冷；闪电提亮；云量随降水', () => {
-    const none = precipSkyLook(precipVisualOf(P, { rain: 'none', snow: 'none' }, NORMAL_POWER), 0);
-    const heavy = precipSkyLook(precipVisualOf(P, { rain: 'heavy', snow: 'none' }, NORMAL_POWER), 0);
-    const light = precipSkyLook(precipVisualOf(P, { rain: 'light', snow: 'none' }, NORMAL_POWER), 0);
-    const snow = precipSkyLook(precipVisualOf(P, { rain: 'none', snow: 'heavy' }, NORMAL_POWER), 0);
+    const none = precipSkyLook(precipVisualOf(P, { rain: 'none', snow: 'none' }, NORMAL_POWER), 0, DAY_SKY);
+    const heavy = precipSkyLook(precipVisualOf(P, { rain: 'heavy', snow: 'none' }, NORMAL_POWER), 0, DAY_SKY);
+    const light = precipSkyLook(precipVisualOf(P, { rain: 'light', snow: 'none' }, NORMAL_POWER), 0, DAY_SKY);
+    const snow = precipSkyLook(precipVisualOf(P, { rain: 'none', snow: 'heavy' }, NORMAL_POWER), 0, DAY_SKY);
     assert.equal(none.key, 1);
     assert.equal(none.fog, 0);
     assert.ok(heavy.key < light.key && light.key < 1);
     assert.ok(heavy.fog > light.fog && heavy.shadow < light.shadow && heavy.saturation < 1);
     assert.ok(snow.cool > heavy.cool);
     assert.ok(snow.skyTop.b > heavy.skyTop.b, 'snow sky lighter / colder than rain sky');
-    const flash = precipSkyLook(precipVisualOf(P, { rain: 'heavy', snow: 'none' }, NORMAL_POWER), 1);
+    const flash = precipSkyLook(precipVisualOf(P, { rain: 'heavy', snow: 'none' }, NORMAL_POWER), 1, DAY_SKY);
     assert.ok(flash.hemi > heavy.hemi * 2 && flash.particle > heavy.particle);
-    assert.throws(() => precipSkyLook(precipVisualOf(P, { rain: 'none', snow: 'none' }, NORMAL_POWER), 2), /flash/);
+    assert.throws(() => precipSkyLook(precipVisualOf(P, { rain: 'none', snow: 'none' }, NORMAL_POWER), 2, DAY_SKY), /flash/);
   });
 
   test('weather-fx setOvercast：云更多（不超过 2× 上限）、云色变灰；0 时恢复原数量', () => {

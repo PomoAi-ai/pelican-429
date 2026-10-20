@@ -267,13 +267,13 @@ export interface LevelData {
   readonly islands: readonly SkyIsland[];
 }
 
-/** 每列最高的有碰撞（collision!=='none'）瓦片的顶边 y（ty+1）；整列无碰撞瓦片为 0。 */
+/** 每列最高的有块（实体或平台）格的顶边 y（ty+1）；整列无块为 0。 */
 export function computeSurface(map: TileQuery): Int16Array {
   if (map.height > 0x7fff) throw new Error(`computeSurface: map height ${map.height} exceeds Int16 range`);
   const out = new Int16Array(map.width);
   for (let tx = 0; tx < map.width; tx++) {
     for (let ty = map.height - 1; ty >= 0; ty--) {
-      if (map.collisionAt(tx, ty) !== 'none') {
+      if ((map.solidMask(tx, ty) | map.platformMask(tx, ty)) !== 0) {
         out[tx] = ty + 1;
         break;
       }

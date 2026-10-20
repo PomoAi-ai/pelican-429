@@ -1,9 +1,9 @@
 import * as THREE from 'three';
-import { FullScreenQuad } from 'three/addons/postprocessing/Pass.js';
 import { TUNING } from '../../config/tuning.ts';
 import { CHARACTER_STAGE_LOOK, characterStageSunDirection, characterStageFraming } from '../../config/character-stage-look.ts';
 import { createStageView } from '../stage/stage.ts';
 import { compileForStage } from '../stage/warm-up.ts';
+import { createShowcaseCompositor } from '../stage/showcase-renderer.ts';
 
 /** 各发型顺序共用正式游戏灯光与后期，避免每张卡片占一套渲染目标。 */
 export function createD1HairGameStage(renderer: THREE.WebGLRenderer) {
@@ -11,14 +11,7 @@ export function createD1HairGameStage(renderer: THREE.WebGLRenderer) {
   stage.camera.near = .05;
   stage.camera.far = 1000;
   stage.scene.background = new THREE.Color(CHARACTER_STAGE_LOOK.surfaceBackground);
-  const material = new THREE.RawShaderMaterial({
-    uniforms: { tImage: { value: null as THREE.Texture | null } },
-    vertexShader: 'precision highp float; attribute vec3 position; attribute vec2 uv; varying vec2 vUv; void main(){ vUv=uv; gl_Position=vec4(position.xy,0.0,1.0); }',
-    fragmentShader: 'precision highp float; uniform sampler2D tImage; varying vec2 vUv; void main(){ gl_FragColor=texture2D(tImage,vUv); }',
-    depthTest: false,
-    depthWrite: false,
-  });
-  const quad = new FullScreenQuad(material);
+  const compositor = createShowcaseCompositor(renderer);
   const size = new THREE.Vector2();
   const rotation = new THREE.Quaternion();
   const originalPosition = new THREE.Vector3();
@@ -75,13 +68,8 @@ export function createD1HairGameStage(renderer: THREE.WebGLRenderer) {
         // 一张阴影贴图在卡片间重用，每换角色都必须重新绘制。
         stage.keyLight.shadow.needsUpdate = true;
         renderer.shadowMap.needsUpdate = true;
-        material.uniforms.tImage!.value = stage.renderTexture();
-        renderer.setRenderTarget(null);
-        renderer.setViewport(rect.left, size.y - rect.bottom, rect.width, rect.height);
-        renderer.setScissor(left, size.y - bottom, right - left, bottom - top);
-        renderer.setScissorTest(true);
         // renderTexture 已完成色调映射与 sRGB 编码，只复制最终像素。
-        quad.render(renderer);
+        compositor.draw(stage.renderTexture(), rect, clip);
       } finally {
         root.position.copy(originalPosition);
         root.quaternion.copy(originalRotation);
@@ -93,8 +81,7 @@ export function createD1HairGameStage(renderer: THREE.WebGLRenderer) {
       }
     },
     dispose(): void {
-      quad.dispose();
-      material.dispose();
+      compositor.dispose();
       stage.dispose();
     },
   };

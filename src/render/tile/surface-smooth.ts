@@ -281,6 +281,7 @@ export interface MapSurfaceSource {
   readonly height: number;
   get(tx: number, ty: number): number;
   shapeAt(tx: number, ty: number): TileShape;
+  plain(tx: number, ty: number): boolean;
 }
 
 /**
@@ -299,7 +300,7 @@ export function createMapSurfaceQuery(
     surfaceShape(tx, ty) {
       if (ty < 0 || ty >= map.height) return null;
       const cx = clampX(tx);
-      if (!smoothId(map.get(cx, ty)) || covered(cx, ty)) return null;
+      if (!smoothId(map.get(cx, ty)) || covered(cx, ty) || !map.plain(cx, ty)) return null;
       return map.shapeAt(cx, ty);
     },
     lakeBed: (tx, ty) => lakes.length > 0 && inLakeBed(lakes, tx, ty),

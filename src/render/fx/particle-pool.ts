@@ -2,7 +2,7 @@
  * 粒子对象池（任务 018）：一个 InstancedMesh（低模小球）承载固定上限的粒子，活跃粒子保持在前 count 个实例
  * （移除用末尾交换），每帧只写活跃实例的矩阵与颜色；不分配新 GPU 资源。
  * 粒子：位置/速度/重力/阻尼/寿命/起止尺寸/颜色；尺寸按寿命从 size0 线性到 size1（淡出靠缩小，实例不支持逐个透明度）。
- * lit=true：MeshBasicMaterial（由 light-texture 自动挂接瓦片光照，地下变暗）；lit=false：加性混合、userData.noLightMap（自发光火花）。
+ * lit=true：MeshBasicMaterial（由 light-field-material 自动挂接瓦片光照，地下变暗）；lit=false：加性混合、userData.noLightMap（自发光火花）。
  */
 import * as THREE from 'three';
 

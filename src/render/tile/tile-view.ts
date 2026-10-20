@@ -2,7 +2,7 @@
  * 瓦片视图：每个区块若干 InstancedMesh —— 方块（全部 block 形瓦片共用）、斜坡（左低右高 / 左高右低）、半砖、
  * 单向平台薄板、内凹填角，地表花草（flora.ts：每物种一个）、地被、灌木，以及草皮下泥土正面的攀附植被（face-climbers）。
  * 方块/薄板/填角共用 tile-material（世界坐标连续纹理 + 过渡着色）。瓦片 (tx,ty) 的方块中心为 (tx+.5, ty+.5, 0)，
- * 方块 z ∈ [BLOCK_BACK_Z, .5]（顶面向后延伸承接树根），薄板贴顶。
+ * 方块 z ∈ [BLOCK_BACK_Z, BLOCK_FRONT_Z]（格子深 2），薄板贴顶。
  *
  * 每实例属性（着色器约定见 tile-transitions / tile-material）：
  * - aLayers = (正面底材, 顶, 底) 纹理层；草皮（look.tufts）顶部暴露时顶用草顶层并长花草（flora.planFlora：连续草皮带 +
@@ -89,6 +89,14 @@ export const TILE_APPEARANCE: Readonly<Record<string, TileLook | null>> = Object
   timber: Object.freeze({ shape: 'block', side: 'planks', top: 'planks', bottom: 'planks' }),
   // 渔屋屋顶：碰撞用斜坡瓦片，视觉由渔屋模型（structure-view）绘制。
   roof: null,
+  // 建筑材料与建筑平台由块视图（piece-view）按定义构件绘制。
+  ceramic: null,
+  alloy: null,
+  ashlar: null,
+  ceramicplatform: null,
+  alloyplatform: null,
+  // 交通中心街面板：视觉由交通中心模型的前庭铺装绘制。
+  paving: null,
 });
 
 export const SLAB_HEIGHT = 0.25;
@@ -295,11 +303,11 @@ function buildEntries(map: TileMap, table: TransitionTable): Array<Entry | undef
 
 function createCellLookup(map: TileMap, byId: ReadonlyArray<Entry | undefined>): CellLookup {
   const entryAt = (tx: number, ty: number): Entry | undefined => {
-    // 左右/底部越界按边缘格延伸（世界边缘不倒角）；顶部越界为空气。
+    // 左右/底部越界按边缘格延伸（世界边缘不倒角）；顶部越界为空气。多块格与新形态由块视图绘制，这里按空气。
     if (ty >= map.height) return undefined;
     const cx = Math.min(map.width - 1, Math.max(0, tx));
     const cy = Math.max(0, ty);
-    return byId[map.get(cx, cy)];
+    return map.plain(cx, cy) ? byId[map.get(cx, cy)] : undefined;
   };
   const shapeAt = (tx: number, ty: number): WorldShape => map.shapeAt(Math.min(map.width - 1, Math.max(0, tx)), Math.max(0, ty));
   const blockClass = (tx: number, ty: number): CellClass | null => {
@@ -483,7 +491,7 @@ function climberSite(ctx: TileViewCtx, tx: number, ty: number, shape: WorldShape
   let sideL = 0;
   let sideR = 0;
   for (let r = ty; r > ty - CLIMB_ROWS && r >= 0; r--) {
-    const key = byId[map.get(tx, r)]?.key;
+    const key = cells.entryAt(tx, r)?.key;
     if (key !== 'grass' && key !== 'dirt') break;
     if (r < ty && map.shapeAt(tx, r) !== SHAPE_FULL) break;
     bottom = r;
@@ -508,7 +516,7 @@ function planChunk(ctx: TileViewCtx, cx: number, cy: number): ChunkPlan {
   for (let ty = y0; ty < y1; ty++) {
     for (let tx = x0; tx < x1; tx++) {
       const id = map.get(tx, ty);
-      const entry = byId[id];
+      const entry = cells.entryAt(tx, ty);
       if (entry === undefined || entry.look.shape !== 'block') {
         // 不可见瓦片（空气/branch）跳过；未知 id 已由 TileMap.set 拒绝，这里再兜底校验。
         if (entry === undefined && !map.registry.has(id)) throw new Error(`tile-view: unknown tile id ${id} at (${tx},${ty})`);

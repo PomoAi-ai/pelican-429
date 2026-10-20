@@ -1,14 +1,59 @@
 import * as THREE from 'three';
-import { BUILDING_SCENE_TUNING, AI_CITY_HARBOR_LOOK } from '../../config/ai-city-look.ts';
+import { AI_CITY_HARBOR_LOOK, AI_CITY_LOOK, BUILDING_SCENE_TUNING } from '../../config/ai-city-look.ts';
 import { MAGLEV } from '../../config/maglev.ts';
-import { createStage } from '../../render/stage/stage.ts';
+import { attachStage, WEBGL_STAGE_BACKEND } from '../../render/stage/stage.ts';
 import { createCameraRig } from '../../render/stage/camera-rig.ts';
-import { createAiCityLighting } from '../../render/city/ai-city-lighting.ts';
+import { DEFAULT_PRECIP } from '../../config/precip-rules.ts';
+import { createDaylight } from '../../render/sky/daylight.ts';
+import { createPrecipController } from '../../render/sky/precip.ts';
+import { createPrecipSky } from '../../render/sky/precip-sky.ts';
 import { createMaglevCar, createMaglevTrack, disposeMaglevResources } from '../../render/transit/maglev-model.ts';
 import { createMaglevRailLights } from '../../render/transit/maglev-lighting.ts';
 import { createMaglevDrive, stepMaglevDrive } from '../../sim/maglev-drive.ts';
-import { createPageContext, readPageParams, type PageContext } from '../shell/page-context.ts';
-import { VIEW_MAX_DT } from '../shell/frame-clock.ts';
+import type { PageContext } from '../shell/page-context.ts';
+import { pageRenderer } from '../shell/page-renderer.ts';
+import { createViewLoop } from '../shell/view-loop.ts';
+import '../../ui/lab/maglev-track.css';
+
+const TEMPLATE = `
+<main id="maglev-app">
+  <div id="maglev-stage"></div>
+  <header class="heading">
+    <p>SKYLINE / MAGLEV</p>
+    <h1>晴空线</h1>
+    <span>160 格直线 · 三节连挂 · 每节两座</span>
+  </header>
+  <nav class="toolbar" aria-label="车厢和镜头">
+    <div class="variants" role="group" aria-label="车厢形态">
+      <button id="open-car" type="button" aria-pressed="true">敞开式</button>
+      <button id="closed-car" type="button" aria-pressed="false">有棚式</button>
+    </div>
+    <label class="zoom">远近 <input id="zoom" type="range" min="0.75" max="2" step="0.05" value="1" aria-label="镜头缩放" /></label>
+    <button id="reset" type="button">回到起点</button>
+  </nav>
+  <aside class="telemetry" aria-label="行驶状态">
+    <div><output id="speed">0.0</output><span>格 / 秒</span></div>
+    <p id="direction">停车</p>
+    <div class="line-progress"><span id="progress"></span></div>
+    <p><span id="position">80.0</span> / 160 格</p>
+  </aside>
+  <footer class="controls">
+    <p>轨道深 2 格 · 底座深 3 格<br /><span>正面游戏透视 · A / D 行驶 · 空格刹车</span></p>
+    <div role="group" aria-label="驾驶控制">
+      <button data-drive="left" type="button" aria-label="按住向左行驶">← <span>向左</span></button>
+      <button data-drive="brake" type="button" class="brake">刹车</button>
+      <button data-drive="right" type="button" aria-label="按住向右行驶"><span>向右</span> →</button>
+    </div>
+  </footer>
+  <details class="downloads">
+    <summary>模型文件</summary>
+    <a href="./models/maglev/open-car.glb" download>敞开式 GLB</a>
+    <a href="./models/maglev/closed-car.glb" download>有棚式 GLB</a>
+    <a href="./models/maglev/track.glb" download>轨道 GLB</a>
+  </details>
+  <p id="status" role="status">正在准备轨道……</p>
+</main>
+`;
 
 const MAGLEV_SCENE_TUNING = {
   ...BUILDING_SCENE_TUNING,
@@ -104,23 +149,27 @@ function installDriving(canvas: HTMLCanvasElement, signal: AbortSignal) {
 }
 
 export function mountMaglevTrack(ctx: PageContext): void {
+  document.getElementById('loading')!.hidden = true;
+  document.title = '晴空线 · 磁悬浮试车场';
+  ctx.root.innerHTML = TEMPLATE;
   const host = document.querySelector<HTMLDivElement>('#maglev-stage')!;
   const status = document.querySelector<HTMLParagraphElement>('#status')!;
-  const stage = createStage(host, MAGLEV_SCENE_TUNING, { quality: 'high', antialias: 'smaa' }, readPageParams().debug);
-  const studioEnvironment = stage.scene.environment;
-  const lighting = createAiCityLighting(stage, {
+  const stage = attachStage(host, pageRenderer(ctx, 'game', MAGLEV_SCENE_TUNING), MAGLEV_SCENE_TUNING, { quality: 'high', antialias: 'smaa' }, WEBGL_STAGE_BACKEND);
+  // 试车场固定在上午十点的晴天，与城区走同一条昼夜与天色路径。
+  const daylight = createDaylight({ stage, clock: { day: 1, second: 36000 }, openSky: () => 1, look: {
     ...AI_CITY_HARBOR_LOOK,
-    exposure: 1,
     keyColor: '#f7fbff', keyIntensity: 2.2,
     hemiSky: '#f3f6fa', hemiGround: '#e1e6eb', hemiIntensity: .35,
-    environmentIntensity: .3, haze: '#e8eef4',
-    rimColor: '#ecf5ff', rimIntensity: .35, rimDirection: { x: -.35, y: .45, z: .82 },
-    aoIntensity: .2,
-  });
-  lighting.setEnabled(true);
-  // Keep the studio's reflection bands so white and silver curves read against the outdoor sky.
-  stage.scene.environment = studioEnvironment;
-  stage.scene.environmentIntensity = .65;
+    // Keep the studio's reflection bands so white and silver curves read against the outdoor sky.
+    environmentIntensity: .65,
+    rimColor: '#ecf5ff', rimIntensity: .35,
+    atmosphere: { ...AI_CITY_LOOK.atmosphere, exposure: 1, haze: '#e8eef4', rimDirection: { x: -.35, y: .45, z: .82 },
+      aoIntensity: .2, skyReflection: false },
+  } });
+  const clearSky = createPrecipController(DEFAULT_PRECIP);
+  const sky = createPrecipSky({ scene: stage.scene, base: daylight.base, keyLight: stage.keyLight, hemiLight: stage.hemiLight,
+    rimLight: stage.rimLight, grade: stage.postFx.grade }, DEFAULT_PRECIP.seed);
+  stage.scene.add(sky.root);
   const root = new THREE.Group();
   const train = new THREE.Group();
   train.name = 'three-car-maglev';
@@ -164,11 +213,9 @@ export function mountMaglevTrack(ctx: PageContext): void {
   const position = document.querySelector<HTMLSpanElement>('#position')!;
   const progress = document.querySelector<HTMLSpanElement>('#progress')!;
   const direction = document.querySelector<HTMLParagraphElement>('#direction')!;
-  let previous: number | null = null;
   let elapsed = 0, facing: -1 | 1 = 1;
-  const frame = (now: number) => {
-    const dt = previous === null ? 0 : Math.min((now - previous) / 1000, VIEW_MAX_DT);
-    previous = now; elapsed += dt;
+  const loop = createViewLoop(dt => {
+    elapsed += dt;
     const previousLift = drive.lift;
     stepMaglevDrive(drive, input.read(), dt, bounds);
     const lift = drive.lift * drive.lift * (3 - 2 * drive.lift);
@@ -177,7 +224,9 @@ export function mountMaglevTrack(ctx: PageContext): void {
     train.position.set(drive.x, MAGLEV.railTop - MAGLEV.shoeBottom + MAGLEV.hoverHeight * lift + bob, 0);
     if (drive.speed !== 0) facing = drive.speed > 0 ? 1 : -1;
     rig.update(train.position.x, 0, facing, dt);
-    lighting.update();
+    daylight.update();
+    sky.update({ visual: clearSky.visual, lightning: clearSky.lightning, camera: stage.camera, view: { x: train.position.x, y: 0, w: 1, h: 1 } });
+    daylight.updateSky(sky.look!);
     stage.render();
     speed.value = Math.abs(drive.speed).toFixed(1);
     position.textContent = train.position.x.toFixed(1);
@@ -187,17 +236,12 @@ export function mountMaglevTrack(ctx: PageContext): void {
       ? drive.x <= half || drive.x >= bounds.trackLength - half ? '落轨停靠 · 已到端点，可反向行驶' : '落轨停靠'
       : drive.lift < 1 ? drive.lift > previousLift ? '起浮中' : '下降停靠'
       : drive.speed > 0 ? '悬浮行驶 →' : drive.speed < 0 ? '← 悬浮行驶' : '悬浮待行';
-  };
-  stage.renderer.setAnimationLoop(frame);
+  }, ctx.reportError);
+  loop.start();
   status.textContent = '';
   ctx.onDispose(() => {
-    stage.renderer.setAnimationLoop(null);
-    railLights.dispose(); disposeMaglevResources(root); lighting.dispose(); stage.dispose();
+    loop.stop();
+    railLights.dispose(); disposeMaglevResources(root); sky.dispose(); daylight.dispose(); stage.dispose();
   });
 }
 
-const page = createPageContext(document.querySelector<HTMLElement>('#maglev-app')!, error => {
-  document.querySelector<HTMLParagraphElement>('#status')!.textContent = `轨道场景加载失败：${String(error)}`;
-});
-try { mountMaglevTrack(page.context); }
-catch (error) { page.dispose(); page.context.reportError(error); throw error; }

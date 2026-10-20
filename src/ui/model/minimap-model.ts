@@ -1,17 +1,18 @@
 /**
  * 小地图纯逻辑（无 DOM，可在 node 测试）：
- * - 颜色映射：瓦片（按注册表 key）、斜坡形状、水量、天空/洞穴背景、树（干/冠）、渔屋后墙 → 打包 RGBA。
- * - 世界底图栅格：每格 tilePx×tilePx 像素（默认 4，斜坡画成斜边），行 0 = 世界顶部；
+ * - 颜色映射：瓦片（按注册表 key）、格内形状（1/4 掩码）、水量、天空/洞穴背景、树（干/冠）、渔屋后墙 → 打包 RGBA。
+ * - 世界底图栅格：每格 tilePx×tilePx 像素（默认 4，像素按所在 1/4 子格取 solidMask/platformMask），行 0 = 世界顶部；
  *   按小地图自己的区块（chunkTiles 格）增量重绘：瓦片变化由调用方 markTile（订阅 TileMap.onChange），
- *   水量变化由 scanFluid 比较每区块水量哈希（不调用破坏性的 takeDirtyChunks，不影响 tile-view/water-view）。
+ *   水量按 1/4 子格画（像素所在子格的水面），变化由 scanFluid 对水量版本变了的液体区块重算小地图区块水量哈希
+ *   （不调用破坏性的 takeDirtyChunks，不影响 tile-view/water-view）。
  * - 视窗计算：小地图跟随玩家并夹在地图内、缩放边界、大地图适配/平移/以光标为锚缩放、源/目标矩形裁剪。
- * 依赖：world 层只读类型 + 纯常量/纯函数模块（tile-shapes、fluid-map 的 FLUID_FULL）。
+ * 依赖：world 层只读类型 + 纯常量模块（tile-shapes 的 SUBCELLS、fluid-map 的 FLUID_FULL）。
  */
 import type { TileMap } from '../../world/tile-map.ts';
 import type { FluidMap } from '../../world/fluid-map.ts';
 import type { DesertInfo, FishingHut, SkyIsland, TreeInstance, TreeKind } from '../../world/level.ts';
 import { FLUID_FULL } from '../../world/fluid-map.ts';
-import { SHAPE_FULL, isTileShape, shapeTopAt } from '../../world/tile-shapes.ts';
+import { SUBCELLS } from '../../world/tile-shapes.ts';
 
 // ---------------------------------------------------------------- 颜色
 
@@ -42,6 +43,12 @@ export const TILE_COLORS: Readonly<Record<string, Rgb>> = Object.freeze({
   branch: hex(0x2f6a30),
   timber: hex(0x9a6a3a),
   roof: hex(0xa3483a),
+  ceramic: hex(0xd8d1c4),
+  alloy: hex(0x3f5872),
+  ashlar: hex(0xc8b48c),
+  ceramicplatform: hex(0xc9c0b0),
+  alloyplatform: hex(0x5a7088),
+  paving: hex(0xa9b4bb),
 });
 
 /** 树冠颜色（按树种）；dead 无树冠。 */
@@ -67,8 +74,6 @@ const CAVE_TOP: Rgb = hex(0x4a3526);
 const CAVE_DEEP: Rgb = hex(0x231912);
 const WATER_SHALLOW: Rgb = hex(0x5cb4e8);
 const WATER_DEEP: Rgb = hex(0x1d5fa8);
-/** 单向平台只画顶部这一比例的厚度。 */
-const PLATFORM_THICKNESS = 0.25;
 
 const mix = (a: Rgb, b: Rgb, t: number): Rgb => [
   Math.round(a[0] + (b[0] - a[0]) * t),
@@ -97,12 +102,6 @@ export function waterOver(under: Rgb, amount: number): Rgb {
   return mix(under, water, 0.55 + 0.35 * k);
 }
 
-/** 水在格内的填充高度（0..1）：至少一像素行可见（amount>0 时）。 */
-export function waterFillHeight(amount: number, tilePx: number): number {
-  if (amount <= 0) return 0;
-  return Math.max(1 / tilePx, amount / FLUID_FULL);
-}
-
 /** 瓦片 key 的材质色；未知 key 即抛（新瓦片类型必须在这里登记颜色）。 */
 export function tileColor(key: string): Rgb {
   const c = TILE_COLORS[key];
@@ -110,15 +109,9 @@ export function tileColor(key: string): Rgb {
   return c;
 }
 
-/**
- * 格内子像素 (fx, fyUp ∈ (0,1)，fyUp 从格底向上) 是否被瓦片覆盖：
- * solid 按形状顶高（斜坡斜边），oneWay 只画顶部薄层，none 不覆盖。
- */
-export function tileCovers(collision: 'none' | 'solid' | 'oneWay', shape: number, fx: number, fyUp: number): boolean {
-  if (collision === 'none') return false;
-  if (collision === 'oneWay') return fyUp >= 1 - PLATFORM_THICKNESS;
-  if (!isTileShape(shape)) throw new Error(`minimap: invalid tile shape ${shape}`);
-  return shape === SHAPE_FULL || fyUp <= shapeTopAt(shape, fx);
+/** 格内子像素 (fx, fyUp ∈ (0,1)，fyUp 从格底向上) 所在 1/4 子格是否在掩码（solidMask | platformMask）内。 */
+export function tileCovers(mask: number, fx: number, fyUp: number): boolean {
+  return (mask & (1 << (Math.floor(fyUp * SUBCELLS) * SUBCELLS + Math.floor(fx * SUBCELLS)))) !== 0;
 }
 
 // ---------------------------------------------------------------- 栅格
@@ -127,8 +120,8 @@ export const MINIMAP_TILE_PX = 4;
 export const MINIMAP_CHUNK_TILES = 16;
 
 export interface MinimapSource {
-  readonly tiles: Pick<TileMap, 'width' | 'height' | 'registry' | 'get' | 'shapeAt'>;
-  readonly fluid: Pick<FluidMap, 'width' | 'height' | 'cells' | 'revision'>;
+  readonly tiles: Pick<TileMap, 'width' | 'height' | 'registry' | 'get' | 'solidMask' | 'platformMask'>;
+  readonly fluid: Pick<FluidMap, 'width' | 'height' | 'subWidth' | 'subHeight' | 'cells' | 'revision' | 'chunksX' | 'chunkSize' | 'chunkRevisions' | 'surfaceAt'>;
   readonly trees: readonly TreeInstance[];
   readonly structures: readonly FishingHut[];
   /** 沙漠（020）：其外扩范围内的沙画成 DESERT_SAND_COLOR；缺省 = 无沙漠（测试关卡）。 */
@@ -306,16 +299,16 @@ export function createMinimapRaster(source: MinimapSource, options: MinimapRaste
     return false;
   };
 
+  const { cells: water, subWidth, subHeight } = fluid;
   const fluidHash = new Uint32Array(chunksX * chunksY);
   const hashChunk = (cx: number, cy: number): number => {
     let h = 0x811c9dc5;
-    const x1 = Math.min(W, (cx + 1) * C);
-    const y1 = Math.min(H, (cy + 1) * C);
-    const cells = fluid.cells;
-    for (let ty = cy * C; ty < y1; ty++) {
-      const row = ty * W;
-      for (let tx = cx * C; tx < x1; tx++) {
-        h ^= cells[row + tx] as number;
+    const sx1 = Math.min(W, (cx + 1) * C) * SUBCELLS;
+    const sy1 = Math.min(H, (cy + 1) * C) * SUBCELLS;
+    for (let sy = cy * C * SUBCELLS; sy < sy1; sy++) {
+      const row = sy * subWidth;
+      for (let sx = cx * C * SUBCELLS; sx < sx1; sx++) {
+        h ^= water[row + sx] as number;
         h = Math.imul(h, 0x01000193);
       }
     }
@@ -323,6 +316,9 @@ export function createMinimapRaster(source: MinimapSource, options: MinimapRaste
   };
   for (let cy = 0; cy < chunksY; cy++) for (let cx = 0; cx < chunksX; cx++) fluidHash[cy * chunksX + cx] = hashChunk(cx, cy);
   let fluidRevision = fluid.revision;
+  const seenFluidChunks = fluid.chunkRevisions.slice();
+  /** 像素高度（子格行）的一半：像素中心在子格水面以下画水；最下层的有水子格至少画最低一行像素。 */
+  const halfPixel = SUBCELLS / P / 2;
 
   const dirty = new Set<number>();
   const shade = (c: Rgb, tx: number, ty: number): Rgb => {
@@ -343,9 +339,7 @@ export function createMinimapRaster(source: MinimapSource, options: MinimapRaste
         if (collision === undefined) throw new Error(`minimap: tile id ${id} at (${tx},${ty}) missing from registry`);
         const base = id === sandId && desertCol[tx] === 1 ? DESERT_SAND_COLOR : colorById[id];
         const mat = base ? shade(base, tx, ty) : null;
-        const shape = collision === 'solid' ? tiles.shapeAt(tx, ty) : SHAPE_FULL;
-        const amount = fluid.cells[ty * W + tx] as number;
-        const fill = waterFillHeight(amount, P);
+        const mask = tiles.solidMask(tx, ty) | tiles.platformMask(tx, ty);
         const below = ty < (surface[tx] as number);
         const back: Rgb = below ? caveColor((surface[tx] as number) - ty - 1) : sky;
         const py0 = (H - 1 - ty) * P;
@@ -355,7 +349,7 @@ export function createMinimapRaster(source: MinimapSource, options: MinimapRaste
           for (let sx = 0; sx < P; sx++) {
             const fx = (sx + 0.5) / P;
             let c: Rgb;
-            if (mat && tileCovers(collision, shape, fx, fyUp)) {
+            if (mat && tileCovers(mask, fx, fyUp)) {
               c = mat;
             } else {
               const wx = tx + fx;
@@ -363,7 +357,13 @@ export function createMinimapRaster(source: MinimapSource, options: MinimapRaste
               let bg: Rgb | null = null;
               for (let i = 0; i < bucket.length && bg === null; i++) bg = treeColorAt((bucket[i] as TreeHit).tree, wx, wy);
               if (bg === null) bg = huts.length > 0 && inHut(wx, wy) ? HUT_WALL_COLOR : back;
-              c = amount > 0 && fyUp <= fill ? waterOver(bg, amount) : bg;
+              const subX = Math.floor(wx * SUBCELLS);
+              const subY = Math.floor(wy * SUBCELLS);
+              const amount = water[subY * subWidth + subX] as number;
+              const top = amount === 0 ? 0 : subY + 1 < subHeight && (water[(subY + 1) * subWidth + subX] as number) > 0 ? 1 : amount / FLUID_FULL;
+              const frac = wy * SUBCELLS - subY;
+              const lowest = subY === 0 || (water[(subY - 1) * subWidth + subX] as number) === 0;
+              c = amount > 0 && (frac <= top || (lowest && frac <= halfPixel)) ? waterOver(bg, amount) : bg;
             }
             pixels[rowBase + sx] = ((255 << 24) | (c[2] << 16) | (c[1] << 8) | c[0]) >>> 0;
           }
@@ -409,8 +409,16 @@ export function createMinimapRaster(source: MinimapSource, options: MinimapRaste
       if (fluidRevision === fluid.revision) return 0;
       fluidRevision = fluid.revision;
       let n = 0;
-      for (let cy = 0; cy < chunksY; cy++) {
-        for (let cx = 0; cx < chunksX; cx++) {
+      const revisions = fluid.chunkRevisions;
+      for (let k = 0; k < revisions.length; k++) {
+        if (revisions[k] === seenFluidChunks[k]) continue;
+        seenFluidChunks[k] = revisions[k] as number;
+        const fx = k % fluid.chunksX;
+        const fy = (k - fx) / fluid.chunksX;
+        const S = fluid.chunkSize;
+        const cx1 = Math.min(chunksX - 1, Math.floor(((fx + 1) * S - 1) / C));
+        const cy1 = Math.min(chunksY - 1, Math.floor(((fy + 1) * S - 1) / C));
+        for (let cy = Math.floor((fy * S) / C); cy <= cy1; cy++) for (let cx = Math.floor((fx * S) / C); cx <= cx1; cx++) {
           const i = cy * chunksX + cx;
           const h = hashChunk(cx, cy);
           if (h === fluidHash[i]) continue;

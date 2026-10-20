@@ -1,6 +1,6 @@
-"""Skin the approved Rodin gatekeeper and line hound, preserving their mesh and textures.
+"""Skin the approved Rodin line hound, preserving its mesh and textures.
 
-blender --background --python scripts/blender_enemies/build_bipeds.py -- --kind gatekeeper
+blender --background --python scripts/blender_enemies/build_bipeds.py -- --kind line-hound
 Source orientation is inspected with --yaw-deg before exporting; +X is forward.
 """
 import argparse
@@ -18,9 +18,8 @@ sys.dont_write_bytecode = True
 sys.path.insert(0, str(ROOT / 'scripts/blender_npcs'))
 from studio import setup_studio
 
-HEIGHTS = {'gatekeeper': 2.6, 'line-hound': 1.5}
-TIMINGS = {'gatekeeper': {'skill1': (42, 8, 48), 'skill2': (30, 14, 54)},
-           'line-hound': {'skill1': (30, 32, 54), 'skill2': (36, 10, 54)}}
+HEIGHTS = {'line-hound': 1.5}
+TIMINGS = {'line-hound': {'skill1': (30, 32, 54), 'skill2': (36, 10, 54)}}
 
 
 def points_of(obj):
@@ -56,23 +55,13 @@ def normalize(objects, height, yaw):
 
 
 def joint_positions(kind):
-    if kind == 'gatekeeper':
-        joints = {'root': (0, 0, 0), 'pelvis': (-.015, 0, .53), 'chest': (-.005, 0, .64), 'head': (0, 0, .81)}
-        parents = {'pelvis': 'root', 'chest': 'pelvis', 'head': 'chest'}
+    joints = {'root': (0, 0, 0), 'body': (0, 0, .66), 'head': (.47, 0, .77)}
+    parents = {'body': 'root', 'head': 'body'}
+    for fore, x, z, knee_x, knee_z, foot_x in [('F', .27, .64, .24, .42, .44), ('B', -.41, .74, -.60, .44, -.48)]:
         for side, sign in [('L', 1), ('R', -1)]:
-            joints.update({f'arm.{side}': (-.04, sign * .145, .72), f'forearm.{side}': (-.03, sign * .18, .585),
-                           f'hand.{side}': (.005, sign * .22, .44), f'thigh.{side}': (-.015, sign * .12, .53),
-                           f'shin.{side}': (-.01, sign * .12, .33), f'foot.{side}': (-.045, sign * .12, .087)})
-            parents.update({f'arm.{side}': 'chest', f'forearm.{side}': f'arm.{side}', f'hand.{side}': f'forearm.{side}',
-                            f'thigh.{side}': 'pelvis', f'shin.{side}': f'thigh.{side}', f'foot.{side}': f'shin.{side}'})
-    else:
-        joints = {'root': (0, 0, 0), 'body': (0, 0, .66), 'head': (.47, 0, .77)}
-        parents = {'body': 'root', 'head': 'body'}
-        for fore, x, z, knee_x, knee_z, foot_x in [('F', .27, .64, .24, .42, .44), ('B', -.41, .74, -.60, .44, -.48)]:
-            for side, sign in [('L', 1), ('R', -1)]:
-                limb = f'{fore}{side}'
-                joints.update({f'thigh.{limb}': (x, sign * .23, z), f'shin.{limb}': (knee_x, sign * .25, knee_z), f'foot.{limb}': (foot_x, sign * .26, .115)})
-                parents.update({f'thigh.{limb}': 'body', f'shin.{limb}': f'thigh.{limb}', f'foot.{limb}': f'shin.{limb}'})
+            limb = f'{fore}{side}'
+            joints.update({f'thigh.{limb}': (x, sign * .23, z), f'shin.{limb}': (knee_x, sign * .25, knee_z), f'foot.{limb}': (foot_x, sign * .26, .115)})
+            parents.update({f'thigh.{limb}': 'body', f'shin.{limb}': f'thigh.{limb}', f'foot.{limb}': f'shin.{limb}'})
     return joints, parents
 
 
@@ -104,7 +93,7 @@ def bind(objects, rig, kind, height):
     for obj in objects:
         weights = np.zeros((len(obj.data.vertices), len(names)))
         # Rodin's disconnected armour panels are rigid mechanical parts. Keep every
-        # connected panel on one joint so a shoulder sweep cannot stretch its plating.
+        # connected panel on one joint so a leg swing cannot stretch its plating.
         parents = list(range(len(obj.data.vertices)))
         def component(index):
             while parents[index] != index:
@@ -126,14 +115,10 @@ def bind(objects, rig, kind, height):
             children = [child for child, parent in hierarchy.items() if parent == name]
             if name.startswith('foot.'):
                 end = start + np.asarray((.085, 0, -.045))
-            elif name.startswith('hand.'):
-                end = start + np.asarray((.005, 0, -.12))
             elif name == 'head':
                 end = start + np.asarray((.035, 0, .11))
             elif len(children) == 1:
                 end = np.asarray(joints[children[0]])
-            elif name == 'chest':
-                end = np.asarray(joints['head'])
             elif name == 'body':
                 start = np.asarray((-.4, 0, .73))
                 end = np.asarray((.4, 0, .73))
@@ -161,12 +146,11 @@ def bind(objects, rig, kind, height):
                 knee = joints[f'shin.{limb}'][2]
                 ankle = joints[f'foot.{limb}'][2]
                 hip = joints[f'thigh.{limb}'][2]
-                body = 'pelvis' if kind == 'gatekeeper' else 'body'
                 upper = smooth(knee-.015,knee+.015,z)
                 lower = 1-smooth(ankle-.015,ankle+.02,z)
                 pelvis = smooth(hip-.015,hip+.025,z)
                 weights[indices] = 0
-                weights[indices,names.index(body)] = pelvis
+                weights[indices,names.index('body')] = pelvis
                 weights[indices,names.index(f'thigh.{limb}')] = upper*(1-pelvis)
                 weights[indices,names.index(f'shin.{limb}')] = (1-upper)*(1-lower)*(1-pelvis)
                 weights[indices,names.index(f'foot.{limb}')] = lower*(1-pelvis)
@@ -194,8 +178,8 @@ def shift(rig, name, vector):
 def pose_feet(rig, kind, height, time, stride, lift):
     """Two-joint mechanical legs follow grounded stance and a raised return arc."""
     joints, _ = joint_positions(kind)
-    limbs = [('L', 0), ('R', .5)] if kind == 'gatekeeper' else [('FL', 0), ('BR', 0), ('FR', .5), ('BL', .5)]
-    body_name = 'pelvis' if kind == 'gatekeeper' else 'body'
+    limbs = [('FL', 0), ('BR', 0), ('FR', .5), ('BL', .5)]
+    body_name = 'body'
     bpy.context.view_layer.update()
     parent_pose = rig.pose.bones[body_name].matrix.copy()
     parent_rest = rig.data.bones[body_name].matrix_local
@@ -219,7 +203,7 @@ def pose_feet(rig, kind, height, time, stride, lift):
             direction = ankle - hip
             distance = direction.length
         axis = direction.normalized()
-        pole = Vector((1 if kind == 'gatekeeper' else -1, 0, 0))
+        pole = Vector((-1, 0, 0))
         bend = (pole - axis * pole.dot(axis)).normalized()
         along = (a*a - b*b + distance*distance) / (2*distance)
         knee = hip + axis * along + bend * math.sqrt(max(0, a*a - along*along))
@@ -239,58 +223,35 @@ def pose_feet(rig, kind, height, time, stride, lift):
 def animate(rig, kind, name, frame, duration, height):
     t = frame / duration
     wave = math.sin(t * math.tau)
-    body = 'chest' if kind == 'gatekeeper' else 'body'
     if name == 'idle':
         turn(rig, 'head', (0,0,1), .055 * wave)
-        turn(rig, body, (0,1,0), .008 * wave)
+        turn(rig, 'body', (0,1,0), .008 * wave)
     elif name == 'move':
         shift(rig, 'root', (0, 0, -height * (.027 + .006 * math.cos(t * math.tau * 2))))
-        pose_feet(rig, kind, height, t, .20 if kind == 'gatekeeper' else .27, .05 if kind == 'gatekeeper' else .09)
+        pose_feet(rig, kind, height, t, .27, .09)
         turn(rig, 'head', (0,0,1), .02*wave)
-        if kind == 'gatekeeper':
-            for side, sign in [('L',1),('R',-1)]:
-                turn(rig, f'arm.{side}', (0,1,0), .2*wave*sign)
-                turn(rig, f'forearm.{side}', (0,1,0), -.13)
     elif name == 'hit':
         recoil = math.sin(math.pi*t) ** 2
-        turn(rig, body, (0,1,0), -.15*recoil)
+        turn(rig, 'body', (0,1,0), -.15*recoil)
         turn(rig, 'head', (0,1,0), -.10*recoil)
-        if kind == 'gatekeeper':
-            turn(rig, 'arm.R', (0,1,0), -.18*recoil)
-            turn(rig, 'arm.L', (0,1,0), -.18*recoil)
     else:
         startup, active, recovery = TIMINGS[kind][name]
         prepare = float(smooth(0, startup, frame))
-        release = float(smooth(startup, startup + active, frame))
         recover = 1 - float(smooth(startup + active, duration, frame))
-        if kind == 'gatekeeper':
-            if name == 'skill1':
-                turn(rig, 'chest', (0,0,1), (.18*prepare - .35*release)*recover)
-                turn(rig, 'arm.R', (0,1,0), (-.85*prepare - .35*release)*recover)
-                turn(rig, 'forearm.R', (0,1,0), (-.6*prepare + .55*release)*recover)
-                turn(rig, 'hand.R', (0,0,1), (.25*prepare - .5*release)*recover)
-            else:
-                turn(rig, 'chest', (0,1,0), (.06*prepare + .10*release)*recover)
-                turn(rig, 'arm.R', (0,1,0), (-.6*prepare - .6*release)*recover)
-                turn(rig, 'forearm.R', (0,1,0), (-.8*prepare + .75*release)*recover)
-                turn(rig, 'arm.L', (0,1,0), -.45*prepare*recover)
-                turn(rig, 'forearm.L', (0,1,0), -.6*prepare*recover)
-            turn(rig, 'head', (0,0,1), -.06*prepare*recover)
-        else:
-            # Logical jump supplies world translation. The clip only folds real joints.
-            tuck = prepare * recover
-            if name == 'skill2':
-                tuck = prepare * (1 - float(smooth(startup, startup + active*.4, frame)))
-            shift(rig, 'root', (0,0,-height*.06*tuck))
-            pose_feet(rig, kind, height, .1, .05*tuck, 0)
-            turn(rig, 'head', (0,1,0), -.10*tuck)
-            for limb, sign in [('FL',1),('FR',1),('BL',-1),('BR',-1)]:
-                turn(rig, f'thigh.{limb}', (0,1,0), -.18*sign*tuck)
-                turn(rig, f'shin.{limb}', (0,1,0), .28*sign*tuck)
+        # Logical jump supplies world translation. The clip only folds real joints.
+        tuck = prepare * recover
+        if name == 'skill2':
+            tuck = prepare * (1 - float(smooth(startup, startup + active*.4, frame)))
+        shift(rig, 'root', (0,0,-height*.06*tuck))
+        pose_feet(rig, kind, height, .1, .05*tuck, 0)
+        turn(rig, 'head', (0,1,0), -.10*tuck)
+        for limb, sign in [('FL',1),('FR',1),('BL',-1),('BR',-1)]:
+            turn(rig, f'thigh.{limb}', (0,1,0), -.18*sign*tuck)
+            turn(rig, f'shin.{limb}', (0,1,0), .28*sign*tuck)
 
 
 def bake(rig, kind, height):
-    clips = {'idle': 180, 'move': 48 if kind == 'gatekeeper' else 36,
+    clips = {'idle': 180, 'move': 36,
              **{name: sum(timing) for name,timing in TIMINGS[kind].items()}, 'hit': 36}
     scene = bpy.context.scene
     scene.render.fps = 60

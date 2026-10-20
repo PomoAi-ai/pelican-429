@@ -12,7 +12,7 @@ import { nodePatches } from '../stage/node-patches.ts';
 import { addDiscard, beforeLighting, deformBeforeInstance, fragmentNormal, isOpaque, materialLabel, normalOf, roughnessOf, shared, toWorld } from './webgpu-node-utils.ts';
 import type { N, PatchTable, Translate } from './webgpu-node-utils.ts';
 
-/** GLSL fract( sin( dot( p, vec2( 127.1, 311.7 ) ) ) * 43758.5453 )（港口幕墙与能量门共用的格哈希）。 */
+/** GLSL fract( sin( dot( p, vec2( 127.1, 311.7 ) ) ) * 43758.5453 )（能量门的格哈希）。 */
 const hash2 = (p: N): N => fract(sin(dot(p, vec2(127.1, 311.7))).mul(43758.5453)) as unknown as N;
 
 /** 在 color_fragment 之后改 diffuseColor.rgb（原 setupDiffuseColor 已乘完顶点色/实例色、做完 alphaTest）。 */
@@ -146,25 +146,6 @@ const gateDissolve: Translate<'gate-dissolve'> = (material, { dissolve }, source
   };
 };
 
-// ---- 港口幕墙 harbor-curtain-wall（render/harbor-perspective detailGlazing）----
-
-const harborCurtainWall: Translate<'harbor-curtain-wall'> = (material) => {
-  // GLSL harborFacade = modelMatrix * instanceMatrix * position（幕墙网格无顶点变形，即 positionWorld）。
-  const f = positionWorld as unknown as N;
-  const grid = vec2(f.x.add(f.z).div(1.65), f.y.div(2.2));
-  const pane = fract(grid);
-  const paneHash = hash2(floor(grid) as unknown as N);
-  const paneEdge = min(pane, float(1).sub(pane));
-  const frame = float(1).sub(smoothstep(0.012, 0.035, min(paneEdge.x, paneEdge.y)));
-  const curtain = sin(pane.x.mul(38).add(paneHash.mul(6))).mul(0.12).add(0.88);
-  afterColor(material, (rgb) => rgb.mul(mix(paneHash.mul(0.55).add(0.7).mul(curtain), 0.36, frame)) as unknown as N);
-  beforeLighting(material, function () {
-    (this as typeof this & { roughnessNode: Node | null }).roughnessNode = clamp(roughnessOf(this).add(paneHash.sub(0.5).mul(0.16)).add(frame.mul(0.22)), 0.08, 0.65) as unknown as Node;
-  });
-  const base = normalOf(material);
-  material.normalNode = normalize(base.add(vec3(paneHash.sub(0.5).mul(0.045), sin(paneHash.mul(12)).mul(0.012), 0).mul(float(1).sub(frame)))) as unknown as Node;
-};
-
 // ---- 港口岸景雾 harbor-shore-haze（render/harbor-shore：整段替换 fog_fragment）----
 
 const harborShoreHaze: Translate<'harbor-shore-haze'> = (material, { near, color, halfDistance }, source) => {
@@ -181,24 +162,10 @@ const harborShoreHaze: Translate<'harbor-shore-haze'> = (material, { near, color
   };
 };
 
-// ---- 港口原画大气 harbor-painted-air（render/harbor-side-scene：MeshBasic，color_fragment 之后）----
-
-const harborPaintedAir: Translate<'harbor-painted-air'> = (material, { air, night, cloud, haze }) => {
-  // 同 GLSL：${haze.toFixed(2)}。
-  const amount = Number(haze.toFixed(2));
-  afterColor(material, (c) => {
-    const litWindow = smoothstep(0.04, 0.22, c.r.sub(c.b)).mul(smoothstep(0.3, 0.8, c.r));
-    const nightArt = c.mul(vec3(0.12, 0.18, 0.3)).add(c.mul(litWindow).mul(0.85));
-    return mix(mix(c.mul(float(1).sub(shared(cloud).mul(0.25))), nightArt, shared(night)), shared(air), amount) as unknown as N;
-  });
-};
-
-export const CITY_PATCHES: PatchTable<'natural-building' | 'furniture-fabric' | 'ai-city-finish' | 'gate-dissolve' | 'harbor-curtain-wall' | 'harbor-shore-haze' | 'harbor-painted-air'> = {
+export const CITY_PATCHES: PatchTable<'natural-building' | 'furniture-fabric' | 'ai-city-finish' | 'gate-dissolve' | 'harbor-shore-haze'> = {
   'natural-building': naturalBuilding,
   'furniture-fabric': furnitureFabric,
   'ai-city-finish': aiCityFinish,
   'gate-dissolve': gateDissolve,
-  'harbor-curtain-wall': harborCurtainWall,
   'harbor-shore-haze': harborShoreHaze,
-  'harbor-painted-air': harborPaintedAir,
 };

@@ -2,32 +2,37 @@
 import { describe, test } from 'node:test';
 import assert from 'node:assert/strict';
 
+import { createFluidMap } from '../src/world/fluid-map.ts';
+import { createTileMap } from '../src/world/tile-map.ts';
+import { DEFAULT_TILES, TILE_STONE } from '../src/world/tile-types.ts';
 import { BED_EDGE, WATER_DEPTH_MAX, WATER_DEPTH_MIN, computeWaterDepth, decodeWaterDepth } from '../src/world/water-depth.ts';
 
 /** rows：自上而下的字符串，'#' 实心、'~' 满水、'-' 半格水（128）、'.' 空气。 */
 function grid(rows: readonly string[]) {
   const height = rows.length;
   const width = (rows[0] as string).length;
-  const solid = new Uint8Array(width * height);
-  const water = new Uint8Array(width * height);
+  const map = createTileMap(width, height, DEFAULT_TILES);
+  const water: Array<[number, number, number]> = [];
   rows.forEach((row, r) => {
     const ty = height - 1 - r;
     for (let tx = 0; tx < width; tx++) {
       const c = row[tx];
-      if (c === '#') solid[ty * width + tx] = 1;
-      if (c === '~') water[ty * width + tx] = 255;
-      if (c === '-') water[ty * width + tx] = 128;
+      if (c === '#') map.set(tx, ty, TILE_STONE);
+      if (c === '~') water.push([tx, ty, 255]);
+      if (c === '-') water.push([tx, ty, 128]);
     }
   });
-  const isSolid = (tx: number, ty: number): boolean => solid[ty * width + tx] === 1;
-  return { width, height, water, isSolid };
+  const fluid = createFluidMap(map);
+  for (const [tx, ty, level] of water) fluid.set(tx, ty, level);
+  const isSolid = (tx: number, ty: number): boolean => map.solidMask(tx, ty) !== 0;
+  return { width, height, fluid, isSolid };
 }
 
 function run(rows: readonly string[]) {
   const g = grid(rows);
   const out = new Uint8Array(g.width * g.height * 2);
   computeWaterDepth({ ...g, threshold: 96 }, out);
-  const at = (tx: number, ty: number) => decodeWaterDepth(out, g.width, tx, ty);
+  const at = (tx: number, ty: number) => decodeWaterDepth(out, g.width, 2, tx, ty);
   return { ...g, out, at };
 }
 
@@ -71,10 +76,10 @@ describe('water-depth', () => {
     const dry = run(['....', '.-..', '####']);
     // 128 ≥ 96 → 仍是水；改成阈值以下的水量
     const g = grid(['....', '....', '####']);
-    g.water[1 * g.width + 1] = 40;
+    g.fluid.set(1, 1, 40);
     const out = new Uint8Array(g.width * g.height * 2);
     computeWaterDepth({ ...g, threshold: 96 }, out);
-    assert.equal(decodeWaterDepth(out, g.width, 1, 1).depth, WATER_DEPTH_MIN);
+    assert.equal(decodeWaterDepth(out, g.width, 2, 1, 1).depth, WATER_DEPTH_MIN);
     assert.ok(dry.at(1, 1).depth > WATER_DEPTH_MIN);
   });
 
@@ -107,6 +112,5 @@ describe('water-depth', () => {
     const g = grid(['..']);
     assert.throws(() => computeWaterDepth({ ...g, threshold: 96 }, new Uint8Array(3)), /water-depth/);
     assert.throws(() => computeWaterDepth({ ...g, threshold: 0 }, new Uint8Array(4)), /water-depth/);
-    assert.throws(() => computeWaterDepth({ ...g, water: new Uint8Array(1), threshold: 96 }, new Uint8Array(4)), /water-depth/);
   });
 });

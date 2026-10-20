@@ -1,9 +1,8 @@
 import * as THREE from 'three';
-import type { FacilityChapterId, FacilitySceneId } from '../../config/facility-scenes.ts';
+import type { FacilityChapterId } from '../../config/facility-scenes.ts';
 import { FORTRESS_BLACKHOLE } from '../../config/facility-structure.ts';
 import { TUNING } from '../../config/tuning.ts';
 import type { Tuning } from '../../config/tuning.ts';
-import { createFacilityView } from '../../render/facility/facility-view.ts';
 import { createFortressView } from '../../render/facility/facility-fortress.ts';
 import { createCathedralView } from '../../render/facility/facility-cathedral.ts';
 import { createAbyssView } from '../../render/facility/facility-abyss.ts';
@@ -80,11 +79,11 @@ async function loadFortressView(renderer: StageRenderer, format: 'ktx2' | 'webp'
 }
 
 /** Configure the scene before precipitation captures its baseline lighting. */
-export async function createFacilityPresentation(stage: Stage<StageRenderer>, sceneId: FacilitySceneId, textureFormat: 'ktx2' | 'webp' = 'ktx2') {
+export async function createFacilityPresentation(stage: Stage<StageRenderer>, sceneId: FacilityChapterId, textureFormat: 'ktx2' | 'webp' = 'ktx2') {
   const interior = sceneId === 'cathedral' || sceneId === 'abyss' ? await loadInteriorBackgroundTexture(stage.renderer, sceneId) : null;
   const view = sceneId === 'fortress'
     ? await loadFortressView(stage.renderer, textureFormat)
-    : sceneId === 'original' ? createFacilityView() : FACTORIES[sceneId](interior!);
+    : FACTORIES[sceneId](interior!);
   if (sceneId === 'fortress') {
     const { x, y, z } = FORTRESS_BLACKHOLE.position;
     stage.postFx.setGravityLens({ center: new THREE.Vector3(x, y, z), radius: 9 });

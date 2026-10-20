@@ -1,24 +1,47 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { isSceneGameLevel, opensSceneGame, pageRoute, parseAppMode, parsePageParams } from '../src/config/app-mode.ts';
-import { resolveSceneEntry } from '../src/app/workspace/scene-catalog.ts';
-import { SITE_SECTIONS, findSitePage } from '../src/config/site-directory.ts';
+import { pageRoute, parseAppMode, parseDevCamera, parsePageParams } from '../src/config/app-mode.ts';
+import { SCENE_ENTRIES, resolveSceneEntry } from '../src/app/workspace/scene-catalog.ts';
+import { SITE_SECTIONS, findSitePage, siteSections } from '../src/config/site-directory.ts';
 
-test('发布版支持主线与场景游玩，但阻止需要本地素材的旧入口', () => {
+test('发布版开放游玩与轻量资料页，阻止原画库、历史模型、画质对比与开发场景', () => {
   assert.equal(parseAppMode(new URLSearchParams(), true), 'index');
   assert.equal(parseAppMode(new URLSearchParams('mode=story'), true), 'story');
-  assert.equal(parseAppMode(new URLSearchParams('mode=catalog'), true), 'catalog');
   assert.equal(parseAppMode(new URLSearchParams('mode=about'), true), 'about');
-  // 原画资料库就是 mode=catalog，旧模式名不再存在。
-  assert.throws(() => parseAppMode(new URLSearchParams('mode=art-library'), false));
   // 全部开发场景已由两级导航取代。
   assert.throws(() => parseAppMode(new URLSearchParams('mode=dev'), false));
   assert.equal(parseAppMode(new URLSearchParams('level=facility&scene=fortress'), true), 'game');
-  for (const mode of ['concepts', 'showcase', 'compare', 'resources', 'lab', 'facility', 'sounds']) {
-    const params = new URLSearchParams({ mode });
-    assert.throws(() => parseAppMode(params, true));
-    assert.equal(parseAppMode(params, false), mode);
+  for (const mode of ['concepts', 'sounds', 'resources', 'showcase']) assert.equal(parseAppMode(new URLSearchParams({ mode }), true), mode);
+  for (const query of ['mode=catalog', 'mode=compare', 'mode=lab', 'mode=homestead', 'mode=showcase&library=history', 'mode=render-lab', 'mode=hair-gallery', 'mode=maglev']) {
+    const params = new URLSearchParams(query);
+    assert.throws(() => parseAppMode(params, true), /本地完整版/, query);
+    assert.equal(parseAppMode(params, false), params.get('mode'));
   }
+  // 机房只剩游戏网址一个入口。
+  for (const release of [false, true]) assert.throws(() => parseAppMode(new URLSearchParams('mode=facility&scene=fortress'), release), /mode=game&level=facility/);
+  // 独立交通中心页与住宅页的旧网址同样报错并给出新网址。
+  for (const query of ['mode=transit', 'mode=game&level=transit&flight=abyss']) assert.throws(() => parseAppMode(new URLSearchParams(query), false), /mode=game&from=transit/, query);
+  assert.throws(() => parseAppMode(new URLSearchParams('mode=residence'), false), /mode=homestead&scene=residence/);
+});
+
+test('自由镜头是开发开关：本地可开，发布版与未知取值都报错', () => {
+  assert.equal(parseDevCamera(new URLSearchParams('mode=game'), true), false);
+  assert.equal(parseDevCamera(new URLSearchParams('level=facility&cam=free'), false), true);
+  assert.throws(() => parseDevCamera(new URLSearchParams('cam=free'), true), /本地完整版/);
+  assert.throws(() => parseDevCamera(new URLSearchParams('cam=orbit'), false), /cam=orbit/);
+});
+
+test('发布版顶栏只列能打开的页面：保留概念、声音、透视与展示场，去掉原画库、历史、对比与实验室', () => {
+  const pages = siteSections(true).flatMap(section => section.clusters.flat());
+  const ids = pages.map(page => page.id);
+  for (const id of ['concepts', 'sounds', 'perspective', 'showcase']) assert.ok(ids.includes(id), id);
+  for (const id of ['catalog', 'history', 'compare', 'lab', 'render-lab', 'hair-gallery', 'maglev']) assert.ok(!ids.includes(id), id);
+  for (const page of pages) {
+    const url = new URL(page.href, 'http://x/');
+    assert.equal(url.pathname, '/', page.href);
+    assert.doesNotThrow(() => parseAppMode(url.searchParams, true), page.href);
+  }
+  assert.ok(siteSections(false).flatMap(section => section.clusters.flat()).some(page => page.id === 'render-lab'));
 });
 
 test('发布版拒绝未发布的画质资源，本地仍可对照原版', () => {
@@ -33,63 +56,46 @@ test('发布版拒绝未发布的画质资源，本地仍可对照原版', () =>
   for (const release of [false, true]) assert.throws(() => parsePageParams(new URLSearchParams('textures=4k'), release), /未知角色资源规格：4k/);
 });
 
-test('网址按入口条件依次分派：站点页、场景工作区、交通中心、城区与原野、家园与展示场', () => {
-  const desktop = { release: false, embedded: false, coarsePointer: false };
-  const phone = { ...desktop, coarsePointer: true };
-  const route = (query: string, host = desktop) => pageRoute(new URLSearchParams(query), host);
+test('网址按入口条件依次分派：站点页、场景工作区与展示场；城区、原野、交通中心与家园一律是整页游戏', () => {
+  const route = (query: string, release = false) => pageRoute(new URLSearchParams(query), release);
   assert.equal(route(''), 'index');
-  for (const mode of ['catalog', 'about', 'concepts', 'story', 'compare', 'sounds', 'intro', 'showcase'] as const) assert.equal(route(`mode=${mode}`), mode);
-  for (const mode of ['lab', 'resources', 'facility']) assert.equal(route(`mode=${mode}`), 'workspace');
-  assert.equal(route('mode=game&level=transit'), 'workspace');
-  assert.equal(route('mode=game&level=transit', phone), 'transit');
-  assert.equal(route('mode=game', phone), 'harbor');
-  assert.equal(route('seed=7&level=harbor', phone), 'harbor');
-  assert.equal(route('mode=game&free=1', phone), 'game');
-  assert.equal(route('mode=game&level=facility', phone), 'game');
+  for (const mode of ['catalog', 'about', 'concepts', 'story', 'compare', 'sounds', 'intro', 'showcase', 'render-lab', 'hair-gallery', 'maglev'] as const) assert.equal(route(`mode=${mode}`), mode);
+  for (const mode of ['lab', 'resources']) assert.equal(route(`mode=${mode}`), 'workspace');
+  assert.equal(route('mode=game'), 'game');
+  assert.equal(route('mode=game&from=transit&flight=abyss'), 'game');
+  assert.equal(route('mode=game&free=1'), 'game');
+  assert.equal(route('mode=game&level=facility&scene=abyss'), 'game');
   assert.equal(route('mode=game&level=boss-arena'), 'game');
-  assert.equal(route('mode=game&bench=1'), 'harbor');
-  assert.equal(route('mode=game', { ...desktop, release: true }), 'harbor');
-  assert.equal(route('mode=homestead&scene=residence'), 'residence');
+  assert.equal(route('mode=game&bench=1'), 'game');
+  assert.equal(route('mode=game', true), 'game');
+  assert.equal(route('mode=homestead&scene=residence'), 'game');
   assert.equal(route('mode=homestead'), 'game');
   assert.equal(route('mode=controls'), 'game');
-  assert.throws(() => route('mode=lab', { ...desktop, release: true }));
+  assert.throws(() => route('mode=lab', true));
 });
 
 test('两级导航：每个入口地址都落回自己，同一页的其他参数也归到同一入口', () => {
   for (const page of SITE_SECTIONS.flatMap(section => section.clusters.flat())) {
-    assert.equal(findSitePage(new URL(page.href, 'http://x/').searchParams)?.page.id, page.id, page.href);
+    assert.equal(findSitePage(new URL(page.href, 'http://x/'))?.page.id, page.id, page.href);
   }
-  const page = (query: string) => findSitePage(new URLSearchParams(query))?.page.id;
+  const page = (query: string) => findSitePage(new URL(`http://x/?${query}`))?.page.id;
   assert.equal(page('mode=resources&scene=room'), 'perspective');
-  assert.equal(page('mode=game&level=facility&scene=abyss&free=1'), 'free-world');
+  assert.equal(page('mode=game&free=1&seed=7'), 'free-world');
   assert.equal(page('level=facility'), 'fortress');
+  assert.equal(page('mode=render-lab&hair=showcase&framing=head'), 'render-lab');
+  assert.equal(page('mode=hair-gallery&environment=studio'), 'hair-gallery');
   assert.equal(page('mode=showcase&demo=sam'), 'showcase');
-  assert.equal(page('mode=catalog'), 'art-library');
+  assert.equal(page('mode=catalog'), 'catalog');
   assert.equal(page(''), undefined);
   assert.equal(page('mode=about'), undefined);
 });
 
-test('场景工作区认主世界游戏网址：城区、原野、交通中心与机房关卡各落到自己的目录条目', () => {
+test('场景工作区只认非游戏场景，游戏网址交给整页游戏', () => {
   const entry = (query: string) => resolveSceneEntry(new URL(`http://x/?${query}`)).id;
-  assert.equal(entry('mode=game'), 'city');
-  assert.equal(entry('seed=7&level=harbor'), 'city');
-  assert.equal(entry('mode=game&free=1&seed=7&region=fortress'), 'wilds');
-  assert.equal(entry('mode=game&level=transit&flight=fortress'), 'transit');
-  assert.equal(entry('mode=game&level=facility&scene=abyss&landing=1'), 'facility:abyss');
-  assert.throws(() => entry('mode=game&level=boss-arena'));
-  for (const level of [null, 'harbor', 'facility', 'transit']) assert.equal(isSceneGameLevel(new URLSearchParams(level === null ? '' : { level })), true, String(level));
-  for (const level of ['boss-arena', 'test', 'composition']) assert.equal(isSceneGameLevel(new URLSearchParams({ level })), false, level);
-});
-
-test('只有开发版桌面顶层页把主世界游戏网址交给场景工作区，手机、内嵌、发布版与渲染基准仍整页游戏', () => {
-  const desktop = { release: false, embedded: false, coarsePointer: false };
-  const opens = (query: string, host = desktop) => opensSceneGame(new URLSearchParams(query), host);
-  assert.equal(opens('mode=game&free=1'), true);
-  assert.equal(opens('level=facility&scene=abyss'), true);
-  assert.equal(opens('mode=game&free=1', { ...desktop, coarsePointer: true }), false);
-  assert.equal(opens('mode=game&level=facility', { ...desktop, embedded: true }), false);
-  assert.equal(opens('mode=game', { ...desktop, release: true }), false);
-  assert.equal(opens('mode=game&free=1&bench=1'), false);
-  assert.equal(opens('mode=game&level=boss-arena'), false);
-  assert.equal(opens('mode=lab&demo=transit'), false);
+  assert.equal(entry('mode=lab'), 'sandbox');
+  assert.equal(entry('mode=lab&demo=transit-flight-lab'), 'transit-flight-lab');
+  assert.equal(entry('mode=resources&scene=room#walls'), 'room:walls');
+  for (const query of ['mode=game', 'mode=game&free=1', 'mode=game&level=facility&scene=abyss']) assert.throws(() => entry(query), /不是场景工作区地址/, query);
+  // 侧栏条目来自页面登记表，每条的网址都要落回它自己。
+  for (const item of SCENE_ENTRIES) assert.equal(resolveSceneEntry(new URL(item.href, 'http://x/')).id, item.id, item.href);
 });

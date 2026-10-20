@@ -1,12 +1,13 @@
 /**
  * 水下深度图（任务 019，纯逻辑、确定性）：给光照注入的“水下”通道用，每格两字节（行主序 ty*width+tx，y 向上）：
  * - 有符号深度 d = 水面 y − 格心 y（格），编码到 [WATER_DEPTH_MIN, WATER_DEPTH_MAX]：水格为正；水面上方紧邻的一格为负，
- *   使着色器双线性插值后在真实水面处过零（格内水面按顶部水格的水量）；不在水下的格为 WATER_DEPTH_MIN。
+ *   使着色器双线性插值后在真实水面处过零（格内水面取顶部水格的 surfaceAt：水按 1/4 子格存，斜坡、半砖格里的水在空出的子格）；不在水下的格为 WATER_DEPTH_MIN。
  * - 湖床渐隐 bed ∈ [0,1]：水格为 1；湖床第一行与岸壁（与水格同一行、左右紧邻的实心格）为 BED_EDGE，再往下为 0。
  *   着色器双线性插值后，染色从水体边界向实心里约半格到一格内渐隐（湖床表面/伸进水里的沙被染色，湖底下方的地层截面不染）。
  *   湖底下方遇到空气（空腔）即停止。
- * 水格 = 非实心且水量 ≥ threshold（与 light-map 的水介质判定一致）。
+ * 水格 = 逻辑格水量 amountAt ≥ threshold（部分实心格也可以是水格）；实心 = 格内有实心子格（湖床、岸壁染色用）。
  */
+import type { FluidQuery } from './fluid-map.ts';
 
 export const WATER_DEPTH_MIN = -1;
 export const WATER_DEPTH_MAX = 15;
@@ -18,8 +19,8 @@ const RANGE = WATER_DEPTH_MAX - WATER_DEPTH_MIN;
 export interface WaterDepthInput {
   readonly width: number;
   readonly height: number;
-  /** 每格水量（FluidMap.cells，行主序）。 */
-  readonly water: Uint8Array;
+  /** 逻辑格水量与格内水面（FluidMap 满足）。 */
+  readonly fluid: Pick<FluidQuery, 'amountAt' | 'surfaceAt'>;
   readonly isSolid: (tx: number, ty: number) => boolean;
   /** 水量 ≥ 该值（1..255）算水格。 */
   readonly threshold: number;
@@ -30,9 +31,9 @@ export function encodeWaterDepth(d: number): number {
   return Math.round(((c - WATER_DEPTH_MIN) / RANGE) * 255);
 }
 
-/** 解码 (tx,ty) 的深度与湖床渐隐（测试/调试用）。 */
-export function decodeWaterDepth(out: Uint8Array, width: number, tx: number, ty: number): { depth: number; bed: number } {
-  const i = (ty * width + tx) * 2;
+/** 解码 (tx,ty) 的深度与湖床渐隐（测试/调试用）；stride 同 computeWaterDepth。 */
+export function decodeWaterDepth(out: Uint8Array, width: number, stride: number, tx: number, ty: number): { depth: number; bed: number } {
+  const i = (ty * width + tx) * stride;
   const v = out[i] as number;
   return { depth: v === 0 ? WATER_DEPTH_MIN : v === 255 ? WATER_DEPTH_MAX : (v / 255) * RANGE + WATER_DEPTH_MIN, bed: (out[i + 1] as number) / 255 };
 }
@@ -43,9 +44,8 @@ export function decodeWaterDepth(out: Uint8Array, width: number, tx: number, ty:
  * 每列独立，岸壁只看左右紧邻列的水面：窗口两侧各多算一列即可与全量结果一致。
  */
 export function computeWaterDepth(input: WaterDepthInput, out: Uint8Array, stride = 2, offset = 0, x0 = 0, x1 = input.width - 1): void {
-  const { width, height, water, isSolid, threshold } = input;
+  const { width, height, fluid, isSolid, threshold } = input;
   if (!(Number.isInteger(width) && width > 0 && Number.isInteger(height) && height > 0)) throw new Error(`water-depth: invalid size ${width}×${height}`);
-  if (water.length !== width * height) throw new Error(`water-depth: water length ${water.length} does not match ${width}×${height}`);
   if (!(Number.isInteger(threshold) && threshold >= 1 && threshold <= 255)) throw new Error(`water-depth: invalid threshold ${threshold}`);
   if (!(Number.isInteger(stride) && stride >= 2 && Number.isInteger(offset) && offset >= 0 && offset + 2 <= stride)) throw new Error(`water-depth: invalid stride ${stride} / offset ${offset}`);
   if (out.length !== width * height * stride) throw new Error(`water-depth: out length ${out.length} does not match ${width}×${height}×${stride}`);
@@ -59,18 +59,17 @@ export function computeWaterDepth(input: WaterDepthInput, out: Uint8Array, strid
   const bed = new Float32Array(n);
   /** 水格所在水体的水面 y（非水格 NaN），供岸壁扩展。 */
   const surface = new Float32Array(n).fill(Number.NaN);
-  const wet = (i: number, tx: number, ty: number): boolean => (water[i] as number) >= threshold && !isSolid(tx, ty);
+  const wet = (tx: number, ty: number): boolean => fluid.amountAt(tx, ty) >= threshold;
 
   for (let tx = wx0; tx <= wx1; tx++) {
     let surf = Number.NaN;
     let lowest = -1;
     let prevWet = false;
     for (let ty = height - 1; ty >= 0; ty--) {
-      const i = ty * width + tx;
       const li = ty * ww + tx - wx0;
-      if (wet(i, tx, ty)) {
+      if (wet(tx, ty)) {
         if (!prevWet) {
-          surf = ty + Math.min(1, (water[i] as number) / 255);
+          surf = ty + fluid.surfaceAt(tx, ty);
           const above = li + ww;
           if (ty + 1 < height && !isSolid(tx, ty + 1)) depth[above] = Math.max(depth[above] as number, surf - (ty + 1.5));
         }

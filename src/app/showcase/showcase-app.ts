@@ -1,6 +1,6 @@
 import type { Texture } from 'three';
 import { loadInteriorBackgroundTexture } from '../../render/stage/free-world-interior-textures.ts';
-import { CHARACTER_CATALOG, CHARACTER_HISTORY_CATALOG } from '../../config/showcase.ts';
+import { CHARACTER_CATALOG, CHARACTER_HISTORY_CATALOG, releaseShowcaseCatalog } from '../../config/showcase.ts';
 import type { ShowcaseCard } from '../../config/showcase.ts';
 import { TUNING, validateTuning } from '../../config/tuning.ts';
 import { createShowcaseRenderer } from '../../render/stage/showcase-renderer.ts';
@@ -16,8 +16,11 @@ import { isEnemyKind } from '../../config/enemy-models.ts';
 import { disposeNpcAssets } from '../../render/npc/npc-rig.ts';
 import { mountCharacterStage } from './character-stage-app.ts';
 import { CHARACTER_STAGE_PARAMS, readCharacterStageLocation } from '../../ui/model/character-stage-location.ts';
-import { readPageParams, type PageContext } from '../shell/page-context.ts';
+import type { PageContext } from '../shell/page-context.ts';
+import { pageRenderer } from '../shell/page-renderer.ts';
+import { createViewLoop } from '../shell/view-loop.ts';
 import { onLanguageChange, t } from '../../config/i18n.ts';
+import { RELEASE } from '../../ui/site/release.ts';
 
 export async function mountShowcase(context: PageContext): Promise<void> {
   validateTuning(TUNING);
@@ -27,8 +30,9 @@ export async function mountShowcase(context: PageContext): Promise<void> {
   if (library !== null && library !== 'history') throw new Error(`未知角色资料库：${library}`);
   const historicalDemo = CHARACTER_HISTORY_CATALOG.demos!.some((demo) => demo.id === params.get('demo'));
   const isHistory = library === 'history' || historicalDemo;
+  if (isHistory && RELEASE) throw new Error('历史模型只在本地完整版提供。');
   if (isHistory) { params.set('library', 'history'); history.replaceState(null, '', `${location.pathname}?${params}`); }
-  const catalog = isHistory ? CHARACTER_HISTORY_CATALOG : CHARACTER_CATALOG;
+  const catalog = isHistory ? CHARACTER_HISTORY_CATALOG : RELEASE ? releaseShowcaseCatalog(CHARACTER_CATALOG) : CHARACTER_CATALOG;
   const syncTitle = (): void => { document.title = `${t(catalog.title)} · Pelican 429`; };
   syncTitle();
   context.onDispose(onLanguageChange(syncTitle));
@@ -67,7 +71,7 @@ export async function mountShowcase(context: PageContext): Promise<void> {
     }
     await session.setSoundEnabled(enabled);
   });
-  const host = createShowcaseRenderer(app, readPageParams().debug);
+  const host = createShowcaseRenderer(app, pageRenderer(context, 'game', TUNING));
   let caveBackground: Texture | null = null;
   const sessions = new Map<number, ShowcaseSession>();
   const sessionKeys = new Map<number, string>();
@@ -82,8 +86,8 @@ export async function mountShowcase(context: PageContext): Promise<void> {
     return manual ? panel.views.get(manual.id)!.viewport : null;
   });
   let stopped = false;
-  let raf = 0;
-  let last = performance.now();
+  // 回调在资源就绪后才运行；循环先建好，加载中途释放也能 stop。
+  const loop = createViewLoop((dt) => frame(dt), (error) => fail(error));
   let syncTime = 0;
   let syncRevision = '';
   const unsubscribe = model.subscribe(() => {
@@ -96,7 +100,7 @@ export async function mountShowcase(context: PageContext): Promise<void> {
   const dispose = (): void => {
     if (stopped) return;
     stopped = true;
-    cancelAnimationFrame(raf);
+    loop.stop();
     unsubscribe(); input.dispose();
     for (const session of sessions.values()) session.dispose();
     sessions.clear();
@@ -130,86 +134,81 @@ export async function mountShowcase(context: PageContext): Promise<void> {
   }
   catch (error) { fail(error); return; }
   if (stopped) return;
-  last = performance.now();
 
-  const frame = (now: number): void => {
-    if (stopped) return;
-    try {
-      let elapsed = Math.min(Math.max(0, (now - last) / 1000), TUNING.sim.maxFrameTime);
-      last = now;
-      for (const [id, session] of sessions) {
-        const card = model.cards.find((item) => item.id === id);
-        if (!card || sessionKeys.get(id) !== sessionKey(card)) {
-          session.dispose(); sessions.delete(id); sessionKeys.delete(id);
-        }
+  // 构造或重置会话耗时较长：下一帧 dt 记 0，避免把构造时间算进推进。
+  const resync = (): void => { loop.stop(); loop.start(); };
+  const frame = (dt: number): void => {
+    let elapsed = dt;
+    for (const [id, session] of sessions) {
+      const card = model.cards.find((item) => item.id === id);
+      if (!card || sessionKeys.get(id) !== sessionKey(card)) {
+        session.dispose(); sessions.delete(id); sessionKeys.delete(id);
       }
-      const clip = panel.scroll.getBoundingClientRect();
-      const cards = model.cards.map((card) => {
-        const view = panel.views.get(card.id)!;
-        const rect = view.viewport.getBoundingClientRect();
-        const visible = rect.bottom > clip.top && rect.top < clip.bottom && rect.right > clip.left && rect.left < clip.right && !document.hidden;
-        return { card, view, rect, visible };
-      });
-      // 每帧最多构造一个角色，勾选整个目录时页面仍能响应。
-      const pending = cards.find((c) => c.visible && !sessions.has(c.card.id) && !preparing.has(c.card.id));
-      if (pending) {
-        const { card } = pending;
-        const entry = model.entry(card.entryId);
-        const actor = entry.actor;
-        const key = sessionKey(card);
-        const asset = entry.grassyAnimation ? loadGrassyAsset(entry.grassyAnimation.variant) : isEnemyKind(actor) ? loadEnemyAsset(actor) : null;
-        if (asset) {
-          preparing.add(card.id);
-          void asset.then(() => {
-            preparing.delete(card.id);
-            if (!stopped && model.cards.includes(card) && sessionKey(card) === key) {
-              sessions.set(card.id, createShowcaseSession(host.renderer, card, caveBackground!));
-              sessionKeys.set(card.id, key);
-            }
-          }).catch(fail);
-        } else {
-          sessions.set(card.id, createShowcaseSession(host.renderer, card, caveBackground!));
-          sessionKeys.set(card.id, key);
-        }
-        elapsed = 0; last = performance.now();
+    }
+    const clip = panel.scroll.getBoundingClientRect();
+    const cards = model.cards.map((card) => {
+      const view = panel.views.get(card.id)!;
+      const rect = view.viewport.getBoundingClientRect();
+      const visible = rect.bottom > clip.top && rect.top < clip.bottom && rect.right > clip.left && rect.left < clip.right && !document.hidden;
+      return { card, view, rect, visible };
+    });
+    // 每帧最多构造一个角色，勾选整个目录时页面仍能响应。
+    const pending = cards.find((c) => c.visible && !sessions.has(c.card.id) && !preparing.has(c.card.id));
+    if (pending) {
+      const { card } = pending;
+      const entry = model.entry(card.entryId);
+      const actor = entry.actor;
+      const key = sessionKey(card);
+      const asset = entry.grassyAnimation ? loadGrassyAsset(entry.grassyAnimation.variant) : isEnemyKind(actor) ? loadEnemyAsset(actor) : null;
+      if (asset) {
+        preparing.add(card.id);
+        void asset.then(() => {
+          preparing.delete(card.id);
+          if (!stopped && model.cards.includes(card) && sessionKey(card) === key) {
+            sessions.set(card.id, createShowcaseSession(host.renderer, card, caveBackground!));
+            sessionKeys.set(card.id, key);
+          }
+        }).catch(fail);
+      } else {
+        sessions.set(card.id, createShowcaseSession(host.renderer, card, caveBackground!));
+        sessionKeys.set(card.id, key);
       }
-      // 先完成全部重置，再统一推进；否则重建耗时会让同一帧后面的卡片少走一步。
-      for (const { card, visible } of cards) {
-        const session = sessions.get(card.id);
-        if (session && visible && (session.needsReset || (!model.synchronized && card.playing && card.loop && !card.manual && session.complete))) {
-          session.reset(); elapsed = 0; last = performance.now();
-        }
+      elapsed = 0; resync();
+    }
+    // 先完成全部重置，再统一推进；否则重建耗时会让同一帧后面的卡片少走一步。
+    for (const { card, visible } of cards) {
+      const session = sessions.get(card.id);
+      if (session && visible && (session.needsReset || (!model.synchronized && card.playing && card.loop && !card.manual && session.complete))) {
+        session.reset(); elapsed = 0; resync();
       }
-      const syncWaiting = model.synchronized && cards.some((c) => {
-        const session = sessions.get(c.card.id);
-        return !c.visible || !session || ('ready' in session && !session.ready);
-      });
-      const syncPlaying = model.synchronized && !syncWaiting && model.cards.every((c) => c.playing);
-      const syncDuration = Math.max(0, ...[...sessions.values()].map((s) => s.duration));
-      if (syncPlaying) syncTime += elapsed * (model.cards[0]?.speed ?? 1);
-      if (syncPlaying && syncDuration > 0 && syncTime >= syncDuration) {
-        for (const session of sessions.values()) session.reset();
-        syncTime = 0; elapsed = 0; last = performance.now();
-      }
-      input.refresh();
-      host.begin();
-      for (const { card, view, rect, visible } of cards) {
-        const session = sessions.get(card.id);
-        if (!session) { view.update(t(visible ? '正在准备预览…' : '滚动到此处以加载'), 0, true); continue; }
-        if (!visible) { session.advance(0, false, null); view.update(t('离屏暂停 · 保留当前进度'), session.progress, true); continue; }
-        const playing = card.playing && !syncWaiting;
-        const manual = card.manual ? () => session.aim(input.pointer.x, input.pointer.y, rect) : null;
-        const dt = session.advance(elapsed, playing, manual ? () => input.consume(input.pointer.inside ? manual() : null) : null);
-        const texture = session.render(rect, dt, model.worldScale);
-        host.draw(texture, rect, clip);
-        view.update(syncWaiting ? t('同步组等待全部预览就绪') : session.status, session.progress, syncWaiting);
-      }
-      panel.setNote(syncWaiting ? t('同步对比已暂停：请让全部画面可见并等待资源加载') : model.synchronized ? t('同步对比 · 统一起点与速度') : t(`独立预览 · ${cards.filter((c) => c.visible).length} 个画面可见 · 离屏自动暂停`));
-      loading.hidden = true;
-      raf = requestAnimationFrame(frame);
-    } catch (error) { fail(error); }
+    }
+    const syncWaiting = model.synchronized && cards.some((c) => {
+      const session = sessions.get(c.card.id);
+      return !c.visible || !session || ('ready' in session && !session.ready);
+    });
+    const syncPlaying = model.synchronized && !syncWaiting && model.cards.every((c) => c.playing);
+    const syncDuration = Math.max(0, ...[...sessions.values()].map((s) => s.duration));
+    if (syncPlaying) syncTime += elapsed * (model.cards[0]?.speed ?? 1);
+    if (syncPlaying && syncDuration > 0 && syncTime >= syncDuration) {
+      for (const session of sessions.values()) session.reset();
+      syncTime = 0; elapsed = 0; resync();
+    }
+    input.refresh();
+    host.begin();
+    for (const { card, view, rect, visible } of cards) {
+      const session = sessions.get(card.id);
+      if (!session) { view.update(t(visible ? '正在准备预览…' : '滚动到此处以加载'), 0, true); continue; }
+      if (!visible) { session.advance(0, false, null); view.update(t('离屏暂停 · 保留当前进度'), session.progress, true); continue; }
+      const playing = card.playing && !syncWaiting;
+      const manual = card.manual ? () => session.aim(input.pointer.x, input.pointer.y, rect) : null;
+      const dt = session.advance(elapsed, playing, manual ? () => input.consume(input.pointer.inside ? manual() : null) : null);
+      const texture = session.render(rect, dt, model.worldScale);
+      host.draw(texture, rect, clip);
+      view.update(syncWaiting ? t('同步组等待全部预览就绪') : session.status, session.progress, syncWaiting);
+    }
+    panel.setNote(syncWaiting ? t('同步对比已暂停：请让全部画面可见并等待资源加载') : model.synchronized ? t('同步对比 · 统一起点与速度') : t(`独立预览 · ${cards.filter((c) => c.visible).length} 个画面可见 · 离屏自动暂停`));
+    loading.hidden = true;
   };
   await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
-  last = performance.now();
-  raf = requestAnimationFrame(frame);
+  if (!stopped) loop.start();
 }

@@ -8,8 +8,11 @@
 
 - [基础术语表](concepts/core-glossary.md)
 - [资源分类与命名](concepts/resource-classification.md)
-- [材料与构件库](concepts/material-library.md)
 - [坐标与尺度约定](concepts/core-coordinates.md)
+
+## 材料与构件库
+
+- [材料与构件库](concepts/material-library.md)
 
 ## 基础设定
 
@@ -17,6 +20,7 @@
 - [角色标尺标准](concepts/character-ruler-standard.md)
 - [玩家角色、伙伴与人物比例](concepts/character-proportions.md)
 - [场景由哪些部分组成](concepts/scene-composition.md)
+- [时间、历法与日月](concepts/world-time.md)
 - [地形瓦片与组合](concepts/terrain-combinations.md)
 - [自然区域与算力设施](concepts/world-regions.md)
 - [原图与设定资料来源](concepts/artwork-sources.md)
@@ -57,3 +61,7 @@
 
 - [经济与生存系统设计](concepts/economy.md)
 - [界面与操作](concepts/ui-controls.md)
+
+## 剧情设计
+
+- [第一章 · 拯救 GPT-6 Astra](concepts/chapter-1.md)

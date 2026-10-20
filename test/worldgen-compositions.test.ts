@@ -5,8 +5,8 @@ import { TUNING } from '../src/config/tuning.ts';
 import { WORLDGEN_RULES } from '../src/config/worldgen-rules.ts';
 import { bodyRect, createBody } from '../src/physics/body.ts';
 import { moveAndCollide, overlapsSolid } from '../src/physics/tile-collision.ts';
-import { stepFluid } from '../src/world/fluid-sim.ts';
-import { SHAPE_HALF, SHAPE_SLOPE_L, SHAPE_SLOPE_R } from '../src/world/tile-shapes.ts';
+import { advanceFluid } from '../src/world/fluid-sim.ts';
+import { SHAPE_HALF, SHAPE_SLOPE_L, SHAPE_SLOPE_R, SUBCELLS } from '../src/world/tile-shapes.ts';
 import { TILE_ROOF } from '../src/world/tile-types.ts';
 import { createTerrainCompositionLevel } from '../src/world/terrain-compositions.ts';
 import { generateWorld } from '../src/world/worldgen.ts';
@@ -134,17 +134,18 @@ test('普通世界浅水盆经过真实液体模拟后保持盆内水量和完�
     assert.ok(lake);
     const mass = (): number => {
       let amount = 0;
-      for (let x = c.x0; x <= c.x1; x++) for (let y: number = c.baseY - 3; y <= c.baseY; y++) amount += world.fluid.amountAt(x, y);
+      for (let sx = c.x0 * SUBCELLS; sx < (c.x1 + 1) * SUBCELLS; sx++) for (let sy = (c.baseY - 3) * SUBCELLS; sy < (c.baseY + 1) * SUBCELLS; sy++) amount += world.fluid.subAt(sx, sy);
       return amount;
     };
     const before = mass();
     assert.ok(before > 0, 'pond must contain actual water');
-    for (let tick = 0; tick < 120; tick++) stepFluid(world.fluid, { maxCellsPerStep: 4096, minSpread: 2 }, tick);
+    for (let tick = 0; tick < 120; tick++) advanceFluid(world.fluid, { maxCellsPerStep: 4096, minSpread: 2 }, tick);
     assert.equal(mass(), before);
     for (let x = c.x0; x <= c.x1; x++) for (let y: number = c.baseY - 3; y <= c.baseY; y++) {
       if (world.fluid.amountAt(x, y) === 0) continue;
-      assert.ok(x >= lake.x0 && x <= lake.x1 && y < lake.level, `leak at ${x},${y}`);
-      assert.notEqual(world.map.collisionAt(x, y), 'solid');
+      // 岸边斜坡/半砖格的空子格也会进水。
+      const bank: boolean = world.map.solidMask(x, y) !== 0 && x >= lake.x0 - 1 && x <= lake.x1 + 1;
+      assert.ok(((x >= lake.x0 && x <= lake.x1) || bank) && y < lake.level, `leak at ${x},${y}`);
     }
   } finally { world.fluid.dispose(); }
 });

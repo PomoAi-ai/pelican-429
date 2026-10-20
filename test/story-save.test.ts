@@ -27,13 +27,24 @@ test('旧难度存档按剩余比例降低 Boss 血量，重新保存加载不�
   }
 });
 
+test('旧版存档的 gatekeeper 敌人读出为 omi，新版存档出现旧 id 报错', () => {
+  const storage = memoryStorage();
+  const checkpoint = { phase: 'core', countdownTicks: 0 };
+  const enemy = { kind: 'gatekeeper', x: 98, y: 20, hp: 10, facing: -1, home: { x: 98, y: 20 } };
+  const progress = { player: null, enemies: [enemy], boss: null };
+  storage.setItem(STORY_SAVE_KEY, JSON.stringify({ version: 3, checkpoint, destination: 'fortress', progress }));
+  assert.deepEqual(loadStorySave(storage)!.progress, { ...progress, enemies: [{ ...enemy, kind: 'omi' }] });
+  storage.setItem(STORY_SAVE_KEY, JSON.stringify({ version: 4, checkpoint, destination: 'fortress', progress }));
+  assert.throws(() => loadStorySave(storage), /Invalid story progress/);
+});
+
 test('浏览器检查点往返保留倒计时与通关后的主世界选择', () => {
   const storage = memoryStorage();
   assert.equal(loadStorySave(storage), null);
   saveStory(storage, { phase: 'countdown', countdownTicks: 123 }, 'fortress');
-  assert.deepEqual(loadStorySave(storage), { version: 3, checkpoint: { phase: 'countdown', countdownTicks: 123 }, destination: 'fortress' });
+  assert.deepEqual(loadStorySave(storage), { version: 4, checkpoint: { phase: 'countdown', countdownTicks: 123 }, destination: 'fortress' });
   saveStory(storage, { phase: 'restored', countdownTicks: 0 }, 'free');
-  assert.deepEqual(loadStorySave(storage), { version: 3, checkpoint: { phase: 'restored', countdownTicks: 0 }, destination: 'free' });
+  assert.deepEqual(loadStorySave(storage), { version: 4, checkpoint: { phase: 'restored', countdownTicks: 0 }, destination: 'free' });
 });
 
 test('损坏或越级的浏览器存档明确报错，不假装新游戏', () => {
@@ -67,6 +78,6 @@ test('浏览器记录保留真实战斗进度，拒绝损坏快照且结局选�
       assert.throws(() => loadStorySave(storage), /Invalid story progress/);
     }
     saveStory(storage, { phase: 'restored', countdownTicks: 0 }, 'free');
-    assert.deepEqual(loadStorySave(storage), { version: 3, checkpoint: { phase: 'restored', countdownTicks: 0 }, destination: 'free' });
+    assert.deepEqual(loadStorySave(storage), { version: 4, checkpoint: { phase: 'restored', countdownTicks: 0 }, destination: 'free' });
   } finally { world.fluid.dispose(); }
 });

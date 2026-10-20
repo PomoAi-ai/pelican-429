@@ -41,7 +41,7 @@ export function createNpcWorld(stage: ReturnType<typeof createStageView>, enviro
     return {
       x: frame.x,
       groundY,
-      backdrop: { width: level.map.width, height: level.map.height, surface: ground },
+      backdrop: { hills: { width: level.map.width, surface: ground } },
       update(view: Readonly<Rect>, time: number, dt: number): void {
         // 多卡片共享天气 uniform，必须在本卡渲染前恢复无降水状态。
         const precip = sharedPrecipUniforms();
@@ -50,7 +50,7 @@ export function createNpcWorld(stage: ReturnType<typeof createStageView>, enviro
         precip.uPrRipple.value = 0;
         views.update(view, time, dt, 0);
         // 模型缓存材质与技能光环由角色管理，避免跨卡片重复注入光照图。
-        lighting.worldLight.update(root, frameIndex++);
+        lighting.worldLight.update(root, frameIndex++, view);
       },
       dispose,
     };

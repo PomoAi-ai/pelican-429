@@ -12,6 +12,7 @@ import * as THREE from 'three';
 import type { Rect } from '../../core/math.ts';
 import { hash01 } from '../../core/rng.ts';
 import { CAVE_CELL, CAVE_ENTRANCE } from '../../world/level.ts';
+import type { FluidQuery } from '../../world/fluid-map.ts';
 import type { CaveGlow, CaveInfo } from '../../world/level.ts';
 import type { TileQuery } from '../../world/tile-map.ts';
 import { SHAPE_FULL } from '../../world/tile-shapes.ts';
@@ -85,7 +86,7 @@ function glowKind(g: CaveGlow, u: number): CaveDecorKind | null {
 }
 
 /** 列 [x0,x1] 内的洞穴装饰（确定性；不依赖加载顺序）。 */
-export function planCaveDecor(map: TileQuery, caves: CaveInfo, water: Uint8Array, x0: number, x1: number): CaveDecorItem[] {
+export function planCaveDecor(map: TileQuery, caves: CaveInfo, water: Pick<FluidQuery, 'amountAt'>, x0: number, x1: number): CaveDecorItem[] {
   const { width, height } = map;
   if (!(Number.isInteger(x0) && Number.isInteger(x1) && x0 >= 0 && x1 < width && x0 <= x1)) throw new Error(`cave-decor: invalid columns ${x0}..${x1}`);
   const R = CAVE_DECOR_RULES;
@@ -106,7 +107,7 @@ export function planCaveDecor(map: TileQuery, caves: CaveInfo, water: Uint8Array
     for (let x = x0; x <= x1; x++) {
       const i = y * width + x;
       const m = caves.mask[i];
-      if ((m !== CAVE_CELL && m !== CAVE_ENTRANCE) || solid(x, y) || (water[i] as number) > 0 || nearGlow(x, y)) continue;
+      if ((m !== CAVE_CELL && m !== CAVE_ENTRANCE) || solid(x, y) || water.amountAt(x, y) > 0 || nearGlow(x, y)) continue;
       const floor = full(x, y - 1) && !solid(x, y + 1);
       const ceiling = full(x, y + 1) && !solid(x, y - 1);
       const u = hash01(x, y, SALT);
@@ -246,7 +247,7 @@ export interface CaveDecorView {
   dispose(): void;
 }
 
-export function createCaveDecorView(map: TileQuery, caves: CaveInfo, water: Uint8Array): CaveDecorView {
+export function createCaveDecorView(map: TileQuery, caves: CaveInfo, water: Pick<FluidQuery, 'amountAt'>): CaveDecorView {
   const root = new THREE.Group();
   root.name = 'cave-decor';
   const uTime: THREE.IUniform<number> = { value: 0 };

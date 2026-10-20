@@ -230,12 +230,12 @@ function updateEnemyIntent(e: Entity, target: Readonly<EnemyTarget> | null, terr
   enemy.engaged = enemy.enabled && !enemy.holdPost && Math.hypot(dx, dy) <= perception && Math.abs(target.x - enemy.home.x) <= cfg.leash;
   if (terrain.safeZones !== undefined) updateFreeWorldPursuit(e, target, terrain, wasEngaged);
   const inRange = enemy.engaged;
-  enemy.lookTarget = enemy.kind === 'gatekeeper' && (e.attack || (enemy.enabled && inRange)) ? { x: target.x, y: target.y } : null;
+  enemy.lookTarget = enemy.kind === 'omi' && (e.attack || (enemy.enabled && inRange)) ? { x: target.x, y: target.y } : null;
   if (enemy.kind === 'watchWasp' && enemy.enabled) flyDrone(e, target, map, terrain.safeZones !== undefined, speedScale);
   if (e.attack) {
     const def = cfg.skills[enemy.skill!];
     if (!(def.mode === 'slam' && enemy.airborne) && !advanceAttack(e.attack)) {
-      const followWithClamp = enemy.kind === 'gatekeeper' && enemy.skill === 0;
+      const followWithClamp = enemy.kind === 'omi' && enemy.skill === 0;
       cancelEnemySkill(e);
       if (followWithClamp) enemy.cooldownTicks = 8;
       b.vx = 0;
@@ -279,7 +279,7 @@ function updateEnemyIntent(e: Entity, target: Readonly<EnemyTarget> | null, terr
         enemy.dropping = true;
       }
       let index = enemy.nextSkill;
-      if (enemy.kind === 'gatekeeper' && Math.abs(dx) > cfg.skills[0].range) index = 1;
+      if (enemy.kind === 'omi' && Math.abs(dx) > cfg.skills[0].range) index = 1;
       if (enemy.kind === 'lineHound' && Math.abs(dx) > 2.2) index = 0;
       if (enemy.kind === 'loadmaster' && target.y > b.y + 1.8) index = 0;
       const def = cfg.skills[index];

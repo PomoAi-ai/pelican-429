@@ -7,7 +7,7 @@ import { createAiCityEnvironment, type AiCityClearing } from './ai-city-environm
 
 // 地下长廊窗外的地下城远景：夹在长廊背墙（Z −1.2～−1）与地层背板（Z −1.7）之间，只从窗洞露出；
 // 未挖空处被深3地层格挡住。贴图按世界坐标铺开并随镜头平移，模拟约 60 格外的深处。
-const GEOFRONT = { minX: 29, maxX: 94, minY: -14, maxY: 1, z: -1.6, height: 26, follow: .67 };
+export const GEOFRONT = { minX: 29, maxX: 94, minY: -14, maxY: 1, z: -1.6, height: 26, follow: .67 };
 
 function createGeofrontVista(map: THREE.Texture) {
   map.colorSpace = THREE.SRGBColorSpace;
@@ -16,6 +16,7 @@ function createGeofrontVista(map: THREE.Texture) {
   const size = new THREE.Vector2(GEOFRONT.height * image.width / image.height, GEOFRONT.height);
   const center = new THREE.Vector2((GEOFRONT.minX + GEOFRONT.maxX) / 2, (GEOFRONT.minY + GEOFRONT.maxY) / 2);
   const material = new THREE.ShaderMaterial({
+    name: 'residence-geofront-vista',
     uniforms: { uMap: { value: map }, uSize: { value: size }, uCenter: { value: center }, uCamera: { value: new THREE.Vector2() } },
     vertexShader: /* glsl */ `
       varying vec2 vWorld;
@@ -56,7 +57,7 @@ export function createHarborResidenceEnvironment(homeCenter: number, clearing: A
   let disposed = false;
   let weather: PrecipSkyLook | undefined;
   let night = 0, moonLight = 0;
-  return { root,
+  return { root, foreground: foreground.foreground,
     async prepare(signal: AbortSignal, progress: (value: { completed: number; total: number }) => void): Promise<void> {
       signal.throwIfAborted(); progress({ completed: 0, total: 1 });
       const [backdrop, vista] = await Promise.allSettled([
@@ -74,13 +75,13 @@ export function createHarborResidenceEnvironment(homeCenter: number, clearing: A
       const loaded = backdrop.value;
       geofront = createGeofrontVista(vista.value); geofront.setCamera(camera); root.add(geofront.mesh);
       scenery = loaded; loaded.root.position.y = RESIDENCE_WORLD.groundTop;
-      loaded.setCamera(camera); loaded.setNightFactor(night, moonLight);
+      loaded.setCamera(camera, root); loaded.setNightFactor(night, moonLight);
       if (weather) loaded.setWeather(weather);
       root.add(loaded.root);
       await foreground.prepare(signal, step => progress({ completed: 1 + step.completed, total: 1 + step.total }));
     },
     setCamera(value: THREE.PerspectiveCamera): void {
-      camera = value; scenery?.setCamera(value); geofront?.setCamera(value); foreground.setCamera(value);
+      camera = value; scenery?.setCamera(value, root); geofront?.setCamera(value); foreground.setCamera(value);
     },
     setLayerVisible(id: AiCityLayerId, visible: boolean): void { scenery!.setLayerVisible(id, visible); foreground.setLayerVisible(id, visible); },
     setWeather(value: PrecipSkyLook): void { weather = value; scenery?.setWeather(value); foreground.setWeather(value); },

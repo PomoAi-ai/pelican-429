@@ -22,7 +22,7 @@ import { FISH_COLORS } from '../src/config/fish-appearance.ts';
 import { FISH_FLOP, createFlopState, findWaterTarget, startDive, startFlop, stepFlop } from '../src/render/fx/fish-flop.ts';
 import type { FlopEnv, FlopSignal, FlopState } from '../src/render/fx/fish-flop.ts';
 import { FISH_SHOT } from '../src/render/fx/fish-shot-view.ts';
-import { isLightMappable } from '../src/render/stage/light-texture.ts';
+import { isLightMappable } from '../src/render/stage/light-field-material.ts';
 import { createPelicanAttackLayer, FISH_TOSS } from '../src/render/pelican/pelican-attack-layer.ts';
 import type { PelicanSpitInput, PouchState } from '../src/render/pelican/pelican-attack-layer.ts';
 import { MOUTH_FISH, createPelicanPouch } from '../src/render/pelican/pelican-pouch.ts';
@@ -371,7 +371,8 @@ describe('吐鱼特效（projectile-fx）', () => {
     const scene = new THREE.Scene();
     const views = createProjectileViews();
     // 无地形 → 平地 = 鱼开始时的高度（≈0.1）；x ≥ 9 的格子 ty ∈ [−2, 0] 有水（水面 y=1，高过平地）。
-    const fluid = { width: 100, height: 100, amountAt: (tx: number, ty: number) => (tx >= 9 && ty >= -2 && ty <= 0 ? 255 : 0) };
+    const amountAt = (tx: number, ty: number): number => (tx >= 9 && ty >= -2 && ty <= 0 ? 255 : 0);
+    const fluid = { amountAt };
     const fx = createProjectileFx({ scene, tuning: TUNING, fluid, makeFish: () => views.makeFish() });
     fx.handleEvents([impact({ reason: 'terrain', x: 5, y: 0.3, vx: 6 })]);
     let entered = false;

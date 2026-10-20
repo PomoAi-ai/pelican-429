@@ -10,7 +10,7 @@
  */
 import type { Vec2 } from '../core/math.ts';
 import type { FishingHut } from './level.ts';
-import { SHAPE_FULL, shapeTopAt } from './tile-shapes.ts';
+import { FULL_MASK } from './tile-shapes.ts';
 import type { TileQuery } from './tile-map.ts';
 import { HUT_DOOR_APRON, HUT_YARD_COLUMNS } from './structures.ts';
 
@@ -67,10 +67,10 @@ function topBelow(map: TileQuery, tx: number, fromY: number): number {
  */
 export function flatAt(map: TileQuery, tx: number, y: number): boolean {
   if (tx < 1 || tx >= map.width - 1 || y < 1 || y >= map.height) return false;
-  if (map.shapeAt(tx, y - 1) !== SHAPE_FULL) return false;
+  if (map.solidMask(tx, y - 1) !== FULL_MASK) return false;
   for (let x = tx - 1; x <= tx + 1; x++) {
     if (map.collisionAt(x, y - 1) !== 'solid' || map.collisionAt(x, y) !== 'none') return false;
-    if (x !== tx && shapeTopAt(map.shapeAt(x, y - 1), x < tx ? 1 : 0) !== 1) return false;
+    if (x !== tx && map.topAt(x, y - 1, x < tx ? 1 : 0) !== 1) return false;
   }
   return true;
 }
@@ -103,7 +103,7 @@ function findDummy(map: TileQuery, hut: FishingHut, landFace: number, ld: number
     if (tx < 1 || tx >= map.width - 1) break;
     const y = topBelow(map, tx, hut.floorY + HOME_DUMMY_MAX_RISE);
     if (y < 1 || Math.abs(y - hut.floorY) > HOME_DUMMY_MAX_RISE) continue;
-    if (map.collisionAt(tx, y - 1) !== 'solid' || map.shapeAt(tx, y - 1) !== SHAPE_FULL) continue;
+    if (map.solidMask(tx, y - 1) !== FULL_MASK) continue;
     const dummy: Vec2 = { x: tx + 0.5, y };
     if (!bodyHitsSolid(map, dummy.x, dummy.y)) return dummy;
   }

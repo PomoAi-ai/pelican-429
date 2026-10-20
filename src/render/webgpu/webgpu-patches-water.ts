@@ -1,5 +1,5 @@
 /**
- * WebGPU 水面与降水补丁（render/water-shading、water-ripples、harbor-side-scene、precip-surface 的 GLSL 同式）：
+ * WebGPU 水面与降水补丁（render/water-shading、water-ripples、precip-surface 的 GLSL 同式）：
  * - 波动在 begin_vertex（实例/批次变换之前）：deformBeforeInstance；
  * - 水面片元在 color_fragment 覆盖 diffuseColor（setupDiffuseColor 之后），湖面明暗在 opaque_fragment 前乘 outgoingLight（setupLighting）；
  * - 降水湿润/积雪在 emissivemap_fragment 前改反照率与粗糙度（beforeLighting：法线已扰动、受光计算之前）。
@@ -172,17 +172,6 @@ const waterRipples: Translate<'water-ripples'> = (material, { wind, time }) => {
   };
 };
 
-// ---- harbor-lake-light（opaque_fragment 前：outgoingLight *= light; diffuseColor.a *= 0.32）----
-
-const harborLakeLight: Translate<'harbor-lake-light'> = (material, { light }) => {
-  const prev = material.setupLighting;
-  material.setupLighting = function (builder: NodeBuilder): Node {
-    const out = v(vec3(prev.call(this, builder))).mul(shared(light));
-    diffuseColor.a.assign(diffuseColor.a.mul(0.32));
-    return out as unknown as Node;
-  };
-};
-
 // ---- precip-surface（PRECIP_SURFACE_FRAGMENT 同式）----
 
 const prHash = (p: N): N => fract(sin(dot(p, vec2(127.1, 311.7))).mul(43758.5453));
@@ -251,10 +240,9 @@ const precipSurface: Translate<'precip-surface'> = (material, { uniforms: u }, s
   });
 };
 
-export const WATER_PATCHES: PatchTable<'water-surface' | 'water-wave' | 'water-ripples' | 'harbor-lake-light' | 'precip-surface'> = {
+export const WATER_PATCHES: PatchTable<'water-surface' | 'water-wave' | 'water-ripples' | 'precip-surface'> = {
   'water-surface': waterSurface,
   'water-wave': waterWave,
   'water-ripples': waterRipples,
-  'harbor-lake-light': harborLakeLight,
   'precip-surface': precipSurface,
 };

@@ -22,15 +22,15 @@ export async function mountStory(context: PageContext): Promise<void> {
     replaceGameLocation(url);
   }
   if (save) {
-    const { mountGame } = await import('../game/game-app.ts');
+    const { mountGame } = await import('../game/game-mount.ts');
     await mountGame(context, save);
     return;
   }
   const checkpoint = { phase: 'perimeter', countdownTicks: 0 } as const;
-  const initialStory = { version: 3, checkpoint, destination: 'fortress' } as const;
+  const initialStory = { version: 4, checkpoint, destination: 'fortress' } as const;
   if (intro === 'skip') {
     saveStory(window.localStorage, checkpoint, 'fortress');
-    const { mountGame } = await import('../game/game-app.ts');
+    const { mountGame } = await import('../game/game-mount.ts');
     await mountGame(context, initialStory, true);
     return;
   }
@@ -39,7 +39,7 @@ export async function mountStory(context: PageContext): Promise<void> {
   let running: Promise<void>;
   let preparing: Promise<void> | undefined;
   const ready = (): Promise<void> => preparing ??= new Promise<void>((resolve, reject) => {
-    running = import('../game/game-app.ts').then(({ mountGame }) => mountGame(context, initialStory, true, async () => {
+    running = import('../game/game-mount.ts').then(({ mountGame }) => mountGame(context, initialStory, true, async () => {
       resolve();
       await activation;
     }));

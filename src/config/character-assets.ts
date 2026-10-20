@@ -3,23 +3,32 @@ import { ENEMY_RULES } from './enemy-rules.ts';
 import type { EnemyKind } from './enemy-rules.ts';
 import type { ShowcaseActor } from './showcase.ts';
 import { GRASSY_MODELS } from './grassy.ts';
+import { CATALOG_GROUPS } from './catalog.ts';
 
 export interface CharacterAsset {
   readonly group: string;
-  readonly label: string;
+  /** 手写标签是 t() 的中文键；取自原画资料库的标签是 [中, 英]。 */
+  readonly label: string | readonly [string, string];
   readonly path: string;
   readonly thumbnail: string;
 }
 
-function enemyImages(kind: EnemyKind): readonly CharacterAsset[] {
+/** 原画资料库是参考图的唯一登记；展示场按条目取图，prefix 只取本角色目录下的图。 */
+function catalogImages(entryId: string, group: string, prefix = './'): CharacterAsset[] {
+  const entry = CATALOG_GROUPS.flatMap((catalog) => catalog.entries).find((candidate) => candidate.id === entryId)!;
+  return entry.images.filter((image) => image.path.startsWith(prefix))
+    .map((image) => ({ group, label: image.label, path: image.path, thumbnail: image.path }));
+}
+
+function enemyViews(kind: EnemyKind): CharacterAsset[] {
   const directory = ENEMY_MODEL_DIRS[kind];
-  return [
-    ...[['thumbnail', '真实模型'], ['front', '正面'], ['side', '侧面']].map(([file, label]) => ({ group: '模型多视图', label: `${ENEMY_RULES[kind].name} · ${label}`, path: `${directory}/${file}.png`, thumbnail: `${directory}/${file}.png` })),
-    { group: '正侧面参考', label: `${ENEMY_RULES[kind].name} · 原画`, path: `${directory}/reference.png`, thumbnail: `${directory}/reference.png` },
-    ...(kind === 'watchWasp' ? [['flight-concept', '倾斜飞行'], ['thermite-concept', '铝热剂火雨']].map(([file, label]) => ({
-      group: '战斗效果概念', label: `哨蜂 · ${label}`, path: `${directory}/${file}.png`, thumbnail: `${directory}/${file}.png`,
-    })) : []),
-  ];
+  return [['thumbnail', '真实模型'], ['front', '正面'], ['side', '侧面']].map(([file, label]) => ({ group: '模型多视图', label: `${ENEMY_RULES[kind].name} · ${label}`, path: `${directory}/${file}.png`, thumbnail: `${directory}/${file}.png` }));
+}
+
+/** 建模用正侧面原画，未进原画资料库的敌人直接取模型目录。 */
+function enemyReference(kind: EnemyKind): CharacterAsset {
+  const path = `${ENEMY_MODEL_DIRS[kind]}/reference.png`;
+  return { group: '正侧面参考', label: `${ENEMY_RULES[kind].name} · 原画`, path, thumbnail: path };
 }
 
 export const CHARACTER_ASSETS: Readonly<Record<ShowcaseActor, readonly CharacterAsset[]>> = {
@@ -29,17 +38,16 @@ export const CHARACTER_ASSETS: Readonly<Record<ShowcaseActor, readonly Character
     { group: '模型多视图', label: '白色飞行车 · 实际模型预览', path: './models/white-vtol/preview.png', thumbnail: './models/white-vtol/preview.png' },
   ],
   sam: [
+    ...catalogImages('npc-references', '四方向参考', './characters/sam/'),
     ...[['front', '正面'], ['back', '背面'], ['left', '左侧'], ['right', '右侧']].flatMap(([view, label]) => [
-      { group: '四方向参考', label: `Sam · 怪物形态 · ${label}`, path: `./characters/sam/reference-${view}.png`, thumbnail: `./characters/sam/reference-${view}.png` },
-      { group: '四方向参考', label: `Sam · 人形态 · ${label}`, path: `./characters/sam/human/reference-${view}.png`, thumbnail: `./characters/sam/human/reference-${view}.png` },
       { group: '模型多视图', label: `Sam · 怪物形态 · 模型${label}`, path: `./characters/sam/render-${view}.png`, thumbnail: `./characters/sam/render-${view}.png` },
       { group: '模型多视图', label: `Sam · 人形态 · 模型${label}`, path: `./characters/sam/human/render-${view}.png`, thumbnail: `./characters/sam/human/render-${view}.png` },
     ]),
   ],
   tibo: [
+    ...catalogImages('npc-references', '四方向参考', './characters/tibo/'),
+    ...catalogImages('tibo-human', '四方向参考', './characters/tibo/'),
     ...[['front', '正面'], ['back', '背面'], ['left', '左侧'], ['right', '右侧']].flatMap(([view, label]) => [
-      { group: '四方向参考', label: `Tibo · 怪物形态 · ${label}`, path: `./characters/tibo/reference-${view}.png`, thumbnail: `./characters/tibo/reference-${view}.png` },
-      { group: '四方向参考', label: `Tibo · 人形态 · ${label}`, path: `./characters/tibo/human/reference-${view}.png`, thumbnail: `./characters/tibo/human/reference-${view}.png` },
       { group: '模型多视图', label: `Tibo · 怪物形态 · 模型${label}`, path: `./characters/tibo/render-${view}.png`, thumbnail: `./characters/tibo/render-${view}.png` },
       { group: '模型多视图', label: `Tibo · 人形态 · 模型${label}`, path: `./characters/tibo/human/render-${view}.png`, thumbnail: `./characters/tibo/human/render-${view}.png` },
     ]),
@@ -48,21 +56,12 @@ export const CHARACTER_ASSETS: Readonly<Record<ShowcaseActor, readonly Character
     { group: '模型多视图', label: '光子 · 默认视角', path: './characters/luma/portrait.jpg', thumbnail: './characters/luma/portrait.jpg' },
   ],
   human: [
-    { group: '超载效果概念', label: '服务器超载 · 过热阵列与数据冲击波（概念图）', path: './characters/human/equipment-concepts/combat-v5/server-overload.png', thumbnail: './characters/human/equipment-concepts/combat-v5/server-overload.png' },
-    { group: '超载效果新版', label: '服务器超载 · 悬浮阵列与等离子冲击', path: './characters/human/equipment-concepts/combat-v4/server-overload.png', thumbnail: './characters/human/equipment-concepts/combat-v4/server-overload.png' },
-    { group: '装备概念', label: '推进飞行 · 装备定稿', path: './characters/human/equipment-concepts/flight.png', thumbnail: './characters/human/equipment-concepts/flight.png' },
-    { group: '装备概念', label: '键盘武器 · Codex 攻击', path: './characters/human/equipment-concepts/codex-attack.png', thumbnail: './characters/human/equipment-concepts/codex-attack.png' },
-    { group: '装备概念', label: '非攻击姿态 · 键盘背负', path: './characters/human/equipment-concepts/keyboard-stowed.png', thumbnail: './characters/human/equipment-concepts/keyboard-stowed.png' },
-    ...[['keyboard-one-hand-combo', '键盘单手连击'], ['codex-barrage', 'Codex 实体光弹'], ['bug-swarm', 'Bug 虫群'], ['server-overload', '服务器超载']].map(([file, label]) => ({
-      group: '战斗效果概念', label: `${label} · 概念图`,
-      path: `./characters/human/equipment-concepts/combat-v2/${file}.png`,
-      thumbnail: `./characters/human/equipment-concepts/combat-v2/${file}.png`,
-    })),
-    ...[['airborne-keyboard', '空中键盘单手连击'], ['airborne-codex', '空中 Codex 光弹'], ['airborne-bug', '空中 Bug 虫群'], ['airborne-overload', '空中服务器超载']].map(([file, label]) => ({
-      group: '空中技能概念', label: `${label} · 概念图`,
-      path: `./characters/human/equipment-concepts/combat-v3/${file}.png`,
-      thumbnail: `./characters/human/equipment-concepts/combat-v3/${file}.png`,
-    })),
+    ...catalogImages('combat-studies', '超载效果概念', './characters/human/equipment-concepts/combat-v5/'),
+    ...catalogImages('combat-studies', '超载效果新版', './characters/human/equipment-concepts/combat-v4/'),
+    ...catalogImages('grassy-equipment', '装备概念'),
+    ...catalogImages('keyboard-combo', '战斗效果概念'),
+    ...catalogImages('combat-studies', '战斗效果概念', './characters/human/equipment-concepts/combat-v2/'),
+    ...catalogImages('combat-studies', '空中技能概念', './characters/human/equipment-concepts/combat-v3/'),
     ...[['hero', '三分之四'], ['front', '正面'], ['right', '右侧'], ['left', '左侧'], ['back', '背面']].map(([view, label]) => ({
       group: '模型多视图', label: `正式装备模型 · ${label}`,
       path: `./characters/human/models-equipped/render-game-${view}.png`,
@@ -73,17 +72,12 @@ export const CHARACTER_ASSETS: Readonly<Record<ShowcaseActor, readonly Character
       path: `./characters/human/models-equipped/render-game-ride-${view}.png`,
       thumbnail: `./characters/human/models-equipped/render-game-ride-${view}.png`,
     })),
-    { group: '角色卡', label: 'Grassy · 人类形态', path: './characters/human/grassy-human-card.png', thumbnail: './characters/human/grassy-human-card.png' },
-    { group: '四方向参考', label: '人形定稿 · 正面', path: './characters/human/turnaround-master-v2/front.png', thumbnail: './characters/human/turnaround-master-v2/front.png' },
-    { group: '四方向参考', label: '人形定稿 · 背面', path: './characters/human/turnaround-master-v2/back.png', thumbnail: './characters/human/turnaround-master-v2/back.png' },
-    { group: '四方向参考', label: '人形定稿 · 左侧', path: './characters/human/turnaround-master-v2/left.png', thumbnail: './characters/human/turnaround-master-v2/left.png' },
-    { group: '四方向参考', label: '人形定稿 · 右侧母版', path: './characters/human/turnaround-master-v2/right.png', thumbnail: './characters/human/turnaround-master-v2/right.png' },
+    ...catalogImages('grassy-human', '角色卡', './characters/human/grassy-human-card.png'),
+    ...catalogImages('grassy-human', '四方向参考', './characters/human/turnaround-master-v2/'),
   ],
   pelican: [
-    { group: '角色卡', label: 'Grassy · 鹈鹕形态', path: './characters/pelican/grassy-pelican-card.png', thumbnail: './characters/pelican/grassy-pelican-card.png' },
-    ...[['normal-and-three-skills-v1', '吐水普攻与三个技能'], ['photon-swarm-ultimate-v1', '光子爆裂大招']].map(([file, label]) => ({
-      group: '战斗效果概念', label: `${label} · 概念图`, path: `./characters/pelican/skill-concepts/${file}.png`, thumbnail: `./characters/pelican/skill-concepts/${file}.png`,
-    })),
+    ...catalogImages('grassy-pelican', '角色卡'),
+    ...catalogImages('npc-skills', '战斗效果概念', './characters/pelican/'),
     {"group": "2D 原画", "label": "2D 原画 · 四分之三", "path": "./characters/pelican/02-pelican-2d-three-quarter.png", "thumbnail": "./characters/pelican/02-pelican-2d-three-quarter.png"},
     {"group": "2D 原画", "label": "2D 原画 · 正侧面", "path": "./characters/pelican/01-pelican-2d-profile.png", "thumbnail": "./characters/pelican/01-pelican-2d-profile.png"},
     {"group": "2D 原画", "label": "2D 原画 · 对齐版", "path": "./characters/pelican/02-pelican-2d-aligned.png", "thumbnail": "./characters/pelican/02-pelican-2d-aligned.png"},
@@ -149,8 +143,10 @@ export const CHARACTER_ASSETS: Readonly<Record<ShowcaseActor, readonly Character
     {"group": "骑行素材", "label": "海岸骑行原始参考 · SVG", "path": "./characters/pelican/ride/coastal-reference.svg", "thumbnail": "./characters/pelican/ride/coastal-reference.svg"},
   ],
   dummy: [],
-  gatekeeper: enemyImages('gatekeeper'), lineHound: enemyImages('lineHound'),
-  watchWasp: enemyImages('watchWasp'), loadmaster: enemyImages('loadmaster'),
+  omi: [...enemyViews('omi'), enemyReference('omi')],
+  lineHound: [...enemyViews('lineHound'), ...catalogImages('line-hound', '正侧面参考')],
+  watchWasp: [...enemyViews('watchWasp'), enemyReference('watchWasp'), ...catalogImages('wasp-actions', '战斗效果概念')],
+  loadmaster: [...enemyViews('loadmaster'), enemyReference('loadmaster')],
   fish: [],
 };
 

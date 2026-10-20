@@ -8,13 +8,13 @@
 共享源位于 `src/render/transit/maglev-model.ts`，尺寸配置位于 `src/config/maglev.ts`；场景直接使用同一模型生成函数。
 
 重新导出：`node scripts/export-maglev-models.ts`。
-启动场景：`npm run dev`，访问 http://127.0.0.1:5174/maglev-track.html 。
-构建：`npm run build:full`，产物为 `dist-full/maglev-track.html`。
+启动场景：`npm run dev`，访问 http://127.0.0.1:5174/?mode=maglev 。
+构建：`npm run build:full`，产物为 `dist-full/index.html`，网址同上加 `?mode=maglev`。
 
 A/D 或方向键行驶，空格刹车，也支持按住页面按钮。可切换车棚及缩放、归位。
 场景沿 X 轴长 160 格，沿用游戏平视透视；三节连挂。未包含角色上下车与坐姿动画。
 
-造型依据：`public/art-library/maglev-tandem-streamline/multiview.png`，连续白银流线曲面，前后两排单座。
+造型依据：`public/catalog/maglev-tandem-streamline/multiview.png`，连续白银流线曲面，前后两排单座。
 
 当前修订按侧面图校正车头、座位、侧开孔、尾部和磁靴。实际车体宽约 1.767 格，含连接件长约 7.425 格。这是逐步贴近概念图的版本，尚未达到所有视图及材质细节完全一致。
 

@@ -18,7 +18,7 @@ import {
 } from '../src/render/building/hut-geometry.ts';
 import type { BedHeight } from '../src/render/building/hut-geometry.ts';
 import { createStructureView } from '../src/render/building/structure-view.ts';
-import { BLOCK_BACK_Z } from '../src/render/tile/tile-geometry.ts';
+import { BLOCK_BACK_Z, BLOCK_FRONT_Z } from '../src/render/tile/tile-geometry.ts';
 import type { FishingHut } from '../src/world/level.ts';
 import { createTileMap } from '../src/world/tile-map.ts';
 import { SHAPE_SLOPE_L, SHAPE_SLOPE_R, shapeTopAt } from '../src/world/tile-shapes.ts';
@@ -108,12 +108,12 @@ describe('hut-geometry', () => {
     });
   }
 
-  test('屋顶板：竖直厚 .8，z ∈ [BLOCK_BACK_Z − .2, .7]，覆盖屋檐到屋脊', () => {
+  test('屋顶板：竖直厚 .8，z ∈ [BLOCK_BACK_Z − .2, BLOCK_FRONT_Z + .2]，覆盖屋檐到屋脊', () => {
     const hut = makeHut(20, 30, 1);
     const roof = buildHutParts(hut, flatBed(25)).get('roof') as THREE.BufferGeometry;
     const b = box(roof);
     assert.ok(Math.abs(b.min.z - HUT_ROOF_Z_MIN) < EPS && Math.abs(b.max.z - HUT_ROOF_Z_MAX) < EPS, `roof z ${b.min.z}..${b.max.z}`);
-    assert.ok(Math.abs(HUT_ROOF_Z_MIN - (BLOCK_BACK_Z - 0.2)) < EPS && HUT_ROOF_Z_MAX === 0.7);
+    assert.ok(Math.abs(HUT_ROOF_Z_MIN - (BLOCK_BACK_Z - 0.2)) < EPS && Math.abs(HUT_ROOF_Z_MAX - (BLOCK_FRONT_Z + 0.2)) < EPS);
     assert.ok(Math.abs(b.min.x - hut.roofX0) < EPS && Math.abs(b.max.x - (hut.roofX1 + 1)) < EPS, `roof x ${b.min.x}..${b.max.x}`);
     assert.ok(Math.abs(b.max.y - (hut.roofY + hut.roofRows)) < EPS, `ridge ${b.max.y}`);
     assert.ok(Math.abs(b.min.y - (hut.roofY - 0.8)) < EPS, `eave underside ${b.min.y}`);
@@ -123,12 +123,12 @@ describe('hut-geometry', () => {
     }
   });
 
-  test('背墙板 z ∈ [BLOCK_BACK_Z, BLOCK_BACK_Z+.1]，覆盖墙内并收在屋顶线下；前墙剖切（室内前方无几何）', () => {
+  test('背墙板 z ∈ [BLOCK_BACK_Z − .2, BLOCK_BACK_Z]（标准墙厚贴格子后沿），覆盖墙内并收在屋顶线下；前墙剖切（室内前方无几何）', () => {
     const hut = makeHut(20, 30, 1);
     const parts = buildHutParts(hut, flatBed(25));
     const wall = parts.get('backWall') as THREE.BufferGeometry;
     const b = box(wall);
-    assert.ok(b.min.z >= BLOCK_BACK_Z - EPS && b.max.z <= BLOCK_BACK_Z + 0.1 + EPS, `back wall z ${b.min.z}..${b.max.z}`);
+    assert.ok(b.min.z >= BLOCK_BACK_Z - 0.2 - EPS && b.max.z <= BLOCK_BACK_Z + EPS, `back wall z ${b.min.z}..${b.max.z}`);
     assert.ok(Math.abs(b.min.x - hut.x0) < 0.05 && Math.abs(b.max.x - (hut.x1 + 1)) < 0.05, `back wall x ${b.min.x}..${b.max.x}`);
     assert.ok(Math.abs(b.min.y - hut.floorY) < EPS, `back wall from floor ${b.min.y}`);
     for (const v of vertices(wall)) assert.ok(v.y <= hutRoofTop(hut, v.x) + EPS, `back wall below roof at x=${v.x}`);

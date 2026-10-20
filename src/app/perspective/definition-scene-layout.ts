@@ -19,10 +19,13 @@ import { BIG_ROCKS, LANDMARK_ROCKS, MID_ROCKS, ROCK_SALT, SAND_ROCKS, SMALL_ROCK
 import { mulberry32 } from '../../core/rng.ts';
 import { climberInstance, createClimberAtlas, createClimberMaterial, createClimberMesh, type ClimberInstance } from '../../render/decor/face-climbers.ts';
 import { generateTileTextures } from '../../render/tile/tile-textures.ts';
-import { createSolarPanel, solarTrackingAngle, type SolarPanelState } from '../../physics/solar-panel.ts';
 import { caption } from '../../render/npc/npc-effects.ts';
-import type { DefinitionCollider, DefinitionPlatform } from '../../physics/definition-collision.ts';
+import type { Vec2 } from '../../core/math.ts';
+import { placeDefinitionSolid, removeDefinitionSolid, type DefinitionPlatformLine, type DefinitionSolid, type DefinitionWorldData } from '../../sim/definition-world.ts';
+import type { SupportSurface } from '../../world/special-parts.ts';
+import type { TileMap } from '../../world/tile-map.ts';
 import { createDefinitionDepthTrial, type DefinitionDepthTrial } from './definition-depth-trial.ts';
+import { walkDepth, type WalkObstacle } from '../../render/building/walk-depth.ts';
 import { t } from '../../config/i18n.ts';
 
 /** 文案（title、description、items）在构建时已按当前语言翻译；切换语言时场景重新挂载并重建。 */
@@ -37,7 +40,8 @@ export interface SceneSection {
   playerX: number;
   playerY: number;
   items: readonly string[];
-  solarTrial?: SolarPanelState;
+  /** 试踩的太阳能板：模拟世界太阳能板列表里的下标。 */
+  solarTrial?: number;
   /** 玩家在该分区的世界 Z（未给出时站 Z=0 中线）。 */
   walkZ?: (x: number, y: number) => number;
 }
@@ -50,31 +54,21 @@ interface SectionBuilder {
   label(text: string | (() => string), x: number, y: number, width?: number): void;
   furniture(kind: FurnitureKind, x: number, y: number, options?: FurnitureOptions): THREE.Group;
   readonly blockers: Blocker[];
+  /** 家具、大石顶面（布局坐标）。 */
+  readonly stands: SupportSurface[];
+  readonly platforms: DefinitionPlatformLine[];
 }
 
 // 家具贴格子背面摆放（定义坐标 +Z 朝后沿），前沿离人物中线最近。
 const FURNITURE_Z = DEFINITION_DEPTH.tile / 2 - .5;
 
-/** 人物平时走 Z=0；横向离落地家具或树干1格开始平滑让到镜头侧，站上家具顶面时回到家具深度中心。返回世界 Z。 */
 interface Blocker { readonly box: THREE.Box3; readonly top: number }
 
+/** 家具与树干的让位（walk-depth）；长廊局部 +Z 朝后沿，深度取反成世界 Z，没有落脚面的 top 为 Infinity。 */
 function walkAround(blockers: readonly Blocker[]): (x: number, y: number) => number {
-  // ponytail: 按家具包围盒线性扫描，只用于定义预览；若推广到游戏需改为逻辑层的占格查询。
-  return (px, py) => {
-    let z = 0;
-    for (const { box, top } of blockers) {
-      // 站在落脚面（椅子座面、工作站桌面）上就回到家具深度中心，不再按靠背或屏幕高度让位。
-      // 只认落脚面上方1格以内：站在上层平台时，正下方地面的家具不算脚下。
-      if (py >= top - .05 && py < top + 1 && px > box.min.x && px < box.max.x) return -(box.min.z + box.max.z) / 2;
-      if (py >= box.max.y || py + 3.1 <= box.min.y) continue;
-      // 身体半宽0.3；离家具1格开始 smoothstep 让出，越过后回到中线。
-      // 身体中心让到家具前沿+0.5，背包也不会陷进家具；平台上身体可以一半伸出前沿，碰撞仍按XY二维计算。
-      const gap = Math.max(box.min.x - (px + .3), px - .3 - box.max.x, 0);
-      const t = Math.max(0, 1 - gap);
-      z = Math.max(z, (-box.min.z + .5) * t * t * (3 - 2 * t));
-    }
-    return z;
-  };
+  const obstacles: WalkObstacle[] = blockers.map(({ box, top }) => ({ x: box.min.x, y: box.min.y, width: box.max.x - box.min.x, height: box.max.y - box.min.y,
+    centerZ: -(box.min.z + box.max.z) / 2, frontZ: -box.min.z, top: Number.isFinite(top) ? top : null }));
+  return (x, y) => walkDepth(obstacles, x, y);
 }
 
 function addShapeGallery({ kit, label }: SectionBuilder): void {
@@ -255,11 +249,12 @@ export function createDefinitionSceneLayout(selectedId: string) {
   root.name = 'definition-scene';
   const sections: SceneSection[] = [];
   const disposers: Array<() => void> = [];
-  const solarPanels: SolarPanelState[] = [];
-  const updates: Array<(time: number, player: WorkstationPlayer | null) => void> = [];
+  const solar: Vec2[] = [];
+  const updates: Array<(time: number, player: WorkstationPlayer | null, solarAngle: (index: number) => number) => void> = [];
   const groups = new Map<string, THREE.Group>();
-  const solids: DefinitionCollider[] = [];
-  const platforms: DefinitionPlatform[] = [];
+  const solids: DefinitionSolid[] = [];
+  const platforms: DefinitionPlatformLine[] = [];
+  const stands: SupportSurface[] = [];
   let tileDepthTrial: DefinitionDepthTrial | null = null;
   let nextX = 0;
   function section(id: string, title: string, description: string, width: number, height: number,
@@ -294,14 +289,12 @@ export function createDefinitionSceneLayout(selectedId: string) {
         const stand = FURNITURE_STAND_TOP[kind];
         const top = stand === undefined ? box.max.y : y + stand;
         blockers.push({ box, top });
-        // 家具落脚面作为单向平台，可以跳上去站立；盆栽叶冠不算落脚面。
-        if (kind !== 'plant') kit.platforms.push({ left: box.min.x - x, right: box.max.x - x, top });
+        // 家具落脚面只承托，可以跳上去站立；盆栽叶冠不算落脚面。
+        if (kind !== 'plant') stands.push({ left: box.min.x, right: box.max.x, top });
       }
       if (kind === 'solar') {
-        const panel = createSolarPanel(x + localX + .5, y, 0);
-        solarPanels.push(panel);
-        solids.push(panel.collider);
-        updates.push(time => view.update!(time, panel.angle, null));
+        const index = solar.push({ x: x + localX + .5, y }) - 1;
+        updates.push((time, _player, solarAngle) => view.update!(time, solarAngle(index), null));
       } else if (view.update) updates.push((time, player) => view.update!(time, undefined, player));
       return view.root;
     };
@@ -311,8 +304,8 @@ export function createDefinitionSceneLayout(selectedId: string) {
       if (ground) kit.solid('A', tile, playerY - 2);
       if (tile < 0 || tile >= width) kit.solid('A', tile, playerY - 1);
     }
-    build({ kit, x, label, furniture, blockers });
-    solids.push(...kit.solids.map(solid => ({ points: solid.points.map(([px, py]) => [px + x, py] as const) })));
+    build({ kit, x, label, furniture, blockers, stands, platforms });
+    solids.push(...kit.solids.map(solid => ({ ...solid, points: solid.points.map(([px, py]) => [px + x, py] as const) })));
     platforms.push(...kit.platforms.map(platform => ({ ...platform, left: platform.left + x, right: platform.right + x })));
     if (id !== 'solar' && id !== 'liquids') label(() => t(title), width / 2, height + .8, Math.min(width * .55, 9));
     sections.push({ id, title: t(title), description, x: x - ground, y: 0, width: width + ground * 2, height: height + 2, playerX: x + playerX, playerY, items,
@@ -336,7 +329,7 @@ export function createDefinitionSceneLayout(selectedId: string) {
     corridorWidth, 15, [...['格子深2 · 前沿与后沿各0.5', '墙0.2紧贴格子背面', '地面家具 · 床长3、桌宽2', '挂墙平台拉通 · 放全部家具', '居中平台拉通 · 放全部家具', '椅子朝前 / 朝左 / 朝右'].map(item => t(item)),
       t('花草{flora}种 · 灌木{shrub}种').replace('{flora}', String(FLORA_SPECIES.length)).replace('{shrub}', String(SHRUB_KINDS.length)),
       t('树木{n}种').replace('{n}', String(TREE_KINDS.length)), t('岩石{n}种').replace('{n}', String(ROCK_KINDS.length)), t('水池 浅 / 中 / 深'), t('中线行走，过家具前让')],
-    ({ kit, x, furniture, label, blockers }) => {
+    ({ kit, x, furniture, label, blockers, stands, platforms }) => {
       const { tile, reserve } = DEFINITION_DEPTH;
       for (let column = 0; column < corridorWidth; column++) {
         if (column < waterStart || column >= waterStart + corridorLiquid.width) kit.solid('A', column, 0);
@@ -420,7 +413,7 @@ export function createDefinitionSceneLayout(selectedId: string) {
       const planned = TREE_KINDS.map((kind, index) =>
         planTree(kind, x + treeStart + 2 + index * CORRIDOR_TREE_GAP, 1, mulberry32(0x7a11 + index), index));
       // 树冠平台与游戏同一规则：平台行 ty 的整格顶面单向可站。
-      for (const tree of planned) for (const pad of tree.platforms) kit.platforms.push({ left: pad.x0 - x, right: pad.x1 + 1 - x, top: pad.ty + 1 });
+      for (const tree of planned) for (const pad of tree.platforms) platforms.push({ left: pad.x0, right: pad.x1 + 1, top: pad.ty + 1, tile: 'branch' });
       // 树干和家具一样让位：按树干外皮（主干中心 TREE_Z ± 半径）让到前沿 +0.5；树干没有落脚面，站在树冠上不算脚下。
       for (const tree of planned) blockers.push({ top: Infinity, box: new THREE.Box3(
         new THREE.Vector3(tree.x + .5 - tree.trunkRadius, tree.baseY, -(TREE_Z + tree.trunkRadius)),
@@ -463,7 +456,7 @@ export function createDefinitionSceneLayout(selectedId: string) {
           if (MID_ROCKS.has(kind) || BIG_ROCKS.has(kind)) {
             const standable = BIG_ROCKS.has(kind);
             blockers.push({ box, top: standable ? box.max.y : Infinity });
-            if (standable) kit.platforms.push({ left: main.x - main.width * .3 - x, right: main.x + main.width * .3 - x, top: box.max.y });
+            if (standable) stands.push({ left: main.x - main.width * .3, right: main.x + main.width * .3, top: box.max.y });
           }
           label(() => t(ROCK_LABELS[kind]), rockColumn + slot / 2, Math.max(2, box.max.y + .6), 2);
           rockColumn += slot;
@@ -472,7 +465,7 @@ export function createDefinitionSceneLayout(selectedId: string) {
       }
       corridorLiquid.root.position.x = x + waterStart;
       kit.root.parent!.add(corridorLiquid.root);
-      solids.push(...corridorLiquid.solids.map(solid => ({ points: solid.points.map(([px, py]) => [px + x + waterStart, py] as const) })));
+      solids.push(...corridorLiquid.solids.map(solid => ({ ...solid, points: solid.points.map(([px, py]) => [px + x + waterStart, py] as const) })));
       label(() => t('水池 · 浅 / 中 / 深'), waterStart + corridorLiquid.width / 2, 6.2, 6);
 
       const points: THREE.Vector3[] = [];
@@ -566,7 +559,7 @@ export function createDefinitionSceneLayout(selectedId: string) {
       label(() => t('左门'), 2, 5.8, 3); label(() => t('右门'), 6, 5.8, 3);
       label(() => t('开局四板 · 深2'), 10, 5.8, 4);
     }, 3, 1);
-  const solarRowStart = solarPanels.length;
+  const solarRowStart = solar.length;
   section('solar', '一整排太阳能 · 踩踏与追光', t('12块半格高面板在连续整砖顶逐格排开，每块宽1、高0.5、深2，居中安装。沿整排左右走动，脚下板面随受力倾转；离开的面板逐渐恢复追光。'), 16, 6,
     ['连续12格 · 每格一块整板', '整砖顶面 · 同高居中安装', '每块独立受力与恢复追光'].map(item => t(item)), ({ kit, furniture, label }) => {
       kit.solid('B', 1, 0);
@@ -577,7 +570,7 @@ export function createDefinitionSceneLayout(selectedId: string) {
       kit.solid('B', 14, 0);
       label(() => t('连续12格 · 独立踩踏与追光'), 8, 4.6, 6);
     }, .5);
-  if (selectedId === 'solar') sections[0]!.solarTrial = solarPanels[solarRowStart + 5]!;
+  if (selectedId === 'solar') sections[0]!.solarTrial = solarRowStart + 5;
   const liquid = createDefinitionLiquid();
   disposers.push(() => liquid.dispose());
   section('liquids', '液体 · 水位与透明度',
@@ -586,26 +579,25 @@ export function createDefinitionSceneLayout(selectedId: string) {
     ({ kit, x }) => {
       liquid.root.position.x = x;
       kit.root.parent!.add(liquid.root);
-      solids.push(...liquid.solids.map(solid => ({ points: solid.points.map(([px, py]) => [px + x, py] as const) })));
+      solids.push(...liquid.solids.map(solid => ({ ...solid, points: solid.points.map(([px, py]) => [px + x, py] as const) })));
     }, liquid.playerX, liquid.playerY);
   const terrainTextures = generateTileTextures(256);
   for (const scene of ROCK_TERRAIN_SCENES) {
     section(scene.id, scene.title, t(scene.description), scene.width, scene.height, scene.items.map(item => t(item)),
       ({ kit }) => kit.terrain(scene.cells, terrainTextures), scene.playerX, scene.playerY);
   }
-  const trialStart = solids.length;
-  const refreshDepthTrialCollision = (): void => {
-    if (tileDepthTrial) solids.splice(trialStart, solids.length - trialStart, ...tileDepthTrial.solids);
-  };
-  refreshDepthTrialCollision();
+  const data: DefinitionWorldData = { solids, platforms, stands, solar };
+  let trialPlaced: readonly DefinitionSolid[] = [];
   return {
-    root, sections, collision: { solids, platforms }, solarPanels, tileDepthTrial, refreshDepthTrialCollision,
-    setSunDirection(sun: { x: number; y: number }): void {
-      const angle = solarTrackingAngle(sun);
-      for (const panel of solarPanels) panel.sunAngle = angle;
+    root, sections, data, tileDepthTrial,
+    /** 试放区的砖块随面板操作换掉；在两次模拟步进之间调用。 */
+    syncDepthTrial(map: TileMap, offset: Vec2): void {
+      for (const solid of trialPlaced) removeDefinitionSolid(map, solid, offset);
+      trialPlaced = tileDepthTrial ? tileDepthTrial.solids : [];
+      for (const solid of trialPlaced) placeDefinitionSolid(map, solid, offset);
     },
-    update(time: number, player: WorkstationPlayer | null): void {
-      for (const update of updates) update(time, player);
+    update(time: number, player: WorkstationPlayer | null, solarAngle: (index: number) => number): void {
+      for (const update of updates) update(time, player, solarAngle);
       if (selectedId === 'liquids') liquid.update(time);
       if (selectedId === 'depth-walk') {
         corridorLiquid.update(time);

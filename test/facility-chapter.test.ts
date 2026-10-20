@@ -247,8 +247,8 @@ test('正式跑跳输入能跨过深渊断桥并在另一侧落地', () => {
   } finally { dispose(); }
 });
 
-test('基础展示场不使用角色自由探索入口', () => {
-  assert.throws(() => parseFacilityChapter(new URLSearchParams('scene=original')), /未知可玩机房章节/);
+test('已移除的原版机房场景网址报错并给出新网址', () => {
+  assert.throws(() => parseFacilityChapter(new URLSearchParams('scene=original')), /已移除，请改用 \?mode=game&level=facility&scene=/);
 });
 
 test('堡垒哨蜂投弹且有不同外观，阵亡后永久移除', () => {
@@ -357,19 +357,6 @@ test('冷却液耗尽生命才死亡，死亡期间输入无效，重生后可�
       assert.equal(world.photon.chargeTicks, 0);
     }
   } finally { dispose(); }
-});
-
-test('普通水体仍可游泳，不受堡垒冷却液死亡规则影响', () => {
-  const level = createFacilityLevel('original');
-  try {
-    const world = createSimWorld({ level, windMode: 'calm', precipMode: 'manual', precipState: { rain: 'none', snow: 'none' } });
-    const player = getPlayer(world);
-    Object.assign(player.body, { x: 22.5, prevX: 22.5, y: 6, prevY: 6 });
-    for (let tick = 0; tick < 90; tick++) stepSim(world, NEUTRAL_INPUT);
-    assert.equal(player.pelican!.inWater, true);
-    assert.equal(player.health!.hp, player.health!.maxHp);
-    assert.equal(world.respawnTicks, 0);
-  } finally { level.fluid.dispose(); }
 });
 
 test('骑车能跳上缺口上方的悬浮平台并落到对岸', () => {

@@ -22,11 +22,11 @@ type Sample = { title: string; group: string } & (
 const samples: Sample[] = [
   { title: '冷启动 · 序章开场', group: '背景音乐', kind: 'music', intensity: 0, intro: true },
   ...([['探索', 0], ['警戒', 1], ['战斗', 2]] as const).map(([name, intensity]): Sample =>
-    ({ title: `机房堡垒 · ${name}`, group: '背景音乐', kind: 'music', intensity, intro: false })),
+    ({ title: `山体算力堡垒 · ${name}`, group: '背景音乐', kind: 'music', intensity, intro: false })),
   ...Object.entries(WORLD_MUSIC).map(([theme, track]): Sample =>
-    ({ title: track.title, group: '大世界音乐', kind: 'worldMusic', theme: theme as WorldMusicTheme, intensity: 0 })),
+    ({ title: track.title, group: '主世界音乐', kind: 'worldMusic', theme: theme as WorldMusicTheme, intensity: 0 })),
   ...([['警戒', 1], ['遭遇战', 2]] as const).map(([name, intensity]): Sample =>
-    ({ title: `大世界 · ${name}`, group: '大世界音乐', kind: 'worldMusic', theme: 'wilds', intensity })),
+    ({ title: `主世界 · ${name}`, group: '主世界音乐', kind: 'worldMusic', theme: 'wilds', intensity })),
   { title: '黑洞 · 引力旋涡', group: '环境声音', kind: 'blackhole' },
   ...([['outside', '堡垒外部'], ['gate', '入口'], ['racks', '服务器机架'], ['network', '网络核心'], ['roof', '屋顶风声']] as const)
     .map(([zone, title]): Sample => ({ title, zone, group: '环境声音', kind: 'zone' })),

@@ -182,32 +182,12 @@ function pattern(from: number, to: number, step: number, accents: readonly numbe
   return hits;
 }
 
-// 乐团段（八分音符网格）：kick 在 1、2 拍后半和 3 拍，snare 在 2、4 拍，反拍 hat 更重。
+// 乐团段（八分音符网格）：kick 在 1、2 拍后半和 3 拍。
 const KICK_GROOVE = [1, 0, 0, 0.7, 0.85, 0, 0, 0];
-const SNARE_GROOVE = [0, 0, 0.8, 0, 0, 0, 0.95, 0];
-const HAT_GROOVE = [0.45, 0.8, 0.45, 0.8, 0.45, 0.8, 0.45, 0.8];
-// 接句段（十六分音符网格）：四拍 kick，snare 从 2、4 拍滚成十六分音符渐强。
+// 接句段（十六分音符网格）：四拍 kick。
 const KICK_BUILD = [1, 0, 0, 0, 0.8, 0, 0, 0, 0.9, 0, 0, 0, 0.85, 0, 0, 0];
-const SNARE_BUILD = [0, 0, 0, 0, 0.7, 0, 0, 0, 0.6, 0, 0.7, 0, 0.75, 0.8, 0.9, 1];
-const HAT_BUILD = [0.5, 0.25, 0.7, 0.25, 0.5, 0.25, 0.7, 0.25, 0.5, 0.3, 0.7, 0.3, 0.55, 0.35, 0.75, 0.4];
-const SOFT_HAT = [0.3, 0.2];
 
 export const OVERTURE_KICKS: readonly DrumHit[] = [
   ...pattern(SWARM_AT + 0.25, KEY_CHANGE_AT, 0.25, KICK_GROOVE),
   ...pattern(DUET_AT, SYNC_AT, SIXTEENTH, KICK_BUILD),
-];
-export const OVERTURE_SNARES: readonly DrumHit[] = [
-  ...pattern(SWARM_AT + 0.25, KEY_CHANGE_AT, 0.25, SNARE_GROOVE),
-  { at: DUET_AT - 2 * SIXTEENTH, accent: 0.5 },
-  { at: DUET_AT - SIXTEENTH, accent: 0.7 },
-  ...pattern(DUET_AT, SYNC_AT, SIXTEENTH, SNARE_BUILD),
-];
-// Claude Opus 4.x 攀升的后半段 hat 加密到十六分音符；升华段只留轻 hat，星空段完全去掉鼓。
-export const OVERTURE_HATS: readonly DrumHit[] = [
-  ...pattern(SWARM_AT + 0.25, 12, 0.25, HAT_GROOVE),
-  ...pattern(12, KEY_CHANGE_AT, SIXTEENTH, HAT_BUILD),
-  ...pattern(KEY_CHANGE_AT, ASTRA_AT, 0.25, SOFT_HAT),
-  ...pattern(DUET_AT, SYNC_AT, SIXTEENTH, HAT_BUILD),
-  { at: TUTTI_HITS[0] + 0.25, accent: 0.6 },
-  { at: TUTTI_HITS[1] + 0.25, accent: 0.6 },
 ];

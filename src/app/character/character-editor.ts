@@ -5,18 +5,17 @@ import type { GrassyAction } from '../../config/grassy.ts';
 import { createGrassyRig, type GrassyRig } from '../../render/grassy/grassy-rig.ts';
 import { animateGrassy } from '../../render/grassy/grassy-animator.ts';
 import type { CharacterPreview } from '../../ui/panels/character-editor.tsx';
-import { VIEW_MAX_DT } from '../shell/frame-clock.ts';
+import { createViewLoop } from '../shell/view-loop.ts';
+import { readPageParams } from '../shell/page-context.ts';
+import { TUNING } from '../../config/tuning.ts';
+import { createRenderer } from '../../render/stage/stage.ts';
 
-/** 宿主先加载共享角色资产；预览只拥有自己的 renderer 和 rig，不销毁游戏的资源缓存。 */
-export async function createCharacterPreview(parent: HTMLElement, appearance: CharacterAppearance, onError: (error: unknown) => void, prepare?: (renderer: THREE.WebGLRenderer) => Promise<void>): Promise<CharacterPreview> {
-  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+/** 宿主先加载共享角色资产；预览只拥有自己的次级 renderer（不绑定角色贴图）和 rig，不销毁游戏的资源缓存。 */
+export async function createCharacterPreview(parent: HTMLElement, appearance: CharacterAppearance, onError: (error: unknown) => void, prepare?: () => Promise<void>): Promise<CharacterPreview> {
+  const renderer = createRenderer('studio', TUNING, readPageParams().debug);
   let rig: GrassyRig;
-  try { await prepare?.(renderer); rig = createGrassyRig('game', undefined, appearance); }
+  try { await prepare?.(); rig = createGrassyRig('game', undefined, appearance); }
   catch (error) { renderer.dispose(); throw error; }
-  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
-  renderer.outputColorSpace = THREE.SRGBColorSpace;
-  renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.2;
   parent.append(renderer.domElement);
   const scene = new THREE.Scene(); scene.background = new THREE.Color('#f5f7fa');
   const camera = new THREE.PerspectiveCamera(35, 1, .05, 100);
@@ -34,28 +33,21 @@ export async function createCharacterPreview(parent: HTMLElement, appearance: Ch
   let equipmentVisible = true;
   let action: GrassyAction = 'idle';
   let age = 0;
-  let previous = performance.now();
-  let frame = 0;
-  let disposed = false;
   const resize = new ResizeObserver(() => {
     const { width, height } = parent.getBoundingClientRect();
     renderer.setSize(Math.max(1, width), Math.max(1, height), false);
     camera.aspect = Math.max(1, width) / Math.max(1, height); camera.updateProjectionMatrix();
   });
   resize.observe(parent);
-  const draw = (now: number): void => {
-    if (disposed) return;
-    try {
-      const dt = Math.min((now - previous) / 1000, VIEW_MAX_DT); previous = now; age += dt;
-      const duration = rig.actions[action].getClip().duration;
-      for (const { node, visible } of equipment) node.visible = visible;
-      animateGrassy(rig, action, age % (duration + (action === 'keyboard_smash' ? .8 : 0)), dt, null);
-      if (!equipmentVisible) for (const { node } of equipment) node.visible = false;
-      controls.update(); renderer.render(scene, camera);
-      frame = requestAnimationFrame(draw);
-    } catch (error) { onError(error); }
-  };
-  frame = requestAnimationFrame(draw);
+  const loop = createViewLoop(dt => {
+    age += dt;
+    const duration = rig.actions[action].getClip().duration;
+    for (const { node, visible } of equipment) node.visible = visible;
+    animateGrassy(rig, action, age % (duration + (action === 'keyboard_smash' ? .8 : 0)), dt, null);
+    if (!equipmentVisible) for (const { node } of equipment) node.visible = false;
+    controls.update(); renderer.render(scene, camera);
+  }, onError);
+  loop.start();
   return {
     applyAppearance: value => rig.applyAppearance(value),
     setAction(value) { action = value; age = 0; rig.motionPose.reset(); },
@@ -69,7 +61,7 @@ export async function createCharacterPreview(parent: HTMLElement, appearance: Ch
     },
     setEquipmentVisible(value) { equipmentVisible = value; },
     dispose() {
-      disposed = true; cancelAnimationFrame(frame); resize.disconnect(); controls.dispose(); rig.dispose(); renderer.dispose(); renderer.domElement.remove();
+      loop.stop(); resize.disconnect(); controls.dispose(); rig.dispose(); renderer.dispose(); renderer.domElement.remove();
     },
   };
 }

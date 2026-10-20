@@ -156,7 +156,7 @@
 | 光子伙伴渲染与动作 | `render/luma/`、`config/luma.ts` |
 | Tibo 首领与击败后变身演出 | `entities/boss.ts`、`sim/mainline.ts` |
 | 家园经济：电力、算力、Token、机器人、天亮结算、昼夜 | `sim/homestead*.ts`、`config/homestead.ts` |
-| 住宅区：构件放置与拆除、房间、可挖地下（Astra 入住的房间也在这里） | `app/residence-app.ts`、`sim/residence.ts` |
+| 住宅区：构件放置与拆除、房间、可挖地下（Astra 入住的房间也在这里） | `app/city/`、`sim/city.ts`、`sim/building.ts` |
 | 沙漠地形生成 | `world/desert.ts` |
 | 风与天气 | `world/free-world-weather.ts` |
 | 三座机房 | `world/facility-level.ts`、`config/facility-scenes.ts` |

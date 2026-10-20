@@ -32,7 +32,7 @@ import { onLanguageChange } from '../model/language.ts';
 import type { BigMapLimits, BigMapView, MinimapRaster, MinimapSource, WorldRect } from '../model/minimap-model.ts';
 
 export interface MinimapSourceLive extends MinimapSource {
-  readonly tiles: MinimapSource['tiles'] & Pick<TileMap, 'onChange'>;
+  readonly tiles: MinimapSource['tiles'] & Pick<TileMap, 'onChange' | 'onMaskChange'>;
 }
 
 export interface MinimapPoint {
@@ -313,7 +313,8 @@ export function createMinimap(options: MinimapOptions): Minimap {
   const raster = createMinimapRaster(source, { tilePx: P, pixels: new Uint32Array(image.data.buffer) });
   baseCtx.putImageData(image, 0, 0);
   if (chapter !== undefined) drawFacilityMapBase(baseCtx, source, chapter, P);
-  const unsubscribe = source.tiles.onChange((tx, ty) => raster.markTile(tx, ty));
+  // 多块格增删只改掩码不改主块，两种变化都要重画。
+  const unsubscribe = [source.tiles.onChange((tx, ty) => raster.markTile(tx, ty)), source.tiles.onMaskChange((tx, ty) => raster.markTile(tx, ty))];
   // 小窗。
   const { mini, view, miniCanvas, label } = buildMiniWindow(parent, cssW, cssH);
   const title = document.createElement('div');
@@ -518,7 +519,7 @@ export function createMinimap(options: MinimapOptions): Minimap {
     dispose() {
       if (disposed) return;
       disposed = true;
-      unsubscribe();
+      for (const off of unsubscribe) off();
       unsubscribeLanguage();
       for (const [t, type, l, opts] of listeners) t.removeEventListener(type, l, opts);
       listeners.length = 0;

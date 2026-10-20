@@ -47,7 +47,7 @@ export function createGroundProfile(map: TileQuery, ground: ArrayLike<number>, o
     if (ty >= map.height) return false;
     const cx = clampX(tx);
     const cy = Math.max(0, ty);
-    return smoothById[map.get(cx, cy)] === true && map.shapeAt(cx, cy) === SHAPE_FULL;
+    return smoothById[map.get(cx, cy)] === true && map.plain(cx, cy) && map.shapeAt(cx, cy) === SHAPE_FULL;
   };
   const surface = createMapSurfaceQuery(map, (id) => smoothById[id] === true, (tx, ty) => solid(tx, ty + 1), options.lakes ?? []);
 
@@ -59,6 +59,8 @@ export function createGroundProfile(map: TileQuery, ground: ArrayLike<number>, o
     const g = ground[c] as number;
     if (g === 0) return 0;
     const ty = g - 1;
+    // 多块格与新形态（建筑块）按实体块的真实顶线，没有有机起伏。
+    if (!map.plain(c, ty)) return ty + (map.topAt(c, ty, f) ?? 1);
     const shape = map.shapeAt(c, ty);
     const organic = smoothById[map.get(c, ty)] === true && !solid(c, g);
     const d = organic ? hermiteAt(surfaceHermite(surface, c, ty), f) : 0;

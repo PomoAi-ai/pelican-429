@@ -34,9 +34,9 @@
 
 ![土中岩层、空岛底岩与含矿岩层的同源透视和XY占格图](/concepts/natural-rock-combinations-wireframe.png)
 
-- [进入土中岩层透视演示](./?mode=resources&scene=room#rock-soil)
-- [进入空岛底岩透视演示](./?mode=resources&scene=room#rock-island)
-- [进入含矿岩层透视演示](./?mode=resources&scene=room#rock-ore)
+- [进入土中岩层透视演示](../?mode=resources&scene=room#rock-soil)
+- [进入空岛底岩透视演示](../?mode=resources&scene=room#rock-island)
+- [进入含矿岩层透视演示](../?mode=resources&scene=room#rock-ore)
 
 图与场景使用同一份格子定义。下表坐标为各分区内部坐标，不含演示场景之间的横向排布间距；土材料与岩材料都为Z=[−1,+1]。同格可以有多片材料，碰撞按组合后的实际XY轮廓登记一次，不按材料片重复登记。
 
@@ -52,7 +52,7 @@
 
 ![空岛泥土内埋入岩脊、向下连续出露并收尖的透视和占格详图](/concepts/natural-rock-island-wireframe.png)
 
-[进入空岛底岩透视演示](./?mode=resources&scene=room#rock-island)
+[进入空岛底岩透视演示](../?mode=resources&scene=room#rock-island)
 
 空岛下面显示的石头是同一岩体的出露部分：上端埋在岛顶泥土内部，下端从土层下面露出，逐行收窄成倒坡与尖底。“挂在空岛下面”表示仍连接岛体的岩层，不表示已经脱离的下落物。岩体下方与坡外保留空气，不增加承托地板。
 
@@ -201,7 +201,7 @@
 - 尺寸与深度图：`public/concepts/natural-rock-wireframe.png`。
 - 六种格子关系图：`public/concepts/natural-rock-placement-wireframe.png`。
 - 可复现绘图源：`assets/concepts/scene-depth-guide/draw_rock_wireframe.py`；仅用于资料绘图，不作为游戏或展示场模型生成器。
-- 独立定义：`docs/natural-rock-definitions.md`；公开副本：`public/concepts/natural-rock-definitions.md`。
+- 定义正文：`public/concepts/natural-rock-definitions.md`。
 
 此前 `natural-rock-wireframe-draft.png` 是初步讨论图；本页正式线框图与上述坐标表用于本轮后续评审。正式接入游戏时，游戏与资源展示场应使用同一套资源和生成函数，不从资料脚本另建展示专用资产。
 

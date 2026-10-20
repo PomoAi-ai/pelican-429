@@ -5,8 +5,8 @@ import { TUNING } from '../config/tuning.ts';
 import { createFacilityLevel } from './facility-level.ts';
 import { createFluidMap } from './fluid-map.ts';
 import { computeSurface, type LevelData } from './level.ts';
-import { createTileMap } from './tile-map.ts';
-import { SHAPE_FULL, SHAPE_SLOPE_L, SHAPE_SLOPE_R } from './tile-shapes.ts';
+import { createTileMap, type TilePiece } from './tile-map.ts';
+import { SHAPE_FULL, SHAPE_SLOPE_L, SHAPE_SLOPE_R, SUBCELLS, isTileShape } from './tile-shapes.ts';
 import { DEFAULT_TILES, TILE_AIR, TILE_PLATFORM, TILE_STONE } from './tile-types.ts';
 import { generateWorld } from './worldgen.ts';
 import type { WorldComposition } from './worldgen-compositions.ts';
@@ -44,7 +44,9 @@ export function generateFreeWorld(seed: number, size: FreeWorldSize, entry: 'wil
   const spawn = entry === 'wilds' ? entrySpawn(wild) : wild.spawn;
   const ids = new Uint16Array(width * height);
   const shapes = new Uint8Array(width * height);
-  const water = new Uint8Array(width * height);
+  // 子格水量（行主序 sy*subWidth+sx），与 FluidMap.cells 同布局。
+  const subWidth = width * SUBCELLS;
+  const water = new Uint8Array(subWidth * height * SUBCELLS);
   const mask = new Uint8Array(width * height);
   const facilities: NonNullable<LevelData['facilities']>[number][] = [];
   const safeZones = freeWorldSafeZones({ spawn, structures: wild.structures });
@@ -53,13 +55,25 @@ export function generateFreeWorld(seed: number, size: FreeWorldSize, entry: 'wil
   let blackhole: LevelData['blackhole'];
   const floor = TUNING.worldgen.surfaceBase;
 
+  /** load 只收单块旧形状；多块格、形态 ≥ 4 与加深块在 load 之后逐块 placePiece。 */
+  const composite = new Map<number, readonly TilePiece[]>();
+  const put = (target: number, id: number): void => {
+    ids[target] = id;
+    composite.delete(target);
+  };
+
   function copy(level: LevelData, dx: number, dy: number): void {
     for (let y = 0; y < level.map.height; y++) for (let x = 0; x < level.map.width; x++) {
       const target = (y + dy) * width + x + dx;
-      ids[target] = level.map.get(x, y);
-      shapes[target] = level.map.shapeAt(x, y);
-      water[target] = level.fluid.amountAt(x, y);
+      const pieces = level.map.pieces(x, y);
+      const single = pieces.length === 1 && !pieces[0]!.deep && isTileShape(pieces[0]!.shape)
+        && (level.map.collisionAt(x, y) === 'solid' || pieces[0]!.shape === SHAPE_FULL);
+      put(target, single ? pieces[0]!.id : TILE_AIR);
+      shapes[target] = single ? pieces[0]!.shape : SHAPE_FULL;
+      if (!single && pieces.length > 0) composite.set(target, pieces);
     }
+    const { cells, subWidth: from, subHeight } = level.fluid;
+    for (let sy = 0; sy < subHeight; sy++) water.set(cells.subarray(sy * from, (sy + 1) * from), (sy + dy * SUBCELLS) * subWidth + dx * SUBCELLS);
   }
 
   function road(left: number, length: number, from: number, to: number): void {
@@ -68,7 +82,7 @@ export function generateFreeWorld(seed: number, size: FreeWorldSize, entry: 'wil
       const b = Math.round(from + (to - from) * (offset + 1) / length);
       const top = Math.max(a, b);
       const x = left + offset;
-      for (let y = 0; y < top; y++) ids[y * width + x] = TILE_STONE;
+      for (let y = 0; y < top; y++) put(y * width + x, TILE_STONE);
       shapes[(top - 1) * width + x] = a < b ? SHAPE_SLOPE_R : a > b ? SHAPE_SLOPE_L : SHAPE_FULL;
     }
   }
@@ -87,19 +101,19 @@ export function generateFreeWorld(seed: number, size: FreeWorldSize, entry: 'wil
       try {
         road(cursor, APPROACH, previousFloor, floor);
         for (let column = x; column < x + scene.width; column++) {
-          for (let row = 0; row < y; row++) ids[row * width + column] = TILE_STONE;
+          for (let row = 0; row < y; row++) put(row * width + column, TILE_STONE);
         }
         copy(source, x, y);
         // 堡垒西端高台在单独关卡里只能飞上去；连通世界沿地面打通隧道，西侧道路才能步行进入。
         if (id === 'fortress') {
           for (let column = x; column < x + FORTRESS_PLATEAU.right; column++) {
-            for (let row = floor; row < floor + 4; row++) ids[row * width + column] = TILE_AIR;
+            for (let row = floor; row < floor + 4; row++) put(row * width + column, TILE_AIR);
           }
         }
         // 教堂桥两端须补齐可见踏板。
         if (id === 'cathedral') {
           for (const start of [0, scene.width - 8]) for (let column = start; column < start + 8; column++) {
-            ids[(floor - 1) * width + x + column] = TILE_PLATFORM;
+            put((floor - 1) * width + x + column, TILE_PLATFORM);
           }
         }
         for (const enemy of source.enemies ?? []) enemies.push({ ...enemy, x: enemy.x + x, y: enemy.y + y });
@@ -113,9 +127,14 @@ export function generateFreeWorld(seed: number, size: FreeWorldSize, entry: 'wil
     road(cursor, END_APRON, floor, floor);
     const map = createTileMap(width, height, DEFAULT_TILES);
     map.load(ids, shapes);
+    for (const [target, pieces] of composite) {
+      for (const piece of pieces) {
+        if (!map.placePiece(target % width, Math.floor(target / width), piece)) throw new Error(`generateFreeWorld: piece overlap copying (${target % width},${Math.floor(target / width)})`);
+      }
+    }
     const fluid = createFluidMap(map);
     for (let index = 0; index < water.length; index++) {
-      if (water[index]! > 0) fluid.set(index % width, Math.floor(index / width), water[index]!);
+      if (water[index]! > 0) fluid.setSub(index % subWidth, Math.floor(index / subWidth), water[index]!);
     }
     return {
       map, fluid, seed, surface: computeSurface(map),

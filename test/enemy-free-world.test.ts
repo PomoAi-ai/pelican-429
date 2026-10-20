@@ -132,7 +132,7 @@ test('玩家身体跨入安全区边界后，不受区外已经启动的近战�
 test('实体推挤不能把敌人留在生活区内，玩家仍能正常进入', () => {
   const { level, groundY } = createShowcaseLevel('surface');
   const zone = { x: 30, y: groundY - 1, w: 10, h: 15 };
-  const world = createSimWorld({ level: { ...level, safeZones: [zone], enemies: [{ kind: 'gatekeeper', x: 29.47, y: groundY }] }, windMode: 'calm' });
+  const world = createSimWorld({ level: { ...level, safeZones: [zone], enemies: [{ kind: 'omi', x: 29.47, y: groundY }] }, windMode: 'calm' });
   try {
     const enemy = world.entities.find(e => e.enemy)!;
     const player = getPlayer(world);

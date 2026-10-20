@@ -5,7 +5,7 @@ import assert from 'node:assert/strict';
 import * as THREE from 'three';
 import { TUNING } from '../src/config/tuning.ts';
 import { createCloudShadowPatcher, CLOUD_SHADOW_PROGRAM_TAG } from '../src/render/sky/cloud-shadow.ts';
-import { isLightMappable } from '../src/render/stage/light-texture.ts';
+import { isLightMappable } from '../src/render/stage/light-field-material.ts';
 import {
   BED_HEIGHT_RANGE,
   BED_KINDS,

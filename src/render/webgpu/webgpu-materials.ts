@@ -32,7 +32,7 @@ import type { NodePatch } from '../stage/node-patches.ts';
 import type { WindUniforms } from '../sky/wind.ts';
 import { TAU } from '../../world/wind.ts';
 import { cloudShadow, depthHaze, lightMap } from './webgpu-light-map.ts';
-import { deformBeforeInstance, inverseLinear, materialLabel, preInstance, shared, sharedVec4Array, toWorld, windSway } from './webgpu-node-utils.ts';
+import { deformBeforeInstance, inverseLinear, materialLabel, preInstance, refreshEveryRender, shared, sharedVec4Array, toWorld, windSway } from './webgpu-node-utils.ts';
 import type { N, ShadowParts, ShadowTable, ShadowTranslate, Translate } from './webgpu-node-utils.ts';
 import { CHARACTER_GEOMETRY_PREPARERS, CHARACTER_PATCHES, CHARACTER_SHADOW_PATCHES } from './webgpu-patches-characters.ts';
 import { CITY_PATCHES } from './webgpu-patches-city.ts';
@@ -53,6 +53,7 @@ export function installNodePatches(renderer: WebGPURenderer): void {
     if (patches.length === 0) return node;
     if (node === null || node === material) throw new Error(`webgpu-materials: 材质 '${materialLabel(material)}' 登记了节点补丁，但没有可修改的节点材质副本`);
     const nodeMaterial = node as NodeMaterial;
+    refreshEveryRender(material);
     for (const patch of patches) (NODE_PATCH_TRANSLATIONS[patch.kind] as Translate<NodePatch['kind']>)(nodeMaterial, patch, material);
     const key = nodeMaterial.customProgramCacheKey;
     nodeMaterial.customProgramCacheKey = () => `${key.call(nodeMaterial)}|np${material.uuid}`;

@@ -10,7 +10,7 @@ import type { Entity } from '../../entities/entity.ts';
 import { solidExtents } from '../../entities/pelican-ride.ts';
 import { solidsCollide } from '../../physics/entity-collision.ts';
 import type { TileQuery } from '../../world/tile-map.ts';
-import { SHAPE_FULL, shapeTopAt } from '../../world/tile-shapes.ts';
+import { maskBounds } from '../../world/tile-shapes.ts';
 import { dummyTopAt } from './dummy-shape.ts';
 
 /** 世界坐标轴对齐盒。 */
@@ -59,7 +59,7 @@ export const BEAK_OBSTACLE_REGION: ObstacleRegion = Object.freeze({ back: 0.2, r
 
 /**
  * 收集 e（插值脚底 x/y）朝向一侧 region 内的障碍盒到 out（先清空）：
- * 实心瓦片（单向平台不算；斜坡/半砖取其最高顶，保守）与 layer/mask 互相匹配的其他实体（插值位置、solidExtents）。
+ * 实心块的 1/4 掩码包围盒（单向平台不算，保守）与 layer/mask 互相匹配的其他实体（插值位置、solidExtents）。
  */
 export function collectObstacleBoxes(
   out: ObstacleBox[],
@@ -81,10 +81,10 @@ export function collectObstacleBoxes(
   if (map) {
     for (let tx = Math.floor(rx0); tx <= Math.floor(rx1); tx++) {
       for (let ty = Math.floor(ry0); ty <= Math.floor(ry1); ty++) {
-        if (map.collisionAt(tx, ty) !== 'solid') continue;
-        const shape = map.shapeAt(tx, ty);
-        const top = shape === SHAPE_FULL ? 1 : Math.max(shapeTopAt(shape, 0), shapeTopAt(shape, 1));
-        out.push({ x0: tx, x1: tx + 1, y0: ty, y1: ty + top });
+        const mask = map.solidMask(tx, ty);
+        if (mask === 0) continue;
+        const b = maskBounds(mask);
+        out.push({ x0: tx + b.x0, x1: tx + b.x1, y0: ty + b.y0, y1: ty + b.y1 });
       }
     }
   }

@@ -6,7 +6,6 @@
 import * as THREE from 'three';
 import type { SimEvent } from '../../core/game-events.ts';
 import type { Vec2 } from '../../core/math.ts';
-import { FLUID_FULL } from '../../world/fluid-map.ts';
 import type { FluidQuery } from '../../world/fluid-map.ts';
 import { createParticlePool } from '../fx/particle-pool.ts';
 import { WATER_WAVE_GLSL, waterWaveAt } from './water-shading.ts';
@@ -159,7 +158,7 @@ export function createWaterRipples(options: { readonly fluid: FluidQuery; readon
       const a = fluid.amountAt(tx, ty);
       if (a < MIN_AMOUNT) continue;
       if (fluid.amountAt(tx, ty + 1) >= MIN_AMOUNT) return null; // 探测窗口顶已在水下（不是水面）
-      return ty + Math.max(FILM, a / FLUID_FULL);
+      return ty + Math.max(FILM, fluid.surfaceAt(tx, ty));
     }
     return null;
   };

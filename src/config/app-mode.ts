@@ -1,12 +1,27 @@
-export const RELEASE_MODES: readonly string[] = ['index', 'catalog', 'about', 'story', 'game', 'intro', 'controls'];
+export const RELEASE_MODES: readonly string[] = ['index', 'about', 'story', 'game', 'intro', 'controls', 'concepts', 'sounds', 'resources', 'showcase'];
 
-export function parseAppMode(params: URLSearchParams, release: boolean): 'index' | 'catalog' | 'about' | 'concepts' | 'story' | 'game' | 'homestead' | 'showcase' | 'compare' | 'resources' | 'lab' | 'intro' | 'facility' | 'sounds' | 'controls' {
+const APP_MODES = ['index', 'catalog', 'about', 'concepts', 'story', 'game', 'homestead', 'showcase', 'compare', 'resources', 'lab', 'intro', 'sounds', 'controls',
+  'render-lab', 'hair-gallery', 'maglev'] as const;
+export type AppMode = typeof APP_MODES[number];
+
+export function parseAppMode(params: URLSearchParams, release: boolean): AppMode {
   const mode = params.get('mode') ?? (params.has('level') || params.has('seed') ? 'game' : 'index');
-  if (mode !== 'catalog' && mode !== 'about' && mode !== 'concepts' && mode !== 'index' && mode !== 'story' && mode !== 'game' && mode !== 'homestead' && mode !== 'showcase' && mode !== 'compare' && mode !== 'resources' && mode !== 'lab' && mode !== 'intro' && mode !== 'facility' && mode !== 'sounds' && mode !== 'controls') throw new Error(`未知页面模式：${mode}`);
-  if (release) {
-    if (!RELEASE_MODES.includes(mode)) throw new Error('此开发页面仅在本地完整版提供，请返回首页继续游玩。');
+  // 机房、交通中心与住宅都只剩游戏网址一个入口，旧网址明确报错并给出新网址。
+  if (mode === 'facility') throw new Error('mode=facility 已移除，请改用 ?mode=game&level=facility&scene=…');
+  if (mode === 'transit' || mode === 'game' && params.get('level') === 'transit') {
+    throw new Error('独立交通中心页已移除，交通中心在主世界城区：请改用 ?mode=game&from=transit（直接发射加 &flight=<目的地>）');
   }
-  return mode;
+  if (mode === 'residence') throw new Error('mode=residence 已移除，请改用 ?mode=homestead&scene=residence（原版住宅）或 ?mode=game（主世界城区）');
+  if (!(APP_MODES as readonly string[]).includes(mode)) throw new Error(`未知页面模式：${mode}`);
+  if (release && (!RELEASE_MODES.includes(mode) || params.has('library'))) throw new Error('此开发页面仅在本地完整版提供，请返回首页继续游玩。');
+  return mode as AppMode;
+}
+
+/** 发布版只有 index 一个 HTML 入口，只开放 RELEASE_MODES，历史模型库只在本地完整版。 */
+export function releasedUrl(url: URL): boolean {
+  const mode = url.searchParams.get('mode');
+  return (mode === null || RELEASE_MODES.includes(mode)) && !url.searchParams.has('library')
+    && (!url.pathname.endsWith('.html') || url.pathname.endsWith('/index.html'));
 }
 
 const TEXTURE_TIERS = ['original', 'web-1k', 'web', 'ktx2', 'ktx2-256', 'ktx2-compact', 'ktx2-256-compact'] as const;
@@ -27,38 +42,25 @@ export function parsePageParams(params: URLSearchParams, release: boolean): Page
   return { textures: (textures as TextureTier | null) ?? 'ktx2-compact', debug: params.has('debug') };
 }
 
-/** 开发版桌面把这些游戏网址（城区、原野、交通中心、机房关卡）交给场景工作区挂载，其余关卡仍走整页游戏。 */
-export function isSceneGameLevel(params: URLSearchParams): boolean {
-  const level = params.get('level');
-  return level === null || level === 'harbor' || level === 'facility' || level === 'transit';
-}
-
-export interface AppHost {
-  readonly release: boolean;
-  /** 页面运行在 iframe 内（如手机横屏宿主）。 */
-  readonly embedded: boolean;
-  readonly coarsePointer: boolean;
-}
-
-/** 游戏网址是否由场景工作区挂载；发布版、手机、内嵌页与渲染基准（整页帧循环驱动）仍是整页游戏。 */
-export function opensSceneGame(params: URLSearchParams, host: AppHost): boolean {
-  return !host.release && !host.embedded && !host.coarsePointer && parseAppMode(params, false) === 'game' && isSceneGameLevel(params) && !params.has('bench');
+/** 开发开关 ?cam=free：游戏页的自由镜头与预设视角；发布版拒绝。 */
+export function parseDevCamera(params: URLSearchParams, release: boolean): boolean {
+  const cam = params.get('cam');
+  if (cam === null) return false;
+  if (cam !== 'free') throw new Error(`未知镜头开关：cam=${cam}（仅支持 cam=free）`);
+  if (release) throw new Error('自由镜头是开发开关，仅在本地完整版提供。');
+  return true;
 }
 
 export type PageRoute = 'index' | 'catalog' | 'about' | 'concepts' | 'story' | 'workspace' | 'compare' | 'sounds' | 'intro'
-  | 'transit' | 'harbor' | 'residence' | 'showcase' | 'game';
+  | 'render-lab' | 'hair-gallery' | 'maglev' | 'showcase' | 'game';
 
 /** 网址 → 页面入口，按顺序取第一个命中的条件。 */
-export function pageRoute(params: URLSearchParams, host: AppHost): PageRoute {
-  const mode = parseAppMode(params, host.release);
-  const level = params.get('level');
+export function pageRoute(params: URLSearchParams, release: boolean): PageRoute {
+  const mode = parseAppMode(params, release);
   if (mode === 'index' || mode === 'catalog' || mode === 'about' || mode === 'concepts' || mode === 'story') return mode;
-  if (mode === 'lab' || mode === 'resources' || mode === 'facility' || opensSceneGame(params, host)) return 'workspace';
-  if (mode === 'compare' || mode === 'sounds' || mode === 'intro') return mode;
-  if (mode === 'game' && level === 'transit') return 'transit';
-  // 世界地图从城区出发；free=1 的主世界网址（重建、区域定位、城区右端出口）直接进原野。
-  if (mode === 'game' && (level === 'harbor' || (level === null && params.get('free') !== '1'))) return 'harbor';
-  if (mode === 'homestead' && params.get('scene') === 'residence') return 'residence';
+  if (mode === 'lab' || mode === 'resources') return 'workspace';
+  if (mode === 'compare' || mode === 'sounds' || mode === 'intro' || mode === 'render-lab' || mode === 'hair-gallery' || mode === 'maglev') return mode;
   if (mode === 'showcase') return 'showcase';
+  // 城区、原野、交通中心、机房、家园与原版住宅都由游戏页按网址装配（app/game/game-level）。
   return 'game';
 }

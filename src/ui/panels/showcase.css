@@ -1,4 +1,4 @@
-.showcase-app, .residence-demo {
+.showcase-app {
   --sc-bg: #10191e; --sc-panel: #182329; --sc-line: #2b393f; --sc-muted: #91a5ae; --sc-text: #e6eeed; --sc-accent: #b8df9d;
 }
 /* Base UI 封装控件沿用展示场强调色。 */
@@ -19,7 +19,7 @@
 .showcase-app button:disabled { cursor: not-allowed; opacity: 0.45; }
 .showcase-app button:focus-visible, .showcase-app select:focus-visible, .showcase-app input:focus-visible, .sc-viewport:focus-visible { outline: 2px solid var(--sc-accent); outline-offset: 3px; }
 .showcase-app input:is([type=checkbox], [type=radio]) { width: 14px; height: 14px; margin: 0; accent-color: var(--sc-accent); cursor: pointer; flex-shrink: 0; }
-.showcase-app .sc-active { color: var(--sc-accent); border-color: #779963; background: #293c2e; }
+.showcase-app [aria-pressed="true"] { color: var(--sc-accent); border-color: #779963; background: #293c2e; }
 .showcase-app .sc-primary { color: #17201b; background: var(--sc-accent); border-color: var(--sc-accent); font-weight: 650; }
 .sc-sidebar { display: flex; min-height: 0; flex-direction: column; background: #131e24; border-right: 1px solid var(--sc-line); }
 .sc-brand { display: flex; align-items: center; gap: 12px; padding: 26px 20px 22px; }

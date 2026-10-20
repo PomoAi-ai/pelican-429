@@ -3,18 +3,19 @@
  * - water-front：z=WATER_FRONT_Z（方块正面之后）的半透明前面 + 水面顶面（自前面向 −z 延伸，湖中段伸到 WATER_TOP_BACK_Z、
  *   向两岸按 sqrt 渐收到背板 z，侧视时也能看到一窄条水面），depthWrite=false、renderOrder 2；
  * - water-back：z=WATER_BACK_Z 的淡色透明背板，顶点灰度随深度变暗 × 色板 back；不写深度，先于水中微粒和前面绘制。
- * 水格（amount ≥ WATER_MIN_AMOUNT）高度 = 上方有水 ? 1 : max(WATER_FILM_HEIGHT, amount/255)（薄层画成水膜）；水面格的左右顶点取与相邻水面格高度的平均，水面连续。
+ * 水格（逻辑格水量 amountAt ≥ WATER_MIN_AMOUNT）高度 = max(WATER_FILM_HEIGHT, 格内水面 surfaceAt)（水按 1/4 子格存，斜坡、半砖格的水在空出的子格，
+ * 网格仍按逻辑格画、被方块正面遮住实心部分；上方有水为 1；薄层画成水膜）；水面格的左右顶点取与相邻水面格高度的平均，水面连续。
  * 水面顶点 aSurface>0（浅于 .15 格按水深缩小，薄膜不沉入地面），顶点着色器按 uTime + 风场多频正弦波动（waterWaveAt 为 JS 镜像）。
  * 每顶点 aWater = (距本列水面深度[格], 顶面?1:0, 岸边泡沫 0..1, 顶面前→后 0..1)：前面按深度渐变/高光边/焦散，顶面反射/菲涅耳。
- * 水底延伸：水格下方是实心格时，前面与背板向下延伸 WATER_BED_SINK 格（前面同在方块正面之后）——
+ * 水底延伸：水格下方一行子格有实心时，前面与背板向下延伸 WATER_BED_SINK 格（前面同在方块正面之后）——
  * 有方块处被方块正面遮住，方块顶边被平滑地表削低处（湖床台阶 S 形、斜坡上方的空三角）露出的是水而不是背景。
  * 只重建已加载的脏区块（连同 8 邻区块），每帧至多 maxRebuildsPerFrame 个（其余顺延）。
  */
 import * as THREE from 'three';
 import type { Rect } from '../../core/math.ts';
-import { FLUID_FULL } from '../../world/fluid-map.ts';
 import type { FluidMap } from '../../world/fluid-map.ts';
 import { CHUNK_SIZE } from '../../world/tile-map.ts';
+import { SUBCELLS } from '../../world/tile-shapes.ts';
 import type { ChunkCoord } from '../../world/tile-map.ts';
 import { DEFAULT_WATER_PALETTE, waterPalette } from '../../config/water-palettes.ts';
 import type { WaterPaletteName } from '../../config/water-palettes.ts';
@@ -114,7 +115,7 @@ class QuadBuffer {
 }
 
 export function createWaterView(fluid: FluidMap, options: WaterViewOptions = {}): WaterView {
-  const { width, height, cells, solid } = fluid;
+  const { width, height, subWidth, solid } = fluid;
   const root = new THREE.Group();
   root.name = 'water';
   const uTime: THREE.IUniform<number> = { value: 0 };
@@ -124,13 +125,17 @@ export function createWaterView(fluid: FluidMap, options: WaterViewOptions = {})
   const backMaterial = materials.back;
   const chunks = new Map<number, { group: THREE.Group; geometries: THREE.BufferGeometry[] }>();
 
-  const amount = (tx: number, ty: number): number =>
-    tx < 0 || ty < 0 || tx >= width || ty >= height ? 0 : (cells[ty * width + tx] as number);
-  const isWater = (tx: number, ty: number): boolean => amount(tx, ty) >= WATER_MIN_AMOUNT;
+  const isWater = (tx: number, ty: number): boolean => fluid.amountAt(tx, ty) >= WATER_MIN_AMOUNT;
+  /** 格 (tx,ty) 正下方那一行子格里有实心。 */
+  const bedBelow = (tx: number, ty: number): boolean => {
+    const row = (ty * SUBCELLS - 1) * subWidth + tx * SUBCELLS;
+    for (let k = 0; k < SUBCELLS; k++) if (solid[row + k] === 1) return true;
+    return false;
+  };
   /** 水格高度（非水格为 0）。 */
   const levelOf = (tx: number, ty: number): number => {
     if (!isWater(tx, ty)) return 0;
-    return isWater(tx, ty + 1) ? 1 : Math.max(WATER_FILM_HEIGHT, amount(tx, ty) / FLUID_FULL);
+    return Math.max(WATER_FILM_HEIGHT, fluid.surfaceAt(tx, ty));
   };
   const isSurface = (tx: number, ty: number): boolean => isWater(tx, ty) && !isWater(tx, ty + 1);
   /** 水面格在某侧的边顶高：相邻格也是水面格时取两者平均。 */
@@ -223,7 +228,7 @@ export function createWaterView(fluid: FluidMap, options: WaterViewOptions = {})
         const shadeTop = shade(d + (surface ? 1 - hl : 0));
         const bottom = shade(d + 1);
         back.quad([[tx, ty, zb], [tx + 1, ty, zb], [tx + 1, yr, zb], [tx, yl, zb]], [0, 0, 1], [0, 0, s, s], [bottom, bottom, shadeTop, shadeTop]);
-        if (ty > 0 && solid[(ty - 1) * width + tx] === 1) {
+        if (ty > 0 && bedBelow(tx, ty)) {
           // 水底延伸（被方块正面遮住，只在平滑削低处露出）。
           const yb = ty - WATER_BED_SINK;
           const zs = WATER_BED_Z;

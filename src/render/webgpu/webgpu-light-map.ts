@@ -1,61 +1,57 @@
 /**
- * WebGPU 通用光照补丁：光照图 light-map（LIGHT_MAP_FRAGMENT_PARS 同式）、云影 cloud-shadow、景深雾 depth-haze。
+ * WebGPU 通用光照补丁：1/4 光场 light-map（light-field-material 的 LIGHT_MAP_FRAGMENT_PARS 同式）、云影 cloud-shadow、景深雾 depth-haze。
  * 光照补丁改写 setupLighting（与 GLSL 在 opaque_fragment 之前改 outgoingLight 同位置），按登记顺序链式包裹；景深雾改写 setupFog。
  */
 import * as THREE from 'three';
 import type { Node, NodeBuilder } from 'three/webgpu';
-import { Break, If, Loop, clamp, diffuseColor, dot, emissive, exp2, float, floor, length, max, min, mix, positionView, positionWorld, pow, reference, select, sin, smoothstep, texture, vec2, vec3, vec4 } from 'three/tsl';
+import { Break, If, Loop, clamp, diffuseColor, dot, emissive, exp2, float, floor, length, max, min, mix, mod, positionView, positionWorld, pow, reference, select, sin, smoothstep, texture, vec2, vec3, vec4 } from 'three/tsl';
 import { HAZE_MAX } from '../sky/depth-haze.ts';
+import { LIGHT_SLOT_WIDTH } from '../stage/light-field-atlas.ts';
 import {
-  LM_SOFT_HI, LM_SOFT_LO, LM_TERRAIN_ALBEDO, LM_TERRAIN_HI, LM_TERRAIN_LO, LM_TERRAIN_LUM_HI, LM_TERRAIN_LUM_LO, LM_WATER_FRONT_Z, LM_WATER_LIGHT_HI,
+  LM_LAMP_CAP, LM_TERRAIN_ALBEDO, LM_TERRAIN_HI, LM_TERRAIN_LO, LM_TERRAIN_LUM_HI, LM_TERRAIN_LUM_LO, LM_WATER_LIGHT_HI,
   LM_WATER_LIGHT_LO, TERRAIN_LUMA,
-} from '../stage/light-texture.ts';
-import type { LightMapUniforms } from '../stage/light-texture.ts';
+} from '../stage/light-field-material.ts';
+import type { LightMapUniforms } from '../stage/light-field-material.ts';
+import { WATER_FRONT_Z } from '../water/water-view.ts';
+import { LIGHT_STRIP } from '../../world/light-field.ts';
 import { CLOUD_EDGE, CLOUD_OCTAVES, TAU } from '../../world/wind.ts';
 import { WATER_DEPTH_MAX, WATER_DEPTH_MIN } from '../../world/water-depth.ts';
 import { shared, sharedVec4Array } from './webgpu-node-utils.ts';
 import type { N, Translate } from './webgpu-node-utils.ts';
 
 const LUMA = vec3(0.2126, 0.7152, 0.0722);
+const RECIPROCAL_PI = 1 / Math.PI;
 const textureNodes = new WeakMap<THREE.IUniform, ReturnType<typeof texture>>();
-function lightMapTexture(u: LightMapUniforms): ReturnType<typeof texture> {
-  let map = textureNodes.get(u.uLightMap);
-  if (map === undefined) textureNodes.set(u.uLightMap, (map = texture(u.uLightMap.value)));
+function textureOf(u: THREE.IUniform<THREE.Texture>): ReturnType<typeof texture> {
+  let map = textureNodes.get(u);
+  if (map === undefined) textureNodes.set(u, (map = texture(u.value)));
   return map;
 }
 
-/** lmAmbient( w )：光照图环境亮度（双三次软化暗部，下限 uLightMin）；水面等补丁按本列取天空可见度时复用。 */
+/** lfLight( w.xy )：光场图集采样（LIGHT_FIELD_ATLAS_GLSL 同式），RGB 灯光、A 天空光。 */
+function lightFieldSample(u: LightMapUniforms): (p: N) => N {
+  const atlas = textureOf(u.uLightField);
+  return (p: N): N => {
+    const bounds = shared(u.uLightFieldBounds);
+    const window = shared(u.uLightFieldWindow);
+    const layout = shared(u.uLightFieldLayout);
+    const c = p.sub(bounds.xy).mul(bounds.z);
+    const cx = clamp(c.x, window.x.add(0.5), window.y.sub(0.5));
+    const cy = clamp(c.y, 0.5, bounds.w.sub(0.5));
+    const strip = floor(cx.div(LIGHT_STRIP));
+    const slot = mod(strip, layout.x);
+    const row = floor(slot.div(layout.y));
+    const col = slot.sub(row.mul(layout.y));
+    const x = col.mul(LIGHT_SLOT_WIDTH).add(1).add(cx).sub(strip.mul(LIGHT_STRIP));
+    const y = row.mul(bounds.w).add(cy);
+    return atlas.sample(vec2(x, y).div(layout.zw)) as unknown as N;
+  };
+}
+
+/** lmAmbient( w )：光场环境亮度（下限 uLightMin）；水面等补丁按本列取天空可见度时复用。 */
 export function lightMapAmbient(u: LightMapUniforms): (w: N) => N {
-  const lmTex = lightMapTexture(u);
-  const size = shared(u.uLightMapSize);
-  const sample = (uv: N): N => lmTex.sample(uv) as unknown as N;
-  const lmSoft = (p: N): N => {
-    const st = p.sub(0.5);
-    const i = floor(st);
-    const f = st.sub(i);
-    const f2 = f.mul(f);
-    const f3 = f2.mul(f);
-    const w0 = float(1).sub(f.mul(3)).add(f2.mul(3)).sub(f3).div(6);
-    const w1 = float(4).sub(f2.mul(6)).add(f3.mul(3)).div(6);
-    const w2 = float(1).add(f.mul(3)).add(f2.mul(3)).sub(f3.mul(3)).div(6);
-    const w3 = f3.div(6);
-    const g0 = w0.add(w1);
-    const g1 = w2.add(w3);
-    const h0 = i.sub(0.5).add(w1.div(g0)).div(size);
-    const h1 = i.add(1.5).add(w3.div(g1)).div(size);
-    const a = sample(h0).g;
-    const b = sample(vec2(h1.x, h0.y)).g;
-    const c = sample(vec2(h0.x, h1.y)).g;
-    const d = sample(h1).g;
-    return g0.y.mul(g0.x.mul(a).add(g1.x.mul(b))).add(g1.y.mul(g0.x.mul(c).add(g1.x.mul(d))));
-  };
-  return (w: N): N => {
-    const lm = sample(w.xy.div(size)).r.toVar();
-    If(lm.lessThan(LM_SOFT_HI), () => {
-      lm.assign(mix(lmSoft(w.xy), lm, smoothstep(LM_SOFT_LO, LM_SOFT_HI, lm)));
-    });
-    return max(lm, shared(u.uLightMin));
-  };
+  const sample = lightFieldSample(u);
+  return (w: N): N => max(sample(w.xy).a, shared(u.uLightMin));
 }
 
 export const lightMap: Translate<'light-map'> = (material, { uniforms: u, dynMax, options }, source) => {
@@ -63,10 +59,15 @@ export const lightMap: Translate<'light-map'> = (material, { uniforms: u, dynMax
   // GLSL 按着色器里有无 totalEmissiveRadiance 区分受光材质：即带 emissive 的标准/Lambert/Phong/Toon。
   const lit = (source as { emissive?: THREE.Color }).emissive !== undefined;
   if (terrain && !lit) throw new Error(`webgpu-materials: 材质 '${source.name || source.type}' 要求地形暗部收敛，但不是受光材质`);
-  const lmTex = lightMapTexture(u);
-  const size = shared(u.uLightMapSize);
-  const sample = (uv: N): N => lmTex.sample(uv) as unknown as N;
+  const sample = lightFieldSample(u);
+  const depthTex = textureOf(u.uWaterDepth);
   const lmAmbient = lightMapAmbient(u);
+  const lmLamp = (w: N): N => {
+    const encoded = sample(w.xy).rgb;
+    const e = min(encoded.mul(encoded), vec3(0.996)).toVar();
+    const lamp = e.div(float(1).sub(e)).toVar();
+    return lamp.mul(float(LM_LAMP_CAP).div(max(dot(lamp, LUMA), LM_LAMP_CAP)));
+  };
   const lmDynamic = (w: N): N => {
     const lights = sharedVec4Array(u.uDynLights);
     const count = shared(u.uDynCount, 'int');
@@ -104,9 +105,9 @@ export const lightMap: Translate<'light-map'> = (material, { uniforms: u, dynMax
     return hue.mul(lt.div(la)).mul(light);
   };
   const lmWaterTint = (w: N): N => {
-    const t = sample(w.xy.div(size)).toVar();
-    const d = t.b.mul(WATER_DEPTH_MAX - WATER_DEPTH_MIN).add(WATER_DEPTH_MIN);
-    const gate = t.a.mul(smoothstep(0, 0.1, d)).mul(smoothstep(LM_WATER_FRONT_Z - 0.03, LM_WATER_FRONT_Z + 0.01, w.z));
+    const t = (depthTex.sample(w.xy.div(shared(u.uWaterDepthSize))) as unknown as N).toVar();
+    const d = t.r.mul(WATER_DEPTH_MAX - WATER_DEPTH_MIN).add(WATER_DEPTH_MIN);
+    const gate = t.g.mul(smoothstep(0, 0.1, d)).mul(smoothstep(WATER_FRONT_Z - 0.03, WATER_FRONT_Z + 0.01, w.z));
     const k = smoothstep(0, shared(u.uWaterRange), d);
     const tint = mix(vec3(1), mix(shared(u.uWaterShallow), shared(u.uWaterDeep), k), mix(shared(u.uWaterAlpha).x, shared(u.uWaterAlpha).y, k).mul(gate));
     return select(gate.lessThanEqual(0), vec3(1), tint);
@@ -117,9 +118,11 @@ export const lightMap: Translate<'light-map'> = (material, { uniforms: u, dynMax
   material.setupLighting = function (builder: NodeBuilder): Node {
     const w = positionWorld as unknown as N;
     const o = (vec3(prev.call(this, builder)) as N).mul(lmWaterTint(w)).toVar();
-    if (terrain) return lmTerrain(o.sub(emissive), diffuseColor.rgb, w).add(emissive);
+    // 灯光照到的是漫反射：辐照度 × 反照率 / π。
+    const lamp = (): N => diffuseColor.rgb.mul(lmLamp(w)).mul(RECIPROCAL_PI) as unknown as N;
+    if (terrain) return lmTerrain(o.sub(emissive), diffuseColor.rgb, w).add(lamp()).add(emissive);
     if (water) return o.mul(lmCombine(lmWaterLight(lmSample(w)), lmAura(w)));
-    if (lit) return o.sub(emissive).mul(lmCombine(ambient(w), lmAura(w))).add(emissive);
+    if (lit) return o.sub(emissive).mul(lmCombine(ambient(w), lmAura(w))).add(lamp()).add(emissive);
     return o.mul(lmCombine(ambient(w), lmAura(w)));
   };
 };

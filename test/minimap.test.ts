@@ -190,7 +190,7 @@ describe('minimap 颜色映射', () => {
     }
   });
 
-  test('水：按水量填充高度，越满越深；非法水量即抛', () => {
+  test('水：按 1/4 子格画，像素颜色取所在子格水量（越满越深）；非法水量即抛', () => {
     const H = 4;
     const w = world(3, H, 1);
     w.fluid.set(0, 1, 255);
@@ -200,11 +200,12 @@ describe('minimap 颜色映射', () => {
     const sky = skyColor(1, H);
     const full = opaque(waterOver(sky, 255));
     assert.deepEqual(new Set(tilePixels(r, H, 0, 1)), new Set([full]));
-    // 64/255 ≈ .25：只有底行是水。
-    assert.equal(px(r, H, 1, 1, 0, 3), opaque(waterOver(sky, 64)));
+    // 水位 64/255 ≈ .25 格：底行子格满水，其上子格只剩 1 单位（像素中心不在水面下）。
+    assert.equal(px(r, H, 1, 1, 0, 3), opaque(waterOver(sky, 255)));
     assert.equal(px(r, H, 1, 1, 0, 2), opaque(sky));
-    // 极少量的水也至少一行可见。
-    assert.equal(px(r, H, 2, 1, 1, 3), opaque(waterOver(sky, 3)));
+    // 极少量的水（底行子格 12 单位）也至少一行可见。
+    assert.equal(px(r, H, 2, 1, 1, 3), opaque(waterOver(sky, 12)));
+    assert.equal(px(r, H, 2, 1, 1, 2), opaque(sky));
     assert.ok(lum(waterOver(sky, 255)) < lum(waterOver(sky, 32)), 'fuller water is darker');
     assert.ok(waterOver(sky, 255)[2] > waterOver(sky, 255)[0], 'water is blue');
     assert.throws(() => waterOver(sky, 0), /water amount/);

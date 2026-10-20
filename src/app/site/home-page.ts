@@ -10,7 +10,7 @@ export function mountHomePage(ctx: PageContext): void {
     hasSave: localStorage.getItem(STORY_SAVE_KEY) !== null,
     onCustomize(done) {
       void Promise.all([import('../character/open-character-editor.ts'), import('../character/character-appearance.ts')]).then(([{ openSavedCharacterEditor }, { createCharacterAppearanceStore }]) => {
-        openSavedCharacterEditor(createCharacterAppearanceStore(window.localStorage), done, true);
+        openSavedCharacterEditor(createCharacterAppearanceStore(window.localStorage), done, ctx);
       }).catch(error => { done(); ctx.reportError(error); });
     },
   });

@@ -21,7 +21,7 @@ const LAYERS: Record<Layer, { z: number; height: Partial<Record<Plate, number>>;
 export const AI_CITY_BACKDROP_FILES = PLATE_FILES.length + 2;
 const OVERLAP = .03;
 const SKY = { z: -170, bottom: -14, height: 150 };
-const WATER = { y: 0, near: -9, far: -235 };
+export const WATER = { y: 0, near: -9, far: -235 };
 const HAZE = '#c4a3c9';
 
 const VERTEX = /* glsl */ `
@@ -104,15 +104,15 @@ export async function loadAiCityBackdrop(signal: AbortSignal, onLoaded: () => vo
   const geometry = new THREE.PlaneGeometry(1, 1).translate(0, .5, 0);
   const common = {
     uNight: { value: 0 }, uTime: { value: 0 }, uWeatherDim: { value: 1 },
-    uHaze: { value: 0 }, uFogColor: { value: new THREE.Color(AI_CITY_LOOK.fog) }, uTint: { value: new THREE.Color(HAZE) },
+    uHaze: { value: 0 }, uFogColor: { value: new THREE.Color(AI_CITY_LOOK.atmosphere.fog) }, uTint: { value: new THREE.Color(HAZE) },
   };
   const materials: THREE.Material[] = [];
-  const shader = (map: THREE.Texture, haze: number, lights: number, reflect: number, name: string): THREE.ShaderMaterial => {
+  const shader = (map: THREE.Texture, haze: number, lights: number, reflect: number): THREE.ShaderMaterial => {
     const material = new THREE.ShaderMaterial({
       uniforms: { ...common, uMap: { value: map }, uBaseHaze: { value: haze }, uLights: { value: lights }, uReflect: { value: reflect } },
       vertexShader: VERTEX, fragmentShader: FRAGMENT, transparent: true, depthWrite: false, side: THREE.DoubleSide,
     });
-    material.name = `ai-city-painted-${name}`; materials.push(material);
+    material.name = 'ai-city-painted'; materials.push(material);
     return material;
   };
   const looks = new Map<string, readonly [THREE.ShaderMaterial, THREE.ShaderMaterial]>();
@@ -121,7 +121,7 @@ export async function loadAiCityBackdrop(signal: AbortSignal, onLoaded: () => vo
     let pair = looks.get(key);
     if (!pair) {
       const { haze, reflect } = LAYERS[layer], map = byFile.get(`${plate}.png`)!;
-      pair = [shader(map, haze, 1, 0, key), shader(map, haze, 1, reflect, `${key}-reflection`)];
+      pair = [shader(map, haze, 1, 0), shader(map, haze, 1, reflect)];
       looks.set(key, pair);
     }
     return pair;
@@ -152,7 +152,7 @@ export async function loadAiCityBackdrop(signal: AbortSignal, onLoaded: () => vo
     return [layer, list];
   })) as Record<Layer, Array<{ plate: Plate; x: number; width: number; height: number; flip: boolean }>>;
 
-  const sky = shader(byFile.get('sky.jpg')!, 0, 0, 0, 'sky');
+  const sky = shader(byFile.get('sky.jpg')!, 0, 0, 0);
   sky.transparent = false;
   const waterMaterial = new THREE.ShaderMaterial({
     uniforms: { ...common, uMap: { value: water } }, depthWrite: false,

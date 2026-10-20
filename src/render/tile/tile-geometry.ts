@@ -14,12 +14,13 @@
 import * as THREE from 'three';
 import { SHAPE_HALF, SHAPE_SLOPE_L, SHAPE_SLOPE_R, shapeTopAt } from '../../world/tile-shapes.ts';
 import type { TileShape } from '../../world/tile-shapes.ts';
+import { DEFINITION_DEPTH } from '../../config/definition-kit.ts';
 import { CONVEX_RADIUS, FILLET_RADIUS } from './tile-transitions.ts';
 import { reliefRings } from './tile-relief.ts';
 
-export const BLOCK_FRONT_Z = 0.5;
-/** 地表方块向后延伸到的 z（顶面深 1.5 格，接近 2D 横版观感；承接树根，水背板同一深度）。 */
-export const BLOCK_BACK_Z = -1.0;
+/** 格子前面与背面（depth-definitions：格子深 2，Z=[−1,+1]）；背面承接树根，水背板同一深度。 */
+export const BLOCK_FRONT_Z = DEFINITION_DEPTH.tile / 2;
+export const BLOCK_BACK_Z = -DEFINITION_DEPTH.tile / 2;
 /** 地表装饰（草皮/花草/水草）z 范围：后沿离顶面后沿 .15，前沿 .2（不挡鹈鹕脚）。 */
 export const GROUND_DECOR_Z_MIN = BLOCK_BACK_Z + 0.15;
 export const GROUND_DECOR_Z_MAX = 0.2;
@@ -96,14 +97,13 @@ function profile(hx: number, hy: number, segments: number): ProfilePoint[] {
 }
 
 /**
- * 挤出轮廓几何：宽 1、高 height（中心在原点），z ∈ [back, BLOCK_FRONT_Z]。
+ * 挤出轮廓几何：宽 1、高 height（中心在原点），z ∈ [back, zf]。
  * 前面扇形 + 前沿滚圆环（tile-relief：ROUND_RINGS 段，kind 倒角）+ 侧壁环（WALL_RINGS 段，kind 侧壁）+ 背面。
  * 每个轮廓点在每个环上一个共享顶点（法线 = 外法线·sinφ + z·cosφ）；aVert.z 为环编码（着色器解出内缩比例与后收深度）。
  */
-export function createProfileGeometry(height: number, back: number, segments = 1): THREE.BufferGeometry {
+export function createProfileGeometry(height: number, back: number, segments = 1, zf = BLOCK_FRONT_Z): THREE.BufferGeometry {
   if (!(height > 0 && height <= 1)) throw new Error(`tile-geometry: invalid height ${height}`);
   if (!(Number.isInteger(segments) && segments >= 1)) throw new Error(`tile-geometry: invalid edge segments ${segments}`);
-  const zf = BLOCK_FRONT_Z;
   const rings = reliefRings(zf, back);
   const pts = profile(0.5, height / 2, segments);
   const n = pts.length;
@@ -170,10 +170,11 @@ export function createHalfGeometry(): THREE.BufferGeometry {
   return g;
 }
 
-/** 单向平台薄板：1 × height，z ∈ [−.5, .5]（不向后延伸）。 */
+/** 单向平台薄板：1 × height，无墙平台深 1 以人物平面居中（depth-definitions），z ∈ [−.5, .5]。 */
 export function createSlabGeometry(height = 0.25): THREE.BufferGeometry {
   if (!(height > 0 && height <= 1)) throw new Error(`tile-geometry: invalid slab height ${height}`);
-  return createProfileGeometry(height, -0.5);
+  const half = DEFINITION_DEPTH.platform / 2;
+  return createProfileGeometry(height, -half, 1, half);
 }
 
 /** 填角顶点 aVert.x 的环编码偏移：aVert.x = FILLET_RING_BASE − 环编码（≤ −2，与方块的角序/边序/形状顶线标记区分）。 */

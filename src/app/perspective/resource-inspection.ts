@@ -1,7 +1,7 @@
-import * as THREE from 'three';
-import { FullScreenQuad } from 'three/addons/postprocessing/Pass.js';
+import type * as THREE from 'three';
 import { RESOURCE_CATALOG } from '../../render/resource/resource-catalog.ts';
 import { loadInteriorBackgroundTexture } from '../../render/stage/free-world-interior-textures.ts';
+import { createShowcaseCompositor } from '../../render/stage/showcase-renderer.ts';
 import { loadGrassyAsset } from '../../render/grassy/grassy-rig.ts';
 import { createShowcaseModel } from '../../ui/model/showcase-model.ts';
 import { createResourceControls } from '../../ui/hud/resource-controls.ts';
@@ -9,7 +9,7 @@ import { attachResourceCameraInteraction, createResourceCameraControls } from '.
 import { createWorldShowcaseSession } from '../showcase/session.ts';
 import type { ResourceSceneEntry } from '../workspace/scene-catalog.ts';
 import { yieldScene, waitSceneResource, type SceneMountContext } from '../workspace/scene-mount.ts';
-import { VIEW_MAX_DT } from '../shell/frame-clock.ts';
+import { createViewLoop } from '../shell/view-loop.ts';
 import { t } from '../../config/i18n.ts';
 
 /** 同一张画布检查真实游戏资源；变体与参数沿用资源目录和共享预览。 */
@@ -30,9 +30,7 @@ export async function mountResourceInspection(context: SceneMountContext, entry:
   samples.classList.toggle('resource-inspection-comparison', comparison);
   const disposers: Array<() => void> = [];
   const sessions: ReturnType<typeof createWorldShowcaseSession>[] = [];
-  let frame = 0;
   context.onDispose(() => {
-    cancelAnimationFrame(frame);
     for (const session of sessions) session.dispose();
     for (const dispose of disposers.reverse()) dispose();
     renderer.domElement.classList.remove('resource-inspection-canvas');
@@ -69,13 +67,7 @@ export async function mountResourceInspection(context: SceneMountContext, entry:
   canvas.classList.add('resource-inspection-canvas'); canvas.setAttribute('aria-label', t(entry.title)); viewport.prepend(canvas);
   const resize = (): void => renderer.setSize(viewport.clientWidth, viewport.clientHeight);
   const observer = new ResizeObserver(resize); observer.observe(viewport); disposers.push(() => observer.disconnect()); resize();
-  const material = new THREE.RawShaderMaterial({
-    uniforms: { tImage: { value: null as THREE.Texture | null } },
-    vertexShader: 'precision highp float; attribute vec3 position; attribute vec2 uv; varying vec2 vUv; void main(){ vUv=uv; gl_Position=vec4(position.xy,0.0,1.0); }',
-    fragmentShader: 'precision highp float; uniform sampler2D tImage; varying vec2 vUv; void main(){ gl_FragColor=texture2D(tImage,vUv); }',
-    depthTest: false, depthWrite: false,
-  });
-  const quad = new FullScreenQuad(material); disposers.push(() => { quad.dispose(); material.dispose(); });
+  const compositor = createShowcaseCompositor(renderer); disposers.push(() => compositor.dispose());
   context.progress(t('加载资源检查背景与比例参照'), 0, 2);
   let completed = 0;
   const loaded = (): void => context.progress(t('加载资源检查背景与比例参照'), ++completed, 2);
@@ -98,10 +90,7 @@ export async function mountResourceInspection(context: SceneMountContext, entry:
     await session.prepare(views[index]!.sample.getBoundingClientRect(), signal);
     signal.throwIfAborted();
   }
-  let previous = performance.now();
-  const renderFrame = (now: number): void => {
-    if (signal.aborted) return;
-    const dt = Math.max(0, Math.min((now - previous) / 1000, VIEW_MAX_DT)); previous = now;
+  const loop = createViewLoop(dt => {
     const bounds = viewport.getBoundingClientRect();
     renderer.setRenderTarget(null); renderer.setScissorTest(false); renderer.setViewport(0, 0, bounds.width, bounds.height);
     renderer.setClearColor('#10191e', 1); renderer.clear();
@@ -110,17 +99,11 @@ export async function mountResourceInspection(context: SceneMountContext, entry:
       if (session.needsReset || session.complete) session.reset();
       const elapsed = session.advance(dt, card.playing, null);
       const rect = views[index]!.sample.getBoundingClientRect();
-      material.uniforms.tImage!.value = session.render(rect, elapsed, false);
-      renderer.setRenderTarget(null); renderer.setScissorTest(true);
-      renderer.setViewport(rect.left - bounds.left, bounds.bottom - rect.bottom, rect.width, rect.height);
-      renderer.setScissor(rect.left - bounds.left, bounds.bottom - rect.bottom, rect.width, rect.height);
-      quad.render(renderer);
+      const texture = session.render(rect, elapsed, false);
+      const local = new DOMRect(rect.left - bounds.left, rect.top - bounds.top, rect.width, rect.height);
+      compositor.draw(texture, local, local);
     }
-    renderer.setScissorTest(false);
-    frame = requestAnimationFrame(draw);
-  };
-  const draw = (now: number): void => {
-    try { renderFrame(now); } catch (error) { context.reportError(error); }
-  };
-  renderFrame(performance.now());
+  }, context.reportError);
+  context.onDispose(loop.stop);
+  loop.start();
 }

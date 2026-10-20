@@ -1,4 +1,3 @@
-@import './d1-preview-nav.css';
 
 :root {
   font-family: 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', system-ui, sans-serif;
@@ -9,7 +8,11 @@
   -webkit-font-smoothing: antialiased;
 }
 * { box-sizing: border-box; }
-body { margin: 0; }
+/* 入口骨架默认整页固定、#app 铺满窗口并用站点深色；本页整页滚动、沿用上面的浅色，站点顶栏固定在页面顶部。 */
+html, body { height: auto; overflow: visible; }
+body { margin: 0; padding-top: var(--dev-nav-height); background: none; color: inherit; }
+#app { position: static; }
+#app canvas { cursor: auto; }
 a { color: #715d40; text-decoration: none; }
 a:hover { text-decoration: underline; }
 button { font: inherit; cursor: pointer; }
@@ -18,7 +21,7 @@ button:focus-visible, a:focus-visible { outline: 2px solid #715d40; outline-offs
 .hair-header p { margin: 0 0 6px; font-size: 10px; letter-spacing: .16em; color: #8c7f6f; }
 .hair-header h1 { margin: 0; font-size: 22px; font-weight: 500; }
 .hair-header a { font-size: 12px; }
-.hair-toolbar { position: sticky; top: var(--d1-preview-nav-height); z-index: 2; padding: 14px 24px 10px; background: #eee9e1f5; border-bottom: 1px solid #41372b25; }
+.hair-toolbar { position: sticky; top: var(--dev-nav-height); z-index: 2; padding: 14px 24px 10px; background: #eee9e1f5; border-bottom: 1px solid #41372b25; }
 .hair-control { display: flex; align-items: baseline; gap: 14px; margin-bottom: 9px; }
 .hair-control > span { flex-shrink: 0; font-size: 12px; color: #786b59; }
 .hair-buttons { display: flex; flex-wrap: wrap; gap: 6px; }

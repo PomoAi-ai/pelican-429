@@ -1,0 +1,95 @@
+{
+  "method": "unified ruler: each haired barefoot base = 3.1 tiles at 240 px/tile; forms share their character base body scale; sole alignment",
+  "foot_y": 1010,
+  "pixels_per_tile": 240,
+  "ruler_x": [
+    110,
+    2660
+  ],
+  "images": [
+    {
+      "source": "public/catalog/grassy-base/grassy-anime-young-base-v2.png",
+      "crop": [
+        45,
+        5,
+        385,
+        866
+      ],
+      "scale": 0.8931572629051621,
+      "position": [
+        258,
+        249
+      ]
+    },
+    {
+      "source": "public/catalog/grassy-base/grassy-anime-young-base-v2.png",
+      "crop": [
+        405,
+        5,
+        690,
+        866
+      ],
+      "scale": 0.8931572629051621,
+      "position": [
+        683,
+        250
+      ]
+    },
+    {
+      "source": "public/catalog/grassy-bald/grassy-anime-young-bald-v2.png",
+      "crop": [
+        45,
+        60,
+        385,
+        866
+      ],
+      "scale": 0.8931572629051621,
+      "position": [
+        1058,
+        297
+      ]
+    },
+    {
+      "source": "public/catalog/grassy-bald/grassy-anime-young-bald-v2.png",
+      "crop": [
+        405,
+        60,
+        690,
+        866
+      ],
+      "scale": 0.8931572629051621,
+      "position": [
+        1483,
+        299
+      ]
+    },
+    {
+      "source": "public/catalog/grassy-anime/grassy-anime-young-v2.png",
+      "crop": [
+        50,
+        5,
+        410,
+        925
+      ],
+      "scale": 0.8419867947178872,
+      "position": [
+        1859,
+        244
+      ]
+    },
+    {
+      "source": "public/catalog/grassy-anime/grassy-anime-young-v2.png",
+      "crop": [
+        430,
+        5,
+        730,
+        925
+      ],
+      "scale": 0.8419867947178872,
+      "position": [
+        2284,
+        243
+      ]
+    }
+  ]
+}

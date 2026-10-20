@@ -1,31 +1,106 @@
 import * as THREE from 'three';
-import { HAIR_ASSETS, HAIR_LABELS, hairTitle, isBlenderHair, readHairStyle, type HairStyle } from './d1-lab-hair-catalog.ts';
+import { DEFAULT_SPHERICAL_EYE_HAIRS, HAIR_ASSETS, HAIR_LABELS, SPHERICAL_EYE_HAIRS, hairTitle, isBlenderHair, readHairStyle, type HairStyle } from './d1-lab-hair-catalog.ts';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { D1_ACTIONS, D1_ANIMATED_MODELS, type D1AnimatedVariant } from '../../config/grassy.ts';
+import { D1_ACTIONS, type D1AnimatedVariant } from '../../config/grassy.ts';
 import { D1_ARTWORK } from '../../config/showcase.ts';
 import { createD1Rig, disposeD1Assets, loadD1Asset } from '../../render/grassy/d1-rig.ts';
 import { applyD1LabLooks, D1_LAB_VERSIONS, type D1LabVersion } from '../../render/grassy/d1-lab-looks.ts';
 import { createD1LabMotion } from '../../render/grassy/d1-lab-motion.ts';
 import { createD1LabGaits } from '../../render/grassy/d1-lab-gait.ts';
 import { contourD1LabHair } from '../../render/grassy/d1-lab-hair-contour.ts';
-import { characterModelPath, loadCharacterModel } from '../../render/character/character-model.ts';
+import { loadCharacterModel } from '../../render/character/character-model.ts';
 import { disposeModelResources } from '../../render/character/model-resources.ts';
-import { createPageContext, type PageContext } from '../shell/page-context.ts';
-import { VIEW_MAX_DT } from '../shell/frame-clock.ts';
+import type { PageContext } from '../shell/page-context.ts';
+import { pageRenderer } from '../shell/page-renderer.ts';
+import { createViewLoop } from '../shell/view-loop.ts';
+import { TUNING } from '../../config/tuning.ts';
+import { createStudioLights } from '../../render/stage/light-presets.ts';
+import '../../ui/lab/d1-render-lab.css';
+
+const TEMPLATE = `
+<header class="lab-header">
+  <div class="lab-brand"><span class="lab-mark" aria-hidden="true">D1</span><div><p>PELICAN 429 / RENDER STUDY</p><h1>独立渲染实验</h1></div></div>
+  <div class="lab-header-links">
+    <a href="./?mode=render-lab&amp;hair=showcase&amp;framing=head&amp;angle=0&amp;projection=orthographic">头部对比预览</a>
+    <a id="lab-showcase-link" href="./?mode=showcase&amp;stageActor=d1.idle,1,1,0.7854,0,1,1,outfit,1&amp;textures=web-1k" target="_blank" rel="noopener">打开当前展示场 <span aria-hidden="true">↗</span></a>
+  </div>
+</header>
+<fieldset id="lab-hair-controls" class="lab-hair-picker" disabled aria-describedby="lab-hair-version-hint"><legend>模型 / 头发版本</legend><div class="lab-hair-buttons" role="group" aria-label="模型 / 头发版本"></div>
+<p id="lab-hair-version-hint" class="lab-version-description">新头发在 Blender 中按发束制作，重点检查正面、侧面和头皮贴合。保留所选八款发型，并加入游戏正式精细版对照；切换保留当前视角。</p>
+</fieldset>
+<main class="lab-layout">
+  <section class="lab-stage" data-view-mode="all" aria-label="D1 实时渲染预览">
+    <div id="lab-canvas"></div>
+    <div class="lab-stage-toolbar"><div><strong id="lab-view-title">全部版本</strong><p id="lab-view-description">点击任一角色放大 · 拖动任一角色同步旋转</p></div><button id="lab-show-all" type="button" hidden>← 返回全部版本</button></div>
+    <div id="lab-gallery" class="lab-gallery" aria-label="全部渲染版本"></div>
+    <div id="lab-status" class="lab-status" role="status" aria-live="polite">正在准备角色与材质…</div>
+    <p class="lab-stage-help">拖动旋转 · 滚轮缩放 · 右键平移</p>
+    <span class="lab-stage-note">同一镜头 · 同一动作 · 同一光照</span>
+  </section>
+  <aside class="lab-panel" aria-label="渲染实验控制">
+    <div class="lab-intro"><p class="lab-eyebrow">LOOK DEVELOPMENT</p><h2>保留每一版的美感</h2><p>全部渲染版本同时展示，点击任一版本放大查看。镜头、光照、动作和眨眼同步。</p></div>
+    <fieldset id="lab-controls" disabled>
+      <section class="lab-control-section">
+        <h3><span>01</span>眼球注视</h3>
+        <label class="lab-version-select" for="lab-eye-version">眼睛版本<select id="lab-eye-version" aria-describedby="lab-eye-hint"><option value="patch">原眼片（保留对照）</option><option value="sphere">球形眼球 · 可转动视线</option></select></label>
+        <p id="lab-eye-hint" class="lab-control-hint">31、34、35、39、40、41、42、43、44、45、46、47 支持球眼；39、40、41、42、43、44、45、46、47 默认启用。可切换原眼片对照。</p>
+        <fieldset id="lab-gaze-controls" hidden disabled>
+          <legend class="lab-eyebrow">控制注视方向</legend>
+          <label class="lab-version-select" for="lab-gaze-mode">注视方式<select id="lab-gaze-mode"><option value="manual">手动方向</option><option value="pointer">跟随鼠标</option><option value="auto">自然扫视</option></select></label>
+          <div class="lab-gaze-grid" role="group" aria-label="注视方向，按正面画面的左右"><button type="button" data-gaze-yaw="-15" data-gaze-pitch="10" aria-label="注视左上" aria-pressed="false">↖</button><button type="button" data-gaze-yaw="0" data-gaze-pitch="10" aria-label="注视向上" aria-pressed="false">↑</button><button type="button" data-gaze-yaw="15" data-gaze-pitch="10" aria-label="注视右上" aria-pressed="false">↗</button><button type="button" data-gaze-yaw="-15" data-gaze-pitch="0" aria-label="注视向左" aria-pressed="false">←</button><button id="lab-gaze-center" type="button" data-gaze-yaw="0" data-gaze-pitch="0" aria-label="注视正视前方" aria-pressed="false">正视</button><button type="button" data-gaze-yaw="15" data-gaze-pitch="0" aria-label="注视向右" aria-pressed="false">→</button><button type="button" data-gaze-yaw="-15" data-gaze-pitch="-10" aria-label="注视左下" aria-pressed="false">↙</button><button type="button" data-gaze-yaw="0" data-gaze-pitch="-10" aria-label="注视向下" aria-pressed="false">↓</button><button type="button" data-gaze-yaw="15" data-gaze-pitch="-10" aria-label="注视右下" aria-pressed="false">↘</button></div>
+          <label class="lab-range-label" for="lab-gaze-yaw">左右视线 <output id="lab-gaze-yaw-value" for="lab-gaze-yaw">0°</output></label>
+          <input id="lab-gaze-yaw" type="range" min="-18" max="18" step="1" value="0" />
+          <label class="lab-range-label" for="lab-gaze-pitch">上下视线 <output id="lab-gaze-pitch-value" for="lab-gaze-pitch">0°</output></label>
+          <input id="lab-gaze-pitch" type="range" min="-12" max="12" step="1" value="0" />
+          <p class="lab-control-hint">左右按正面画面计算，旋转镜头后仍按头部方向。跟随鼠标时，在角色画面内移动；拖动仍旋转镜头。所有渲染同步，暂停动画也能控制视线。</p>
+        </fieldset>
+      </section>
+      <section class="lab-control-section">
+        <h3><span>02</span>配色与观察</h3>
+        <label class="lab-version-select" for="lab-projection">比较镜头<select id="lab-projection" aria-describedby="lab-projection-hint"><option value="perspective">近景透视 · 原镜头</option><option value="orthographic">等比例 · 原画对照</option></select></label>
+        <p id="lab-projection-hint" class="lab-control-hint">等比例镜头避免前额和刘海因离镜头近而放大，便于检查正面与侧面轮廓。</p>
+        <div class="lab-segment" role="group" aria-label="取景范围"><button type="button" data-framing="body" aria-pressed="true">全身</button><button type="button" data-framing="head" aria-pressed="false">头部特写</button></div>
+        <div class="lab-angles" role="group" aria-label="观察角度"><button type="button" data-angle="-90" aria-pressed="false">左侧</button><button type="button" data-angle="-45" aria-pressed="false">左45°</button><button type="button" data-angle="0" aria-pressed="false">正面</button><button type="button" data-angle="45" aria-pressed="true">右45°</button><button type="button" data-angle="90" aria-pressed="false">右侧</button><button type="button" data-angle="180" aria-pressed="false">背面</button></div>
+      </section>
+      <section class="lab-control-section">
+        <h3><span>03</span>动作研究</h3>
+        <div class="lab-action-row"><label class="lab-action-select" for="lab-action">动作<select id="lab-action"></select></label><label class="lab-action-select" for="lab-speed">播放速度<select id="lab-speed"><option value="0.25">0.25× · 慢放</option><option value="0.5">0.5× · 慢放</option><option value="1" selected>1× · 正常</option><option value="1.5">1.5× · 加速</option></select></label></div>
+        <label class="lab-action-select lab-gait-select" for="lab-gait">步态版本<select id="lab-gait" aria-describedby="lab-gait-hint"><option value="original" selected>原动作（保留）</option><option value="smooth">顺滑步态（实验）</option></select></label>
+        <p id="lab-gait-hint" class="lab-control-hint">仅走路、跑步；切换保留当前进度。</p>
+        <label class="lab-range-label" for="lab-timeline">动作进度 <output id="lab-time" for="lab-timeline">0.00 / 0.00 秒</output></label>
+        <input id="lab-timeline" type="range" min="0" max="1" step="0.0001" value="0" aria-describedby="lab-motion-hint" />
+        <div class="lab-motion-buttons"><button id="lab-step-back" type="button" aria-label="后退一帧，1/30 秒">上一帧</button><button id="lab-pause" type="button" aria-pressed="false">暂停动画</button><button id="lab-step-forward" type="button" aria-label="前进一帧，1/30 秒">下一帧</button><button id="lab-replay" type="button">重播</button></div>
+        <p id="lab-motion-hint" class="lab-control-hint">拖动进度暂停定位。逐帧步长 1/30 秒；暂停时自动眨眼一同停止。</p>
+      </section>
+      <section class="lab-control-section">
+        <h3><span>04</span>眨眼与头发</h3>
+        <label class="lab-version-select" for="lab-animation-version">模型动画<select id="lab-animation-version"><option value="refined" selected>修正版</option><option value="original">原版（保留）</option></select></label>
+        <p class="lab-control-hint lab-animation-hint">全部渲染版本共用所选动画，可切换方式对照。</p>
+        <label class="lab-toggle" for="lab-auto-blink"><span>自动眨眼</span><input id="lab-auto-blink" type="checkbox" checked /></label>
+        <label class="lab-range-label" for="lab-closure">眼睑闭合 <output id="lab-closure-value" for="lab-closure">自动</output></label>
+        <input id="lab-closure" type="range" min="0" max="1" step="0.01" value="0" disabled />
+        <div class="lab-range-ends"><span>睁开</span><span>闭合</span></div>
+        <label class="lab-toggle lab-hair-toggle" for="lab-hair-motion"><span>头发惯性</span><input id="lab-hair-motion" type="checkbox" checked aria-describedby="lab-hair-hint" /></label>
+        <p id="lab-hair-hint" class="lab-control-hint">修正版在全部渲染中启用发梢惯性；原版保留之前的动画。</p>
+      </section>
+      <section class="lab-control-section">
+        <h3><span>05</span>灯光</h3>
+        <label class="lab-range-label" for="lab-light-angle">主光方位 <output id="lab-light-angle-value" for="lab-light-angle">−35°</output></label>
+        <input id="lab-light-angle" type="range" min="-180" max="180" step="1" value="-35" />
+        <label class="lab-range-label" for="lab-light-power">主光强度 <output id="lab-light-power-value" for="lab-light-power">3.0</output></label>
+        <input id="lab-light-power" type="range" min="0" max="5" step="0.1" value="3" />
+        <p class="lab-control-hint">暖主光、冷轮廓光与柔和环境补光。</p>
+      </section>
+    </fieldset>
+    <figure class="lab-reference"><figcaption>配色参考 <span>外服 · 细腿定稿</span></figcaption><a id="lab-reference-link" target="_blank" rel="noopener" aria-label="打开 D1 外服原画大图"><img id="lab-reference-image" alt="D1 外服定稿原画，包含正面、侧面、背面和头部多视图" /><span>打开原画大图 ↗</span></a></figure>
+    <details class="lab-definition" open><summary>这次如何渲染</summary><dl><div><dt>V7</dt><dd>动画明暗分层，强调原画线条与发束高光。</dd></div><div><dt>V8</dt><dd>连续柔光与丝绸反射，观察布料和头发的亮面。</dd></div><div><dt>V9</dt><dd>暖彩色块与冷暖暗部，保留手绘感。</dd></div><div><dt>V10</dt><dd>保留原画发色，只加入少量现场光照。</dd></div><div><dt>头发</dt><dd>Blender 发束模型与独立发色贴图共用同步光照，发根固定、发梢柔和跟随。各阶段造型均可切换对比。</dd></div></dl></details>
+    <p class="lab-isolation-note">独立实验页面，使用角色与候选头发资源。</p>
+  </aside>
+</main>
+`;
 
 type PreviewCard = { version: D1LabVersion; element: HTMLElement; button: HTMLButtonElement; viewport: HTMLElement };
 type Projection = 'perspective' | 'orthographic';
-const SPHERICAL_EYE_MODELS = ['blender-eye-surface', 'blender-hair-contact', 'blender-d12', 'blender-scalp-fit', 'rodin-smooth-extracted', 'rodin-ear-aligned', 'rodin-source-remake', 'rodin-snug-fit', 'rodin-raw-head', 'rodin-braid-y21', 'procedural-braid', 'blender-scalp-flow'];
-const DEFAULT_SPHERICAL_EYE_MODELS = ['blender-scalp-fit', 'rodin-smooth-extracted', 'rodin-ear-aligned', 'rodin-source-remake', 'rodin-snug-fit', 'rodin-raw-head', 'rodin-braid-y21', 'procedural-braid', 'blender-scalp-flow'];
-
-function syncPreviewNavigation(): void {
-  const params = new URLSearchParams(location.search);
-  const current = params.get('framing') === 'head' && params.get('projection') === 'orthographic' ? 'head' : 'lab';
-  for (const link of document.querySelectorAll<HTMLAnchorElement>('.d1-preview-nav a')) {
-    if (link.dataset.preview === current) link.setAttribute('aria-current', 'page');
-    else link.removeAttribute('aria-current');
-  }
-}
 
 function readVersion(value: string, cards: PreviewCard[]): D1LabVersion {
   const version = cards.find(candidate => candidate.version === value);
@@ -56,13 +131,8 @@ function createPreviewCards(): PreviewCard[] {
   });
 }
 
-function createStudio(host: HTMLElement, cards: PreviewCard[], projection: Projection) {
-  const renderer = new THREE.WebGLRenderer({ antialias: true });
-  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
-  renderer.toneMapping = THREE.NeutralToneMapping;
-  renderer.toneMappingExposure = 1;
-  renderer.shadowMap.enabled = true;
-  renderer.shadowMap.type = THREE.PCFShadowMap;
+function createStudio(host: HTMLElement, cards: PreviewCard[], projection: Projection, renderer: THREE.WebGLRenderer) {
+  // 各版本按分组复用同一张阴影图，由 render 决定何时重画。
   renderer.shadowMap.autoUpdate = false;
   renderer.domElement.setAttribute('aria-label', 'D1 三维角色，可拖动旋转视角');
   host.append(renderer.domElement);
@@ -81,19 +151,8 @@ function createStudio(host: HTMLElement, cards: PreviewCard[], projection: Proje
   controls.maxZoom = 4;
   controls.maxPolarAngle = Math.PI * (projection === 'orthographic' ? .5 : .49);
 
-  const key = new THREE.DirectionalLight('#fff3e5', 3);
-  key.target.position.set(0, 1.5, 0);
-  key.castShadow = true;
-  key.shadow.mapSize.set(2048, 2048);
-  key.shadow.radius = 3;
-  Object.assign(key.shadow.camera, { left: -4, right: 4, top: 4, bottom: -4, near: .1, far: 16 });
-  key.shadow.normalBias = .025;
-  key.shadow.bias = -.00008;
-  const rim = new THREE.DirectionalLight('#e6eeff', .65);
-  rim.position.set(3, 4, -4);
-  const fill = new THREE.DirectionalLight('#fff1e6', 1.8);
-  fill.position.set(-1, 3, 6);
-  scene.add(key, key.target, rim, fill, new THREE.HemisphereLight('#e7ecf5', '#b7aaa0', 1.5));
+  const lights = createStudioLights(2048);
+  scene.add(...lights.objects);
 
   const ground = new THREE.Mesh(new THREE.PlaneGeometry(200, 200), new THREE.MeshStandardMaterial({ color: '#d4cdc1', roughness: 1 }));
   ground.rotation.x = -Math.PI / 2;
@@ -136,13 +195,8 @@ function createStudio(host: HTMLElement, cards: PreviewCard[], projection: Proje
   const resize = new ResizeObserver(resizeViewport);
   resize.observe(host);
   resizeViewport();
-  const setLightAngle = (degrees: number): void => {
-    const angle = THREE.MathUtils.degToRad(degrees);
-    key.position.set(Math.sin(angle) * 4, 6, Math.cos(angle) * 4);
-  };
-  setLightAngle(-35);
   return {
-    renderer, scene, camera, controls, key, setLightAngle,
+    renderer, scene, camera, controls, key: lights.key, setLightAngle: lights.setAngle,
     resize: resizeViewport,
     frame(head: boolean, angle: number) {
       frameHeight = head ? (projection === 'orthographic' ? 1.5 : 1.55) : 4.3;
@@ -175,15 +229,11 @@ function createStudio(host: HTMLElement, cards: PreviewCard[], projection: Proje
       renderer.setScissorTest(false);
     },
     dispose() {
-      renderer.setAnimationLoop(null);
       resize.disconnect();
       controls.dispose();
-      key.dispose();
-      rim.dispose();
-      fill.dispose();
+      lights.dispose();
       ground.geometry.dispose();
       ground.material.dispose();
-      renderer.dispose();
       renderer.domElement.remove();
     },
   };
@@ -295,7 +345,7 @@ function bindHairControl(hairStyle: HairStyle, signal: AbortSignal): void {
     if (selected === hairStyle) return;
     const url = new URL(location.href);
     url.searchParams.set('hair', selected);
-    if (!SPHERICAL_EYE_MODELS.includes(selected)) url.searchParams.set('eyes', 'patch');
+    if (!SPHERICAL_EYE_HAIRS.includes(selected)) url.searchParams.set('eyes', 'patch');
     location.assign(url.href);
   }, { signal });
 }
@@ -318,7 +368,7 @@ function bindMotionControls(motion: ReturnType<typeof createD1LabMotion>, signal
     time.value = `${motion.time.toFixed(2)} / ${motion.duration.toFixed(2)} 秒`;
     timeline.setAttribute('aria-valuetext', time.value);
     pause.setAttribute('aria-pressed', String(motion.paused));
-    pause.textContent = motion.paused ? '继续动作' : '暂停动作';
+    pause.textContent = motion.paused ? '播放动画' : '暂停动画';
     previous.disabled = motion.time <= 0;
     next.disabled = motion.time >= motion.duration;
   };
@@ -407,7 +457,6 @@ function bindControls(studio: ReturnType<typeof createStudio>, motion: ReturnTyp
     url.searchParams.set('framing', head ? 'head' : 'body');
     url.searchParams.set('angle', String(angle));
     history.replaceState(null, '', url);
-    syncPreviewNavigation();
   };
   const referenceImage = document.querySelector<HTMLImageElement>('#lab-reference-image')!;
   const referenceLink = document.querySelector<HTMLAnchorElement>('#lab-reference-link')!;
@@ -481,20 +530,22 @@ function bindControls(studio: ReturnType<typeof createStudio>, motion: ReturnTyp
 }
 
 export async function mountD1RenderLab(ctx: PageContext): Promise<void> {
-  syncPreviewNavigation();
+  document.getElementById('loading')!.hidden = true;
+  document.title = 'D1 · 独立渲染实验';
+  ctx.root.innerHTML = TEMPLATE;
   const params = new URLSearchParams(location.search);
   const projection = params.get('projection') ?? 'perspective';
   if (projection !== 'perspective' && projection !== 'orthographic') throw new Error(`未知镜头方式：${projection}`);
   const hairStyle = readHairStyle(params.get('hair') ?? 'showcase');
-  const eyeStyle = params.get('eyes') ?? (DEFAULT_SPHERICAL_EYE_MODELS.includes(hairStyle) ? 'sphere' : 'patch');
+  const eyeStyle = params.get('eyes') ?? (DEFAULT_SPHERICAL_EYE_HAIRS.includes(hairStyle) ? 'sphere' : 'patch');
   if (eyeStyle !== 'patch' && eyeStyle !== 'sphere') throw new Error(`未知眼睛版本：${eyeStyle}`);
-  if (eyeStyle === 'sphere' && !SPHERICAL_EYE_MODELS.includes(hairStyle)) throw new Error('球形眼睛需要眼周修复版或之后的模型；请先切换模型版本');
+  if (eyeStyle === 'sphere' && !SPHERICAL_EYE_HAIRS.includes(hairStyle)) throw new Error('球形眼睛需要眼周修复版或之后的模型；请先切换模型版本');
   const hairFamily = isBlenderHair(hairStyle) ? 'blender' : 'rodin';
   const nativeHair = hairStyle === 'showcase' || hairStyle === 'game-detailed';
   const variant = hairStyle === 'showcase' ? 'game' : hairStyle === 'game-detailed' ? 'detailed' : 'outfit';
   const cards = createPreviewCards();
   const status = document.querySelector<HTMLElement>('#lab-status')!;
-  const studio = createStudio(document.querySelector<HTMLElement>('#lab-canvas')!, cards, projection);
+  const studio = createStudio(document.querySelector<HTMLElement>('#lab-canvas')!, cards, projection, pageRenderer(ctx, 'studio', TUNING));
   let rig: ReturnType<typeof createD1Rig> | null = null;
   let look: ReturnType<typeof applyD1LabLooks> | null = null;
   let fit: ReturnType<typeof contourD1LabHair> | null = null;
@@ -507,7 +558,6 @@ export async function mountD1RenderLab(ctx: PageContext): Promise<void> {
     rig?.dispose();
     if (eyeAsset) disposeModelResources(eyeAsset);
     disposeD1Assets();
-    THREE.DefaultLoadingManager.setURLModifier(url => url);
     studio.dispose();
   });
   const { signal } = ctx;
@@ -521,7 +571,7 @@ export async function mountD1RenderLab(ctx: PageContext): Promise<void> {
   bindHairControl(hairStyle, signal);
   const eyeSelect = document.querySelector<HTMLSelectElement>('#lab-eye-version')!;
   eyeSelect.value = eyeStyle;
-  eyeSelect.options[1]!.disabled = !SPHERICAL_EYE_MODELS.includes(hairStyle);
+  eyeSelect.options[1]!.disabled = !SPHERICAL_EYE_HAIRS.includes(hairStyle);
   eyeSelect.addEventListener('change', () => {
     const url = new URL(location.href);
     url.searchParams.set('eyes', eyeSelect.value);
@@ -532,13 +582,11 @@ export async function mountD1RenderLab(ctx: PageContext): Promise<void> {
     if (signal.aborted) { disposeModelResources(loaded.scene); return; }
     eyeAsset = loaded.scene;
   }
-  // 独立文档只替换这一项资源，继续复用游戏的模型加载、尺寸与骨骼装配。
+  // 只换模型文件来源（与头发预览相同），继续复用游戏的模型加载、尺寸与骨骼装配。
   const hairAsset = HAIR_ASSETS[hairStyle];
-  const modelPath = characterModelPath(D1_ANIMATED_MODELS.find(model => model.id === variant)!.path, 'web-1k');
-  THREE.DefaultLoadingManager.setURLModifier(url => url === modelPath ? hairAsset : url);
-  await loadD1Asset(variant, 'web-1k');
+  await loadD1Asset(variant, 'web-1k', hairAsset);
   if (signal.aborted) return;
-  const actor = createD1Rig(variant, 'anime', 'web-1k', eyeAsset ?? undefined);
+  const actor = createD1Rig(variant, 'anime', 'web-1k', eyeAsset ?? undefined, hairAsset);
   rig = actor;
   if (hairStyle === 'rodin-contour') fit = contourD1LabHair(actor.root);
   const material = applyD1LabLooks(actor.root, nativeHair ? 'showcase' : hairFamily);
@@ -553,24 +601,14 @@ export async function mountD1RenderLab(ctx: PageContext): Promise<void> {
   document.querySelector<HTMLFieldSetElement>('#lab-controls')!.disabled = false;
   document.querySelector<HTMLFieldSetElement>('#lab-hair-controls')!.disabled = false;
   status.hidden = true;
-  let previous = performance.now();
-  studio.renderer.setAnimationLoop(now => {
-    const dt = Math.min((now - previous) / 1000, VIEW_MAX_DT);
-    previous = now;
+  const loop = createViewLoop(dt => {
     const actualDt = motion!.update(dt);
     material.update(actualDt);
     syncMotion();
     studio.controls.update();
     studio.render(material);
-  });
+  }, ctx.reportError);
+  ctx.onDispose(loop.stop);
+  loop.start();
 }
 
-const page = createPageContext(document.body, error => {
-  const status = document.querySelector<HTMLElement>('#lab-status')!;
-  status.hidden = false;
-  status.dataset.error = '';
-  status.setAttribute('role', 'alert');
-  status.textContent = `渲染实验加载失败\n${error instanceof Error ? error.message : String(error)}`;
-});
-import.meta.hot?.dispose(page.dispose);
-void mountD1RenderLab(page.context).catch((error: unknown) => { page.dispose(); page.context.reportError(error); });

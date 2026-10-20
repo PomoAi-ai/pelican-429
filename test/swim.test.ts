@@ -78,7 +78,7 @@ function trace(w: SimWorld, n: number, frame: (i: number) => Partial<InputFrame>
 }
 
 describe('physics/fluid-contact', () => {
-  test('waterSpanInColumn：满格/部分格/上方有水视为满格，与区间求交', () => {
+  test('waterSpanInColumn：按取样点所在子列累加，部分子格按水量、上方子格有水视为满，与区间求交', () => {
     const level = parseLevel(POOL, LEVEL_LEGEND);
     const f = level.fluid;
     f.set(3, 5, FLUID_FULL);
@@ -86,10 +86,11 @@ describe('physics/fluid-contact', () => {
     assert.ok(Math.abs(waterSpanInColumn(f, 3, 5, 7) - 1.2) < 1e-9);
     assert.ok(Math.abs(waterSpanInColumn(f, 3, 5.5, 6.1) - 0.6) < 1e-9);
     assert.equal(waterSpanInColumn(f, 3, 6.5, 8), 0);
-    // 上方格有水 → 本格按满格
+    // 上方子格有水 → 本子格按满（水量 204 的子格高 .8 子格，这里按 1 子格 = .25 格）
     f.set(4, 5, 51);
-    f.set(4, 6, 10);
-    assert.ok(Math.abs(waterSpanInColumn(f, 4, 5, 6) - 1) < 1e-9);
+    assert.ok(Math.abs(waterSpanInColumn(f, 4, 5, 6) - 0.2) < 1e-9);
+    f.setSub(16, 21, 10);
+    assert.ok(Math.abs(waterSpanInColumn(f, 4, 5, 5.25) - 0.25) < 1e-9);
     // 越界列为 0
     assert.equal(waterSpanInColumn(f, -3, 0, 20), 0);
   });
@@ -446,10 +447,12 @@ describe('sim：液体推进与 pourFluid', () => {
     const level = parseLevel(POOL, LEVEL_LEGEND);
     const w = createSimWorld({ level, tuning: TUNING });
     assert.equal(w.fluid, level.fluid);
-    const added = pourFluid(w, 20.3, 15.7, 3 * FLUID_FULL);
-    assert.equal(added, 3 * FLUID_FULL);
-    assert.equal(w.fluid.amountAt(20, 15), FLUID_FULL);
-    assert.equal(w.fluid.amountAt(20, 17), FLUID_FULL, '超出单格的水向上堆叠');
+    const added = pourFluid(w, 20.3, 15.7, 6 * FLUID_FULL);
+    assert.equal(added, 6 * FLUID_FULL);
+    // (20.3, 15.7) 在格 20 的子格行 62：这一行 4 个子格装满后向上一行堆叠。
+    assert.equal(w.fluid.subAt(80, 62), FLUID_FULL);
+    assert.equal(w.fluid.subAt(83, 62), FLUID_FULL);
+    assert.equal(w.fluid.subAt(81, 63), FLUID_FULL, '超出一行子格的水向上堆叠');
     w.hitstopTicks = 10;
     const before = Uint8Array.from(w.fluid.cells);
     for (let i = 0; i < 10; i++) stepSim(w, input());
@@ -457,7 +460,7 @@ describe('sim：液体推进与 pourFluid', () => {
     stepSim(w, input());
     assert.notDeepEqual(Uint8Array.from(w.fluid.cells), before);
     for (let i = 0; i < 600; i++) stepSim(w, input());
-    assert.equal(w.fluid.totalMass(), 3 * FLUID_FULL);
+    assert.equal(w.fluid.totalMass(), 6 * FLUID_FULL);
     assert.equal(w.fluid.amountAt(20, 15), 0, '水已落下');
   });
 

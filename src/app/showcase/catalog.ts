@@ -13,7 +13,7 @@ import type { ScenarioContext, ScenarioDriver, ShowcaseScenario } from './scenar
 type SimulatedActor = Exclude<ShowcaseActor, 'human' | 'd1' | 'luma' | 'sam' | 'tibo' | 'ruler' | 'flyingRoadster'>;
 
 const adapters: Readonly<Record<SimulatedActor, (ctx: ScenarioContext) => ScenarioDriver>> = {
-  pelican: preparePelican, dummy: prepareDummy, gatekeeper: prepareEnemy, lineHound: prepareEnemy, watchWasp: prepareEnemy, loadmaster: prepareEnemy, fish: prepareFish,
+  pelican: preparePelican, dummy: prepareDummy, omi: prepareEnemy, lineHound: prepareEnemy, watchWasp: prepareEnemy, loadmaster: prepareEnemy, fish: prepareFish,
 };
 
 export function createShowcaseScenario(id: string, environment: ShowcaseEnvironment, facing: 1 | -1, attackMotion: 'still' | 'walk' | 'run' = 'still'): ShowcaseScenario {

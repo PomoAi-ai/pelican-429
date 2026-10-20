@@ -17,18 +17,15 @@ const ROUTES: Readonly<Record<PageRoute, StartPage>> = {
   compare: async reportError => { await (await import('../site/texture-compare-app.ts')).mountTextureCompare(createPageContext(document.getElementById('app')!, reportError).context); },
   sounds: async reportError => { (await import('../site/sound-gallery.ts')).mountSoundGallery(createPageContext(document.getElementById('app')!, reportError).context); },
   intro: async reportError => { await (await import('../intro/intro-app.ts')).mountIntro(createPageContext(document.getElementById('app')!, reportError).context); },
-  transit: async reportError => {
-    const page = createPageContext(document.getElementById('app')!, reportError);
-    try { await (await import('../transit/transit-app.ts')).mountTransitPage(page.context, page.dispose); } catch (error) { page.dispose(); throw error; }
-  },
-  harbor: async reportError => { await (await import('../residence/residence-app.ts')).mountResidencePage(createPageContext(document.body, reportError).context, 'harbor'); },
-  residence: async reportError => { await (await import('../residence/residence-app.ts')).mountResidencePage(createPageContext(document.body, reportError).context, 'original'); },
+  'render-lab': async reportError => { await (await import('../lab/d1-render-lab.ts')).mountD1RenderLab(createPageContext(document.getElementById('app')!, reportError).context); },
+  'hair-gallery': async reportError => { (await import('../lab/d1-hair-gallery.ts')).mountD1HairGallery(createPageContext(document.getElementById('app')!, reportError).context); },
+  maglev: async reportError => { (await import('../lab/maglev-track.ts')).mountMaglevTrack(createPageContext(document.getElementById('app')!, reportError).context); },
   showcase: async reportError => { await (await import('../showcase/showcase-app.ts')).mountShowcase(createPageContext(document.getElementById('app')!, reportError).context); },
-  game: async reportError => { await (await import('../game/game-app.ts')).mountGame(createPageContext(document.getElementById('app')!, reportError).context); },
+  game: async reportError => { await (await import('../game/game-mount.ts')).mountGame(createPageContext(document.getElementById('app')!, reportError).context); },
 };
 
 // 这些整页只在挂载时取文案（原生模板），切换语言时整页重载；语言选择已先存入 localStorage。
-const RELOAD_ON_LANGUAGE: ReadonlySet<PageRoute> = new Set(['compare', 'transit', 'harbor', 'residence']);
+const RELOAD_ON_LANGUAGE: ReadonlySet<PageRoute> = new Set(['compare']);
 
 export async function startRoute(route: PageRoute, reportError: (error: unknown) => void): Promise<void> {
   if (RELOAD_ON_LANGUAGE.has(route)) onLanguageChange(() => location.reload());

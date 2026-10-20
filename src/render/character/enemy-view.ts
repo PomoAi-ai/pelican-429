@@ -12,7 +12,7 @@ import { createThermiteStream } from './drone-thermite-view.ts';
 
 // GLB 的蓄力、命中、收招段已烘焙；分别缩放才能让动作与新版伤害时刻一致。
 const CLIP_PHASE_TICKS: Readonly<Record<EnemyKind, readonly [readonly [number, number, number], readonly [number, number, number]]>> = {
-  gatekeeper: [[42, 8, 48], [30, 14, 54]],
+  omi: [[42, 8, 48], [30, 14, 54]],
   lineHound: [[30, 32, 54], [36, 10, 54]],
   watchWasp: [[57, 1, 42], [72, 180, 1]],
   loadmaster: [[72, 12, 90], [54, 16, 72]],

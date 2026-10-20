@@ -69,13 +69,13 @@ function HomePage({ options, images }: { options: HomePageOptions; images: Store
   useLanguage();
   const imagesActive = useSyncExternalStore(images.subscribe, images.get);
   const [customizing, setCustomizing] = useState(false);
-  const play = options.hasSave ? t('继续游戏') : t('进入游戏');
+  const play = options.hasSave ? t('继续游戏') : t('开始游戏');
   const external = { target: '_blank', rel: 'noopener' } as const;
   return (
     <ImagesActive.Provider value={imagesActive}>
       <main id="entry-index">
         <section className="home-hero" aria-labelledby="home-title">
-          <div className="home-hero-art" role="img" aria-label={t('鹈鹕站在黑洞前哨的石台上，远处是蓝天下的未来都市与海面')}><img className="home-hero-poster" src="./resourcesprivate-source/fortress-overview.webp" alt="" fetchPriority="high" /></div>
+          <div className="home-hero-art" role="img" aria-label={t('鹈鹕站在黑洞前哨的石台上，远处是蓝天下的未来都市与海面')}><img className="home-hero-poster" src="./resources/home/fortress-overview.webp" alt="" fetchPriority="high" /></div>
           <div className="home-hero-shade"></div>
           <div className="home-hero-copy">
             <p className="home-pill"><span className="home-status-dot"></span>{t('独立横版动作冒险 · 主线制作中')}</p>
@@ -96,7 +96,7 @@ function HomePage({ options, images }: { options: HomePageOptions; images: Store
           <aside className="home-hero-contact" aria-label={t('联系作者')}>
             <a className="home-hero-author" href="https://x.com/grassy429" {...external}><img src="./contact/x-avatar.jpg" alt={t('作者头像')} width="48" height="48" /><span><strong>{t('小草')}</strong><small>{t('作者 · @grassy429')}</small></span></a>
             <div className="home-hero-contact-links"><a href="https://x.com/grassy429" {...external}>{X_ICON} {t('关注 X')}</a><a href="https://github.com/PomoAi-ai/pelican-429" {...external}>{GITHUB_ICON} GitHub</a></div>
-            <figure className="home-hero-qr"><img src="./resourcesprivate-source/wechat-group.webp" alt={t('鹈鹕 429 微信交流群二维码')} width="132" height="132" /><figcaption>{t('微信扫码')}<br />{t('加入交流群')}</figcaption></figure>
+            <figure className="home-hero-qr"><img src="./resources/home/wechat-group.webp" alt={t('鹈鹕 429 微信交流群二维码')} width="132" height="132" /><figcaption>{t('微信扫码')}<br />{t('加入交流群')}</figcaption></figure>
           </aside>
           <canvas className="home-hero-score" aria-hidden="true"></canvas>
           <a className="home-scroll-cue" href="#home-world" aria-label={t('向下探索')}><span></span></a>
@@ -112,8 +112,8 @@ function HomePage({ options, images }: { options: HomePageOptions; images: Store
         <section className="home-journey home-section" id="home-journey" aria-labelledby="home-journey-title">
           <div className="home-journey-heading"><div><p className="home-eyebrow">02 / START YOUR JOURNEY</p><h2 id="home-journey-title">{t('先听故事，再走进世界。')}</h2></div><p>{t('从序章出发，或直接体验正在生长的主线。')}</p></div>
           <div className="home-chapters">
-            <a className="home-chapter home-prelude" href="./?mode=intro&opening=finale"><div className="home-chapter-image"><LazyImage src="./resourcesprivate-source/prelude-card.webp" alt={t('Grassy 在雨雪夜的房间中编程')} /><span className="home-chapter-badge">{t('序章 · 可观看')}</span><span className="home-play-icon" aria-hidden="true">▶</span></div><div className="home-chapter-copy"><p className="home-eyebrow">PROLOGUE / 00</p><h3>{t('AGI 降智风暴')}</h3><p>{t('四个音符把 AGI 推向 99%，一道 429 劈下。黑暗里，新的旋律重新响起。')}</p><span className="home-text-link">{t('观看序章动画')} <span aria-hidden="true">→</span></span></div></a>
-            <a className="home-chapter home-mainline" href="./?mode=story"><div className="home-chapter-image"><LazyImage src="./resourcesprivate-source/fortress-overview.webp" alt={t('山体算力堡垒全景：三层机房、屋顶冷却阵列与黑洞前哨')} /><span className="home-chapter-badge home-chapter-badge-live"><span className="home-status-dot"></span>{t('主线 · 开发中试玩')}</span></div><div className="home-chapter-copy"><p className="home-eyebrow">CHAPTER ONE / 01</p><h3>{t('深入山体堡垒')}</h3><p>{t('从黑洞前哨出发，穿过堡垒门禁，深入多层机房：清理外围守卫、击退 Tibo、击败 Sam，让前沿模型重新开放。主线仍在制作中，剧情与关卡将持续完善。')}</p><span className="home-text-link">{t('进入主线试玩')} <span aria-hidden="true">→</span></span></div></a>
+            <a className="home-chapter home-prelude" href="./?mode=intro&opening=finale"><div className="home-chapter-image"><LazyImage src="./resources/home/prelude-card.webp" alt={t('Grassy 在雨雪夜的房间中编程')} /><span className="home-chapter-badge">{t('序章 · 可观看')}</span><span className="home-play-icon" aria-hidden="true">▶</span></div><div className="home-chapter-copy"><p className="home-eyebrow">PROLOGUE / 00</p><h3>{t('AGI 降智风暴')}</h3><p>{t('四个音符把 AGI 推向 99%，一道 429 劈下。黑暗里，新的旋律重新响起。')}</p><span className="home-text-link">{t('观看序章动画')} <span aria-hidden="true">→</span></span></div></a>
+            <a className="home-chapter home-mainline" href="./?mode=story"><div className="home-chapter-image"><LazyImage src="./resources/home/fortress-overview.webp" alt={t('山体算力堡垒全景：三层机房、屋顶冷却阵列与黑洞前哨')} /><span className="home-chapter-badge home-chapter-badge-live"><span className="home-status-dot"></span>{t('主线 · 开发中试玩')}</span></div><div className="home-chapter-copy"><p className="home-eyebrow">CHAPTER ONE / 01</p><h3>{t('深入山体堡垒')}</h3><p>{t('从黑洞前哨出发，穿过堡垒门禁，深入多层机房：清理外围守卫、击退 Tibo、击败 Sam，让前沿模型重新开放。主线仍在制作中，剧情与关卡将持续完善。')}</p><span className="home-text-link">{play} <span aria-hidden="true">→</span></span></div></a>
           </div>
           <aside className="home-controls" aria-label={t('游玩提示')}><div><strong>{t('出发前的小提示')}</strong><p>{t('推荐使用电脑游玩；具体操作以游戏内提示为准。')}</p></div><div className="home-control-keys"><span><kbd>A</kbd><kbd>D</kbd> {t('移动')}</span><span><kbd>Space</kbd> {t('跳跃')}</span><span><kbd>F</kbd> {t('切换形态')}</span><span><kbd>{t('鼠标')}</kbd> {t('瞄准与攻击')}</span></div></aside>
         </section>
@@ -122,25 +122,25 @@ function HomePage({ options, images }: { options: HomePageOptions; images: Store
           <div className="home-cast-group">
             <h3 className="home-cast-label">{t('主角')}<small>HEROES</small></h3>
             <div className="home-cast-grid home-cast-heroes">
-              <CastCard image="./resourcesprivate-source/pelican.webp" alt={t('戴绿帽、系红围巾的白色鹈鹕')} name={t('鹈鹕')} note={t('吐水普攻、鱼群轰炸、振翅突进、吞弹反击')} />
-              <CastCard image="./resourcesprivate-source/grassy.webp" alt={t('穿红色上衣、背着键盘装备的少年 Grassy')} name={t('Grassy · 人类')} note={t('正式装备角色 · 骑行、键盘战斗与推进飞行')} />
+              <CastCard image="./resources/home/pelican.webp" alt={t('戴绿帽、系红围巾的白色鹈鹕')} name={t('鹈鹕')} note={t('吐水普攻、鱼群轰炸、振翅突进、吞弹反击')} />
+              <CastCard image="./resources/home/grassy.webp" alt={t('穿红色上衣、背着键盘装备的少年 Grassy')} name={t('Grassy · 人类')} note={t('正式装备角色 · 骑行、键盘战斗与推进飞行')} />
               <CastCard image="./characters/luma/portrait.jpg" fill alt={t('在黑暗中发出青色微光的光子')} name={t('光子')} note={t('像萤火虫一样的一团活的光，一路引导')} />
             </div>
           </div>
           <div className="home-cast-group">
             <h3 className="home-cast-label">{t('首领')}<small>BOSSES</small></h3>
             <div className="home-cast-grid home-cast-bosses">
-              <BossCard image="./resourcesprivate-source/tibo.webp" alt={t('穿黑色帽衫、戴重置胸章的 Tibo')} number="01" name="Tibo" title={t('重置大师 · The Reset Master')} note={t('机房核心的第一位首领，击退他才能解锁变身。')} skillsLabel={t('Tibo 的技能')} skills={[t('薯条攻击'), t('额度返场'), t('重置降临')]} />
-              <BossCard image="./resourcesprivate-source/sam.webp" alt={t('穿灰色毛衣、戴路由胸章的 Sam')} number="02" name="Sam" title={t('模型路由者 · The Model Router')} note={t('Tibo 之后抵达的对手，击败他，前沿模型才能重新开放。')} skillsLabel={t('Sam 的技能')} skills={[t('模型路由攻击'), t('算力激涌'), t('AGI 降临')]} />
+              <BossCard image="./resources/home/tibo.webp" alt={t('穿黑色帽衫、戴重置胸章的 Tibo')} number="01" name="Tibo" title={t('重置大师 · The Reset Master')} note={t('机房核心的第一位首领，击退他才能解锁变身。')} skillsLabel={t('Tibo 的技能')} skills={[t('薯条攻击'), t('额度返场'), t('重置降临')]} />
+              <BossCard image="./resources/home/sam.webp" alt={t('穿灰色毛衣、戴路由胸章的 Sam')} number="02" name="Sam" title={t('模型路由者 · The Model Router')} note={t('Tibo 之后抵达的对手，击败他，前沿模型才能重新开放。')} skillsLabel={t('Sam 的技能')} skills={[t('模型路由攻击'), t('算力激涌'), t('AGI 降临')]} />
             </div>
           </div>
           <div className="home-cast-group">
             <h3 className="home-cast-label">{t('堡垒守卫')}<small>FORTRESS GUARDS</small></h3>
             <div className="home-cast-grid home-cast-guards">
-              <CastCard image="./resourcesprivate-source/gatekeeper.webp" alt={t('大头双钳的白色机器人欧米 OMI-01')} name={t('欧米 OMI-01')} note={t('夹臂横扫 · 突进夹击')} />
-              <CastCard image="./resourcesprivate-source/line-hound.webp" alt={t('四足机械犬巡线犬')} name={t('巡线犬')} note={t('直线扑冲 · 落地震击')} />
-              <CastCard image="./resourcesprivate-source/watch-wasp.webp" alt={t('四旋翼无人机哨蜂')} name={t('哨蜂')} note={t('悬停投弹 · 铝热剂投放')} />
-              <CastCard image="./resourcesprivate-source/loadmaster.webp" alt={t('带黄色机械臂的轮式搬运机器人搬山')} name={t('搬山')} note={t('前方下砸 · 低位横扫')} />
+              <CastCard image="./resources/home/omi.webp" alt={t('大头双钳的白色机器人欧米 OMI-01')} name={t('欧米 OMI-01')} note={t('夹臂横扫 · 突进夹击')} />
+              <CastCard image="./resources/home/line-hound.webp" alt={t('四足机械犬巡线犬')} name={t('巡线犬')} note={t('直线扑冲 · 落地震击')} />
+              <CastCard image="./resources/home/watch-wasp.webp" alt={t('四旋翼无人机哨蜂')} name={t('哨蜂')} note={t('悬停投弹 · 铝热剂投放')} />
+              <CastCard image="./resources/home/loadmaster.webp" alt={t('带黄色机械臂的轮式搬运机器人搬山')} name={t('搬山')} note={t('前方下砸 · 低位横扫')} />
             </div>
           </div>
           {linkReleased('./?mode=showcase') && <a className="home-text-link home-cast-more" href="./?mode=showcase">{t('在角色展示场查看实时 3D 模型')} <span aria-hidden="true">→</span></a>}
@@ -183,7 +183,7 @@ function HomePage({ options, images }: { options: HomePageOptions; images: Store
                 <p>{t('反馈问题、提出建议或交流想法，欢迎在 GitHub Issues 留言、在 X 上关注 @grassy429，或扫码加入微信交流群。')}</p>
                 <div className="home-actions"><a className="home-button home-button-secondary" href="https://github.com/PomoAi-ai/pelican-429/issues" {...external}>{GITHUB_ICON} GitHub Issues <span aria-hidden="true">↗</span></a><a className="home-button home-button-secondary" href="https://x.com/grassy429" {...external}>{X_ICON} @grassy429 <span aria-hidden="true">↗</span></a></div>
               </div>
-              <figure className="home-qr"><LazyImage src="./resourcesprivate-source/wechat-group.webp" alt={t('鹈鹕 429 微信交流群二维码')} /><figcaption>{t('微信扫码加入交流群 · 二维码定期更新，失效请通过 Issues 联系')}</figcaption></figure>
+              <figure className="home-qr"><LazyImage src="./resources/home/wechat-group.webp" alt={t('鹈鹕 429 微信交流群二维码')} /><figcaption>{t('微信扫码加入交流群 · 二维码定期更新，失效请通过 Issues 联系')}</figcaption></figure>
             </article>
           </div>
         </section>
@@ -201,7 +201,7 @@ function HomePage({ options, images }: { options: HomePageOptions; images: Store
             <nav className="home-footer-links" aria-label={t('页脚导航')}>
               <a href="./?mode=story">{play}</a>
               <a href="./?mode=intro&opening=finale">{t('序章动画')}</a>
-              {linkReleased('./?mode=concepts') && <a href="./?mode=concepts">{t('设定资料')}</a>}
+              {linkReleased('./?mode=concepts') && <a href="./?mode=concepts">{t('基础概念')}</a>}
               <a href="https://github.com/PomoAi-ai/pelican-429" {...external}>GitHub</a>
               <a href="https://x.com/grassy429" {...external}>X</a>
               <a href="https://www.pomoai.ai" target="_blank" rel="sponsored noopener">{t('赞助 PomoAI')}</a>

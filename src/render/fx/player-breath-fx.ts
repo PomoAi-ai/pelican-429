@@ -26,7 +26,7 @@ export function createPlayerBreathFx(fluid: FluidQuery) {
       if (player && p && player.health!.hp > 0) {
         const b = player.body;
         const noseY = b.y + b.height * .9;
-        const submerged = waterSpanInColumn(fluid, Math.floor(b.x), noseY, noseY + .05) > 0;
+        const submerged = waterSpanInColumn(fluid, b.x, noseY, noseY + .05) > 0;
         if (submerged) {
           const ratio = p.oxygenTicks / p.oxygenMaxTicks;
           const interval = ratio === 0 ? .12 : ratio < .25 ? .25 : .7;
@@ -48,7 +48,7 @@ export function createPlayerBreathFx(fluid: FluidQuery) {
         bubble.y += dt * (.65 + bubble.age * .3);
         bubble.x += Math.sin(bubble.phase + bubble.age * 5) * dt * .12;
         // 按真实水格收掉气泡，避免越过水面或穿出岸壁后仍漂浮。
-        if (bubble.age >= 2.4 || waterSpanInColumn(fluid, Math.floor(bubble.x), bubble.y, bubble.y + .02) === 0) {
+        if (bubble.age >= 2.4 || waterSpanInColumn(fluid, bubble.x, bubble.y, bubble.y + .02) === 0) {
           bubbles.splice(i, 1);
         }
       }

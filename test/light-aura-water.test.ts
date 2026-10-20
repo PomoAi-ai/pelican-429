@@ -9,15 +9,15 @@ import { CAVE_RULES } from '../src/config/cave-island-rules.ts';
 import { DEFAULT_LIGHTING } from '../src/config/lighting-rules.ts';
 import { WATER_PALETTES } from '../src/config/water-palettes.ts';
 import { createCaveWallMaterial } from '../src/render/decor/cave-wall-view.ts';
-import { LIGHT_MAP_PROGRAM_TAG, LM_WATER_LIGHT_HI, auraFalloff, createWorldLight, injectLightMap, screenLight, waterLightResponse } from '../src/render/stage/light-texture.ts';
-import type { LightMapUniforms } from '../src/render/stage/light-texture.ts';
+import { LIGHT_MAP_PROGRAM_TAG, LM_WATER_LIGHT_HI, auraFalloff, createWorldLight, injectLightMap, screenLight, waterLightResponse } from '../src/render/stage/light-field-material.ts';
+import type { LightMapUniforms } from '../src/render/stage/light-field-material.ts';
 import { WATER_FRAGMENT, WATER_SKY_HI, WATER_SKY_LO, createWaterMaterials, waterSkyVisibility } from '../src/render/water/water-shading.ts';
 import { createFluidMap } from '../src/world/fluid-map.ts';
 import { createTileMap } from '../src/world/tile-map.ts';
 import { DEFAULT_TILES } from '../src/world/tile-types.ts';
 
 const shaderOf = (lib: { vertexShader: string; fragmentShader: string }) => ({ vertexShader: lib.vertexShader, fragmentShader: lib.fragmentShader, uniforms: {} as Record<string, THREE.IUniform>, defines: {} });
-const uniforms = { uLightMap: { value: new THREE.Texture() }, uLightMapSize: { value: new THREE.Vector2(10, 10) }, uLightMin: { value: 0 }, uDynLights: { value: [new THREE.Vector4()] }, uDynCount: { value: 0 } } as LightMapUniforms;
+const uniforms = { uLightField: { value: new THREE.Texture() }, uLightMin: { value: 0 }, uDynLights: { value: [new THREE.Vector4()] }, uDynCount: { value: 0 } } as LightMapUniforms;
 const compiled = (m: THREE.Material) => {
   const sh = shaderOf(THREE.ShaderLib.standard);
   m.onBeforeCompile(sh as never, {} as THREE.WebGLRenderer);
@@ -77,7 +77,7 @@ describe('鹈鹕微光：颜色、衰减与合成', () => {
   test('着色器：光照材质与 Basic 都用屏幕合成（不再 max）；鹈鹕最低亮度仍包住环境采样', () => {
     const std = shaderOf(THREE.ShaderLib.standard);
     injectLightMap(std, uniforms, 2, 'std');
-    assert.match(std.fragmentShader, /\(outgoingLight - totalEmissiveRadiance\) \* lmCombine\(lmSample\(vLmWorld\), lmAura\(vLmWorld\)\) \+ totalEmissiveRadiance;/);
+    assert.match(std.fragmentShader, /\(outgoingLight - totalEmissiveRadiance\) \* lmCombine\(lmSample\(vLmWorld\), lmAura\(vLmWorld\)\) \+ diffuseColor\.rgb \* lmLamp\(vLmWorld\) \* RECIPROCAL_PI \+ totalEmissiveRadiance;/);
     assert.match(std.fragmentShader, /#define LM_AURA_RECEIVE 1\.0000/);
     assert.doesNotMatch(std.fragmentShader, /max\(vec3\(lmSample/);
     const basic = shaderOf(THREE.ShaderLib.basic);

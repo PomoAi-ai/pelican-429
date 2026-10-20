@@ -5,6 +5,7 @@
 import * as THREE from 'three';
 import { HOMESTEAD } from '../../config/homestead.ts';
 import { BUILDING_KIT } from '../../config/building-kit.ts';
+import { DEFINITION_DEPTH } from '../../config/definition-kit.ts';
 import { sampleWorldTime } from '../../core/calendar.ts';
 import { solarTrackingAngle } from '../../physics/solar-panel.ts';
 import { createDefinitionFurniture, type FurnitureKind } from '../building/definition-furniture.ts';
@@ -24,11 +25,11 @@ export interface HomesteadView {
   dispose(): void;
 }
 
-/** 设施在角色平面后方，无人机在角色平面上。 */
-const FACILITY_Z = -0.9;
+/** 设施按家具标准深 1 贴格子背面（Z=[−1,0]，这里取深度中心），无人机在角色平面上。 */
+const FACILITY_Z = -DEFINITION_DEPTH.tile / 2 + 0.5;
 const DRONE_Z = 0.2;
-/** 太阳能板按格子摆在角色平面稍后方，和瓦片一格一格对齐。 */
-const PANEL_Z = -0.45;
+/** 太阳能板与格子同深、以角色平面居中，和瓦片一格一格对齐。 */
+const PANEL_Z = 0;
 const STATUS_COLOR: Readonly<Record<Drone['status'], number>> = {
   flying: 0x5cff8a, working: 0x5cff8a, returning: 0x5cff8a, docked: 0x5fb8ff, full: 0x5fb8ff,
   charging: 0xffd25a, stalled: 0xff5a5a, retreat: 0xff5a5a, blocked: 0xff5a5a,
@@ -100,6 +101,8 @@ export function createHomesteadView(scene: THREE.Scene, trees: readonly TreeInst
     const at = (kind: FurnitureKind, spot: Spot): THREE.Group => {
       const item = createDefinitionFurniture(kind);
       item.root.position.set(spot.x, spot.y, kind === 'solar' ? PANEL_Z : FACILITY_Z);
+      // 定义构件 +Z 朝后沿，镜像到世界坐标（同城区建筑层）。
+      item.root.scale.z = -1;
       // 家园存档仍使用两格机器人坞，保留既有机位和相邻设施的占格。
       if (kind === 'dock') item.root.scale.x = spot.width / 3;
       furniture.push(item);

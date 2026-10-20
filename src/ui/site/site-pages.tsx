@@ -1,17 +1,16 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { t } from '../../config/i18n.ts';
-import type { ArtLibraryGroup } from '../../config/art-library.ts';
+import type { CatalogGroup } from '../../config/catalog.ts';
 import { mountReact } from '../react/mount.tsx';
 import { useLanguage } from '../react/use-language.ts';
-import { ArtLibrary, loadArtLibraryGroups } from './art-library.tsx';
+import { Catalog, loadCatalogGroups } from './catalog.tsx';
 import { ConceptPage } from './concept-page.tsx';
-import { RELEASE } from './release.ts';
 import './homepage.css';
 import './site-pages.css';
 
 type SitePageMode = 'catalog' | 'about' | 'concepts';
 
-/** 原画资料库（catalog）、基础概念与帮助页挂到站点根；原画资料库只在本地提供，发布版只显示说明。 */
+/** 原画资料库（catalog）、基础概念与帮助页挂到站点根；原画资料库只在本地完整版提供（发布版在 parseAppMode 拒绝）。 */
 export function mountSitePage(mode: SitePageMode): void {
   document.body.classList.add('site-home');
   const container = document.createElement('div');
@@ -25,8 +24,7 @@ function SitePage({ mode }: { mode: SitePageMode }) {
   const scroller = useRef<HTMLElement>(null);
   let content: ReactNode;
   if (mode === 'concepts') content = <ConceptPage scroller={scroller} />;
-  else if (mode === 'catalog' && !RELEASE) content = <ArtLibraryLoader />;
-  else if (mode === 'catalog') content = <ReleaseCatalog />;
+  else if (mode === 'catalog') content = <CatalogLoader />;
   else content = <AboutPage />;
   return <main id="dev-index" ref={scroller}>{content}</main>;
 }
@@ -36,28 +34,18 @@ function useTitle(title: string): void {
 }
 
 /** 定义 JSON 读完再挂视图；读取失败直接把原因显示出来。 */
-function ArtLibraryLoader() {
-  const [groups, setGroups] = useState<readonly ArtLibraryGroup[] | null>(null);
+function CatalogLoader() {
+  const [groups, setGroups] = useState<readonly CatalogGroup[] | null>(null);
   const [failure, setFailure] = useState<string | null>(null);
   useEffect(() => {
-    void loadArtLibraryGroups().then(setGroups, (error: unknown) => {
+    void loadCatalogGroups().then(setGroups, (error: unknown) => {
       setFailure(error instanceof Error ? error.message : String(error));
       throw error;
     });
   }, []);
   if (failure !== null) return <section className="home-section">{t('原画资料库载入失败：')}{failure}</section>;
   if (groups === null) return <section className="home-section">{t('正在载入原画资料库…')}</section>;
-  return <ArtLibrary groups={groups} />;
-}
-
-function ReleaseCatalog() {
-  useTitle(t('原画资料库'));
-  return (
-    <section className="home-section">
-      <p className="home-eyebrow">PELICAN 429 / LIBRARY</p><h1>{t('原画资料库')}</h1>
-      <p className="dev-catalog-description">{t('原画资料库在本地完整版中提供。')}</p>
-    </section>
-  );
+  return <Catalog groups={groups} />;
 }
 
 const arrow = (symbol: string) => <span aria-hidden="true">{symbol}</span>;
@@ -89,10 +77,10 @@ function AboutPage() {
         <div><p className="home-eyebrow">PELICAN 429 / FIELD GUIDE</p>
           <h1>{t('冒险，从这里上手。')}</h1>
           <p>{t('怎么移动、如何战斗、进度存在哪——出发前需要知道的，都在这里。')}</p>
-          <a className="help-primary" href="./?mode=story">{t('进入主线')} {arrow('→')}</a>
+          <a className="help-primary" href="./?mode=story">{t('开始游戏')} {arrow('→')}</a>
           <a className="help-text-link" href="./?mode=game">{t('去主世界练习')} {arrow('↗')}</a>
         </div>
-        <figure><img src="./resources/home/fortress-overview.webp" alt={t('山体堡垒与海边都市的游戏实景')} /><figcaption>01 / {t('山体堡垒 · 开发中试玩')}</figcaption></figure>
+        <figure><img src="./resources/home/fortress-overview.webp" alt={t('山体堡垒与海边都市的游戏实景')} /><figcaption>01 / {t('山体算力堡垒 · 开发中试玩')}</figcaption></figure>
       </header>
       <div className="help-layout">
         <nav className="help-index" aria-label={t('帮助页目录')}>
@@ -119,7 +107,7 @@ function AboutPage() {
               <aside className="help-touch"><span className="help-tag">{t('触屏游玩')}</span><h3>{t('左手移动，右手行动')}</h3>
                 <p>{t('左侧摇杆轻推慢走、推远奔跑，上推跳跃或飞行，下推下平台或下潜。右侧按钮负责跳跃、普攻、变身和骑乘；按住普攻会自动瞄准屏内最近的敌人。')}</p>
                 <p>{t('轻点技能键快速释放；支持瞄准的技能可按住拖动方向，松手释放。')}</p>
-                <a className="help-text-link" href="./?mode=controls&level=test">{t('试用触屏操作')} {arrow('→')}</a>
+                <a className="help-text-link" href="./?mode=controls&level=test">{t('手机操控测试')} {arrow('→')}</a>
                 <div className="help-tip"><strong>{t('随时暂停')}</strong><p>{t('键盘按 Esc / O，或打开游戏菜单 → 设置。H 可随时重新显示操作提示。')}</p></div>
               </aside>
             </div>
@@ -141,7 +129,7 @@ function AboutPage() {
               </div>
             </div>
           </section>
-          <footer className="help-footer">PELICAN 429 <span>{t('准备好了，就出发。')} <a href="./?mode=story">{t('进入游戏')} →</a></span></footer>
+          <footer className="help-footer">PELICAN 429 <span>{t('准备好了，就出发。')} <a href="./?mode=story">{t('开始游戏')} →</a></span></footer>
         </div>
       </div>
     </section>

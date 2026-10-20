@@ -10,10 +10,15 @@ import { hash01, hashU32 } from '../core/rng.ts';
 import { CAVE_CELL, CAVE_ENTRANCE, CAVE_NONE } from './level.ts';
 import type { CaveEntrance, CaveGlow, CaveGlowKind, CavePool, CaveRoom } from './level.ts';
 import type { CaveBasin } from './caves.ts';
-import { SHAPE_FULL, SHAPE_SLOPE_L, SHAPE_SLOPE_R, shapeMaxTop } from './tile-shapes.ts';
+import type { FluidQuery } from './fluid-map.ts';
+import { SHAPE_FULL, SHAPE_SLOPE_L, SHAPE_SLOPE_R, pieceShapePolygon, shapeMaxTop } from './tile-shapes.ts';
 import type { TileShape } from './tile-shapes.ts';
-import { RIDE_PROBE_EPS, ceilingClear, probeObstacle } from './ride-clearance.ts';
-import type { RideProbeMap } from './ride-clearance.ts';
+import { COLLISION_EPS, pushSolid, type CollisionSource } from './collision-geometry.ts';
+import { ceilingClear, probeObstacle } from './ride-clearance.ts';
+import type { TileQuery } from './tile-map.ts';
+
+/** 坡道地面查找只需碰撞类型与单块形状：世界生成中途的网格与生成后的 TileMap 都满足。 */
+export type RideGrid = Pick<TileQuery, 'collisionAt' | 'shapeAt'>;
 
 const SALT_GLOW = 0x6107;
 
@@ -126,7 +131,7 @@ const clamp01 = (v: number): number => (v < 0 ? 0 : v > 1 ? 1 : v);
  * 不先于保险杠高度（bumperHeight）的障碍出现（= pelican-ride.headBlocked，否则 clearance 下车）。地面按坡道设计地面（口部 surfaceY、每列降 1）附近向下找。
  * 返回第一个不可骑处，全部可骑返回 null。
  */
-export function entranceRideBlock(map: RideProbeMap, e: CaveEntrance, ride: RideEnvelope): RideBlock | null {
+export function entranceRideBlock(map: RideGrid, probe: CollisionSource, e: CaveEntrance, ride: RideEnvelope): RideBlock | null {
   const len = Math.abs(e.innerX - e.x);
   const hw = ride.halfWidth;
   const H = ride.height;
@@ -153,40 +158,57 @@ export function entranceRideBlock(map: RideProbeMap, e: CaveEntrance, ride: Ride
     const x = a + e.dir * i * RIDE_SAMPLE;
     const x0 = x - hw;
     const x1 = x + hw;
-    const tx0 = Math.floor(x0 + RIDE_PROBE_EPS);
-    const tx1 = Math.ceil(x1 - RIDE_PROBE_EPS) - 1;
+    const tx0 = Math.floor(x0 + COLLISION_EPS);
+    const tx1 = Math.ceil(x1 - COLLISION_EPS) - 1;
     let y = -Infinity;
     for (let tx = tx0; tx <= tx1; tx++) {
       const r = floorRow(tx);
       if (r !== null) y = Math.max(y, top(tx, r, clamp01(x0 - tx), clamp01(x1 - tx)));
     }
     if (y === -Infinity) continue;
-    if (!ceilingClear(map, x, hw, y, H)) {
-      for (let ty = Math.floor(y + RIDE_PROBE_EPS); ty < y + H; ty++) {
+    if (!ceilingClear(probe, x, hw, y, H)) {
+      for (let ty = Math.floor(y + COLLISION_EPS); ty < y + H; ty++) {
         for (let tx = tx0; tx <= tx1; tx++) {
-          if (map.collisionAt(tx, ty) === 'solid' && top(tx, ty, clamp01(x0 - tx), clamp01(x1 - tx)) > y + RIDE_PROBE_EPS) return { x, y, check: 'box', tx, ty: ty >= design(tx) ? ty : -1 };
+          if (map.collisionAt(tx, ty) === 'solid' && top(tx, ty, clamp01(x0 - tx), clamp01(x1 - tx)) > y + COLLISION_EPS) return { x, y, check: 'box', tx, ty: ty >= design(tx) ? ty : -1 };
         }
       }
       return { x, y, check: 'box', tx: tx0, ty: -1 };
     }
     // 同 pelican-ride.headBlocked：骑行高度窗口的障碍先于保险杠障碍出现才下车（台阶/墙由保险杠处理）。
-    const head = probeObstacle(map, x, y, e.dir, ride.reach, ride.stepUp, H);
+    const head = probeObstacle(probe, x, y, e.dir, ride.reach, ride.stepUp, H);
     if (head === null) continue;
-    const bump = probeObstacle(map, x, y, e.dir, ride.reach + RIDE_TOUCH_EPS, ride.stepUp, ride.bumperHeight);
+    const bump = probeObstacle(probe, x, y, e.dir, ride.reach + RIDE_TOUCH_EPS, ride.stepUp, ride.bumperHeight);
     if (bump === null || head < bump - RIDE_TOUCH_EPS) {
       const px = x + e.dir * head;
-      const tx = e.dir > 0 ? Math.floor(px + RIDE_PROBE_EPS) : Math.ceil(px - RIDE_PROBE_EPS) - 1;
-      return { x, y, check: 'probe', tx, ty: lowestSolid(tx, Math.floor(y + RIDE_PROBE_EPS), Math.ceil(y + H) + 1) };
+      const tx = e.dir > 0 ? Math.floor(px + COLLISION_EPS) : Math.ceil(px - COLLISION_EPS) - 1;
+      return { x, y, check: 'probe', tx, ty: lowestSolid(tx, Math.floor(y + COLLISION_EPS), Math.ceil(y + H) + 1) };
     }
   }
   return null;
 }
 
 /** 网格适配为探测地图（生成中途：非空气即实心；越界按实心）。 */
-function gridProbeMap(grid: Uint16Array, shapes: Uint8Array, width: number, height: number, air: number): RideProbeMap {
+function gridProbeMap(grid: Uint16Array, shapes: Uint8Array, width: number, height: number, air: number): RideGrid {
   return {
     collisionAt: (tx, ty) => (tx < 0 || tx >= width || ty < 0 || ty >= height || grid[ty * width + tx] !== air ? 'solid' : 'none'),
     shapeAt: (tx, ty) => (tx < 0 || tx >= width || ty < 0 || ty >= height ? SHAPE_FULL : (shapes[ty * width + tx] as TileShape)),
+  };
+}
+
+/** 同一网格的碰撞几何（单块旧形状码与块形态码 0..3 相同），每次查询读网格当前内容。 */
+function gridCollision(grid: Uint16Array, shapes: Uint8Array, width: number, height: number, air: number): CollisionSource {
+  return {
+    gather(x0, y0, x1, y1, out) {
+      out.solidCount = 0;
+      out.supportCount = 0;
+      for (let ty = Math.floor(y0); ty <= Math.floor(y1); ty++) {
+        for (let tx = Math.floor(x0); tx <= Math.floor(x1); tx++) {
+          const inside = tx >= 0 && tx < width && ty >= 0 && ty < height;
+          if (inside && grid[ty * width + tx] === air) continue;
+          pushSolid(out, pieceShapePolygon(inside ? shapes[ty * width + tx] as number : SHAPE_FULL), tx, ty, true);
+        }
+      }
+    },
   };
 }
 
@@ -200,6 +222,7 @@ function gridProbeMap(grid: Uint16Array, shapes: Uint8Array, width: number, heig
  */
 export function clearEntranceHeadroom(grid: Uint16Array, shapes: Uint8Array, mask: Uint8Array, ground: Int32Array, entrances: readonly CaveEntrance[], width: number, height: number, air: number): { readonly cells: number; readonly slopesRemoved: number } {
   const map = gridProbeMap(grid, shapes, width, height, air);
+  const probe = gridCollision(grid, shapes, width, height, air);
   let n = 0;
   let slopesRemoved = 0;
   const carve = (x: number, ty: number): void => {
@@ -221,7 +244,7 @@ export function clearEntranceHeadroom(grid: Uint16Array, shapes: Uint8Array, mas
       if (roof >= 0) for (let ty = f + e.height; ty < roof; ty++) carve(x, ty);
     }
     for (let guard = 0; guard < 64; guard++) {
-      const b = entranceRideBlock(map, e, CAVE_RULES.RIDE);
+      const b = entranceRideBlock(map, probe, e, CAVE_RULES.RIDE);
       if (!b || b.ty < 0) break;
       const before = n;
       carve(b.tx, b.ty);
@@ -273,7 +296,7 @@ export function planCavePools(grid: Uint16Array, mask: Uint8Array, basins: reado
  * 洞底格按 MUSHROOM_CHANCE 放蘑菇丛、否则按 CRYSTAL_CHANCE 放晶簇；天花板格按 CRYSTAL_CHANCE × .6 放晶簇（青/紫各半）；
  * 洞室中心空气格按 FIREFLY_CHANCE 放萤火虫群。亮度取 GLOW_LIGHT。
  */
-export function planCaveGlows(grid: Uint16Array, mask: Uint8Array, water: Uint8Array, rooms: readonly CaveRoom[], ground: Int32Array, width: number, height: number, air: number, seed: number): CaveGlow[] {
+export function planCaveGlows(grid: Uint16Array, mask: Uint8Array, water: Pick<FluidQuery, 'amountAt'>, rooms: readonly CaveRoom[], ground: Int32Array, width: number, height: number, air: number, seed: number): CaveGlow[] {
   const R = CAVE_RULES;
   const salt = (seed ^ SALT_GLOW) >>> 0;
   const out: CaveGlow[] = [];
@@ -296,7 +319,7 @@ export function planCaveGlows(grid: Uint16Array, mask: Uint8Array, water: Uint8A
     if (list) list.push([x, y]);
     else grid8.set(k, [[x, y]]);
   };
-  const open = (i: number): boolean => mask[i] === CAVE_CELL && grid[i] === air && (water[i] as number) === 0;
+  const open = (i: number): boolean => mask[i] === CAVE_CELL && grid[i] === air && water.amountAt(i % width, Math.floor(i / width)) === 0;
   rooms.forEach((r, k) => {
     const i = r.cy * width + r.cx;
     if (r.cy > 0 && r.cy < height && open(i) && hash01(k, 0, salt) < R.FIREFLY_CHANCE && far(r.cx, r.cy)) add(r.cx, r.cy, 'fireflies', false);
@@ -324,7 +347,7 @@ export function planCaveGlows(grid: Uint16Array, mask: Uint8Array, water: Uint8A
   return out;
 }
 
-/** 光照图静态光源（world/light-map 的 emitters）：每个发光源一格。 */
+/** 光照图静态光源（world/light-field 的 emitters）：每个发光源一格。 */
 export function caveLightSources(glows: readonly CaveGlow[]): Array<{ readonly tx: number; readonly ty: number; readonly level: number }> {
   return glows.map((g) => ({ tx: g.x, ty: g.y, level: g.light }));
 }

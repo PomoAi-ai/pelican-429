@@ -25,7 +25,7 @@ interface BuildRule {
 }
 
 /**
- * 家园概念版本数值，见 docs/economy.md。单位：时间为游戏小时，功率为电，能量为电·时，算力为 P，货币为 M Token，
+ * 家园概念版本数值，见 public/concepts/economy.md。单位：时间为游戏小时，功率为电，能量为电·时，算力为 P，货币为 M Token，
  * 长度为格；1 个模拟 tick = 1 游戏秒（1 游戏小时 = 60 现实秒）。
  */
 export interface HomesteadRules {

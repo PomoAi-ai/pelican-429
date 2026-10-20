@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { TUNING } from '../src/config/tuning.ts';
-import type { FacilitySceneId } from '../src/config/facility-scenes.ts';
+import type { FacilityChapterId } from '../src/config/facility-scenes.ts';
 import { FACILITY_PLATFORMS } from '../src/config/facility-scenes.ts';
 import { FORTRESS_PLATEAU, FORTRESS_STRUCTURE } from '../src/config/facility-structure.ts';
 import { ENEMY_RULES } from '../src/config/enemy-rules.ts';
@@ -125,10 +125,9 @@ test('堡垒主路保持安全，落入地板下的冷却液仍持续耗尽生�
 });
 
 for (const route of [
-  { scene: 'original', start: 16, end: 108 },
   { scene: 'fortress', start: 70, end: 194 },
   { scene: 'cathedral', start: 16, end: 170 },
-] satisfies Array<{ scene: FacilitySceneId; start: number; end: number }>) test(`${route.scene} 安全通路可以持续步行到出口，不落水或受阻`, () => {
+] satisfies Array<{ scene: FacilityChapterId; start: number; end: number }>) test(`${route.scene} 安全通路可以持续步行到出口，不落水或受阻`, () => {
   const level = createFacilityLevel(route.scene);
   const body = createBody({ x: route.start, y: level.spawn.y, halfWidth: TUNING.player.halfWidth, height: TUNING.player.height,
     stepUp: TUNING.player.stepUp, groundSnap: TUNING.player.groundSnap });

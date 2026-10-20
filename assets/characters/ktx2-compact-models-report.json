@@ -825,15 +825,15 @@
       }
     },
     {
-      "source": "./characters/enemies/gatekeeper/model.glb",
-      "output": "./characters/enemies/gatekeeper/model.ktx2-compact.glb",
+      "source": "./characters/enemies/omi/model.glb",
+      "output": "./characters/enemies/omi/model.ktx2-compact.glb",
       "sourceSha256": "5a80107fc34704bd7286228e6efc19be2bbee8c27be5cfbb6043200979bf37c3",
       "sourceBytes": 3629384,
       "outputBytes": 1241964,
       "sourceBufferBytes": 3490680,
       "storedBufferBytes": 1027101,
       "images": [],
-      "before": "./characters/enemies/gatekeeper/model.ktx2.glb",
+      "before": "./characters/enemies/omi/model.ktx2.glb",
       "beforeBytes": 1753840,
       "beforeSha256": "39c91eabaa8d20e31aa6cf9e2f34b3df47657054b2576d9455b9ef6d2c768da3",
       "quantizedViews": 294,

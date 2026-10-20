@@ -24,12 +24,14 @@ import { createLumaCompanion } from '../../render/luma/luma-companion.ts';
 import { DUMMY_HEALTH_LAYER } from '../../render/character/entity-views.ts';
 import { warmUpStage } from '../../render/stage/warm-up.ts';
 import { t } from '../../config/i18n.ts';
+import { undergroundInspectionLight } from '../../render/stage/light-presets.ts';
 
 function createSceneContent(stage: ReturnType<typeof createStageView>, rig: ReturnType<typeof createPelicanRig>, card: ShowcaseCard, caveBackground: THREE.Texture) {
   const disposers: Array<() => void> = [];
   const background = stage.scene.background;
   disposers.push(() => { stage.scene.background = background; });
-  if (card.resource && card.environment === 'underground') stage.scene.background = new THREE.Color('#111c27');
+  // 世界场景的明暗由游戏光照图负责，地下检视只换背景色，主光与半球光保持游戏值。
+  if (card.resource && card.environment === 'underground') stage.scene.background = undergroundInspectionLight(TUNING).background;
   try {
     const scenario = card.resource ? createResourceScenario(card) : createShowcaseScenario(card.entryId, card.environment, card.facing, card.attackMotion);
     const palette = scenario.entry.actor === 'water' ? resolveWaterPalette(scenario.entry.action) : DEFAULT_WATER_PALETTE;
@@ -111,7 +113,7 @@ function createSceneContent(stage: ReturnType<typeof createStageView>, rig: Retu
         if (card.resource?.inspectionLight && card.environment === 'underground') {
           lighting.worldLight.setAura(focus.x, focus.y, Math.max(scenario.height, scenario.width) * 1.5, 0.75, [0.8, 0.88, 1]);
         }
-        lighting.worldLight.update(stage.scene, frameIndex++);
+        lighting.worldLight.update(stage.scene, frameIndex++, view);
         stage.renderer.setScissorTest(false);
       },
       aim(clientX: number, clientY: number, rect: DOMRect) {

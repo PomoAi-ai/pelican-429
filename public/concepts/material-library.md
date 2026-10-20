@@ -14,9 +14,10 @@
 ## 查看入口
 
 - [分类与命名](resource-classification.md)
-- [自由搭建场](/?mode=lab&demo=sandbox)
-- [材料与形状](/?mode=lab&demo=tiles)
-- [AI 住宅](/?mode=lab&demo=residence)
+- [自由搭建场](../?mode=lab&demo=sandbox)
+- [材料与形状](../?mode=lab&demo=tiles)
+- [主世界城区](../?mode=game)
+- [原版住宅](../?mode=homestead&scene=residence)
 
 所有条目均可在住宅与自由搭建场选择、铺设和移除。登记占位表示锚点范围；小块按实际轮廓占格，不会填满整个父格。
 

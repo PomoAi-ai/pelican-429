@@ -10,7 +10,7 @@ import type { LightingTuning } from '../src/config/lighting-rules.ts';
 import { createPostFx, planPasses } from '../src/render/stage/post-fx.ts';
 import { fitShadowCamera, lightBasis, shadowReceiverBounds } from '../src/render/stage/shadow-fit.ts';
 import type { ShadowFitInput, Vec3Like } from '../src/render/stage/shadow-fit.ts';
-import { createBackdrop, hazeFactor } from '../src/render/stage/stage.ts';
+import { createHills, hazeFactor } from '../src/render/backdrop/backdrop-hills.ts';
 import { buildShaftAnchors, createLightShafts, selectVisibleShafts, shaftAxis } from '../src/render/sky/light-shafts.ts';
 import { makeTree } from './helpers/render-fixtures.ts';
 
@@ -403,7 +403,7 @@ describe('大气透视', () => {
     const width = 120;
     const surface = new Int16Array(width).fill(40);
     const haze = { ...DEFAULT_LIGHTING.haze, cameraDistance: 30 };
-    const backdrop = createBackdrop({ width, height: 100, surface, haze });
+    const backdrop = createHills({ width, surface, haze });
     const hazeColor = new THREE.Color(haze.color);
     const meshes: THREE.Mesh[] = [];
     backdrop.root.traverse((o) => {

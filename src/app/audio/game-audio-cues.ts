@@ -23,7 +23,7 @@ function snapshot(e: Entity) {
   };
 }
 type Snapshot = ReturnType<typeof snapshot>;
-const ENEMY_PITCH: Record<string, number> = { gatekeeper: 0.88, lineHound: 1.25, watchWasp: 1.6, loadmaster: 0.58 };
+const ENEMY_PITCH: Record<string, number> = { omi: 0.88, lineHound: 1.25, watchWasp: 1.6, loadmaster: 0.58 };
 const ENEMY_ACTION_PITCH: Record<string, number> = Object.fromEntries(Object.entries(ENEMY_RULES).flatMap(([kind, rule]) =>
   rule.skills.map(skill => [skill.id, ENEMY_PITCH[kind]!])));
 

@@ -1,8 +1,7 @@
 import { BUILDING_KIT } from '../config/building-kit.ts';
 import { clamp } from '../core/math.ts';
 import type { Body } from './body.ts';
-import { definitionColliderSection } from './definition-collision.ts';
-import { COLLISION_EPS as EPS } from './tile-collision.ts';
+import { COLLISION_EPS as EPS, polygonSection } from '../world/collision-geometry.ts';
 
 const PANEL = BUILDING_KIT.solar;
 
@@ -39,7 +38,7 @@ export function createSolarPanel(x: number, y: number, sunAngle: number): SolarP
 export function stepSolarPanels(panels: readonly SolarPanelState[], body: Body, dt: number): void {
   let supportTop: number | null = null;
   for (const panel of panels) {
-    const previous = definitionColliderSection(panel.collider, 0, body.x - body.halfWidth + EPS, body.x + body.halfWidth - EPS);
+    const previous = polygonSection(panel.collider.points, 0, body.x - body.halfWidth, body.x + body.halfWidth);
     panel.loaded = body.onGround && body.vy <= 0 && previous !== null && Math.abs(previous[1] - body.y) <= EPS;
     const target = panel.loaded
       ? -clamp((body.x - panel.x) / (PANEL.panelWidth / 2), -1, 1) * PANEL.tilt
@@ -47,7 +46,7 @@ export function stepSolarPanels(panels: readonly SolarPanelState[], body: Body, 
     panel.angle += (target - panel.angle) * (1 - Math.exp(-(panel.loaded ? 7 : 2.5) * dt));
     updateCollider(panel);
     if (panel.loaded) {
-      const next = definitionColliderSection(panel.collider, 0, body.x - body.halfWidth + EPS, body.x + body.halfWidth - EPS);
+      const next = polygonSection(panel.collider.points, 0, body.x - body.halfWidth, body.x + body.halfWidth);
       if (next !== null) supportTop = supportTop === null ? next[1] : Math.max(supportTop, next[1]);
     }
   }

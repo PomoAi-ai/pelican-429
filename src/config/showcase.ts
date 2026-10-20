@@ -8,7 +8,9 @@ import { LUMA_ACTIONS } from './luma.ts';
 import { FISH_SPECIES } from './fish-appearance.ts';
 import type { FishSpeciesId } from './fish-appearance.ts';
 import { NPCS, NPC_ACTIONS } from './npc.ts';
+import { RELEASE_MODEL_PATHS, WEB_MODEL_SOURCES, compactModelPath } from './web-models.ts';
 import type { NpcKind, NpcForm } from './npc.ts';
+import { MAX_SHOWCASE_CARDS } from './showcase-limits.ts';
 
 export type ShowcaseEnvironment = 'surface' | 'underground';
 export type ShowcaseActor = 'pelican' | 'human' | 'd1' | 'luma' | 'dummy' | 'fish' | 'ruler' | 'flyingRoadster' | NpcKind | EnemyKind;
@@ -39,16 +41,14 @@ export interface ShowcaseEntry<Actor extends string = ShowcaseActor> {
   readonly grassyAnimation?: { readonly variant: GrassyAnimatedVariant; readonly clip: GrassyAction; readonly flight?: GrassyFlight };
 }
 
-export const MAX_SHOWCASE_CARDS = 8;
-
 /** 展示场右侧原画对比：各 D1 变体默认显示的原画，路径取自原画资料库条目。 */
-const D1_BASE_ARTWORK = './art-library/d1-base/d1-base-slim-legs-v1.png';
+const D1_BASE_ARTWORK = './catalog/d1-base/d1-base-slim-legs-v1.png';
 export const D1_ARTWORK: Readonly<Record<D1AnimatedVariant, string>> = {
   detailed: D1_BASE_ARTWORK,
   game: D1_BASE_ARTWORK,
   light: D1_BASE_ARTWORK,
-  outfit: './art-library/d1-seven/character-seven-views-slim-legs-v1.png',
-  equipped: './art-library/d1-equipped/d1-equipped-slim-legs-v1.png',
+  outfit: './catalog/d1-seven/character-seven-views-slim-legs-v1.png',
+  equipped: './catalog/d1-equipped/d1-equipped-slim-legs-v1.png',
 };
 
 export const SHOWCASE_ACTORS: ReadonlyArray<{ id: ShowcaseActor; name: string; image: string; description: string; defaultEntry: string }> = [
@@ -152,7 +152,7 @@ export const SHOWCASE_ENTRIES: readonly ShowcaseEntry[] = [
   ...entries('watchWasp', '外观对比', [
     ['variants', '随机机群', '出生时固定机身配色、桨叶配色和双叶或三叶形态', 6],
   ]),
-  ...entries('gatekeeper', '欧米动作', [
+  ...entries('omi', '欧米动作', [
     ['tracking', '目标跟随', '主角往返跳跃，欧米使用实战头眼追踪与机械步态', 8],
   ]),
   ...FISH_SPECIES.map((species) => ({
@@ -248,7 +248,7 @@ export const CHARACTER_CATALOG: ShowcaseCatalog = {
     cards: ENEMY_KINDS.map((kind) => ({ entryId: `${kind}.idle` })),
   }, {
     id: 'omi-actions', title: '欧米 OMI-01 · 呼吸与双技能', description: '大头双钳机器人：待机呼吸与眼部扫描、主角跟随、夹臂横扫、突进夹击。',
-    cards: ['idle', 'tracking', 'skill1', 'skill2'].map((action) => ({ entryId: `gatekeeper.${action}` })),
+    cards: ['idle', 'tracking', 'skill1', 'skill2'].map((action) => ({ entryId: `omi.${action}` })),
   }, {
     id: 'fortress-enemy-skills', title: '堡垒运维队 · 八技能', description: '四种敌人的两个技能，展示真实伤害与动作时间轴。',
     cards: ENEMY_KINDS.flatMap((kind) => [1, 2].map((index) => ({ entryId: `${kind}.skill${index}` }))),
@@ -317,6 +317,22 @@ export const CHARACTER_CATALOG: ShowcaseCatalog = {
     cards: FISH_SPECIES.map((species) => ({ entryId: `fish.species.${species.id}` })),
   }],
 };
+
+/**
+ * 发布版展示场只放游戏档模型：条目实际加载的模型在发布档位（ktx2-compact）下的路径必须已发布，
+ * 示例只留全部卡片都保留的。
+ */
+export function releaseShowcaseCatalog(catalog: ShowcaseCatalog): ShowcaseCatalog {
+  const released = (source: string): boolean => RELEASE_MODEL_PATHS.includes(WEB_MODEL_SOURCES.includes(source) ? compactModelPath(source, 512) : source);
+  const entries = catalog.entries.filter((entry) => {
+    const { staticModel, grassyAnimation } = entry;
+    if (staticModel !== undefined) return released([...GRASSY_MODELS, ...GRASSY_CUSTOMIZATION_MODELS, ...D1_MODELS].find((model) => model.id === staticModel)!.path);
+    if (grassyAnimation) return released(GRASSY_ANIMATED_MODELS.find((model) => model.id === grassyAnimation.variant)!.path);
+    return true;
+  });
+  const kept = new Set(entries.map((entry) => entry.id));
+  return { ...catalog, entries, demos: catalog.demos?.filter((demo) => demo.cards.every((card) => kept.has(card.entryId))) };
+}
 
 export const CHARACTER_HISTORY_CATALOG: ShowcaseCatalog = {
   mode: 'showcase', library: 'history', title: '角色历史资料库',

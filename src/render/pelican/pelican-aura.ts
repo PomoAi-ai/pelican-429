@@ -1,5 +1,5 @@
 /**
- * 鹈鹕自带微光（021 追加）：纯逻辑（可在 node 测试），由 main 每帧驱动，结果写入 light-texture 的光圈 uniform（setAura）。
+ * 鹈鹕自带微光（021 追加）：纯逻辑（可在 node 测试），由 main 每帧驱动，结果写入 light-field-material 的光圈 uniform（setAura）。
  * - 环境亮度 ambient ∈ [0,1]：鹈鹕身体中部在光照图上的双线性亮度（不含光圈自身，所以不会自激）；
  * - 目标强度 = smoothstep(darkStart → darkFull)（暗处 1、亮处 0）× (水下 waterIntensity : intensity)；颜色水下偏青；
  * - 实际强度/颜色按 1 − exp(−dt/fadeTime) 指数平滑（进出洞口、入水出水约 0.5 s 过渡）。
@@ -61,20 +61,4 @@ export function createPelicanAura(cfg: AuraTuning): PelicanAura {
       return toward(ambient, inWater, 1);
     },
   };
-}
-
-/** 光照图亮度（Uint8 行主序）在世界点 (x,y) 的双线性采样 [0,1]（纹素中心在 i+.5，越界夹取）。 */
-export function sampleLight(light: Uint8Array, width: number, height: number, x: number, y: number): number {
-  if (light.length !== width * height) throw new Error(`pelican-aura: light length ${light.length} != ${width}×${height}`);
-  if (!(Number.isFinite(x) && Number.isFinite(y))) throw new Error(`pelican-aura: invalid sample point (${x},${y})`);
-  const fx = Math.min(width - 1, Math.max(0, x - 0.5));
-  const fy = Math.min(height - 1, Math.max(0, y - 0.5));
-  const x0 = Math.floor(fx);
-  const y0 = Math.floor(fy);
-  const x1 = Math.min(width - 1, x0 + 1);
-  const y1 = Math.min(height - 1, y0 + 1);
-  const tx = fx - x0;
-  const ty = fy - y0;
-  const at = (cx: number, cy: number): number => (light[cy * width + cx] as number) / 255;
-  return (at(x0, y0) * (1 - tx) + at(x1, y0) * tx) * (1 - ty) + (at(x0, y1) * (1 - tx) + at(x1, y1) * tx) * ty;
 }

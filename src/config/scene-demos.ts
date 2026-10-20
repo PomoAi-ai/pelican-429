@@ -1,5 +1,5 @@
 import type { ShowcaseDemo } from './showcase.ts';
-import { MAX_SHOWCASE_CARDS } from './showcase.ts';
+import { MAX_SHOWCASE_CARDS } from './showcase-limits.ts';
 import { TERRAIN_COMPOSITIONS } from './terrain-compositions.ts';
 
 export const SCENE_DEMOS: readonly ShowcaseDemo[] = [

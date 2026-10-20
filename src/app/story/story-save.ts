@@ -8,7 +8,7 @@ import type { MainlineProgress } from '../../sim/mainline-progress.ts';
 import { STORY_SAVE_KEY } from '../../config/story-save.ts';
 
 export interface StorySave {
-  version: 3;
+  version: 4;
   checkpoint: MainlineCheckpoint;
   destination: 'fortress' | 'free';
   progress?: MainlineProgress;
@@ -25,9 +25,11 @@ const PREVIOUS_BOSS_HP = { tibo: 3700, sam: 5250 } as const;
 const cooldowns = (value: unknown): boolean => Array.isArray(value) && value.length === 3 && value.every(counter);
 
 /** localStorage 是外部输入；校验一次后模拟层按快照类型恢复。 */
-function readProgress(value: unknown, checkpoint: MainlineCheckpoint, version: 2 | 3): MainlineProgress {
+function readProgress(value: unknown, checkpoint: MainlineCheckpoint, version: 2 | 3 | 4): MainlineProgress {
   const invalid = (): never => { throw new Error('主线进度数据无效 / Invalid story progress'); };
   if (!record(value) || !Array.isArray(value.enemies)) return invalid();
+  // v4 起敌人 id gatekeeper 改名为 omi；旧版本在校验前迁移。
+  const enemies: unknown[] = version < 4 ? value.enemies.map(enemy => record(enemy) && enemy.kind === 'gatekeeper' ? { ...enemy, kind: 'omi' } : enemy) : value.enemies;
   const p = value.player;
   if (p !== null && (!actor(p, TUNING.player.maxHp) || (p.form !== 'pelican' && p.form !== 'human')
     || typeof p.riding !== 'boolean' || !counter(p.flightTicks) || p.flightTicks > TUNING.player.flight.maxTicks
@@ -35,7 +37,7 @@ function readProgress(value: unknown, checkpoint: MainlineCheckpoint, version: 2
     || !cooldowns(p.weaponCooldowns) || !cooldowns(p.humanCooldowns) || !counter(p.photonCooldownTicks)
     || (['perimeter', 'core', 'tibo'].includes(checkpoint.phase) && p.form !== 'pelican'))) return invalid();
   const keys = new Set<string>();
-  for (const enemy of value.enemies) {
+  for (const enemy of enemies) {
     if (!record(enemy) || typeof enemy.kind !== 'string' || !Object.hasOwn(ENEMY_RULES, enemy.kind)
       || !actor(enemy, ENEMY_RULES[enemy.kind as keyof typeof ENEMY_RULES].maxHp) || !record(enemy.home) || !position(enemy.home)) return invalid();
     const key = `${enemy.kind}:${enemy.home.x}:${enemy.home.y}`;
@@ -46,7 +48,7 @@ function readProgress(value: unknown, checkpoint: MainlineCheckpoint, version: 2
   if (boss !== null && (!record(boss) || (boss.kind !== 'tibo' && boss.kind !== 'sam')
     || boss.kind !== checkpoint.phase || !actor(boss, version === 2 ? PREVIOUS_BOSS_HP[boss.kind] : BOSS_RULES[boss.kind].maxHp) || typeof boss.healAvailable !== 'boolean')) return invalid();
   if (p !== null && (checkpoint.phase === 'tibo' || checkpoint.phase === 'sam') && boss === null) return invalid();
-  const progress = value as unknown as MainlineProgress;
+  const progress = { ...value, enemies } as unknown as MainlineProgress;
   // 旧存档按血量比例迁移；新版本保存后不再重复缩减。
   if (version === 2 && progress.boss !== null) {
     const boss = progress.boss;
@@ -63,7 +65,7 @@ export function loadStorySave(storage: Pick<Storage, 'getItem'>): StorySave | nu
   if (typeof data !== 'object' || data === null) throw new Error('主线存档格式无效 / Invalid story save');
   const save = data as Partial<Omit<StorySave, 'version'>> & { version?: number };
   const cp = save.checkpoint;
-  if ((save.version !== 2 && save.version !== 3) || !cp || !MAINLINE_PHASES.includes(cp.phase)
+  if ((save.version !== 2 && save.version !== 3 && save.version !== 4) || !cp || !MAINLINE_PHASES.includes(cp.phase)
     || !Number.isInteger(cp.countdownTicks) || cp.countdownTicks < 0
     || cp.countdownTicks > Math.round(MAINLINE_COUNTDOWN_SECONDS / TUNING.sim.step)
     || (cp.phase !== 'countdown' && cp.countdownTicks !== 0)
@@ -72,10 +74,10 @@ export function loadStorySave(storage: Pick<Storage, 'getItem'>): StorySave | nu
     throw new Error('主线存档版本或检查点无效 / Invalid story save version or checkpoint');
   }
   if (save.progress !== undefined && save.destination !== 'fortress') throw new Error('主世界选择不能携带堡垒快照 / Invalid story progress destination');
-  return { version: 3, checkpoint: { phase: cp.phase, countdownTicks: cp.countdownTicks }, destination: save.destination,
+  return { version: 4, checkpoint: { phase: cp.phase, countdownTicks: cp.countdownTicks }, destination: save.destination,
     ...(save.progress === undefined ? {} : { progress: readProgress(save.progress, cp, save.version) }) };
 }
 
 export function saveStory(storage: Pick<Storage, 'setItem'>, checkpoint: MainlineCheckpoint, destination: StorySave['destination'], progress?: MainlineProgress): void {
-  storage.setItem(STORY_SAVE_KEY, JSON.stringify({ version: 3, checkpoint, destination, ...(progress === undefined ? {} : { progress }) } satisfies StorySave));
+  storage.setItem(STORY_SAVE_KEY, JSON.stringify({ version: 4, checkpoint, destination, ...(progress === undefined ? {} : { progress }) } satisfies StorySave));
 }

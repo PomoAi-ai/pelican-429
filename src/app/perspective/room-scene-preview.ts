@@ -21,7 +21,10 @@ import { createPerspectiveMinimap } from './perspective-minimap.ts';
 import { yieldScene, waitSceneResource, type SceneMountContext } from '../workspace/scene-mount.ts';
 import type { PerspectiveSceneEntry } from '../workspace/scene-catalog.ts';
 import { bindDefinitionDepthTrial } from './definition-depth-trial.ts';
-import { VIEW_MAX_DT } from '../shell/frame-clock.ts';
+import { createViewLoop } from '../shell/view-loop.ts';
+import { solarTrackingAngle } from '../../physics/solar-panel.ts';
+import { createDefinitionWorld } from '../../sim/definition-world.ts';
+import { createSimWorld, trackSolarSun } from '../../sim/sim-world.ts';
 import { t } from '../../config/i18n.ts';
 
 type View = 'front' | 'angle' | 'top';
@@ -34,7 +37,7 @@ function mountPreview(app: HTMLElement, sections: readonly SceneSection[], varia
       <header class="room-preview-toolbar">
         <span class="room-preview-status" data-mode>${t('游戏')}</span>
         <div class="room-preview-group" role="group" aria-label="${t('观察角度')}">
-          <button type="button" data-view="front" aria-pressed="true">${t('正常视角')}</button>
+          <button type="button" data-view="front" aria-pressed="true">${t('正视')}</button>
           <button type="button" data-view="angle" aria-pressed="false">${t('斜视')}</button>
           <button type="button" data-view="top" aria-pressed="false">${t('俯视')}</button>
         </div>
@@ -49,7 +52,7 @@ function mountPreview(app: HTMLElement, sections: readonly SceneSection[], varia
           <button type="button" data-wire aria-pressed="${variant !== 'depth'}">${t('半透明')}</button>
           ${variant === 'depth' ? `<button type="button" data-render-mode="wireframe" aria-pressed="true" title="${t('淡色半透明格面与轮廓，保留砖块厚度')}">${t('透视线框')}</button><button type="button" data-render-mode="solid" aria-pressed="false">${t('实景')}</button>` : ''}
         </div>
-        ${variant === 'depth' ? `<div class="room-preview-group" role="group" aria-label="${t('天空时段')}"><button type="button" data-sky="day" aria-pressed="true">${t('白天')}</button><button type="button" data-sky="night" aria-pressed="false">${t('夜晚')}</button></div><div class="room-preview-group" role="group" aria-label="${t('层次效果')}"><button type="button" data-layering="flat" aria-pressed="false" title="${t('对比用的旧层距：背景格子 −4 / −10、远景 −20 / −43 / −76，无距离雾，前景清晰')}">${t('旧层次')}</button><button type="button" data-layering="deep" aria-pressed="true" title="${t('规则层距：背景格子 −7 / −16、远景 −35 / −70 / −140，近处起渐浓的距离雾，前景下沉一格并模糊压暗，玩法地面换成与近景相同的贴图')}">${t('景深 G')}</button></div><div class="room-preview-group" role="group" aria-label="${t('分层视角')}"><button type="button" data-landscape-view>${t('大场景全览')}</button><button type="button" data-play-view>${t('真实游玩视角')}</button></div>` : `
+        ${variant === 'depth' ? `<div class="room-preview-group" role="group" aria-label="${t('天空时段')}"><button type="button" data-sky="day" aria-pressed="true">${t('白天')}</button><button type="button" data-sky="night" aria-pressed="false">${t('夜晚')}</button></div><div class="room-preview-group" role="group" aria-label="${t('层次效果')}"><button type="button" data-layering="flat" aria-pressed="false" title="${t('对比用的旧层距：背景格子 −4 / −10、远景 −20 / −43 / −76，无距离雾，前景清晰')}">${t('旧层次')}</button><button type="button" data-layering="deep" aria-pressed="true" title="${t('规则层距：背景格子 −7 / −16、远景 −35 / −70 / −140，近处起渐浓的距离雾，前景下沉一格并模糊压暗，玩法地面换成与近景相同的贴图')}">${t('景深 G')}</button></div><div class="room-preview-group" role="group" aria-label="${t('分层视角')}"><button type="button" data-landscape-view>${t('大场景全览')}</button><button type="button" data-play-view>${t('游玩视角')}</button></div>` : `
         <div class="room-preview-group room-preview-solar" role="group" aria-label="${t('太阳与光照')}">
           <label for="solar-direction">${t('太阳')} <output data-solar-position>${t('上方')}</output></label>
           <input id="solar-direction" type="range" min="-1" max="1" step="0.01" value="0" aria-label="${t('太阳从左到右的位置')}"/>
@@ -61,7 +64,7 @@ function mountPreview(app: HTMLElement, sections: readonly SceneSection[], varia
         <div class="room-preview-group">
           <button type="button" data-play aria-pressed="true">${t('暂停游玩')}</button>
           <button type="button" data-tools aria-expanded="true" aria-controls="perspective-tools">${t('面板')}</button>
-          <a data-definition href="./?mode=concepts#${variant === 'depth' ? 'scene-depth-layers' : 'concept-building'}">${t('定义 ↗')}</a>
+          <a data-definition href="./?mode=concepts#${variant === 'depth' ? 'scene-depth-layers' : 'building-overview'}">${t('定义 ↗')}</a>
         </div>
       </header>
       <div class="room-preview-workspace">
@@ -123,11 +126,7 @@ export async function mountScenePerspective(context: SceneMountContext, entry: P
   const { root: app, renderer, signal } = context;
   const variant = entry.variant;
   const disposers: Array<() => void> = [];
-  let frame = 0;
-  let disposed = false;
   const dispose = (): void => {
-    disposed = true;
-    cancelAnimationFrame(frame);
     for (const release of disposers.splice(0).reverse()) release();
   };
   context.onDispose(dispose);
@@ -140,7 +139,18 @@ export async function mountScenePerspective(context: SceneMountContext, entry: P
     const layout = depth ?? rooms ?? settlement!;
     const solarLayout = rooms ?? settlement;
     disposers.push(layout.dispose);
-    const { container, showTools } = mountPreview(app, layout.sections, variant);
+    // 角色跑游戏模拟：布局写成格子世界，布局坐标为负时整体平移进地图，分区与观察点同样平移。
+    const initial = layout.sections.find(section => section.id === entry.sectionId)!;
+    const definition = createDefinitionWorld(layout.data, { x: initial.playerX, y: initial.playerY });
+    const { offset } = definition;
+    const world = createSimWorld({ level: definition.level, playerForm: 'human', unlimitedFlight: true, solar: definition.solar });
+    disposers.push(() => world.fluid.dispose());
+    layout.root.position.set(offset.x, offset.y, 0);
+    const sections = layout.sections.map((section): SceneSection => ({ ...section,
+      x: section.x + offset.x, y: section.y + offset.y, playerX: section.playerX + offset.x, playerY: section.playerY + offset.y,
+      ...section.walkZ ? { walkZ: (x: number, y: number) => section.walkZ!(x - offset.x, y - offset.y) } : {} }));
+    rooms?.syncDepthTrial(world.map, offset);
+    const { container, showTools } = mountPreview(app, sections, variant);
     context.attachToolbar(app.querySelector<HTMLElement>('.room-preview-toolbar')!);
     const playButton = app.querySelector<HTMLButtonElement>('[data-play]')!;
     const cameraButton = app.querySelector<HTMLButtonElement>('[data-camera]')!;
@@ -152,7 +162,7 @@ export async function mountScenePerspective(context: SceneMountContext, entry: P
     // 定义套件以 +Z 指向背景墙建模；游戏从 +Z 观察，统一映射整个建筑组，保持 X/Y 与深度尺寸。
     layout.root.scale.z = -1;
     stage.scene.add(layout.root);
-    const bounds = depth ? depth.bounds : new THREE.Box3().setFromObject(layout.root);
+    const bounds = depth ? depth.bounds.clone().translate(new THREE.Vector3(offset.x, offset.y, 0)) : new THREE.Box3().setFromObject(layout.root);
     const size = bounds.getSize(new THREE.Vector3());
     const depthEnvironment = depth ? createDepthEnvironment(stage, entry.sectionId as DepthTheme) : null;
     if (depthEnvironment) disposers.push(() => depthEnvironment.dispose());
@@ -211,7 +221,8 @@ export async function mountScenePerspective(context: SceneMountContext, entry: P
     });
     if (variant === 'settlement') {
       const width = Math.ceil(bounds.max.x) + 1;
-      stage.addBackdrop({ width, height: Math.ceil(bounds.max.y) + 1, surface: new Int16Array(width) });
+      // 远山脚按布局的 0 高度摆放，跟着布局平移。
+      stage.addBackdrop({ hills: { width, surface: new Int16Array(width).fill(offset.y) } });
     }
     const overview: SceneSection = { id: 'all', title: depth ? '全景 · 当前分层场景' : '全景 · 所有组合同时在场', description: '选择左侧分区查看细节；透视投影不会改变实际世界尺寸。', x: bounds.min.x, y: bounds.min.y, width: size.x, height: size.y, playerX: 0, playerY: 0, items: [] };
     stage.camera.far = Math.max(1000, size.x * 8);
@@ -223,7 +234,7 @@ export async function mountScenePerspective(context: SceneMountContext, entry: P
     controls.maxDistance = size.x * 6;
     controls.minPolarAngle = 0.06;
     controls.maxPolarAngle = Math.PI * 0.78;
-    let current = layout.sections.find(section => section.id === entry.sectionId)!;
+    let current = sections.find(section => section.id === entry.sectionId)!;
     let framing = current;
     let view: View = depth || entry.sectionId === 'tile-depth' ? 'angle' : 'front';
     let showingDepth = false;
@@ -235,7 +246,7 @@ export async function mountScenePerspective(context: SceneMountContext, entry: P
       trialPanel.open = true;
       app.querySelector<HTMLElement>('#perspective-tools')!.prepend(trialPanel);
       bindDefinitionDepthTrial(trialPanel, rooms.tileDepthTrial, () => {
-        rooms.refreshDepthTrialCollision();
+        rooms.syncDepthTrial(world.map, offset);
         gameplay?.select(current);
       });
       showTools();
@@ -292,7 +303,7 @@ export async function mountScenePerspective(context: SceneMountContext, entry: P
       navigation.innerHTML = stops.map((stop, index) => `<button type="button" data-depth-stop="${index}" aria-pressed="false"><b>${index + 1} · ${t(stop.name)}</b><small>${t(stop.description)}</small></button>`).join('');
       for (const button of navigation.querySelectorAll<HTMLButtonElement>('[data-depth-stop]')) button.addEventListener('click', () => {
         const stop = stops[Number(button.dataset.depthStop)]!;
-        gameplay?.select({ ...current, playerX: stop.x, playerY: stop.y });
+        gameplay?.select({ ...current, playerX: stop.x + offset.x, playerY: stop.y + offset.y });
         view = 'front';
         showingDepth = false;
         gameplay?.setViewAngles(viewAngles());
@@ -305,7 +316,7 @@ export async function mountScenePerspective(context: SceneMountContext, entry: P
     const solarTrial = app.querySelector<HTMLElement>('[data-solar-trial]')!;
     const solarLoad = app.querySelector<HTMLOutputElement>('[data-solar-load]')!;
     for (const button of app.querySelectorAll<HTMLButtonElement>('[data-solar-step]')) button.addEventListener('click', () => {
-      const panel = current.solarTrial!;
+      const { panel } = world.solar[current.solarTrial!]!;
       gameplay!.select({ ...current, playerX: panel.x + Number(button.dataset.solarStep) * .25, playerY: panel.y + .5 });
     });
     app.querySelector('[data-solar-leave]')!.addEventListener('click', () => gameplay!.select(current));
@@ -324,18 +335,18 @@ export async function mountScenePerspective(context: SceneMountContext, entry: P
         }
         for (const input of layerInputs) input.disabled = current.id === 'cave' && (input.dataset.depthLayer === 'sky' || input.dataset.depthLayer === 'clouds');
         showDepthStops();
-        solarTrial.hidden = !current.solarTrial;
-        if (current.solarTrial) showTools();
+        solarTrial.hidden = current.solarTrial === undefined;
+        if (current.solarTrial !== undefined) showTools();
       }
       title.textContent = section.title;
       description.textContent = section.description;
-      app.querySelector<HTMLAnchorElement>('[data-definition]')!.href = `./?mode=concepts#${section.id.startsWith('rock-') ? 'natural-rock' : variant === 'depth' ? 'scene-depth-layers' : 'concept-building'}`;
-      for (const button of app.querySelectorAll<HTMLButtonElement>('[data-section]')) button.setAttribute('aria-pressed', String(layout.sections[Number(button.dataset.section)] === section));
+      app.querySelector<HTMLAnchorElement>('[data-definition]')!.href = `./?mode=concepts#${section.id.startsWith('rock-') ? 'natural-rock-definitions' : variant === 'depth' ? 'scene-depth-layers' : 'building-overview'}`;
+      for (const button of app.querySelectorAll<HTMLButtonElement>('[data-section]')) button.setAttribute('aria-pressed', String(sections[Number(button.dataset.section)] === section));
       setView();
       if (section !== overview) gameplay?.select(current);
       if (depth) { gameplay?.observe(); setView(); }
     };
-    for (const button of app.querySelectorAll<HTMLButtonElement>('[data-section]')) button.addEventListener('click', () => select(layout.sections[Number(button.dataset.section)]!));
+    for (const button of app.querySelectorAll<HTMLButtonElement>('[data-section]')) button.addEventListener('click', () => select(sections[Number(button.dataset.section)]!));
     for (const button of skyButtons) button.addEventListener('click', () => {
       skyPhase = button.dataset.sky as SkyPhase;
       depthEnvironment!.select(current.id, skyPhase);
@@ -410,7 +421,7 @@ export async function mountScenePerspective(context: SceneMountContext, entry: P
       setWireframe(false);
       gameplay!.setViewAngles(viewAngles());
       for (const button of viewButtons) button.setAttribute('aria-pressed', String(button.dataset.view === view));
-      title.textContent = `${current.title} · ${t('真实游玩视角')}`;
+      title.textContent = `${current.title} · ${t('游玩视角')}`;
       stage.canvas.focus({ preventScroll: true });
     });
     if (depth) setWireframe(true);
@@ -437,31 +448,27 @@ export async function mountScenePerspective(context: SceneMountContext, entry: P
     signal.throwIfAborted();
     const droneFleet = createUtilityDroneFleet(stage.scene, stage.createPmrem());
     if (signal.aborted) { droneFleet.dispose(); signal.throwIfAborted(); }
-    gameplay = createPerspectiveControls(app, stage, droneFleet, controls, rig, layout.collision, bounds, current, viewAngles(), solarLayout ? solarLayout.solarPanels : [], true,
-      { cameraMode: 'inspection', tuning: TUNING, world: context.world, onMode(playing, following) {
+    gameplay = createPerspectiveControls(app, stage, droneFleet, controls, rig, world, bounds, current, viewAngles(),
+      { cameraMode: 'inspection', tuning: TUNING, hudWorld: context.world, onMode(playing, following) {
         playButton.setAttribute('aria-pressed', String(playing)); playButton.textContent = t(playing ? '暂停游玩' : '继续游玩');
-        cameraButton.setAttribute('aria-pressed', String(following)); cameraButton.textContent = t(following ? '自由镜头' : '跟随玩家');
+        cameraButton.setAttribute('aria-pressed', String(!following));
       } });
     disposers.push(() => gameplay!.dispose());
     gameplay.select(current);
     playButton.disabled = false;
     playButton.addEventListener('click', () => gameplay!.setPlaying(!gameplay!.playing), { signal });
     cameraButton.addEventListener('click', () => gameplay!.setFollowing(!gameplay!.following), { signal });
-    const minimap = settlement ? createPerspectiveMinimap(app.querySelector<HTMLElement>('.room-preview-viewport')!, layout.collision,
+    const minimap = settlement ? createPerspectiveMinimap(app.querySelector<HTMLElement>('.room-preview-viewport')!, world.map,
       { minX: bounds.min.x, minY: bounds.min.y, maxX: bounds.max.x, maxY: bounds.max.y }, (x, y) => {
         // 分区之间的空隙不属于任何分区，保持当前分区高亮。
-        select(layout.sections.find(section => x >= section.x && x < section.x + section.width) ?? current);
+        select(sections.find(section => x >= section.x && x < section.x + section.width) ?? current);
         gameplay!.select({ ...current, playerX: x, playerY: y });
       }) : null;
     if (minimap) { disposers.push(() => minimap.dispose()); gameplay.hud.attachMap(minimap.root); }
     if (playView) playView.disabled = false;
     gameplay.observe(); setView();
-    let previous: number | null = null;
     let time = 0;
-    const renderFrame = (now: number): void => {
-      if (signal.aborted || disposed) return;
-      const dt = previous === null ? 0 : Math.max(0, Math.min((now - previous) / 1000, VIEW_MAX_DT));
-      previous = now;
+    const loop = createViewLoop(dt => {
       time += dt;
       if (solarLayout) {
         if (solarAutomatic) {
@@ -473,27 +480,23 @@ export async function mountScenePerspective(context: SceneMountContext, entry: P
         // 太阳沿可见天空弧线移动，天体、主光和面板共享同一世界方向。
         const sunDirection = { x: .26 * Math.sin(angle), y: .19 + .01 * Math.cos(angle), z: -1 };
         solarSky!.setSunDirection(sunDirection);
-        solarLayout.setSunDirection(sunDirection);
+        trackSolarSun(world, solarTrackingAngle(sunDirection));
         stage.setSunDirection(sunDirection);
         solarOutput!.value = Math.abs(sunDirection.x) < .03 ? t('上方') : `${t(sunDirection.x < 0 ? '左侧' : '右侧')} ${Math.round(THREE.MathUtils.radToDeg(Math.atan2(Math.abs(sunDirection.x), sunDirection.y)))}°`;
       }
       gameplay!.update(dt);
       minimap?.update(rig!.root.position.x, rig!.root.position.y);
-      solarLayout?.update(time, gameplay!.body);
-      if (current.solarTrial) {
-        const panel = current.solarTrial;
+      solarLayout?.update(time, gameplay!.body, index => world.solar[index]!.panel.angle);
+      if (current.solarTrial !== undefined) {
+        const { panel } = world.solar[current.solarTrial]!;
         solarLoad.value = `${t(panel.loaded ? '玩家压板' : '无人 · 恢复追光')} · ${t('面板 {angle}° · 太阳目标 {sun}°').replace('{angle}', THREE.MathUtils.radToDeg(panel.angle).toFixed(1)).replace('{sun}', THREE.MathUtils.radToDeg(panel.sunAngle).toFixed(1))}`;
       }
       if (controls.enabled) controls.update();
       solarSky?.update(stage.camera);
       depthEnvironment?.update(stage.camera, dt);
       stage.render();
-      depthEnvironment?.renderForeground();
-      frame = requestAnimationFrame(draw);
-    };
-    const draw = (now: number): void => {
-      try { renderFrame(now); } catch (error) { context.reportError(error); }
-    };
-    renderFrame(performance.now());
+    }, context.reportError);
+    disposers.push(loop.stop);
+    loop.start();
   }
 }

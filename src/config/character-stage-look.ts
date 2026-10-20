@@ -5,6 +5,12 @@ export const CHARACTER_STAGE_LOOK = {
   sunPosition: -.5,
 } as const;
 
+/**
+ * 地下检视光：展示页切到地下环境时的背景色与舞台灯强度（相对 tuning.render 的 hemi、keyLight）。
+ * 取正式角色展示场的一套：地下没有日光直射，主光关掉；半球光留 0.65，与人物、敌人展示页原用的比例一致。
+ */
+export const UNDERGROUND_INSPECTION = { background: '#172b3b', hemi: 0.65, key: 0 } as const;
+
 export function characterStageSunDirection(fov: number, aspect: number, position: number) {
   const angle = position * Math.PI / 2;
   const halfHeight = Math.tan(fov * Math.PI / 360);

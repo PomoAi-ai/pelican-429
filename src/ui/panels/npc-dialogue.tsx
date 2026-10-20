@@ -75,10 +75,6 @@ export function createNpcDialogue(parent: HTMLElement, world: SimWorld, project:
     for (const event of ['pointerdown', 'mousedown', 'click']) root.addEventListener(event, e => e.stopPropagation());
   }
   targets.addEventListener('keydown', e => e.stopPropagation());
-  targets.addEventListener('keyup', e => {
-    // The game cancels Space on release; native buttons need that default action.
-    if (e.code === 'Space') e.stopPropagation();
-  });
   const residents: Array<{ entity: Entity; button: HTMLButtonElement; chip: HTMLSpanElement }> = [];
   function addResident(entity: Entity): void {
     const button = document.createElement('button');

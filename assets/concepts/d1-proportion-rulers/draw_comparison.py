@@ -18,7 +18,7 @@ def board(groups, folder, name, title, notes):
     draw.text((42, 90), f'一张图片 · 统一标尺 · {2 * len(groups)} 个视图    |    每个角色的有发赤脚基础版 = 3.1 格，各形态沿用本角色的身体倍率，保留头发与鞋底高度差', font=std.font(24), fill=std.GRAY)
     records, edges = [], [PURPLE_X + 20]
     for group, (spec, base) in enumerate(groups):
-        source = ROOT / 'public/art-library' / spec['folder'] / spec['source']
+        source = ROOT / 'public/catalog' / spec['folder'] / spec['source']
         art = Image.open(source).convert('RGB')
         assert art.size == spec['size']
         # Hair or boots must not rescale the body: every form is drawn at the base body's size.
@@ -43,7 +43,7 @@ def board(groups, folder, name, title, notes):
     draw.text((40, FOOT + 95), '1 格 = 240 px；紫尺按 3.1 格 ÷ 3.3 等分，是设计参照，不是读图地标；无头发版不按颅顶放大。', font=std.font(22), fill=std.INK)
     for i, note in enumerate(notes):
         draw.text((40, FOOT + 135 + 40 * i), note, font=std.font(22), fill=std.INK)
-    target = ROOT / 'public/art-library' / folder
+    target = ROOT / 'public/catalog' / folder
     target.mkdir(exist_ok=True)
     out.save(target / f'{name}.png')
     (target / f'{name}.json').write_text(json.dumps(dict(method='unified ruler: each haired barefoot base = 3.1 tiles at 240 px/tile; forms share their character base body scale; sole alignment', foot_y=FOOT, pixels_per_tile=std.UNIT, ruler_x=[PURPLE_X, orange_x], images=records), ensure_ascii=False, indent=2)+'\n')

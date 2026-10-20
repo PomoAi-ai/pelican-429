@@ -18,7 +18,7 @@ import { entranceSpan } from './caves.ts';
 import { reachableCells } from './reachability.ts';
 import type { ReachOptions } from './reachability.ts';
 import { HUT_DOOR_APRON } from './structures.ts';
-import { SHAPE_FULL } from './tile-shapes.ts';
+import { FULL_MASK, SHAPE_FULL } from './tile-shapes.ts';
 import type { TileMap } from './tile-map.ts';
 import { TILE_AIR } from './tile-types.ts';
 import { crownPads } from './trees.ts';
@@ -158,7 +158,7 @@ function verifyShapes(v: VerifyInput, where: string, spawnLo: number, spawnHi: n
     const tx = i % width;
     const ty = (i - tx) / width;
     const at = `${where}: shape ${shapes[i]} at (${tx},${ty})`;
-    if (map.shapeAt(tx, ty) !== shapes[i]) throw new Error(`${at} not loaded into the map`);
+    if (map.pieces(tx, ty).length !== 1 || map.pieces(tx, ty)[0]!.shape !== shapes[i]) throw new Error(`${at} not loaded into the map`);
     if (map.collisionAt(tx, ty + 1) === 'solid') throw new Error(`${at} is covered by a solid tile`);
     const id = map.get(tx, ty);
     if (id === ids.roof) {
@@ -166,7 +166,7 @@ function verifyShapes(v: VerifyInput, where: string, spawnLo: number, spawnHi: n
       continue;
     }
     if (!groundId(id)) throw new Error(`${at}: shaped tile id ${id} is neither ground nor roof`);
-    if (map.collisionAt(tx, ty - 1) !== 'solid' || map.shapeAt(tx, ty - 1) !== SHAPE_FULL) throw new Error(`${at}: must rest on a FULL solid tile`);
+    if (map.solidMask(tx, ty - 1) !== FULL_MASK) throw new Error(`${at}: must rest on a FULL solid tile`);
     // 021：洞底斜坡（上方是洞穴格）与浮空岛顶面斜坡（本格是浮空块瓦片）不按地表规则检查。
     if (v.caves.mask[(ty + 1) * width + tx] !== CAVE_NONE || v.floaterMask[i] === 1) continue;
     if (ty !== (ground[tx] as number) - 1) throw new Error(`${at}: shape must be on the top ground tile (ground ${ground[tx]})`);
@@ -242,7 +242,6 @@ export function verifyWorld(v: VerifyInput, seed: number, cfg: WorldgenTuning): 
       // 021：洞穴格（mask 非 0）允许在地表下为空气；浮空块瓦片允许在地表之上。
       if (ty < g && !solidId(id) && !(ty === g - 1 && id === ids.timber) && caveMask[i] === CAVE_NONE) throw new Error(`${where}: hole under the surface at (${x},${ty})`);
       if (ty >= g && solidId(id) && v.floaterMask[i] !== 1) throw new Error(`${where}: solid tile above the surface at (${x},${ty})`);
-      if ((fluid.cells[i] as number) > 0 && fluid.solid[i] === 1) throw new Error(`${where}: water inside solid tile at (${x},${ty})`);
     }
   }
   const sx = Math.floor(spawn.x);
@@ -251,7 +250,7 @@ export function verifyWorld(v: VerifyInput, seed: number, cfg: WorldgenTuning): 
   for (let x = Math.max(0, spawnLo - R.SPAWN_RAMP); x <= Math.min(width - 1, spawnHi + R.SPAWN_RAMP); x++) {
     for (let ty = 0; ty < height; ty++) {
       const i = ty * width + x;
-      if ((fluid.cells[i] as number) > 0 && caveMask[i] === CAVE_NONE) throw new Error(`${where}: water at (${x},${ty}) inside the spawn zone`);
+      if (openWater(v, x, ty) && caveMask[i] === CAVE_NONE) throw new Error(`${where}: water at (${x},${ty}) inside the spawn zone`);
       if (grid[i] === ids.branch) throw new Error(`${where}: tree platform at (${x},${ty}) inside the spawn zone`);
     }
   }
@@ -267,7 +266,7 @@ export function verifyWorld(v: VerifyInput, seed: number, cfg: WorldgenTuning): 
   for (let x = Math.min(sx, dx); x <= Math.max(sx, dx); x++) {
     for (let ty = 0; ty < height; ty++) {
       const i = ty * width + x;
-      if ((fluid.cells[i] as number) > 0 && caveMask[i] === CAVE_NONE) throw new Error(`${where}: water at (${x},${ty}) between spawn and dummy`);
+      if (openWater(v, x, ty) && caveMask[i] === CAVE_NONE) throw new Error(`${where}: water at (${x},${ty}) between spawn and dummy`);
       if (grid[i] === ids.branch) throw new Error(`${where}: tree platform at (${x},${ty}) between spawn and dummy`);
     }
   }
@@ -297,6 +296,11 @@ export function verifyWorld(v: VerifyInput, seed: number, cfg: WorldgenTuning): 
       throw new Error(`${where}: fish spawn (${f.x},${f.y}) of lake ${f.lake} is not inside water`);
     }
   }
+}
+
+/** 无实心子格的格里有水；岸边部分实心格（洞穴水潭、湖的斜坡/半砖岸）里的水随所属水体检查，不按地表水计。 */
+function openWater(v: VerifyInput, x: number, ty: number): boolean {
+  return v.fluid.amountAt(x, ty) > 0 && v.map.solidMask(x, ty) === 0;
 }
 
 /** 表层洞口有独立出口，水盆必须在现有地下网络上方保有连续地基。 */
@@ -353,7 +357,7 @@ function verifyDeserts(v: VerifyInput, where: string, spawnLo: number, spawnHi: 
     nearest = Math.min(nearest, sx < d.lo ? d.lo - sx : sx - d.hi);
     for (const l of v.lakes) if (l.x1 + 1 >= d.lo && l.x0 - 1 <= d.hi) throw new Error(`${w}: water body ${l.x0}..${l.x1} inside the desert`);
     for (let x = d.lo; x <= d.hi; x++) {
-      for (let ty = 0; ty < map.height; ty++) if ((fluid.cells[ty * width + x] as number) > 0 && v.caves.mask[ty * width + x] === CAVE_NONE) throw new Error(`${w}: water at (${x},${ty})`);
+      for (let ty = 0; ty < map.height; ty++) if (openWater(v, x, ty) && v.caves.mask[ty * width + x] === CAVE_NONE) throw new Error(`${w}: water at (${x},${ty})`);
     }
     for (let x = d.x0; x <= d.x1; x++) {
       if (mouth[x] === 1) continue;

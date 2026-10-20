@@ -1,7 +1,6 @@
 import { Fragment, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
-import { RELEASE_MODES } from '../../config/app-mode.ts';
 import { t } from '../../config/i18n.ts';
-import { SITE_SECTIONS, findSitePage, type SitePage, type SiteSection } from '../../config/site-directory.ts';
+import { findSitePage, siteSections, type SitePage, type SiteSection } from '../../config/site-directory.ts';
 import { getLanguage } from '../model/language.ts';
 import { mountReact } from '../react/mount.tsx';
 import { useLanguage } from '../react/use-language.ts';
@@ -32,17 +31,10 @@ export function mountSiteNavigation(parent: HTMLElement, options: SiteNavigation
 
 function SiteNavigation({ mode, playing, hasSave, release }: SiteNavigationOptions) {
   useLanguage();
-  // 发布版只列在线可用的页面（原画资料库只在本地提供）；整类都不可用时大类也不显示。
-  const [sections] = useState(() => {
-    const online = (page: SitePage): boolean =>
-      RELEASE_MODES.includes(new URL(page.href, location.href).searchParams.get('mode')!) && page.id !== 'art-library';
-    return SITE_SECTIONS
-      .map(section => ({ ...section, clusters: section.clusters.map(cluster => cluster.filter(page => !release || online(page))).filter(cluster => cluster.length > 0) }))
-      .filter(section => section.clusters.length > 0);
-  });
-  const [current, setCurrent] = useState(() => findSitePage(new URLSearchParams(location.search)));
+  const [sections] = useState(() => siteSections(release));
+  const [current, setCurrent] = useState(() => findSitePage(new URL(location.href)));
   useEffect(() => {
-    const sync = (): void => setCurrent(findSitePage(new URLSearchParams(location.search)));
+    const sync = (): void => setCurrent(findSitePage(new URL(location.href)));
     window.addEventListener('popstate', sync);
     return () => window.removeEventListener('popstate', sync);
   }, []);
@@ -51,7 +43,7 @@ function SiteNavigation({ mode, playing, hasSave, release }: SiteNavigationOptio
       <a className="home-brand" href="./" aria-label={t('鹈鹕 429 首页')} aria-current={mode === 'index' ? 'page' : undefined}>
         <span className="home-brand-mark">P<span>429</span></span><span>PELICAN 429<small>{t('一场越过边界的冒险')}</small></span>
       </a>
-      <nav className="home-nav dev-links" aria-label={t('网站导航')}>
+      <nav className="home-nav dev-links" aria-label={t('站点导航')}>
         <a className="home-section-link" href="./#home-world">{t('游戏介绍')}</a>
         <a className="home-section-link" href="./#home-journey">{t('章节')}</a>
         <a className="home-section-link" href="./#home-cast">{t('角色')}</a>
@@ -77,7 +69,7 @@ function SiteNavigation({ mode, playing, hasSave, release }: SiteNavigationOptio
           </button>
         </span>
       </nav>
-      <div id="home-wechat-pop" className="home-wechat-pop" popover="auto"><img src="./resourcesprivate-source/wechat-group.webp" alt={t('鹈鹕 429 微信交流群二维码')} width="180" height="180" /><p>{t('微信扫码加入交流群')}</p></div>
+      <div id="home-wechat-pop" className="home-wechat-pop" popover="auto"><img src="./resources/home/wechat-group.webp" alt={t('鹈鹕 429 微信交流群二维码')} width="180" height="180" /><p>{t('微信扫码加入交流群')}</p></div>
       {current && <SubNavigation section={sections.find(item => item.id === current.section.id)} page={current.page} />}
     </header>
   );

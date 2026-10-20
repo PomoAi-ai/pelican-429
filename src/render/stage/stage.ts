@@ -1,23 +1,23 @@
 /**
  * 渲染舞台：WebGLRenderer、透视相机、灯光、远景与后期。
  * 光照（tuning.render.lighting）：午后暖阳主光（投影）+ 半球光（天空冷蓝/地面暖绿）+ 无阴影的反向边缘光 + 弱环境贴图；
- * 主光阴影相机每帧按相机可视矩形拟合并对齐纹素（shadow-fit，防闪烁）；远山按距离混入大气雾色（hazeFactor）。
- * 画面经 post-fx（场景 HDR → GTAO/Bloom → 色调映射 → 调色 → [SMAA]）输出；setQuality 切换高/低画质，setAntialias 切换 SMAA/MSAA。
+ * 主光阴影相机每帧按相机可视矩形拟合并对齐纹素（shadow-fit，防闪烁）；背景层（远景、背景格子、近景模糊）见 render/backdrop。
+ * 画面经 post-fx（场景 HDR → GTAO/Bloom → 色调映射 → 调色 → [SMAA]）输出，再叠上模糊的近景；setQuality 切换高/低画质，setAntialias 切换 SMAA/MSAA。
  * 世界坐标：1 瓦片 = 1 单位，y 向上，逻辑平面为 z=0，相机位于 +Z 侧看向 -Z。
  */
 import * as THREE from 'three';
 import type { WebGPURenderer } from 'three/webgpu';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
-import { hash01, valueNoise1D } from '../../core/rng.ts';
-import type { AntialiasMode, LightingQuality, LightingTuning, ShadowTypeName, ToneMappingName } from '../../config/lighting-rules.ts';
+import type { AntialiasMode, LightingQuality, ShadowTypeName, ToneMappingName } from '../../config/lighting-rules.ts';
 import type { Tuning } from '../../config/tuning.ts';
 import { onLanguageChange, t } from '../../config/i18n.ts';
 import type { TileQuery } from '../../world/tile-map.ts';
+import { createBackdrop, type Backdrop, type BackdropOptions, type ForegroundFilter, type StageBackdrop } from '../backdrop/backdrop.ts';
+import { createForegroundFilter } from '../backdrop/foreground-filter.ts';
 import { createPostFx } from './post-fx.ts';
 import type { PostFx, PostFxInput } from './post-fx.ts';
 import { fitShadowCamera, shadowReceiverBounds } from './shadow-fit.ts';
 import type { ShadowFit, Vec3Like } from './shadow-fit.ts';
-import { configureCharacterTextures, disposeCharacterTextures } from '../character/character-model.ts';
 
 const SHADOW_HALF_EXTENT_MIN = 14;
 
@@ -48,8 +48,10 @@ export interface Stage<R extends StageRenderer = THREE.WebGLRenderer> {
   setAntialias(mode: AntialiasMode): void;
   /** 最近一次阴影相机拟合结果（调试用；首帧渲染前为 null）。 */
   shadowFit(): ShadowFit | null;
-  /** 按地图尺寸与地表高度添加远景（山丘剪影），只调用一次。 */
-  addBackdrop(options: BackdropOptions): void;
+  /** 按层距表建立背景层（远景、背景格子、近景模糊），只调用一次。 */
+  addBackdrop(options: BackdropOptions): Backdrop;
+  /** addBackdrop 之前为 null。 */
+  readonly backdrop: Backdrop | null;
   setSize(width: number, height: number): void;
   /** 运行时改像素比（动态分辨率）：画布缓冲与后期目标按新比例重建，CSS 尺寸不变。 */
   setPixelRatio(ratio: number): void;
@@ -57,25 +59,6 @@ export interface Stage<R extends StageRenderer = THREE.WebGLRenderer> {
   padPointLights(): void;
   render(): void;
   renderTexture(): THREE.Texture;
-  dispose(): void;
-}
-
-export interface BackdropOptions {
-  readonly width: number;
-  readonly height: number;
-  /** 每列地面高度（建议 groundSurface：只计厚实心，不含树平台），长度必须等于 width。 */
-  readonly surface: Int16Array;
-  /** 大气透视（缺省 = 不混雾色）；cameraDistance 为相机到 z=0 平面距离。 */
-  readonly haze?: BackdropHaze;
-}
-
-export interface BackdropHaze extends Readonly<LightingTuning['haze']> {
-  readonly cameraDistance: number;
-}
-
-export interface Backdrop {
-  readonly root: THREE.Group;
-  readonly layers: Readonly<Record<'near' | 'middle' | 'far', THREE.Mesh>>;
   dispose(): void;
 }
 
@@ -120,14 +103,6 @@ export function shadowHalfExtent(fovDeg: number, distance: number, aspect: numbe
   return Math.max(SHADOW_HALF_EXTENT_MIN, hh * aspect + 2);
 }
 
-/** 大气透视混合比例：距离 near→far 之间按 smoothstep 从 0 升到 max。 */
-export function hazeFactor(distance: number, haze: Pick<LightingTuning['haze'], 'near' | 'far' | 'max'>): number {
-  if (!Number.isFinite(distance)) throw new Error(`stage: invalid haze distance ${distance}`);
-  if (!(haze.far > haze.near)) throw new Error(`stage: haze.far (${haze.far}) must be > haze.near (${haze.near})`);
-  const t = Math.min(1, Math.max(0, (distance - haze.near) / (haze.far - haze.near)));
-  return haze.max * t * t * (3 - 2 * t);
-}
-
 const TONE_MAPPING: Readonly<Record<ToneMappingName, THREE.ToneMapping>> = {
   aces: THREE.ACESFilmicToneMapping,
   agx: THREE.AgXToneMapping,
@@ -139,105 +114,6 @@ const SHADOW_TYPE: Readonly<Record<ShadowTypeName, THREE.ShadowMapType>> = {
   pcfsoft: THREE.PCFSoftShadowMap,
   vsm: THREE.VSMShadowMap,
 };
-
-/**
- * 远景：三层连续山脊，山顶、坡肩、山脚沿 z 展开；每层一个网格，高度围绕地表均值。
- * 只做地表（无洞穴），不再需要地下背景墙。不投射/接收阴影。纯 three 对象，可脱离浏览器测试。
- */
-export function createBackdrop(options: BackdropOptions): Backdrop {
-  const { width, height, surface } = options;
-  if (!(Number.isInteger(width) && width > 0 && Number.isInteger(height) && height > 0)) {
-    throw new Error(`stage: invalid map size ${width}×${height}`);
-  }
-  if (surface.length !== width) throw new Error(`stage: surface length ${surface.length} does not match map width ${width}`);
-  let sum = 0;
-  for (let x = 0; x < width; x++) sum += surface[x] as number;
-  const mean = sum / width;
-  /** 以 x 为中心、半宽 r 的地表均值（让远山轻微随地形起伏）。 */
-  const localMean = (x: number, r: number): number => {
-    let s = 0;
-    let n = 0;
-    for (let c = Math.max(0, Math.floor(x - r)); c <= Math.min(width - 1, Math.ceil(x + r)); c++, n++) s += surface[c] as number;
-    return n > 0 ? s / n : mean;
-  };
-
-  const root = new THREE.Group();
-  root.name = 'backdrop';
-  const resources: Array<{ dispose(): void }> = [];
-
-  const haze = options.haze;
-  const hazeColor = new THREE.Color(haze ? haze.color : SKY_BOTTOM);
-  // 不同尺度的连续噪声让峰谷错落，实际 z 间距在移动和转动镜头时产生视差。
-  const layers = [
-    { name: 'far', z: -76, color: '#96adbd', rise: 23, amplitude: 19, span: 55, depth: 8, seed: 0x4138 },
-    { name: 'middle', z: -43, color: '#7b9f9d', rise: 13, amplitude: 13, span: 36, depth: 6, seed: 0x7251 },
-    { name: 'near', z: -20, color: '#6d9485', rise: 4, amplitude: 8, span: 26, depth: 4, seed: 0x9357 },
-  ] as const;
-  const layerMeshes = {} as Record<'near' | 'middle' | 'far', THREE.Mesh>;
-  const skirtBottom = -40;
-  for (const layer of layers) {
-    const pad = 180;
-    const segments = Math.ceil((width + 2 * pad) / 2.5);
-    const positions: number[] = [];
-    const colors: number[] = [];
-    const indices: number[] = [];
-    const base = new THREE.Color(layer.color);
-    const sunlit = base.clone().lerp(new THREE.Color('#e5dec3'), 0.16);
-    const distanceFog = haze ? hazeFactor(haze.cameraDistance - layer.z, haze) : 0;
-    const c = new THREE.Color();
-    for (let i = 0; i <= segments; i++) {
-      const x = -pad + (width + 2 * pad) * i / segments;
-      const broad = valueNoise1D(x / layer.span, layer.seed);
-      const shoulder = valueNoise1D(x / (layer.span * 0.39), layer.seed + 1);
-      const detail = valueNoise1D(x / 5.5, layer.seed + 2);
-      const crest = mean + (localMean(x, 40) - mean) * 0.18 + layer.rise
-        + layer.amplitude * (0.72 * broad + 0.23 * shoulder + 0.05 * detail);
-      const slope = 7 + layer.amplitude * (0.35 + 0.25 * hash01(i, 0, layer.seed));
-      for (let row = 0; row < 3; row++) {
-        const y = row === 0 ? crest : row === 1 ? crest - slope : skirtBottom;
-        positions.push(x, y, row * layer.depth * 0.5);
-        // 坡肩用缓慢变化的明暗表现折面，山脚淡入雾色，避免整片纯色墙。
-        const light = row === 0 ? 0.3 : row === 1 ? 0.15 + 0.55 * (shoulder * 0.5 + 0.5) : 0;
-        const footFog = haze ? haze.lowBoost * (row === 2 ? 4.3 : row === 1 ? 1 : 0) : 0;
-        c.copy(base).lerp(sunlit, light).lerp(hazeColor, Math.min(0.88, distanceFog + footFog));
-        colors.push(c.r, c.g, c.b);
-      }
-      if (i < segments) {
-        for (let row = 0; row < 2; row++) {
-          const a = i * 3 + row;
-          indices.push(a, a + 1, a + 3, a + 3, a + 1, a + 4);
-        }
-      }
-    }
-    const merged = new THREE.BufferGeometry();
-    merged.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
-    merged.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
-    merged.setIndex(indices);
-    merged.computeVertexNormals();
-    merged.computeBoundingSphere();
-    const material = new THREE.MeshBasicMaterial({ vertexColors: true, fog: false });
-    material.userData.noLightMap = true; // 远景不受瓦片光照影响（见 light-texture）
-    resources.push(merged, material);
-    const mesh = new THREE.Mesh(merged, material);
-    mesh.name = `backdrop-hills-${layer.name}`;
-    mesh.position.z = layer.z;
-    mesh.matrixAutoUpdate = false;
-    mesh.updateMatrix();
-    root.add(mesh);
-    layerMeshes[layer.name] = mesh;
-  }
-
-  return {
-    root,
-    layers: layerMeshes,
-    dispose() {
-      root.removeFromParent();
-      root.clear();
-      for (const r of resources) r.dispose();
-      resources.length = 0;
-    },
-  };
-}
 
 export function createSkyTexture(top: string, bottom: string): THREE.CanvasTexture {
   const canvas = document.createElement('canvas');
@@ -265,6 +141,7 @@ export interface StageOptions {
 /** 两种后端的 PMREMGenerator 共有的部分。 */
 export interface EnvironmentGenerator {
   fromScene(scene: THREE.Scene, sigma: number): THREE.RenderTarget;
+  fromEquirectangular(texture: THREE.Texture, target?: THREE.RenderTarget | null): THREE.RenderTarget;
   dispose(): void;
 }
 
@@ -280,47 +157,50 @@ export function currentViewportHeight(renderer: StageRenderer, out: THREE.Vector
 export interface StageBackend<R extends StageRenderer> {
   pmrem(renderer: R): EnvironmentGenerator;
   postFx(input: Omit<PostFxInput, 'renderer'> & { readonly renderer: R }): PostFx;
+  foregroundFilter(renderer: R): ForegroundFilter;
 }
 
 export const WEBGL_STAGE_BACKEND: StageBackend<THREE.WebGLRenderer> = {
   pmrem: (renderer) => new THREE.PMREMGenerator(renderer),
   postFx: createPostFx,
+  foregroundFilter: createForegroundFilter,
 };
 
-/** 一个页面只拥有一个 WebGL 上下文；多个预览舞台共用它。 */
-export function createStageRenderer(tuning: Tuning, debug: boolean, options: Pick<THREE.WebGLRendererParameters, 'alpha' | 'antialias'> = {}): THREE.WebGLRenderer {
-  const renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: 'high-performance', ...options });
+/**
+ * 渲染器预设：game 走后期链（画布不做多重采样）；studio 是直接绘制的角色近景（画布多重采样、透明底）；
+ * thumbnail 是离屏静态预览（固定像素比、不投影）。色调映射、曝光与阴影类型都取自调参，各预设一致。
+ */
+export type RendererPreset = 'game' | 'studio' | 'thumbnail';
+
+const RENDERER_PRESETS: Readonly<Record<RendererPreset, { readonly alpha: boolean; readonly antialias: boolean }>> = {
+  game: { alpha: false, antialias: false },
+  studio: { alpha: true, antialias: true },
+  thumbnail: { alpha: true, antialias: true },
+};
+
+export interface RendererParameters {
+  readonly alpha: boolean;
+  readonly antialias: boolean;
+  readonly powerPreference: 'high-performance';
+}
+
+/** 唯一的渲染器工厂；construct 换成 WebGPURenderer 即得同一配置的 WebGPU 渲染器。角色贴图由页主渲染器的持有方绑定，这里不绑定。 */
+export function createRenderer(preset: RendererPreset, tuning: Tuning, debug: boolean): THREE.WebGLRenderer;
+export function createRenderer<R extends StageRenderer>(preset: RendererPreset, tuning: Tuning, debug: boolean, construct: (parameters: RendererParameters) => R): R;
+export function createRenderer(preset: RendererPreset, tuning: Tuning, debug: boolean,
+  construct: (parameters: RendererParameters) => StageRenderer = parameters => new THREE.WebGLRenderer(parameters)): StageRenderer {
+  const renderer = construct({ ...RENDERER_PRESETS[preset], powerPreference: 'high-performance' });
   // 着色器错误检查让每个程序首次使用时同步读取编译日志；GPU 进程忙时每次往返上百毫秒，新建渲染器（切换透视标签）累计可达十秒。
   // 只在 ?debug 下开启；关闭时着色器出错仍有浏览器的 WebGL 警告。
   renderer.debug.checkShaderErrors = debug;
-  configureStageRenderer(renderer, tuning);
-  return renderer;
-}
-
-/** 像素比、输出色彩空间、色调映射、曝光与阴影类型；两种后端共用。 */
-export function configureStageRenderer(renderer: StageRenderer, tuning: Tuning): void {
-  const r = tuning.render;
-  const l = r.lighting;
-  const pixelRatio = Math.min(window.devicePixelRatio || 1, l.maxPixelRatio);
-  renderer.setPixelRatio(pixelRatio);
+  const l = tuning.render.lighting;
+  renderer.setPixelRatio(preset === 'thumbnail' ? 1 : Math.min(window.devicePixelRatio || 1, l.maxPixelRatio));
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = TONE_MAPPING[l.toneMapping];
-  renderer.toneMappingExposure = r.exposure;
-  renderer.shadowMap.enabled = true;
+  renderer.toneMappingExposure = tuning.render.exposure;
+  renderer.shadowMap.enabled = preset !== 'thumbnail';
   renderer.shadowMap.type = SHADOW_TYPE[l.shadow.type];
-  configureCharacterTextures(renderer);
-}
-
-export function createStage(container: HTMLElement, tuning: Tuning, options: StageOptions, debug: boolean): Stage {
-  const renderer = createStageRenderer(tuning, debug);
-  const stage = attachStage(container, renderer, tuning, options, WEBGL_STAGE_BACKEND);
-  const detach = stage.dispose;
-  stage.dispose = () => {
-    detach();
-    disposeCharacterTextures();
-    renderer.dispose();
-  };
-  return stage;
+  return renderer;
 }
 
 /** 把已有渲染器挂进容器并建立场景视图；释放时只摘下画布，渲染器留给调用方继续复用。 */
@@ -450,7 +330,7 @@ export function createStageViewWith<R extends StageRenderer>(renderer: R, tuning
     camera.updateProjectionMatrix();
     postFx.setSize(w, h, renderer.getPixelRatio());
   };
-  let backdrop: Backdrop | null = null;
+  let backdrop: StageBackdrop | null = null;
 
   // 可见点光源数是每个受光材质程序键的一部分：数目一变（灯随机房、无人机、技能特效显隐），场景里的材质当帧全部重编，
   // 游玩中卡顿数百毫秒。用零强度占位灯把数目补到历史最高值：只增不减，只在出现新高时编译一次。
@@ -511,8 +391,12 @@ export function createStageViewWith<R extends StageRenderer>(renderer: R, tuning
     shadowFit: () => lastFit,
     addBackdrop(opts) {
       if (backdrop) throw new Error('stage: backdrop already added');
-      backdrop = createBackdrop({ ...opts, haze: opts.haze ?? { ...l.haze, cameraDistance: tuning.camera.distance } });
-      scene.add(backdrop.root);
+      const hills = opts.hills && { ...opts.hills, haze: opts.hills.haze ?? { ...l.haze, cameraDistance: tuning.camera.distance } };
+      backdrop = createBackdrop({ renderer, scene, camera, keyLight }, backend.foregroundFilter(renderer), tuning.camera.distance, { ...opts, ...hills ? { hills } : {} });
+      return backdrop;
+    },
+    get backdrop() {
+      return backdrop;
     },
     setSize,
     setPixelRatio(ratio) {
@@ -524,7 +408,9 @@ export function createStageViewWith<R extends StageRenderer>(renderer: R, tuning
     render() {
       updateKeyLight();
       padPointLights();
+      backdrop?.beforeRender();
       postFx.render();
+      backdrop?.afterRender();
     },
     renderTexture() {
       updateKeyLight();

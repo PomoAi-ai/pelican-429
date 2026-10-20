@@ -1,33 +1,39 @@
 import { t } from '../../config/i18n.ts';
-import { definitionColliderSection, type DefinitionCollision } from '../../physics/definition-collision.ts';
+import { terrainHeightAt } from '../../physics/tile-collision.ts';
+import type { DefinitionPoint } from '../../config/definition-kit.ts';
+import type { TileQuery } from '../../world/tile-map.ts';
+import { pieceOutline } from '../../world/tile-shapes.ts';
 import { bigMapFit, bigMapFitScale, bigMapRect, clampBigMap, followView, panBigMap, rasterBlit, worldToView, zoomBigMapAt,
   type BigMapView } from '../../ui/model/minimap-model.ts';
 
 interface WorldRect { readonly minX: number; readonly minY: number; readonly maxX: number; readonly maxY: number }
 
 const TILE_PX = 4;
-// 玩家站立需要的净高；落点上方被实体占住时换下一个落脚面。
-const CLEARANCE = 1.7;
 
-function drawCollisionMap(canvas: HTMLCanvasElement, collision: DefinitionCollision, world: WorldRect): void {
+/** 按格画出范围内的块（实体与平台的真实轮廓）与特殊构件。 */
+function drawTileMap(canvas: HTMLCanvasElement, map: TileQuery, world: WorldRect): void {
   const context = canvas.getContext('2d')!;
-  const toPixel = (x: number, y: number): [number, number] => [(x - world.minX) * TILE_PX, (world.maxY - y) * TILE_PX];
-  context.clearRect(0, 0, canvas.width, canvas.height);
-  context.fillStyle = '#9fb3a8';
-  for (const solid of collision.solids) {
+  const fill = (points: readonly DefinitionPoint[], ox: number, oy: number): void => {
     context.beginPath();
-    for (const [x, y] of solid.points) context.lineTo(...toPixel(x, y));
+    for (const [x, y] of points) context.lineTo((x + ox - world.minX) * TILE_PX, (world.maxY - y - oy) * TILE_PX);
     context.closePath(); context.fill();
+  };
+  context.clearRect(0, 0, canvas.width, canvas.height);
+  for (let ty = Math.max(0, Math.floor(world.minY)); ty < Math.min(map.height, Math.ceil(world.maxY)); ty++) {
+    for (let tx = Math.max(0, Math.floor(world.minX)); tx < Math.min(map.width, Math.ceil(world.maxX)); tx++) {
+      for (const piece of map.pieces(tx, ty)) {
+        const collision = map.registry.byId(piece.id).collision;
+        context.fillStyle = collision === 'solid' ? '#9fb3a8' : '#d09c52';
+        fill(pieceOutline(collision, piece.shape), tx, ty);
+      }
+    }
   }
-  context.fillStyle = '#d09c52';
-  for (const platform of collision.platforms) {
-    const [x, y] = toPixel(platform.left, platform.top);
-    context.fillRect(x, y, (platform.right - platform.left) * TILE_PX, 2);
-  }
+  context.fillStyle = '#9fb3a8';
+  for (const part of map.parts.all()) for (const points of part.solids) fill(points, 0, 0);
 }
 
-/** 大场景小地图：按碰撞体画出地形，点击传送到所点位置下方最近的可站立面。 */
-export function createPerspectiveMinimap(host: HTMLElement, collision: DefinitionCollision, world: WorldRect,
+/** 大场景小地图：按格画出地形，点击传送到所点位置下方最近的可站立面。 */
+export function createPerspectiveMinimap(host: HTMLElement, map: TileQuery, world: WorldRect,
   onTeleport: (x: number, y: number) => void) {
   const width = world.maxX - world.minX;
   const height = world.maxY - world.minY;
@@ -45,16 +51,10 @@ export function createPerspectiveMinimap(host: HTMLElement, collision: Definitio
   root.append(view);
   host.append(root);
 
-  drawCollisionMap(canvas, collision, world);
+  drawTileMap(canvas, map, world);
 
-  const landing = (x: number, y: number): number => {
-    const spans = collision.solids.map(solid => definitionColliderSection(solid, 0, x - .3, x + .3))
-      .filter((span): span is [number, number] => span !== null);
-    const tops = [...spans.map(([, top]) => top), ...collision.platforms.filter(p => p.left <= x && x <= p.right).map(p => p.top)];
-    const free = tops.filter(top => top <= y + .5 && !spans.some(([low, high]) => low < top + CLEARANCE && high > top + .05));
-    // 所点一列没有落脚面时照常传送，角色下落后由游玩逻辑送回当前分区。
-    return free.length > 0 ? Math.max(...free) : y;
-  };
+  // 所点一列没有落脚面时照常传送，角色下落后由游玩逻辑送回当前分区；身体放不下时由传送就近找空位。
+  const landing = (x: number, y: number): number => terrainHeightAt(map, x, y + .5, y + .5, true) ?? y;
   const onClick = (event: MouseEvent): void => {
     const rect = view.getBoundingClientRect();
     const x = world.minX + (event.clientX - rect.left) / rect.width * width;
@@ -82,8 +82,8 @@ export function createPerspectiveMinimap(host: HTMLElement, collision: Definitio
   };
 }
 
-/** 自由搭建世界没有 TileMap；沿用透视地图的真实碰撞轮廓及正式地图的坐标变换。 */
-export function createPlayableDefinitionMinimap(host: HTMLElement, collision: DefinitionCollision, world: WorldRect) {
+/** 场景演示的小地图：按格画出拼合后的世界，坐标变换与正式地图相同；M 开关大地图，Esc 关闭。 */
+export function createPlayableDefinitionMinimap(host: HTMLElement, map: TileQuery, world: WorldRect) {
   const events = new AbortController();
   const width = world.maxX - world.minX;
   const height = world.maxY - world.minY;
@@ -159,17 +159,22 @@ export function createPlayableDefinitionMinimap(host: HTMLElement, collision: De
     const rect = canvas.getBoundingClientRect();
     bigView = zoomBigMapAt(bigView, 1.25 ** -Math.sign(event.deltaY), event.clientX - rect.left, event.clientY - rect.top, limits()); redraw();
   }, { passive: false, signal: events.signal });
-  drawCollisionMap(base, collision, world);
+  window.addEventListener('keydown', event => {
+    const target = event.target as HTMLElement | null;
+    if (target?.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(target?.tagName ?? '')) return;
+    if (event.repeat || event.ctrlKey || event.metaKey || event.altKey) return;
+    if (event.code !== 'KeyM' && !(event.code === 'Escape' && bigView !== null)) return;
+    event.preventDefault(); event.stopImmediatePropagation();
+    setOpen(event.code === 'KeyM' ? bigView === null : false);
+  }, { capture: true, signal: events.signal });
+  drawTileMap(base, map, world);
   return {
     root,
-    get bigMapOpen(): boolean { return bigView !== null; },
-    toggleBigMap(open?: boolean): void { setOpen(open ?? bigView === null); },
     update(x: number, y: number): void {
       // 每帧调用：玩家没动就不重画整张地图。
       if (x === position.x && y === position.y) return;
       position = { x, y }; redraw();
     },
-    refresh(): void { drawCollisionMap(base, collision, world); redraw(); },
     dispose(): void { events.abort(); resize.disconnect(); root.remove(); },
   };
 }

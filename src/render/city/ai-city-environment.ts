@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { mulberry32 } from '../../core/rng.ts';
 import { RESIDENCE_WORLD, RESIDENCE_SEGMENT_WIDTH as SEGMENT_WIDTH } from '../../config/residence.ts';
 import { AI_CITY_LAYERS, type AiCityLayerId } from '../../config/ai-city-look.ts';
+import { CITY_BACKDROP_LAYER, DEPTH_G } from '../../config/depth-layers.ts';
 import { planTree } from '../../world/trees.ts';
 import type { TreeKind } from '../../world/level.ts';
 import { buildTreeGeometry } from '../tree/tree-geometry.ts';
@@ -259,8 +260,8 @@ function createEnvironmentSegment(layer: SegmentLayer, index: number, homeCenter
   const city = createAiCityBatches();
   city.root.name = `ai-city-${layer}-segment-${index}`;
   city.root.position.x = index * SEGMENT_WIDTH;
-  const originalDepth = { garden: -7, architecture: -16, canyon: -35, city: -70, distance: -140 };
-  if (layer !== 'ground') city.root.position.z = AI_CITY_LAYERS.find(value => value.id === layer)!.depth - originalDepth[layer];
+  // 城景按方案 G 层距建模，推到城区取景的层距。
+  if (layer !== 'ground') city.root.position.z = AI_CITY_LAYERS.find(value => value.id === layer)!.depth - DEPTH_G.distance[CITY_BACKDROP_LAYER[layer]];
   const plan: SegmentPlan = { beds: [], trees: [], waters: [] };
   const local = clearing && { minX: clearing.minX - index * SEGMENT_WIDTH, maxX: clearing.maxX - index * SEGMENT_WIDTH };
   switch (layer) {
@@ -366,7 +367,8 @@ export function createAiCityEnvironment({ homeCenter, scenery, clearing = null }
   };
   const setVisibleRange = (x: number, width: number): void => { range = { x, w: width }; sync(); };
   sync();
-  return { root, layers,
+  // foreground：前景格子（镜头一侧的水岸与花槽），交给背景层做近景模糊。
+  return { root, layers, foreground: ground,
     async prepare(signal: AbortSignal, onProgress: (progress: { completed: number; total: number }) => void): Promise<void> {
       signal.throwIfAborted();
       let completed = 0;

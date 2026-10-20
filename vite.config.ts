@@ -4,16 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { join, relative } from 'node:path';
 import { RELEASE_MODEL_PATHS } from './src/config/web-models.ts';
 import { NPCS } from './src/config/npc.ts';
-import { HARBOR_PAINTED_FILES, HARBOR_PAINTED_PATH, HARBOR_LAKE_FILES, HARBOR_LAKE_PATH } from './src/config/harbor-painted.ts';
-
-// 普通构建只发布 index（Vite 默认入口）；full 构建全部页面。
-const PAGES = {
-  main: 'index.html',
-  renderLab: 'render-lab.html',
-  hairGallery: 'd1-hair-gallery.html',
-  harborPerspective: 'harbor-perspective.html',
-  maglevTrack: 'maglev-track.html',
-};
+import { SHOWCASE_ACTORS } from './src/config/showcase.ts';
 
 function configureMarkdownEncoding(server: Pick<ViteDevServer, 'middlewares'>) {
   server.middlewares.use((req, res, next) => {
@@ -31,9 +22,8 @@ export default defineConfig(({ command, mode }) => ({
   server: { host: '127.0.0.1', port: 5174 },
   preview: { host: '127.0.0.1', port: 4174 },
   build: {
+    // 只有 index 一个入口（Vite 默认）；full 构建另外整份复制 public，普通构建只发布 release-assets 白名单。
     target: 'es2022', copyPublicDir: mode === 'full',
-    ...(mode === 'full' ? { rolldownOptions: { input: Object.fromEntries(Object.entries(PAGES)
-      .map(([name, file]) => [name, fileURLToPath(new URL(`./${file}`, import.meta.url))])) } } : {}),
   },
   plugins: [{
     name: 'markdown-utf8',
@@ -50,21 +40,22 @@ export default defineConfig(({ command, mode }) => ({
         ...Object.values(NPCS).flatMap(npc => npc.forms.map(form => form.image)),
         'characters/luma/portrait.jpg', 'contact/x-avatar.jpg', 'ui/hud-icons.webp',
         'scenes/ai-city-background-v1/skyline.png', 'scenes/ai-city-background-v1/canyon.png',
-        'scenes/ai-skyline-depth-v1/sky.jpg',
-        ...HARBOR_PAINTED_FILES.map(file => `${HARBOR_PAINTED_PATH}/${file}`),
-        ...HARBOR_LAKE_FILES.map(file => `${HARBOR_LAKE_PATH}/${file}`),
+        // 展示场目录卡片的角色图。
+        ...SHOWCASE_ACTORS.map(actor => actor.image),
       ];
-      for (const directory of ['resources/home', 'resources/free-world', 'concepts', 'ui/hud']) {
+      // 场景透视与资源检查用 resources 与天际线分层图。
+      for (const directory of ['resources', 'scenes/ai-skyline-depth-v1', 'concepts', 'ui/hud']) {
         for (const entry of readdirSync(join(publicDir, directory), { recursive: true, withFileTypes: true })) {
           if (entry.isFile()) files.push(relative(publicDir, join(entry.parentPath, entry.name)));
         }
       }
-      for (const file of files) {
+      // 清单之间有重叠（如展示场卡片图也在 resources 目录里），按输出路径去重。
+      for (const file of new Set(files.map(file => file.replace(/^\.\//, '').replaceAll('\\', '/')))) {
         const source = readFileSync(join(publicDir, file));
         if (file.endsWith('.glb') && source.toString('ascii', 0, 4) !== 'glTF') {
           throw new Error(`发布模型不是 GLB 文件，请先拉取 Git LFS 资源：${file}`);
         }
-        this.emitFile({ type: 'asset', fileName: file.replace(/^\.\//, '').replaceAll('\\', '/'), source });
+        this.emitFile({ type: 'asset', fileName: file, source });
       }
     },
   } satisfies Plugin] : []],

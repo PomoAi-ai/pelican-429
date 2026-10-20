@@ -8,7 +8,7 @@
 import { CAVE_RULES, ISLAND_RULES, ISLET_RULES } from '../config/cave-island-rules.ts';
 import { HUT_RULES } from '../config/worldgen-rules.ts';
 import type { WorldgenTuning } from '../config/worldgen-rules.ts';
-import { FLUID_FULL } from './fluid-map.ts';
+import { fillWaterBody } from './fluid-map.ts';
 import type { FluidMap } from './fluid-map.ts';
 import { applyCaveMask, clearEntranceHeadroom, placeCaveSlopes, placeEntranceRamps, planCaveGlows, planCavePools } from './cave-features.ts';
 import { entranceSpan, planCaveNetwork } from './caves.ts';
@@ -194,17 +194,12 @@ export function finishFloaters(grid: Uint16Array, width: number, height: number,
   return { trees: Object.freeze(trees), islands: Object.freeze(islands) };
 }
 
-/** 地下水潭注水（满格）+ 发光源；返回 CaveInfo 与注水格数。 */
+/** 地下水潭注水（满格，岸边斜坡/半砖的连通空子格一并灌满）+ 发光源；返回 CaveInfo 与注水格数。 */
 export function finishCaves(grid: Uint16Array, ground: Int32Array, fluid: FluidMap, network: CaveNetwork, width: number, height: number, air: number, seed: number): { readonly caves: CaveInfo; readonly waterCells: number } {
   const pools = planCavePools(grid, network.mask, network.basins, width, air);
   let waterCells = 0;
-  for (const p of pools) {
-    for (const i of p.cells) {
-      fluid.set(i % width, Math.floor(i / width), FLUID_FULL);
-      waterCells++;
-    }
-  }
-  const glows = planCaveGlows(grid, network.mask, fluid.cells, network.rooms, ground, width, height, air, seed);
+  for (const p of pools) waterCells += fillWaterBody(fluid, p.cells.map((i) => [i % width, Math.floor(i / width)] as const));
+  const glows = planCaveGlows(grid, network.mask, fluid, network.rooms, ground, width, height, air, seed);
   const caves: CaveInfo = Object.freeze({ mask: network.mask, rooms: network.rooms, entrances: network.entrances, pools: Object.freeze(pools), glows: Object.freeze(glows) });
   return { caves, waterCells };
 }

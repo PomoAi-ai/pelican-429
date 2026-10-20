@@ -4,7 +4,7 @@
  */
 import type * as THREE from 'three';
 import type { DisturbUniforms } from '../flora/grass-disturb.ts';
-import type { LightMapPatchOptions, LightMapUniforms } from './light-texture.ts';
+import type { LightMapPatchOptions, LightMapUniforms } from './light-field-material.ts';
 import type { PrecipUniforms } from '../sky/precip-surface.ts';
 import type { WaterPaletteUniforms } from '../water/water-shading.ts';
 import type { WindUniforms } from '../sky/wind.ts';
@@ -56,16 +56,13 @@ export type NodePatch =
   | { readonly kind: 'water-surface'; readonly wind: WindUniforms; readonly time: Scalar; readonly palette: WaterPaletteUniforms; readonly ripple: Scalar }
   | { readonly kind: 'water-wave'; readonly wind: WindUniforms; readonly time: Scalar }
   | { readonly kind: 'water-ripples'; readonly wind: WindUniforms; readonly time: Scalar }
-  | { readonly kind: 'harbor-lake-light'; readonly light: Scalar }
   | { readonly kind: 'hut-texture'; readonly texture: THREE.IUniform<THREE.Texture>; readonly wind: WindUniforms | null; readonly sway: { readonly lean: number; readonly flutter: number } }
   | { readonly kind: 'hut-smoke'; readonly wind: WindUniforms; readonly smoke: { readonly rate: number; readonly rise: number; readonly r0: number; readonly r1: number; readonly drift: number } }
   | { readonly kind: 'natural-building'; readonly grass: THREE.Texture | null; readonly period: number }
   | { readonly kind: 'furniture-fabric' }
   | { readonly kind: 'ai-city-finish'; readonly finish: 'ceramic' | 'wall' | 'ashlar' | 'alloy'; readonly variation: readonly [tone: number, warmth: number, roughness: number] }
   | { readonly kind: 'gate-dissolve'; readonly dissolve: Scalar }
-  | { readonly kind: 'harbor-curtain-wall' }
-  | { readonly kind: 'harbor-shore-haze'; readonly near: Scalar; readonly color: THREE.IUniform<THREE.Color>; readonly halfDistance: number }
-  | { readonly kind: 'harbor-painted-air'; readonly air: THREE.IUniform<THREE.Color>; readonly night: Scalar; readonly cloud: Scalar; readonly haze: number };
+  | { readonly kind: 'harbor-shore-haze'; readonly near: Scalar; readonly color: THREE.IUniform<THREE.Color>; readonly halfDistance: number };
 
 const registry = new WeakMap<THREE.Material, NodePatch[]>();
 

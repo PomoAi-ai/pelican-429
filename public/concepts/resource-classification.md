@@ -65,7 +65,8 @@
 
 ## 预览
 
-- [自由搭建场](/?mode=lab&demo=sandbox)
-- [材料与形状演示](/?mode=lab&demo=tiles)
-- [AI 住宅](/?mode=lab&demo=residence)
-- [场景透视](/?mode=resources&scene=room)
+- [自由搭建场](../?mode=lab&demo=sandbox)
+- [材料与形状演示](../?mode=lab&demo=tiles)
+- [主世界城区](../?mode=game)
+- [原版住宅](../?mode=homestead&scene=residence)
+- [场景透视](../?mode=resources&scene=room)

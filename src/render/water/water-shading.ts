@@ -8,7 +8,7 @@
  * - 背板：淡色透明层，顶点灰度（按上方水深变暗）× 色板 back，让远景透过水体。
  * - 雨点涟漪（022）：顶面按 (x, z) 网格的随机雨点画扩散细环，强度/活跃格比例 = 共享降水 uniform uPrRipple（雨强）。
  * 色板为 uniform（setPalette 运行时切换不重编译）；光照图/云影由各自 patcher 链式注入（保留 onBeforeCompile 链）。
- * - 随光照变暗（修复轮 B）：前面/背板标记 userData.waterBody → light-texture 把整体（含自发光底色、高光边、天空反射）
+ * - 随光照变暗（修复轮 B）：前面/背板标记 userData.waterBody → light-field-material 把整体（含自发光底色、高光边、天空反射）
  *   乘 水响应(光照图) ⊕ 微光（洞内水潭只在发光物/微光/光球附近可见，深水暗）；天空可见度 wsky = smoothstep(WATER_SKY_LO, HI,
  *   本列水面上方一格的环境光照)（光照图挂接后由 LM_LIGHT_MAP 提供 lmAmbient；洞内发光物 ≤ .49 → 0）乘到天空反射/菲涅耳、
  *   条纹亮带、波光、焦散上，高光边在无天空处收敛到下沿色（洞内不再出现平的浅灰窄带）。
@@ -270,7 +270,7 @@ export function createWaterMaterials(palette: WaterPalette, uTime: THREE.IUnifor
 
   const front = new THREE.MeshStandardMaterial({ transparent: true, opacity: 0.55, depthWrite: false, roughness: 0.3, metalness: 0 });
   front.name = 'water-front';
-  // 水体：光照图整体乘（含自发光底色）+ 水响应曲线（render/light-texture）。
+  // 水体：光照图整体乘（含自发光底色）+ 水响应曲线（render/stage/light-field-material）。
   front.userData.waterBody = true;
   front.onBeforeCompile = (shader) => {
     vertex(shader);

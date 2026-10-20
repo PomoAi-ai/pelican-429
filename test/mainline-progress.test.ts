@@ -30,7 +30,7 @@ test('重建世界后按驻点保留清怪与受伤进度，恢复位置和资�
     player.pelican!.weapon.fish = 2;
     player.pelican!.weapon.cooldowns = [5, 40, 70];
     world.photon.cooldownTicks = 460;
-    const guard = world.entities.find(entity => entity.enemy?.kind === 'gatekeeper' && entity.body.y === 20)!;
+    const guard = world.entities.find(entity => entity.enemy?.kind === 'omi' && entity.body.y === 20)!;
     guard.body.x += 2;
     guard.health!.hp = 19;
     startEnemySkill(guard, 0, player.body);

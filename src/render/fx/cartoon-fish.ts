@@ -4,7 +4,7 @@
  * - 部件：前半身（头）+ 后半身（mid 枢轴）+ 尾柄/分叉尾鳍（tail 枢轴，挂在 mid 下）——两级枢轴绕 Z 反相摆动 = 身体 S 形扭动；
  *   浅色肚皮、背鳍、腹鳍、两侧胸鳍（扑动）、大眼睛（白眼球 + 黑瞳 + 高光）、上下唇与下颌枢轴（嘴一张一合）、鳞片纹理（DataTexture）。
  * - 配色：FISH_VARIANTS（橙/蓝沿用共享 FISH_COLORS 身体色，另加金色）；同一套几何共享，材质按配色共享。
- * - 全部为 MeshStandard 材质（由 light-texture 自动挂接瓦片光照/云影）；无每帧分配。
+ * - 全部为 MeshStandard 材质（由 light-field-material 自动挂接瓦片光照/云影）；无每帧分配。
  * 纯函数 fishWiggle / fishTumbleRate 给出扭动与翻滚参数，便于测试。
  */
 import * as THREE from 'three';

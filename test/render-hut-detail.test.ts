@@ -10,8 +10,8 @@ import { HUT_FACADE_Z_MAX, HUT_PARTS, HUT_PROP_Z_MAX, HUT_SWAY_PARTS, buildHutGe
 import type { BedHeight } from '../src/render/building/hut-geometry.ts';
 import { HUT_SMOKE_PUFFS, buildSmokeGeometry, createHutMaterials } from '../src/render/building/hut-material.ts';
 import { HUT_TEXTURE_LAYERS, HUT_TEXTURE_SIZE, generateHutTextures } from '../src/render/building/hut-textures.ts';
-import { injectLightMap, isLightMappable } from '../src/render/stage/light-texture.ts';
-import type { LightMapUniforms } from '../src/render/stage/light-texture.ts';
+import { injectLightMap, isLightMappable } from '../src/render/stage/light-field-material.ts';
+import type { LightMapUniforms } from '../src/render/stage/light-field-material.ts';
 import { HUT_MESHES_PER_HUT, createStructureView } from '../src/render/building/structure-view.ts';
 import { BLOCK_FRONT_Z } from '../src/render/tile/tile-geometry.ts';
 import { sharedWindUniforms } from '../src/render/sky/wind.ts';
@@ -181,11 +181,15 @@ describe('渔屋细节：材质挂接', () => {
   test('光照图与云影：三种材质都可挂接，且在本材质注入之后链式注入不丢片段', () => {
     const m = createHutMaterials();
     const uniforms: LightMapUniforms = {
-      uLightMap: { value: new THREE.Texture() },
-      uLightMapSize: { value: new THREE.Vector2(10, 10) },
+      uLightField: { value: new THREE.Texture() },
+      uLightFieldBounds: { value: new THREE.Vector4(0, 0, 4, 40) },
+      uLightFieldWindow: { value: new THREE.Vector2(0, 40) },
+      uLightFieldLayout: { value: new THREE.Vector4(1, 1, 130, 40) },
       uLightMin: { value: 0.1 },
       uDynLights: { value: [new THREE.Vector4()] },
       uDynCount: { value: 0 },
+      uWaterDepth: { value: new THREE.Texture() },
+      uWaterDepthSize: { value: new THREE.Vector2(10, 10) },
       uWaterShallow: { value: new THREE.Color() },
       uWaterDeep: { value: new THREE.Color() },
       uWaterAlpha: { value: new THREE.Vector2() },

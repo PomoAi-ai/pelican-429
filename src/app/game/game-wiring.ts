@@ -76,7 +76,7 @@ export function createEntityViews(stage: { scene: THREE.Object3D }, level: Level
       : createPlayerViewFactory({ rig, tuning: TUNING, terrain: level.map, actors, fishRelay: projectiles.fishRelay, treeRide, grassyVariant, grassyGait,
         windAt, appearance, modelView }),
     trainingDummy: createDummyViewFactory({ tuning: TUNING, terrain: level.map, treeRide }),
-    gatekeeper: createEnemyViewFactory(level.map), lineHound: createEnemyViewFactory(level.map),
+    omi: createEnemyViewFactory(level.map), lineHound: createEnemyViewFactory(level.map),
     watchWasp: createEnemyViewFactory(level.map), loadmaster: createEnemyViewFactory(level.map),
     sam: entity => entity.npc ? createWandererView(entity) : takeBossView(entity),
     tibo: entity => entity.npc ? createWandererView(entity) : takeBossView(entity),

@@ -43,11 +43,13 @@ export function createPaintedBackdrop(definitions: readonly PaintedLayer[], fram
   const cameraPosition = new THREE.Vector3();
   const cameraRotation = new THREE.Quaternion();
   const rootRotation = new THREE.Quaternion();
+  const frameRotation = new THREE.Quaternion();
   const imageAspect = framing.aspect ?? 1.5;
   return {
     root,
     layers,
-    update(camera: THREE.Camera) {
+    /** cameraFrame：camera 坐标所在的物体（城区环境平移进格子世界，代理相机按环境局部坐标给出）；缺省为世界。 */
+    update(camera: THREE.Camera, cameraFrame?: THREE.Object3D) {
       const projection = camera.projectionMatrix.elements;
       const aspect = projection[5]! / projection[0]!;
       const cover = Math.max(framing.cover ?? 1.45, aspect / imageAspect * 1.08);
@@ -57,6 +59,11 @@ export function createPaintedBackdrop(definitions: readonly PaintedLayer[], fram
       if (framing.cameraFacing) {
         camera.getWorldPosition(cameraPosition);
         camera.getWorldQuaternion(cameraRotation);
+        if (cameraFrame) {
+          cameraFrame.updateWorldMatrix(true, false);
+          cameraPosition.applyMatrix4(cameraFrame.matrixWorld);
+          cameraRotation.premultiply(cameraFrame.getWorldQuaternion(frameRotation));
+        }
         root.updateWorldMatrix(true, false);
         root.getWorldQuaternion(rootRotation).invert();
       }

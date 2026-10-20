@@ -92,7 +92,7 @@ D1_MALE_SHEETS = [
 
 def build(spec, base):
     """Front/right sheet on the unified ruler; base is the same character's haired barefoot sheet."""
-    source = ROOT / 'public/art-library' / spec['folder'] / spec['source']
+    source = ROOT / 'public/catalog' / spec['folder'] / spec['source']
     original_bytes = source.read_bytes()
     art = Image.open(source).convert('RGB')
     assert art.size == spec['size'], (source, art.size)

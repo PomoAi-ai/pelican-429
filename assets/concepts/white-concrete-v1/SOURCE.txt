@@ -45,7 +45,7 @@ shapes.json和walls.json保留来源及精确二维顶点。与图片同名的JS
 每种模式运行：Blender --background --factory-startup --python render_sheets.py -- --mode solids|walls|camera|assembly --width 对应输出宽度。
 
 后续运行时接入（2026-10-13）
-已接入共享 src/render/white-concrete-material.ts 与 DefinitionKit；上方“范围说明”记录的是此前仅制作图录时的状态。
+曾接入共享 src/render/building/white-concrete-material.ts 与 DefinitionKit；该材质后来不再被引用，已删除（见 git 历史）。上方“范围说明”记录的是此前仅制作图录时的状态。
 33种实体、背景墙、混凝土开窗外环和四角拼窗共用原始颜色纹理，粗糙度0.9、金属度0；按世界坐标三平面映射，一格对应一幅纹理。
 运行时采用镜像重复使纹理边缘连续；这是采样方式，不表示原始PNG经过四边像素周期认证。
 玻璃、蓝色金属窗棂、木门和平台继续使用原有材料；实体深2、墙厚0.2与既有碰撞轮廓不变。

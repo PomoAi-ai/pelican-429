@@ -14,19 +14,22 @@ import { TREE_SHAPES } from '../src/config/worldgen-rules.ts';
 import { CAVE_DECOR_Z_MAX, CAVE_DECOR_Z_MIN, planCaveDecor } from '../src/render/decor/cave-decor-view.ts';
 import { caveWallCells, isCarvedWall } from '../src/render/decor/cave-wall-view.ts';
 import { createGroundProfile } from '../src/render/tile/ground-profile.ts';
-import { injectLightMap } from '../src/render/stage/light-texture.ts';
-import type { LightMapUniforms } from '../src/render/stage/light-texture.ts';
-import { auraDarkness, auraTarget, createPelicanAura, sampleLight } from '../src/render/pelican/pelican-aura.ts';
+import { injectLightMap } from '../src/render/stage/light-field-material.ts';
+import type { LightMapUniforms } from '../src/render/stage/light-field-material.ts';
+import { auraDarkness, auraTarget, createPelicanAura } from '../src/render/pelican/pelican-aura.ts';
 import { islandGroundProfile, planSkyIslandParts } from '../src/render/decor/sky-island-view.ts';
 import { groundSurface } from '../src/render/stage/stage.ts';
 import { levelGroundColumns } from '../src/render/decor/surface-decor-view.ts';
 import { buildTreeGeometry } from '../src/render/tree/tree-geometry.ts';
 import { caveLightSources } from '../src/world/cave-features.ts';
 import { entranceSpan } from '../src/world/caves.ts';
-import { stepFluid } from '../src/world/fluid-sim.ts';
+import { advanceFluid } from '../src/world/fluid-sim.ts';
 import { CAVE_CELL, CAVE_ENTRANCE, CAVE_NONE, CAVE_OPEN, caveCovered } from '../src/world/level.ts';
 import type { SkyIsland } from '../src/world/level.ts';
-import { LIGHT_FULL, createLightMap } from '../src/world/light-map.ts';
+import { createFluidMap } from '../src/world/fluid-map.ts';
+import { LIGHT_FULL } from '../src/world/light-field.ts';
+import { createWorldLightField } from '../src/world/light-field-tiles.ts';
+import type { WorldLightFieldInput } from '../src/world/light-field-tiles.ts';
 import { bodyFlood } from '../src/world/reachability.ts';
 import { islandSkyPass, isletLaunch, isletLaunchSide } from '../src/world/sky-islands.ts';
 import { createTileMap } from '../src/world/tile-map.ts';
@@ -43,6 +46,16 @@ const NEAR_SLACK = 6;
 const JUMP_ROWS = 4.2;
 
 const cache = new Map<number, GeneratedWorld>();
+
+/** 整个世界都计算的光场。 */
+function fullField(input: WorldLightFieldInput) {
+  const field = createWorldLightField(input);
+  field.view(0, field.strips, 0);
+  field.sync();
+  return field;
+}
+/** 逻辑格中心的天空光（0..255）。 */
+const cellLight = (field: ReturnType<typeof fullField>, x: number, y: number): number => Math.round(field.sample(x + .5, y + .5) * LIGHT_FULL);
 const world = (seed: number): GeneratedWorld => {
   let w = cache.get(seed);
   if (!w) cache.set(seed, (w = generateWorld(seed, CFG)));
@@ -132,20 +145,25 @@ describe('021 洞穴：生成规则（默认 seed + 99 seed）', () => {
       if (w.caves.pools.length === 0) continue;
       pools += w.caves.pools.length;
       const W = w.map.width;
-      const before = w.caves.pools.map((p) => p.cells.reduce((a, i) => a + (w.fluid.cells[i] as number), 0));
+      // 水潭水量按子格精确求和（逻辑格 amountAt 向上取整）。
+      const tileMass = (i: number): number => {
+        let m = 0;
+        for (let k = 0; k < 16; k++) m += w.fluid.subAt((i % W) * 4 + (k % 4), Math.floor(i / W) * 4 + Math.floor(k / 4));
+        return m;
+      };
+      const before = w.caves.pools.map((p) => p.cells.reduce((a, i) => a + tileMass(i), 0));
       for (const p of w.caves.pools) {
         for (const i of p.cells) {
-          assert.equal(w.fluid.cells[i], 255, `seed ${seed}: pool cell not full`);
           const x = i % W;
           const y = Math.floor(i / W);
+          assert.equal(w.fluid.amountAt(x, y), 255, `seed ${seed}: pool cell not full`);
           for (const [dx, dy] of [[-1, 0], [1, 0], [0, -1]] as const) {
-            const j = (y + dy) * W + x + dx;
-            assert.ok(w.map.collisionAt(x + dx, y + dy) === 'solid' || (w.fluid.cells[j] as number) > 0, `seed ${seed}: pool leaks at (${x + dx},${y + dy})`);
+            assert.ok(w.map.collisionAt(x + dx, y + dy) === 'solid' || w.fluid.amountAt(x + dx, y + dy) > 0, `seed ${seed}: pool leaks at (${x + dx},${y + dy})`);
           }
         }
       }
-      for (let s = 0; s < 600; s++) stepFluid(w.fluid, TUNING.fluid, s);
-      w.caves.pools.forEach((p, k) => assert.equal(p.cells.reduce((a, i) => a + (w.fluid.cells[i] as number), 0), before[k], `seed ${seed}: pool ${k} changed`));
+      for (let s = 0; s < 600; s++) advanceFluid(w.fluid, TUNING.fluid, s);
+      w.caves.pools.forEach((p, k) => assert.equal(p.cells.reduce((a, i) => a + tileMass(i), 0), before[k], `seed ${seed}: pool ${k} changed`));
       cache.delete(seed); // 模拟改了水量，后续用例重新生成
     }
     assert.ok(pools >= 10, `pools across 30 seeds: ${pools}`);
@@ -160,18 +178,18 @@ describe('021 洞穴：生成规则（默认 seed + 99 seed）', () => {
     for (const k of ['mushroom', 'crystalCyan', 'crystalPurple', 'fireflies']) assert.ok(kinds.has(k as never), `kind ${k}`);
     for (const g of gs) {
       assert.equal(w.caves.mask[g.y * W + g.x], CAVE_CELL);
-      assert.equal(w.fluid.cells[g.y * W + g.x], 0);
+      assert.equal(w.fluid.amountAt(g.x, g.y), 0);
       assert.equal(g.light, CAVE_RULES.GLOW_LIGHT[g.kind]);
     }
     for (let i = 0; i < gs.length; i++) for (let j = i + 1; j < gs.length; j++) assert.ok(Math.max(Math.abs(gs[i]!.x - gs[j]!.x), Math.abs(gs[i]!.y - gs[j]!.y)) >= CAVE_RULES.GLOW_GAP);
-    const lmOf = (emitters: boolean) => createLightMap({ map: w.map, water: w.fluid.cells, canopies: [], config: DEFAULT_LIGHTING.lightMap, ...(emitters ? { emitters: caveLightSources(gs) } : {}) });
+    const lmOf = (emitters: boolean) => fullField({ map: w.map, fluid: w.fluid, trees: [], decay: DEFAULT_LIGHTING.lightMap, ...(emitters ? { emitters: caveLightSources(gs) } : {}) });
     const lit = lmOf(true);
     const dark = lmOf(false);
     const deep = gs.filter((g) => g.kind !== 'fireflies').slice(0, 10);
     for (const g of deep) {
-      const i = g.y * W + g.x;
-      assert.ok((lit.light[i] as number) >= g.light, `glow (${g.x},${g.y}) lit ${lit.light[i]}`);
-      assert.ok((lit.light[i] as number) > (dark.light[i] as number), `glow (${g.x},${g.y}) brighter than without emitters`);
+      const v = cellLight(lit, g.x, g.y);
+      assert.ok(v >= g.light, `glow (${g.x},${g.y}) lit ${v}`);
+      assert.ok(v > cellLight(dark, g.x, g.y), `glow (${g.x},${g.y}) brighter than without emitters`);
     }
   });
 });
@@ -351,8 +369,8 @@ describe('021 渲染：背景墙、装饰、岛上树、光照', () => {
   test('洞穴装饰：确定性；全部在有顶洞穴格内，z 在鹈鹕身后；发光源格都有发光装饰', () => {
     const w = world(CFG.seed);
     const W = w.map.width;
-    const a = planCaveDecor(w.map, w.caves, w.fluid.cells, 0, W - 1);
-    assert.deepEqual(planCaveDecor(w.map, w.caves, w.fluid.cells, 0, W - 1), a);
+    const a = planCaveDecor(w.map, w.caves, w.fluid, 0, W - 1);
+    assert.deepEqual(planCaveDecor(w.map, w.caves, w.fluid, 0, W - 1), a);
     assert.ok(a.length > 200, `decor ${a.length}`);
     for (const d of a) {
       assert.ok(d.z >= CAVE_DECOR_Z_MIN && d.z <= CAVE_DECOR_Z_MAX && d.z < 0, `z ${d.z}`);
@@ -413,16 +431,14 @@ describe('021 渲染：背景墙、装饰、岛上树、光照', () => {
     for (let x = 0; x < 20; x++) for (let y = 0; y < 10; y++) map.set(x, y, TILE_DIRT);
     for (let x = 5; x <= 14; x++) for (let y = 25; y < 28; y++) map.set(x, y, TILE_DIRT);
     const island = { kind: 'island', x0: 5, x1: 14, bottoms: Array(10).fill(25), tops: Array(10).fill(28) } as unknown as SkyIsland;
-    const water = new Uint8Array(800);
-    const cfg = DEFAULT_LIGHTING.lightMap;
-    const pass = createLightMap({ map, water, canopies: [], config: cfg, skyPass: islandSkyPass([island], 20, 40), skyShade: 200, skyPassDecay: 0.7 });
-    const block = createLightMap({ map, water, canopies: [], config: cfg });
-    assert.equal(pass.light[15 * 20 + 10], 200);
-    assert.ok((block.light[15 * 20 + 10] as number) < 200);
-    assert.equal(pass.light[15 * 20 + 1], LIGHT_FULL);
-    assert.throws(() => createLightMap({ map, water, canopies: [], config: cfg, emitters: [{ tx: 1, ty: 1, level: 0 }] }), /emitter/);
-    assert.throws(() => createLightMap({ map, water, canopies: [], config: cfg, skyPass: new Uint8Array(3), skyPassDecay: 0.7 }), /skyPass/);
-    assert.throws(() => createLightMap({ map, water, canopies: [], config: cfg, skyPass: islandSkyPass([island], 20, 40) }), /skyPassDecay/);
+    const base = { map, fluid: createFluidMap(map), trees: [], decay: DEFAULT_LIGHTING.lightMap };
+    const pass = fullField({ ...base, skyPass: islandSkyPass([island], 20, 40) });
+    const block = fullField(base);
+    assert.equal(cellLight(pass, 10, 15), ISLAND_LIGHT.SKY_SHADE);
+    assert.ok(cellLight(block, 10, 15) < ISLAND_LIGHT.SKY_SHADE);
+    assert.equal(cellLight(pass, 1, 15), LIGHT_FULL);
+    assert.throws(() => fullField({ ...base, emitters: [{ tx: 1, ty: 1, level: 0 }] }), /emitter/);
+    assert.throws(() => fullField({ ...base, skyPass: new Uint8Array(3) }), /skyPass/);
   });
 });
 
@@ -476,18 +492,17 @@ describe('021 鹈鹕微光', () => {
     assert.throws(() => a.update(-1, 0, false), /dt/);
   });
 
-  test('采样光照图：双线性、越界夹取；着色器注入光圈（与光照图屏幕合成）', () => {
-    const light = new Uint8Array([0, 255, 0, 255]);
-    assert.equal(sampleLight(light, 2, 2, 0.5, 0.5), 0);
-    assert.ok(Math.abs(sampleLight(light, 2, 2, 1, 0.5) - 0.5) < 1e-9);
-    assert.equal(sampleLight(light, 2, 2, -5, 0.5), 0);
-    assert.throws(() => sampleLight(light, 3, 2, 0, 0), /light length/);
+  test('着色器注入光圈（与光照图屏幕合成）', () => {
     const uniforms: LightMapUniforms = {
-      uLightMap: { value: new THREE.Texture() },
-      uLightMapSize: { value: new THREE.Vector2(10, 10) },
+      uLightField: { value: new THREE.Texture() },
+      uLightFieldBounds: { value: new THREE.Vector4(0, 0, 4, 40) },
+      uLightFieldWindow: { value: new THREE.Vector2(0, 40) },
+      uLightFieldLayout: { value: new THREE.Vector4(1, 1, 130, 40) },
       uLightMin: { value: 0 },
       uDynLights: { value: [new THREE.Vector4()] },
       uDynCount: { value: 0 },
+      uWaterDepth: { value: new THREE.Texture() },
+      uWaterDepthSize: { value: new THREE.Vector2(10, 10) },
       uWaterShallow: { value: new THREE.Color() },
       uWaterDeep: { value: new THREE.Color() },
       uWaterAlpha: { value: new THREE.Vector2() },
@@ -534,7 +549,7 @@ describe('021 浮空岛返工：天空光照、土质岛体、连续斜坡、高
     const w = world(CFG.seed);
     const W = w.map.width;
     const H = w.map.height;
-    const lm = createLightMap({ map: w.map, water: w.fluid.cells, canopies: [], config: DEFAULT_LIGHTING.lightMap, skyPass: islandSkyPass(w.islands, W, H), skyShade: ISLAND_LIGHT.SKY_SHADE, skyPassDecay: ISLAND_LIGHT.SKY_PASS_DECAY });
+    const lm = fullField({ map: w.map, fluid: w.fluid, trees: [], decay: DEFAULT_LIGHTING.lightMap, skyPass: islandSkyPass(w.islands, W, H) });
     const fm = floaterMask(w);
     const exposed = (x: number, y: number): boolean => [[1, 0], [-1, 0], [0, 1], [0, -1]].some(([dx, dy]) => w.map.collisionAt(x + dx!, y + dy!) === 'none');
     // 离最近空气格的曼哈顿距离不超过 r。
@@ -548,9 +563,13 @@ describe('021 浮空岛返工：天空光照、土质岛体、连续斜坡、高
       for (let i = 0; i <= s.x1 - s.x0; i++) {
         const x = s.x0 + i;
         for (let y = s.bottoms[i] as number; y < (s.tops[i] as number); y++) {
-          const v = lm.light[y * W + x] as number;
-          // 外露面 = 相邻空气（天空光或岛下 SKY_SHADE）进入实心衰减一次（airDecay）。
-          if (exposed(x, y)) assert.ok(v >= Math.floor(ISLAND_LIGHT.SKY_SHADE * DEFAULT_LIGHTING.lightMap.airDecay), `${s.kind} ${s.id} exposed (${x},${y}) light ${v}`);
+          const v = cellLight(lm, x, y);
+          // 外露面 = 贴着空气的那排子格：相邻空气（天空光或岛下 SKY_SHADE）进入实心衰减一次（airDecay），格心已在实心半格深处。
+          if (exposed(x, y)) {
+            const face = Math.max(...[[1, 0], [-1, 0], [0, 1], [0, -1]].filter(([dx, dy]) => w.map.collisionAt(x + dx!, y + dy!) === 'none')
+              .map(([dx, dy]) => Math.round(lm.sample(x + .5 + dx! * .375, y + .5 + dy! * .375) * LIGHT_FULL)));
+            assert.ok(face >= Math.floor(ISLAND_LIGHT.SKY_SHADE * DEFAULT_LIGHTING.lightMap.airDecay), `${s.kind} ${s.id} exposed (${x},${y}) light ${face}`);
+          }
           if (!exposed(x, y) && near(x, y, 2)) assert.ok(v >= LIGHT_FULL * 0.4, `${s.kind} ${s.id} second ring (${x},${y}) light ${v}`);
           if (!near(x, y, 4)) {
             assert.ok(v < LIGHT_FULL * 0.25, `${s.kind} ${s.id} core (${x},${y}) light ${v}`);
@@ -560,8 +579,8 @@ describe('021 浮空岛返工：天空光照、土质岛体、连续斜坡、高
         }
         // 块底下方 3 行空气：天空光（≥ SKY_SHADE 的 95%），不随深度变暗。
         for (let y = (s.bottoms[i] as number) - 3; y < (s.bottoms[i] as number); y++) {
-          if (y < 0 || fm[y * W + x] || w.map.collisionAt(x, y) !== 'none' || (w.fluid.cells[y * W + x] as number) > 0) continue;
-          const v = lm.light[y * W + x] as number;
+          if (y < 0 || fm[y * W + x] || w.map.collisionAt(x, y) !== 'none' || w.fluid.amountAt(x, y) > 0) continue;
+          const v = cellLight(lm, x, y);
           assert.ok(v >= Math.floor(ISLAND_LIGHT.SKY_SHADE * 0.95), `below ${s.kind} ${s.id} (${x},${y}) light ${v}`);
         }
       }

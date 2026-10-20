@@ -1,0 +1,19 @@
+{
+  "tool": "built-in image_gen",
+  "user_reference": "http://127.0.0.1:5174/catalog/ai-city-final-home-v1/final-energy-home.png",
+  "status": "awaiting user review; not approved and not integrated into game",
+  "images": [
+    {
+      "file": "01-cleaned-reference.png",
+      "title": "原画清理参考",
+      "prompt": "精确编辑这张原画，只清除前景的双层剖面住宅。\n移除整栋中央房屋，包括屋顶太阳能板、外墙、门窗、房屋底座、室内楼板、床、桌椅、屏幕、盆栽、屋顶机器人、室内机器人和两个人物。把原来被房屋挡住的区域，自然补画成与左右相连的未来城市环境，桥梁和远景的连接要连续，不能留下空白或换成另一栋前景房屋。\n保留原图已有的环形高塔、城市楼群、空中轨道及列车、飞行器、山崖瀑布、山脉、天空，以及原本的镜头、明亮三维游戏画风和光照。其他区域尽量保持原样。\n输出一张完整横向环境图，无人物、室内空间、界面或文字。",
+      "reference": "public/catalog/ai-city-final-home-v1/final-energy-home.png"
+    },
+    {
+      "file": "02-background-redraw.png",
+      "title": "仅以清理参考重绘的整体背景",
+      "prompt": "参考这张已清除前景房屋的图片，重新绘制一张清晰、完整的未来生态城市背景效果图，横向 16:9。\n\n沿用参考图的建筑造型语言、明亮精致的三维游戏美术风格、接近水平略带侧转的镜头，以及城市、轨道桥和山崖瀑布之间的空间关系。自然延续画面，不另设新的建筑主题。\n画面内容是暖白未来楼群、屋顶花园、环形能源塔、空中轨道列车、小型飞行器、山崖瀑布、河谷、远山与天空。建筑以暖白为主，绿植自然鲜活，玻璃和设备只保留少量柔和蓝绿点缀。保持原画的清爽光照，建筑细节清楚，避免景深模糊。\n去掉参考图最前方的观景平台、栏杆、灯柱、座椅、花槽和荷花池，将底部自然延续为城市所在的远处河谷。不要人物、前景可玩建筑、室内家具、格子、界面或文字。\n\n这一张是完整背景效果图，按自然场景绘制即可。",
+      "reference": "public/catalog/ai-home-background-reference-v1/01-cleaned-reference.png"
+    }
+  ]
+}

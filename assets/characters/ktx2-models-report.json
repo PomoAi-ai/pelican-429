@@ -497,8 +497,8 @@
       ]
     },
     {
-      "source": "./characters/enemies/gatekeeper/model.glb",
-      "output": "./characters/enemies/gatekeeper/model.ktx2.glb",
+      "source": "./characters/enemies/omi/model.glb",
+      "output": "./characters/enemies/omi/model.ktx2.glb",
       "sourceSha256": "5a80107fc34704bd7286228e6efc19be2bbee8c27be5cfbb6043200979bf37c3",
       "sourceBytes": 3629384,
       "outputBytes": 1753840,

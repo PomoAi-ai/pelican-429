@@ -6,7 +6,7 @@ import ruler_standard as std
 
 
 def lines(folder, landmarks, stem='three-forms'):
-    folder = ROOT / 'public/art-library' / folder
+    folder = ROOT / 'public/catalog' / folder
     meta = json.loads((folder / f'{stem}-shared-ruler.json').read_text())
     front = meta['images'][0]
     left, right = meta['ruler_x']

@@ -4,7 +4,7 @@ import { isDaytime, secondsUntilSunrise } from '../core/calendar.ts';
 import type { GameTime } from '../core/calendar.ts';
 import type { Rect } from '../core/math.ts';
 import type { TreeInstance } from '../world/level.ts';
-import { SHAPE_FULL } from '../world/tile-shapes.ts';
+import { FULL_MASK } from '../world/tile-shapes.ts';
 import { TILE_AIR, TILE_BRANCH, TILE_DIRT, TILE_GRASS, TILE_SAND, TILE_STONE } from '../world/tile-types.ts';
 import { createHomestead, createRobot, GAME_HOUR, stepHomestead } from './homestead-economy.ts';
 import type { Homestead, HomesteadRobot } from './homestead-economy.ts';
@@ -127,7 +127,7 @@ function layoutFacilities(world: SimWorld): HomesteadFacilities {
   const flat = (tx: number): number | null => {
     if (!world.map.inBounds(tx, 0)) return null;
     const y = topSurface(world, tx);
-    if (y > ceiling || world.map.collisionAt(tx, y - 1) !== 'solid' || world.map.shapeAt(tx, y - 1) !== SHAPE_FULL) return null;
+    if (y > ceiling || world.map.solidMask(tx, y - 1) !== FULL_MASK) return null;
     // 只避开树干：按整个树冠宽度避让的话，多数种子在安全区里放不下全部设施。
     return level.trees.some(t => Math.abs(tx - t.x) <= 1) ? null : y;
   };

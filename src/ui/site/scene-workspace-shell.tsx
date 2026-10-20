@@ -9,7 +9,7 @@ export interface SceneDirectoryEntry {
   readonly id: string;
   readonly title: string;
   readonly href: string;
-  readonly section: 'world' | 'scenes' | 'perspectives';
+  readonly section: 'scenes' | 'perspectives';
 }
 
 export interface SceneWorkspaceShell {
@@ -55,20 +55,10 @@ function SceneDirectory({ entries, selected: store }: { entries: readonly SceneD
   const link = (item: SceneDirectoryEntry) => (
     <a key={item.id} href={item.href} aria-current={item.id === selected.id ? 'page' : undefined}>{t(item.title)}</a>
   );
-  const perspectives = selected.section === 'perspectives';
   return (
     <>
-      <h1>{perspectives ? t('场景透视') : t('场景')}</h1>
-      <nav aria-label={t('场景目录')}>
-        {perspectives ? entries.filter(item => item.section === 'perspectives').map(link) : (
-          <>
-            <h2>{t('主世界')}</h2>
-            {entries.filter(item => item.section === 'world').map(link)}
-            <h2>{t('其他场景')}</h2>
-            {entries.filter(item => item.section === 'scenes').map(link)}
-          </>
-        )}
-      </nav>
+      <h1>{selected.section === 'perspectives' ? t('场景透视') : t('场景')}</h1>
+      <nav aria-label={t('场景目录')}>{entries.filter(item => item.section === selected.section).map(link)}</nav>
     </>
   );
 }

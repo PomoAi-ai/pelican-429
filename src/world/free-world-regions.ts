@@ -31,7 +31,7 @@ export function freeWorldRegions(level: LevelData, ground: Int16Array): FreeWorl
   });
   for (const facility of level.facilities ?? []) {
     const spawn = FACILITY_CHAPTERS[facility.id].spawn;
-    const labelEn = { fortress: 'Mountain Fortress', cathedral: 'Compute Cathedral', abyss: 'Fiber Abyss' }[facility.id];
+    const labelEn = { fortress: 'Mountain Compute Fortress', cathedral: 'Compute Cathedral', abyss: 'Fiber Abyss' }[facility.id];
     regions.push({ id: facility.id, label: FACILITY_SCENES[facility.id].name, labelEn,
       position: { x: facility.x + spawn.x, y: facility.y + spawn.y } });
   }

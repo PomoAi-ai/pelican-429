@@ -16,7 +16,7 @@ export function createWorldCompositionNavigation(parent: HTMLElement, compositio
     caption.textContent = t('世界地形定位');
     select.setAttribute('aria-label', t('世界地形定位'));
     select.title = t('重载当前种子的同一世界，并从所选地形旁开始');
-    select.options[0]!.text = t('返回出生点');
+    select.options[0]!.text = t('回到起点');
     compositions.forEach((composition, index) => {
       const item = TERRAIN_COMPOSITIONS.find((entry) => entry.id === composition.kind)!;
       select.options[index + 1]!.text = `${t(item.label)} · x ${composition.x0}`;

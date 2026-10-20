@@ -14,6 +14,7 @@ import type { HomesteadState } from '../../sim/homestead.ts';
 import type { Entity } from '../../entities/entity.ts';
 import type { ScreenPoint, WorldToScreen } from './hud.ts';
 import { clock } from '../model/clock.ts';
+import { linkReleased } from '../site/release.ts';
 
 export interface GameHudWorld { readonly time: Readonly<GameTime>; readonly weather?: SceneWeatherMode }
 export interface GameHudOptions {
@@ -342,13 +343,18 @@ export function createGameHud(root: HTMLElement, options: GameHudOptions): GameH
     moveTo(bubble, left, below ? p.y + droneH / 2 + 16 : above);
     setStyle(bubble, '--tail', px(clamp(p.x - left, 20, w - 20)));
   };
+  // 没有家园作业的场景靠跳进家园派活；发布版没有家园，只保留取消。
+  const dispatch = options.workOrders !== undefined || linkReleased('./?mode=homestead');
   const updateBubble = (i: number): void => {
     const real = options.workOrders?.state.drones[i];
     setText(q(bubble, '[data-bubble-name]'), droneName(i));
     setText(q(bubble, '[data-bubble-state]'), real ? `Lv${real.robot.level} · ${t('电量 {n}%').replace('{n}', String(Math.round(real.robot.battery * 100)))}` : t('外观展示'));
-    setText(q(bubble, '[data-bubble-say]'), real ? t('{status}。选择任务后点选或框选目标，由空闲无人机接单。').replace('{status}', droneStatus(real)) : t('当前场景只展示跟随，选择下面操作将进入家园派工作业。'));
+    setText(q(bubble, '[data-bubble-say]'), real ? t('{status}。选择任务后点选或框选目标，由空闲无人机接单。').replace('{status}', droneStatus(real))
+      : t(dispatch ? '当前场景只展示跟随，选择下面操作将进入家园派工作业。' : '当前场景只展示跟随。'));
     for (const button of bubble.querySelectorAll<HTMLElement>('[data-choice]')) {
-      if (button.dataset.choice !== 'cancel') button.title = t(real ? '打开家园作业工具' : '进入家园派工作业');
+      if (button.dataset.choice === 'cancel') continue;
+      button.title = t(real ? '打开家园作业工具' : '进入家园派工作业');
+      button.hidden = !dispatch;
     }
   };
   const openBubble = (i: number): void => {
@@ -401,7 +407,7 @@ export function createGameHud(root: HTMLElement, options: GameHudOptions): GameH
 
   const handleKey = (e: KeyboardEvent): boolean => {
     const digit = /^(?:Digit|Numpad)([1-4])$/.exec(e.code);
-    if (talking !== null && digit) { choose(CHOICES[Number(digit[1]) - 1]!); return true; }
+    if (talking !== null && digit && (dispatch || digit[1] === '4')) { choose(CHOICES[Number(digit[1]) - 1]!); return true; }
     if (e.code === 'Escape') {
       if (talking !== null) closeBubble();
       else if (inventory.isOpen()) inventory.close();

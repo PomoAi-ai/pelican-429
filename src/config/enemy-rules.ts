@@ -3,7 +3,7 @@ import type { AttackTuning } from './tuning.ts';
 import { validateProjectileDef } from './weapon-rules.ts';
 import type { ProjectileDef } from './weapon-rules.ts';
 
-export type EnemyKind = 'gatekeeper' | 'lineHound' | 'watchWasp' | 'loadmaster';
+export type EnemyKind = 'omi' | 'lineHound' | 'watchWasp' | 'loadmaster';
 export interface EnemySkill extends AttackTuning {
   readonly name: string;
   readonly mode: 'melee' | 'dash' | 'pounce' | 'slam' | 'bomb' | 'thermite';
@@ -45,11 +45,11 @@ export const DRONE_PAYLOADS: Readonly<Record<'bomb' | 'thermite', ProjectileDef>
 };
 
 export const ENEMY_RULES: Readonly<Record<EnemyKind, EnemyRule>> = {
-  gatekeeper: {
+  omi: {
     name: '欧米 OMI-01', height: 2.6, halfWidth: 0.52, maxHp: 88, speed: 3.3, range: 14, leash: 28, cooldownTicks: 21,
     skills: [
-      skill('gatekeeper-sweep', '夹臂横扫', 'melee', 22, 8, 16, 12, { x: 0.25, y: 0.45, w: 1.9, h: 1.7 }, 2.2),
-      skill('gatekeeper-clamp', '突进夹击', 'dash', 18, 18, 28, 16, { x: 0.2, y: 0.35, w: 1.5, h: 1.8 }, 4.8, 10),
+      skill('omi-sweep', '夹臂横扫', 'melee', 22, 8, 16, 12, { x: 0.25, y: 0.45, w: 1.9, h: 1.7 }, 2.2),
+      skill('omi-clamp', '突进夹击', 'dash', 18, 18, 28, 16, { x: 0.2, y: 0.35, w: 1.5, h: 1.8 }, 4.8, 10),
     ],
   },
   lineHound: {

@@ -93,7 +93,8 @@ export function bindKeyboardMouse(options: KeyboardMouseOptions): KeyboardMouseB
     }
     const action = lookup.keys.get(e.code);
     if (action === undefined) return;
-    e.preventDefault();
+    // 只取消游戏自己按住的键：UI 拦下 keydown 时（焦点在按钮上按空格），松开要保留按钮的原生激活。
+    if (tracker.isHeld(action)) e.preventDefault();
     tracker.release(action, e.code);
   }, { capture: true });
   on<MouseLike>(canvas, 'mousedown', (e) => {

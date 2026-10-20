@@ -1,4 +1,4 @@
-import { opensSceneGame, pageRoute, parseAppMode, parsePageParams } from './config/app-mode.ts';
+import { pageRoute, parseAppMode, parseDevCamera, parsePageParams } from './config/app-mode.ts';
 import { STORY_SAVE_KEY } from './config/story-save.ts';
 import { mountMobileGameViewport } from './ui/hud/mobile-game-viewport.ts';
 import { homeScreenInstallState } from './ui/hud/home-screen-install.ts';
@@ -24,23 +24,21 @@ async function boot(): Promise<void> {
   document.querySelector('#loading p')!.textContent = t('AGI 降临…');
   homeScreenInstallState();
   const params = new URLSearchParams(location.search);
-  const host = { release: RELEASE, embedded: window !== window.parent, coarsePointer: matchMedia('(pointer: coarse)').matches };
   const mode = parseAppMode(params, RELEASE);
-  // 资源档位与调试参数各页共用，在路由前校验；发布版拒绝未发布的档位。
+  // 资源档位、调试与镜头开关在路由前校验；发布版拒绝未发布的档位与开发开关。
   parsePageParams(params, RELEASE);
+  parseDevCamera(params, RELEASE);
   // ?bench 只在原野整页游戏里生效：其他入口不会读它，在路由前校验，避免静默忽略。
   if (params.has('bench')) (await import('./app/game/bench.ts')).parseBench(params);
-  const sceneGame = opensSceneGame(params, host);
-  const playing = !sceneGame && (mode === 'game' || mode === 'homestead' || mode === 'story' || mode === 'controls');
-  const mobileTransit = mode === 'lab' && params.get('demo') === 'transit' && host.coarsePointer;
-  if (playing || mobileTransit) {
+  const playing = mode === 'game' || mode === 'homestead' || mode === 'story' || mode === 'controls';
+  if (playing) {
     configureGameInterface();
     if (mountMobileGameViewport()) return;
-    if (host.coarsePointer) fullscreenOnFirstTap();
+    if (matchMedia('(pointer: coarse)').matches) fullscreenOnFirstTap();
   }
   // 页面内链接已按发布版过滤（导航与首页组件各自处理），手机横屏宿主在上面已返回，外层不挂载站点根。
   mountSiteNavigation(document.getElementById('root')!, { mode, playing, hasSave: localStorage.getItem(STORY_SAVE_KEY) !== null, release: RELEASE });
-  await startRoute(pageRoute(params, host), bootError);
+  await startRoute(pageRoute(params, RELEASE), bootError);
 }
 
 boot().catch(bootError);

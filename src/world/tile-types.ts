@@ -31,6 +31,14 @@ export const TILE_TIMBER = 7;
 export const TILE_ROOF = 8;
 /** 砂岩：沙漠沙层之下的岩层与台地（实心，层理纹理）。id 9 留空（测试用作临时瓦片）。 */
 export const TILE_SANDSTONE = 10;
+/** 建筑材料（城区建造）：暖白岩板、深蓝合金、米黄色方石三种实体砖与两种平台，由块视图（piece-view）按定义构件绘制。 */
+export const TILE_CERAMIC = 11;
+export const TILE_ALLOY = 12;
+export const TILE_ASHLAR = 13;
+export const TILE_PLATFORM_CERAMIC = 14;
+export const TILE_PLATFORM_ALLOY = 15;
+/** 交通中心街面板：实心（城区用地内一排 B 半砖），不是建造构件，瓦片层与块视图都不渲染（由交通中心模型绘制）。 */
+export const TILE_PAVING = 16;
 
 export const BUILTIN_TILES: readonly TileDef[] = Object.freeze([
   Object.freeze({ id: TILE_AIR, key: 'air', collision: 'none' as const }),
@@ -43,6 +51,12 @@ export const BUILTIN_TILES: readonly TileDef[] = Object.freeze([
   Object.freeze({ id: TILE_TIMBER, key: 'timber', collision: 'solid' as const, hardness: 2 }),
   Object.freeze({ id: TILE_ROOF, key: 'roof', collision: 'solid' as const, hardness: 2 }),
   Object.freeze({ id: TILE_SANDSTONE, key: 'sandstone', collision: 'solid' as const, hardness: 2 }),
+  Object.freeze({ id: TILE_CERAMIC, key: 'ceramic', collision: 'solid' as const, hardness: 3 }),
+  Object.freeze({ id: TILE_ALLOY, key: 'alloy', collision: 'solid' as const, hardness: 3 }),
+  Object.freeze({ id: TILE_ASHLAR, key: 'ashlar', collision: 'solid' as const, hardness: 3 }),
+  Object.freeze({ id: TILE_PLATFORM_CERAMIC, key: 'ceramicplatform', collision: 'oneWay' as const, hardness: 2 }),
+  Object.freeze({ id: TILE_PLATFORM_ALLOY, key: 'alloyplatform', collision: 'oneWay' as const, hardness: 2 }),
+  Object.freeze({ id: TILE_PAVING, key: 'paving', collision: 'solid' as const, hardness: 3 }),
 ]);
 
 const COLLISIONS: readonly TileCollision[] = ['none', 'solid', 'oneWay'];

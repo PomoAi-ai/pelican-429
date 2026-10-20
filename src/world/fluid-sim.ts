@@ -1,10 +1,11 @@
 /**
- * 格子液体模拟（F1 元胞自动机 + 活跃集合），只用整数、无随机数，完全确定性。
+ * 液体模拟（F1 元胞自动机 + 活跃集合），在 1/4 子格上推进，只用整数、无随机数，完全确定性。
+ * 每个非实心子格容量 FLUID_FULL；“满”指达到 FLUID_FULL。下文的“格”均指子格，“行”为子格行。
  *
  * 每步：list = takeActive()（升序去重）；只处理前 min(len, maxCellsPerStep) 个，其余重新 wake（延后）。
  * 按升序逐格（原地更新），记 residual = minSpread − 1：
- *   1. 向下：下方格非实心且未满 → 流入 min(a, 255 − below)；有变化即写回。
- *   2. 按行平衡（Terraria 式）：若本格有水且"有支撑"（ty=0、下方实心或下方满水），沿本行向左右扫描
+ *   1. 向下：下方格非实心且未满 → 流入 min(a, FULL − below)；有变化即写回。
+ *   2. 按行平衡（Terraria 式）：若本格有水且"有支撑"（最底行、下方实心或下方满水），沿本行向左右扫描
  *      连续的"有水且有支撑"的格子构成水面段（已扫描过的格子本步打戳，不重复扫描），然后：
  *      a) 扩展：段内总量 S > residual·n 时，左右交替把紧邻的"干且有支撑"格并入段（每侧每步 ≤ SPREAD_PER_STEP 格），
  *         直到 S ≤ residual·n 或无干格可并——水面向干地每步可推进多格，铺到每格 ≤ residual 即停；
@@ -26,10 +27,11 @@
  *     分配取得。只在集合内 max − min ≥ 2（非最小）时才重排：未扩展时由判定保证；有扩展时并入的干格为 0，
  *     且扩展前 S > residual·n 意味着某格 ≥ residual + 1 = minSpread ≥ 2，故同样 max − min ≥ 2。于是 Σ a² 严格减少。
  *   N×N 上字典序是良序，故只能发生有限次流动；无流动的格子不再被唤醒，活跃集合最终为空（休眠）。
- *   侧向 t ≤ diff/2 保证 cells[j] + t ≤ a ≤ 255；外泄以下方格剩余容量封顶；均分值 ≤ 段内原最大值；均不会溢出。
+ *   侧向 t ≤ diff/2 保证 cells[j] + t ≤ a ≤ FULL；外泄以下方格剩余容量封顶；均分值 ≤ 段内原最大值；均不会溢出。
  */
 import type { FluidMap } from './fluid-map.ts';
 import { FLUID_FULL } from './fluid-map.ts';
+import { SUBCELLS } from './tile-shapes.ts';
 
 export interface FluidSimConfig {
   /** 单步最多处理的活跃格数（整数 ≥ 1）。 */
@@ -60,15 +62,15 @@ function stampsFor(f: FluidMap): { marks: Uint32Array; epoch: number } {
 
 /** 有支撑：底行、下方实心或下方满水（水不会再往下落）。 */
 function supported(f: FluidMap, i: number): boolean {
-  if (i < f.width) return true;
-  const j = i - f.width;
+  if (i < f.subWidth) return true;
+  const j = i - f.subWidth;
   return f.solid[j] === 1 || f.cells[j] === FLUID_FULL;
 }
 
 /** 段端外侧格 j 可外泄：非实心且无支撑（其下方格非实心且未满），返回下方格可容纳量，否则 0。 */
 function drainCapacity(f: FluidMap, j: number): number {
   if (f.solid[j] === 1 || supported(f, j)) return 0;
-  return FLUID_FULL - (f.cells[j - f.width] as number);
+  return FLUID_FULL - (f.cells[j - f.subWidth] as number);
 }
 
 /**
@@ -76,7 +78,8 @@ function drainCapacity(f: FluidMap, j: number): number {
  * 调用前 cells[i] 已是最新值。residual = minSpread − 1。顺序：扩展干格 → 外泄 → 均分（见文件头）。
  */
 function balanceRow(f: FluidMap, i: number, ty: number, residual: number, marks: Uint32Array, epoch: number): number {
-  const { cells, solid, width } = f;
+  const { cells, solid } = f;
+  const width = f.subWidth;
   const rowStart = ty * width;
   const rowEnd = rowStart + width - 1;
   const inSeg = (j: number): boolean => solid[j] === 0 && (cells[j] as number) > 0 && supported(f, j);
@@ -187,7 +190,8 @@ export function stepFluid(f: FluidMap, cfg: FluidSimConfig, stepIndex: number): 
   const n = Math.min(list.length, cfg.maxCellsPerStep);
   for (let k = n; k < list.length; k++) f.wake(list[k] as number);
 
-  const { cells, solid, width } = f;
+  const { cells, solid } = f;
+  const width = f.subWidth;
   const minSpread = cfg.minSpread;
   const { marks, epoch } = stampsFor(f);
   let changed = 0;
@@ -244,6 +248,14 @@ export function stepFluid(f: FluidMap, cfg: FluidSimConfig, stepIndex: number): 
     }
   }
   return { processed: n, changed, deferred: list.length - n };
+}
+
+/**
+ * 一次流体推进（模拟每 stepInterval tick 调用一次，index 为第几次）：SUBCELLS 个子步。
+ * 子格流体每子步只移动 1/4 格，这样按格计的下落与铺开速度与每 tick 节奏无关。
+ */
+export function advanceFluid(f: FluidMap, cfg: FluidSimConfig, index: number): void {
+  for (let s = 0; s < SUBCELLS; s++) stepFluid(f, cfg, index * SUBCELLS + s);
 }
 
 /** 反复推进直到活跃集合为空，返回步数；超过 maxSteps 仍活跃则抛。 */

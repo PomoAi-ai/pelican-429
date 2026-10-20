@@ -74,7 +74,7 @@ test('地面与飞行敌人身体碰到安全区即拒绝出生，没有安全�
   const { level, groundY } = createShowcaseLevel('surface');
   const safeLevel = { ...level, safeZones: [{ x: 30, y: groundY, w: 5, h: 10 }] };
   try {
-    for (const kind of ['gatekeeper', 'lineHound', 'loadmaster', 'watchWasp'] as const) {
+    for (const kind of ['omi', 'lineHound', 'loadmaster', 'watchWasp'] as const) {
       const x = 30 - ENEMY_RULES[kind].halfWidth / 2;
       const y = groundY + (kind === 'watchWasp' ? 4 : 0);
       assert.equal(enemySpawnFits(level, kind, x, y), true, kind);
@@ -159,11 +159,12 @@ test('不同种子的真实区域都能容纳玩家与营地 NPC，机房也能�
   }
 });
 
-test('三档世界保持同种子可复现，扩大地图增加自然区域，旧机房网址加载同一地图', () => {
+test('三档世界保持同种子可复现，扩大地图增加自然区域，原野网址加载同一地图；带关卡的旧原野别名报错', () => {
+  assert.throws(() => loadGameLevel(new URLSearchParams('level=facility&free=1&scene=cathedral&seed=429')), /原野网址不带 level 参数/);
   let previousRooms = 0;
   for (const size of ['small', 'medium', 'large'] as const satisfies readonly FreeWorldSize[]) {
     const a = generateFreeWorld(429, size, 'wilds');
-    const b = loadGameLevel(new URLSearchParams(`level=facility&free=1&scene=cathedral&seed=429&size=${size}`)).level;
+    const b = loadGameLevel(new URLSearchParams(`mode=game&free=1&seed=429&size=${size}`)).level;
     try {
       assert.equal(a.map.width, FREE_WORLD_SIZES[size].width);
       assert.equal(a.map.height, FREE_WORLD_SIZES[size].height);

@@ -16,6 +16,7 @@ import { Slider } from '../controls/slider.tsx';
 import { mountReact } from '../react/mount.tsx';
 import { createStore, type Store } from '../react/store.ts';
 import { useLanguage } from '../react/use-language.ts';
+import { RELEASE } from '../site/release.ts';
 import './showcase.css';
 
 /** 游戏循环每帧按卡片读取画面区域并回报状态。 */
@@ -144,7 +145,8 @@ export function PreviewCard({ card, model, onNpcSound, views, sharedScene, hidde
     views.set(card.id, view);
     return () => { views.delete(card.id); };
   }, []);
-  useLayoutEffect(() => createCharacterAssets(assetsRef.current!, showcaseEntry(card.entryId).actor, card.id, isHistory,
+  // 图片资料引用原画库与模型源文件，发布版不带这些文件。
+  useLayoutEffect(() => RELEASE ? undefined : createCharacterAssets(assetsRef.current!, showcaseEntry(card.entryId).actor, card.id, isHistory,
     !sharedScene && model.activeDemo?.id !== 'pelican-combat' && !(actor === 'human' && card.humanView === 'world')), []);
   // 模型视角控件会接管画面区域的角色与说明（可拖动时改为按钮），所以按原顺序命令式设置，再由控件覆盖。
   useLayoutEffect(() => {
@@ -182,7 +184,7 @@ export function PreviewCard({ card, model, onNpcSound, views, sharedScene, hidde
       items={[{ value: 'world', label: t('横版实战') }, { value: 'model', label: t('模型查看') }] as const} onValueChange={(humanView) => model.update(card, { humanView, manual: false }, true)} /></label>}
     {humanWorld && castAnimation && animation.flight === undefined && <label className="sc-control"><span>{t('移动施法')}</span><Select label={t('移动施法')} value={card.attackMotion}
       items={[{ value: 'still', label: t('静止') }, { value: 'walk', label: t('行走') }, { value: 'run', label: t('跑步') }] as const} onValueChange={(attackMotion) => model.update(card, { attackMotion }, true)} /></label>}
-    {equipmentCharacter && animation && <label className="sc-control"><span>{t('模型精细度')}</span><Select label={t('模型精细度')} value={animation.variant}
+    {equipmentCharacter && animation && !RELEASE && <label className="sc-control"><span>{t('模型精细度')}</span><Select label={t('模型精细度')} value={animation.variant}
       items={GRASSY_ANIMATED_MODELS.map((item) => ({ value: item.id, label: t(item.label) }))} onValueChange={(variant) => changeGrassy(variant, model.entry(card.entryId).grassyAnimation!.flight)} /></label>}
     {equipmentCharacter && castAnimation && <label className="sc-control"><span>{t('施法姿态')}</span><Select label={t('施法姿态')} value={animation.flight ?? 'ground'}
       items={[{ value: 'ground', label: t('地面施法') }, ...GRASSY_FLIGHTS.map((item) => ({ value: item.id, label: t(item.label) }))]} onValueChange={(flight) => changeGrassy(model.entry(card.entryId).grassyAnimation!.variant, flight === 'ground' ? undefined : flight)} /></label>}
@@ -195,7 +197,7 @@ export function PreviewCard({ card, model, onNpcSound, views, sharedScene, hidde
           <div className="sc-action-buttons">
             {items.map((item) => {
               const selected = item.id === card.entryId || d1Character && entry.d1Animation !== undefined && item.d1Animation === entry.d1Animation;
-              return <button key={item.id} type="button" className={`sc-action-button${selected ? ' sc-active' : ''}`} aria-pressed={selected} title={t(item.description)} onClick={() => model.changeAction(card, item.id)}>{t(item.label)}</button>;
+              return <button key={item.id} type="button" className="sc-action-button" aria-pressed={selected} title={t(item.description)} onClick={() => model.changeAction(card, item.id)}>{t(item.label)}</button>;
             })}
           </div>
         </div>
@@ -210,7 +212,7 @@ export function PreviewCard({ card, model, onNpcSound, views, sharedScene, hidde
         if (model.entry(card.entryId).staticModel) model.changeAction(card, 'd1.idle');
       } else model.changeAction(card, value);
     }} /></label>}
-    {d1Character && <button type="button" className={card.d1HairVisible ? 'sc-active' : undefined} aria-pressed={card.d1HairVisible} disabled={entry.staticModel !== undefined}
+    {d1Character && <button type="button" aria-pressed={card.d1HairVisible} disabled={entry.staticModel !== undefined}
       onClick={() => model.update(card, { d1HairVisible: !card.d1HairVisible }, true)}>{t('显示头发')}</button>}
     {d1Character && <label className="sc-control"><span>{t('渲染风格')}</span><Select label={t('渲染风格')} value={card.d1Shading} disabled={entry.staticModel !== undefined}
       items={D1_SHADINGS.map((item) => ({ value: item.id, label: t(item.label) }))} onValueChange={(d1Shading) => model.update(card, { d1Shading }, true)} /></label>}
@@ -223,9 +225,9 @@ export function PreviewCard({ card, model, onNpcSound, views, sharedScene, hidde
     {npcActor && <SoundButtons frame={frame}
       play={() => { void onNpcSound(card, true).then(() => model.update(card, { playing: true }, !sharedScene)); }}
       stop={() => { void onNpcSound(card, false); }} />}
-    <button type="button" className={card.loop ? 'sc-active' : undefined} aria-pressed={card.loop} onClick={() => model.update(card, { loop: !card.loop })}>{t('循环')}</button>
+    <button type="button" aria-pressed={card.loop} onClick={() => model.update(card, { loop: !card.loop })}>{t('循环')}</button>
     <button type="button" hidden={facingHidden} onClick={() => model.update(card, { facing: card.facing === 1 ? -1 : 1 }, true)}>{t(card.facing === 1 ? '朝右 →' : '← 朝左')}</button>
-    <button type="button" hidden={targetDodgeHidden} className={card.targetDodge ? 'sc-active' : undefined} aria-pressed={card.targetDodge}
+    <button type="button" hidden={targetDodgeHidden} aria-pressed={card.targetDodge}
       onClick={() => model.update(card, { targetDodge: !card.targetDodge, playing: true }, true)}>{t('目标躲避')}</button>
     <label className="sc-control"><span>{t('速度')}</span><Select label={t('速度')} value={card.speed} items={SPEEDS} onValueChange={(speed) => model.update(card, { speed })} /></label>
   </>;
@@ -256,7 +258,7 @@ export function PreviewCard({ card, model, onNpcSound, views, sharedScene, hidde
         <div className="sc-card-row sc-stage-view-row">
           {optionControls}
           {modelControls}
-          <details className="sc-stage-control-assets"><summary>{t('图片资料')}</summary>{assets}</details>
+          {!RELEASE && <details className="sc-stage-control-assets"><summary>{t('图片资料')}</summary>{assets}</details>}
           <button type="button" aria-label={t('从场景移除')} onClick={() => model.close(card.id)}>{t('移除')}</button>
         </div>
       </div>
@@ -269,7 +271,7 @@ export function PreviewCard({ card, model, onNpcSound, views, sharedScene, hidde
         <span className="sc-card-index" aria-hidden="true">{`#${String(card.id).padStart(2, '0')}`}</span>
         <button type="button" className="sc-close" aria-label={t('关闭预览')} onClick={() => model.close(card.id)}>×</button>
       </header>
-      {assets}
+      {!RELEASE && assets}
       <div className="sc-actions" role="group" aria-label={t(actor === 'human' ? equipmentCharacter ? '角色动作与精细度' : '历史模型版本选择' : '动作选择')}>
         {optionControls}
         {actionList}
@@ -280,7 +282,7 @@ export function PreviewCard({ card, model, onNpcSound, views, sharedScene, hidde
         <div className="sc-card-row" hidden={staticModel}>{playback}</div>
         <div className="sc-card-row sc-secondary">
           <button type="button" className="sc-compare" disabled={model.full} title={model.full ? t(`最多同时预览 ${model.catalog.maxCards} 张卡，请先关闭一张`) : t('添加同项目对照')} onClick={() => model.duplicate(card)}>{t('＋ 添加对照')}</button>
-          <button type="button" hidden={actor !== 'pelican' && !humanWorld} className={card.manual ? 'sc-active' : undefined} onClick={() => { model.update(card, { manual: !card.manual }); viewportRef.current!.focus(); }}>{t('手动控制')}</button>
+          <button type="button" hidden={actor !== 'pelican' && !humanWorld} aria-pressed={card.manual} onClick={() => { model.update(card, { manual: !card.manual }); viewportRef.current!.focus(); }}>{t('手动控制')}</button>
           <label className="sc-zoom">{t('缩放')}<Slider label={t('镜头缩放')} value={card.zoom} min={0.65} max={2.5} step={0.05} onValueChange={(zoom) => model.update(card, { zoom })} /></label>
         </div>
         <CardBottom frame={frame} staticModel={staticModel} />
@@ -364,22 +366,22 @@ function ShowcasePanel({ model, revision, note, returnUrl, onNpcSound, views, ro
         </nav>
         <div className="sc-sidebar-bottom">
           <button type="button" onClick={() => model.clear()}>{t('清空选择')}</button>
-          <a href={returnUrl}>{t('↗ 返回游戏')}</a>
+          <a href={returnUrl}>{t('返回游戏 ↗')}</a>
           <a className="sc-home-link" href="./">{t('首页索引')}</a>
           <p>{t(`最多 ${catalog.maxCards} 张预览卡 · ${action}在右侧切换`)}</p>
         </div>
       </aside>
       <main className="sc-main">
         <div className="sc-toolbar">
-          <button type="button" className="sc-primary" onClick={() => model.all({ playing: true })}>{t('▶ 全部播放')}</button>
-          <button type="button" onClick={() => model.all({ playing: false })}>{t('Ⅱ 全部暂停')}</button>
+          <button type="button" className="sc-primary" onClick={() => model.all({ playing: true })}>{t('▶ 播放动画')}</button>
+          <button type="button" onClick={() => model.all({ playing: false })}>{t('Ⅱ 暂停动画')}</button>
           <button type="button" onClick={() => model.reset()}>{t('↺ 全部重置')}</button>
           <label className="sc-control"><span>{t('统一速度')}</span><Select label={t('统一速度')} value={speed} items={SPEEDS} onValueChange={(next) => { setSpeed(next); model.all({ speed: next }); }} /></label>
           <label className="sc-control"><span>{t('统一环境')}</span><Select<'' | ShowcaseCard['environment']> label={t('统一环境')} value={cardEnvironments.size === 1 ? cards[0]!.environment : ''}
             items={[{ value: '', label: t('各自设置') }, { value: 'surface', label: t('全部地上') }, { value: 'underground', label: t('全部地下') }] as const}
             onValueChange={(environment) => { if (environment) model.all({ environment }, true); }} /></label>
-          <button type="button" className={model.synchronized ? 'sc-active' : undefined} aria-pressed={model.synchronized} title={t('从同一起点播放；任一对比画面离屏时整组暂停')} onClick={() => model.sync(!model.synchronized)}>{t('同步对比')}</button>
-          <button type="button" className={model.worldScale ? 'sc-active' : undefined} aria-pressed={model.worldScale} title={t('按相同的世界尺寸取景，比较实际尺寸')} onClick={() => model.scale(!model.worldScale)}>{t('统一比例')}</button>
+          <button type="button" aria-pressed={model.synchronized} title={t('从同一起点播放；任一对比画面离屏时整组暂停')} onClick={() => model.sync(!model.synchronized)}>{t('同步对比')}</button>
+          <button type="button" aria-pressed={model.worldScale} title={t('按相同的世界尺寸取景，比较实际尺寸')} onClick={() => model.scale(!model.worldScale)}>{t('统一比例')}</button>
         </div>
         <div ref={scrollRef} className="sc-scroll">
           <div className="sc-empty" hidden={cards.length !== 0}>

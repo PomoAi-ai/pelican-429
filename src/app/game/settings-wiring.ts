@@ -9,7 +9,7 @@ import { newWorldSearch } from '../../config/game-settings.ts';
 import type { GameSettings } from '../../config/game-settings.ts';
 import type { LightingQuality } from '../../config/lighting-rules.ts';
 import type { ActionTracker } from '../../input/action-map.ts';
-import type { WorldLight } from '../../render/stage/light-texture.ts';
+import type { WorldLight } from '../../render/stage/light-field-material.ts';
 import type { Stage, StageRenderer } from '../../render/stage/stage.ts';
 import type { TileGrid } from '../../render/tile/tile-grid.ts';
 import type { WorldViews } from '../../render/stage/world-views.ts';
@@ -66,6 +66,7 @@ export function loadStartupSettings(params: URLSearchParams, defaultPrecip: Prec
 export interface SettingsWiringInput {
   readonly chapter: boolean;
   readonly gm: boolean;
+  readonly sceneBar: boolean;
   readonly startup: StartupSettings;
   readonly stage: Stage<StageRenderer>;
   readonly world: SimWorld;
@@ -166,6 +167,7 @@ export function createSettingsWiring(input: SettingsWiringInput): SettingsWiring
   const settingsPanel = createSettingsPanel({
     chapter: input.chapter,
     gm: input.gm,
+    sceneBar: input.sceneBar,
     parent: document.body,
     controller: settings,
     seed: input.seed,

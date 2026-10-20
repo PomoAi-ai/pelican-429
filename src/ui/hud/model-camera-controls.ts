@@ -29,7 +29,7 @@ export function createModelCameraControls(parent: HTMLElement, viewport: HTMLEle
     select.setAttribute('aria-label', t('模型视角'));
     custom.textContent = t('自由视角');
     for (const [option, text] of options) option.textContent = t(text);
-    reset.textContent = t('视角复位');
+    reset.textContent = t('重置镜头');
   };
   const apply = (yaw: number, pitch: number): void => model.setModelView(card,
     Math.atan2(Math.sin(yaw), Math.cos(yaw)), Math.max(-Math.PI / 4, Math.min(Math.PI / 3, pitch)));
@@ -64,7 +64,7 @@ export function createModelCameraControls(parent: HTMLElement, viewport: HTMLEle
       turn.setAttribute('aria-label', t('转向'));
       pitchText.textContent = t('俯仰');
       pitch.setAttribute('aria-label', t('模型俯仰'));
-      reset.textContent = '↺'; reset.title = t('视角复位'); reset.setAttribute('aria-label', t('视角复位'));
+      reset.textContent = '↺'; reset.title = t('重置镜头'); reset.setAttribute('aria-label', t('重置镜头'));
     };
     syncLanguage(); syncCompact();
     return {

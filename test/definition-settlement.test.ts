@@ -1,9 +1,12 @@
 import assert from 'node:assert/strict';
 import { after, before, test } from 'node:test';
+import { createDefinitionDepthLayout } from '../src/app/perspective/definition-depth-layout.ts';
+import { createDefinitionSceneLayout } from '../src/app/perspective/definition-scene-layout.ts';
 import { createDefinitionSettlementLayout } from '../src/app/perspective/definition-settlement-layout.ts';
-import { createPerspectivePlayer } from '../src/app/perspective/perspective-player.ts';
-import { NEUTRAL_INPUT } from '../src/entities/pelican-controller.ts';
+import { SCENE_ENTRIES } from '../src/app/workspace/scene-catalog.ts';
 import { TUNING } from '../src/config/tuning.ts';
+import { createDefinitionWorld, type DefinitionWorldData } from '../src/sim/definition-world.ts';
+import { createSimWorld, getPlayer, NEUTRAL_INPUT, stepSim, type InputFrame } from '../src/sim/sim-world.ts';
 
 const globals = globalThis as { document?: unknown };
 const previousDocument = globals.document;
@@ -18,48 +21,46 @@ after(() => {
   else globals.document = previousDocument;
 });
 
-test('住宅正常飞行会耗尽推进并滑翔，默认展示飞行保持上升', () => {
-  const collision = { solids: [], platforms: [] };
-  const start = { x: 2, y: 10 };
-  const bounds = { width: 56, height: 30 };
-  const normal = createPerspectivePlayer(collision, start, bounds, [], false);
-  const inspection = createPerspectivePlayer(collision, start, bounds);
-  for (let tick = 0; tick < TUNING.player.flight.maxTicks + 60; tick++) {
-    normal.step({ ...NEUTRAL_INPUT, jumpHeld: true });
-    inspection.step({ ...NEUTRAL_INPUT, jumpHeld: true });
-  }
-  assert.equal(normal.entity.pelican!.flightMode, 'glide');
-  assert.ok(normal.entity.body.vy < 0, '推进耗尽后应进入下降滑翔');
-  assert.equal(inspection.entity.pelican!.flightMode, 'fly');
-  assert.ok(inspection.entity.body.vy > 0, '检视模式应保持持续推进');
-  assert.ok(inspection.entity.body.y > normal.entity.body.y);
-});
+type Layout = ReturnType<typeof createDefinitionSettlementLayout>;
 
-function traveler(collision: ReturnType<typeof createDefinitionSettlementLayout>['collision']) {
-  const player = createPerspectivePlayer(collision, { x: 2, y: 3 }, { width: 240, height: 30 });
-  const body = player.entity.body;
+/** 住宅布局写成格子世界后的玩家；x、y 换回布局坐标，断言沿用布局里的高度。 */
+function playable(layout: { readonly data: DefinitionWorldData }, start: { x: number; y: number }) {
+  const { level, offset } = createDefinitionWorld(layout.data, start);
+  const world = createSimWorld({ level, playerForm: 'human' });
+  const entity = getPlayer(world);
   return {
-    player,
+    entity,
+    step(input: Partial<InputFrame>): void { stepSim(world, { ...NEUTRAL_INPUT, ...input }); },
+    get x(): number { return entity.body.x - offset.x; },
+    get y(): number { return entity.body.y - offset.y; },
+    get onGround(): boolean { return entity.body.onGround; },
+  };
+}
+
+function traveler(layout: Layout) {
+  const body = playable(layout, { x: 2, y: 3 });
+  return {
+    player: body,
     body,
     walkTo(x: number): void {
       for (let tick = 0; tick < 5000; tick++) {
         const moveX = Math.abs(body.x - x) < .04 ? 0 : body.x < x ? 1 : -1;
-        player.step({ ...NEUTRAL_INPUT, moveX });
-        if (moveX === 0 && Math.abs(body.vx) < .01) return;
+        body.step({ moveX });
+        if (moveX === 0 && Math.abs(body.entity.body.vx) < .01) return;
       }
       assert.fail(`无法走到 ${x}，停在 (${body.x}, ${body.y})`);
     },
     jumpTo(y: number): void {
       for (let tick = 0; tick < 1500; tick++) {
         if (body.onGround && body.y >= y - .01) return;
-        // 跳到最高点后松键落回平台；持续按住现在会进入无限飞行。
-        player.step({ ...NEUTRAL_INPUT, jumpPressed: body.onGround, jumpHeld: body.onGround || body.vy > 0 });
+        // 跳到最高点后松键落回平台；持续按住会进入飞行。
+        body.step({ jumpPressed: body.onGround, jumpHeld: body.onGround || body.entity.body.vy > 0 });
       }
       assert.fail(`无法跳上 ${y}，停在 (${body.x}, ${body.y})`);
     },
     descendToStreet(): void {
       for (let tick = 0; tick < 600; tick++) {
-        player.step({ ...NEUTRAL_INPUT, downHeld: true });
+        body.step({ downHeld: true });
         if (body.onGround && Math.abs(body.y - 3) < .01) return;
       }
       assert.fail(`无法沿室外平台回到主街，停在 (${body.x}, ${body.y})`);
@@ -70,7 +71,7 @@ function traveler(collision: ReturnType<typeof createDefinitionSettlementLayout>
 test('主街可以双向步行穿过全部房屋，不被侧墙或支柱挡住', () => {
   const layout = createDefinitionSettlementLayout();
   try {
-    const player = traveler(layout.collision);
+    const player = traveler(layout);
     for (const x of [13, 29, 45, 61, 77, 93, 98, 85, 69, 53, 37, 21, 5, 2]) {
       player.walkTo(x);
       assert.ok(player.body.onGround);
@@ -84,26 +85,28 @@ test('主街可以双向步行穿过全部房屋，不被侧墙或支柱挡住',
 test('主街贯穿湖桥、矿井入口和空岛下方，步行与骑车均可双向通过', () => {
   const layout = createDefinitionSettlementLayout();
   try {
-    const walker = traveler(layout.collision);
+    const walker = traveler(layout);
     for (const x of [99, 118, 126.5, 161.5, 168, 198.5, 214, 239, 198.5, 168, 124, 100, 2]) {
       walker.walkTo(x);
       assert.ok(walker.body.onGround && Math.abs(walker.body.y - 3) < .01, `主街 ${x} 无连续地面`);
     }
-    for (const [start, target] of [[2, 239], [239, 2]] as const) {
-      const cyclist = createPerspectivePlayer(layout.collision, { x: start, y: 3 }, { width: 240, height: 30 });
-      cyclist.step({ ...NEUTRAL_INPUT, mountPressed: true });
-      for (let tick = 0; tick < TUNING.player.bike.mountTicks; tick++) cyclist.step(NEUTRAL_INPUT);
+    // 地图左右边界是墙，骑车冲到墙前会撞车；两端各留出刹车距离。
+    for (const [start, target] of [[4, 236], [236, 4]] as const) {
+      const cyclist = playable(layout, { x: start, y: 3 });
+      for (let tick = 0; tick < 5; tick++) cyclist.step({});
+      cyclist.step({ mountPressed: true });
+      for (let tick = 0; tick < TUNING.player.bike.mountTicks; tick++) cyclist.step({});
       assert.equal(cyclist.entity.pelican!.ride.mode, 'riding');
-      const direction = target === 239 ? 1 : -1;
+      const direction = target > start ? 1 : -1;
       let reached = false;
       for (let tick = 0; tick < 5000; tick++) {
-        cyclist.step({ ...NEUTRAL_INPUT, moveX: direction });
-        const { x, y, onGround } = cyclist.entity.body;
+        cyclist.step({ moveX: direction });
+        const { x, y, onGround } = cyclist;
         assert.equal(cyclist.entity.pelican!.ride.mode, 'riding', `骑车在 (${x}, ${y}) 因 ${cyclist.entity.pelican!.ride.cause} 被迫中断`);
         assert.ok(onGround && Math.abs(y - 3) < .01, `骑车在 (${x}, ${y}) 离开主街`);
         if ((x - target) * direction >= 0) { reached = true; break; }
       }
-      assert.ok(reached, `骑车无法到达 ${target}，停在 (${cyclist.entity.body.x}, ${cyclist.entity.body.y})`);
+      assert.ok(reached, `骑车无法到达 ${target}，停在 (${cyclist.x}, ${cyclist.y})`);
     }
   } finally {
     layout.dispose();
@@ -113,10 +116,10 @@ test('主街贯穿湖桥、矿井入口和空岛下方，步行与骑车均可�
 test('主街经矿井入口下穿、步行穿过矿道并从另一侧跳回街面', () => {
   const layout = createDefinitionSettlementLayout();
   try {
-    const route = traveler(layout.collision);
+    const route = traveler(layout);
     route.walkTo(126.5);
-    for (let tick = 0; tick < 600 && !(route.body.onGround && route.body.y === -7); tick++) {
-      route.player.step({ ...NEUTRAL_INPUT, downHeld: true });
+    for (let tick = 0; tick < 600 && !(route.body.onGround && Math.abs(route.body.y + 7) < .01); tick++) {
+      route.player.step({ downHeld: true });
     }
     assert.ok(route.body.onGround && Math.abs(route.body.y + 7) < .01, `矿井无法下到通道，停在 (${route.body.x}, ${route.body.y})`);
     route.walkTo(161.5);
@@ -131,7 +134,7 @@ test('主街经矿井入口下穿、步行穿过矿道并从另一侧跳回街�
 test('空岛可从地面逐层跳上，经过岛顶后从另一侧下穿回主街', () => {
   const layout = createDefinitionSettlementLayout();
   try {
-    const route = traveler(layout.collision);
+    const route = traveler(layout);
     route.walkTo(100);
     route.walkTo(198.5);
     route.jumpTo(21);
@@ -147,7 +150,7 @@ test('空岛可从地面逐层跳上，经过岛顶后从另一侧下穿回主�
 test('连续走跳进入经典及 A、C、B+H 二层房屋，并从室外登顶再下到主街', () => {
   const layout = createDefinitionSettlementLayout();
   try {
-    const player = traveler(layout.collision);
+    const player = traveler(layout);
     for (const [x, upperFloor, roof] of [[36, 9, 15], [52, 9, 14.5], [68, 9, 14.5], [84, 8.5, 14.5]] as const) {
       player.walkTo(x + 5);
       player.jumpTo(upperFloor);
@@ -164,5 +167,20 @@ test('连续走跳进入经典及 A、C、B+H 二层房屋，并从室外登顶�
     }
   } finally {
     layout.dispose();
+  }
+});
+
+test('全部透视检视条目都能写成格子世界，出生后落地', () => {
+  for (const entry of SCENE_ENTRIES) {
+    if (entry.kind !== 'perspective' || entry.variant === 'settlement') continue;
+    const layout = entry.variant === 'depth' ? createDefinitionDepthLayout() : createDefinitionSceneLayout(entry.sectionId);
+    try {
+      const section = layout.sections.find(item => item.id === entry.sectionId) ?? layout.sections[0]!;
+      const player = playable(layout, { x: section.playerX, y: section.playerY });
+      for (let tick = 0; tick < 60; tick++) player.step({});
+      assert.ok(player.onGround, `${entry.id} 出生后没有落地，停在 (${player.x}, ${player.y})`);
+    } finally {
+      layout.dispose();
+    }
   }
 });

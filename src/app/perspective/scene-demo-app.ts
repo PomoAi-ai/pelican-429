@@ -1,14 +1,12 @@
 import * as THREE from 'three';
-import { DEFAULT_PRECIP } from '../../config/precip-rules.ts';
 import { SCENE_DEMOS } from '../../config/scene-demos.ts';
 import { TUNING } from '../../config/tuning.ts';
 import { createFixedStepper } from '../../core/fixed-step.ts';
-import type { DefinitionCollider, DefinitionPlatform } from '../../physics/definition-collision.ts';
-import { tileDefinitionCollision } from '../../physics/tile-definition-collision.ts';
+import { mapLevel } from '../../sim/definition-world.ts';
+import { createSimWorld } from '../../sim/sim-world.ts';
 import { loadInteriorBackgroundTexture } from '../../render/stage/free-world-interior-textures.ts';
 import { loadGrassyAsset } from '../../render/grassy/grassy-rig.ts';
 import { caption } from '../../render/npc/npc-effects.ts';
-import { computePrecipColumn } from '../../render/sky/precip-columns.ts';
 import { LAB_CATALOG } from '../../render/resource/resource-catalog.ts';
 import { createResourcePreview } from '../../render/resource/resource-preview.ts';
 import { levelGroundColumns } from '../../render/decor/surface-decor-view.ts';
@@ -16,14 +14,18 @@ import { WIND_UNIFORM_NAMES, sharedWindUniforms, windUniformValues, writeWindUni
 import { createWorldViews } from '../../render/stage/world-views.ts';
 import { labCardText } from '../../ui/model/lab-card-text.ts';
 import { createShowcaseModel } from '../../ui/model/showcase-model.ts';
-import { TILE_AIR, TILE_GRASS, TILE_DIRT } from '../../world/tile-types.ts';
+import type { FluidMap } from '../../world/fluid-map.ts';
+import type { DesertInfo } from '../../world/level.ts';
+import { createTileMap, type TileMap } from '../../world/tile-map.ts';
+import { SUBCELLS } from '../../world/tile-shapes.ts';
+import { DEFAULT_TILES, TILE_AIR, TILE_GRASS, TILE_DIRT } from '../../world/tile-types.ts';
 import { createResourceScenario } from '../showcase/resource-scenario.ts';
 import type { SceneSection } from './definition-scene-layout.ts';
 import { createSceneDemoStage } from '../workspace/scene-demo-stage.ts';
 import { waitSceneResource, yieldScene, type SceneMountContext } from '../workspace/scene-mount.ts';
 import { t } from '../../config/i18n.ts';
 
-/** 原对照样本保持自己的种子与风场，沿同一条可行走路线排列。 */
+/** 原对照样本保持自己的种子与风场，沿同一条可行走路线排列；走动的角色跑在拼合了各样本格子与水的关卡上。 */
 export async function mountSceneDemo(context: SceneMountContext, demoId: string): Promise<void> {
   const demo = SCENE_DEMOS.find(item => item.id === demoId);
   if (!demo) throw new Error(`未知场景演示：${demoId}`);
@@ -43,12 +45,12 @@ export async function mountSceneDemo(context: SceneMountContext, demoId: string)
     }),
   ]), context.signal);
   context.signal.throwIfAborted();
-  const solids: DefinitionCollider[] = [];
-  const platforms: DefinitionPlatform[] = [];
+  const copies: Array<(map: TileMap) => (fluid: FluidMap) => void> = [];
+  const deserts: DesertInfo[] = [];
   const sections: SceneSection[] = [];
   const samples: Array<{ update(time: number, dt: number, view: { x: number; y: number; w: number; h: number }): void }> = [];
-  const columnReaders: Array<(columns: Float32Array) => void> = [];
   let nextX = 0;
+  let height = 0;
   let top = 36;
   const commonGround = 14;
   for (const [index, card] of model.cards.entries()) {
@@ -88,9 +90,25 @@ export async function mountSceneDemo(context: SceneMountContext, demoId: string)
     const resource = createResourcePreview(local, level, scenario.groundY, card, views,
       { ...focus, width: scenario.width, height: scenario.height });
     context.onDispose(() => resource.dispose());
-    const collision = tileDefinitionCollision(level.map, offsetX, offsetY);
-    solids.push(...collision.solids);
-    platforms.push(...collision.platforms);
+    // 拼合关卡按本样本此刻的格子与水量复制一份（块按原样、水按子格）；拼合地图在全部样本排好后才建。
+    copies.push(map => {
+      for (let y = 0; y < level.map.height; y++) for (let x = left; x < right; x++) {
+        for (const piece of level.map.pieces(x, y)) {
+          if (!map.placePiece(x + offsetX, y + offsetY, piece)) throw new Error(`场景演示拼合失败：(${x + offsetX}, ${y + offsetY})`);
+        }
+      }
+      return fluid => {
+        for (let sy = 0; sy < level.fluid.subHeight; sy++) for (let sx = left * SUBCELLS; sx < right * SUBCELLS; sx++) {
+          const amount = level.fluid.subAt(sx, sy);
+          if (amount > 0) fluid.setSub(sx + offsetX * SUBCELLS, sy + offsetY * SUBCELLS, amount);
+        }
+      };
+    });
+    for (const desert of level.deserts) {
+      if (desert.x1 < left || desert.x0 >= right) continue;
+      deserts.push({ ...desert, x0: Math.max(desert.x0, left) + offsetX, x1: Math.min(desert.x1, right - 1) + offsetX, mesas: [] });
+    }
+    height = Math.max(height, level.map.height + offsetY);
     const text = labCardText(card, model);
     const label = caption(() => t(text.title), '#ebf8ed', Math.min(width - 2, 5), true, 'comic');
     label.position.set(focus.x, floor - 1.5, 1.1);
@@ -141,21 +159,17 @@ export async function mountSceneDemo(context: SceneMountContext, demoId: string)
       },
     });
     const nextBoundary = nextX;
-    const precipSource = { map: level.map, fluid: level.fluid, deserts: level.deserts, desertFactor: DEFAULT_PRECIP.snow.desertFactor };
-    columnReaders.push(columns => {
-      for (let x = left; x < right; x++) {
-        const column = computePrecipColumn(precipSource, x);
-        columns.set([column.roof + offsetY, column.stop + offsetY, column.snow, column.water ? 1 : 0], (nextBoundary + x - left) * 4);
-      }
-    });
     nextX += width;
   }
-  // 两端采用真实实体边界，保持相机与人物都在样本世界内。
-  solids.push({ points: [[-1, 0], [0, 0], [0, top], [-1, top]] },
-    { points: [[nextX, 0], [nextX + 1, 0], [nextX + 1, top], [nextX, top]] });
+  // 地图左右边界即实体墙，人物与镜头都留在样本世界内。
+  const map = createTileMap(nextX, Math.max(top, height), DEFAULT_TILES);
+  const fills = copies.map(copy => copy(map));
+  const level = { ...mapLevel(map, { x: sections[0]!.playerX, y: sections[0]!.playerY }), deserts };
+  for (const fill of fills) fill(level.fluid);
+  const world = createSimWorld({ level, playerForm: 'human' });
+  context.onDispose(() => level.fluid.dispose());
   context.progress(t('装配真实场景样本'), model.cards.length, model.cards.length);
   await yieldScene(context.signal);
-  await runtime.play({ solids, platforms }, new THREE.Box3(new THREE.Vector3(0, 0, -2), new THREE.Vector3(nextX, top, 2)), sections,
-    (time, dt, view) => { for (const sample of samples) sample.update(time, dt, view); },
-    columns => { for (const read of columnReaders) read(columns); });
+  await runtime.play(world, new THREE.Box3(new THREE.Vector3(0, 0, -2), new THREE.Vector3(nextX, top, 2)), sections,
+    (time, dt, view) => { for (const sample of samples) sample.update(time, dt, view); });
 }

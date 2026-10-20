@@ -1,4 +1,4 @@
-"""Reshape the approved v9 head toward the bald concept (public/art-library/d1-bald/d1-bald-slim-legs-v1.png).
+"""Reshape the approved v9 head toward the bald concept (public/catalog/d1-bald/d1-bald-slim-legs-v1.png).
 
 Silhouette overlays against the concept (crown and chin aligned) showed four differences, each fixed by a smooth
 displacement; positions move, topology, UVs and textures stay, so the painted face follows its surface:

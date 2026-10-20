@@ -1,26 +1,20 @@
 import { openCharacterEditor } from '../../ui/panels/character-editor.tsx';
 import { createCharacterPreview } from './character-editor.ts';
 import type { createCharacterAppearanceStore } from './character-appearance.ts';
-import { configureCharacterTextures, currentCharacterTextureRenderer } from '../../render/character/character-model.ts';
 import { loadGrassyAsset } from '../../render/grassy/grassy-rig.ts';
+import { TUNING } from '../../config/tuning.ts';
+import type { PageContext } from '../shell/page-context.ts';
+import { pageRenderer } from '../shell/page-renderer.ts';
 
-/** 游戏已预载；首页优先使用现有解码器，尚无场景时才临时借用预览 renderer。 */
-export function openSavedCharacterEditor(store: ReturnType<typeof createCharacterAppearanceStore>, onClose: () => void, loadAssets = false) {
+/** 游戏已预载角色；首页传入页面，由页主渲染器（与首屏场景共用）转码后加载，预览自己的渲染器不绑定贴图。 */
+export function openSavedCharacterEditor(store: ReturnType<typeof createCharacterAppearanceStore>, onClose: () => void, loadFor?: PageContext) {
   return openCharacterEditor({
     appearance: store.current(),
     onApply: value => store.save(value),
     onClose,
-    createPreview: (parent, appearance, onError) => createCharacterPreview(parent, appearance, onError, loadAssets ? async renderer => {
-      const previous = currentCharacterTextureRenderer();
-      if (previous) { await loadGrassyAsset('game'); return; }
-      configureCharacterTextures(renderer);
-      try { await loadGrassyAsset('game'); }
-      finally {
-        // 首页背景可能在下载模型期间自行启动，不覆盖它新绑定的 renderer。
-        if (currentCharacterTextureRenderer() === renderer) {
-          configureCharacterTextures(null);
-        }
-      }
+    createPreview: (parent, appearance, onError) => createCharacterPreview(parent, appearance, onError, loadFor ? async () => {
+      pageRenderer(loadFor, 'game', TUNING);
+      await loadGrassyAsset('game');
     } : undefined),
   });
 }

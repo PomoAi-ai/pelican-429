@@ -103,7 +103,7 @@ test('搬山起手后的低扫不能越过脚边石砖命中人形玩家', () =>
 // 只检查出生点或地面实体支撑，无法阻止敌人走进有实体池底的水域。
 test('地面追击在有支撑的积水和冷却液之前停住', () => {
   for (const danger of ['water', 'coolant'] as const) for (const raised of [false, true]) {
-    const a = arena('gatekeeper', -6);
+    const a = arena('omi', -6);
     try {
       if (raised) for (let x = 30; x <= 36; x++) a.world.map.set(x, a.groundY, TILE_STONE);
       const floor = a.groundY + (raised ? 1 : 0);
@@ -150,7 +150,7 @@ test('巡线犬不会向没有安全落点的深坑起跳，前摇中新出现�
 // 平台导航只对玩家目标开启时，脱战的敌人会永久停在驻地正上方。
 test('地面机器人脱战后安全下穿平台回到驻地，危险落点则留在平台', () => {
   for (const wet of [false, true]) {
-    const a = arena('gatekeeper', 6);
+    const a = arena('omi', 6);
     try {
       for (let x = 22; x <= 35; x++) a.world.map.set(x, a.groundY + 4, TILE_PLATFORM);
       if (wet) for (let x = 22; x <= 35; x++) for (let y = a.groundY; y < a.groundY + 3; y++) a.world.fluid.set(x, y, 255);
@@ -167,7 +167,7 @@ test('地面机器人脱战后安全下穿平台回到驻地，危险落点则�
 
 // 返家允许走到目标前 .2 格，预测却沿用追击的 1.4 格停距会漏掉横移入水。
 test('返家跳台按实际水平速度预测，不会斜跳进入驻地旁的水', () => {
-  const a = arena('gatekeeper', 6);
+  const a = arena('omi', 6);
   try {
     for (let x = 25; x <= 31; x++) a.world.map.set(x, a.groundY + 4, TILE_PLATFORM);
     for (let x = 28; x <= 30; x++) for (let y = a.groundY + 5; y <= a.groundY + 7; y++) a.world.fluid.set(x, y, 255);
@@ -184,7 +184,7 @@ test('返家跳台按实际水平速度预测，不会斜跳进入驻地旁的�
 
 // 只查询原脚底同一格的支撑会把向下斜坡误判成悬崖。
 test('机器人沿连续下坡追击，不把较低的安全地面当成断崖', () => {
-  const a = arena('gatekeeper', -8);
+  const a = arena('omi', -8);
   try {
     for (let x = 29; x <= 39; x++) {
       const top = a.groundY - Math.min(x - 29, 3);
@@ -204,7 +204,7 @@ test('机器人沿连续下坡追击，不把较低的安全地面当成断崖',
 
 // 起手后不再更新注视目标，或用注视方向更新攻击朝向，都会破坏此行为。
 test('欧米攻击中持续注视移动目标，身体保持起手方向', () => {
-  const a = arena('gatekeeper', 4);
+  const a = arena('omi', 4);
   try {
     startEnemySkill(a.enemy, 0, a.target());
     for (const target of [{ x: 32, y: a.groundY + 4 }, { x: 25, y: a.groundY + 1 }]) {
@@ -220,7 +220,7 @@ test('欧米攻击中持续注视移动目标，身体保持起手方向', () =>
 
 // 未清除目标会让脱战或受击姿态仍被战斗注视覆盖。
 test('欧米脱离感知范围或受击后停止战斗注视', () => {
-  const a = arena('gatekeeper', 4);
+  const a = arena('omi', 4);
   try {
     a.enemy.enemy!.enabled = true;
     updateEnemy(a.enemy, a.target(), a.world.level, a.world.tuning, 1);
@@ -236,7 +236,7 @@ test('欧米脱离感知范围或受击后停止战斗注视', () => {
 
 // 空闲受击时每帧 cancel 会重新灌满冷却，持续普攻后敌人始终无法还击。
 test('空闲受击期间冷却继续减少，攻击只在首次打断时重置冷却', () => {
-  const a = arena('gatekeeper', 4);
+  const a = arena('omi', 4);
   try {
     startEnemySkill(a.enemy, 0, a.target());
     a.enemy.health!.hitstunTicks = 12;
@@ -250,7 +250,7 @@ test('空闲受击期间冷却继续减少，攻击只在首次打断时重置�
 
 // 如果夹扫后恢复完整冷却，欧米的双招衔接会重新变成两次孤立进攻。
 test('欧米夹扫结束后迅速衔接突进', () => {
-  const a = arena('gatekeeper', 2);
+  const a = arena('omi', 2);
   try {
     a.enemy.enemy!.enabled = true;
     startEnemySkill(a.enemy, 0, a.target());
@@ -265,7 +265,7 @@ test('欧米夹扫结束后迅速衔接突进', () => {
 test('搬山起手受伤不退缩，收招恢复可打断', () => {
   const a = arena('loadmaster', 2.1);
   try {
-    const hit = ENEMY_RULES.gatekeeper.skills[0];
+    const hit = ENEMY_RULES.omi.skills[0];
     startEnemySkill(a.enemy, 0, a.target());
     const def = ENEMY_RULES.loadmaster.skills[0];
     const hp = a.enemy.health!.hp;
@@ -301,7 +301,7 @@ test('持续普通水弹不能让搬山从满血到死亡始终无法出招', ()
 });
 
 // 普攻再次打断完整起手会让轻型敌人从满血到死亡一招也出不来。
-for (const kind of ['gatekeeper', 'lineHound', 'watchWasp'] as const) test(`${kind} 连续喷水时能挣脱硬直并实际还击`, () => {
+for (const kind of ['omi', 'lineHound', 'watchWasp'] as const) test(`${kind} 连续喷水时能挣脱硬直并实际还击`, () => {
   const a = arena(kind, 6);
   try {
     a.enemy.enemy!.enabled = true;
@@ -318,7 +318,7 @@ for (const kind of ['gatekeeper', 'lineHound', 'watchWasp'] as const) test(`${ki
 
 // 韧性若被连续命中无限续期，敌人就会永久霸体而失去明确的反击窗口。
 test('连续受击触发短暂韧性后恢复可打断，并且不能立即再次触发', () => {
-  const a = arena('gatekeeper', 6);
+  const a = arena('omi', 6);
   try {
     const hit = a.world.tuning.weapons.water.projectile;
     applyHit(a.enemy, 1, hit, 1, a.world.tuning.combat);
@@ -377,7 +377,7 @@ test('哨蜂能升到地图顶部外向最高飞行位置的玩家投弹', () =>
 });
 
 // 只追x且固定1.4格停距，会把已发现上层玩家的地怪永久留在平台下方。
-for (const kind of ['gatekeeper', 'lineHound'] as const) test(`${kind} 可以跳到上方四格的单向平台继续进攻`, () => {
+for (const kind of ['omi', 'lineHound'] as const) test(`${kind} 可以跳到上方四格的单向平台继续进攻`, () => {
   const a = arena(kind, -2);
   try {
     for (let x = 26; x < 35; x++) a.world.map.set(x, a.groundY + 3, TILE_PLATFORM);
@@ -410,7 +410,7 @@ test('搬山低扫可以看准蓄力后起跳越过', () => {
 });
 
 // Removing startup gating or hitIds deduplication would deal damage early or repeatedly.
-for (const kind of ['gatekeeper', 'loadmaster'] as const) for (const index of [0, 1] as const) {
+for (const kind of ['omi', 'loadmaster'] as const) for (const index of [0, 1] as const) {
   test(`${kind} 技能 ${index + 1} 有前摇且每轮只命中一次`, () => {
     const a = arena(kind, kind === 'loadmaster' ? 2.1 : 1.4);
     try {
@@ -671,7 +671,7 @@ test('哨蜂冷却期间追随远离出生点的玩家升降，起手后仍保�
 
 // 忽略单向平台下穿或只保留水平控制，会把追击者永久留在玩家上一层。
 test('机器人和哨蜂能下穿单向平台追击下层玩家', () => {
-  for (const kind of ['gatekeeper', 'watchWasp'] as const) {
+  for (const kind of ['omi', 'watchWasp'] as const) {
     const a = arena(kind, 6);
     try {
       for (let x = 24; x <= 32; x++) a.world.map.set(x, a.groundY + 5, TILE_PLATFORM);
@@ -706,8 +706,8 @@ test('哨蜂追击遇实体矮墙会上升越过再回到玩家上空', () => {
 
 // 盲目等短程技能进攻会使远处玩家始终只见到敌人缓慢步行。
 test('欧米远处先突进，巡线犬近处可震击，脱战后返回驻地', () => {
-  for (const kind of ['gatekeeper', 'lineHound'] as const) {
-    const a = arena(kind, kind === 'gatekeeper' ? 4 : 1.7);
+  for (const kind of ['omi', 'lineHound'] as const) {
+    const a = arena(kind, kind === 'omi' ? 4 : 1.7);
     try {
       a.enemy.enemy!.enabled = true;
       a.enemy.enemy!.cooldownTicks = 0;
@@ -723,7 +723,7 @@ test('欧米远处先突进，巡线犬近处可震击，脱战后返回驻地',
 
 // 只截断vx会使地面怪在一格台阶前永久停住，取消实体空间检查则会反复撞高墙。
 test('轻型机器人追击能跳上一格台阶，高墙前停止而不连续撞墙', () => {
-  const a = arena('gatekeeper', -6);
+  const a = arena('omi', -6);
   try {
     a.enemy.enemy!.enabled = true;
     a.enemy.enemy!.cooldownTicks = 10000;
@@ -744,8 +744,8 @@ test('轻型机器人追击能跳上一格台阶，高墙前停止而不连续�
   } finally { a.dispose(); }
 });
 
-test('钳卫突进不能穿过实体墙，地面追击不迈出平台', () => {
-  const a = arena('gatekeeper', 4);
+test('欧米突进不能穿过实体墙，地面追击不迈出平台', () => {
+  const a = arena('omi', 4);
   try {
     for (let y = a.groundY; y < a.groundY + 5; y++) a.world.map.set(26, y, TILE_STONE);
     startEnemySkill(a.enemy, 1, a.target());
@@ -761,7 +761,7 @@ test('钳卫突进不能穿过实体墙，地面追击不迈出平台', () => {
 });
 
 test('章节敌人致死后玩家重生并清理正在执行的攻击', () => {
-  const a = arena('gatekeeper', 1.4);
+  const a = arena('omi', 1.4);
   try {
     a.player.health!.hp = 1;
     startEnemySkill(a.enemy, 0, a.target());

@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import type { DefinitionDepthMode } from '../../config/definition-kit.ts';
 import { createDefinitionKit } from '../../render/building/definition-kit.ts';
-import { createDefinitionDepthOccupancy, definitionDepthConflict, type DefinitionDepthPlacement } from '../../sim/definition-depth.ts';
+import { createDefinitionDepthOccupancy, definitionDepthConflict, type DefinitionDepthPlacement } from '../../world/building-layers.ts';
 import { t } from '../../config/i18n.ts';
 
 type TrialShape = 'A' | 'C';
@@ -52,7 +52,7 @@ export function createDefinitionDepthTrial(x: number, y: number) {
   return {
     root, placeTile, describe,
     get solids() {
-      return active ? active.solids.map(solid => ({ points: solid.points.map(([px, py]) => [px + x, py + y] as const) })) : [];
+      return active ? active.solids.map(solid => ({ ...solid, points: solid.points.map(([px, py]) => [px + x, py + y] as const) })) : [];
     },
     placeWall(name: 'left' | 'right' | 'above'): string {
       const wall = walls.get(name)!;

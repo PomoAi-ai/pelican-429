@@ -2,7 +2,7 @@
  * 建筑视图（渔屋）：每座房子一个静态 Mesh（hut-<id>，顶点色 + 程序化细节纹理），其下挂两个子网格：
  * hut-<id>-sway（随风部件，共享风 uniform）与 hut-<id>-smoke（烟囱烟团，着色器按天气时间推进）。
  * 一次性构建（数量很少，不需要流式加载）；3 个材质所有房子共享（hut-material），每座房子 3 个 draw call。
- * 光照图（light-texture）与云影（cloud-shadow）由 main/world-views 按场景遍历自动挂接到这些材质。
+ * 光场（light-field-material）与云影（cloud-shadow）由 main/world-views 按场景遍历自动挂接到这些材质。
  * 栈桥桩/地基木桩的湖床高度从地图推导（bedHeightFromMap）。
  */
 import * as THREE from 'three';

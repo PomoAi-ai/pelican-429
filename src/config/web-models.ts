@@ -1,24 +1,16 @@
 import { CUSTOMIZATION_MODELS } from './character-customization-assets.ts';
-import { GRASSY_CUSTOMIZATION_MODELS } from './grassy.ts';
+import { D1_ANIMATED_MODELS, D1_MODELS, GRASSY_ANIMATED_MODELS, GRASSY_CUSTOMIZATION_MODELS } from './grassy.ts';
+import { ENEMY_KINDS, enemyModelPath } from './enemy-models.ts';
+import { NPCS } from './npc.ts';
 import { FLYING_ROADSTER_MODEL } from './flying-roadster.ts';
 
-/** 原始模型及无损版本保留供近景对照；默认游戏资源同时压缩贴图与模型数据。 */
+/** 原始模型及无损版本保留供近景对照；默认游戏资源同时压缩贴图与模型数据。[0] 是主角游戏档。 */
 export const WEB_MODEL_SOURCES: readonly string[] = [
-  './characters/human/models-equipped/grassy-equipped-game.glb',
-  './characters/human/customization/d1-base-animated.glb',
-  './characters/human/customization/d1-base-game.glb',
-  './characters/human/customization/d1-base-light.glb',
-  './characters/human/customization/d1-base-static.glb',
-  './characters/human/customization/d1-outfit-game.glb',
-  './characters/human/customization/d1-equipped-game.glb',
-  './characters/sam/sam.glb',
-  './characters/sam/human/sam-human.glb',
-  './characters/tibo/tibo.glb',
-  './characters/tibo/human/tibo-human.glb',
-  './characters/enemies/line-hound/model.glb',
-  './characters/enemies/watch-wasp/model.glb',
-  './characters/enemies/loadmaster/model.glb',
-  './characters/enemies/gatekeeper/model.glb',
+  GRASSY_ANIMATED_MODELS.find(model => model.id === 'game')!.path,
+  ...D1_ANIMATED_MODELS.map(model => model.path),
+  D1_MODELS.find(model => model.id === 'd1-base-modular')!.path,
+  ...Object.values(NPCS).flatMap(npc => npc.forms.map(form => form.path)),
+  ...ENEMY_KINDS.map(enemyModelPath),
   ...CUSTOMIZATION_MODELS.map(model => model.path),
 ];
 

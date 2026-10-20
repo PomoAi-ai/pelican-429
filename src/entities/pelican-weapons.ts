@@ -146,7 +146,7 @@ export function isSkimming(e: Entity, p: PelicanData, fluid: FluidQuery | null, 
   const b = e.body;
   const tx = Math.floor(b.x);
   if (tx < 0 || tx >= fluid.width) return false;
-  return waterSpanInColumn(fluid, tx, b.y - tuning.weapons.skim.height, b.y) > 0;
+  return waterSpanInColumn(fluid, b.x, b.y - tuning.weapons.skim.height, b.y) > 0;
 }
 
 /** 资源回复：水（游泳/掠水/陆地）与掠水兜鱼。 */

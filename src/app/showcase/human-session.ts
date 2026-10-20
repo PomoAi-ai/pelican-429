@@ -13,6 +13,7 @@ import { DEFAULT_PELICAN_ANIM_TUNING } from '../../render/pelican/pelican-animat
 import { createStageView } from '../../render/stage/stage.ts';
 import type { InputFrame } from '../../sim/sim-world.ts';
 import { t } from '../../config/i18n.ts';
+import { undergroundInspectionLight } from '../../render/stage/light-presets.ts';
 
 /** 模型与骨骼动作来自共享资源；展示场只管理版本、播放时间、灯光与镜头。 */
 export function createHumanShowcaseSession(renderer: THREE.WebGLRenderer, card: ShowcaseCard) {
@@ -85,9 +86,11 @@ export function createHumanShowcaseSession(renderer: THREE.WebGLRenderer, card: 
     if (assetChanged) show();
     revision = card.revision;
     const underground = card.environment === 'underground';
-    stage.scene.background = new THREE.Color(underground ? '#172b3b' : '#d6e5df');
+    const inspection = undergroundInspectionLight(TUNING);
+    stage.scene.background = underground ? inspection.background : new THREE.Color('#d6e5df');
     floorMaterial.color.set(underground ? '#465567' : '#a8c6b7');
-    stage.hemiLight.intensity = TUNING.render.hemi * (underground ? 0.65 : 1);
+    stage.hemiLight.intensity = underground ? inspection.hemi : TUNING.render.hemi;
+    stage.keyLight.intensity = underground ? inspection.key : TUNING.render.keyLight;
     if (rig && entry.grassyAnimation) { rig.motionPose.reset(); animate(0); }
   }
   show();

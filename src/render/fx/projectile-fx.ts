@@ -45,7 +45,7 @@ export interface ProjectileFxOptions {
   /** 地形（鱼蹦跳找地面/撞墙）；缺省时鱼在结束点原地蹦。 */
   readonly terrain?: TileQuery;
   /** 格子水（鱼蹦回水里）；缺省视为附近没水。 */
-  readonly fluid?: FluidQuery;
+  readonly fluid?: Pick<FluidQuery, 'amountAt'>;
   /** 鱼模型工厂（projectile-views.makeFish）。 */
   readonly makeFish: () => FishModel;
   /** 飞鱼（实体 id）的配色（projectile-views.fishVariant）；缺省按 id 哈希。 */

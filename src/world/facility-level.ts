@@ -1,59 +1,14 @@
-import { mulberry32 } from '../core/rng.ts';
-import type { FacilitySceneId } from '../config/facility-scenes.ts';
+import type { FacilityChapterId } from '../config/facility-scenes.ts';
 import { FACILITY_PLATFORMS, FACILITY_SCENES } from '../config/facility-scenes.ts';
 import { FORTRESS_BLACKHOLE, FORTRESS_CHASM, FORTRESS_COOLANT, FORTRESS_PLATEAU, FORTRESS_STRUCTURE } from '../config/facility-structure.ts';
-import { createFluidMap, FLUID_FULL } from './fluid-map.ts';
+import { createFluidMap } from './fluid-map.ts';
 import { computeSurface } from './level.ts';
 import type { LevelData } from './level.ts';
 import { createTileMap } from './tile-map.ts';
-import { DEFAULT_TILES, TILE_BRANCH, TILE_DIRT, TILE_GRASS, TILE_PLATFORM, TILE_STONE, TILE_TIMBER } from './tile-types.ts';
-import { planTree } from './trees.ts';
+import { DEFAULT_TILES, TILE_BRANCH, TILE_GRASS, TILE_PLATFORM, TILE_STONE } from './tile-types.ts';
 import { enemySpawnFits, type EnemySpawn } from './enemy-spawns.ts';
 
-/** 室外桥梁与机房共用连续通路；设备模型位于后景，不改变角色的通行平面。 */
-function createOriginalLevel(): LevelData {
-  const width = 116;
-  const height = 48;
-  const groundY = 10;
-  const map = createTileMap(width, height, DEFAULT_TILES);
-  const ids = new Uint16Array(width * height);
-  for (let x = 0; x < width; x++) {
-    const creek = x >= 19 && x <= 26;
-    const industrial = x >= 40 && x < 104;
-    const top = creek ? 5 : groundY;
-    for (let y = 0; y < top; y++) {
-      ids[y * width + x] = y < top - 3 ? TILE_STONE : y < top - 1 ? TILE_DIRT
-        : creek ? TILE_STONE : industrial ? TILE_TIMBER : TILE_GRASS;
-    }
-    if (creek) ids[(groundY - 1) * width + x] = TILE_PLATFORM;
-  }
-  const rng = mulberry32(429);
-  const trees = [
-    planTree('pine', 4, groundY, rng, 1),
-    planTree('oak', 12, groundY, rng, 2),
-    planTree('pine', 30, groundY, rng, 3),
-    planTree('oak', 110, groundY, rng, 4),
-  ];
-  for (const tree of trees) for (const platform of tree.platforms) {
-    for (let x = Math.max(0, platform.x0); x <= Math.min(width - 1, platform.x1); x++) {
-      ids[platform.ty * width + x] = TILE_BRANCH;
-    }
-  }
-  map.load(ids);
-  const fluid = createFluidMap(map);
-  for (let x = 19; x <= 26; x++) for (let y = 5; y < 8; y++) fluid.set(x, y, FLUID_FULL);
-  return {
-    map, fluid, surface: computeSurface(map), seed: 429,
-    spawn: { x: 34, y: groundY }, spawnFacing: 1,
-    trees, lakes: [{ x0: 19, x1: 26, level: 8, perched: false }],
-    dummies: [], structures: [], deserts: [], islands: [],
-    fishSpawns: [{ x: 22, y: 6.5, lake: 0, seed: 429 }],
-    caves: { mask: new Uint8Array(width * height), entrances: [], rooms: [], pools: [], glows: [] },
-  };
-}
-
-export function createFacilityLevel(sceneId: FacilitySceneId): LevelData {
-  if (sceneId === 'original') return createOriginalLevel();
+export function createFacilityLevel(sceneId: FacilityChapterId): LevelData {
   const { width, height, floorY: floor } = FACILITY_SCENES[sceneId];
   const map = createTileMap(width, height, DEFAULT_TILES);
   const ids = new Uint16Array(width * height);
@@ -86,7 +41,7 @@ export function createFacilityLevel(sceneId: FacilitySceneId): LevelData {
   map.load(ids);
   const fluid = createFluidMap(map);
   const enemies: EnemySpawn[] = sceneId === 'fortress' ? [
-    { kind: 'gatekeeper', x: 98, y: 20 },
+    { kind: 'omi', x: 98, y: 20 },
     { kind: 'lineHound', x: 120, y: 20 },
     { kind: 'watchWasp', x: 137, y: 24 },
     { kind: 'watchWasp', x: 145, y: 23 },
@@ -94,7 +49,7 @@ export function createFacilityLevel(sceneId: FacilitySceneId): LevelData {
     { kind: 'loadmaster', x: 177, y: 20 },
   ] : [];
   const spawnMap = { map, fluid, ...(sceneId === 'fortress' ? { lethalCoolant: FORTRESS_COOLANT } : {}) };
-  const guards = ['gatekeeper', 'lineHound', 'loadmaster'] as const;
+  const guards = ['omi', 'lineHound', 'loadmaster'] as const;
   let guardIndex = 0;
   for (const [left, right, platformY] of FACILITY_PLATFORMS[sceneId]) {
     if (right - left < 8 || sceneId === 'fortress' && platformY <= floor) continue;

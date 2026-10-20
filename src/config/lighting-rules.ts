@@ -29,7 +29,7 @@ export interface Direction3 {
   readonly z: number;
 }
 
-/** 泰拉瑞亚式瓦片光照（world/light-map）：天空光自上照入，经每格介质按比例衰减传播。 */
+/** 泰拉瑞亚式瓦片光照（world/light-field，按 1/4 子格）：天空光自上照入，经每格介质按比例衰减传播。 */
 export interface LightMapTuning {
   /** 光离开该介质格进入邻格时乘的比例 (0,1)：空气 / 实心 / 水 / 树冠 / 单向平台。 */
   readonly airDecay: number;

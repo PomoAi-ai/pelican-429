@@ -3,12 +3,12 @@ import { createDefinitionLiquid } from '../../render/building/definition-liquid.
 import { DEFINITION_DEPTH } from '../../config/definition-kit.ts';
 import { ROCK_TERRAIN_SCENES } from '../../config/rock-terrain.ts';
 import { generateTileTextures } from '../../render/tile/tile-textures.ts';
-import type { DefinitionCollider, DefinitionPlatform } from '../../physics/definition-collision.ts';
+import type { Vec2 } from '../../core/math.ts';
+import type { DefinitionWorldData } from '../../sim/definition-world.ts';
 import { createDefinitionKit, type DefinitionKit } from '../../render/building/definition-kit.ts';
 import { createDefinitionFurniture, type FurnitureKind, type FurnitureOptions } from '../../render/building/definition-furniture.ts';
 import type { WorkstationPlayer } from '../../render/residence/workstation-display-state.ts';
 import { addDefinitionRoom, DEFINITION_ROOMS, type SceneSection } from './definition-scene-layout.ts';
-import { createSolarPanel, solarTrackingAngle, type SolarPanelState } from '../../physics/solar-panel.ts';
 import { createSettlementLandscape } from './settlement-landscape.ts';
 import { yieldScene } from '../workspace/scene-mount.ts';
 import { t } from '../../config/i18n.ts';
@@ -164,8 +164,8 @@ function* settlementLayoutSteps() {
   root.name = 'definition-settlement';
   const placements: Placement[] = [];
   const disposers: Array<() => void> = [];
-  const solarPanels: SolarPanelState[] = [];
-  const updates: Array<(time: number, player: WorkstationPlayer | null) => void> = [];
+  const solar: Vec2[] = [];
+  const updates: Array<(time: number, player: WorkstationPlayer | null, solarAngle: (index: number) => number) => void> = [];
   const sources: Array<{ kit: DefinitionKit; x: number; y: number }> = [];
   function builder(offsetX = 0, offsetY = 0): TownBuilder {
     const source = createDefinitionKit();
@@ -207,9 +207,8 @@ function* settlementLayoutSteps() {
         root.add(view.root);
         disposers.push(() => view.dispose());
         if (kind === 'solar') {
-          const panel = createSolarPanel(offsetX + x + .5, offsetY + y, 0);
-          solarPanels.push(panel);
-          updates.push(time => view.update!(time, panel.angle, null));
+          const index = solar.push({ x: offsetX + x + .5, y: offsetY + y }) - 1;
+          updates.push((time, _player, solarAngle) => view.update!(time, solarAngle(index), null));
         } else if (view.update) updates.push((time, player) => view.update!(time, undefined, player));
         record(t('家具'), kind === 'solar' ? `${kind}-${options.solarVariant ?? 'level'}` : kind, x, y);
       },
@@ -256,7 +255,7 @@ function* settlementLayoutSteps() {
     id: 'solar', title: t('旅舍屋顶 · 整排太阳能'),
     description: t('整砖旅舍屋顶连续铺12块太阳能板，宽1、高0.5、深2；从右侧室外平台可以登顶，沿面板走动会逐块受力，离开后恢复追光。'),
     x: 2, y: 1, width: 20, height: 13, playerX: 16.5, playerY: 9,
-    solarTrial: solarPanels[5]!,
+    solarTrial: 5,
     items: ['12块连续面板 · 居中安装', '真实屋顶支撑 · 右侧平台连接主街', '室内家具深1 · 贴格子背面'].map(item => t(item)),
   });
   const liquid = createDefinitionLiquid();
@@ -290,21 +289,21 @@ function* settlementLayoutSteps() {
   const landscape = createSettlementLandscape();
   root.add(landscape.root);
   disposers.push(landscape.dispose);
-  const solids: DefinitionCollider[] = sources.flatMap(({ kit, x, y }) => kit.solids.map(solid => ({
-    points: solid.points.map(([px, py]) => [px + x, py + y] as const),
-  })));
-  solids.push(...solarPanels.map(panel => panel.collider));
-  solids.push(...liquid.solids.map(solid => ({ points: solid.points.map(([x, y]) => [x + 100, y - 2] as const) })));
-  const platforms: DefinitionPlatform[] = sources.flatMap(({ kit, x, y }) => kit.platforms.map(platform => ({
-    left: platform.left + x, right: platform.right + x, top: platform.top + y,
-  })));
+  const data: DefinitionWorldData = {
+    solids: [...sources, { kit: liquid, x: 100, y: -2 }].flatMap(({ kit, x, y }) => kit.solids.map(solid => ({
+      ...solid, points: solid.points.map(([px, py]) => [px + x, py + y] as const),
+    }))),
+    platforms: sources.flatMap(({ kit, x, y }) => kit.platforms.map(platform => ({
+      ...platform, left: platform.left + x, right: platform.right + x, top: platform.top + y,
+    }))),
+    stands: [], solar,
+  };
   complete = true;
-  return { root, sections, collision: { solids, platforms }, solarPanels,
-    setSunDirection(sun: { x: number; y: number }): void {
-      const angle = solarTrackingAngle(sun);
-      for (const panel of solarPanels) panel.sunAngle = angle;
+  return { root, sections, data,
+    update(time: number, player: WorkstationPlayer | null, solarAngle: (index: number) => number): void {
+      for (const update of updates) update(time, player, solarAngle);
+      liquid.update(time); landscape.update(time);
     },
-    update(time: number, player: WorkstationPlayer | null): void { for (const update of updates) update(time, player); liquid.update(time); landscape.update(time); },
     dispose(): void { for (const dispose of disposers.reverse()) dispose(); root.removeFromParent(); root.clear(); } };
   } finally {
     if (!complete) { for (const dispose of disposers.reverse()) dispose(); root.clear(); }

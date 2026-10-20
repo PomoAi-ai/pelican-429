@@ -5,9 +5,9 @@ import { INTRO_DURATION, INTRO_FORTRESS_REVEAL_AT, INTRO_GOAL_AT, introSceneAt }
 import { lerp } from '../../core/math.ts';
 import { createFishSchool } from '../../entities/fish.ts';
 import { focusHeight } from '../../render/stage/camera-rig.ts';
-import { createStageRenderer, createStageView } from '../../render/stage/stage.ts';
+import { createRenderer, createStageView } from '../../render/stage/stage.ts';
 import { createWorldViews } from '../../render/stage/world-views.ts';
-import { createWorldLight } from '../../render/stage/light-texture.ts';
+import { createWorldLight } from '../../render/stage/light-field-material.ts';
 import { createFacilityLevel } from '../../world/facility-level.ts';
 import { createFacilityPresentation, facilityGameTuning, frameFacilityCamera } from '../facility/facility-presentation.ts';
 import { createWorldPrecip, facilityWeather } from '../game/precip-wiring.ts';
@@ -17,7 +17,8 @@ import { readPageParams } from '../shell/page-context.ts';
 /** 序章只揭示真实关卡和落点；角色的坠落留给游戏模拟。 */
 export async function createIntroFortress() {
   const tuning = facilityGameTuning();
-  const renderer = createStageRenderer(tuning, readPageParams().debug);
+  // 次级渲染器：最后一幕拷贝到序章的 2D 画布，与游戏页主渲染器同时存在；不画角色，不绑定角色贴图。
+  const renderer = createRenderer('game', tuning, readPageParams().debug);
   // 最后一幕仍需拷贝到 2D 画布，固定像素上限避免高 DPR 放大两次渲染成本。
   renderer.setPixelRatio(1);
   const disposers: Array<() => void> = [() => renderer.dispose()];
@@ -78,7 +79,7 @@ export async function createIntroFortress() {
         facility.update(seconds);
         worldViews.update(visible, environmentTime, dt, 1);
         precip.update(visible, environmentTime, dt, target, weather);
-        lighting.update(view.scene, ++frame);
+        lighting.update(view.scene, ++frame, visible);
         view.render();
       },
       dispose,

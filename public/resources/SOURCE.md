@@ -26,7 +26,7 @@
 | pelican.webp | `public/characters/pelican/02-pelican-2d-three-quarter.png` | 640 |
 | grassy.webp | `public/characters/human/models-equipped/render-game-hero.png` | 600（原宽） |
 | tibo.webp、sam.webp | `public/characters/{tibo,sam}/human/render-front.png` | 640 |
-| gatekeeper.webp、line-hound.webp、watch-wasp.webp、loadmaster.webp | `public/characters/enemies/<id>/thumbnail.png` | 640 |
+| omi.webp、line-hound.webp、watch-wasp.webp、loadmaster.webp | `public/characters/enemies/<id>/thumbnail.png` | 640 |
 | wechat-group.webp | `public/contact/wechat-group.jpg` | 360 |
 
 更新方式：原图变化后按上表重新生成同名文件，例如 `uv run --with pillow python3 -c "from PIL import Image; im=Image.open('<原图>'); im.thumbnail((<宽度>, 10000), Image.LANCZOS); im.save('public/resources/home/<文件>', 'WEBP', quality=82, method=6)"`。

@@ -6,7 +6,7 @@ export const SOUND_ENGLISH: Record<string, string> = {
   ...Object.fromEntries(Object.values(WORLD_MUSIC).flatMap(track => [[track.title, track.titleEn], [track.notes, track.notesEn]])),
   // Boss groups are proper names; listed so the group filter can translate every group.
   'Sam': 'Sam', 'Tibo': 'Tibo',
-  '大世界音乐': 'World music', '大世界': 'Open world', '遭遇战': 'Encounter',
+  '主世界音乐': 'Main world music', '主世界': 'Main world', '遭遇战': 'Encounter',
   '声音目录 · 鹈鹕 429': 'Sound library · Pelican 429',
   '一次听一个。背景、环境、技能与角色声音，直接复用游戏音源。': 'Listen to one sound at a time. Music, ambience, skills, and voices use the actual game audio.',
   '查找声音': 'Find sounds', '黑洞、脚步、Sam…': 'Black hole, footsteps, Sam…', '试听音量': 'Preview volume',
@@ -14,7 +14,7 @@ export const SOUND_ENGLISH: Record<string, string> = {
   '已停止 · 选择声音继续试听': 'Stopped · Choose a sound to continue', '距黑洞中心': 'Distance from black hole',
   '拖动模拟离开黑洞区域；远处逐渐安静。': 'Drag to move away from the black hole; the sound fades with distance.',
   '声音分类': 'Sound categories', '全部': 'All', '背景音乐': 'Music', '环境声音': 'Ambience', '技能与动作': 'Skills and movement',
-  '冷启动 · 序章开场': 'Cold start · Prelude opening', '机房堡垒': 'Compute fortress', '探索': 'Exploration', '警戒': 'Alert', '战斗': 'Combat',
+  '冷启动 · 序章开场': 'Cold start · Prelude opening', '山体算力堡垒': 'Mountain Compute Fortress', '探索': 'Exploration', '警戒': 'Alert', '战斗': 'Combat',
   '黑洞 · 引力旋涡': 'Black hole · Gravity vortex', '堡垒外部': 'Fortress exterior', '入口': 'Entrance',
   '服务器机架': 'Server racks', '网络核心': 'Network core', '屋顶风声': 'Rooftop wind', '角色招呼': 'Greeting',
   '开场旋律 · 约 15 秒': 'Opening melody · About 15 seconds', '循环配乐 · 点击停止结束': 'Looping music · Click Stop to finish',

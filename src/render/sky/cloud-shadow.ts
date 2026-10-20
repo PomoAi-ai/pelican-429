@@ -1,7 +1,7 @@
 /**
  * 云影：给地表/植被/树/渔屋/水面等光照类网格材质链式注入 cloudShade(世界 x)（render/wind 的 CLOUD_GLSL，共享 uniform），
  * 在 opaque_fragment 之前把 outgoingLight 乘以 [1 − strength, 1] 的暗斑系数 —— 云影随云层漂移量 uCloudDrift 缓慢移动。
- * 与 light-texture 的光照图挂接方式相同（保存原 onBeforeCompile 先调用、缓存键追加标签），两者互不覆盖、顺序无关。
+ * 与 light-field-material 的光照挂接方式相同（保存原 onBeforeCompile 先调用、缓存键追加标签），两者互不覆盖、顺序无关。
  * 不挂接：userData.noCloudShadow 为真的材质、ShaderMaterial 等非网格光照材质。
  */
 import type * as THREE from 'three';

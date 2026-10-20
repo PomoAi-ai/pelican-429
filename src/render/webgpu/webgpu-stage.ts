@@ -7,38 +7,42 @@
 import * as THREE from 'three';
 import { PMREMGenerator, WebGPURenderer } from 'three/webgpu';
 import type { Tuning } from '../../config/tuning.ts';
-import { disposeCharacterTextures } from '../character/character-model.ts';
-import { attachStage, configureStageRenderer } from '../stage/stage.ts';
-import type { Stage, StageBackend, StageOptions, StageRenderer } from '../stage/stage.ts';
+import { bindCharacterTextures } from '../character/character-model.ts';
+import { attachStage, createRenderer } from '../stage/stage.ts';
+import type { EnvironmentGenerator, Stage, StageBackend, StageOptions, StageRenderer } from '../stage/stage.ts';
 import { nodePatches } from '../stage/node-patches.ts';
 import { installNodePatches } from './webgpu-materials.ts';
 import { hasShaderNodes, installShaderMaterials } from './webgpu-shader-materials.ts';
 import { createWebGpuPostFx } from './webgpu-post-fx.ts';
+import { createWebGpuForegroundFilter } from './webgpu-foreground-filter.ts';
 
 const BACKEND: StageBackend<WebGPURenderer> = {
-  pmrem: (renderer) => new PMREMGenerator(renderer),
+  // three 的 WebGPU PMREMGenerator 实现了 fromEquirectangular，类型声明缺这一项。
+  pmrem: (renderer) => new PMREMGenerator(renderer) as PMREMGenerator & Pick<EnvironmentGenerator, 'fromEquirectangular'>,
   postFx: createWebGpuPostFx,
+  foregroundFilter: createWebGpuForegroundFilter,
 };
 
-export async function createWebGpuStage(container: HTMLElement, tuning: Tuning, options: StageOptions): Promise<Stage<WebGPURenderer>> {
+/** WebGPU 舞台就是游戏页的主渲染器，由它绑定角色贴图，释放时解绑。 */
+export async function createWebGpuStage(container: HTMLElement, tuning: Tuning, options: StageOptions, debug: boolean): Promise<Stage<WebGPURenderer>> {
   if (!('gpu' in navigator)) throw new Error('当前浏览器不支持 WebGPU（renderer=webgpu）；去掉该参数使用 WebGL');
   // 适配器不支持 timestamp-query 时 three 在 init 里自动关闭 trackTimestamp，gpu-timer 据此报告不支持。
   // 画布不透明（同 WebGL 舞台）：调色输出的 alpha 带着场景通道的值，透明画布会把 alpha < 1 的像素透出页面底色。
-  const renderer = new WebGPURenderer({ alpha: false, antialias: false, powerPreference: 'high-performance', trackTimestamp: true });
+  const renderer = createRenderer('game', tuning, debug, parameters => new WebGPURenderer({ ...parameters, trackTimestamp: true }));
   await renderer.init();
   // 拿不到适配器时 WebGPURenderer 会静默改用 WebGL2 后端，对比就失去意义。
   if (!(renderer.backend as { isWebGPUBackend?: boolean }).isWebGPUBackend) {
     renderer.dispose();
     throw new Error('WebGPU 适配器不可用（渲染器退回了 WebGL2 后端）；去掉 renderer=webgpu 使用 WebGL');
   }
-  configureStageRenderer(renderer, tuning);
   installNodePatches(renderer);
   installShaderMaterials(renderer);
+  const unbind = bindCharacterTextures(renderer);
   const stage = attachStage(container, renderer, tuning, options, BACKEND);
   const detach = stage.dispose;
   stage.dispose = () => {
     detach();
-    disposeCharacterTextures();
+    unbind();
     renderer.dispose();
   };
   return stage;

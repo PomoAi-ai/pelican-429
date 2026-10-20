@@ -112,9 +112,9 @@
 
 ## 10. 资料依据与实现边界
 
-- `docs/economy.md`：阶段1的开局、包含系统、美术需求；完整经济设定是设计资料，不把其中所有后期物件纳入本轮。
-- `docs/room-layout-definitions.md`：床3×1、桌2×2草案，最新吊灯1×1，人物尺寸、通口避让与实际支撑面。
-- `docs/depth-definitions.md`、`docs/platform-definitions.md`：格子、墙、前沿与后沿；家具深度与平台规则分别处理。
+- `public/concepts/economy.md`：阶段1的开局、包含系统、美术需求；完整经济设定是设计资料，不把其中所有后期物件纳入本轮。
+- `public/concepts/room-layout-definitions.md`：床3×1、桌2×2草案，最新吊灯1×1，人物尺寸、通口避让与实际支撑面。
+- `public/concepts/depth-definitions.md`、`public/concepts/platform-definitions.md`：格子、墙、前沿与后沿；家具深度与平台规则分别处理。
 - `src/render/residence/homestead-view.ts`已有工作站、仓库、机器人坞、蓄电池、交易终端等简化表现；`src/config/homestead.ts`及`src/sim/homestead.ts`已有相关配置和设施。当前住宅与搭建场尺寸由共享资源配置登记，不与经济模式的简化示意尺寸混用。
 
 三张图由本地Python绘制，每件附实体透视与同镜头线框，所有对象共享相机和单位尺度。当前家具已接入实际放置、逐件拆除和共享承托碰撞；相关行为已有专项测试。角色坐卧动画尚未制作，经济设施的完整功能不能仅凭模型推断。旧图的制作优先级保留作历史记录，当前可选项以材料与构件库为准。
@@ -131,7 +131,7 @@
 
 ![选做家具透视与线框：普通桌2×2、椅子1×2、置物架2×2、盆栽1×2；图示放置范围不等于实心碰撞。](furniture-optional.png)
 
-[植物类 · 盆景与盆栽](../?mode=concepts#natural-bonsai)
+[植物类 · 盆景与盆栽](../?mode=concepts#natural-bonsai-definitions)
 
 ![Python线框透视：太阳能板宽1高0.5、深2与深3两种居中安装、整砖和半砖支撑，以及踩踏倾转后恢复追光。](solar-grid-and-load-perspective.png)
 

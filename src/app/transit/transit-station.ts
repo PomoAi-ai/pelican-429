@@ -1,20 +1,24 @@
+/**
+ * 交通中心功能插件（城区）：模型、界面、音效与发射镜头。阶段、电梯与人的位置在模拟层（sim/transit）按 tick 推进，
+ * 这里只发命令并按阶段摆放画面；穿越结束后经返程穿梭层整页跳到目的地。
+ */
 import * as THREE from 'three';
-import { TRANSIT, TRANSIT_DESTINATIONS, TRANSIT_PHASE_SECONDS, TRANSIT_PLANTER_X, TRANSIT_PULSE_SECONDS,
-  type TransitDestinationId } from '../../config/transit.ts';
+import { TRANSIT, TRANSIT_DESTINATIONS, TRANSIT_PHASE_SECONDS, TRANSIT_PLANTER_X, TRANSIT_PULSE_SECONDS } from '../../config/transit.ts';
 import type { Vec2 } from '../../core/math.ts';
 import type { Body } from '../../physics/body.ts';
-import type { Stage } from '../../render/stage/stage.ts';
-import type { createAiCityLighting } from '../../render/city/ai-city-lighting.ts';
+import type { Stage, StageRenderer } from '../../render/stage/stage.ts';
 import { createAiCityGreenery } from '../../render/city/ai-city-environment.ts';
 import { createTransitCenterModel, type TransitVisual } from '../../render/transit/transit-center-model.ts';
-import type { GrassyRig } from '../../render/grassy/grassy-rig.ts';
-import { animateGrassy } from '../../render/grassy/grassy-animator.ts';
-import { cancelTransit, createTransit, enterTransit, launchTransit, seatTransit, selectTransitDestination,
-  stepTransit, transitPhaseProgress, type TransitPhase, type TransitState } from '../../sim/transit.ts';
-import type { createTransitInterface } from './transit-controls.ts';
-import { createTransitPilot, transitWalkZ } from './transit-pilot.ts';
+import { getPlayer, type SimWorld } from '../../sim/sim-world.ts';
+import {
+  canEnterTransit, onTransitDeck, requestTransit, requestTransitLift, selectTransitDestination,
+  transitCabinPosition, transitElevatorY, transitExitPosition, transitPhaseProgress, type TransitPhase, type TransitState, type TransitStation,
+} from '../../sim/transit.ts';
+import type { GameFeature } from '../game/frame-loop.ts';
+import { keepWorldParams } from '../game/free-world-navigation.ts';
+import { createTransitInterface } from './transit-controls.ts';
 import { createTransitAudio } from './transit-audio.ts';
-import { createTransitHandoff, type TransitOwner } from './transit-handoff.ts';
+import { CORRIDOR_DEPART_SECONDS, createReturnCorridorOverlay } from './return-corridor-overlay.ts';
 import { t } from '../../config/i18n.ts';
 
 const PHASE_TEXT: Record<TransitPhase, [string, string]> = {
@@ -34,42 +38,35 @@ const PHASE_TEXT: Record<TransitPhase, [string, string]> = {
   complete: ['正在抵达', '正在进入目的地场景'],
 };
 const FOLLOW_PHASES = new Set<TransitPhase>(['ground', 'elevator', 'calling', 'descending', 'opening', 'boarding', 'disembarking']);
+const CABIN_PHASES = new Set<TransitPhase>(['cabin', 'retract', 'ignition', 'ascent', 'warp', 'travel', 'complete']);
 const smooth = (value: number) => {
   const p = THREE.MathUtils.clamp(value, 0, 1);
   return p * p * (3 - 2 * p);
 };
 
-/** What a scene must provide to mount the transit center; positions are world coordinates. */
-export interface TransitStationHost {
-  readonly stage: Stage;
-  readonly lighting: ReturnType<typeof createAiCityLighting>;
-  readonly ui: ReturnType<typeof createTransitInterface>;
-  readonly rig: GrassyRig;
-  /** World position of the station's local (0, 0): the street surface below the pad axis line. */
-  readonly origin: Vec2;
-  /** Hosted stations leave the ground-phase camera and the street end caps to the surrounding scene. */
-  readonly hosted: boolean;
+export interface TransitStationInput {
+  readonly stage: Stage<StageRenderer>;
+  readonly world: SimWorld;
+  readonly station: TransitStation;
+  /** 玩家视图根：通道与座舱阶段按深度与座舱位置偏移它。 */
+  readonly playerView: () => THREE.Object3D;
   readonly signal: AbortSignal;
-  readonly owner: TransitOwner;
-  body(): Body;
-  teleport(x: number, y: number): void;
-  playing(): boolean;
-  clearInput(): void;
-  stopInput(): void;
-  reportError(error: unknown): void;
+  /** 设置面板、大地图或着陆舱开场期间不接受交互。 */
+  readonly blocked: () => boolean;
+  readonly releaseInput: () => void;
+  /** 进入穿越航道：城区表现停止推进、城区光照关闭。 */
+  readonly leaveCity: () => void;
+  readonly reportError: (error: unknown) => void;
 }
 
 function flightVisual(state: TransitState, travelTime: number, arrival: number): TransitVisual {
   const phase = state.phase, p = transitPhaseProgress(state);
   const flying = phase === 'ascent' || phase === 'warp' || phase === 'travel' || phase === 'complete';
   const open = phase === 'boarding' || phase === 'cabin' || phase === 'disembarking';
-  const ascending = phase === 'elevator' || (phase === 'calling' && state.elevatorDirection === 'down');
-  const descending = phase === 'descending' || (phase === 'calling' && state.elevatorDirection === 'up');
   const climb = 42 * (.045 * p + .955 * p ** 3.1);
   const ascentSpeed = 42 / TRANSIT_PHASE_SECONDS.ascent;
   return {
-    elevatorY: ascending ? TRANSIT.cabinFloor * smooth(p) : descending ? TRANSIT.cabinFloor * (1 - smooth(p))
-      : state.elevatorAtTop ? TRANSIT.cabinFloor : 0,
+    elevatorY: transitElevatorY(state),
     bridgeRetraction: phase === 'retract' ? smooth((p - .2) / .8) : phase === 'ignition' || flying ? 1 : 0,
     doorClosed: open ? 0 : phase === 'opening' ? 1 - smooth(p) : phase === 'retract' ? smooth(p / .25) : 1,
     clampRelease: phase === 'ignition' ? smooth((p - .8) / .2) : flying ? 1 : 0,
@@ -89,13 +86,12 @@ function flightVisual(state: TransitState, travelTime: number, arrival: number):
   };
 }
 
-/** Player coordinates are station-local; takeover starts the follow from wherever the host left the camera. */
-function createTransitCamera(stage: Stage, origin: Vec2) {
+/** 非地面阶段由交通中心接管镜头（游戏镜头之后写入）；接管时从游戏镜头当前位置开始跟随。 */
+function createTransitCamera(stage: Stage<StageRenderer>, origin: Vec2) {
   const base = new THREE.Vector3(), target = new THREE.Vector3(), offset = new THREE.Vector3(origin.x, origin.y, 0);
   const sideFov = stage.camera.fov;
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  return (dt: number, time: number, state: TransitState, visual: TransitVisual, playerX: number, playerY: number,
-    closeView: boolean, takeover: boolean) => {
+  return (dt: number, time: number, state: TransitState, visual: TransitVisual, playerX: number, playerY: number, takeover: boolean) => {
     if (takeover) base.copy(stage.camera.position);
     if (visual.travel >= 0) {
       const settle = smooth(visual.travelTime / 1.8);
@@ -114,7 +110,7 @@ function createTransitCamera(stage: Stage, origin: Vec2) {
     stage.camera.up.set(0, 1, 0);
     stage.camera.fov = sideFov;
     const cabin = state.phase === 'cabin';
-    const upper = cabin || (state.phase === 'ground' && (closeView || playerY > 11)) || state.phase === 'opening' || state.phase === 'boarding';
+    const upper = cabin || state.phase === 'opening' || state.phase === 'boarding';
     const flight = ['ignition', 'ascent', 'warp', 'travel', 'complete'].includes(state.phase);
     const rise = smooth(visual.altitude / 15);
     const height = cabin ? 13.5 : upper ? 19 : flight ? 36 + rise * 14 : 35;
@@ -122,7 +118,6 @@ function createTransitCamera(stage: Stage, origin: Vec2) {
     const distance = Math.max(height, span / stage.camera.aspect) / (2 * Math.tan(THREE.MathUtils.degToRad(stage.camera.fov / 2)));
     // Keep the gantry fixed in frame until the hull has visibly cleared it.
     const flightY = 15 + Math.max(0, visual.altitude - 5) + 80 * smooth((visual.warp - .25) / .75);
-    // On foot the view tracks the runner and stops where the street end caps meet the frame edge.
     const half = Math.max(height * stage.camera.aspect, span) / 2;
     const left = TRANSIT.walkwayMinX - 6 + half, right = TRANSIT.walkwayMaxX + 6 - half;
     const follow = FOLLOW_PHASES.has(state.phase);
@@ -143,87 +138,49 @@ function createTransitCamera(stage: Stage, origin: Vec2) {
   };
 }
 
-function createTransitHud(host: TransitStationHost, pilot: ReturnType<typeof createTransitPilot>,
-  model: ReturnType<typeof createTransitCenterModel>, state: TransitState) {
-  const { ui, stage } = host;
-  const anchor = new THREE.Vector3();
-  let lastPhase: TransitPhase | null = null;
-  return (visual: TransitVisual, prompt: boolean) => {
-    const phase = state.phase, p = transitPhaseProgress(state);
-    if (phase !== lastPhase) {
-      ui.section.dataset.phase = phase; ui.phase.textContent = t(PHASE_TEXT[phase][0]);
-      ui.hint.textContent = t(PHASE_TEXT[phase][1]); ui.panel.hidden = phase !== 'cabin';
-      ui.board.hidden = phase !== 'ground'; ui.overview.disabled = phase !== 'ground';
-      if (phase === 'cabin') {
-        ui.launch.disabled = true; ui.launch.textContent = t('请选择目的地');
-        for (const button of ui.panel.querySelectorAll<HTMLButtonElement>('[data-destination]')) button.setAttribute('aria-pressed', 'false');
-        ui.panel.querySelector<HTMLButtonElement>('[data-destination]')!.focus({ preventScroll: true });
-      }
-      lastPhase = phase;
-    }
-    const near = pilot.canEnter();
-    ui.entry.hidden = !prompt; ui.hatch.hidden = !near || prompt;
-    if (near) {
-      model.hatchAnchor.getWorldPosition(anchor).project(stage.camera);
-      const x = (anchor.x + 1) * .5 * ui.viewport.clientWidth, y = (1 - anchor.y) * .5 * ui.viewport.clientHeight;
-      ui.hatch.style.left = `${x - 15}px`; ui.hatch.style.top = `${y - 85}px`;
-      ui.entry.style.left = `${THREE.MathUtils.clamp(x - 290, 12, ui.viewport.clientWidth - 292)}px`;
-      ui.entry.style.top = `${THREE.MathUtils.clamp(y + 80, 12, ui.viewport.clientHeight - 230)}px`;
-    }
-    if (phase === 'ground') {
-      ui.board.textContent = t(pilot.atUpperDeck() ? '乘电梯 ↓' : '乘电梯 ↑');
-      ui.board.disabled = pilot.approaching || !host.body().onGround;
-      ui.hint.textContent = t(pilot.approaching ? '正在前往电梯…' : near ? '点击舱门或按 E · 确认后进入驾驶舱'
-        : pilot.atUpperDeck() ? '走到右侧舱门点击进入 · S＋空格下穿 · 空格飞行' : PHASE_TEXT.ground[1]);
-    }
-    ui.readout.textContent = phase === 'ground' ? 'READY' : phase === 'cabin' ? 'ONLINE'
-      : phase === 'ignition' ? `T − ${Math.max(1, Math.ceil(TRANSIT_PHASE_SECONDS.ignition * (1 - p)))}`
-      : phase === 'ascent' ? `${visual.speed.toFixed(1)} m/s` : phase === 'warp' ? `${(visual.speed / 1000).toFixed(2)} km/s`
-      : phase === 'travel' ? `T + ${state.elapsed.toFixed(1)} s`
-      : phase === 'complete' ? 'JUMP' : `${Math.round(p * 100)}%`;
-    ui.engine.textContent = phase === 'travel' ? t('航道稳定 · 目的地已锁定')
-      : visual.thrust > 0 ? `ALT ${visual.altitude.toFixed(1)} m  /  THRUST ${Math.round(visual.thrust * 100)}%` : '';
-    ui.meter.style.transform = `scaleX(${phase === 'ground' ? .08 : p})`;
-    ui.flash.style.opacity = String(phase === 'warp' ? smooth((p - .28) / .65) : 0);
-  };
-}
-
-/**
- * The transit center as a mountable unit. The host steps the ground-phase walker (using `collision` and `steer`);
- * once `active`, the station drives the rig pose and camera until the sequence returns to the street.
- */
-export function createTransitStation(host: TransitStationHost) {
-  const { stage, lighting, ui, origin, signal } = host;
-  const model = createTransitCenterModel(stage.renderer, !host.hosted);
+export function createTransitStation(input: TransitStationInput): GameFeature & { dispose(): void } {
+  const { stage, world, station, signal } = input;
+  const { state, origin } = station;
+  const body = (): Body => getPlayer(world).body;
+  const ui = createTransitInterface(document.body);
+  const model = createTransitCenterModel(stage);
   model.root.position.set(origin.x, origin.y, 0);
   stage.scene.add(model.root);
   const flowers = createAiCityGreenery(TRANSIT_PLANTER_X.map(x => ({ x: origin.x + x - .75, y: origin.y + .84, z: -2.25, width: 1.5, depth: .5 })));
   stage.scene.add(flowers.root);
-  const sound = createTransitAudio(signal, host.reportError);
+  const sound = createTransitAudio(signal, input.reportError);
+  // 新建渲染上下文要卡一两秒，趁加载时隐藏着建好。
+  const corridor = createReturnCorridorOverlay(document.body, false);
   const daylightExposure = stage.renderer.toneMappingExposure;
-  const state = createTransit();
-  const pilot = createTransitPilot(host, model, state);
-  const updateCamera = createTransitCamera(stage, origin), updateHud = createTransitHud(host, pilot, model, state);
-  const handoff = createTransitHandoff(ui, signal, host.owner, host.stopInput);
-  let closeView = false, hatchPrompt = false, elapsed = 0, travelTime = 0, chaseLighting = false, travelling = false, driving = false;
+  const updateCamera = createTransitCamera(stage, origin);
+  const anchor = new THREE.Vector3(), seat = new THREE.Vector3();
+  let hatchPrompt = false, elapsed = 0, travelTime = 0, travelling = false, driving = false, posed = false;
+  let departure = -1, lastPhase: TransitPhase | null = null;
+
   const focusCanvas = () => stage.canvas.focus({ preventScroll: true });
   const closePrompt = () => { hatchPrompt = false; focusCanvas(); };
   const showHatch = () => {
-    if (!pilot.canEnter()) return;
-    pilot.stop(); hatchPrompt = true; ui.entry.hidden = false; ui.enter.focus({ preventScroll: true });
+    if (!canEnterTransit(station, body()) || input.blocked()) return;
+    state.approaching = false; hatchPrompt = true; input.releaseInput();
+    ui.entry.hidden = false; ui.enter.focus({ preventScroll: true });
   };
-  const local = (): Vec2 => { const body = host.body(); return { x: body.x - origin.x, y: body.y - origin.y }; };
-  ui.board.addEventListener('click', () => { pilot.approachLift(); closeView = false; focusCanvas(); }, { signal });
+  const interact = () => {
+    if (canEnterTransit(station, body())) showHatch(); else requestTransitLift(station);
+  };
+  const cancel = () => { closePrompt(); requestTransit(station, 'cancel'); };
+  /** 站点街面或其上方（街面以下的地下是普通城区）。 */
+  const near = (b: Body): boolean => {
+    const x = b.x - origin.x;
+    return x >= TRANSIT.walkwayMinX && x <= TRANSIT.walkwayMaxX && b.y - origin.y > -.5;
+  };
+  ui.board.addEventListener('click', () => { requestTransitLift(station); focusCanvas(); }, { signal });
   ui.hatch.addEventListener('click', showHatch, { signal });
   ui.closeEntry.addEventListener('click', closePrompt, { signal });
-  ui.enter.addEventListener('click', () => {
-    if (pilot.canEnter() && enterTransit(state, local())) { pilot.stop(); closePrompt(); }
-  }, { signal });
-  ui.overview.addEventListener('click', () => { closeView = !closeView; ui.overview.setAttribute('aria-pressed', String(closeView)); focusCanvas(); }, { signal });
-  ui.sound.addEventListener('click', () => { const on = sound.toggle(); ui.sound.textContent = t(on ? '♪ 声音 开' : '♪ 声音 关'); ui.sound.setAttribute('aria-pressed', String(on)); focusCanvas(); }, { signal });
+  // 舱门提示只在能进舱时出现，提示期间模拟暂停，站位不会变：关掉提示，下一 tick 开舱。
+  ui.enter.addEventListener('click', () => { requestTransit(station, 'enter'); closePrompt(); }, { signal });
   const ray = new THREE.Raycaster(), pointer = new THREE.Vector2();
   stage.canvas.addEventListener('click', event => {
-    if (!host.playing() || !pilot.canEnter()) return;
+    if (!canEnterTransit(station, body())) return;
     const rect = stage.canvas.getBoundingClientRect();
     pointer.set((event.clientX - rect.left) / rect.width * 2 - 1, 1 - (event.clientY - rect.top) / rect.height * 2);
     ray.setFromCamera(pointer, stage.camera);
@@ -237,66 +194,125 @@ export function createTransitStation(host: TransitStationHost) {
       ui.launch.disabled = false; ui.launch.textContent = t('发射 · {name}').replace('{name}', t(destination.name, 'place'));
     }, { signal });
   }
-  ui.launch.addEventListener('click', () => { if (launchTransit(state)) { pilot.stop(); closeView = false; focusCanvas(); } }, { signal });
-  const cancel = () => { closePrompt(); cancelTransit(state); pilot.stop(); };
+  // 发射按钮在选定目的地后才可用。
+  ui.launch.addEventListener('click', () => { requestTransit(station, 'launch'); focusCanvas(); }, { signal });
   ui.cancel.addEventListener('click', cancel, { signal });
+  // 提示可见时 E 是交通中心交互而不是技能 4；舱门对话框与座舱里 Esc 是取消而不是设置。须在游戏输入的冒泡监听之前拦下。
+  window.addEventListener('keydown', event => {
+    if (event.target instanceof HTMLElement && event.target.closest('input, select, textarea')) return;
+    if (event.ctrlKey || event.metaKey || event.altKey) return;
+    if (event.code === 'Escape' && (hatchPrompt || state.phase === 'cabin')) {
+      event.preventDefault(); event.stopImmediatePropagation(); cancel(); return;
+    }
+    if (event.code !== 'KeyE' || ui.section.hidden || state.phase !== 'ground' || hatchPrompt || input.blocked()) return;
+    event.preventDefault(); event.stopImmediatePropagation();
+    if (!event.repeat) interact();
+  }, { capture: true, signal });
+
+  const updateHud = (visual: TransitVisual, b: Body): void => {
+    const phase = state.phase, p = transitPhaseProgress(state);
+    if (phase !== lastPhase) {
+      ui.section.dataset.phase = phase; ui.phase.textContent = t(PHASE_TEXT[phase][0]);
+      ui.hint.textContent = t(PHASE_TEXT[phase][1]); ui.panel.hidden = phase !== 'cabin';
+      ui.board.hidden = phase !== 'ground';
+      // 登舱到穿越期间画面交给座舱与航道，游戏 HUD 与小地图让开。
+      document.body.toggleAttribute('data-transit-cabin', !(phase === 'ground' || phase === 'calling' || phase === 'elevator' || phase === 'descending'));
+      if (phase === 'cabin') {
+        input.releaseInput();
+        ui.launch.disabled = true; ui.launch.textContent = t('请选择目的地');
+        for (const button of ui.panel.querySelectorAll<HTMLButtonElement>('[data-destination]')) button.setAttribute('aria-pressed', 'false');
+        ui.panel.querySelector<HTMLButtonElement>('[data-destination]')!.focus({ preventScroll: true });
+      }
+      lastPhase = phase;
+    }
+    const canEnter = canEnterTransit(station, b);
+    ui.entry.hidden = !hatchPrompt; ui.hatch.hidden = !canEnter || hatchPrompt;
+    if (canEnter) {
+      model.hatchAnchor.getWorldPosition(anchor).project(stage.camera);
+      const width = window.innerWidth, height = window.innerHeight;
+      const x = (anchor.x + 1) * .5 * width, y = (1 - anchor.y) * .5 * height;
+      ui.hatch.style.left = `${x - 15}px`; ui.hatch.style.top = `${y - 85}px`;
+      ui.entry.style.left = `${THREE.MathUtils.clamp(x - 290, 12, width - 292)}px`;
+      ui.entry.style.top = `${THREE.MathUtils.clamp(y + 80, 12, height - 230)}px`;
+    }
+    if (phase === 'ground') {
+      const deck = onTransitDeck(station, b);
+      ui.board.textContent = t(deck ? '乘电梯 ↓' : '乘电梯 ↑');
+      ui.board.disabled = state.approaching || !b.onGround;
+      ui.hint.textContent = t(state.approaching ? '正在前往电梯…' : canEnter ? '点击舱门或按 E · 确认后进入驾驶舱'
+        : deck ? '走到右侧舱门点击进入 · S＋空格下穿 · 空格飞行' : PHASE_TEXT.ground[1]);
+    }
+    ui.readout.textContent = phase === 'ground' ? 'READY' : phase === 'cabin' ? 'ONLINE'
+      : phase === 'ignition' ? `T − ${Math.max(1, Math.ceil(TRANSIT_PHASE_SECONDS.ignition * (1 - p)))}`
+      : phase === 'ascent' ? `${visual.speed.toFixed(1)} m/s` : phase === 'warp' ? `${(visual.speed / 1000).toFixed(2)} km/s`
+      : phase === 'travel' ? `T + ${state.elapsed.toFixed(1)} s`
+      : phase === 'complete' ? 'JUMP' : `${Math.round(p * 100)}%`;
+    ui.engine.textContent = phase === 'travel' ? t('航道稳定 · 目的地已锁定')
+      : visual.thrust > 0 ? `ALT ${visual.altitude.toFixed(1)} m  /  THRUST ${Math.round(visual.thrust * 100)}%` : '';
+    ui.meter.style.transform = `scaleX(${phase === 'ground' ? .08 : p})`;
+    ui.flash.style.opacity = String(phase === 'warp' ? smooth((p - .28) / .65) : 0);
+  };
+
+  /** 人在模拟层随电梯、沿通道或停在座位上；画面只补通道深度，起飞后跟着座舱锚点。 */
+  const posePlayer = (b: Body): void => {
+    const phase = state.phase, view = input.playerView();
+    if (phase === 'ground' || phase === 'calling' || phase === 'elevator' || phase === 'descending') {
+      // 着陆舱开场也写这个根，只在离开座舱与通道阶段时归位一次。
+      if (posed) { view.position.set(0, 0, 0); view.visible = true; posed = false; }
+      return;
+    }
+    posed = true;
+    const p = transitPhaseProgress(state);
+    if (CABIN_PHASES.has(phase)) {
+      model.cabinAnchor.getWorldPosition(seat);
+      view.position.set(seat.x - b.x, seat.y - b.y, seat.z);
+    } else {
+      const from = phase === 'disembarking' ? transitExitPosition(state.entryFrom!) : state.entryFrom!;
+      view.position.set(0, 0, transitCabinPosition(from, phase === 'opening' ? 0 : phase === 'boarding' ? p : 1 - p).z);
+    }
+    view.visible = phase !== 'travel' && phase !== 'complete' && !(phase === 'warp' && p > .4);
+  };
 
   return {
-    collision: pilot.collision,
-    steer: pilot.steer,
-    handoff,
-    /** The station owns the rig and camera: any phase off the street, or while the hatch dialog is open. */
-    get active(): boolean { return state.phase !== 'ground' || hatchPrompt; },
-    get travelling(): boolean { return travelling; },
-    /** On the station's street or above it; the diggable underground below the paving is ordinary city. */
-    near(body: Body): boolean {
-      const x = body.x - origin.x;
-      return x >= TRANSIT.walkwayMinX && x <= TRANSIT.walkwayMaxX && body.y - origin.y > -.5;
-    },
-    walkZ(x: number, y: number): number { return transitWalkZ(x - origin.x, y - origin.y); },
-    interact(): void {
-      if (!host.playing()) return;
-      if (pilot.canEnter()) showHatch(); else { pilot.approachLift(); focusCanvas(); }
-    },
-    cancel,
-    /** 测试入口：跳过登舱，入座后立即发射。 */
-    launch(destination: TransitDestinationId): void {
-      if (!seatTransit(state, destination) || !launchTransit(state)) throw new Error(`交通中心无法直接发射：阶段 ${state.phase}`);
-      pilot.stop(); closeView = false;
-    },
-    update(dt: number): void {
-      elapsed += dt;
-      const destination = stepTransit(state, dt);
+    get paused() { return hatchPrompt; },
+    update(_view, _time, frameDt) {
+      elapsed += frameDt;
       if (state.phase === 'travel') travelTime = state.elapsed;
-      else if (state.phase === 'complete') travelTime += dt;
-      const visual = flightVisual(state, travelTime, handoff.update(dt));
-      travelling = visual.travel >= 0;
-      if (travelling && !chaseLighting) {
-        chaseLighting = true;
-        lighting.setEnabled(false);
+      else if (state.phase === 'complete') travelTime += frameDt;
+      if (departure >= 0) departure += frameDt;
+      const visual = flightVisual(state, travelTime, departure < 0 ? 0 : Math.min(1, departure / CORRIDOR_DEPART_SECONDS));
+      if (visual.travel >= 0 && !travelling) {
+        travelling = true;
+        input.leaveCity();
         stage.scene.fog = null;
         stage.postFx.setReflections(false);
         stage.postFx.grade.uAoIntensity.value = 0;
-        // The corridor is the only world left: everything the host added besides lights disappears with the city.
+        // 航道是唯一剩下的世界：除灯光外城区的一切随之隐藏。
         for (const child of stage.scene.children) if (child !== model.root && !(child instanceof THREE.Light)) child.visible = false;
       }
       model.update(visual, elapsed); model.root.updateMatrixWorld(true);
-      if (!travelling) pilot.update(dt, elapsed, visual);
-      if (!pilot.canEnter()) hatchPrompt = false;
-      // 舱门确认框打开时宿主停止推进步行角色，待机动画改由交通中心播放。
-      if (hatchPrompt) animateGrassy(host.rig, 'idle', elapsed, dt, null);
-      const drive = !host.hosted || state.phase !== 'ground';
-      const body = host.body();
-      if (drive) updateCamera(dt, elapsed, state, visual, body.x - origin.x, body.y - origin.y, closeView, !driving);
+      const b = body();
+      posePlayer(b);
+      if (!canEnterTransit(station, b)) hatchPrompt = false;
+      const drive = state.phase !== 'ground';
+      if (drive) updateCamera(frameDt, elapsed, state, visual, b.x - origin.x, b.y - origin.y, !driving);
       driving = drive;
-      updateHud(visual, hatchPrompt);
-      sound.update(visual, elapsed, state.phase, body.onGround ? Math.abs(body.vx) : 0);
+      ui.section.hidden = !drive && !hatchPrompt && (!near(b) || world.podLanding !== null);
+      updateHud(visual, b);
+      sound.update(visual, elapsed, state.phase, b.onGround ? Math.abs(b.vx) : 0);
       if (!travelling) flowers.update(elapsed);
-      if (state.phase !== 'ground') stage.renderer.toneMappingExposure = daylightExposure * (1 - visual.thrust * .18 * (1 - visual.warp));
-      if (destination !== null) handoff.start(destination);
+      if (drive) stage.renderer.toneMappingExposure = daylightExposure * (1 - visual.thrust * .18 * (1 - visual.warp));
+      if (state.phase === 'complete' && departure < 0) {
+        departure = 0;
+        input.releaseInput();
+        const destination = TRANSIT_DESTINATIONS.find(item => item.id === state.destination)!;
+        const url = keepWorldParams(destination.href, location.search);
+        url.searchParams.set('landing', '1');
+        corridor.depart(url.href);
+      }
     },
-    dispose(): void {
-      sound.dispose(); flowers.dispose(); model.dispose();
+    dispose() {
+      corridor.hide(0); document.body.removeAttribute('data-transit-cabin'); sound.dispose(); flowers.dispose(); model.dispose(); ui.section.remove();
     },
   };
 }

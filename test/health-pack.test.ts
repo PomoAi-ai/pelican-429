@@ -19,7 +19,7 @@ function arena(seed = 22, playerForm: 'human' | 'pelican' = 'pelican') {
 test('怪物死亡后只判定一次红心掉落，Boss未受击死亡、训练假人与友好居民不掉落', () => {
   const { world, groundY } = arena();
   try {
-    const enemy = addEntity(world, id => createEnemyEntity(id, 'gatekeeper', { x: 30, y: groundY }, world.tuning));
+    const enemy = addEntity(world, id => createEnemyEntity(id, 'omi', { x: 30, y: groundY }, world.tuning));
     const boss = addEntity(world, id => createBossEntity(id, 'sam', { x: 40, y: groundY }, world.tuning));
     addEntity(world, id => createWandererEntity(id, 'sam', { x: 45, y: groundY }, world.tuning, 123));
     addEntity(world, id => createDummyEntity(id, { x: 20, y: groundY }, world.tuning));
@@ -88,7 +88,7 @@ test('附近已有两管血的补给时怪物与Boss停掉血包，远处或已�
     const { world, groundY } = arena(5);
     try {
       const source = addEntity(world, id => kind === 'enemy'
-        ? createEnemyEntity(id, 'gatekeeper', { x: 30, y: groundY }, world.tuning)
+        ? createEnemyEntity(id, 'omi', { x: 30, y: groundY }, world.tuning)
         : createBossEntity(id, 'sam', { x: 30, y: groundY }, world.tuning));
       if (kind === 'enemy') source.health!.hp = 0;
       else applyHit(source, 1, { id: 'test-hit', damage: 1, knockback: { x: 0, y: 0 }, hitstun: 0, hitstop: 0 }, world.tick, world.tuning.combat);

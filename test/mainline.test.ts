@@ -17,7 +17,7 @@ function mainline(checkpoint?: MainlineCheckpoint) {
 
 test('各阶段保留楼层驻军，清外围不要求先消灭楼层守卫', () => {
   const level = createFacilityLevel('fortress');
-  const world = createSimWorld({ level: { ...level, enemies: [{ kind: 'gatekeeper', x: 118, y: 38 }] }, windMode: 'calm' });
+  const world = createSimWorld({ level: { ...level, enemies: [{ kind: 'omi', x: 118, y: 38 }] }, windMode: 'calm' });
   try {
     initializeMainline(world);
     assert.ok(world.entities.some(entity => entity.enemy && entity.body.y === 38));

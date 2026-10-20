@@ -1,12 +1,13 @@
 import { marked } from 'marked';
 import type { ConceptDocument } from './concept-documents.ts';
+import { linkReleased } from './release.ts';
 
 export function conceptUrl(path: string): URL {
   return new URL(path, new URL(import.meta.env.BASE_URL, location.href));
 }
 
 export async function loadConceptMarkdown(entry: ConceptDocument): Promise<string> {
-  const url = conceptUrl(`concepts/${entry.file}`);
+  const url = conceptUrl(`concepts/${entry.id}.md`);
   const response = await fetch(url);
   if (!response.ok) throw new Error(`文档载入失败：${url.pathname}（HTTP ${response.status}）`);
   const markdown = await response.text();
@@ -42,14 +43,18 @@ export function renderConceptMarkdown(entry: ConceptDocument, markdown: string):
     replacement.id = `${entry.id}--${slug}${count ? `-${count}` : ''}`;
     heading.replaceWith(replacement);
   }
-  const source = conceptUrl(`concepts/${entry.file}`);
+  const source = conceptUrl(`concepts/${entry.id}.md`);
   for (const element of section.querySelectorAll<HTMLAnchorElement | HTMLImageElement | HTMLIFrameElement>('a[href], img[src], iframe[src]')) {
     const attribute = element.tagName === 'A' ? 'href' : 'src';
     const original = element.getAttribute(attribute)!;
     const url = original.startsWith('/concepts/') || original.startsWith('/?')
       ? conceptUrl(original.slice(1)) : new URL(original, source);
     if (original.startsWith('#')) element.setAttribute(attribute, `#${entry.id}--${original.slice(1)}`);
-    else element.setAttribute(attribute, url.href);
+    // 发布版打不开的页面：链接只留文字，内嵌预览整个去掉；md 原文仍指向本地完整版页面。
+    else if (element.tagName !== 'IMG' && !linkReleased(url.href)) {
+      if (element.tagName === 'A') element.replaceWith(...element.childNodes);
+      else element.remove();
+    } else element.setAttribute(attribute, url.href);
   }
   for (const table of section.querySelectorAll('table')) {
     const wrapper = document.createElement('div');

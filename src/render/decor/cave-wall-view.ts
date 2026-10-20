@@ -2,7 +2,7 @@
  * 洞穴背景墙：只画"原本是实心、被挖空"的洞穴格（掩码 CAVE_CELL / CAVE_ENTRANCE；入口露天段 CAVE_OPEN 在地表之上，不画），
  * 外加紧邻的实心格一圈（墙伸到方块圆角背后，不露出天空/远山）。地表以上一律不画。
  * - 几何：全局 BatchedMesh（单位方片，实例 = 格平移，multi-draw = 1 draw call），每 CAVE_WALL_BAND 列一带流式增删实例
- *   （视野带立即建、余量带每帧 ≤ 1、超出 2 带卸载）；z = CAVE_WALL_Z（方块背面 BLOCK_BACK_Z 稍后），不投影、接收阴影。
+ *   （视野带立即建、余量带每帧 ≤ 1、超出 2 带卸载）；z = CAVE_WALL_Z（后沿里背景墙位 [−1.2,−1] 的后面），不投影、接收阴影。
  * - 材质：MeshStandard + onBeforeCompile 洞室远景图（按洞室定位，边缘淡入隧道岩壁），
  *   有机边缘：按"墙掩码"纹理（R8，1 = 墙/实心，0 = 外部空气）在噪声扰动的坐标上线性采样，低于阈值即 discard
  *   （只在与外部空气相邻处（洞口）出现参差边缘）。光照图由 world-light 链式挂接（洞内自然变暗、发光源照亮）。
@@ -14,11 +14,12 @@ import { CAVE_CELL, CAVE_ENTRANCE, CAVE_OPEN } from '../../world/level.ts';
 import type { CaveInfo } from '../../world/level.ts';
 import type { TileQuery } from '../../world/tile-map.ts';
 import { injectAfter } from '../tile/tile-material.ts';
+import { DEFINITION_DEPTH } from '../../config/definition-kit.ts';
 import { BLOCK_BACK_Z } from '../tile/tile-geometry.ts';
 import { addNodePatch } from '../stage/node-patches.ts';
 
 export const CAVE_WALL_BAND = 64;
-export const CAVE_WALL_Z = BLOCK_BACK_Z - 0.01;
+export const CAVE_WALL_Z = BLOCK_BACK_Z - DEFINITION_DEPTH.wall;
 export const CAVE_WALL_PROGRAM_KEY = 'cave-wall-room-image-v1';
 
 /** 墙格：被挖空的有顶洞穴格。 */
@@ -110,7 +111,7 @@ const VERTEX_WORLD = `
 export function createCaveWallMaterial(maskTexture: THREE.DataTexture, roomTexture: THREE.DataTexture, width: number, height: number, background: THREE.Texture | null): THREE.MeshStandardMaterial {
   const material = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.95, metalness: 0 });
   material.name = 'cave-wall';
-  // 地形材质：光照图暗部与方块收敛到同一地下色（render/light-texture lmTerrain）。
+  // 地形材质：光照图暗部与方块收敛到同一地下色（render/stage/light-field-material lmTerrain）。
   material.userData.terrainDark = true;
   // 背景墙对鹈鹕微光只接收一部分（光晕以鹈鹕与近地面为主，墙上不出现明显圆形光斑）。
   material.userData.auraReceive = DEFAULT_AURA.wallReceive;

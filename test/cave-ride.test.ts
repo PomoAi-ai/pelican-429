@@ -8,6 +8,7 @@ import { TUNING, validateTuning } from '../src/config/tuning.ts';
 import type { Tuning } from '../src/config/tuning.ts';
 import { createSimWorld, getPlayer, NEUTRAL_INPUT, stepSim } from '../src/sim/sim-world.ts';
 import { entranceRideBlock } from '../src/world/cave-features.ts';
+import { tileCollision } from '../src/world/collision-geometry.ts';
 import type { CaveEntrance } from '../src/world/level.ts';
 import type { LevelData } from '../src/world/level.ts';
 import { createTileMap } from '../src/world/tile-map.ts';
@@ -109,11 +110,12 @@ describe('021 洞口可骑行（验收修复 A）', () => {
     };
     const e = { x: 10, dir: 1, surfaceY: 30, height: 4, x0: 10, x1: 20, innerX: 20, innerY: 20, room: 0 } as CaveEntrance;
     const ride = CAVE_RULES.RIDE;
-    assert.ok(entranceRideBlock(build(4, 3), e, ride) !== null, 'old ramp (h=4, flat open column next to the roof) blocks');
-    assert.equal(entranceRideBlock(build(4, -1), e, ride)?.check, 'box', 'h=4 with slopes still blocks (body straddling a roof step)');
+    const block = (map: ReturnType<typeof createTileMap>, entrance: CaveEntrance) => entranceRideBlock(map, tileCollision(map), entrance, ride);
+    assert.ok(block(build(4, 3), e) !== null, 'old ramp (h=4, flat open column next to the roof) blocks');
+    assert.equal(block(build(4, -1), e)?.check, 'box', 'h=4 with slopes still blocks (body straddling a roof step)');
     // 抬高到 5 行但仍留一列整砖平台：车身越过平台后前探地面跟踪掉进"坑"（下一列坡面低于 g − 1），骑行高度窗口撞顶。
-    assert.equal(entranceRideBlock(build(5, 6), { ...e, height: 5 }, ride)?.check, 'probe', 'flat step under the roof blocks the head probe');
-    assert.equal(entranceRideBlock(build(5, -1), { ...e, height: 5 }, ride), null);
+    assert.equal(block(build(5, 6), { ...e, height: 5 })?.check, 'probe', 'flat step under the roof blocks the head probe');
+    assert.equal(block(build(5, -1), { ...e, height: 5 }), null);
   });
 
   test('多 seed 生成：每个入口坡道 verify 口径可骑；下一列坡面恰低 1 格的坡道列（含口部、露天段与有顶段交界）都是斜坡顶砖', () => {
@@ -122,7 +124,7 @@ describe('021 洞口可骑行（验收修复 A）', () => {
       const w = world(seed);
       const solid = (x: number, y: number): boolean => w.map.collisionAt(x, y) === 'solid';
       for (const e of w.caves.entrances) {
-        const block = entranceRideBlock(w.map, e, CAVE_RULES.RIDE);
+        const block = entranceRideBlock(w.map, tileCollision(w.map), e, CAVE_RULES.RIDE);
         assert.equal(block, null, `seed ${seed} entrance x=${e.x}: ${JSON.stringify(block)}`);
         for (let k = 0; k < Math.abs(e.innerX - e.x); k++) {
           const x = e.x + e.dir * k;

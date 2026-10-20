@@ -19,7 +19,7 @@
     "preview": "vite preview",
     "typecheck": "tsc --noEmit -p .",
     "test": "node --test \"test/**/*.test.ts\"",
-    "docs:resources": "node scripts/build-material-library.ts",
+    "docs:resources": "node scripts/build-material-library.ts && node scripts/build-llms.ts",
     "predev": "npm run docs:resources",
     "prebuild": "npm run docs:resources",
     "prebuild:full": "npm run docs:resources"

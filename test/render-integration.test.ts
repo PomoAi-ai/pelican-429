@@ -11,7 +11,8 @@ import type { PointerSurface, VisibilitySource } from '../src/input/keyboard-mou
 import { createCameraRig, focusHeight } from '../src/render/stage/camera-rig.ts';
 import { createTileView, SLAB_HEIGHT, TILE_APPEARANCE } from '../src/render/tile/tile-view.ts';
 import { TILE_TEXTURE_LAYERS } from '../src/render/tile/tile-textures.ts';
-import { createBackdrop, shadowHalfExtent } from '../src/render/stage/stage.ts';
+import { shadowHalfExtent } from '../src/render/stage/stage.ts';
+import { createHills } from '../src/render/backdrop/backdrop-hills.ts';
 import { createOrbViews } from '../src/render/fx/orb-view.ts';
 import { createOrbFx, ORB_FX_POOL_SIZE } from '../src/render/fx/orb-fx.ts';
 import { createHud } from '../src/ui/hud/hud.ts';
@@ -164,6 +165,18 @@ describe('keyboard-mouse', () => {
     target.dispatchEvent(mouseEvent('mousemove', 0, 20, 30));
     canvas.dispatchEvent(new Event('mouseleave'));
     assert.equal(binding.pointer.inside, false);
+  });
+
+  test('UI 拦下空格的 keydown 时，松开不取消按钮的原生激活；游戏按住的空格松开仍取消', () => {
+    const { target } = setupInput(fakeWindow());
+    target.dispatchStoppedInside(keyEvent('keydown', 'Space'));
+    const uiRelease = keyEvent('keyup', 'Space');
+    target.dispatchStoppedInside(uiRelease);
+    assert.equal(uiRelease.defaultPrevented, false);
+    target.dispatchEvent(keyEvent('keydown', 'Space'));
+    const gameRelease = keyEvent('keyup', 'Space');
+    target.dispatchEvent(gameRelease);
+    assert.equal(gameRelease.defaultPrevented, true);
   });
 
   test('焦点在拦截 keyup 冒泡的 UI 内松开方向键，移动仍被释放', () => {
@@ -357,8 +370,8 @@ describe('view-registry', () => {
     const scene = new THREE.Scene();
     const synced: number[] = [];
     const factory = (e: Entity): EntityView => ({ object: new THREE.Object3D(), sync: () => synced.push(e.id), dispose() {} });
-    const registry = createViewRegistry(scene, { gatekeeper: factory, trainingDummy: factory });
-    const enemy = createEnemyEntity(1, 'gatekeeper', { x: 50, y: 5 }, TUNING);
+    const registry = createViewRegistry(scene, { omi: factory, trainingDummy: factory });
+    const enemy = createEnemyEntity(1, 'omi', { x: 50, y: 5 }, TUNING);
     const dummy = createDummyEntity(2, { x: 50, y: 5 }, TUNING);
     const view = { x: 0, y: 0, w: 20, h: 10 };
     registry.sync([enemy, dummy], 0, 0, view);
@@ -612,7 +625,7 @@ describe('stage 远景与阴影', () => {
     const width = 120;
     const surface = new Int16Array(width);
     for (let x = 0; x < width; x++) surface[x] = 60 + (x % 7);
-    const backdrop = createBackdrop({ width, height: 100, surface });
+    const backdrop = createHills({ width, surface });
     const meshes: THREE.Mesh[] = [];
     backdrop.root.traverse((o) => {
       if ((o as THREE.Mesh).isMesh) meshes.push(o as THREE.Mesh);
@@ -627,7 +640,7 @@ describe('stage 远景与阴影', () => {
     }
     backdrop.dispose();
     assert.equal(backdrop.root.children.length, 0);
-    assert.throws(() => createBackdrop({ width: 10, height: 10, surface: new Int16Array(5) }), /stage/);
+    assert.throws(() => createHills({ width: 10, surface: new Int16Array(5) }), /backdrop/);
   });
 
   test('阴影半范围随宽高比扩大，最小 14', () => {

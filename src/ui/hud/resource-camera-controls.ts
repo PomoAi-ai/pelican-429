@@ -32,7 +32,7 @@ export function createResourceCameraControls(parent: HTMLElement, model: Showcas
       select.setAttribute('aria-label', t('观察角度'));
       custom.textContent = t('自由视角 / 各卡不同');
       for (const [option, text] of options) option.textContent = t(text);
-      reset.textContent = t('恢复正面');
+      reset.textContent = t('重置镜头');
       const cards = getCards();
       root.hidden = cards.length === 0;
       const selected = RESOURCE_CAMERA_VIEWS.find((view) => cards.every((card) => card.resource!.yaw === view.yaw && card.resource!.pitch === view.pitch));

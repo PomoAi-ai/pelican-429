@@ -3,7 +3,7 @@ import { flushSync } from 'react-dom';
 import type { TextureTier } from '../../config/app-mode.ts';
 import { CHARACTER_STAGE_LOOK } from '../../config/character-stage-look.ts';
 import { D1_ARTWORK, type ShowcaseCard } from '../../config/showcase.ts';
-import { ART_LIBRARY_GROUPS, type ArtLibraryEntry } from '../../config/art-library.ts';
+import { CATALOG_GROUPS, type CatalogEntry } from '../../config/catalog.ts';
 import { t } from '../../config/i18n.ts';
 import { translateShowcaseText } from '../../config/i18n/showcase.ts';
 import type { ShowcaseModel } from '../model/showcase-model.ts';
@@ -15,12 +15,13 @@ import { Slider } from '../controls/slider.tsx';
 import { mountReact } from '../react/mount.tsx';
 import { createStore, type Store } from '../react/store.ts';
 import { useLanguage } from '../react/use-language.ts';
+import { RELEASE } from '../site/release.ts';
 import { PreviewCard, modelRevision, useStore, type NpcSound, type PreviewCardView } from './showcase-panel.tsx';
 import './character-stage.css';
 
 // 每张默认原画所在的资料库条目；下拉列出同条目的其他原画。登记的路径不在资料库里时启动即报错。
-const ARTWORK_ENTRIES = new Map<string, ArtLibraryEntry>(Object.values(D1_ARTWORK).map((path) => {
-  const entry = ART_LIBRARY_GROUPS.flatMap((group) => group.entries).find((item) => item.images.some((image) => image.path === path));
+const ARTWORK_ENTRIES = new Map<string, CatalogEntry>(Object.values(D1_ARTWORK).map((path) => {
+  const entry = CATALOG_GROUPS.flatMap((group) => group.entries).find((item) => item.images.some((image) => image.path === path));
   if (!entry) throw new Error(`原画对比路径不在原画资料库中：${path}`);
   return [path, entry];
 }));
@@ -170,7 +171,8 @@ function CharacterStagePanel({ model, stores, applyEnvironment, returnUrl, onNpc
   const sun = useStore(stores.sun);
   const note = useStore(stores.note);
   const [directoryOpen, setDirectoryOpen] = useState(false);
-  const [artworkShown, setArtworkShown] = useState(true);
+  // 发布版只有游戏档贴图，原画在本地原画库：不提供档位对比与原画对比。
+  const [artworkShown, setArtworkShown] = useState(!RELEASE);
   const { cards } = model;
   // 被移除的卡片不再算选中。
   const selected = cards.some((card) => card.id === selectedId) ? selectedId : null;
@@ -199,9 +201,9 @@ function CharacterStagePanel({ model, stores, applyEnvironment, returnUrl, onNpc
       <main className="sc-stage-main">
         <header className="sc-stage-toolbar">
           <button type="button" className="sc-stage-directory-toggle" aria-controls="character-stage-directory" aria-expanded={directoryOpen} onClick={() => setDirectoryOpen(!directoryOpen)}>{t('☰ 目录')}</button>
-          <div className="sc-stage-title"><strong>{t('角色场景')}</strong><span>{`${cards.length} / ${model.catalog.maxCards}`}</span></div>
+          <div className="sc-stage-title"><strong>{t('舞台')}</strong><span>{`${cards.length} / ${model.catalog.maxCards}`}</span></div>
           <div className="sc-stage-global-controls">
-            <label className="sc-control">{t('贴图对比')}<Select label={t('贴图档位对比')} value={textures}
+            {!RELEASE && <label className="sc-control">{t('贴图对比')}<Select label={t('贴图档位对比')} value={textures}
               items={[{ value: 'ktx2-compact', label: t('512 · 贴图＋模型压缩') }, { value: 'ktx2-256-compact', label: t('256 · 贴图＋模型压缩') }, { value: 'ktx2', label: 'KTX2 · 512' }, { value: 'web', label: 'WebP · 512' }, { value: 'original', label: t('原始高清') }] as const}
               onValueChange={(tier) => {
                 const url = new URL(location.href);
@@ -209,9 +211,9 @@ function CharacterStagePanel({ model, stores, applyEnvironment, returnUrl, onNpc
                 url.searchParams.delete('demo');
                 writeCharacterStageLocation(url.searchParams, cards, { zoom: stores.zoom.get(), angle: view.angle, environment: stores.environment.get() });
                 location.assign(url.href);
-              }} /></label>
-            <button type="button" onClick={() => model.all({ playing: true })}>{t('▶ 播放')}</button>
-            <button type="button" onClick={() => model.all({ playing: false })}>{t('Ⅱ 暂停')}</button>
+              }} /></label>}
+            <button type="button" onClick={() => model.all({ playing: true })}>{t('▶ 播放动画')}</button>
+            <button type="button" onClick={() => model.all({ playing: false })}>{t('Ⅱ 暂停动画')}</button>
             <button type="button" onClick={() => model.reset()}>{t('↺ 重播')}</button>
             <button type="button" title={t('显示或隐藏格子标尺，1 格 = 1 世界单位')} aria-pressed={hasRuler} disabled={model.full && !hasRuler}
               onClick={() => { model.selectActor('ruler', !hasRuler); applyEnvironment(); }}>{t('格子标尺')}</button>
@@ -224,13 +226,13 @@ function CharacterStagePanel({ model, stores, applyEnvironment, returnUrl, onNpc
             </label>
             <label className="sc-stage-zoom">{t('缩放')}<Slider label={t('场景镜头缩放')} value={zoom} min={0.65} max={12} step={0.05} onValueChange={(next) => stores.zoom.set(stageZoom(next))} /></label>
             <button ref={resetCameraRef} type="button">{t('重置镜头')}</button>
-            <button type="button" aria-pressed={artworkShown} onClick={() => setArtworkShown(!artworkShown)}>{t('原画对比')}</button>
+            {!RELEASE && <button type="button" aria-pressed={artworkShown} onClick={() => setArtworkShown(!artworkShown)}>{t('原画对比')}</button>}
           </div>
         </header>
         <section className="sc-stage-actionbar" aria-label={t('当前角色操作栏')} hidden={selected === null}>
           {cards.map((card) => <PreviewCard key={card.id} card={card} model={model} onNpcSound={onNpcSound} views={views} sharedScene hidden={card.id !== selected} onCloseControls={() => stores.selected.set(null)} />)}
         </section>
-        <div ref={viewportRef} className="sc-stage-viewport" role="region" aria-label={t('角色展示场景')}>
+        <div ref={viewportRef} className="sc-stage-viewport" role="region" aria-label={t('舞台')}>
           <div className="sc-stage-hint" hidden={selected !== null || cards.length === 0}>{t('点击角色显示工具 · 拖动角色移动位置')}</div>
           <div className="sc-stage-empty" hidden={cards.length !== 0}>
             <strong>{t('场景中还没有角色')}</strong>
@@ -243,7 +245,7 @@ function CharacterStagePanel({ model, stores, applyEnvironment, returnUrl, onNpc
           <button type="button" onClick={() => model.clear()}>{t('清空场景')}</button>
         </footer>
       </main>
-      <StageArtwork model={model} selectedId={selected} rootRef={rootRef} />
+      {!RELEASE && <StageArtwork model={model} selectedId={selected} rootRef={rootRef} />}
     </div>
   );
 }

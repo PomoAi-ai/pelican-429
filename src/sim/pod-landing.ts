@@ -1,7 +1,10 @@
 import { LANDING_POD, type LandingPodPlan } from '../config/transit.ts';
 import { savePrev, type Body } from '../physics/body.ts';
+import type { RideProbe } from '../physics/ride-probe.ts';
+import { moveAndCollide } from '../physics/tile-collision.ts';
 import type { Entity } from '../entities/entity.ts';
-import { NEUTRAL_INPUT, type PelicanInput } from '../entities/pelican-controller.ts';
+import { NEUTRAL_INPUT, resolvePelicanState, updatePelican, type PelicanInput } from '../entities/pelican-controller.ts';
+import type { SimWorld } from './sim-world.ts';
 
 /** 着陆舱开场状态：机房关卡由 stepSim 推进，主世界城区由透视控制按同一固定步长推进。 */
 export interface PodLanding {
@@ -75,4 +78,51 @@ export function liftInPod(pod: PodLanding, body: Body): void {
   body.x = pod.x;
   body.y = pod.ground + podAltitude(pod, pod.ticks);
   body.vx = body.vy = 0;
+}
+
+/**
+ * stepSim 的着陆舱部分（开场降落与走出、确认返回后走回出口、起飞）：世界冻结，只推进玩家；
+ * 本 tick 已处理时返回 true（调用方只再推进 tick）。
+ */
+export function stepPodFreeze(world: SimWorld, player: Entity, rideProbe: RideProbe): boolean {
+  const { entities, map, tuning, fluid } = world;
+  const dt = tuning.sim.step;
+  const freeze = (): void => {
+    for (const entity of entities) savePrev(entity.body);
+    for (const fish of world.fish.fish) savePrev(fish.body);
+  };
+  const walk = (input: PelicanInput): void => {
+    updatePelican(player, input, map, tuning, dt, fluid, 0, rideProbe);
+    moveAndCollide(player.body, map, dt);
+    resolvePelicanState(player);
+  };
+  const landing = world.podLanding;
+  if (landing) {
+    const phase = podLandingPhase(landing, player.body);
+    if (phase !== 'done') {
+      // 走出阶段玩家无法操作，世界像舱内阶段一样冻结，只推进步行，避免被敌人攻击。
+      freeze();
+      if (phase === 'carry') carryInPod(landing, player.body);
+      else walk(POD_WALK_INPUT);
+      return true;
+    }
+    world.podLanding = null;
+  }
+  const boarding = world.podBoarding;
+  if (boarding) {
+    if (player.body.x > boarding.exitX) {
+      freeze();
+      walk(POD_WALK_INPUT);
+      return true;
+    }
+    world.podBoarding = null;
+    world.podTakeoff = boarding;
+  }
+  const takeoff = world.podTakeoff;
+  if (!takeoff) return false;
+  const phase = podTakeoffPhase(takeoff, player.body);
+  freeze();
+  if (phase === 'carry') liftInPod(takeoff, player.body);
+  else if (phase === 'walk') walk(POD_BOARD_INPUT);
+  return true;
 }

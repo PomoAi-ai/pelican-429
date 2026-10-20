@@ -55,7 +55,7 @@ test('敌人追击和玩家主动出招中断恢复，真正脱战后重新等�
     player.health!.hp = 50;
     player.health!.invulnTicks = 999;
     steps(w, 59);
-    const enemy = createEnemyEntity(w.nextId++, 'gatekeeper', { x: 9, y: 1 }, w.tuning);
+    const enemy = createEnemyEntity(w.nextId++, 'omi', { x: 9, y: 1 }, w.tuning);
     w.entities.push(enemy);
     steps(w, 120);
     assert.equal(enemy.enemy!.engaged, true);

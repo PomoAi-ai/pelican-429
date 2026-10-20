@@ -134,6 +134,8 @@ body:has(#game-navigation[open]):has(.scene-toolbar-overlay) { --dev-nav-height:
   #dev-navigation[data-context=home] .home-section-link { display: none; }
   #dev-navigation { padding-left: 16px; padding-right: 16px; }
   #dev-navigation:not([data-context=home]) .home-brand > span:not(.home-brand-mark) { display: none; }
+  /* 语言只在顶栏切换：顶栏横向滚动时把它钉在右端，窄屏也始终可见。 */
+  #dev-navigation .home-nav > button.site-language { position: sticky; right: 0; z-index: 1; background-color: #08111a; }
 }
 @media (max-width: 800px) {
   :root:has(#dev-navigation[data-context=home]) { --site-nav-base-height: 104px; }

@@ -1,8 +1,9 @@
 import { AI_CITY_SUN } from './ai-city-look.ts';
 import { TILE_SHAPE_DEFINITIONS } from './definition-kit.ts';
+import { PLAYER_FLIGHT } from './player-tuning.ts';
 import { TRANSIT } from './transit.ts';
 
-export type ResidenceVariant = 'original' | 'harbor' | 'three';
+export type ResidenceVariant = 'original' | 'harbor';
 
 export const RESIDENCE_MATERIALS = { ceramic: '暖白岩板块', alloy: '深蓝合金块', ashlar: '米黄色方石块',
   grass: '草地土块', dirt: '泥土块', stone: '石块', sand: '沙块', sandstone: '砂岩块', timber: '木料块' } as const;
@@ -116,7 +117,43 @@ export const RESIDENCE_SEGMENTS = Array.from({ length: RESIDENCE_WORLD.width / R
 });
 export const RESIDENCE_SUN = AI_CITY_SUN;
 
+/** 城区并入格子世界：住宅坐标 + CITY_ORIGIN = 格子坐标，住宅世界左下角落在格 (0,0)。 */
+export const CITY_ORIGIN = { x: -WORLD_MIN_X, y: -RESIDENCE_WORLD.minY } as const;
+/** 飞行头顶上限比建造上限高 28 格：建到上限的楼顶上方仍有飞行与俯瞰的空间；地图顶再留出飞行的 ceilingMargin。 */
+export const CITY_FLIGHT_HEADROOM = 28;
+export const CITY_MAP = {
+  width: RESIDENCE_WORLD.width,
+  height: RESIDENCE_WORLD.height + CITY_ORIGIN.y + CITY_FLIGHT_HEADROOM + PLAYER_FLIGHT.ceilingMargin,
+} as const;
+
+/**
+ * 资源在格子世界的落点：实体砖与平台是块（实体的瓦片 key 即材质名，平台为 platform-材质），墙与窗进墙层
+ * （窗的墙标识就是资源 id），能量门与太阳能板是特殊构件，其余家具与装饰是摆放物件。
+ */
+export type ResidenceTarget = 'piece' | 'wall' | 'special' | 'object';
+export function residenceTarget(resource: ResidenceResource): ResidenceTarget {
+  if (resource.kind === 'solid' || resource.kind === 'platform') return 'piece';
+  if (resource.kind === 'wall' || resource.kind === 'glazing') return 'wall';
+  if (resource.kind === 'door' || resource.kind === 'furniture' && resource.furniture === 'solar') return 'special';
+  return 'object';
+}
+export const residenceTileKey = (resource: ResidenceResource & { readonly kind: 'solid' | 'platform' }): string =>
+  resource.kind === 'solid' ? resource.material : `${resource.material}platform`;
+/** 建筑平台块的瓦片 key → 平台材质（瓦片 key 只用小写字母）。 */
+export const RESIDENCE_PLATFORM_TILES: Readonly<Record<string, 'ceramic' | 'alloy'>> = { ceramicplatform: 'ceramic', alloyplatform: 'alloy' };
+export const residenceWallId = (resource: ResidenceResource & { readonly kind: 'wall' | 'glazing' }): string =>
+  resource.kind === 'wall' ? resource.wallId : resource.id;
+
 const resourceById = new Map(RESIDENCE_RESOURCES.map(resource => [resource.id, resource]));
+const resourceByWall = new Map(RESIDENCE_RESOURCES.flatMap(resource =>
+  resource.kind === 'wall' || resource.kind === 'glazing' ? [[residenceWallId(resource), resource] as const] : []));
+
+/** 墙层标识 → 资源；不是住宅墙或窗即抛。 */
+export function residenceWallResource(wallId: string): ResidenceResource {
+  const resource = resourceByWall.get(wallId);
+  if (!resource) throw new Error(`未知住宅墙：${wallId}`);
+  return resource;
+}
 
 export function getResidenceResource(id: string): ResidenceResource {
   const resource = resourceById.get(id);

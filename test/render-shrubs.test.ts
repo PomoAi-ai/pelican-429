@@ -27,7 +27,7 @@ import { siteTopY } from '../src/render/flora/flora.ts';
 import { sharedDisturbUniforms } from '../src/render/flora/grass-disturb.ts';
 import { WOODY_SPECS } from '../src/render/flora/shrub-woody.ts';
 import { LEAF_ALPHA_TEST, createTreeMaterials, sharedLeafAtlas } from '../src/render/tree/tree-material.ts';
-import { isLightMappable } from '../src/render/stage/light-texture.ts';
+import { isLightMappable } from '../src/render/stage/light-field-material.ts';
 import { createTileView } from '../src/render/tile/tile-view.ts';
 import { GROUND_DECOR_Z_MIN } from '../src/render/tile/tile-geometry.ts';
 import { VARIANT_PROGRAM_TAG, variantYRange } from '../src/render/flora/variant-atlas.ts';

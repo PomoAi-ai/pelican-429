@@ -2,13 +2,14 @@
  * 渔屋渲染的公共布局：深度分层常量、调色板、数据校验、屋顶碰撞线、栈桥端点（hut-geometry / hut-exterior / hut-props 共用）。
  *
  * 深度分层（鹈鹕在 z=0，厚约 ±.5）：
- * - 背墙衬底 BLOCK_BACK_Z（−1），板条正面 WALL_Z；
+ * - 背墙按背景墙标准位于后沿 [WALL_BACK_Z, WALL_Z] = [−1.2, −1]：衬底在 WALL_BACK_Z，板条正面贴格子背面 WALL_Z；
  * - 室内件/门框/烟囱/挂件等：z ∈ [WALL_Z, HUT_PROP_Z_MAX]（鹈鹕身后，室内与门洞不遮挡鹈鹕）；
  * - 立面（只贴在实心格前：门洞以上的墙列、地板行、门楣以上）：z ∈ [BLOCK_FRONT_Z, HUT_FACADE_Z_MAX]；
  * - 屋顶板 z ∈ [HUT_ROOF_Z_MIN, HUT_ROOF_Z_MAX]，上表面不高于 roof 斜坡碰撞线。
  */
 import type { Rng } from '../../core/rng.ts';
 import type { FishingHut } from '../../world/level.ts';
+import { DEFINITION_DEPTH } from '../../config/definition-kit.ts';
 import { BLOCK_BACK_Z, BLOCK_FRONT_Z } from '../tile/tile-geometry.ts';
 
 /** 湖床高度：世界 x → 该处湖床（第一个实心格）顶边 y。 */
@@ -17,14 +18,18 @@ export type BedHeight = (x: number) => number;
 /** 屋顶板竖直厚度（瓦面层 + 檐板层）。 */
 export const HUT_ROOF_THICKNESS = 0.8;
 export const ROOF_SHINGLE = 0.55;
-export const HUT_ROOF_Z_MIN = BLOCK_BACK_Z - 0.2;
-export const HUT_ROOF_Z_MAX = 0.7;
-/** 背墙板厚度（衬底在 BLOCK_BACK_Z，木板条正面在 BLOCK_BACK_Z + 该值）。 */
-export const HUT_BACK_WALL_DEPTH = 0.1;
+/** 背墙厚度 = 背景墙标准厚度。 */
+export const HUT_BACK_WALL_DEPTH = DEFINITION_DEPTH.wall;
+/** 背墙正面（板条正面）贴格子背面，衬底在其后。 */
+export const WALL_Z = BLOCK_BACK_Z;
+export const WALL_BACK_Z = WALL_Z - HUT_BACK_WALL_DEPTH;
+export const HUT_ROOF_Z_MIN = WALL_BACK_Z;
+/** 屋顶前檐伸出格子前面 .2。 */
+export const HUT_ROOF_Z_MAX = BLOCK_FRONT_Z + 0.2;
 /** 门框/室内件/烟囱/渔网/灯笼的最前沿 z（鹈鹕身后）。 */
 export const HUT_PROP_Z_MAX = -0.55;
-/** 立面装饰（贴在实心格正面前）的最前沿 z。 */
-export const HUT_FACADE_Z_MAX = 0.82;
+/** 立面装饰（贴在实心格正面前）的最前沿 z，留在前沿 0.5 以内。 */
+export const HUT_FACADE_Z_MAX = BLOCK_FRONT_Z + 0.32;
 export const FACADE_Z = BLOCK_FRONT_Z;
 /** 门洞两侧门框（立面层）宽度：门洞列内只有这两条窄框在鹈鹕前方。 */
 export const HUT_JAMB_WIDTH = 0.11;
@@ -41,7 +46,6 @@ export const LADDER_CLEAR = 0.55;
 /** 估算水位：栈桥板底下方的距离（湖面紧贴栈桥下）。 */
 export const WATERLINE_BELOW_DECK = 0.75;
 
-export const WALL_Z = BLOCK_BACK_Z + HUT_BACK_WALL_DEPTH;
 export const PROP_Z0 = WALL_Z;
 
 export const C = {

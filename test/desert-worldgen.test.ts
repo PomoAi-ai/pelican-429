@@ -121,8 +121,8 @@ describe('020 沙漠：多 seed 生成', () => {
   test('沙漠外扩范围无水；核心无草：沙 3–6 格下接砂岩，台地（含斜面）顶为砂岩', () => {
     for (const [i, w] of worlds.entries()) {
       for (const d of w.deserts) {
-        // 021：地下水潭（洞穴格里的水）不算地表水。
-        for (let x = d.lo; x <= d.hi; x++) for (let ty = 0; ty < w.map.height; ty++) if (!isCave(w, x, ty)) assert.equal(w.fluid.amountAt(x, ty), 0, `seed ${SEEDS[i]} water at ${x}`);
+        // 021：地下水潭（洞穴格里的水，含其岸边斜坡/半砖格的空子格）不算地表水。
+        for (let x = d.lo; x <= d.hi; x++) for (let ty = 0; ty < w.map.height; ty++) if (!isCave(w, x, ty) && w.map.solidMask(x, ty) === 0) assert.equal(w.fluid.amountAt(x, ty), 0, `seed ${SEEDS[i]} water at ${x}`);
         for (const l of w.lakes) assert.ok(l.x1 < d.lo || l.x0 > d.hi, `seed ${SEEDS[i]} lake in desert`);
         for (let x = d.x0; x <= d.x1; x++) {
           const { ty, id } = top(w, x);

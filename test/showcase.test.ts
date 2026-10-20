@@ -196,7 +196,7 @@ test('假人实际受击归零后恢复生命，小鱼从搁浅恢复游动', ()
 
 // 资源预览和角色预览共用容量与独立卡片状态。
 import { createShowcaseModel } from '../src/ui/model/showcase-model.ts';
-import { CHARACTER_CATALOG } from '../src/config/showcase.ts';
+import { CHARACTER_CATALOG, releaseShowcaseCatalog } from '../src/config/showcase.ts';
 import { readCharacterStageLocation, writeCharacterStageLocation } from '../src/ui/model/character-stage-location.ts';
 
 test('切换贴图档位的链接保留多个角色、形态动作、暂停和镜头', () => {
@@ -667,4 +667,14 @@ test('D1 切模型、动作和复制保留独立的头发与精细度，链接�
   const old = readCharacterStageLocation(params, CHARACTER_CATALOG)!.cards[0]!;
   assert.equal(old.d1Variant, 'game');
   assert.equal(old.d1HairVisible, false);
+});
+
+test('发布版展示场只留游戏档模型：去掉 Rodin 静态与精细/轻量档条目，示例和角色默认项都指向保留条目', () => {
+  const release = releaseShowcaseCatalog(CHARACTER_CATALOG);
+  const kept = new Set(release.entries.map(entry => entry.id));
+  for (const id of ['d1.pbr', 'd1.refined', 'd1.83da83be-pbr', 'human.rodin-animated-detailed.idle', 'human.rodin-animated-light.idle']) assert.equal(kept.has(id), false, id);
+  for (const id of ['human.rodin-animated-game.idle', 'human.grassy-modular-static', 'd1.idle', 'omi.idle', 'flyingRoadster.idle']) assert.equal(kept.has(id), true, id);
+  assert.equal(release.demos!.some(demo => demo.id === 'd1-rodin'), false);
+  for (const demo of release.demos!) for (const card of demo.cards) assert.ok(kept.has(card.entryId), `${demo.id}: ${card.entryId}`);
+  for (const subject of release.subjects) assert.ok(kept.has(subject.defaultEntry), subject.id);
 });

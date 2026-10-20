@@ -6,7 +6,8 @@
  *   aVert.z = sinφ：0 为正面前沿、1 为滚圆结束），着色器按 f = 1 − aVert.z 内缩。侧/底边 ROUND_SIDE，顶边 ROUND_TOP
  *   （顶边小，斜坡与整砖交界处缺口小，草顶仍是站立面）。滚圆在 z ≥ zf − depth（> 角色平面 z=0、地表装饰 z ≤ .2）内完成，
  *   碰撞平面与装饰平面上的轮廓不变（偏差约束不受影响）。
- * - 侧壁后收：滚圆之后的侧壁再分 WALL_RINGS 段（aVert.z = 1 + u，u ∈ (0,1] 为向后深度比例）；侧/底暴露边按
+ * - 侧壁后收：从角色平面 z=0 起（滚圆在其前方结束时，中间是一段直壁，角色平面上的轮廓仍与碰撞一致）到背面分
+ *   WALL_RINGS 段（aVert.z = 1 + u，u ∈ (0,1] 为后收段内的深度比例）；侧/底暴露边按
  *   WALL_TAPER·u² 向内收（截面从前向后变窄 → 透视下侧壁朝后、不再露出整块立方体侧面），并叠加沿 z 的土坡起伏
  *   WALL_WOBBLE·u·(2n−1)（n 为世界坐标噪声，相邻格共享点一致）。顶边不收、不起伏（草顶平整承接花草）。
  * - 侧壁着色：侧壁与正面同一纹理展开（u = x ± (zf − z)，绕过棱连续），并随深度渐暗（SIDE_SHADE）。
@@ -49,19 +50,26 @@ export interface ReliefRing {
   readonly round: boolean;
 }
 
-/** 前沿 front → back 的环（含两端）。back 须在滚圆结束之后。 */
+/** 侧壁后收段的起点：滚圆结束处与角色平面 z=0 中靠后的一个。 */
+export function taperStart(front: number): number {
+  return Math.min(front - RELIEF_PARAMS.FRONT_ROUND_DEPTH, 0);
+}
+
+/** 前沿 front → back 的环（含两端）。back 须在后收起点之后。 */
 export function reliefRings(front: number, back: number): ReliefRing[] {
   const D = RELIEF_PARAMS.FRONT_ROUND_DEPTH;
   const zEnd = front - D;
-  if (!(back < zEnd)) throw new Error(`tile-relief: back z ${back} must be behind ${zEnd}`);
+  const start = taperStart(front);
+  if (!(back < start)) throw new Error(`tile-relief: back z ${back} must be behind ${start}`);
   const rings: ReliefRing[] = [];
   for (let k = 0; k <= ROUND_RINGS; k++) {
     const phi = (k / ROUND_RINGS) * 0.5 * Math.PI;
     rings.push({ z: front - D * (1 - Math.cos(phi)), code: k === ROUND_RINGS ? 1 : Math.sin(phi), nxy: Math.sin(phi), nz: Math.cos(phi), round: k < ROUND_RINGS });
   }
+  if (start < zEnd) rings.push({ z: start, code: 1, nxy: 1, nz: 0, round: false });
   for (let j = 1; j <= WALL_RINGS; j++) {
     const u = j / WALL_RINGS;
-    rings.push({ z: zEnd + (back - zEnd) * u, code: 1 + u, nxy: 1, nz: 0, round: false });
+    rings.push({ z: start + (back - start) * u, code: 1 + u, nxy: 1, nz: 0, round: false });
   }
   return rings;
 }

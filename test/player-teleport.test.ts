@@ -55,6 +55,21 @@ test('地图边缘点击容纳完整身体，碰到实体时避开其碰撞体',
   } finally { level.fluid.dispose(); }
 });
 
+test('点击特殊构件内部时避开其碰撞体', () => {
+  const { level } = createTerrainCompositionLevel('meadow', 429, 'grass', 'surface');
+  try {
+    const world = createSimWorld({ level });
+    const target = placePlayer(world, { x: 20, y: level.map.height - 6 })!;
+    const part = level.map.parts.add('hull', { solids: [[[18, target.y - 1], [22, target.y - 1], [22, target.y + 4], [18, target.y + 4]]], supports: [] });
+    const moved = placePlayer(world, target);
+    assert.ok(moved);
+    assert.notDeepEqual(moved, target);
+    assert.equal(overlapsSolid(bodyRect(getPlayer(world).body), world.map), false);
+    level.map.parts.remove(part.id);
+    assert.deepEqual(placePlayer(world, target), target);
+  } finally { level.fluid.dispose(); }
+});
+
 test('传送清除骑行速度与动作缓存，保留玩家身份生命及武器资源', () => {
   const { level } = createTerrainCompositionLevel('meadow', 429, 'grass', 'surface');
   try {

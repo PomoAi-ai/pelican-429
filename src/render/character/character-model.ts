@@ -10,27 +10,31 @@ type TextureSession = ReturnType<typeof acquireKtx2Loader> & { pending: number; 
 let textureSession: TextureSession | null = null;
 const preloaded = new Map<string, Promise<ArrayBuffer>>();
 
-export function configureCharacterTextures(value: StageRenderer | null): void {
-  if (renderer === value) return;
-  if (textureSession) {
-    textureSession.retired = true;
-    if (textureSession.pending === 0) textureSession.release();
-    textureSession = null;
-  }
+/**
+ * 页主渲染器绑定 KTX2 转码能力，返回解绑函数。次级渲染器（缩略图、编辑器预览、序章离屏画面）不绑定，
+ * 复用主渲染器转码出的贴图（同一块 GPU，压缩格式相同）。整页交接时新页面先于旧页面释放就绑定，后绑定的接管；
+ * 被接管的旧绑定解绑时不动新绑定。转码器等仍在加载的模型结算后才释放。
+ */
+export function bindCharacterTextures(value: StageRenderer): () => void {
+  retireTextureSession();
   renderer = value;
+  return () => {
+    if (renderer !== value) return;
+    retireTextureSession();
+    renderer = null;
+    preloaded.clear();
+  };
 }
 
-export function currentCharacterTextureRenderer(): StageRenderer | null {
-  return renderer;
-}
-
-export function disposeCharacterTextures(): void {
-  configureCharacterTextures(null);
-  preloaded.clear();
+function retireTextureSession(): void {
+  if (!textureSession) return;
+  textureSession.retired = true;
+  if (textureSession.pending === 0) textureSession.release();
+  textureSession = null;
 }
 
 function compressedTextures(): TextureSession {
-  if (!renderer) throw new Error('KTX2 贴图需要先创建游戏渲染器');
+  if (!renderer) throw new Error('KTX2 贴图需要先创建并绑定本页的主渲染器');
   if (!textureSession) {
     textureSession = { ...acquireKtx2Loader(renderer), pending: 0, retired: false };
   }

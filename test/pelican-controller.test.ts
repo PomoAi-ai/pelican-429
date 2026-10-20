@@ -365,6 +365,21 @@ test('飞行: 能量耗尽后转为滑翔，速度不超过滑翔终端速度', 
   }
 });
 
+test('飞行: 检视页的 unlimitedFlight 让玩家持续推进，不转滑翔', () => {
+  const tuning = tuningWith((t) => (t.player.flight.maxTicks = 30));
+  const normal = createSimWorld({ level: levelData(sky(200)), tuning });
+  const unlimited = createSimWorld({ level: levelData(sky(200)), tuning, unlimitedFlight: true });
+  for (const w of [normal, unlimited]) {
+    settle(w);
+    steps(w, 1, { jumpPressed: true, jumpHeld: true });
+    steps(w, 120, { jumpHeld: true });
+  }
+  assert.equal(getPlayer(normal).pelican!.flightMode, 'glide');
+  assert.equal(getPlayer(unlimited).pelican!.flightMode, 'fly');
+  assert.ok(getPlayer(unlimited).body.vy > 0);
+  assert.ok(getPlayer(unlimited).body.y > getPlayer(normal).body.y);
+});
+
 test('滑翔: 松开跳跃缓慢下落，终端速度 ≤ glideMaxFall，远慢于自由落体', () => {
   const w = world(sky(40), TUNING);
   settle(w);

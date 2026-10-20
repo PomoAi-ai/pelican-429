@@ -24,17 +24,17 @@ const PRESETS = [
   { value: 'front', label: '正视' }, { value: 'angle', label: '斜视' }, { value: 'top', label: '俯视' },
 ] as const;
 
-function SceneViewButtons({ store, act }: { store: Store<SceneViewState>; act: (action: SceneViewAction) => void }) {
+function SceneViewButtons({ store, act, presetsOnly }: { store: Store<SceneViewState>; act: (action: SceneViewAction) => void; presetsOnly?: true }) {
   useLanguage();
   const { preset, following, playing, playDisabled, cameraDisabled } = useSyncExternalStore(store.subscribe, store.get);
+  const presets = <ToggleGroup<SceneViewAngle | null> label={t('视角预设')} value={preset}
+    options={PRESETS.map(({ value, label }) => ({ value, label: t(label) }))} onValueChange={(angle) => act(angle!)} />;
+  if (presetsOnly) return presets;
   return (
     <>
-      <ToggleGroup<SceneViewAngle | null> label={t('视角预设')} value={preset}
-        options={PRESETS.map(({ value, label }) => ({ value, label: t(label) }))} onValueChange={(angle) => act(angle!)} />
+      {presets}
       <button type="button" data-play-view aria-pressed={following} onClick={() => act('playView')}>{t('游玩视角')}</button>
-      <button type="button" data-camera aria-pressed={following} disabled={cameraDisabled} onClick={() => act('camera')}>
-        {following ? t('自由镜头') : t('跟随玩家')}
-      </button>
+      <button type="button" data-camera aria-pressed={!following} disabled={cameraDisabled} onClick={() => act('camera')}>{t('自由镜头')}</button>
       <button type="button" data-play aria-pressed={playing} disabled={playDisabled} onClick={() => act('play')}>
         {playing ? t('暂停游玩') : t('继续游玩')}
       </button>
@@ -42,13 +42,13 @@ function SceneViewButtons({ store, act }: { store: Store<SceneViewState>; act: (
   );
 }
 
-/** 场景工具条的视角片段：三个预设、游玩视角、自由镜头与暂停；host 是工具条里的占位元素。 */
-export function createSceneViewControls(host: HTMLElement) {
+/** 场景工具条的视角片段：三个预设、游玩视角、自由镜头与暂停；host 是工具条里的占位元素。无玩家的场景用 presetsOnly 只放三个预设。 */
+export function createSceneViewControls(host: HTMLElement, options?: { presetsOnly: true }) {
   const store = createStore<SceneViewState>({ preset: 'front', following: true, playing: true, playDisabled: false, cameraDisabled: false });
   const listeners = new Set<(action: SceneViewAction) => void>();
   // 按钮作为宿主工具条的弹性子项排布。
   host.style.display = 'contents';
-  const unmount = mountReact(host, <SceneViewButtons store={store} act={(action) => listeners.forEach((listener) => listener(action))} />);
+  const unmount = mountReact(host, <SceneViewButtons store={store} presetsOnly={options?.presetsOnly} act={(action) => listeners.forEach((listener) => listener(action))} />);
   return {
     /** 城区每帧报一次可用状态，值不变时不重渲染。 */
     set(patch: Partial<SceneViewState>): void {

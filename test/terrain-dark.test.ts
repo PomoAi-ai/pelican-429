@@ -1,4 +1,4 @@
-// 019 修复轮：地下暗部统一变暗（render/light-texture 的 terrain 路径）。
+// 019 修复轮：地下暗部统一变暗（render/stage/light-field-material 的 terrain 路径）。
 // 地形材质（方块、洞壁背板）在暗处把反照率收敛到同一地下色（光照因子保留），
 // 不同材质同亮度下同样变暗、交界柔和；光球/鹈鹕微光等局部光照亮处恢复材质本色。
 // 修复轮 B：亮度也随变暗收敛（湖底沙与泥土同深度同样变暗）；局部光与环境光合成为总光量（无 max 折线）。
@@ -8,9 +8,9 @@ import * as THREE from 'three';
 
 import { DEFAULT_LIGHTING } from '../src/config/lighting-rules.ts';
 import { createCaveWallMaterial } from '../src/render/decor/cave-wall-view.ts';
-import { LIGHT_MAP_PROGRAM_TAG, LM_TERRAIN_ALBEDO, LM_TERRAIN_HI, LM_TERRAIN_LO, LM_TERRAIN_LUM_HI, LM_TERRAIN_LUM_LO, TERRAIN_LUMA, createWorldLight, injectLightMap, terrainDarkShade } from '../src/render/stage/light-texture.ts';
-import type { LightMapUniforms } from '../src/render/stage/light-texture.ts';
-import type { RGB3 } from '../src/render/stage/light-texture.ts';
+import { LIGHT_MAP_PROGRAM_TAG, LM_TERRAIN_ALBEDO, LM_TERRAIN_HI, LM_TERRAIN_LO, LM_TERRAIN_LUM_HI, LM_TERRAIN_LUM_LO, TERRAIN_LUMA, createWorldLight, injectLightMap, terrainDarkShade } from '../src/render/stage/light-field-material.ts';
+import type { LightMapUniforms } from '../src/render/stage/light-field-material.ts';
+import type { RGB3 } from '../src/render/stage/light-field-material.ts';
 import { createTileMaterial } from '../src/render/tile/tile-material.ts';
 import { generateTileTextures } from '../src/render/tile/tile-textures.ts';
 import { createFluidMap } from '../src/world/fluid-map.ts';
@@ -18,7 +18,7 @@ import { createTileMap } from '../src/world/tile-map.ts';
 import { DEFAULT_TILES } from '../src/world/tile-types.ts';
 
 const shaderOf = (lib: { vertexShader: string; fragmentShader: string }) => ({ vertexShader: lib.vertexShader, fragmentShader: lib.fragmentShader, uniforms: {} as Record<string, THREE.IUniform>, defines: {} });
-const uniforms = { uLightMap: { value: new THREE.Texture() }, uLightMapSize: { value: new THREE.Vector2(10, 10) }, uLightMin: { value: 0 }, uDynLights: { value: [new THREE.Vector4()] }, uDynCount: { value: 0 } } as LightMapUniforms;
+const uniforms = { uLightField: { value: new THREE.Texture() }, uLightMin: { value: 0 }, uDynLights: { value: [new THREE.Vector4()] }, uDynCount: { value: 0 } } as LightMapUniforms;
 
 /** 反照率（线性）：泥土、石头、沙、砂岩、洞壁。 */
 const ALBEDOS: Record<string, RGB3> = {
@@ -139,7 +139,7 @@ describe('地下暗部：着色器与挂接', () => {
   test('terrain 注入：非自发光部分走 lmTerrain（反照率取 diffuseColor），常量与 JS 一致', () => {
     const sh = shaderOf(THREE.ShaderLib.standard);
     injectLightMap(sh, uniforms, 4, 'tile-layers', { terrain: true });
-    assert.match(sh.fragmentShader, /outgoingLight \*= lmWaterTint\(vLmWorld\);\s*outgoingLight = lmTerrain\(outgoingLight - totalEmissiveRadiance, diffuseColor\.rgb, vLmWorld\) \+ totalEmissiveRadiance;\s*#include <opaque_fragment>/);
+    assert.match(sh.fragmentShader, /outgoingLight \*= lmWaterTint\(vLmWorld\);\s*outgoingLight = lmTerrain\(outgoingLight - totalEmissiveRadiance, diffuseColor\.rgb, vLmWorld\) \+ diffuseColor\.rgb \* lmLamp\(vLmWorld\) \* RECIPROCAL_PI \+ totalEmissiveRadiance;\s*#include <opaque_fragment>/);
     assert.match(sh.fragmentShader, /vec3 lmTerrain\(vec3 base, vec3 albedo, vec3 w\)/);
     assert.ok(sh.fragmentShader.includes(`smoothstep(${LM_TERRAIN_LO.toFixed(3)}, ${LM_TERRAIN_HI.toFixed(3)}, a)`));
     assert.ok(sh.fragmentShader.includes(`smoothstep(${LM_TERRAIN_LUM_LO.toFixed(3)}, ${LM_TERRAIN_LUM_HI.toFixed(3)}, a)`));

@@ -10,7 +10,7 @@ import { TUNING } from '../../config/tuning.ts';
 import type { FixedStepper } from '../../core/fixed-step.ts';
 import type { FrameProfiler } from '../../core/frame-profiler.ts';
 import { clamp, lerp } from '../../core/math.ts';
-import type { Vec2 } from '../../core/math.ts';
+import type { Rect, Vec2 } from '../../core/math.ts';
 import type { Entity } from '../../entities/entity.ts';
 import { getSkillWaitTicks } from '../../entities/skill-wait.ts';
 import type { ActionTracker } from '../../input/action-map.ts';
@@ -46,6 +46,14 @@ import type { EntityViewSet } from './game-wiring.ts';
 import type { FacilityChapterHud } from '../../ui/hud/facility-chapter-hud.ts';
 import type { GameAudio } from '../audio/game-audio.ts';
 import { selectMobileAim } from './mobile-aim.ts';
+import type { DevCamera } from './dev-camera.ts';
+
+/** 世界功能插件（城区表现、城区建造）：paused 为真时模拟不步进；update 在视图同步之后、光场更新之前调用。 */
+export interface GameFeature {
+  readonly paused: boolean;
+  /** view = 镜头可视范围，time = 环境时间（秒）。 */
+  update(view: Readonly<Rect>, time: number, frameDt: number): void;
+}
 
 export interface FrameLoopDeps {
   readonly world: SimWorld;
@@ -79,6 +87,9 @@ export interface FrameLoopDeps {
   readonly lander: LandingPod | null;
   readonly chapterHud: FacilityChapterHud | null;
   readonly audio: GameAudio | null;
+  /** 开发开关 cam=free：自由镜头、预设视角与暂停。 */
+  readonly devCamera: DevCamera | null;
+  readonly features: readonly GameFeature[];
 }
 
 export interface FrameLoop {
@@ -118,6 +129,8 @@ export function createFrameLoop(d: FrameLoopDeps): FrameLoop {
   let wasProfiling = false;
   // Esc 先关大地图（小地图自己监听 Escape）：上一帧大地图开着时，本帧的 settings 按键只用于关地图。
   let bigMapWasOpen = false;
+  let alpha = 0;
+  const view = d.devCamera ?? cameraRig;
 
   const tick = (): void => {
     const p = input.pointer;
@@ -181,23 +194,26 @@ export function createFrameLoop(d: FrameLoopDeps): FrameLoop {
     const age = (reveal + alpha) * world.tuning.sim.step;
     const returnAt = MAINLINE_REVEAL.zoomSeconds + (PLAYER_TRANSFORM.durationTicks + 1) * world.tuning.sim.step + MAINLINE_REVEAL.holdSeconds;
     const amount = clamp(Math.min(age / MAINLINE_REVEAL.zoomSeconds, 1 - (age - returnAt) / MAINLINE_REVEAL.returnSeconds), 0, 1);
-    cameraRig.update(lerp(pl.body.prevX, pl.body.x, alpha), lerp(pl.body.prevY, pl.body.y, alpha), pl.facing, paused ? 0 : frameDt,
+    // 自由镜头由开发镜头驱动，跟随相机不再改写视角。
+    if (d.devCamera === null || d.devCamera.following) cameraRig.update(lerp(pl.body.prevX, pl.body.x, alpha), lerp(pl.body.prevY, pl.body.y, alpha), pl.facing, paused ? 0 : frameDt,
       reveal < 0 ? d.lander?.closeup() : {
         shot: { x: pl.body.x, y: pl.body.y + 1.6, distance: Math.min(world.tuning.camera.distance, 7 / Math.min(1, stage.camera.aspect)) },
         blend: amount * amount * (3 - 2 * amount),
       });
+    d.devCamera?.update();
     waterTime += frameDt;
     d.env.update(waterTime, worldDt, alpha);
     // 实体视图在世界视图之后同步：树平台随动取本帧写入 GPU 的风 uniform（与树的顶点位移同一帧）。
-    views.sync(world.entities, alpha, animDt, cameraRig.visibleRect());
+    views.sync(world.entities, alpha, animDt, view.visibleRect());
     d.lander?.update(alpha, waterTime, animDt);
     // 机房背景视图复制主相机，放在着陆舱之后才能拿到起飞冲击改过的视角。
     d.facility?.update(waterTime);
-    d.shafts.update(cameraRig.visibleRect(2), waterTime);
+    d.shafts.update(view.visibleRect(2), waterTime);
     orbFx.update(paused ? 0 : frameDt);
-    d.lighting.updateAura(pl, alpha, frameDt);
+    for (const feature of d.features) feature.update(view.visibleRect(), waterTime, frameDt);
     if (profiling) prof.mark('world');
-    d.lighting.worldLight.update(stage.scene, ++frameIndex);
+    d.lighting.worldLight.update(stage.scene, ++frameIndex, view.visibleRect());
+    d.lighting.updateAura(pl, alpha, frameDt);
     if (profiling) prof.mark('light');
     return pl;
   };
@@ -207,7 +223,7 @@ export function createFrameLoop(d: FrameLoopDeps): FrameLoop {
     const noseY = pl.body.y + pl.body.height * .9;
     hud.update({
       entities: world.entities,
-      headSubmerged: waterSpanInColumn(world.fluid, Math.floor(pl.body.x), noseY, noseY + .05) > 0,
+      headSubmerged: waterSpanInColumn(world.fluid, pl.body.x, noseY, noseY + .05) > 0,
       alpha,
       frameDt,
       stats: { fps, tick: world.tick, droppedTicks: stepper.stats.droppedTicks },
@@ -244,13 +260,15 @@ export function createFrameLoop(d: FrameLoopDeps): FrameLoop {
     if (frameDt > 0) fps = lerp(fps, 1 / frameDt, 0.1);
 
     handleUi();
-    const paused = settings.paused;
+    // 开发暂停与功能暂停（建造）只停模拟；设置面板暂停由 settings.advance 自己处理。
+    const held = (d.devCamera !== null && d.devCamera.paused) || d.features.some(feature => feature.paused);
+    const paused = settings.paused || held;
     if (paused) weaponHud.resetInput();
     d.audio?.update(world, paused);
     if (!paused && PLAY_ACTIONS.some((a) => tracker.isHeld(a))) hud.noteInput();
     bench?.drive();
     // 暂停：模拟不步进（插值系数保持），实体动画冻结；风场随模拟暂停，水等视觉效果继续。
-    const alpha = settings.advance(stepper, elapsed, tick);
+    if (!held) alpha = settings.advance(stepper, elapsed, tick);
     if (profiling) prof.mark('sim');
     const pl = updateViews(alpha, frameDt, paused, profiling);
     stage.render();

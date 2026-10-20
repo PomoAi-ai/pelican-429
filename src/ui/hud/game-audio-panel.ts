@@ -78,8 +78,8 @@ export function createGameAudioPanel(parent: HTMLElement, actions: {
     root.addEventListener(type, (event) => event.stopPropagation());
   }
   let current: AudioStatus = 'locked';
-  let trackTitle = '冷启动 · 机房堡垒';
-  let trackTitleEn = 'COLD BOOT · Fortress';
+  let trackTitle = '冷启动 · 山体算力堡垒';
+  let trackTitleEn = 'COLD BOOT · Mountain Compute Fortress';
   const sync = (): void => {
     summary.textContent = t('声音');
     library.textContent = t('声音目录 · 逐项试听');

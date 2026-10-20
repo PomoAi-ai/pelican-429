@@ -22,7 +22,7 @@ import type { FluidQuery } from '../world/fluid-map.ts';
 import { applyGravity } from '../physics/body.ts';
 import { applyWaterForces, submersion } from '../physics/fluid-contact.ts';
 import type { Body } from '../physics/body.ts';
-import { COLLISION_EPS } from '../physics/tile-collision.ts';
+import { standingOnPlatformOnly } from '../physics/tile-collision.ts';
 import { advanceAttack, startAttack } from '../combat/attacks.ts';
 import type { Entity, PelicanData, PelicanState } from './entity.ts';
 import { bufferRideInput, rideBlocksFlight, rideBumper, rideHorizontal, rideLocksShotSide, updateRideIntent } from './pelican-ride.ts';
@@ -111,21 +111,6 @@ export function bufferPelicanInput(e: Entity, input: PelicanInput, tuning: Tunin
     p.shootAim = input.aim === null ? null : { x: input.aim.x, y: input.aim.y };
   }
   bufferRideInput(p, input, tuning);
-}
-
-/** 脚下支撑只有单向平台（无实心）时才允许下穿。 */
-function standingOnOneWayOnly(b: Body, map: TileQuery): boolean {
-  const ty = Math.round(b.y) - 1;
-  if (Math.abs(b.y - (ty + 1)) > COLLISION_EPS) return false;
-  const tx0 = Math.floor(b.x - b.halfWidth + COLLISION_EPS);
-  const tx1 = Math.ceil(b.x + b.halfWidth - COLLISION_EPS) - 1;
-  let oneWay = false;
-  for (let tx = tx0; tx <= tx1; tx++) {
-    const c = map.collisionAt(tx, ty);
-    if (c === 'solid') return false;
-    if (c === 'oneWay') oneWay = true;
-  }
-  return oneWay;
 }
 
 /** 飞行/滑翔模式判定与上升加速（jumpCut 之后、重力之前）。 */
@@ -293,7 +278,7 @@ export function updatePelican(
   rideBumper(e, rideProbe, tuning, dt);
 
   // 下方向优先穿过单向平台，避免同时按跳跃时反向起飞；实心支撑仍保留正常跳跃。
-  if (input.downHeld && b.onGround && p.ride.mode !== 'mounting' && standingOnOneWayOnly(b, map)) {
+  if (input.downHeld && b.onGround && p.ride.mode !== 'mounting' && standingOnPlatformOnly(b, map)) {
     b.dropThroughTicks = cfg.dropThroughTicks;
     b.onGround = false;
     p.flightNeedsRepress = true;

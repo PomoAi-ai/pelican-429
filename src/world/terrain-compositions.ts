@@ -2,7 +2,7 @@ import { TERRAIN_COMPOSITION_FRAME } from '../config/terrain-compositions.ts';
 import type { TerrainCompositionId } from '../config/terrain-compositions.ts';
 import type { ShowcaseEnvironment } from '../config/showcase.ts';
 import { mulberry32 } from '../core/rng.ts';
-import { createFluidMap, FLUID_FULL } from './fluid-map.ts';
+import { createFluidMap, fillWaterBody } from './fluid-map.ts';
 import { CAVE_CELL, CAVE_ENTRANCE, CAVE_OPEN, computeSurface } from './level.ts';
 import type { CaveRoom, LakeInfo, LevelData, TreeInstance } from './level.ts';
 import { createTileMap } from './tile-map.ts';
@@ -139,8 +139,10 @@ export function createTerrainCompositionLevel(kind: TerrainCompositionId, seed: 
   map.load(grid, shapes);
   const fluid = createFluidMap(map);
   const lakes: LevelData['lakes'] = kind === 'pond' ? [terrainCompositionLake(left, groundY)] : [];
-  for (const lake of lakes) for (let x = lake.x0; x <= lake.x1; x++) {
-    for (let y = ground[x]!; y < lake.level; y++) fluid.set(x, y, FLUID_FULL);
+  for (const lake of lakes) {
+    const body: Array<readonly [number, number]> = [];
+    for (let x = lake.x0; x <= lake.x1; x++) for (let y = ground[x]!; y < lake.level; y++) body.push([x, y]);
+    fillWaterBody(fluid, body);
   }
   const level: LevelData = {
     map, fluid,

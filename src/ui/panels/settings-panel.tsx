@@ -1,15 +1,13 @@
 /**
  * 游戏内设置面板：右上角（小地图下方）齿轮按钮 + 非模态卡片；分组与选项按 config/game-settings 表生成，点选即调用 SettingsController.set（即时生效）。
- * “世界”组：种子输入 + 新世界（由调用方重新加载页面）。
+ * “世界”组：种子输入 + 新世界（由调用方重新加载页面）。页面有公共场景工具条时，天气与种子已在条上，面板不再重复这两组。
  * 开关状态以 controller.open 为准（游戏循环同步读取并暂停）；update() 每帧调用，只在开关、当前值或提示变化时通知视图。
  */
 import { useEffect, useState, useSyncExternalStore, type KeyboardEvent } from 'react';
 import { SETTING_DEFS, SETTING_GROUPS } from '../../config/game-settings.ts';
 import type { GameSettings, SettingDef, SettingKey, SettingOption } from '../../config/game-settings.ts';
-import { LANGUAGES, t } from '../../config/i18n.ts';
-import { setLanguage } from '../model/language.ts';
+import { t } from '../../config/i18n.ts';
 import { resolveNewWorldSeed, type SettingsController } from '../model/settings-model.ts';
-import { Menu } from '../controls/menu.tsx';
 import { Slider } from '../controls/slider.tsx';
 import { Switch } from '../controls/switch.tsx';
 import { ToggleGroup } from '../controls/toggle-group.tsx';
@@ -21,6 +19,8 @@ import './settings-panel.css';
 export interface SettingsPanelOptions {
   readonly chapter: boolean;
   readonly gm: boolean;
+  /** 页面已挂公共场景工具条（天气与世界种子在条上）。 */
+  readonly sceneBar: boolean;
   readonly parent: HTMLElement;
   readonly controller: SettingsController;
   /** 当前世界种子（测试关卡为 null）。 */
@@ -100,7 +100,7 @@ function SettingRow({ def, current, onSet }: { def: SettingDef; current: GameSet
 }
 
 function SettingsView({ store, options, onSet }: { store: Store<PanelView>; options: SettingsPanelOptions; onSet: SetSetting }) {
-  const language = useLanguage();
+  useLanguage();
   const { open, current, issues } = useSyncExternalStore(store.subscribe, store.get);
   const { controller } = options;
   const [seed, setSeed] = useState(options.seed === null ? '' : String(options.seed));
@@ -118,12 +118,12 @@ function SettingsView({ store, options, onSet }: { store: Store<PanelView>; opti
     setInvalidSeed(null);
     options.onNewWorld(next);
   };
-  // KeyFence 拦下了面板内的按键，设置键 Esc / O 在这里交给外观；输入框里的 O 留给打字。语言菜单弹层不在面板 DOM 内，按键由菜单自己处理。
+  // KeyFence 拦下了面板内的按键，设置键 Esc / O 在这里交给外观；输入框里的 O 留给打字。
   const onKeyDown = (event: KeyboardEvent<HTMLElement>): void => {
     if (event.repeat || event.ctrlKey || event.metaKey || event.altKey || !event.currentTarget.contains(event.target as Node)) return;
     if (event.code === 'Escape' || (event.code === 'KeyO' && !(event.target instanceof HTMLInputElement))) controller.toggle();
   };
-  const groups = SETTING_GROUPS.filter((group) => !(options.chapter && group.id === 'weather') && !(!options.gm && group.id === 'debug'));
+  const groups = SETTING_GROUPS.filter((group) => !((options.chapter || options.sceneBar) && group.id === 'weather') && !(!options.gm && group.id === 'debug'));
 
   return <>
     <button
@@ -147,10 +147,6 @@ function SettingsView({ store, options, onSet }: { store: Store<PanelView>; opti
       </div>
       <div className="settings-issues" hidden={issues.length === 0}>{issues.map(issueText).join('\n')}</div>
       {options.chapter && <div className="settings-note">{t('场景预览使用固定天气，无战斗，可调整画面与水色。')}</div>}
-      <div className="settings-row">
-        <span className="settings-label">{t('语言')}</span>
-        <Menu label={t('语言')} value={language} items={LANGUAGES.map(({ id, label }) => ({ value: id, label }))} onValueChange={setLanguage} />
-      </div>
       {options.onCharacter && <button type="button" className="settings-footer" onClick={options.onCharacter}>{t('捏人 · 角色外观')}</button>}
       {groups.map((group) => {
         const defs = SETTING_DEFS.filter((def) => def.group === group.id);
@@ -161,7 +157,7 @@ function SettingsView({ store, options, onSet }: { store: Store<PanelView>; opti
           </div>
         );
       })}
-      <div className="settings-group">
+      {!options.sceneBar && <div className="settings-group">
         <div className="settings-group-title">{t('世界')}</div>
         <div className="settings-row">
           <span className="settings-label">{t('种子')}</span>
@@ -183,7 +179,7 @@ function SettingsView({ store, options, onSet }: { store: Store<PanelView>; opti
           <button type="button" className="settings-new-world" onClick={options.onShowcase}>{t('角色展示场 ↗')}</button>
           <div className="settings-note">{t('选择角色，在预览卡内切换动作，并排查看地上 / 地下效果；返回时重新进入原种子世界。')}</div>
         </>}
-      </div>
+      </div>}
       <button type="button" className="settings-footer" onClick={() => controller.setOpen(false)}>{t('关闭并继续')}</button>
     </div>
   </>;

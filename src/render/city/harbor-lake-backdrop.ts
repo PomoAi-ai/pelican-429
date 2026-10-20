@@ -92,7 +92,7 @@ export async function createHarborLakeBackdrop(bounds: { minX: number; maxX: num
     distance: [depths[0]!.base.mesh, depths[0]!.glow.mesh],
   };
   return { root,
-    setCamera(camera: THREE.PerspectiveCamera): void { backdrop.update(camera); shore.setCamera(camera); },
+    setCamera(camera: THREE.PerspectiveCamera, cameraFrame: THREE.Object3D): void { backdrop.update(camera, cameraFrame); shore.setCamera(camera); },
     setLayerVisible(id: AiCityLayerId, visible: boolean): void { for (const object of layers[id]) object.visible = visible; },
     setWeather(look: PrecipSkyLook): void { cloud = look.cloudAmount; shore.setWeather(look); atmosphere(); },
     setNightFactor(value: number, moon: number): void { night = value; moonLight = moon; shore.setNightFactor(value); atmosphere(); },

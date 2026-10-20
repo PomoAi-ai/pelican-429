@@ -14,6 +14,8 @@ import type { WebGPURenderer } from 'three/webgpu';
 import { diffuseColor } from 'three/tsl';
 import { POINT_CORNER, shaderInputs } from './webgpu-shader-nodes.ts';
 import type { ShaderConversion } from './webgpu-shader-nodes.ts';
+import { CITY_SHADERS } from './webgpu-shader-city.ts';
+import { refreshEveryRender } from './webgpu-node-utils.ts';
 import { FACILITY_SHADERS } from './webgpu-shader-facility.ts';
 import { FX_SHADERS } from './webgpu-shader-fx.ts';
 import { TRANSIT_SHADERS } from './webgpu-shader-transit.ts';
@@ -24,6 +26,7 @@ const SHADER_CONVERSIONS: Readonly<Record<string, ShaderConversion>> = {
   ...FX_SHADERS,
   ...FACILITY_SHADERS,
   ...TRANSIT_SHADERS,
+  ...CITY_SHADERS,
 };
 
 /** 材质清单用：该材质是否有节点版本。 */
@@ -41,6 +44,7 @@ function shaderNodeMaterial(source: THREE.ShaderMaterial): NodeMaterial {
   material.fog = false;
   if (vertex !== undefined) material.vertexNode = vertex;
   if (depth !== undefined) material.depthNode = depth;
+  refreshEveryRender(source);
   material.setupDiffuseColor = () => {
     diffuseColor.assign(color);
   };
@@ -105,8 +109,16 @@ export function installShaderMaterials(renderer: WebGPURenderer): void {
   library.fromMaterial = (material) => ((material as THREE.ShaderMaterial).isShaderMaterial ? shaderNodeMaterial(material as THREE.ShaderMaterial) : copy(material));
   // 包装 renderObject 而不是 setRenderObjectFunction：预编译（compileAsync）也走 renderObject，点精灵因此按四边形网格预编译。
   const render = renderer.renderObject.bind(renderer);
+  const keyed = new WeakSet<THREE.Material>();
   renderer.renderObject = (...args) => {
     const [object, scene, camera, , material, ...rest] = args;
+    // three 按材质属性复用节点构建结果，GLSL 相同而 uniform（贴图、强度）不同的 ShaderMaterial 会共用第一份的节点；
+    // 在渲染对象建立缓存键之前按材质区分。
+    if ((material as THREE.ShaderMaterial).isShaderMaterial && !keyed.has(material)) {
+      keyed.add(material);
+      const key = material.customProgramCacheKey.bind(material);
+      material.customProgramCacheKey = () => `${key()}|${material.uuid}`;
+    }
     if (!((object as THREE.Points).isPoints && (material as THREE.ShaderMaterial).isShaderMaterial)) return render(...args);
     const mesh = syncSprites(object as THREE.Points);
     render(mesh, scene, camera, mesh.geometry, material, ...rest);

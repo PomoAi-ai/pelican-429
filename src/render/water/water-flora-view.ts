@@ -8,7 +8,6 @@
 import * as THREE from 'three';
 import type { Rect, Vec2 } from '../../core/math.ts';
 import type { FluidQuery } from '../../world/fluid-map.ts';
-import { FLUID_FULL } from '../../world/fluid-map.ts';
 import type { LakeInfo, LevelData } from '../../world/level.ts';
 import {
   built,
@@ -152,7 +151,7 @@ function surfaceAt(fluid: FluidQuery, lake: LakeInfo, bedRow: Float32Array | und
   for (let ty = Math.min(fluid.height - 1, lake.level + 1); ty >= floor; ty--) {
     const a = fluid.amountAt(tx, ty);
     if (a < WATER_MIN_AMOUNT) continue;
-    const h = fluid.amountAt(tx, ty + 1) >= WATER_MIN_AMOUNT ? 1 : Math.max(WATER_FILM_HEIGHT, a / FLUID_FULL);
+    const h = Math.max(WATER_FILM_HEIGHT, fluid.surfaceAt(tx, ty));
     return { y: ty + h, wave: Math.min(1, h / WAVE_FULL_DEPTH) };
   }
   return null;

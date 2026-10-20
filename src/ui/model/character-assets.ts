@@ -2,7 +2,7 @@ import { ENEMY_MODEL_DIRS, isEnemyKind } from '../../config/enemy-models.ts';
 import { CHARACTER_ASSETS, GRASSY_HISTORY_ASSETS, GRASSY_HISTORY_DOWNLOADS } from '../../config/character-assets.ts';
 import type { CharacterAsset } from '../../config/character-assets.ts';
 import type { ShowcaseActor } from '../../config/showcase.ts';
-import { t } from '../../config/i18n.ts';
+import { getLanguage, t } from '../../config/i18n.ts';
 import { onLanguageChange } from './language.ts';
 
 const descriptions: Readonly<Record<string, string>> = {
@@ -27,6 +27,8 @@ const descriptions: Readonly<Record<string, string>> = {
   '历史版本': '历史模型截图 · 第一版至第四版',
   '骑行素材': '骑行原画、动画素材与模型截图',
 };
+
+const assetLabel = (label: CharacterAsset['label']): string => typeof label === 'string' ? t(label) : label[getLanguage() === 'en' ? 1 : 0];
 
 function element<K extends keyof HTMLElementTagNameMap>(tag: K, parent: HTMLElement, className: string, text = ''): HTMLElementTagNameMap[K] {
   const node = document.createElement(tag);
@@ -63,7 +65,7 @@ export function createCharacterAssets(parent: HTMLElement, actor: ShowcaseActor,
     label(() => { summary.textContent = t('归档模型与工程索引'); });
     for (const asset of GRASSY_HISTORY_DOWNLOADS) {
       const link = element('a', downloads, '');
-      label(() => { link.textContent = t(asset.label); });
+      label(() => { link.textContent = assetLabel(asset.label); });
       link.href = asset.path; link.target = '_blank'; link.rel = 'noopener';
     }
   }
@@ -101,10 +103,10 @@ export function createCharacterAssets(parent: HTMLElement, actor: ShowcaseActor,
   const showImage = (index: number): void => {
     current = index;
     const asset = selected[index]!;
-    dialogTitle.textContent = t(asset.label);
+    dialogTitle.textContent = assetLabel(asset.label);
     error.hidden = true;
     large.src = asset.path;
-    large.alt = t(asset.label);
+    large.alt = assetLabel(asset.label);
     original.href = large.src;
     position.textContent = `${index + 1} / ${selected.length}`;
     previous.disabled = index === 0;
@@ -127,12 +129,12 @@ export function createCharacterAssets(parent: HTMLElement, actor: ShowcaseActor,
     selected.forEach((asset, index) => {
       const thumbnail = element('button', gallery, 'sc-asset-thumbnail');
       thumbnail.type = 'button';
-      thumbnail.setAttribute('aria-label', t('查看{name}').replace('{name}', t(asset.label)));
+      thumbnail.setAttribute('aria-label', t('查看{name}').replace('{name}', assetLabel(asset.label)));
       const image = element('img', thumbnail, '');
       image.src = asset.thumbnail;
       image.alt = ''; image.loading = 'lazy'; image.decoding = 'async';
       image.addEventListener('error', () => { thumbnail.title = `${t('资源加载失败：')}${asset.path}`; thumbnail.classList.add('sc-asset-error'); });
-      element('span', thumbnail, '', t(asset.label));
+      element('span', thumbnail, '', assetLabel(asset.label));
       thumbnail.addEventListener('click', () => { showImage(index); dialog.showModal(); });
     });
   };
@@ -140,7 +142,6 @@ export function createCharacterAssets(parent: HTMLElement, actor: ShowcaseActor,
     group = next;
     selected = assets.filter((asset) => asset.group === group);
     for (const [name, button] of buttons) {
-      button.classList.toggle('sc-active', name === group);
       button.setAttribute('aria-pressed', String(name === group));
     }
     gallery.classList.toggle('sc-character-card-gallery', group === '角色卡');

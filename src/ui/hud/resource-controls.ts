@@ -84,7 +84,6 @@ export function createResourceControls(parent: HTMLElement, card: ShowcaseCard, 
       const options = card.resource!;
       light.hidden = card.environment !== 'underground';
       light.setAttribute('aria-pressed', String(options.inspectionLight));
-      light.classList.toggle('sc-active', options.inspectionLight);
       seed.value = String(options.seed); wind.value = options.wind;
       const entry = model.entry(card.entryId);
       const building = isBuildingKitKind(entry.actor);
@@ -93,7 +92,6 @@ export function createResourceControls(parent: HTMLElement, card: ShowcaseCard, 
       const groundResource = terrain || (entry.actor === 'grass' && entry.action === 'natural');
       platforms.hidden = !groundResource && entry.actor !== 'tree' && !(entry.actor === 'terrain' && entry.action === 'branch');
       platforms.setAttribute('aria-pressed', String(options.platforms));
-      platforms.classList.toggle('sc-active', options.platforms);
       lab.hidden = model.catalog.mode !== 'lab' || (!terrain && !(entry.actor === 'grass' && entry.action === 'natural'));
       composition.parentElement!.hidden = !terrain || !entry.supportsShapes;
       composition.value = options.composition ?? '';
@@ -107,12 +105,9 @@ export function createResourceControls(parent: HTMLElement, card: ShowcaseCard, 
       explanation.textContent = t(options.composition ? TERRAIN_COMPOSITIONS.find(({ id }) => id === options.composition)!.description : terrain ? '形状改变真实瓦片；邻格决定接缝。植被由暴露顶面、材质、坐标与环境生成。' : entry.actor === 'terrain' ? (entry.action === 'branch' ? '树枝平台是碰撞瓦片，外观由同一棵游戏树模型绘制。' : '屋顶瓦片负责碰撞，外观由游戏渔屋模型绘制。') : '类型决定几何，种子控制实例参数；风力驱动游戏原有动画。自然花草按坐标与环境分布，不随此种子任意重排。');
       context.hidden = groundResource; grid.hidden = !groundResource && !building;
       grid.setAttribute('aria-pressed', String(options.grid));
-      grid.classList.toggle('sc-active', options.grid);
       context.textContent = t(options.context ? '场景模式' : '纯资源模式');
       context.setAttribute('aria-pressed', String(options.context));
-      context.classList.toggle('sc-active', options.context);
       reference.setAttribute('aria-pressed', String(options.reference));
-      reference.classList.toggle('sc-active', options.reference);
     },
   };
 }

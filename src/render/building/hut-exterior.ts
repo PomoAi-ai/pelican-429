@@ -16,6 +16,7 @@ import {
   HUT_ROOF_Z_MAX,
   HUT_ROOF_Z_MIN,
   PROP_Z0,
+  WALL_BACK_Z,
   WALL_TOP_GAP,
   WALL_Z,
   bedAt,
@@ -49,9 +50,9 @@ export function buildBackWall(ctx: HutCtx, b: PartBuilder): void {
   const { hut, rng } = ctx;
   const doorTop = hut.floorY + hut.doorRows;
   const backing = color(C.backing);
-  b.flat(wallPoly(ctx, hut.x0, hut.x0 + 1, doorTop), BLOCK_BACK_Z, backing);
-  b.flat(wallPoly(ctx, hut.x0 + 1, hut.x1, hut.floorY), BLOCK_BACK_Z, backing);
-  b.flat(wallPoly(ctx, hut.x1, hut.x1 + 1, doorTop), BLOCK_BACK_Z, backing);
+  b.flat(wallPoly(ctx, hut.x0, hut.x0 + 1, doorTop), WALL_BACK_Z, backing);
+  b.flat(wallPoly(ctx, hut.x0 + 1, hut.x1, hut.floorY), WALL_BACK_Z, backing);
+  b.flat(wallPoly(ctx, hut.x1, hut.x1 + 1, doorTop), WALL_BACK_Z, backing);
   // 竖木板条（宽 .5，缝 .05 露出衬底）：每块板色差 + 木纹 + 微小前后错落；部分风化发灰。
   const gap = 0.025;
   const nail = color(C.iron);
@@ -63,7 +64,7 @@ export function buildBackWall(ctx: HutCtx, b: PartBuilder): void {
       const weathered = rng() < 0.22;
       const plank = weathered ? color(pick(rng, C.plankWeathered), rng, 0.05) : color(pick(rng, C.plank), rng, 0.06);
       const front = WALL_Z - 0.003 - rng() * 0.02;
-      b.extrude(wallPoly(ctx, xa + gap, xb - gap, yb), BLOCK_BACK_Z + 0.04, front, plank);
+      b.extrude(wallPoly(ctx, xa + gap, xb - gap, yb), WALL_BACK_Z + 0.04, front, plank);
       // 钉子：底部与系梁高度各两颗。
       for (const ny of [yb + 0.2, hut.floorY + 3.05, hut.roofY - 0.4]) {
         if (ny <= yb + 0.1 || ny >= hutRoofTop(hut, Math.min(xb, Math.max(xa, ctx.ridgeX))) - WALL_TOP_GAP - 0.1) continue;

@@ -454,7 +454,7 @@ describe("012 W1：'~' 水图例", () => {
     assert.equal(parsed.fluid.amountAt(2, 2), FLUID_FULL);
     assert.equal(parsed.fluid.amountAt(0, 2), 0);
     assert.equal(parsed.fluid.amountAt(3, 2), 0);
-    assert.equal(parsed.fluid.totalMass(), 4 * FLUID_FULL);
+    assert.equal(parsed.fluid.totalMass(), 4 * 16 * FLUID_FULL);
     assert.deepEqual(parsed.trees, []);
   });
 
@@ -469,7 +469,7 @@ describe("012 W1：'~' 水图例", () => {
     let cells = 0;
     for (const row of WATER_TEST_LEVEL.rows) cells += [...row].filter((ch) => ch === '~').length;
     assert.ok(cells > 0);
-    assert.equal(w.fluid.totalMass(), cells * FLUID_FULL);
+    assert.equal(w.fluid.totalMass(), cells * 16 * FLUID_FULL);
     for (let ty = 0; ty < w.map.height; ty++) {
       for (let tx = 0; tx < w.map.width; tx++) if (w.fluid.amountAt(tx, ty) > 0) assert.equal(w.map.collisionAt(tx, ty), 'none');
     }
