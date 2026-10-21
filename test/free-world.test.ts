@@ -94,7 +94,7 @@ test('同图区域定位与换种子保留规模和 GM，清理旧独立机房�
   assert.equal(query.has('level'), false);
   assert.equal(query.has('scene'), false);
   const returned = new URLSearchParams(freeWorldSearch(facility, 456, false, 'wilds', 'small'));
-  assert.deepEqual(Object.fromEntries(returned), { mode: 'game', quality: 'low', free: '1', seed: '456', gm: '0', region: 'wilds', size: 'small' });
+  assert.deepEqual(Object.fromEntries(returned), { mode: 'game', quality: 'low', debug: '', free: '1', seed: '456', gm: '0', region: 'wilds', size: 'small' });
 });
 
 test('城区右端进原野、原野左端回城区，保留种子与规模并去掉对侧入口标记', () => {
@@ -109,9 +109,9 @@ test('城区右端进原野、原野左端回城区，保留种子与规模并�
   assert.equal(new URLSearchParams(freeWorldSearch('?mode=lab&demo=free-world', 7, false, 'wilds', 'small')).has('demo'), false);
   // 从城区走进原野后再重建或区域定位，不再带着城区的出生入口。
   assert.equal(new URLSearchParams(freeWorldSearch('?mode=game&free=1&from=wilds', 7, false, 'wilds', 'small')).has('from'), false);
-  // 星舰发射与关卡返程把同一世界的种子、规模与 GM 带到目的地，其余参数不带。
-  const landing = keepWorldParams(new URL('http://x/?mode=game&landing=1'), '?mode=game&level=facility&scene=abyss&seed=7&size=large&gm=1&quality=low');
-  assert.deepEqual(Object.fromEntries(landing.searchParams), { mode: 'game', landing: '1', seed: '7', size: 'large', gm: '1' });
+  // 星舰发射与关卡返程把同一世界的种子、规模、GM 与渲染器、调试开关带到目的地，其余参数不带。
+  const landing = keepWorldParams(new URL('http://x/?mode=game&landing=1'), '?mode=game&level=facility&scene=abyss&seed=7&size=large&gm=1&quality=low&renderer=webgpu&debug');
+  assert.deepEqual(Object.fromEntries(landing.searchParams), { mode: 'game', landing: '1', seed: '7', size: 'large', gm: '1', renderer: 'webgpu', debug: '' });
 });
 
 test('大世界配乐跟随真实地形，洞穴与浮岛优先于同列地表，机房使用全局位置', () => {

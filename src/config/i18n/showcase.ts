@@ -273,7 +273,7 @@ export const SHOWCASE_ENGLISH: Record<string, string> = {
   '水生植物': 'Aquatic plants', '湖底、水面与悬浮植物的全部变体': 'All underwater, surface, and floating plant variants',
   '洞穴装饰': 'Cave decorations', '全部地面与顶壁装饰，保留游戏的悬挂方向': 'All floor and ceiling decorations with their game hanging directions',
   '游戏变体': 'Game variants', '空气（留空）': 'Air (empty)', '泥土': 'Dirt', '石头': 'Stone', '木平台': 'Wood platform',
-  '草地': 'Grass', '沙地': 'Sand', '砂岩': 'Sandstone', '木料': 'Timber', '树枝平台（树模型）': 'Branch platform (tree model)', '屋顶（渔屋模型）': 'Roof (hut model)', '交通中心街面板（交通中心模型）': 'Transit street paving (transit model)',
+  '草地': 'Grass', '沙地': 'Sand', '砂岩': 'Sandstone', '木料': 'Timber', '树枝平台（树模型）': 'Branch platform (tree model)', '屋顶（渔屋模型）': 'Roof (hut model)',
   '暖白岩板（建筑构件）': 'Warm white slab (building piece)', '深蓝合金（建筑构件）': 'Deep blue alloy (building piece)', '米黄色方石（建筑构件）': 'Beige ashlar (building piece)',
   '暖白岩板平台（建筑构件）': 'Warm white slab platform (building piece)', '深蓝合金平台（建筑构件）': 'Deep blue alloy platform (building piece)',
   '自然花草': 'Natural flowers', '右侧栈桥': 'Right pier', '左侧栈桥': 'Left pier', '清澈': 'Clear', '翡翠': 'Emerald', '深蓝': 'Deep blue',

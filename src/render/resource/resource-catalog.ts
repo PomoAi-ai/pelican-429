@@ -58,9 +58,9 @@ function resource<K extends keyof ResourceActions>(id: K, choices: ReadonlyArray
   };
 }
 const tileLabels: Record<string, string> = { air: '空气（留空）', dirt: '泥土', stone: '石头', platform: '木平台', grass: '草地', sand: '沙地', sandstone: '砂岩', timber: '木料', branch: '树枝平台（树模型）', roof: '屋顶（渔屋模型）',
-  ceramic: '暖白岩板（建筑构件）', alloy: '深蓝合金（建筑构件）', ashlar: '米黄色方石（建筑构件）', ceramicplatform: '暖白岩板平台（建筑构件）', alloyplatform: '深蓝合金平台（建筑构件）', paving: '交通中心街面板（交通中心模型）' };
-// 主题的名称与说明见 config/resource-subjects，种类始终来自游戏注册表。
-const tiles = [...DEFAULT_TILES.all()].sort((a, b) => Number(b.key === 'grass') - Number(a.key === 'grass'));
+  ceramic: '暖白岩板（建筑构件）', alloy: '深蓝合金（建筑构件）', ashlar: '米黄色方石（建筑构件）', ceramicplatform: '暖白岩板平台（建筑构件）', alloyplatform: '深蓝合金平台（建筑构件）' };
+// 主题的名称与说明见 config/resource-subjects，种类始终来自游戏注册表。交通中心街面板只有碰撞，画面是百余格宽的交通中心前庭，单格卡片展示不出来，不列出。
+const tiles = [...DEFAULT_TILES.all()].filter((tile) => tile.key !== 'paving').sort((a, b) => Number(b.key === 'grass') - Number(a.key === 'grass'));
 const resources = [
   resource('terrain', tiles.map((tile) => {
     const label = tileLabels[tile.key];

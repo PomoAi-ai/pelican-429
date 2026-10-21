@@ -8,6 +8,8 @@ import { useLanguage } from '../react/use-language.ts';
 import './resource-picker.css';
 
 interface PickerState { value: string; group: string; query: string }
+/** 游戏帧循环里几乎没有空闲时段，回调多是超时触发；每张缩略图约 10–20ms，短超时让首屏两三秒内画完（原先等满 200ms 要五六秒）。 */
+const IDLE_TIMEOUT_MS = 50;
 
 /** 缩略图进入视口才排队渲染，空闲时一张张画，同一预览只画一次。 */
 interface Thumbnails {
@@ -106,7 +108,7 @@ export function createResourcePicker(resources: readonly ResidenceResource[], cr
     observer.unobserve(image);
     requests.delete(image);
     done(source);
-    if (pending.size) idle = requestIdleCallback(renderPending, { timeout: 200 });
+    if (pending.size) idle = requestIdleCallback(renderPending, { timeout: IDLE_TIMEOUT_MS });
   };
   const observer = new IntersectionObserver(entries => {
     for (const entry of entries) {
@@ -114,7 +116,7 @@ export function createResourcePicker(resources: readonly ResidenceResource[], cr
       if (entry.isIntersecting) pending.add(image);
       else pending.delete(image);
     }
-    if (pending.size && !idle) idle = requestIdleCallback(renderPending, { timeout: 200 });
+    if (pending.size && !idle) idle = requestIdleCallback(renderPending, { timeout: IDLE_TIMEOUT_MS });
   });
   const thumbnails: Thumbnails = {
     cached: (key) => cache.get(key),

@@ -13,10 +13,10 @@ export function parseMainWorldParams(params: URLSearchParams): { seed: number; g
   };
 }
 
-/** 重新生成与快速旅行保留同一世界的种子、规模和 GM 状态。 */
+/** 重新生成与快速旅行保留同一世界的种子、规模和 GM 状态；页面级开关 debug 随网址保留。 */
 export function freeWorldSearch(current: string, seed: number, gm: boolean, region: string, size: FreeWorldSize): string {
   const params = new URLSearchParams(current);
-  for (const key of ['level', 'scene', 'demo', 'inspect', 'composition', 'material', 'environment', 'debug', 'mapTeleport', 'perfPanel', 'tileGrid', 'dummyShoot', 'from']) params.delete(key);
+  for (const key of ['level', 'scene', 'demo', 'inspect', 'composition', 'material', 'environment', 'mapTeleport', 'perfPanel', 'tileGrid', 'dummyShoot', 'from']) params.delete(key);
   params.set('mode', 'game');
   params.set('free', '1');
   params.set('seed', String(parseSeed(String(seed))));
@@ -36,11 +36,11 @@ export function worldMapSearch(current: string, target: 'wilds' | 'city' | 'tran
   return `?${params}`;
 }
 
-/** 场景间跳转带上当前网址的种子、规模与 GM：城区的这三项只存在网址里，丢掉会让原野换成另一个世界。 */
+/** 场景间跳转带上当前网址的种子、规模与 GM（城区的这三项只存在网址里，丢掉会让原野换成另一个世界），以及渲染器与调试开关。 */
 export function keepWorldParams(target: URL | string, current: string): URL {
   const url = target instanceof URL ? new URL(target) : new URL(target, location.href);
   const params = new URLSearchParams(current);
-  for (const key of ['seed', 'size', 'gm']) {
+  for (const key of ['seed', 'size', 'gm', 'renderer', 'debug']) {
     const value = params.get(key);
     if (value !== null) url.searchParams.set(key, value);
   }

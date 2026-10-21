@@ -19,7 +19,7 @@ import { keepWorldParams } from '../game/free-world-navigation.ts';
 import { createTransitInterface } from './transit-controls.ts';
 import { createTransitAudio } from './transit-audio.ts';
 import { CORRIDOR_DEPART_SECONDS, createReturnCorridorOverlay } from './return-corridor-overlay.ts';
-import { t } from '../../config/i18n.ts';
+import { onLanguageChange, t } from '../../config/i18n.ts';
 
 const PHASE_TEXT: Record<TransitPhase, [string, string]> = {
   ground: ['等待登船', 'A / D 移动 · 按住空格飞行 · S 下降 · E 交互'],
@@ -162,6 +162,8 @@ export function createTransitStation(input: TransitStationInput): GameFeature & 
   const showHatch = () => {
     if (!canEnterTransit(station, body()) || input.blocked()) return;
     state.approaching = false; hatchPrompt = true; input.releaseInput();
+    // 提示期间模拟停着而动画照常：先让人站定，免得停在迈步的速度上原地走。
+    body().vx = 0;
     ui.entry.hidden = false; ui.enter.focus({ preventScroll: true });
   };
   const interact = () => {
@@ -191,7 +193,7 @@ export function createTransitStation(input: TransitStationInput): GameFeature & 
     button.addEventListener('click', () => {
       if (!selectTransitDestination(state, destination.id)) return;
       for (const option of ui.panel.querySelectorAll<HTMLButtonElement>('[data-destination]')) option.setAttribute('aria-pressed', String(option === button));
-      ui.launch.disabled = false; ui.launch.textContent = t('发射 · {name}').replace('{name}', t(destination.name, 'place'));
+      ui.launch.disabled = false; writeLaunch();
     }, { signal });
   }
   // 发射按钮在选定目的地后才可用。
@@ -209,17 +211,24 @@ export function createTransitStation(input: TransitStationInput): GameFeature & 
     if (!event.repeat) interact();
   }, { capture: true, signal });
 
+  const writePhase = (): void => {
+    ui.phase.textContent = t(PHASE_TEXT[state.phase][0]); ui.hint.textContent = t(PHASE_TEXT[state.phase][1]);
+  };
+  const writeLaunch = (): void => {
+    const destination = ui.launch.disabled ? undefined : TRANSIT_DESTINATIONS.find(item => item.id === state.destination);
+    ui.launch.textContent = destination === undefined ? t('请选择目的地') : t('发射 · {name}').replace('{name}', t(destination.name, 'place'));
+  };
+  const unsubscribeLanguage = onLanguageChange(() => { ui.translate(); writePhase(); writeLaunch(); });
   const updateHud = (visual: TransitVisual, b: Body): void => {
     const phase = state.phase, p = transitPhaseProgress(state);
     if (phase !== lastPhase) {
-      ui.section.dataset.phase = phase; ui.phase.textContent = t(PHASE_TEXT[phase][0]);
-      ui.hint.textContent = t(PHASE_TEXT[phase][1]); ui.panel.hidden = phase !== 'cabin';
+      ui.section.dataset.phase = phase; writePhase(); ui.panel.hidden = phase !== 'cabin';
       ui.board.hidden = phase !== 'ground';
       // 登舱到穿越期间画面交给座舱与航道，游戏 HUD 与小地图让开。
       document.body.toggleAttribute('data-transit-cabin', !(phase === 'ground' || phase === 'calling' || phase === 'elevator' || phase === 'descending'));
       if (phase === 'cabin') {
         input.releaseInput();
-        ui.launch.disabled = true; ui.launch.textContent = t('请选择目的地');
+        ui.launch.disabled = true; writeLaunch();
         for (const button of ui.panel.querySelectorAll<HTMLButtonElement>('[data-destination]')) button.setAttribute('aria-pressed', 'false');
         ui.panel.querySelector<HTMLButtonElement>('[data-destination]')!.focus({ preventScroll: true });
       }
@@ -312,7 +321,7 @@ export function createTransitStation(input: TransitStationInput): GameFeature & 
       }
     },
     dispose() {
-      corridor.hide(0); document.body.removeAttribute('data-transit-cabin'); sound.dispose(); flowers.dispose(); model.dispose(); ui.section.remove();
+      unsubscribeLanguage(); corridor.hide(0); document.body.removeAttribute('data-transit-cabin'); sound.dispose(); flowers.dispose(); model.dispose(); ui.section.remove();
     },
   };
 }

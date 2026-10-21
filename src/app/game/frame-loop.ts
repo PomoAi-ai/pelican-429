@@ -48,7 +48,7 @@ import type { GameAudio } from '../audio/game-audio.ts';
 import { selectMobileAim } from './mobile-aim.ts';
 import type { DevCamera } from './dev-camera.ts';
 
-/** 世界功能插件（城区表现、城区建造）：paused 为真时模拟不步进；update 在视图同步之后、光场更新之前调用。 */
+/** 世界功能插件（城区表现、城区建造、交通中心）：paused 为真时模拟不步进、实体动画照常；update 在视图同步之后、光场更新之前调用。 */
 export interface GameFeature {
   readonly paused: boolean;
   /** view = 镜头可视范围，time = 环境时间（秒）。 */
@@ -260,9 +260,11 @@ export function createFrameLoop(d: FrameLoopDeps): FrameLoop {
     if (frameDt > 0) fps = lerp(fps, 1 / frameDt, 0.1);
 
     handleUi();
-    // 开发暂停与功能暂停（建造）只停模拟；设置面板暂停由 settings.advance 自己处理。
-    const held = (d.devCamera !== null && d.devCamera.paused) || d.features.some(feature => feature.paused);
+    // 开发暂停与功能暂停（舱门提示）只停模拟；设置面板暂停由 settings.advance 自己处理。功能暂停时实体动画照常，角色保持待机。
+    const devHeld = d.devCamera !== null && d.devCamera.paused;
+    const held = devHeld || d.features.some(feature => feature.paused);
     const paused = settings.paused || held;
+    const frozen = settings.paused || devHeld;
     if (paused) weaponHud.resetInput();
     d.audio?.update(world, paused);
     if (!paused && PLAY_ACTIONS.some((a) => tracker.isHeld(a))) hud.noteInput();
@@ -270,7 +272,7 @@ export function createFrameLoop(d: FrameLoopDeps): FrameLoop {
     // 暂停：模拟不步进（插值系数保持），实体动画冻结；风场随模拟暂停，水等视觉效果继续。
     if (!held) alpha = settings.advance(stepper, elapsed, tick);
     if (profiling) prof.mark('sim');
-    const pl = updateViews(alpha, frameDt, paused, profiling);
+    const pl = updateViews(alpha, frameDt, frozen, profiling);
     stage.render();
     if (timingGpu) gpu.endFrame();
     if (profiling) prof.mark('render');
