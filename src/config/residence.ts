@@ -1,9 +1,30 @@
-import { AI_CITY_SUN } from './ai-city-look.ts';
+import { AI_CITY_HARBOR_LOOK, AI_CITY_RESIDENCE_LOOK, AI_CITY_SUN, AI_CITY_THREE_LOOK, BUILDING_SCENE_TUNING, type DaylightLook } from './ai-city-look.ts';
 import { TILE_SHAPE_DEFINITIONS } from './definition-kit.ts';
 import { PLAYER_FLIGHT } from './player-tuning.ts';
 import { TRANSIT } from './transit.ts';
 
-export type ResidenceVariant = 'original' | 'harbor';
+export type ResidenceVariant = 'original' | 'harbor' | 'three' | 'four';
+/** 城区地图（初始地形、布局、地下长廊与交通中心用地），由 sim/city 的地图表建出。 */
+export type CityMapId = 'residence' | 'harbor';
+
+/**
+ * 城区变体：同一套模拟、建造、光照与交通中心，差异只在这张表与存档键（app/city/city-save）。
+ * scene 是家园页网址的 scene 值（主世界城区走 mode=game，为 null）；title 为界面文案原文。
+ */
+export const RESIDENCE_VARIANTS: Readonly<Record<ResidenceVariant, {
+  readonly scene: string | null;
+  readonly title: string;
+  readonly map: CityMapId;
+  readonly look: DaylightLook;
+  readonly tuning: typeof BUILDING_SCENE_TUNING;
+}>> = {
+  harbor: { scene: null, title: '主世界', map: 'harbor', look: AI_CITY_HARBOR_LOOK, tuning: BUILDING_SCENE_TUNING },
+  original: { scene: 'residence', title: 'AI 住宅', map: 'residence', look: AI_CITY_RESIDENCE_LOOK, tuning: BUILDING_SCENE_TUNING },
+  three: { scene: 'residence-3', title: 'AI 住宅 3', map: 'harbor', look: AI_CITY_THREE_LOOK, tuning: BUILDING_SCENE_TUNING },
+  // 高台场景向上取景。
+  four: { scene: 'residence-4', title: 'AI 住宅 4', map: 'harbor', look: AI_CITY_THREE_LOOK,
+    tuning: { ...BUILDING_SCENE_TUNING, camera: { ...BUILDING_SCENE_TUNING.camera, framingOffsetY: 3.8 } } },
+};
 
 export const RESIDENCE_MATERIALS = { ceramic: '暖白岩板块', alloy: '深蓝合金块', ashlar: '米黄色方石块',
   grass: '草地土块', dirt: '泥土块', stone: '石块', sand: '沙块', sandstone: '砂岩块', timber: '木料块' } as const;

@@ -3,6 +3,8 @@ import assert from 'node:assert/strict';
 import { pageRoute, parseAppMode, parseDevCamera, parsePageParams } from '../src/config/app-mode.ts';
 import { SCENE_ENTRIES, resolveSceneEntry } from '../src/app/workspace/scene-catalog.ts';
 import { SITE_SECTIONS, findSitePage, siteSections } from '../src/config/site-directory.ts';
+import { RESIDENCE_VARIANTS } from '../src/config/residence.ts';
+import { parseGameLaunch } from '../src/app/game/game-level.ts';
 
 test('发布版开放游玩与轻量资料页，阻止原画库、历史模型、画质对比与开发场景', () => {
   assert.equal(parseAppMode(new URLSearchParams(), true), 'index');
@@ -68,7 +70,7 @@ test('网址按入口条件依次分派：站点页、场景工作区与展示�
   assert.equal(route('mode=game&level=boss-arena'), 'game');
   assert.equal(route('mode=game&bench=1'), 'game');
   assert.equal(route('mode=game', true), 'game');
-  assert.equal(route('mode=homestead&scene=residence'), 'game');
+  for (const scene of ['residence', 'residence-3', 'residence-4']) assert.equal(route(`mode=homestead&scene=${scene}`), 'game');
   assert.equal(route('mode=homestead'), 'game');
   assert.equal(route('mode=controls'), 'game');
   assert.throws(() => route('mode=lab', true));
@@ -86,6 +88,8 @@ test('两级导航：每个入口地址都落回自己，同一页的其他参�
   assert.equal(page('mode=hair-gallery&environment=studio'), 'hair-gallery');
   assert.equal(page('mode=showcase&demo=sam'), 'showcase');
   assert.equal(page('mode=catalog'), 'catalog');
+  assert.equal(page('mode=homestead'), 'homestead');
+  assert.equal(page('mode=homestead&scene=wilds'), 'homestead');
   assert.equal(page(''), undefined);
   assert.equal(page('mode=about'), undefined);
 });
@@ -98,4 +102,17 @@ test('场景工作区只认非游戏场景，游戏网址交给整页游戏', ()
   for (const query of ['mode=game', 'mode=game&free=1', 'mode=game&level=facility&scene=abyss']) assert.throws(() => entry(query), /不是场景工作区地址/, query);
   // 侧栏条目来自页面登记表，每条的网址都要落回它自己。
   for (const item of SCENE_ENTRIES) assert.equal(resolveSceneEntry(new URL(item.href, 'http://x/')).id, item.id, item.href);
+});
+
+// 导航按场景名判定住宅页，与变体表各自维护：任一边改了 scene，入口就会进错城区或落到家园页。
+test('家园页的住宅场景按变体表选城区变体，导航入口与之一致；其余家园场景不进城区', () => {
+  const launch = (query: string) => parseGameLaunch(new URLSearchParams(query)).city;
+  assert.equal(launch('mode=game'), 'harbor');
+  for (const [variant, { scene }] of Object.entries(RESIDENCE_VARIANTS)) {
+    if (scene === null) continue;
+    assert.equal(launch(`mode=homestead&scene=${scene}`), variant);
+    assert.equal(findSitePage(new URL(`http://x/?mode=homestead&scene=${scene}`))?.page.href, `./?mode=homestead&scene=${scene}`);
+  }
+  assert.equal(launch('mode=homestead'), null);
+  assert.equal(launch('mode=homestead&scene=wilds'), null);
 });

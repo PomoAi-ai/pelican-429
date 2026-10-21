@@ -135,7 +135,8 @@ function createFootSink(terrain: TileQuery | undefined, slopeSink: number, body:
     if (!terrain) return 0;
     const rise = y - previousY;
     // 只缓动超过真实斜坡坡度的踏阶抬升，补偿在有限时间内归零；物理始终站在真实砖面上。
-    if (grounded && b.onGround && rise > Math.abs(x - previousX) + COLLISION_EPS && rise <= b.stepUp) {
+    // 踏阶必伴随水平移动；原地竖直上升（着陆舱托举起飞）不是台阶，否则高速爬升时视图会沉到身体下方、停住再弹回。
+    if (grounded && b.onGround && x !== previousX && rise > Math.abs(x - previousX) + COLLISION_EPS && rise <= b.stepUp) {
       stepOffset = Math.max(-b.stepUp, stepOffset - rise);
     }
     stepOffset = b.onGround ? approach(stepOffset, 0, frameDt / 0.12) : 0;

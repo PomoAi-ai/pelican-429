@@ -18,6 +18,8 @@ import { pelicanRestPose } from '../src/render/pelican/pelican-pose.ts';
 import { LEVEL_LEGEND, parseLevel } from '../src/world/test-level.ts';
 import { createSimWorld, getPlayer, NEUTRAL_INPUT, stepSim } from '../src/sim/sim-world.ts';
 import type { InputFrame, SimWorld } from '../src/sim/sim-world.ts';
+import { liftInPod, type PodLanding } from '../src/sim/pod-landing.ts';
+import { savePrev } from '../src/physics/body.ts';
 import { beakTip, GEO, REST, rig } from './helpers/pelican-fixtures.ts';
 
 const DT = TUNING.sim.step;
@@ -392,5 +394,23 @@ describe('喙避让层（纯函数）', () => {
     assert.ok(out.some((b) => b.x0 === dummy(w).body.x - dummy(w).body.halfWidth), '含前方假人');
     assert.ok(!out.some((b) => b.x0 === 3), '不含身后的墙');
     assert.ok(!out.some((b) => b.y1 <= p.body.y + 0.6 && b.x1 - b.x0 === 1), '不含脚下的地面');
+  });
+});
+
+describe('竖直托举：着陆舱起飞时视图跟住身体', () => {
+  test('站着随舱竖直升起，渲染高度每 tick 都等于身体高度，不按踏阶补偿下沉', () => {
+    const w = world(level(30, 14, [{ x: 10, y: 1, ch: 'P' }]));
+    const h = harness(w, false);
+    ticks(h, 30);
+    assert.ok(h.player.body.onGround);
+    const ground = h.player.body.y;
+    const pod: PodLanding = { x: h.player.body.x, ground, exitX: h.player.body.x - 3, altitude: 18, descentTicks: 60, settleTicks: 0, doorTicks: 0, ticks: 60 };
+    while (pod.ticks > 0) {
+      savePrev(h.player.body);
+      liftInPod(pod, h.player.body);
+      h.view.sync(h.player, 1, DT);
+      assert.ok(Math.abs(rig().root.position.y - h.player.body.y) <= TOL, `tick ${pod.ticks}: 视图 ${rig().root.position.y} 身体 ${h.player.body.y}`);
+    }
+    dispose(h);
   });
 });

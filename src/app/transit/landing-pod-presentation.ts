@@ -5,6 +5,7 @@
  */
 import type * as THREE from 'three';
 import { t } from '../../config/i18n.ts';
+import { seatGrassy } from '../../render/grassy/grassy-seated.ts';
 import { createLandingPod, type LandingPod } from '../../render/transit/transit-landing-pod.ts';
 import type { Stage, StageRenderer } from '../../render/stage/stage.ts';
 import type { PodLanding } from '../../sim/pod-landing.ts';
@@ -52,6 +53,7 @@ export function createLandingPodPresentation(o: LandingPodPresentationOptions): 
       if (pose === null) { player.position.set(0, 0, 0); player.rotation.y = 0; return; }
       player.rotation.y = pose.yaw;
       player.position.set(pose.x * (1 - Math.cos(pose.yaw)), pose.lift, pose.z + pose.x * Math.sin(pose.yaw));
+      if (pose.seat !== null) seatGrassy(player, pose.seat.time, pose.seat.dt, pose.seat.typing);
     },
   });
   // 返程穿梭层趁加载时隐藏着建好：新建渲染器会卡一两秒，留到飞走那一刻会把急加速冻住。

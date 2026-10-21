@@ -53,7 +53,8 @@ import { BENCH_SAMPLES, benchRegion, createBench, parseBench } from './bench.ts'
 import { createWorldLighting, installLightShafts } from './lighting-wiring.ts';
 import { createEnvironmentViews, facilityWeather } from './precip-wiring.ts';
 import { levelGroundColumns } from '../../render/decor/surface-decor-view.ts';
-import { AI_CITY_HARBOR_LOOK, AI_CITY_RESIDENCE_LOOK, BUILDING_SCENE_TUNING, WILDS_LOOK } from '../../config/ai-city-look.ts';
+import { WILDS_LOOK } from '../../config/ai-city-look.ts';
+import { RESIDENCE_VARIANTS } from '../../config/residence.ts';
 import { CITY_DEPTH } from '../../config/depth-layers.ts';
 import { CITY_LANDING_EXIT } from '../../sim/city.ts';
 import { loadCity } from '../city/city-save.ts';
@@ -153,7 +154,9 @@ export async function start(run: GameRun, page: PageContext, story: StorySave | 
   const freeWorld = city === null && (story?.destination === 'free' || (!story && params.get('level') === null));
   // 家园概念版本建在主世界地形上，但不使用主世界的工具条和网址改写。
   const homesteadMode = !story && city === null && params.get('mode') === 'homestead';
+  // 主世界城区：右端进原野、GM、世界工具条与返程着陆只属于它，其余城区变体只换变体表里的地图、背景与外观。
   const harborCity = city?.variant === 'harbor';
+  const cityConfig = cityVariant === null ? null : RESIDENCE_VARIANTS[cityVariant];
   const mainWorld = parseMainWorldParams(params);
   const { seed, size } = mainWorld;
   const gm = (freeWorld || harborCity) && mainWorld.gm;
@@ -166,11 +169,11 @@ export async function start(run: GameRun, page: PageContext, story: StorySave | 
   const regions = chapter === null && freeWorld ? freeWorldRegions(level, ground) : [];
   const destination = regions.find(item => item.id === region);
   if (freeWorld && chapter === null && !destination) throw new Error(`当前世界不存在区域：${region}`);
-  const tuning = city ? BUILDING_SCENE_TUNING : chapter === null ? TUNING : facilityGameTuning();
+  const tuning = cityConfig ? cityConfig.tuning : chapter === null ? TUNING : facilityGameTuning();
   const syncTitle = (): void => {
     document.title = story?.destination === 'fortress' ? t('主线 1 · 山体算力堡垒')
       : harborCity ? `${t('主世界 · 城区')} · ${t('鹈鹕 429')}`
-      : city ? `${t('AI 住宅')} · ${t('建造与游玩')}`
+      : cityConfig ? `${t(cityConfig.title)} · ${t('建造与游玩')}`
       : homesteadMode ? `${t('家园概念版本')} · ${t('鹈鹕 429')}`
       : freeWorld ? `${t('主世界 · 原野')} · ${t(FREE_WORLD_SIZES[size].label)} · ${t('鹈鹕 429')}`
       : chapter !== null ? `${t(FACILITY_SCENES[chapter].name, 'facility')} · ${t('自由预览')}`
@@ -366,14 +369,14 @@ export async function start(run: GameRun, page: PageContext, story: StorySave | 
   const devCamera = devCameraModule && devCameraModule.createDevCamera(stage, cameraRig, tuning);
   if (devCamera !== null) disposers.push(devCamera.dispose);
   // 主世界原野与城区、其他场景共用同一条场景工具条，昼夜跟随它的世界时间；家园沿用自己的经济时钟。
-  const sceneBar = freeWorld && !homesteadMode || city ? createSceneToolbar(t(city?.variant === 'original' ? 'AI 住宅' : '主世界')) : null;
+  const sceneBar = freeWorld && !homesteadMode || city ? createSceneToolbar(t(cityConfig?.title ?? '主世界')) : null;
   if (sceneBar !== null) disposers.push(sceneBar.dispose);
   const clock = world.homestead ? world.homestead.economy : sceneBar?.time;
   // 昼夜：日月星在预热前加入场景，随首帧一起编译上传；建在降水层之前，降水层记下的调色已是城区大气的。
   let daylight: Daylight | null = null;
   if (clock) {
     if (!city && !background) throw new Error('game-app: free-world daylight requires the free-world background');
-    const look = city ? (harborCity ? AI_CITY_HARBOR_LOOK : AI_CITY_RESIDENCE_LOOK) : WILDS_LOOK;
+    const look = cityConfig ? cityConfig.look : WILDS_LOOK;
     daylight = createDaylight({ stage, look, clock, openSky: background ? () => background.environment.sky : () => 1 });
     disposers.push(daylight.dispose);
   }
@@ -585,7 +588,7 @@ export async function start(run: GameRun, page: PageContext, story: StorySave | 
     // 城区一侧只用于工具条跳转，网址 region 参数仍只接受原野区域；主线原野不列出，避免跳出主线。
     const citySide = story ? [] : [{ id: 'city', label: '城区', labelEn: 'City' }, { id: 'transit', label: '星舰交通中心', labelEn: 'Starship transit hub' }] as const;
     const build = createBuildButton(cityFeature, () => world.podLanding !== null || transitBusy());
-    disposers.push(build.dispose, onLanguageChange(() => sceneBar.setTitle(t(city?.variant === 'original' ? 'AI 住宅' : '主世界'))));
+    disposers.push(build.dispose, onLanguageChange(() => sceneBar.setTitle(t(cityConfig?.title ?? '主世界'))));
     sceneBar.attach(bar!);
     const mapEvents = new AbortController();
     disposers.push(() => mapEvents.abort());
@@ -654,7 +657,8 @@ export async function start(run: GameRun, page: PageContext, story: StorySave | 
     projectileFx, gpu, prof, settings: () => settings.current(), time: sceneBar!.time });
   const loop = createFrameLoop({ world, level, stage, cameraRig, tracker, controls, input, stepper, pour, entityViews, luma, worldViews, env, shafts, lighting, hud, weaponHud, gameHud, minimap, settings, settingsPanel, perfPanel, prof, gpu, bench,
     resolution: bench === null ? createResolutionGovernor(TUNING.render.lighting.dynamicResolution, stage.renderer.getPixelRatio()) : null, facility, lander, chapterHud, audio, devCamera,
-    features: [cityPresentation, cityFeature, transitStation].filter((feature): feature is GameFeature & { dispose(): void } => feature !== null) });
+    // 交通中心乘坐时接管镜头，城区表现在它之后更新，环境按定下的镜头取景。
+    features: [cityFeature, transitStation, cityPresentation].filter((feature): feature is GameFeature & { dispose(): void } => feature !== null) });
   const arenaHud = bossArena ? createBossArenaHud(document.body, world, kind => {
     tracker.releaseAll();
     summonArenaBoss(world, kind);

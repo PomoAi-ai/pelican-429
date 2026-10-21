@@ -24,6 +24,8 @@ export interface DaylightLook {
   readonly celestialRadius: number;
   // 日月起落线在画面中的高度（0 底、1 顶），按远景天际线设定。
   readonly celestialHorizon: number;
+  // 日月盘直径相对默认画面占比的倍数。
+  readonly celestialDiskScale: number;
   readonly atmosphere: DaylightAtmosphere | null;
 }
 
@@ -78,6 +80,7 @@ export const AI_CITY_LOOK = {
   night: { key: .3, hemi: .3, rim: .2, environment: .07 },
   celestialRadius: 700,
   celestialHorizon: .45,
+  celestialDiskScale: 1,
   atmosphere: CITY_ATMOSPHERE,
 } as const satisfies DaylightLook;
 
@@ -111,6 +114,9 @@ export const AI_CITY_RESIDENCE_LOOK: DaylightLook = {
 export const AI_CITY_HARBOR_LOOK: DaylightLook = { ...AI_CITY_LOOK, keyIntensity: 2.2, hemiIntensity: .85, environmentIntensity: .3,
   celestialHorizon: .52 };
 
+// AI 住宅 3、4 沿用住宅 2 的光照，远景构图更开阔，日月盘缩小以免压过天际线。
+export const AI_CITY_THREE_LOOK: DaylightLook = { ...AI_CITY_HARBOR_LOOK, celestialDiskScale: .22 };
+
 // 原野白天值即舞台按调参建出的灯光，正午画面与不接昼夜时相同；地面反弹与边光不随昼夜换色，天空与雾由原野背景负责。
 const WILDS_RENDER = TUNING.render;
 export const WILDS_LOOK: DaylightLook = {
@@ -129,6 +135,7 @@ export const WILDS_LOOK: DaylightLook = {
     environment: .18 * WILDS_RENDER.envIntensity },
   celestialRadius: 180,
   celestialHorizon: .5,
+  celestialDiskScale: 1,
   atmosphere: null,
 };
 

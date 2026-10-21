@@ -1,13 +1,13 @@
 /**
  * 城区世界：住宅布局写进格子世界（住宅坐标 + CITY_ORIGIN = 格子坐标），以及建造命令、门与太阳能板的逐 tick 推进、
- * 出生点与存档快照。主世界城区（harbor）带两层地下长廊，并在用地上放交通中心（街面板与舰体、甲板、电梯）；
- * 原版住宅（original）保留旧布局。
+ * 出生点与存档快照。初始布局与交通中心用地来自变体的地图（CITY_MAPS）：harbor 地图带两层地下长廊，并在用地上放
+ * 交通中心（街面板与舰体、甲板、电梯）；residence 地图是原版住宅的旧布局。
  */
 import type { DefinitionDepthMode } from '../config/definition-kit.ts';
 import { GRASSY_HEIGHT } from '../config/grassy.ts';
 import {
   CITY_MAP, CITY_ORIGIN, getResidenceResource, RESIDENCE_SEGMENT_WIDTH, RESIDENCE_SEGMENTS, RESIDENCE_SUN, RESIDENCE_TRANSIT,
-  RESIDENCE_WORLD, residenceWallResource, type ResidenceVariant,
+  RESIDENCE_VARIANTS, RESIDENCE_WORLD, residenceWallResource, type CityMapId, type ResidenceVariant,
 } from '../config/residence.ts';
 import { TRANSIT, TRANSIT_LANDING } from '../config/transit.ts';
 import { TUNING } from '../config/tuning.ts';
@@ -33,7 +33,7 @@ type CityBuildCommand =
 export interface CityState {
   readonly variant: ResidenceVariant;
   readonly building: BuildingState;
-  /** 主世界城区的交通中心；原版住宅没有。 */
+  /** 地图带交通中心用地时的交通中心；原版住宅没有。 */
   readonly transit: TransitStation | null;
   /** 建造模式：世界冻结，stepSim 只应用建造命令。由建造界面切换。 */
   editing: boolean;
@@ -60,10 +60,10 @@ export const cityY = (y: number): number => y + CITY_ORIGIN.y;
 const FOUNDATION_TOP = cityY(RESIDENCE_WORLD.foundationTop);
 const GROUND_TOP = cityY(RESIDENCE_WORLD.groundTop);
 
-function citySite(variant: ResidenceVariant): BuildingSite {
+function citySite(map: CityMap): BuildingSite {
   return {
     minX: 0, maxX: CITY_MAP.width, bottom: 0, top: cityY(RESIDENCE_WORLD.height), foundationTop: FOUNDATION_TOP,
-    reserved: variant === 'harbor' ? { minX: cityX(RESIDENCE_TRANSIT.minX), maxX: cityX(RESIDENCE_TRANSIT.maxX) } : null,
+    reserved: map.transit ? { minX: cityX(map.transit.minX), maxX: cityX(map.transit.maxX) } : null,
   };
 }
 
@@ -243,15 +243,33 @@ const PAVING: TilePiece = { id: TILE_PAVING, shape: pieceShapeCode('B'), deep: f
  * 交通中心：用地地面一排写成街面板（B 半砖，正好铺满用地，下面的地下照常可挖），舰体、甲板与电梯进特殊构件层。
  * 读档时同样重铺：街面板不是建造构件，旧存档在这一排留下的方石一并替换。
  */
-function installTransit(state: BuildingState): TransitStation {
+function installTransit(state: BuildingState, transit: typeof RESIDENCE_TRANSIT): TransitStation {
   const { map } = state;
   const site = state.site.reserved!;
   for (let tx = site.minX; tx < site.maxX; tx++) {
     while (map.pieces(tx, FOUNDATION_TOP).length > 0) map.removePiece(tx, FOUNDATION_TOP, 0);
     map.placePiece(tx, FOUNDATION_TOP, PAVING);
   }
-  return addTransitStation(map.parts, { x: cityX(RESIDENCE_TRANSIT.origin.x), y: cityY(RESIDENCE_TRANSIT.origin.y) });
+  return addTransitStation(map.parts, { x: cityX(transit.origin.x), y: cityY(transit.origin.y) });
 }
+
+/**
+ * 城区地图：新建城区时的默认地形与布局，以及交通中心用地。快照记录整张格子，读档只用地图的用地与交通中心；
+ * 存档键按变体区分，快照里不存地图 id，所以变体换地图时要同时换存档键，旧档不迁移。
+ */
+interface CityMap {
+  /** 交通中心用地与原点（住宅坐标）；null 为没有交通中心。 */
+  readonly transit: typeof RESIDENCE_TRANSIT | null;
+  /** 在无用地的草稿场地上铺默认地形与布局。 */
+  readonly build: (draft: BuildingState) => void;
+}
+
+const CITY_MAPS: Readonly<Record<CityMapId, CityMap>> = {
+  residence: { transit: null, build: draft => { fillGround(draft); addResidence(draft); } },
+  harbor: { transit: RESIDENCE_TRANSIT, build: draft => { fillGround(draft); addResidence(draft); addBasement(draft); } },
+};
+
+export const cityMap = (variant: ResidenceVariant): CityMap => CITY_MAPS[RESIDENCE_VARIANTS[variant].map];
 
 function cityLevel(state: BuildingState): LevelData {
   const { map } = state;
@@ -262,17 +280,16 @@ function cityLevel(state: BuildingState): LevelData {
   };
 }
 
-/** 默认城区：地下、住宅布局；主世界城区另加地下长廊，清出用地放交通中心。 */
+/** 默认城区：按变体的地图铺地形与布局；地图带交通中心用地时清出用地放交通中心。 */
 export function createCity(variant: ResidenceVariant): CityWorld {
+  const plan = cityMap(variant);
   const map = createTileMap(CITY_MAP.width, CITY_MAP.height, DEFAULT_TILES);
   // 先按无用地的场地铺默认布局，布局里落在用地内的构件随后清掉（与交通中心并入前的住宅存档一致）。
-  const draft = createBuildingState(map, { ...citySite(variant), reserved: null }, solarTrackingAngle(RESIDENCE_SUN));
-  fillGround(draft);
-  addResidence(draft);
-  if (variant === 'harbor') addBasement(draft);
-  const state: BuildingState = { ...draft, site: citySite(variant), revision: 0 };
-  if (variant === 'harbor') clearSite(state);
-  const transit = variant === 'harbor' ? installTransit(state) : null;
+  const draft = createBuildingState(map, { ...citySite(plan), reserved: null }, solarTrackingAngle(RESIDENCE_SUN));
+  plan.build(draft);
+  const state: BuildingState = { ...draft, site: citySite(plan), revision: 0 };
+  if (plan.transit) clearSite(state);
+  const transit = plan.transit ? installTransit(state, plan.transit) : null;
   state.revision = 0;
   return { level: cityLevel(state), city: cityState(variant, state, transit) };
 }
@@ -300,8 +317,9 @@ const TOKEN = /^(\d+)\.(\d+)(d?)$/;
 /** 按快照重建城区；内容非法（未知块、重叠、违反建造规则）即抛，调用方保留原存档。 */
 export function restoreCity(variant: ResidenceVariant, snapshot: CitySnapshot): CityWorld {
   const invalid = (what: string): never => { throw new Error(`城区存档无效：${what}，原存档已保留。`); };
+  const plan = cityMap(variant);
   const map = createTileMap(CITY_MAP.width, CITY_MAP.height, DEFAULT_TILES);
-  const state = createBuildingState(map, citySite(variant), solarTrackingAngle(RESIDENCE_SUN));
+  const state = createBuildingState(map, citySite(plan), solarTrackingAngle(RESIDENCE_SUN));
   const parsed = new Map<string, TilePiece[]>();
   const piecesOf = (token: string): TilePiece[] => {
     const known = parsed.get(token);
@@ -338,7 +356,7 @@ export function restoreCity(variant: ResidenceVariant, snapshot: CitySnapshot): 
     if (open) toggleDoor(state, [...state.specials.values()].at(-1)!, null);
   }
   for (const [resourceId, x, y] of snapshot.objects) place(resourceId, x, y);
-  const transit = variant === 'harbor' ? installTransit(state) : null;
+  const transit = plan.transit ? installTransit(state, plan.transit) : null;
   state.revision = 0;
   return { level: cityLevel(state), city: cityState(variant, state, transit) };
 }
@@ -379,10 +397,14 @@ export function findCitySpawn(state: BuildingState, preferredX?: number): { x: n
   throw new Error('住宅没有安全入口：请保留至少一处有支撑、净高 3.1 格的站立空间。原存档不会被清空。');
 }
 
-/** 城区入口：from=wilds 在城区右端，from=transit 在交通中心街面旁；其余为默认入口。 */
+/** 城区入口：from=wilds 在城区右端，from=transit 在交通中心街面旁（地图没有交通中心时抛错）；其余为默认入口。 */
 export function cityEntrySpawn(city: CityState, from: 'wilds' | 'transit' | null): { x: number; y: number } {
   if (from === 'wilds') return findCitySpawn(city.building, cityX(RESIDENCE_WORLD.maxX - 8));
-  if (from === 'transit') return findCitySpawn(city.building, cityX(RESIDENCE_TRANSIT.origin.x + TRANSIT.spawnX));
+  if (from === 'transit') {
+    const transit = cityMap(city.variant).transit;
+    if (transit === null) throw new Error(`from=transit 只能用于带交通中心的城区：${city.variant}`);
+    return findCitySpawn(city.building, cityX(transit.origin.x + TRANSIT.spawnX));
+  }
   return findCitySpawn(city.building);
 }
 

@@ -247,13 +247,13 @@ interface LightNodeParts {
   /** 加阴影前的光色（AnalyticLightNode.setupShadow 之后才有）。 */
   readonly baseColorNode: N | null;
 }
-interface DirectData {
+export interface DirectData {
   readonly lightDirection: N;
   readonly lightColor: N;
   readonly lightNode: LightNodeParts;
   readonly reflectedLight: { readonly directDiffuse: N };
 }
-interface LightingModelParts {
+export interface LightingModelParts {
   start(builder: NodeBuilder): void;
   direct(data: DirectData, builder: NodeBuilder): void;
   indirect(builder: NodeBuilder): void;

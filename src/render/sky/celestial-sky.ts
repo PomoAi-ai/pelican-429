@@ -76,7 +76,7 @@ export function keyLightDirection(sunDirection: Direction, sunPower: number, moo
  * horizonLine 是起落线在画面中的高度（0 底、1 顶），按各场景远景的地平线设定。
  * setSunDirection 仍按世界方向摆放，供检查页手动控制。距离只控制遮挡，尺寸由画面占比决定。
  */
-export function createCelestialSky({ radius = 700, horizonLine = .45 } = {}) {
+export function createCelestialSky({ radius = 700, horizonLine = .45, diskScale = 1 } = {}) {
   const view = { tan: 0, aspect: 0 };
   /** 画面坐标：x −1..1 为左右边缘，f 0..1 为底到顶。 */
   const onScreen = (target: THREE.Vector3, x: number, f: number): THREE.Vector3 =>
@@ -183,7 +183,7 @@ export function createCelestialSky({ radius = 700, horizonLine = .45 } = {}) {
         bodies[0]!.position.copy(manualSun).applyQuaternion(toSky).normalize().multiplyScalar(radius);
         bodies[1]!.position.copy(MANUAL_MOON).applyQuaternion(toSky).normalize().multiplyScalar(radius);
       }
-      const diameter = 2 * radius * tan * .1;
+      const diameter = 2 * radius * tan * .1 * diskScale;
       // 纹理中的实体圆直径为画布的 5/8，补偿透明边距以保持日月大小。
       for (const body of bodies) body.scale.setScalar(diameter / .625);
     },

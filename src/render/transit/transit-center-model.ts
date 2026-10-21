@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { LANDING_POD, TRANSIT, TRANSIT_HATCH, TRANSIT_LANDING, TRANSIT_PLANTER_X, TRANSIT_HULL_PROFILE, profileRadiusAt, transitHullRadiusAt } from '../../config/transit.ts';
 import { createTransitCenterFx } from './transit-center-fx.ts';
+import { COCKPIT_SEAT, createCockpitInterior } from './transit-cockpit.ts';
 import { glslShort as g, glslVec3 as v3 } from './transit-exhaust.ts';
 import { createTransitSurface } from './transit-surface.ts';
 import type { Stage, StageRenderer } from '../stage/stage.ts';
@@ -316,30 +317,16 @@ export function createCrewSection(rocket: THREE.Group, p: Palette) {
   const floorRadius = transitHullRadiusAt(floor) - .05;
   const cabinFloor = mesh(rocket, new THREE.CylinderGeometry(floorRadius, floorRadius, .16, 64), p.dark, 'circular cabin interior floor');
   cabinFloor.position.y = floor - .08;
-  box(rocket, 'cabin rear acoustic wall', [0, 20.06, -1.53], [3.1, 3.35, .16], p.cushion, .18);
-  box(rocket, 'pressure cabin overhead light', [0, 21.95, .35], [2.9, .07, .48], p.amber, .03);
-  box(rocket, 'flight seat back', [0, 20.0, .62], [1.3, 1.85, .3], p.cushion, .2);
-  box(rocket, 'flight seat headrest', [0, 21.02, .73], [.87, .55, .33], p.dark, .16);
-  box(rocket, 'flight seat cushion', [0, 19.13, 1.05], [1.35, .24, 1.2], p.cushion, .12);
-  for (const side of [-1, 1]) box(rocket, 'seat side bolster', [side * .72, 19.72, 1.0], [.15, .18, .85], p.silver, .05);
-  const console = box(rocket, 'flight control console', [0, 19.82, 2.1], [2.5, .28, .54], p.dark, .12);
-  console.rotation.x = .22;
-  for (const x of [-.8, 0, .8]) {
-    const display = box(rocket, 'flight display', [x, 20.02, 2.1], [.62, .06, .4], p.cyan, .035);
-    display.rotation.x = .22;
-  }
+  createCockpitInterior(rocket, p);
   return createSlidingHatch(rocket, p);
 }
 
 function createCabin(rocket: THREE.Group, p: Palette) {
   const boardingHatch = createCrewSection(rocket, p);
   const cabinAnchor = new THREE.Object3D();
-  cabinAnchor.name = 'pilot foot anchor';
-  cabinAnchor.position.set(TRANSIT.seatX - TRANSIT.rocketX, TRANSIT.seatY, 1.5);
+  cabinAnchor.name = 'pilot seat anchor';
+  cabinAnchor.position.set(TRANSIT.seatX - TRANSIT.rocketX, COCKPIT_SEAT.y, COCKPIT_SEAT.z);
   rocket.add(cabinAnchor);
-  const light = new THREE.PointLight(0xffdcaa, 12, 5, 2);
-  light.position.set(0, 21.8, 2.2);
-  rocket.add(light);
   return { ...boardingHatch, cabinAnchor };
 }
 

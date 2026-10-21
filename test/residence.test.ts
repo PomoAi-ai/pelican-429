@@ -9,7 +9,7 @@ import {
   buildingItemAt, buildingItemsIn, checkBuilding, createBuildingState, placeBuilding, removeBuilding, toggleDoor,
   type BuildingItem, type BuildingState,
 } from '../src/sim/building.ts';
-import { captureCity, cityX, cityY, createCity, findCitySpawn, restoreCity, stepCity, trackCitySun, type CityState } from '../src/sim/city.ts';
+import { captureCity, cityEntrySpawn, cityX, cityY, createCity, findCitySpawn, restoreCity, stepCity, trackCitySun, type CityState } from '../src/sim/city.ts';
 import { createSimWorld, getPlayer, NEUTRAL_INPUT, setCitySunAngle, stepSim } from '../src/sim/sim-world.ts';
 import { createFluidMap } from '../src/world/fluid-map.ts';
 import { LIGHT_STRIP, MEDIUM_DOOR, MEDIUM_PLATFORM, MEDIUM_SOLID, type LightField } from '../src/world/light-field.ts';
@@ -407,6 +407,13 @@ test('完全封死的城区找不到入口时明确报错，不修改原布局',
   assert.equal(snapshot(state), before);
 });
 
+test('from=transit 只在带交通中心的城区落在交通中心旁，没有交通中心的城区明确报错', () => {
+  assert.throws(() => cityEntrySpawn(createCity('original').city, 'transit'), /from=transit 只能用于带交通中心的城区：original/);
+  const { minX, maxX } = createCity('harbor').city.building.site.reserved!;
+  const spawn = cityEntrySpawn(createCity('harbor').city, 'transit');
+  assert.ok(spawn.x >= minX - 2 && spawn.x <= maxX + 2, `${spawn.x} / ${minX}..${maxX}`);
+});
+
 // 漏清用地会让人物踩在交通中心街面之上的旧构件里，误删用地外或地下格会破坏城区与地下室。
 test('交通中心用地清除地面及以上构件、地面铺街面板，保留用地外与地下格，地面以上禁建、地下可建', () => {
   const state = createCity('harbor').city.building;
@@ -428,7 +435,7 @@ test('交通中心用地清除地面及以上构件、地面铺街面板，保�
 });
 
 // 存档丢了门状态、加深规格或拆建记录，读档后的城区就与离开时不同。
-test('城区存档往返保留建造、拆除、加深与门状态，原版住宅与主世界城区互不覆盖', () => {
+test('城区存档往返保留建造、拆除、加深与门状态，四个城区变体互不覆盖', () => {
   const store = storage();
   store.values.set('pelican-homestead:42', '{"version":2,"old":"unchanged"}');
   const harbor = createCity('harbor').city;
@@ -441,11 +448,22 @@ test('城区存档往返保留建造、拆除、加深与门状态，原版住�
   const original = createCity('original').city;
   ok(placeBuilding(original.building, 'wall', cityX(12), cityY(4), null));
   saveCity(store, original);
+  const three = createCity('three').city;
+  ok(placeBuilding(three.building, 'wall', cityX(146), cityY(4), null));
+  saveCity(store, three);
+  const four = createCity('four').city;
+  ok(placeBuilding(four.building, 'bed', cityX(150), cityY(1.5), null));
+  saveCity(store, four);
   const loaded = loadCity(store, 'harbor');
   assert.equal(loaded.discarded, false);
   assert.deepEqual(captureCity(loaded.world.city), captureCity(harbor));
   assert.equal(placeBuilding(loaded.world.city.building, 'wall', cityX(140), cityY(3), null).ok, false);
   assert.deepEqual(captureCity(loadCity(store, 'original').world.city), captureCity(original));
+  assert.deepEqual(captureCity(loadCity(store, 'three').world.city), captureCity(three));
+  assert.deepEqual(captureCity(loadCity(store, 'four').world.city), captureCity(four));
+  // 交通中心随地图：住宅 3、4 沿用主世界城区的地图，读档后同样带交通中心；原版住宅没有。
+  for (const variant of ['harbor', 'three', 'four'] as const) assert.notEqual(loadCity(store, variant).world.city.transit, null, variant);
+  assert.equal(loadCity(store, 'original').world.city.transit, null);
   assert.equal(store.values.get('pelican-homestead:42'), '{"version":2,"old":"unchanged"}');
 });
 

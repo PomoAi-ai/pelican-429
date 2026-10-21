@@ -13,7 +13,7 @@
   | `mode` | `game`、`homestead`、`story`、`controls` 等 | 选页面；不带 `mode` 但带 `level` 或 `seed` 时按 `game` |
   | `level` | `test`、`composition`、`facility`、`boss-arena` | 选世界；`mode=game` 不带 `level` 是主世界城区。`composition` 另需 `composition`，可带 `material`、`environment` |
   | `free=1` | — | 主世界原野，不能与 `level` 同用 |
-  | `scene` | 机房章节；原野区域；`mode=homestead` 下的 `residence` | 机房章节、原野出生区域（也可写 `region`），或家园页的原版住宅城区 |
+  | `scene` | 机房章节；原野区域；`mode=homestead` 下的 `residence`、`residence-3`、`residence-4` | 机房章节、原野出生区域（也可写 `region`），或家园页的住宅城区（原版住宅、AI 住宅 3、AI 住宅 4） |
   | `seed`、`size`、`gm` | 种子；`small`/`medium`/`large`；`0`/`1` | 主世界的种子、规模与 GM，城区与原野之间往返时保留 |
   | `inspect` | 地形组合的起点 x | 原野出生在该地形定位点 |
   | `from` | `wilds`、`transit` | 城区入口：右端或交通中心街面 |
@@ -36,6 +36,7 @@
   - 摆放物件层（同上）：家具承托面、光源等按半格对齐摆放的物件。
   - 特殊构件层（`world/special-parts.ts` 的 `SpecialParts`）：门、太阳能板、舰体、电梯、甲板等自带碰撞、状态按 tick 推进的构件。
 - 城区与交通中心不是另一套运行时，而是格子世界里的块、墙、物件与特殊构件（`sim/building.ts`、`sim/city.ts`、`sim/transit.ts`）。
+- 住宅城区（原版住宅、AI 住宅 3、4）是主世界城区的变体：同一套模拟、建造、光照、天气与交通中心实现，差异只在变体表（`config/residence.ts`）里的地图（初始地形、布局、地下长廊与交通中心用地，由 `sim/city.ts` 的地图表建出）、背景环境、外观参数、取景与存档键；右端进原野、世界工具条与返程着陆只属于主世界城区。
 - 碰撞几何用块的精确多边形（`world/collision-geometry.ts` 收集，`physics/tile-collision.ts` 求解，只此一个求解器）；派生的 1/4 子格掩码是碰撞粗筛、光照、流体、视线、小地图共用的最小单位。流体以子格为存储与流动单位（`world/fluid-map.ts`），光场以子格为单位按区块增量重算并分摊到多帧（`world/light-field.ts`）。理由：精确多边形保证坡面、台阶与下穿手感，共用栅格让各系统对“哪里是实心”给出同一答案。
 - 背景格子、远景与前景格子只显示、不参与碰撞。层距默认用 depth-definitions 的方案 G，每个世界可给自己的层距表（`config/depth-layers.ts`，背景层由 `render/backdrop/` 按层表摆放）。近景（比建设层更靠近镜头的前景格子层）在所有世界都做模糊，参数按 depth-definitions 执行，WebGL 与 WebGPU 两种后端都要实现，保证同一画面不因后端而变。
 

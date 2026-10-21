@@ -14,7 +14,7 @@ import { SETTING_DEFS, SETTING_GROUPS } from '../src/config/game-settings.ts';
 import * as GRASSY from '../src/config/grassy.ts';
 import { LUMA, LUMA_ACTIONS } from '../src/config/luma.ts';
 import { NPCS, NPC_ACTIONS } from '../src/config/npc.ts';
-import { RESIDENCE_MATERIALS, RESIDENCE_RESOURCES, RESIDENCE_SEGMENTS } from '../src/config/residence.ts';
+import { RESIDENCE_MATERIALS, RESIDENCE_RESOURCES, RESIDENCE_SEGMENTS, RESIDENCE_VARIANTS } from '../src/config/residence.ts';
 import { ROCK_TERRAIN_SCENES } from '../src/config/rock-terrain.ts';
 import { SCENE_DEMOS } from '../src/config/scene-demos.ts';
 import { CHARACTER_CATALOG, CHARACTER_HISTORY_CATALOG, MODEL_SHOWCASE_VIEWS } from '../src/config/showcase.ts';
@@ -84,6 +84,7 @@ test('英文模式下所有界面数据文本都有译文', () => {
     ['weather-rules', [...Object.values(WIND_LABELS), ...Object.values(SCENE_WEATHER_LABELS)]],
     ['ai-city-look', fields(AI_CITY_LAYERS, ['label'])],
     ['residence materials', Object.values(RESIDENCE_MATERIALS)],
+    ['residence variants', Object.values(RESIDENCE_VARIANTS).map((variant) => variant.title)],
     // 资源选择器按组显示，实体砖组名去掉“块”字（ui/panels/resource-picker.tsx）。
     ['residence groups', RESIDENCE_RESOURCES.flatMap((resource) => resource.kind === 'solid' ? [resource.group, resource.group.replace(/块$/, '')] : [resource.group])],
     ['residence segments', RESIDENCE_SEGMENTS.map((segment) => segment.label)],

@@ -1,7 +1,8 @@
 import type { ResidenceVariant } from '../../config/residence.ts';
 import { captureCity, createCity, restoreCity, type CitySnapshot, type CityState, type CityWorld } from '../../sim/city.ts';
 
-const SAVE_KEYS: Readonly<Record<ResidenceVariant, string>> = { harbor: 'pelican-city:v1', original: 'pelican-city-original:v1' };
+const SAVE_KEYS: Readonly<Record<ResidenceVariant, string>> = { harbor: 'pelican-city:v1', original: 'pelican-city-original:v1',
+  three: 'pelican-city-three:v1', four: 'pelican-city-four:v1' };
 /** 住宅时代按旧构件表保存的布局：城区并入格子世界后不迁移，读到即删除并提示。 */
 const LEGACY_KEYS = ['pelican-residence:v1', 'pelican-residence-harbor:v1', 'pelican-residence-harbor:v2'] as const;
 

@@ -62,7 +62,29 @@ export type NodePatch =
   | { readonly kind: 'furniture-fabric' }
   | { readonly kind: 'ai-city-finish'; readonly finish: 'ceramic' | 'wall' | 'ashlar' | 'alloy'; readonly variation: readonly [tone: number, warmth: number, roughness: number] }
   | { readonly kind: 'gate-dissolve'; readonly dissolve: Scalar }
-  | { readonly kind: 'harbor-shore-haze'; readonly near: Scalar; readonly color: THREE.IUniform<THREE.Color>; readonly halfDistance: number };
+  | { readonly kind: 'harbor-curtain-wall' }
+  | { readonly kind: 'harbor-shore-haze'; readonly near: Scalar; readonly color: THREE.IUniform<THREE.Color>; readonly halfDistance: number }
+  /** 住宅 3、4 的视距空气（色调映射前混合）；low 为住宅 4 贴近河面（世界 y = level）的低空雾。 */
+  | {
+      readonly kind: 'residence-air';
+      readonly air: THREE.IUniform<THREE.Color>;
+      readonly density: Scalar;
+      readonly start: number;
+      readonly scale: number;
+      readonly power: number;
+      readonly low: { readonly level: Scalar } | null;
+    }
+  /** 住宅 4 材质图集按世界尺寸三向投影；atlas 在环境 prepare 后才有值。 */
+  | {
+      readonly kind: 'river-surface';
+      readonly atlas: THREE.IUniform<THREE.Texture | null>;
+      readonly origin: readonly [number, number];
+      readonly size: number;
+      readonly strength: number;
+      readonly gain: number;
+    }
+  /** 住宅 4 河城太阳深度图阴影（matrix：世界 → 深度图 [0, 1]³）。 */
+  | { readonly kind: 'river-sun-shadow'; readonly matrix: THREE.IUniform<THREE.Matrix4>; readonly depth: THREE.DepthTexture; readonly size: number };
 
 const registry = new WeakMap<THREE.Material, NodePatch[]>();
 

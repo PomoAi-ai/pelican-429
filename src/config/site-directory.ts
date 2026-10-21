@@ -31,6 +31,9 @@ export interface SiteSection {
 }
 
 const mode = ({ searchParams: params }: URL): string | null => params.get('mode') ?? (params.has('level') || params.has('seed') ? 'game' : null);
+// 家园页的住宅城区场景（与 config/residence 的变体表 scene 一致，由测试核对）；导航不引入变体表，免得连带加载调参。
+const RESIDENCE_SCENES: readonly (string | null)[] = ['residence', 'residence-3', 'residence-4'];
+const homestead = (scene: string) => (url: URL): boolean => mode(url) === 'homestead' && url.searchParams.get('scene') === scene;
 const chapter = (scene: string) => (url: URL): boolean =>
   mode(url) === 'game' && url.searchParams.get('level') === 'facility' && (url.searchParams.get('scene') ?? 'fortress') === scene;
 
@@ -79,8 +82,10 @@ export const SITE_SECTIONS: readonly SiteSection[] = [
       { id: 'free-world', label: ['主世界', 'Main world'], description: ['从 AI 城区出发，左有星舰交通中心，向右走进按种子生成的原野。', 'Start in the AI city: the Starship transit hub on the left, seeded wilds to the right.'], href: './?mode=game',
         match: url => mode(url) === 'game' && url.searchParams.get('level') === null },
       { id: 'story', label: ['主线', 'Story'], description: ['序章到山体算力堡垒，含守卫与首领战。', 'From the prelude to the Mountain Compute Fortress, with guards and boss fights.'], href: './?mode=story', match: url => mode(url) === 'story' },
-      { id: 'homestead', label: ['家园', 'Homestead'], description: ['家园概念版：人形探索、机器人生产、电力与算力。', 'Homestead concept: exploration, robots, power and compute.'], href: './?mode=homestead', match: url => mode(url) === 'homestead' && url.searchParams.get('scene') !== 'residence' },
-      { id: 'residence', label: ['住宅建造', 'Home building'], description: ['用白蓝建筑格、能量门与生活设施搭建自己的 AI 住宅。', 'Build an AI home with white and blue blocks, energy doors and furnishings.'], href: './?mode=homestead&scene=residence', match: url => mode(url) === 'homestead' && url.searchParams.get('scene') === 'residence' },
+      { id: 'homestead', label: ['家园', 'Homestead'], description: ['家园概念版：人形探索、机器人生产、电力与算力。', 'Homestead concept: exploration, robots, power and compute.'], href: './?mode=homestead', match: url => mode(url) === 'homestead' && !RESIDENCE_SCENES.includes(url.searchParams.get('scene')) },
+      { id: 'residence', label: ['住宅建造', 'Home building'], description: ['用白蓝建筑格、能量门与生活设施搭建自己的 AI 住宅。', 'Build an AI home with white and blue blocks, energy doors and furnishings.'], href: './?mode=homestead&scene=residence', match: homestead('residence') },
+      { id: 'residence-3', label: ['AI 住宅 3', 'AI residence 3'], description: ['江景街区里的 AI 住宅：远城、列车与薄云，同一套建造与交通中心。', 'An AI home on a riverside block with a distant city, trains and thin clouds; same building and transit hub.'], href: './?mode=homestead&scene=residence-3', match: homestead('residence-3') },
+      { id: 'residence-4', label: ['AI 住宅 4', 'AI residence 4'], description: ['河城高台上的 AI 住宅，同一套建造与交通中心。', 'An AI home on a terrace above a river city; same building and transit hub.'], href: './?mode=homestead&scene=residence-4', match: homestead('residence-4') },
     ], [
       { id: 'fortress', label: ['01 山体算力堡垒', '01 Mountain Compute Fortress'], description: ['三层机房与屋顶冷却阵列。', 'Server floors and rooftop cooling.'], href: './?mode=game&level=facility&scene=fortress', match: chapter('fortress') },
       { id: 'cathedral', label: ['02 算力大教堂', '02 Compute Cathedral'], description: ['五组算力塔围绕中央大厅。', 'Five compute towers around a central hall.'], href: './?mode=game&level=facility&scene=cathedral', match: chapter('cathedral') },

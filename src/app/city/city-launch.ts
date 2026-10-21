@@ -20,6 +20,6 @@ export function launchFlightFromUrl(params: URLSearchParams, world: SimWorld): v
   const target = TRANSIT_DESTINATIONS.find(item => item.id === flight);
   if (!target) throw new Error(`网址参数 flight 不是交通中心目的地：${flight}`);
   const transit = world.city?.transit;
-  if (!transit) throw new Error('flight 只能在主世界城区使用：?mode=game&from=transit&flight=…');
+  if (!transit) throw new Error(`flight 只能在带交通中心的城区使用：flight=${flight}`);
   launchTransitFlight(transit, getPlayer(world).body, target.id);
 }

@@ -8,6 +8,7 @@ import type { Vec2 } from '../../core/math.ts';
 import type { Body } from '../../physics/body.ts';
 import type { Stage, StageRenderer } from '../../render/stage/stage.ts';
 import { createAiCityGreenery } from '../../render/city/ai-city-environment.ts';
+import { seatGrassy } from '../../render/grassy/grassy-seated.ts';
 import { createTransitCenterModel, type TransitVisual } from '../../render/transit/transit-center-model.ts';
 import { getPlayer, type SimWorld } from '../../sim/sim-world.ts';
 import {
@@ -87,8 +88,9 @@ function flightVisual(state: TransitState, travelTime: number, arrival: number):
 }
 
 /** 非地面阶段由交通中心接管镜头（游戏镜头之后写入）；接管时从游戏镜头当前位置开始跟随。 */
-function createTransitCamera(stage: Stage<StageRenderer>, origin: Vec2) {
+function createTransitCamera(stage: Stage<StageRenderer>, origin: Vec2, cabinAnchor: THREE.Object3D) {
   const base = new THREE.Vector3(), target = new THREE.Vector3(), offset = new THREE.Vector3(origin.x, origin.y, 0);
+  const seat = new THREE.Vector3();
   const sideFov = stage.camera.fov;
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
   return (dt: number, time: number, state: TransitState, visual: TransitVisual, playerX: number, playerY: number, takeover: boolean) => {
@@ -111,7 +113,8 @@ function createTransitCamera(stage: Stage<StageRenderer>, origin: Vec2) {
     stage.camera.fov = sideFov;
     const cabin = state.phase === 'cabin';
     const upper = cabin || state.phase === 'opening' || state.phase === 'boarding';
-    const flight = ['ignition', 'ascent', 'warp', 'travel', 'complete'].includes(state.phase);
+    // Retract already holds the ignition framing, so the close-up pulls back onto a still shot.
+    const flight = ['retract', 'ignition', 'ascent', 'warp', 'travel', 'complete'].includes(state.phase);
     const rise = smooth(visual.altitude / 15);
     const height = cabin ? 13.5 : upper ? 19 : flight ? 36 + rise * 14 : 35;
     const span = cabin ? 24 : upper ? 35 : flight ? 53 + rise * 8 : 43;
@@ -123,12 +126,28 @@ function createTransitCamera(stage: Stage<StageRenderer>, origin: Vec2) {
     const follow = FOLLOW_PHASES.has(state.phase);
     const x = cabin ? 35 : !follow ? 23 : left > right ? (left + right) / 2 : THREE.MathUtils.clamp(playerX, left, right);
     target.set(x, cabin ? 20.2 : upper ? Math.max(19.6, playerY + 1) : flight ? flightY : 10.2, distance).add(offset);
-    base.lerp(target, dt === 0 ? 1 : 1 - Math.exp(-dt * (visual.altitude > 0 ? 8 : 3)));
+    // After the launch click the lens eases in on the pilot at the keys and back out before liftoff.
+    const sinceLaunch = state.phase === 'retract' ? state.elapsed
+      : state.phase === 'ignition' ? TRANSIT_PHASE_SECONDS.retract + state.elapsed : Infinity;
+    const zoom = THREE.MathUtils.smootherstep(sinceLaunch, 0, .8) * (1 - THREE.MathUtils.smootherstep(sinceLaunch, 1.4, 2.6));
+    // The wide shot holds still during the push-in and jumps to its launch framing while hidden behind the close-up.
+    if (zoom === 1) base.copy(target);
+    else if (sinceLaunch > .8 || dt === 0) base.lerp(target, dt === 0 ? 1 : 1 - Math.exp(-dt * (visual.altitude > 0 ? 8 : 3)));
     stage.camera.position.copy(base);
     // The camera falls slightly behind the climb, exposing the engine cluster without leaving the side view.
-    const pitch = reducedMotion ? 0 : .19 * smooth(visual.altitude / 8) * (1 - smooth(visual.warp / .6));
+    let pitch = reducedMotion ? 0 : .19 * smooth(visual.altitude / 8) * (1 - smooth(visual.warp / .6));
     stage.camera.position.y -= Math.sin(pitch) * distance;
     stage.camera.position.z *= Math.cos(pitch);
+    if (zoom > 0) {
+      // Looks down over the window sill so the hands on the keys stay in view.
+      const tilt = reducedMotion ? 0 : -.2;
+      const near = Math.max(5.5, 7 / stage.camera.aspect) / (2 * Math.tan(THREE.MathUtils.degToRad(stage.camera.fov / 2)));
+      cabinAnchor.getWorldPosition(seat).add(target.set(0, 1.8 - Math.sin(tilt) * near, Math.cos(tilt) * near));
+      // Distance changes geometrically so the apparent size grows at an even rate instead of lurching near the pilot.
+      const far = stage.camera.position.distanceTo(seat) + near;
+      stage.camera.position.lerp(seat, (far - far ** (1 - zoom) * near ** zoom) / (far - near));
+      pitch = THREE.MathUtils.lerp(pitch, tilt, zoom);
+    }
     if (!reducedMotion) {
       const force = visual.thrust * (.045 + .11 * (1 - smooth(visual.altitude / 18))) * (1 - smooth(visual.warp / .4));
       stage.camera.position.x += force * (.65 * Math.sin(time * 47) + .25 * Math.sin(time * 79));
@@ -152,7 +171,7 @@ export function createTransitStation(input: TransitStationInput): GameFeature & 
   // 新建渲染上下文要卡一两秒，趁加载时隐藏着建好。
   const corridor = createReturnCorridorOverlay(document.body, false);
   const daylightExposure = stage.renderer.toneMappingExposure;
-  const updateCamera = createTransitCamera(stage, origin);
+  const updateCamera = createTransitCamera(stage, origin, model.cabinAnchor);
   const anchor = new THREE.Vector3(), seat = new THREE.Vector3();
   let hatchPrompt = false, elapsed = 0, travelTime = 0, travelling = false, driving = false, posed = false;
   let departure = -1, lastPhase: TransitPhase | null = null;
@@ -262,21 +281,27 @@ export function createTransitStation(input: TransitStationInput): GameFeature & 
     ui.flash.style.opacity = String(phase === 'warp' ? smooth((p - .28) / .65) : 0);
   };
 
-  /** 人在模拟层随电梯、沿通道或停在座位上；画面只补通道深度，起飞后跟着座舱锚点。 */
-  const posePlayer = (b: Body): void => {
+  /** 人在模拟层随电梯、沿通道或停在座位上；画面只补通道深度，入座后坐在座舱锚点上。 */
+  const posePlayer = (b: Body, time: number, dt: number): void => {
     const phase = state.phase, view = input.playerView();
     if (phase === 'ground' || phase === 'calling' || phase === 'elevator' || phase === 'descending') {
       // 着陆舱开场也写这个根，只在离开座舱与通道阶段时归位一次。
-      if (posed) { view.position.set(0, 0, 0); view.visible = true; posed = false; }
+      if (posed) { view.position.set(0, 0, 0); view.rotation.y = 0; view.visible = true; posed = false; }
       return;
     }
     posed = true;
     const p = transitPhaseProgress(state);
     if (CABIN_PHASES.has(phase)) {
       model.cabinAnchor.getWorldPosition(seat);
-      view.position.set(seat.x - b.x, seat.y - b.y, seat.z);
+      // 视图外层绕世界原点转：把人从行走朝向转到正对仪表台（+z），再按转过的身体 x 平移回座位。
+      const yaw = -getPlayer(world).facing * Math.PI / 2;
+      view.rotation.y = yaw;
+      view.position.set(seat.x - b.x * Math.cos(yaw), seat.y - b.y, seat.z + b.x * Math.sin(yaw));
+      // 登舱后坐下，按下发射后双手移到键盘上。
+      seatGrassy(view, time, dt, phase !== 'cabin');
     } else {
       const from = phase === 'disembarking' ? transitExitPosition(state.entryFrom!) : state.entryFrom!;
+      view.rotation.y = 0;
       view.position.set(0, 0, transitCabinPosition(from, phase === 'opening' ? 0 : phase === 'boarding' ? p : 1 - p).z);
     }
     view.visible = phase !== 'travel' && phase !== 'complete' && !(phase === 'warp' && p > .4);
@@ -301,7 +326,7 @@ export function createTransitStation(input: TransitStationInput): GameFeature & 
       }
       model.update(visual, elapsed); model.root.updateMatrixWorld(true);
       const b = body();
-      posePlayer(b);
+      posePlayer(b, elapsed, frameDt);
       if (!canEnterTransit(station, b)) hatchPrompt = false;
       const drive = state.phase !== 'ground';
       if (drive) updateCamera(frameDt, elapsed, state, visual, b.x - origin.x, b.y - origin.y, !driving);

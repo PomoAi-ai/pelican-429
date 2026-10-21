@@ -1,18 +1,22 @@
 /**
  * WebGPU 城市/港口建筑补丁（render 侧 GLSL 同式）：自然建材三向投影、家具布纹、AI 城建材逐块质感、能量门溶解、
- * 港口幕墙玻璃、港口岸景雾、港口原画大气。GLSL 内联字面量在这里照抄同值（注“同 GLSL”），模块私有常量来自登记数据。
+ * 港口幕墙玻璃、港口岸景雾、港口原画大气、住宅 3/4 视距空气、住宅 4 材质图集与河城太阳阴影。
+ * GLSL 内联字面量在这里照抄同值（注“同 GLSL”），模块私有常量来自登记数据。
  */
 import type * as THREE from 'three';
 import type { Node, NodeBuilder, NodeMaterial } from 'three/webgpu';
 import {
-  abs, cameraViewMatrix, clamp, cos, cross, dFdx, dFdy, diffuseColor, dot, exp2, float, floor, fract, fwidth, length, materialReference, max, min, mix,
-  normalGeometry, normalize, positionGeometry, positionView, positionWorld, select, sign, sin, smoothstep, texture, varying, vec2, vec3, vec4,
+  abs, cameraViewMatrix, clamp, cos, cross, dFdx, dFdy, diffuseColor, dot, exp, exp2, float, floor, fract, fwidth, length, materialReference, max, min, mix,
+  normalGeometry, normalize, positionGeometry, positionView, positionWorld, pow, select, sign, sin, smoothstep, step, texture, varying, vec2, vec3, vec4,
 } from 'three/tsl';
 import { nodePatches } from '../stage/node-patches.ts';
-import { addDiscard, beforeLighting, deformBeforeInstance, fragmentNormal, isOpaque, materialLabel, normalOf, roughnessOf, shared, toWorld } from './webgpu-node-utils.ts';
+import type { DirectData, LightingModelParts } from './webgpu-light-map.ts';
+import {
+  addDiscard, beforeLighting, deformBeforeInstance, fragmentNormal, isOpaque, materialLabel, normalOf, roughnessOf, shared, sharedTexture, toWorld,
+} from './webgpu-node-utils.ts';
 import type { N, PatchTable, Translate } from './webgpu-node-utils.ts';
 
-/** GLSL fract( sin( dot( p, vec2( 127.1, 311.7 ) ) ) * 43758.5453 )（能量门的格哈希）。 */
+/** GLSL fract( sin( dot( p, vec2( 127.1, 311.7 ) ) ) * 43758.5453 )（港口幕墙与能量门共用的格哈希）。 */
 const hash2 = (p: N): N => fract(sin(dot(p, vec2(127.1, 311.7))).mul(43758.5453)) as unknown as N;
 
 /** 在 color_fragment 之后改 diffuseColor.rgb（原 setupDiffuseColor 已乘完顶点色/实例色、做完 alphaTest）。 */
@@ -146,6 +150,25 @@ const gateDissolve: Translate<'gate-dissolve'> = (material, { dissolve }, source
   };
 };
 
+// ---- 港口幕墙 harbor-curtain-wall（render/city/harbor-city detailGlazing）----
+
+const harborCurtainWall: Translate<'harbor-curtain-wall'> = (material) => {
+  // GLSL harborFacade = modelMatrix * instanceMatrix * position（幕墙网格无顶点变形，即 positionWorld）。
+  const f = positionWorld as unknown as N;
+  const grid = vec2(f.x.add(f.z).div(1.65), f.y.div(2.2));
+  const pane = fract(grid);
+  const paneHash = hash2(floor(grid) as unknown as N);
+  const paneEdge = min(pane, float(1).sub(pane));
+  const frame = float(1).sub(smoothstep(0.012, 0.035, min(paneEdge.x, paneEdge.y)));
+  const curtain = sin(pane.x.mul(38).add(paneHash.mul(6))).mul(0.12).add(0.88);
+  afterColor(material, (rgb) => rgb.mul(mix(paneHash.mul(0.55).add(0.7).mul(curtain), 0.36, frame)) as unknown as N);
+  beforeLighting(material, function () {
+    (this as typeof this & { roughnessNode: Node | null }).roughnessNode = clamp(roughnessOf(this).add(paneHash.sub(0.5).mul(0.16)).add(frame.mul(0.22)), 0.08, 0.65) as unknown as Node;
+  });
+  const base = normalOf(material);
+  material.normalNode = normalize(base.add(vec3(paneHash.sub(0.5).mul(0.045), sin(paneHash.mul(12)).mul(0.012), 0).mul(float(1).sub(frame)))) as unknown as Node;
+};
+
 // ---- 港口岸景雾 harbor-shore-haze（render/city/harbor-shore：整段替换 fog_fragment）----
 
 const harborShoreHaze: Translate<'harbor-shore-haze'> = (material, { near, color, halfDistance }, source) => {
@@ -162,10 +185,85 @@ const harborShoreHaze: Translate<'harbor-shore-haze'> = (material, { near, color
   };
 };
 
-export const CITY_PATCHES: PatchTable<'natural-building' | 'furniture-fabric' | 'ai-city-finish' | 'gate-dissolve' | 'harbor-shore-haze'> = {
+// ---- 住宅 3/4 视距空气 residence-air（render/city/residence-three-atmosphere、residence-four-atmosphere：tonemapping_fragment 之前）----
+
+const residenceAir: Translate<'residence-air'> = (material, { air, density, start, scale, power, low }) => {
+  // GLSL vViewPosition.z。
+  const depth = positionView.z.negate();
+  const far = float(1).sub(exp(pow(max(depth.sub(start), 0).mul(shared(density)).div(scale), power).negate()));
+  // 同 GLSL 常量；riverAirHeight 取未变形的 position，住宅 4 的材质没有顶点变形，即 positionWorld.y。
+  const amount = low === null ? far : float(1).sub(float(1).sub(far).mul(float(1).sub(
+    exp(max((positionWorld as unknown as N).y.sub(shared(low.level)), 0).negate().div(15)).mul(0.26).mul(smoothstep(750, 1250, depth)))));
+  // 色调映射前、雾之前（这些材质 fog = false）混合，同 teleport-dissolve 的做法。
+  const prev = material.setupOutput;
+  material.setupOutput = function (this: NodeMaterial, builder: NodeBuilder, outputNode: Node): Node {
+    const out = vec4(outputNode) as unknown as N;
+    return prev.call(this, builder, vec4(mix(out.rgb, shared(air), amount), out.a));
+  };
+};
+
+// ---- 住宅 4 材质图集 river-surface（render/city/residence-four-surfaces：color_fragment 与 roughnessmap_fragment 之后）----
+
+const riverSurface: Translate<'river-surface'> = (material, { atlas, origin, size, strength, gain }, source) => {
+  if (atlas.value === null) throw new Error(`webgpu-patches-city: 材质 '${materialLabel(source)}' 的水城材质图集在构建前未加载`);
+  const w = positionWorld as unknown as N;
+  const n = abs(normalize(cross(dFdx(w), dFdy(w))));
+  const st = select(n.y.greaterThan(0.65), w.xz, select(n.x.greaterThan(n.z), w.zy, w.xy));
+  const sample = sharedTexture(atlas as THREE.IUniform<THREE.Texture>).sample(vec2(...origin).add(0.005).add(fract(st.div(size)).mul(0.49))).rgb;
+  const lum = dot(sample, vec3(0.2126, 0.7152, 0.0722));
+  const k = float(strength).mul(float(1).sub(smoothstep(450, 1400, positionView.z.negate())));
+  afterColor(material, (rgb) => rgb.mul(mix(vec3(1), clamp(sample.mul(gain), vec3(0.48), vec3(1.25)), k)) as unknown as N);
+  beforeLighting(material, function () {
+    (this as typeof this & { roughnessNode: Node | null }).roughnessNode = clamp(roughnessOf(this).add(lum.sub(0.5).mul(0.1).mul(k)), 0.12, 1) as unknown as Node;
+  });
+};
+
+// ---- 住宅 4 河城太阳阴影 river-sun-shadow（render/city/residence-four-shadows：lights_fragment_end 之后）----
+
+const riverSunShadow: Translate<'river-sun-shadow'> = (material, { matrix, depth, size }, source) => {
+  const coord = varying(shared(matrix).mul(vec4(positionWorld, 1)));
+  const map = texture(depth);
+  const prev = material.setupLightingModel;
+  // three 的各 setupLightingModel 都不读 builder 参数。
+  material.setupLightingModel = function () {
+    const model = prev.call(this) as unknown as LightingModelParts | undefined;
+    if (model === undefined) throw new Error(`webgpu-patches-city: river-sun-shadow 需要受光材质（材质 '${materialLabel(source)}'）`);
+    const { start, direct } = model;
+    const shade = float(1).toVar() as unknown as N;
+    model.start = function (b: NodeBuilder): void {
+      const p = coord.xyz.div(coord.w).toVar();
+      const dx = dFdx(p), dy = dFdy(p);
+      const area = abs(dx.x.mul(dy.y).sub(dx.y.mul(dy.x)));
+      const slope = abs(dy.y.mul(dx.z).sub(dx.y.mul(dy.z))).add(abs(dx.x.mul(dy.z).sub(dy.x.mul(dx.z)))).div(max(area, 1e-9));
+      const bias = min(0.003, slope.mul(1.5 / size)).add(0.00008);
+      let visible: N = float(0);
+      // 同 three 的 ShadowNode：WebGPU 深度图 v 向下，矩阵投影出的 v 向上，采样时翻一次。
+      for (let sx = -1; sx <= 1; sx++) for (let sy = -1; sy <= 1; sy++) {
+        visible = visible.add(step(p.z.sub(bias), (map.sample(vec2(p.x, p.y.oneMinus()).add(vec2(sx, sy).div(size))) as unknown as N).x).div(9));
+      }
+      const inside = p.x.greaterThan(0.002).and(p.x.lessThan(0.998)).and(p.y.greaterThan(0.002)).and(p.y.lessThan(0.998)).and(p.z.greaterThan(0)).and(p.z.lessThan(1));
+      shade.assign(select(inside, mix(0.18, 1, visible), float(1)));
+      start.call(this, b);
+    };
+    // GLSL 把同一系数乘到累加后的直射漫反射与高光上；每盏直射光的贡献对光色线性，逐灯乘光色等价。
+    model.direct = function (data: DirectData, b: NodeBuilder): void {
+      direct.call(this, { ...data, lightColor: data.lightColor.mul(shade) }, b);
+    };
+    return model as unknown as ReturnType<NodeMaterial['setupLightingModel']>;
+  };
+};
+
+export const CITY_PATCHES: PatchTable<
+  'natural-building' | 'furniture-fabric' | 'ai-city-finish' | 'gate-dissolve' | 'harbor-curtain-wall' | 'harbor-shore-haze' | 'residence-air' | 'river-surface'
+  | 'river-sun-shadow'
+> = {
   'natural-building': naturalBuilding,
   'furniture-fabric': furnitureFabric,
   'ai-city-finish': aiCityFinish,
   'gate-dissolve': gateDissolve,
+  'harbor-curtain-wall': harborCurtainWall,
   'harbor-shore-haze': harborShoreHaze,
+  'residence-air': residenceAir,
+  'river-surface': riverSurface,
+  'river-sun-shadow': riverSunShadow,
 };

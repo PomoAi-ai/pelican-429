@@ -5,7 +5,7 @@ const LAB = './characters/human/render-lab';
 
 /**
  * 两个 D1 预览页共用的头发目录，数组顺序即页面上的展示顺序。
- * eyes：supported 可切换球形眼睛，default 在渲染实验里默认启用球形眼睛（头发预览页只给 scalp-flow 配球眼，不读此项）。
+ * eyes：supported 可切换球形眼睛，default 在渲染实验里默认启用球形眼睛（头发预览页只给 scalp-flow、shp-rooted、haircurves 配球眼，不读此项）。
  */
 const HAIRS = [
   { key: 'showcase', number: 1, label: '展示场 · 白色基础服游戏标准版', asset: `${LAB}/d1-base-showcase.web-1k.glb`, blender: false },
@@ -25,7 +25,10 @@ const HAIRS = [
   { key: 'rodin-raw-head', number: 44, label: 'Rodin · 原始整头未修改〔对照〕', asset: `${LAB}/d1-outfit-rodin-raw-head-v1.glb`, blender: false, eyes: 'default' },
   { key: 'rodin-braid-y21', number: 45, label: 'Rodin · 两股辫 y21 贴合头皮〔新款〕', asset: `${LAB}/d1-outfit-rodin-braid-y21-v1.glb`, blender: false, eyes: 'default' },
   { key: 'procedural-braid', number: 46, label: '程序化 · 波波头两股辫〔新款〕', asset: `${LAB}/d1-outfit-procedural-braid-v1.glb`, blender: false, eyes: 'default' },
-  { key: 'blender-scalp-flow', number: 47, label: 'Blender · 偏分发流与贴头三股辫〔新款〕', asset: `${LAB}/d1-outfit-blender-scalp-flow-v1.glb`, blender: true, eyes: 'default' },
+  { key: 'blender-scalp-flow', number: 47, label: 'Blender · 原画分束与贴头短发〔新款〕', asset: `${LAB}/d1-outfit-blender-scalp-flow-v1.glb`, blender: true, eyes: 'default' },
+  { key: 'blender-shp-rooted', number: 48, label: 'SHP 发根贴合（试作）', asset: `${LAB}/d1-outfit-shp-rooted-bob-v1.glb`, blender: true, eyes: 'default' },
+  { key: 'blender-haircurves', number: 49, label: 'Hair Curves 原画发流（新款）', asset: `${LAB}/d1-outfit-haircurves-bob-v1.glb`, blender: true, eyes: 'default' },
+  { key: 'mass-bob', number: 50, label: '块面 · 宽发片波波头两股辫〔新款〕', asset: `${LAB}/d1-outfit-mass-bob-v1.glb`, blender: false, eyes: 'default' },
 ] as const;
 
 type Hair = typeof HAIRS[number];

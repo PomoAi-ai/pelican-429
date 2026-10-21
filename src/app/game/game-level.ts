@@ -14,16 +14,20 @@ import type { FacilityChapterId } from '../../config/facility-scenes.ts';
 import { createFacilityLevel } from '../../world/facility-level.ts';
 import { createBossArenaLevel } from '../../world/boss-arena.ts';
 import { parseAppMode } from '../../config/app-mode.ts';
-import type { ResidenceVariant } from '../../config/residence.ts';
+import { RESIDENCE_VARIANTS, type ResidenceVariant } from '../../config/residence.ts';
 
 /**
  * 游戏世界的启动选择：主世界默认入口是城区（harbor，交通中心在它左侧），free=1 的主世界网址直接进原野；
- * 家园页的住宅场景是原版住宅城区（original）；其余关卡见 loadGameLevel。发布版限制已在入口校验过。
+ * 家园页的住宅场景按变体表的 scene 选城区变体（原版住宅、AI 住宅 3、4），其他 scene 留给家园；其余关卡见 loadGameLevel。
+ * 发布版限制已在入口校验过。
  */
 export function parseGameLaunch(params: URLSearchParams): { city: ResidenceVariant | null } {
   const mode = parseAppMode(params, false);
   if (mode === 'game' && params.get('level') === null && params.get('free') !== '1') return { city: 'harbor' };
-  return { city: mode === 'homestead' && params.get('scene') === 'residence' ? 'original' : null };
+  if (mode !== 'homestead') return { city: null };
+  const scene = params.get('scene');
+  const variant = (Object.keys(RESIDENCE_VARIANTS) as ResidenceVariant[]).find(id => RESIDENCE_VARIANTS[id].scene === scene);
+  return { city: scene === null ? null : variant ?? null };
 }
 
 /** 网址是游戏关卡的输入边界；组合关卡与展示卡调用同一个世界工厂。 */

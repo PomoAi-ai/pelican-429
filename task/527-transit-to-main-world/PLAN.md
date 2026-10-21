@@ -1,6 +1,6 @@
 # PLAN -- 星舰飞往主世界：着陆舱落在交通中心旁的着陆场地
 
-## Status: implementing
+## Status: done
 ## Task: 527
 ## Related: 524, 525
 ## Baseline Commit: a13fdd68（工作区含 518–526 未提交改动，以当前工作区为基线）
@@ -57,6 +57,16 @@
 - 增补 32–34（用户：“着陆仓,玩家站在他2个格子附近都可以按 e”“穿梭舱底太丑，和星舰完全不是一个东西”“星舰内部太简陋，应和着陆舱公用，更真实”）：延续本任务授权；三行文件互不重叠，并行派发；渲染效果由用户验收。
 - 登舱范围实现（32）：canBoardPod 范围改为 [exitX−2, 舱轴 + 舱裙最大半径（由 LANDING_POD.skirt 推导，2.8）+ 2]，仍要求在地且与舱同高；SimWorld 新增 podBoarding，出口右侧确认时世界冻结、自动向左走到出口后转为 podTakeoff，渲染端 takeoff() 不变；game-app 与 tile-scene 的提示在 podBoarding 期间隐藏。堡垒舱右侧 x=54 起为深渊，可登舱范围由“在地”条件自然截止在深渊边缘（约舱轴 +3.7），其余两关全程可走。
 
+- 座舱内饰（34）：内饰抽成 `transit-cockpit.ts` 的 createCockpitInterior，由共享 createCrewSection 调用，星舰与着陆舱同源；着陆舱原先没有舱内灯，暖色顶灯与屏幕冷光两盏点光源移入共享函数（星舰 createCabin 的旧灯删除）。内容从舱外可读的面出发：后舱壁与环绕舱壁软包（CanvasTexture 绗缝）、环肋与灯带、后壁环境状态屏与开关板、顶部开关板、白壳座椅带头枕/五点安全带/右扶手手控器；仪表台两侧屏朝向驾驶员、中屏近乎平放，避免挡住舷窗里的角色；左侧不放扶手以让出舱门到座位的走线。屏幕共用一张 CanvasTexture 图集，静态件按材质 mergeStaticParts 合并且不投影，贴图随材质 dispose 事件释放（两条 dispose 路径无需改）。
+
+- 舱底重做（33）：星舰喷管钟口（外套/内壁/发热唇口/ENGINE_CORE_SHADER 喉部）抽成 transit-center-model 的 createNozzleBells，星舰与着陆舱共用（星舰几何与热度计算不变）；舱底改为中心 + 四周共五个 0.8 倍星舰喷管，穿过开孔的隔热罩，出口在罩下 0.04，侧视仍用平面喷焰（宽度随喷管放大）。穿梭层调用 podBody.cruise：隐藏支脚、分层热喉、导出的 createCruiseExhaust 截面尾流；火花用 transit-center-fx 导出的 createExhaustEmbers/updateCruiseEmbers，喷口光与边光取星舰巡航同值；镜头改为星舰定格的舱下 23、fov 38。辉光来源已查清：uProgress 只调走廊暖色相位，与辉光无关；星舰画面的亮区来自走廊透镜环与叠加尾流经舞台后期的 HDR 色调映射与 bloom，故穿梭层改走 EffectComposer（HalfFloat → UnrealBloom 取 DEFAULT_LIGHTING.bloom → OutputPass），不另写辉光。截图里的橙色矩形是乘员舱舷梯门槛（伸出舱壁 0.24）被旧的橙色喷口光照亮，穿梭层按名隐藏。
+- 增补 35（用户：“返程穿梭时候玩家没站立好…点击发射后玩家似乎在操作敲击键盘，而且要正面看上去好像坐下了”）：延续本任务授权。
+- 入座实现（35）：新增 `grassy/grassy-seated.ts` 的 seatGrassy(holder, time)，在 animateGrassy 采样 idle 后改写骨骼（大腿前平、小腿下垂、躯干微前倾、头部看屏微动、双臂两骨 IK 伸到键盘并翻掌、交替起落敲击），背上键盘随胸部变换；改写由 motionPose.restore 下一帧撤销，不新增动作片段、不改模型。以 KeyboardWeapon 定位 Grassy 模型，因此机房 player-forms 外层组、城区 rig.root、星舰 rig.root 共用同一入口。座位原点 COCKPIT_SEAT 与操纵台键盘托（keysTile 并入屏幕图集）放在共享 transit-cockpit.ts；键盘托高于舷窗下框，正面能看到双手敲击。星舰 cabinAnchor 改到座位原点、朝向 0（正对操纵台与镜头），非地面/电梯/登舱阶段全部坐姿打字；着陆舱 PodCarry 增 typing（null 为站立），降落到开门完成前、起飞到达舱轴后坐在座位，yaw 为相对行走朝向的四分之一转（降落 +π/2、起飞 −π/2），站起后走出/走进沿用原 SEAT_TURN 逻辑。坐下与站起直接切换，不做过渡。背上键盘坐下时穿过座椅靠背，只在背后视角可见，未处理。
+- 增补 36（用户：“安全带弄好点，敲键盘稍微矮了点，应该是点击发射才开始敲击”）：着陆舱降落阶段坐着不敲（不是玩家发起的操作）。
+- 入座细化实现（36）：安全带改为深色织带（CanvasTexture 织纹 + 两侧缝线）的五点式收纳形态：肩带从头枕两侧开口穿出、沿靠背外缘垂下，带金属调节扣与插舌，腰带两半沿坐垫两侧，裆带接旋转扣在坐垫前沿；收纳位置在坐姿身体之外，不随坐/站切换显隐。键盘托抬到地板上 1.8、手位肩高靠近（肘约 90°），手肘下沉、两手分开。seatGrassy 增 dt 与 typing：未发射时双手放在大腿上，typing 时伸到键盘敲击，双手位置、肘向、敲击幅度按每个 rig 的权重 0.4 s 平滑插值；星舰 phase !== 'cabin'（点击发射后）才敲，着陆舱 PodCarry.seat 带 typing，起飞为真、降落为假。
+- 增补 37（用户：“主火箭发射的时候，拉近一下看看玩家敲键盘，然后再继续”“拉进去然后赶快恢复”“感觉比较生硬”“时间没处理好”）：特写叠加在原发射镜头之上，按点击发射后的时间用 smootherstep 混合（0–0.8 s 推近、停到 1.4 s、1.4–2.6 s 拉回，止于点火 1.0 s，远早于离地）；位置沿直线移动但距离按几何插值，画面放大速率均匀，不在靠近时猛冲；推近期间底层全景冻结（不再一边后退一边推近），特写完全遮住时底层直接跳到发射取景，拉回落在静止画面上；retract 的底层取景与点火相同；特写画面高 5.5、俯视 0.2 rad 越过舷窗下沿露出手和键盘，减弱动效时不俯视。
+- 起飞飞出前角色“掉一下再弹回”（用户报）：根因是 entity-views 的 createFootSink 踏阶缓动——liftInPod 让着地身体原地竖直上升，每帧升高超过补偿回收速度（1/0.12 s）时被当成台阶压低视图，堡垒舱顶速 11.25/s 时滞后累积到 −0.86，停升后 0.12 s 内弹回。修法：踏阶补偿只在有水平移动时触发（原地竖直托举不是台阶）；复现用例加在 test/entity-contact-pose.test.ts（随舱竖直升起时视图高度逐 tick 等于身体高度）。
+
 ## Implementation Map
 | # | File | Intent | Depends | Done |
 |---|------|--------|---------|------|
@@ -81,8 +91,11 @@
 | 30 | src/render/transit-landing-pod.ts | 抽出舱体+反推喷口/喷焰共享构建 | | ✓ |
 | 31 | src/render/return-corridor-overlay.ts | 穿梭层内渲染舱底同轴视角与喷焰 | 30 | ✓ |
 | 32 | src/sim/pod-landing.ts、src/sim/sim-world.ts、src/app/game-app.ts、test/facility-chapter.test.ts | 舱体（含舷梯）两格内均可按 E 登舱并显示提示；不在出口时先自动走到出口再倒放起飞 | | ✓ |
-| 33 | src/render/transit-landing-pod.ts、src/render/return-corridor-overlay.ts、src/render/transit-exhaust.ts | 返程穿梭画面舱底照星舰巡航镜头重做：发热喷管喉部、同轴尾流截面、火花、喷口光、收起支脚 | | |
-| 34 | src/render/transit-center-model.ts | 星舰与着陆舱共用的乘员舱内饰做细：座椅、操纵台、屏幕、顶板、内衬与舱内灯光 | | |
+| 33 | src/render/transit-landing-pod.ts、src/render/return-corridor-overlay.ts、src/render/transit-exhaust.ts | 返程穿梭画面舱底照星舰巡航镜头重做：发热喷管喉部、同轴尾流截面、火花、喷口光、收起支脚 | | ✓ |
+| 34 | src/render/transit-center-model.ts、新 src/render/transit-cockpit.ts | 星舰与着陆舱共用的乘员舱内饰做细：座椅、操纵台、屏幕、顶板、内衬与舱内灯光 | | ✓ |
+| 35 | src/render/grassy/*、src/render/transit-landing-pod.ts、src/app/transit-pilot.ts、src/render/transit-cockpit.ts | 舱内入座：星舰与着陆舱共用坐姿，坐在座椅上、双手在操纵台键盘上敲击（发射/起飞后），正面看是坐着 | | ✓ |
+| 36 | src/render/transit-cockpit.ts、src/render/grassy/grassy-seated.ts、src/app/transit-pilot.ts、src/render/transit-landing-pod.ts | 安全带做成真实织带；键盘与敲击手位抬高；只在点击发射/确认起飞后才敲击，之前坐着不敲 | 35 | ✓ |
+| 37 | src/app/transit-station.ts | 发射时镜头推近看敲键盘，起飞前拉回 | 36 | ✓ |
 
 ## Validation
 | Command | Required | Done |

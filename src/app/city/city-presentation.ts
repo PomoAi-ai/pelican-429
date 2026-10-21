@@ -3,15 +3,18 @@
  * 环境按住宅坐标建模，整体平移 CITY_ORIGIN 放进格子世界，并用平移后的代理相机做分段流式与视差。
  */
 import * as THREE from 'three';
-import { CITY_ORIGIN, getResidenceResource, RESIDENCE_TRANSIT, RESIDENCE_WORLD } from '../../config/residence.ts';
+import { CITY_ORIGIN, getResidenceResource, RESIDENCE_WORLD, type ResidenceVariant } from '../../config/residence.ts';
 import { solarTrackingAngle } from '../../physics/solar-panel.ts';
-import { createAiCityEnvironment } from '../../render/city/ai-city-environment.ts';
+import { createAiCityEnvironment, type AiCityClearing } from '../../render/city/ai-city-environment.ts';
 import { createHarborResidenceEnvironment } from '../../render/city/harbor-residence-environment.ts';
+import { createResidenceFourEnvironment } from '../../render/city/residence-four-environment.ts';
+import { createResidenceThreeEnvironment } from '../../render/city/residence-three-environment.ts';
 import type { Daylight } from '../../render/sky/daylight.ts';
+import type { PrecipSkyLook } from '../../render/sky/precip-sky.ts';
 import type { PrecipView } from '../../render/sky/precip-view.ts';
 import type { WorldLight } from '../../render/stage/light-field-material.ts';
 import type { Stage, StageRenderer } from '../../render/stage/stage.ts';
-import type { CityState } from '../../sim/city.ts';
+import { cityMap, type CityState } from '../../sim/city.ts';
 import { setCitySunAngle, type SimWorld } from '../../sim/sim-world.ts';
 import type { GameFeature } from '../game/frame-loop.ts';
 
@@ -25,6 +28,29 @@ interface CityPresentationInput {
   readonly signal: AbortSignal;
   readonly progress: (completed: number, total: number) => void;
 }
+
+/** 城区背景环境：按住宅坐标建模，由城区表现整体平移进格子世界；foreground 交给背景层做近景模糊，没有则为 null。 */
+interface CityEnvironment {
+  readonly root: THREE.Object3D;
+  readonly foreground: THREE.Object3D | null;
+  prepare(signal: AbortSignal, progress: (step: { completed: number; total: number }) => void): Promise<void>;
+  setCamera(camera: THREE.PerspectiveCamera): void;
+  setWeather(look: PrecipSkyLook): void;
+  setNightFactor(night: number, moonLight: number): void;
+  update(time: number): void;
+  dispose(): void;
+}
+
+type CityEnvironmentStage = Pick<Stage<StageRenderer>, 'renderer' | 'scene' | 'camera' | 'keyLight'>;
+
+/** clearing 是地图的交通中心用地（住宅坐标），其中不建前景格子；没有交通中心为 null。 */
+const CITY_ENVIRONMENTS: Readonly<Record<ResidenceVariant,
+  (homeCenter: number, clearing: AiCityClearing | null, stage: CityEnvironmentStage) => CityEnvironment>> = {
+  original: (homeCenter, clearing) => createAiCityEnvironment({ homeCenter, scenery: 'full', clearing }),
+  harbor: (homeCenter, clearing) => createHarborResidenceEnvironment(homeCenter, clearing),
+  three: createResidenceThreeEnvironment,
+  four: createResidenceFourEnvironment,
+};
 
 // 远景不挂游戏光场。
 const markNoLightMap = (root: THREE.Object3D): void => root.traverse(node => {
@@ -40,9 +66,7 @@ function homeCenter(city: CityState): number {
 
 export async function createCityPresentation(input: CityPresentationInput): Promise<GameFeature & { leave(): void; dispose(): void }> {
   const { stage, world, city, worldLight, precip, daylight } = input;
-  const harbor = city.variant === 'harbor';
-  const center = homeCenter(city);
-  const environment = harbor ? createHarborResidenceEnvironment(center, RESIDENCE_TRANSIT) : createAiCityEnvironment({ homeCenter: center, scenery: 'full' });
+  const environment = CITY_ENVIRONMENTS[city.variant](homeCenter(city), cityMap(city.variant).transit, stage);
   environment.root.position.set(CITY_ORIGIN.x, CITY_ORIGIN.y, 0);
   const proxy = new THREE.PerspectiveCamera();
   const syncProxy = (): void => {
@@ -55,7 +79,7 @@ export async function createCityPresentation(input: CityPresentationInput): Prom
   syncProxy();
   stage.scene.add(environment.root);
   if (!stage.backdrop) throw new Error('city-presentation: stage.addBackdrop must run first');
-  stage.backdrop.blur(environment.foreground);
+  if (environment.foreground) stage.backdrop.blur(environment.foreground);
   stage.scene.add(worldLight.lamps);
   const dispose = (): void => {
     worldLight.lamps.removeFromParent(); environment.dispose();

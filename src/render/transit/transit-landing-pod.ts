@@ -9,6 +9,7 @@ import { createParticlePool } from '../fx/particle-pool.ts';
 import type { Stage, StageRenderer } from '../stage/stage.ts';
 import { beam, box, createCrewSection, createHullPalette, createNozzleBells, mesh, pipe, profileSection, ring, shell } from './transit-center-model.ts';
 import type { Palette } from './transit-center-model.ts';
+import { COCKPIT_SEAT } from './transit-cockpit.ts';
 import { createCruiseExhaust, createPlume } from './transit-exhaust.ts';
 import { createTransitSurface } from './transit-surface.ts';
 
@@ -40,9 +41,9 @@ const LEG_HINGE = { r: SKIRT_BASE - .05, y: .06 } as const;
 // Deployed foot drop relative to the hinge: lands on the ground when the shield bottom rests at the clearance height.
 const LEG_DROP = LEG_HINGE.y + CLEARANCE;
 const LEG_STOW = 2.8;
-// Four retro bells are the starship's nozzle at this scale, recessed through the heat shield: the exit sits just under it
-// and the jacket top stays below the cabin floor.
-const NOZZLES = [0, 1, 2, 3].map(k => polar(1.3, 0, k * Math.PI / 2)).map(([x, , z]) => [x, z] as const);
+// A centre bell ringed by four, each the starship's nozzle at this scale, recessed through the heat shield:
+// the exit sits just under it and the jacket top stays below the cabin floor.
+const NOZZLES = [[0, 0] as const, ...[0, 1, 2, 3].map(k => polar(1.3, 0, k * Math.PI / 2)).map(([x, , z]) => [x, z] as const)];
 const NOZZLE_SCALE = .8;
 const NOZZLE_EXIT = -.04;
 // Starship bell profile: exit at 1.05, opening radius .62.
@@ -122,7 +123,7 @@ function createLeg(pod: THREE.Group, p: Palette, angle: number, out: number) {
 }
 
 /**
- * 舱体本身：乘员舱、下段筒身、裙段、支脚与四个反推喷管（星舰同款钟口与喉部），关卡着陆舱与返程穿梭画面共用。
+ * 舱体本身：乘员舱、下段筒身、裙段、支脚与五个反推喷管（星舰同款钟口与喉部），关卡着陆舱与返程穿梭画面共用。
  * 侧视用 thrust 的平面喷焰，floorY 以下被裁掉；同轴仰视用 cruise 的截面尾流。
  */
 export function createPodBody(surface: ReturnType<typeof createTransitSurface>, floorY: number) {
@@ -178,7 +179,11 @@ export function createPodBody(surface: ReturnType<typeof createTransitSurface>, 
 }
 
 /** Player pose while the pod owns it: interpolated body x/y, cabin-floor lift above the body, depth and yaw relative to facing left. */
-interface PodCarry { readonly x: number; readonly y: number; readonly lift: number; readonly z: number; readonly yaw: number }
+interface PodCarry {
+  readonly x: number; readonly y: number; readonly lift: number; readonly z: number; readonly yaw: number;
+  /** Set while the player sits at the console (pose it with seatGrassy); typing once the player has launched. Null while standing or walking. */
+  readonly seat: { readonly time: number; readonly dt: number; readonly typing: boolean } | null;
+}
 
 /** The level and the city both step a PodLanding at the sim rate; each poses its own player object from the carry pose. */
 interface LandingPodHost {
@@ -312,10 +317,19 @@ export function createLandingPod(stage: Stage<StageRenderer>, landing: PodLandin
       const d = walked(alpha);
       // Cabin floor above the interpolated body: rides the descent and touchdown sink, FLOOR + CLEARANCE once landed.
       const floor = root.position.y + FLOOR - lerp(body.prevY, body.y, alpha);
-      // At the seat the player faces the glazing like the rocket pilot, turning back to walk left on the way out; pivots about the body.
+      const y = lerp(body.prevY, body.y, alpha);
+      // Seated at the console until the door has opened on landing, and from reaching the pod axis on takeoff, typing only on the
+      // takeoff the player launched (the landing flies itself); faces the console straight ahead, a quarter turn from the
+      // walking facing (left on landing, right on takeoff).
+      if (takeoff ? body.x >= landing.x : landing.ticks < total) {
+        host.carry({ x: landing.x, y, lift: floor, z: planeZ + LANDING_POD.z + COCKPIT_SEAT.z, yaw: takeoff ? -Math.PI / 2 : Math.PI / 2,
+          seat: { time, dt, typing: takeoff } });
+        return;
+      }
+      // Stood up at the seat the player faces the glazing like the rocket pilot, turning back to walk left on the way out; pivots about the body.
       // Boarding walks in facing right, so the seat turn (which assumes facing left) is skipped.
-      host.carry({ x: lerp(body.prevX, body.x, alpha), y: lerp(body.prevY, body.y, alpha), lift: floor * aboard(d),
-        z: planeZ + depthAt(d, walk), yaw: takeoff ? 0 : SEAT_TURN * Math.max(0, 1 - d / THRESHOLD) });
+      host.carry({ x: lerp(body.prevX, body.x, alpha), y, lift: floor * aboard(d),
+        z: planeZ + depthAt(d, walk), yaw: takeoff ? 0 : SEAT_TURN * Math.max(0, 1 - d / THRESHOLD), seat: null });
     },
     droneEscort(index) {
       if (!active()) return undefined;

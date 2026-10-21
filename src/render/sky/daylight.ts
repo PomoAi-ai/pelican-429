@@ -165,7 +165,8 @@ export function createDaylight({ stage, look, clock, openSky }: DaylightOptions)
   const skyTint = new THREE.Color(1, 1, 1);
   const defaultSun = new THREE.Vector3().copy(TUNING.render.lighting.sun.direction).normalize();
   const sun = new THREE.Vector3();
-  const celestial = createCelestialSky({ radius: look.celestialRadius, horizonLine: look.celestialHorizon });
+  const celestial = createCelestialSky({ radius: look.celestialRadius, horizonLine: look.celestialHorizon,
+    diskScale: look.celestialDiskScale });
   stage.scene.add(celestial.root);
   const atmosphere = look.atmosphere ? createAtmosphere(stage, look.atmosphere) : null;
   let t = sampleWorldTime(clock);

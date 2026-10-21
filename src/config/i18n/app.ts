@@ -286,6 +286,7 @@ const PLACES: Record<string, string> = {
   '试玩关卡 · 悬空战斗桥与网络核心': 'Playable level · Suspended battle bridge and network core',
   // Residence pages and build mode.
   '主世界 · 城区': 'Main world · City', '主世界 · 原野': 'Main world · Wilds', '建造与游玩': 'Build and play',
+  'AI 住宅 3': 'AI residence 3', 'AI 住宅 4': 'AI residence 4',
   '原野入口': 'Wilds entrance',
   '本机独立存档 · 修改后自动保存': 'Saved on this device · Changes save automatically', '旧住宅存档不再兼容，已丢弃；城区从默认布局开始。': 'The old residence save is no longer compatible and was discarded; the city starts from the default layout.', '已保存到本机': 'Saved on this device',
   '未保存：{error}。当前布局仍保留，请重试保存。': 'Not saved: {error}. The current layout is kept; try saving again.',

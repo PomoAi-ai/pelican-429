@@ -43,7 +43,7 @@ const TEMPLATE = `
       <section class="lab-control-section">
         <h3><span>01</span>眼球注视</h3>
         <label class="lab-version-select" for="lab-eye-version">眼睛版本<select id="lab-eye-version" aria-describedby="lab-eye-hint"><option value="patch">原眼片（保留对照）</option><option value="sphere">球形眼球 · 可转动视线</option></select></label>
-        <p id="lab-eye-hint" class="lab-control-hint">31、34、35、39、40、41、42、43、44、45、46、47 支持球眼；39、40、41、42、43、44、45、46、47 默认启用。可切换原眼片对照。</p>
+        <p id="lab-eye-hint" class="lab-control-hint">31、34、35、39、40、41、42、43、44、45、46、47、48、49、50 支持球眼；39、40、41、42、43、44、45、46、47、48、49、50 默认启用。可切换原眼片对照。</p>
         <fieldset id="lab-gaze-controls" hidden disabled>
           <legend class="lab-eyebrow">控制注视方向</legend>
           <label class="lab-version-select" for="lab-gaze-mode">注视方式<select id="lab-gaze-mode"><option value="manual">手动方向</option><option value="pointer">跟随鼠标</option><option value="auto">自然扫视</option></select></label>

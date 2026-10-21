@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { TUNING } from '../../config/tuning.ts';
+import { createPostFx } from '../../render/stage/post-fx.ts';
 import { createRenderer } from '../../render/stage/stage.ts';
 import { gameHost } from '../../ui/hud/mobile-game-viewport.ts';
 import { readPageParams } from '../shell/page-context.ts';
@@ -16,8 +17,8 @@ const CRUISE_START = 1;
 const CORRIDOR_BASE = '#0d162d';
 /** 离开时穿梭画面淡入的时长，淡入完成才整页跳转。 */
 export const CORRIDOR_DEPART_SECONDS = 1.2;
-// Like the starship's travel shot, the camera sits on the pod axis below the heat shield looking up the corridor.
-const CAMERA_DROP = 18, FOV = 42;
+// The starship's settled travel shot: on the pod axis below the heat shield, looking up the corridor at the same distance and lens.
+const CAMERA_DROP = 23, FOV = 38;
 
 /**
  * 全屏穿梭层，自带画布与渲染器（独立上下文，配置仍走渲染器工厂），跨整页跳转时两页各建一个；画面照星舰穿越镜头：同轴仰视着陆舱舱底的发热喷管、
@@ -66,18 +67,28 @@ export function createReturnCorridorOverlay(parent: HTMLElement, shown: boolean)
   const embers = createExhaustEmbers();
   pod.root.add(embers.points);
   // The starship's travel lights: a cool glow at the nozzles and two corridor-coloured rims circling the hull.
+  // Placed as the starship's, scaled to the pod's bells: just above the exits and off axis, so it lights the bells rather than the shield face.
   const nozzleLight = new THREE.PointLight(0x93bdff, 60, 22, 1.8);
-  nozzleLight.position.y = -1;
+  nozzleLight.position.set(0, .32, .8);
+  pod.root.add(nozzleLight);
   const rims = [0x5fb4ff, 0xc46bff].map(color => new THREE.PointLight(color, 75, 26, 1.6));
-  scene.add(nozzleLight, ...rims);
+  scene.add(...rims);
   const camera = new THREE.PerspectiveCamera(FOV, 1, .1, 200);
   camera.position.y = -CAMERA_DROP;
   camera.up.set(0, 0, -1);
   camera.lookAt(0, 0, 0);
+  // The starship stage's post chain (HDR target, bloom, one tone-mapping grade): the white-hot throats and additive exhaust
+  // compress and glow instead of clipping flat white. AO is zeroed as in the starship's travel shot; there is no ground to shade.
+  const postFx = createPostFx({ renderer, scene, camera, lighting: TUNING.render.lighting, quality: 'high' });
+  postFx.grade.uAoIntensity.value = 0;
   let start = performance.now(), frame = 0;
   const draw = (now: number): void => {
-    const { clientWidth: w, clientHeight: h } = canvas;
-    if (canvas.width !== Math.round(w * renderer.getPixelRatio()) || canvas.height !== Math.round(h * renderer.getPixelRatio())) renderer.setSize(w, h, false);
+    // 后期链不接受零尺寸；与 attachStage 一样按至少 1 像素算（隐藏的宿主文档里画布可能还没有布局）。
+    const w = Math.max(1, canvas.clientWidth), h = Math.max(1, canvas.clientHeight);
+    if (canvas.width !== Math.round(w * renderer.getPixelRatio()) || canvas.height !== Math.round(h * renderer.getPixelRatio())) {
+      renderer.setSize(w, h, false);
+      postFx.setSize(w, h, renderer.getPixelRatio());
+    }
     const time = CRUISE_START + (now - start) / 1000;
     const still = reducedMotion.matches;
     material.uniforms.uAspect!.value = camera.aspect = w / h;
@@ -97,7 +108,7 @@ export function createReturnCorridorOverlay(parent: HTMLElement, shown: boolean)
     pod.cruise(time);
     updateCruiseEmbers(embers, pod.emitters, time, 0);
     nozzleLight.intensity = 60 * (1 + .08 * Math.sin(time * 43) + .04 * Math.sin(time * 79));
-    renderer.render(scene, camera);
+    postFx.render();
   };
   const loop = (now: number): void => {
     draw(now);
@@ -130,6 +141,7 @@ export function createReturnCorridorOverlay(parent: HTMLElement, shown: boolean)
         embers.points.geometry.dispose();
         embers.points.material.dispose();
         surface.dispose();
+        postFx.dispose();
         renderer.dispose();
         // 外壳内反复切关卡会各建一个上下文，不主动释放会累积到浏览器上限。
         renderer.forceContextLoss();

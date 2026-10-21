@@ -73,7 +73,7 @@ export function podTakeoffPhase(pod: PodLanding, body: Body): 'walk' | 'carry' |
 }
 
 /** 起飞的一个 tick：调用方先存 prev；身体对准舱轴坐进座位。 */
-function liftInPod(pod: PodLanding, body: Body): void {
+export function liftInPod(pod: PodLanding, body: Body): void {
   pod.ticks--;
   body.x = pod.x;
   body.y = pod.ground + podAltitude(pod, pod.ticks);

@@ -79,6 +79,7 @@ let sequence = 0;
 let renderer: THREE.WebGLRenderer;
 let visible: Card[] = [];
 let sphericalEyeAsset: THREE.Object3D | undefined;
+const SPHERICAL_EYE_CARDS: readonly HairStyle[] = ['blender-scalp-flow', 'blender-shp-rooted', 'blender-haircurves'];
 
 function previewUrl(hair: HairStyle): string {
   const url = new URL('./', location.href);
@@ -197,7 +198,7 @@ function evict(): void {
 
 function createModel(card: Card): Model {
   const family = isBlenderHair(card.hair) ? 'blender' : 'rodin';
-  const rig = createD1Rig(card.variant, 'anime', 'web-1k', card.hair === 'blender-scalp-flow' ? sphericalEyeAsset : undefined, card.path);
+  const rig = createD1Rig(card.variant, 'anime', 'web-1k', SPHERICAL_EYE_CARDS.includes(card.hair) ? sphericalEyeAsset : undefined, card.path);
   let fit: Model['fit'] = null;
   let look: Model['look'] | null = null;
   try {
@@ -238,7 +239,7 @@ async function loadNext(): Promise<void> {
       disposeD1Asset(card.variant, 'web-1k', card.path);
       return;
     }
-    if (card.hair === 'blender-scalp-flow' && !sphericalEyeAsset) {
+    if (SPHERICAL_EYE_CARDS.includes(card.hair) && !sphericalEyeAsset) {
       const loaded = await loadCharacterModel('./characters/human/render-lab/d1-spherical-eyes-v3.glb', 'original');
       if (closed) { disposeModelResources(loaded.scene); return; }
       sphericalEyeAsset = loaded.scene;
