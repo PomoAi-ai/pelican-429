@@ -302,6 +302,24 @@ describe('minimap 增量重绘', () => {
     assert.equal(px(r, H, 40, 2, 0, 0), opaque(waterOver(skyColor(2, H), 255)));
   });
 
+  test('水在区块上下边界两侧变化时，增量重绘与新建栅格一致（水面像素读邻区块子格）', () => {
+    // 16 格高的区块边界在子格行 63/64 之间。
+    const cases: { name: string; initial: [number, number][]; change: [number, number] }[] = [
+      { name: '上方区块的水面被下方区块的水顶满', initial: [[62, 255], [63, 50]], change: [64, 255] },
+      { name: '下方区块的最低水格被上方区块的水托住', initial: [[64, 50]], change: [63, 255] },
+      { name: '下方区块排干后上方区块的水面回落', initial: [[62, 255], [63, 50], [64, 255]], change: [64, 0] },
+    ];
+    for (const { name, initial, change } of cases) {
+      const w = world(16, 32, 0);
+      for (const [sy, amount] of initial) w.fluid.setSub(0, sy, amount);
+      const r = createMinimapRaster(w.source, { chunkTiles: 16, noise: 0 });
+      w.fluid.setSub(0, change[0], change[1]);
+      r.scanFluid();
+      r.flush();
+      assert.deepEqual(r.pixels, createMinimapRaster(w.source, { chunkTiles: 16, noise: 0 }).pixels, name);
+    }
+  });
+
   test('液体模拟流动后，小地图清除旧水格并显示新水格', () => {
     const H = 4;
     const w = world(4, H, 1);

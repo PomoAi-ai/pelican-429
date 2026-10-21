@@ -74,29 +74,13 @@ describe('鹈鹕微光：颜色、衰减与合成', () => {
     assert.deepEqual(screenLight(1, [0.4, 0.3, 0.2]), [1, 1, 1]);
   });
 
-  test('着色器：光照材质与 Basic 都用屏幕合成（不再 max）；鹈鹕最低亮度仍包住环境采样', () => {
-    const std = shaderOf(THREE.ShaderLib.standard);
-    injectLightMap(std, uniforms, 2, 'std');
-    assert.match(std.fragmentShader, /\(outgoingLight - totalEmissiveRadiance\) \* lmCombine\(lmSample\(vLmWorld\), lmAura\(vLmWorld\)\) \+ diffuseColor\.rgb \* lmLamp\(vLmWorld\) \* RECIPROCAL_PI \+ totalEmissiveRadiance;/);
-    assert.match(std.fragmentShader, /#define LM_AURA_RECEIVE 1\.0000/);
-    assert.doesNotMatch(std.fragmentShader, /max\(vec3\(lmSample/);
-    const basic = shaderOf(THREE.ShaderLib.basic);
-    injectLightMap(basic, uniforms, 2, 'basic');
-    assert.match(basic.fragmentShader, /outgoingLight \*= lmCombine\(lmSample\(vLmWorld\), lmAura\(vLmWorld\)\);/);
-    const body = shaderOf(THREE.ShaderLib.standard);
-    injectLightMap(body, uniforms, 2, 'body', { floor: 0.14 });
-    assert.match(body.fragmentShader, /lmCombine\(max\(lmSample\(vLmWorld\), 0\.1400\), lmAura\(vLmWorld\)\)/);
-    assert.throws(() => injectLightMap(shaderOf(THREE.ShaderLib.standard), uniforms, 2, 'bad-recv', { auraReceive: 1.5 }), /bad-recv.*auraReceive/);
-  });
-
-  test('洞壁背板：auraReceive = wallReceive，着色器常量与缓存键随之；方块材质保持 1', () => {
+  test('洞壁背板：auraReceive = wallReceive，缓存键随之；方块材质保持 1', () => {
     const wall = createCaveWallMaterial(new THREE.DataTexture(new Uint8Array(4), 2, 2), new THREE.DataTexture(), 2, 2, new THREE.Texture());
     assert.equal(wall.userData.auraReceive, DEFAULT_AURA.wallReceive);
     const wl = world();
     const key = wall.customProgramCacheKey();
     wl.patchMaterial(wall);
-    assert.equal(wall.customProgramCacheKey(), `${key}|${LIGHT_MAP_PROGRAM_TAG}|terrain|aura${DEFAULT_AURA.wallReceive}`);
-    assert.ok(compiled(wall).fragmentShader.includes(`#define LM_AURA_RECEIVE ${DEFAULT_AURA.wallReceive.toFixed(4)}`));
+    assert.equal(wall.customProgramCacheKey(), `${key}|${LIGHT_MAP_PROGRAM_TAG}|terrain|aura${DEFAULT_AURA.wallReceive}|slots0`);
     const plain = new THREE.MeshStandardMaterial();
     wl.patchMaterial(plain);
     assert.doesNotMatch(plain.customProgramCacheKey(), /\|aura/);
@@ -138,23 +122,18 @@ describe('水体随光照变暗', () => {
     assert.doesNotMatch(WATER_FRAGMENT, /mix\( wcol, uEdge,/);
   });
 
-  test('水前面/背板标记 waterBody：整体（含自发光底色）乘 水响应(光照) ⊕ 微光；缓存键带 water；不可与 terrain/floor 同用', () => {
+  test('水前面/背板标记 waterBody：缓存键带 water，挂接后可注入；不可与 terrain/floor 同用', () => {
     const mats = createWaterMaterials(WATER_PALETTES.clear, { value: 0 });
     const wl = world();
     for (const m of [mats.front, mats.back]) {
       assert.equal(m.userData.waterBody, true, m.name);
       const key = m.customProgramCacheKey();
       wl.patchMaterial(m);
-      assert.equal(m.customProgramCacheKey(), `${key}|${LIGHT_MAP_PROGRAM_TAG}|water`);
-      const fs = compiled(m).fragmentShader;
-      assert.match(fs, /outgoingLight \*= lmCombine\(lmWaterLight\(lmSample\(vLmWorld\)\), lmAura\(vLmWorld\)\);\s*#include <opaque_fragment>/);
-      assert.doesNotMatch(fs, /\+ totalEmissiveRadiance;\s*#include <opaque_fragment>/, 'emissive glow is scaled by the light map too');
+      assert.equal(m.customProgramCacheKey(), `${key}|${LIGHT_MAP_PROGRAM_TAG}|water|slots0`);
+      compiled(m);
     }
-    // 光照图片段先于水体着色主体（水着色用 #ifdef LM_LIGHT_MAP 调 lmAmbient）。
-    const fs = compiled(mats.front).fragmentShader;
-    assert.ok(fs.indexOf('#define LM_LIGHT_MAP') > 0 && fs.indexOf('#define LM_LIGHT_MAP') < fs.indexOf('wsky = smoothstep('));
-    assert.throws(() => injectLightMap(shaderOf(THREE.ShaderLib.standard), uniforms, 2, 'wt', { water: true, terrain: true }), /wt.*water/);
-    assert.throws(() => injectLightMap(shaderOf(THREE.ShaderLib.standard), uniforms, 2, 'wf', { water: true, floor: 0.1 }), /wf.*water/);
+    assert.throws(() => injectLightMap(shaderOf(THREE.ShaderLib.standard), uniforms, 2, 0, 'wt', { water: true, terrain: true }), /wt.*water/);
+    assert.throws(() => injectLightMap(shaderOf(THREE.ShaderLib.standard), uniforms, 2, 0, 'wf', { water: true, floor: 0.1 }), /wf.*water/);
     wl.dispose();
     mats.dispose();
   });

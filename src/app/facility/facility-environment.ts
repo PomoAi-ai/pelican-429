@@ -51,7 +51,7 @@ export async function createFacilityEnvironment(stage: Stage, sceneId: FacilityC
     const rig = createPelicanRig({ scale: TUNING.render.pelicanScale });
     disposers.push(() => rig.dispose());
     const entities = createEntityViews(stage, level, disposers, () => world.entities, worldViews.treeRide, world.env.wind, rig, options.grassyVariant);
-    const lighting = createWorldLighting(level, world, DEFAULT_WATER_PALETTE, disposers, facilityGameTuning().render.lighting);
+    const lighting = createWorldLighting(level, world, DEFAULT_WATER_PALETTE, stage.quality, disposers, facilityGameTuning().render.lighting);
     const stepper = createFixedStepper(TUNING.sim);
     let frame = 0;
     return {

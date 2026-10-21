@@ -1,16 +1,18 @@
 /**
- * 1/4 光场的游戏材质接入：world/light-field 的天空光（含洞穴发光）与灯光 → 镜头窗口图集（light-field-atlas），
- * 通过“共享 GLSL 片段 + onBeforeCompile 链式注入”挂到场景里所有网格材质上（WebGPU 由 webgpu-light-map 按节点补丁翻译）：
+ * 1/4 光场的游戏材质接入：world/light-field 的天空光（含洞穴发光）、灯光与遮挡 → 镜头窗口图集（light-field-atlas），
+ * 通过“共享 GLSL 片段 + onBeforeCompile 链式注入”挂到场景里所有网格材质上（WebGPU 由 webgpu-light-map 按节点补丁翻译）。
+ * 所有世界用同一个光照模型（light-field-lighting），只差 uniform（实心深度渐隐、地上地下分界）与灯槽数：
  * - 顶点：在 project_vertex 之后算世界坐标（含 instancing/batching）→ varying vLmWorld；
- * - 片元：在 opaque_fragment 之前按世界 xy 采样天空光，与动态光（光球点光源，2D 距离衰减）取最大，与鹈鹕微光屏幕合成，
- *   乘到非自发光部分：outgoingLight = (outgoingLight − emissive)·lm + emissive（光球核心等自发光不被压暗）；灯光按漫反射叠加。
+ * - 受光材质：逐分量调制 three 的光照（方向光乘天光与太阳透过率、点光乘逐格可见度、间接光乘门控与反弹、
+ *   加地下底光、窗下日光与灯光场辐照度）；门控 = 天光曲线、动态光（光球点光源，2D 距离衰减）与最低亮度取大 ⊕ 鹈鹕微光；
+ * - Basic/Matcap：整体乘同一门控。自发光不被压暗。
  * 每帧 update(scene, frame, view)：给新出现的材质挂接；收集点光源写动态光；按扫描间隔比对水量；镜头窗口补算条带；
- * 光场有变化则重打包上传。瓦片掩码变化经 TileMap.onMaskChange 进光场。光场重算每帧只用约 LIGHT_FRAME_BUDGET_MS，
- * 镜头看得见的条带当帧算完，其余（挖格、水流、开关门的重算与窗口边缘的条带）镜头附近先算、分到后续帧。
+ * 光场有变化则重打包上传；固定灯槽跟随镜头附近的灯具。瓦片掩码变化经 TileMap.onMaskChange 进光场。
+ * 光场重算每帧只用约 LIGHT_FRAME_BUDGET_MS，镜头看得见的条带当帧算完，其余（挖格、水流、开关门的重算与窗口边缘的条带）镜头附近先算、分到后续帧。
  * 不挂接：userData.noLightMap 为真的材质（远景）、ShaderMaterial/Sprite/Points/Line 等非网格光照材质。
  *
- * - 地形暗部：方块与洞壁背板（material.userData.terrainDark）在暗处把反照率色相与亮度收敛到地下色 LM_TERRAIN_ALBEDO，
- *   保留光照因子；暗灰石材 × 近 0 的光照落入色调映射趾部，逐块石纹会跨过截断阈值出现锯齿黑块，收敛后变暗只跟光场走。
+ * - 地形暗部：方块与洞壁背板（material.userData.terrainDark）在受光前按光量把反照率色相与亮度收敛到地下色 LM_TERRAIN_ALBEDO；
+ *   暗灰石材 × 近 0 的光照落入色调映射趾部，逐块石纹会跨过截断阈值出现锯齿黑块，收敛后变暗只跟光场走。
  * - 水体（material.userData.waterBody）：整体（含自发光底色）乘 水响应(光照) ⊕ 微光，洞内水潭更暗。
  * - 水下深度图（world/water-depth，逻辑格分辨率的整图 RG 纹理）：水面前层之前的片元乘水体吸收色。
  */
@@ -22,15 +24,16 @@ import type { WaterPalette } from '../../config/water-palettes.ts';
 import { WATER_DEPTH_MAX, WATER_DEPTH_MIN, computeWaterDepth } from '../../world/water-depth.ts';
 import type { FluidMap } from '../../world/fluid-map.ts';
 import type { TreeInstance } from '../../world/level.ts';
-import { LIGHT_STRIP, type LightEmitter, type LightRules } from '../../world/light-field.ts';
-import { createWorldLightField, type WorldLightField } from '../../world/light-field-tiles.ts';
+import { LIGHT_CELL, LIGHT_STRIP, type LightEmitter, type LightRules } from '../../world/light-field.ts';
+import { CITY_SKY_SOLID_PASS, createWorldLightField, type WorldLightField } from '../../world/light-field-tiles.ts';
 import type { TileMap } from '../../world/tile-map.ts';
 import { WATER_FRONT_Z } from '../water/water-view.ts';
-import { GAME_LIGHT_SLOTS, LIGHT_FIELD_ATLAS_GLSL, createLightFieldAtlas, createRowUploads, type LightFieldAtlas } from './light-field-atlas.ts';
+import { GAME_LIGHT_SLOTS, LIGHT_FIELD_ATLAS_GLSL, createLightFieldAtlas, createRowUploads } from './light-field-atlas.ts';
+import { LIGHTING_MODEL_PARS, createLampSlots, injectLightingModel, replaceOnce } from './light-field-lighting.ts';
 import { addNodePatch, removeNodePatch } from './node-patches.ts';
 import type { NodePatch } from './node-patches.ts';
 
-export const LIGHT_MAP_PROGRAM_TAG = 'lightfield-v1';
+export const LIGHT_MAP_PROGRAM_TAG = 'lightfield-v2';
 /** 每帧光场与水下深度重算的时间预算（毫秒）：60 帧下留给其余渲染的余量。 */
 const LIGHT_FRAME_BUDGET_MS = 2;
 /** 水下深度每段重算的列数（约 0.5 ms）。 */
@@ -48,7 +51,7 @@ export const LM_WATER_LIGHT_LO = 0;
 export const LM_WATER_LIGHT_HI = 0.6;
 /** 灯光解码后的亮度上限：叠加再多也保持灯色而不变白（与城区光照同值）。 */
 export const LM_LAMP_CAP = 4;
-export type RGB3 = readonly [number, number, number];
+type RGB3 = readonly [number, number, number];
 const LUMA: RGB3 = [0.2126, 0.7152, 0.0722];
 const dot3 = (a: RGB3, b: RGB3): number => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
 /** 地下色的亮度（Rec.709）。 */
@@ -83,30 +86,6 @@ export function waterLightResponse(l: number): number {
   return l * smoothstepJs(LM_WATER_LIGHT_LO, LM_WATER_LIGHT_HI, l);
 }
 
-/**
- * lmTerrain 的 JS 镜像（测试用，同式）：base = 光照后（光场之前）的非自发光颜色，albedo = 反照率，amb = 环境亮度，
- * dyn = 光球动态光 [0,1]，aura = 微光（颜色 × 强度 × 衰减 × 接收系数）。返回乘光照后的颜色。
- */
-export function terrainDarkShade(base: RGB3, albedo: RGB3, amb: number, dyn: number, aura: RGB3): [number, number, number] {
-  checkUnit('terrainDarkShade', 'ambient light', amb);
-  checkUnit('terrainDarkShade', 'dynamic light', dyn);
-  const light = screenLight(Math.max(amb, dyn), aura);
-  const a = dot3(light, LUMA);
-  const k = smoothstepJs(LM_TERRAIN_LO, LM_TERRAIN_HI, a);
-  const kl = smoothstepJs(LM_TERRAIN_LUM_LO, LM_TERRAIN_LUM_HI, a);
-  const la = Math.max(dot3(albedo, LUMA), 1e-4);
-  const shade = dot3(base, LUMA) / la;
-  // 色相：按 k 在地下色（同亮度）与本色之间混合；亮度目标：比地下色亮的材质（沙、砂岩）按 kl 几何收敛，
-  // 暗材质（土、石）按 k 抬到地下色亮度（暗处所有材质同亮度；近地表沙不压暗）。
-  const lt = la > TERRAIN_LUMA ? TERRAIN_LUMA * Math.pow(la / TERRAIN_LUMA, kl) : TERRAIN_LUMA + (la - TERRAIN_LUMA) * k;
-  const out: [number, number, number] = [0, 0, 0];
-  for (let i = 0; i < 3; i++) {
-    const t = ((LM_TERRAIN_ALBEDO[i] as number) * la * shade) / TERRAIN_LUMA;
-    out[i] = (t + ((base[i] as number) - t) * k) * (lt / la) * (light[i] as number);
-  }
-  return out;
-}
-
 const TERRAIN_LUMA_GLSL = TERRAIN_LUMA.toFixed(6);
 
 export interface LightMapUniforms {
@@ -132,9 +111,22 @@ export interface LightMapUniforms {
   /** 鹈鹕自带微光：xy = 中心，z = 半径，w = 强度 [0,1]；uAuraColor = 光色。 */
   readonly uAura: THREE.IUniform<THREE.Vector4>;
   readonly uAuraColor: THREE.IUniform<THREE.Color>;
+  /** 遮挡图集（与 uLightField 同布局）：R = 非门实心，G = 遮挡度 5×5 平均。 */
+  readonly uLightOcclusion: THREE.IUniform<THREE.Texture>;
+  /** 光场子格宽高。 */
+  readonly uLightFieldSize: THREE.IUniform<THREE.Vector2>;
+  /** 夜晚系数 [0,1]（白天折灯）与天色（室内反弹）。 */
+  readonly uNight: THREE.IUniform<number>;
+  readonly uSkyTint: THREE.IUniform<THREE.Color>;
+  /** 地上地下分界（世界 y）：其下一格内渐变为地下。 */
+  readonly uUndergroundTop: THREE.IUniform<number>;
+  /** log(天光) × 它 = 离实心表层的格数（向内为正）。 */
+  readonly uSolidDepthScale: THREE.IUniform<number>;
+  /** 固定灯槽点光的世界坐标（长度 = 灯槽数）。 */
+  readonly uLampSlots: THREE.IUniform<THREE.Vector3[]>;
 }
 
-/** 片元声明 + 采样函数（LM_DYN_MAX 由 define 提供）。 */
+/** 片元声明 + 采样函数（LM_DYN_MAX、LM_AURA_RECEIVE、LM_FLOOR、LM_LAMP_SLOTS 由 define 提供）。 */
 const LIGHT_MAP_FRAGMENT_PARS = /* glsl */ `
 ${LIGHT_FIELD_ATLAS_GLSL}
 uniform float uLightMin;
@@ -155,9 +147,9 @@ float lmAmbient(vec3 w) {
   return max(lfLight(w.xy).a, uLightMin);
 }
 // 灯光辐照度：RGB 存 √(x/(1+x))，按 e/(1-e) 解码；e 夹在 .996 以下避免 1-e 为零，按亮度整体封顶保持灯色。
-vec3 lmLamp(vec3 w) {
-  vec3 e = lfLight(w.xy).rgb;
-  e = min(e * e, vec3(.996));
+// 光场与点光同单位（后墙辐照度）：单盏吊灯在后墙的峰值约 28，上限压到 LM_LAMP_CAP，灯后热斑缩到约 1.8 格内且保留灯色。
+vec3 lmLampDecode(vec3 encoded) {
+  vec3 e = min(encoded * encoded, vec3(.996));
   vec3 lamp = e / (1.0 - e);
   return lamp * (${LM_LAMP_CAP.toFixed(1)} / max(dot(lamp, vec3(0.2126, 0.7152, 0.0722)), ${LM_LAMP_CAP.toFixed(1)}));
 }
@@ -190,17 +182,17 @@ vec3 lmCombine(float l, vec3 a) {
 float lmWaterLight(float l) {
   return l * smoothstep(${LM_WATER_LIGHT_LO.toFixed(3)}, ${LM_WATER_LIGHT_HI.toFixed(3)}, l);
 }
-// 地形暗部（terrainDarkShade 同式）：按总光量把反照率色相与亮度收敛到 LM_TERRAIN_ALBEDO（保留光照因子），亮处保留本色。
-vec3 lmTerrain(vec3 base, vec3 albedo, vec3 w) {
+// 地形暗部：受光前按总光量把反照率色相与亮度收敛到 LM_TERRAIN_ALBEDO，亮处保留本色。
+// 暗灰石材 × 近 0 的光照落入色调映射趾部，逐块石纹会跨过截断阈值出现锯齿黑块，收敛后变暗只跟光场走。
+vec3 lmTerrainAlbedo(vec3 albedo, vec3 w) {
   vec3 light = lmCombine(max(lmAmbient(w), lmDynamic(w)), lmAura(w));
   float a = dot(light, vec3(0.2126, 0.7152, 0.0722));
   float k = smoothstep(${LM_TERRAIN_LO.toFixed(3)}, ${LM_TERRAIN_HI.toFixed(3)}, a);
   float kl = smoothstep(${LM_TERRAIN_LUM_LO.toFixed(3)}, ${LM_TERRAIN_LUM_HI.toFixed(3)}, a);
   float la = max(dot(albedo, vec3(0.2126, 0.7152, 0.0722)), 1e-4);
-  float shade = dot(base, vec3(0.2126, 0.7152, 0.0722)) / la;
-  vec3 hue = mix(vec3(${LM_TERRAIN_ALBEDO.map((v) => v.toFixed(4)).join(', ')}) * (la / ${TERRAIN_LUMA_GLSL}) * shade, base, k);
+  vec3 hue = mix(vec3(${LM_TERRAIN_ALBEDO.map((v) => v.toFixed(4)).join(', ')}) * (la / ${TERRAIN_LUMA_GLSL}), albedo, k);
   float lt = la > ${TERRAIN_LUMA_GLSL} ? ${TERRAIN_LUMA_GLSL} * pow(la / ${TERRAIN_LUMA_GLSL}, kl) : mix(${TERRAIN_LUMA_GLSL}, la, k);
-  return hue * (lt / la) * light;
+  return hue * (lt / la);
 }
 // 水下吸收：深度 d（水面处过零）> 0、湖床渐隐 > 0，且在水面前层之前（更靠后的物体由半透明水面染色）。
 vec3 lmWaterTint(vec3 w) {
@@ -211,6 +203,7 @@ vec3 lmWaterTint(vec3 w) {
   float k = smoothstep(0.0, uWaterRange, d);
   return mix(vec3(1.0), mix(uWaterShallow, uWaterDeep, k), mix(uWaterAlpha.x, uWaterAlpha.y, k) * gate);
 }
+${LIGHTING_MODEL_PARS}
 `;
 
 const LIGHT_MAP_VERTEX_PARS = /* glsl */ `
@@ -230,28 +223,19 @@ const LIGHT_MAP_VERTEX = /* glsl */ `
 }
 `;
 
-// 灯光照到的是漫反射：辐照度 × 反照率 / π（与 three 的间接漫反射同单位）。
+/** 受光材质：光照已逐分量调制，出光只乘水下吸收。 */
 const FRAGMENT_APPLY_LIT = /* glsl */ `
 outgoingLight *= lmWaterTint(vLmWorld);
-outgoingLight = (outgoingLight - totalEmissiveRadiance) * lmCombine(lmSample(vLmWorld), lmAura(vLmWorld)) + diffuseColor.rgb * lmLamp(vLmWorld) * RECIPROCAL_PI + totalEmissiveRadiance;
 `;
-const FRAGMENT_APPLY_TERRAIN = /* glsl */ `
-outgoingLight *= lmWaterTint(vLmWorld);
-outgoingLight = lmTerrain(outgoingLight - totalEmissiveRadiance, diffuseColor.rgb, vLmWorld) + diffuseColor.rgb * lmLamp(vLmWorld) * RECIPROCAL_PI + totalEmissiveRadiance;
-`;
-const FRAGMENT_APPLY_UNLIT = /* glsl */ `
-outgoingLight *= lmWaterTint(vLmWorld);
-outgoingLight *= lmCombine(lmSample(vLmWorld), lmAura(vLmWorld));
+/** Basic/Matcap：没有逐分量光照，整体乘门控。 */
+const FRAGMENT_APPLY_BASIC = /* glsl */ `
+outgoingLight *= lmWaterTint(vLmWorld) * lmGate(vLmWorld, max(lmLightAt(vLmWorld.xy).a, uLightMin));
 `;
 /** 水体：整体（含自发光底色）乘 水响应(光照) ⊕ 微光。 */
 const FRAGMENT_APPLY_WATER = /* glsl */ `
 outgoingLight *= lmWaterTint(vLmWorld);
 outgoingLight *= lmCombine(lmWaterLight(lmSample(vLmWorld)), lmAura(vLmWorld));
 `;
-
-function requireChunk(src: string, chunk: string, stage: string, name: string): void {
-  if (!src.includes(chunk)) throw new Error(`light-field-material: ${stage} shader of material '${name}' lacks '${chunk}' (three changed or another injection removed it)`);
-}
 
 /** 单个材质的光场挂接选项。 */
 export interface LightMapPatchOptions {
@@ -265,32 +249,29 @@ export interface LightMapPatchOptions {
   readonly auraReceive?: number;
 }
 
-/** 把光场注入一份已编译前的着色器源（onBeforeCompile 的 shader 参数）。 */
-export function injectLightMap(shader: { vertexShader: string; fragmentShader: string; uniforms: Record<string, THREE.IUniform>; defines?: Record<string, unknown> }, uniforms: LightMapUniforms, dynMax: number, name: string, options: LightMapPatchOptions = {}): void {
+/** 把光场注入一份已编译前的着色器源（onBeforeCompile 的 shader 参数）；lampSlots = 固定灯槽数（同一世界内不变）。 */
+export function injectLightMap(shader: { vertexShader: string; fragmentShader: string; uniforms: Record<string, THREE.IUniform>; defines?: Record<string, unknown> }, uniforms: LightMapUniforms, dynMax: number, lampSlots: number, name: string, options: LightMapPatchOptions = {}): void {
   const { floor = 0, terrain = false, water = false, auraReceive = 1 } = options;
   if (!(Number.isFinite(floor) && floor >= 0 && floor < 1)) throw new Error(`light-field-material: material '${name}' lightFloor must be in [0,1), got ${floor}`);
   if (!(Number.isFinite(auraReceive) && auraReceive >= 0 && auraReceive <= 1)) throw new Error(`light-field-material: material '${name}' auraReceive must be in [0,1], got ${auraReceive}`);
   if (terrain && floor > 0) throw new Error(`light-field-material: material '${name}' cannot combine terrain darkening with lightFloor ${floor}`);
   if (water && (terrain || floor > 0)) throw new Error(`light-field-material: material '${name}' water body cannot combine with terrain darkening or lightFloor`);
-  requireChunk(shader.vertexShader, '#include <common>', 'vertex', name);
-  requireChunk(shader.vertexShader, '#include <project_vertex>', 'vertex', name);
-  requireChunk(shader.fragmentShader, '#include <common>', 'fragment', name);
-  requireChunk(shader.fragmentShader, '#include <opaque_fragment>', 'fragment', name);
-  Object.assign(shader.uniforms, uniforms);
-  shader.vertexShader = shader.vertexShader
-    .replace('#include <common>', `#include <common>\n${LIGHT_MAP_VERTEX_PARS}`)
-    .replace('#include <project_vertex>', `#include <project_vertex>\n${LIGHT_MAP_VERTEX}`);
-  const lit = shader.fragmentShader.includes('totalEmissiveRadiance');
+  const lit = shader.fragmentShader.includes('totalEmissiveRadiance') || shader.fragmentShader.includes('getDirectionalLightInfo(');
   if (terrain && !lit) throw new Error(`light-field-material: material '${name}' requests terrain darkening but has no lit shading (totalEmissiveRadiance)`);
-  const apply = terrain ? FRAGMENT_APPLY_TERRAIN : water ? FRAGMENT_APPLY_WATER : floorApply(lit ? FRAGMENT_APPLY_LIT : FRAGMENT_APPLY_UNLIT, floor);
-  shader.fragmentShader = shader.fragmentShader
-    .replace('#include <common>', `#include <common>\n#define LM_DYN_MAX ${dynMax}\n#define LM_AURA_RECEIVE ${auraReceive.toFixed(4)}\n${LIGHT_MAP_FRAGMENT_PARS}`)
-    .replace('#include <opaque_fragment>', `${apply}\n#include <opaque_fragment>`);
-}
-
-/** 有最低亮度时把环境采样包进 max(·, floor)。 */
-function floorApply(code: string, floor: number): string {
-  return floor > 0 ? code.replace('lmSample(vLmWorld)', `max(lmSample(vLmWorld), ${floor.toFixed(4)})`) : code;
+  Object.assign(shader.uniforms, uniforms);
+  const vertex = replaceOnce(shader.vertexShader, '#include <common>', `#include <common>\n${LIGHT_MAP_VERTEX_PARS}`, name);
+  shader.vertexShader = replaceOnce(vertex, '#include <project_vertex>', `#include <project_vertex>\n${LIGHT_MAP_VERTEX}`, name);
+  let fragment = replaceOnce(shader.fragmentShader, '#include <common>', `#include <common>
+#define LM_DYN_MAX ${dynMax}
+#define LM_LAMP_SLOTS ${lampSlots}
+#define LM_AURA_RECEIVE ${auraReceive.toFixed(4)}
+#define LM_FLOOR ${floor.toFixed(4)}
+${LIGHT_MAP_FRAGMENT_PARS}`, name);
+  if (terrain) fragment = replaceOnce(fragment, '#include <emissivemap_fragment>', 'diffuseColor.rgb = lmTerrainAlbedo(diffuseColor.rgb, vLmWorld);\n#include <emissivemap_fragment>', name);
+  // 水体保留整体乘光照的响应曲线，不走逐分量光照。
+  if (lit && !water) fragment = injectLightingModel(fragment, name);
+  const apply = water ? FRAGMENT_APPLY_WATER : lit ? FRAGMENT_APPLY_LIT : FRAGMENT_APPLY_BASIC;
+  shader.fragmentShader = replaceOnce(fragment, '#include <opaque_fragment>', `${apply}\n#include <opaque_fragment>`, name);
 }
 
 type PatchableMaterial = THREE.Material & { isMeshStandardMaterial?: boolean; isMeshBasicMaterial?: boolean; isMeshLambertMaterial?: boolean; isMeshPhongMaterial?: boolean; isMeshToonMaterial?: boolean; isMeshMatcapMaterial?: boolean };
@@ -313,21 +294,23 @@ interface WorldLightInput {
   readonly emitters?: readonly LightEmitter[];
   /** 浮空岛天空光穿透掩码（逻辑格）。 */
   readonly skyPass?: Uint8Array;
-  /** 城区：住宅光场规则，图集另打包遮挡图供城区着色（light-field-city）共用。 */
-  readonly city?: { readonly rules: LightRules };
+  /** 城区：住宅光场规则（露天按地基顶面以上）、地上地下分界（世界 y）与固定灯槽数；缺省为游戏世界规则、全图按地下、无灯槽。 */
+  readonly city?: { readonly rules: LightRules; readonly undergroundTop: number; readonly lampSlots: number };
 }
 
 export interface WorldLight {
   readonly field: WorldLightField;
-  /** 镜头窗口图集；城区着色与游戏材质共用同一份。 */
-  readonly atlas: LightFieldAtlas;
   readonly uniforms: LightMapUniforms;
+  /** 固定灯槽点光；灯槽数大于 0 的调用方把它加进场景。 */
+  readonly lamps: THREE.Group;
   /** 已挂接的材质数（调试）。 */
   readonly patched: number;
   /** 挂接单个材质（幂等）；不可挂接返回 false。 */
   patchMaterial(material: THREE.Material): boolean;
   /** 每帧：挂接新材质、动态光、水量扫描、按镜头补算条带并上传变化。 */
   update(scene: THREE.Object3D, frame: number, view: Readonly<Rect>): void;
+  /** 昼夜：夜晚系数 [0,1] 与天色（线性 RGB）。 */
+  setSky(night: number, skyTint: THREE.Color): void;
   /** 切换水下吸收色板（与 water-view.setPalette 同步调用）。 */
   setWaterPalette(palette: WaterPalette): void;
   /** 鹈鹕微光：中心 (x,y)、半径、强度 [0,1]、线性 RGB 光色；强度 0 = 关闭。 */
@@ -346,7 +329,10 @@ export function createWorldLight(input: WorldLightInput): WorldLight {
     ...(input.skyPass ? { skyPass: input.skyPass } : {}),
     ...(input.city ? { rules: input.city.rules } : {}),
   });
-  const atlas = createLightFieldAtlas(field, { slots: GAME_LIGHT_SLOTS, occlusion: input.city !== undefined });
+  const atlas = createLightFieldAtlas(field, { slots: GAME_LIGHT_SLOTS });
+  const lampSlots = input.city?.lampSlots ?? 0;
+  // 游戏世界的实心按每格 solidDecay 衰减，城区按每子格 CITY_SKY_SOLID_PASS。
+  const solidPass = input.city ? CITY_SKY_SOLID_PASS : cfg.solidDecay ** LIGHT_CELL;
 
   const { width, height } = map;
   // RGBA（只用 RG）：分区上传只认 RGBA。
@@ -404,7 +390,15 @@ export function createWorldLight(input: WorldLightInput): WorldLight {
     uWaterRange: { value: 1 },
     uAura: { value: new THREE.Vector4(0, 0, 1, 0) },
     uAuraColor: { value: new THREE.Color(1, 1, 1) },
+    uLightOcclusion: { value: atlas.occlusion },
+    uLightFieldSize: { value: new THREE.Vector2(field.width, field.height) },
+    uNight: { value: 0 },
+    uSkyTint: { value: new THREE.Color(1, 1, 1) },
+    uUndergroundTop: { value: input.city?.undergroundTop ?? height },
+    uSolidDepthScale: { value: LIGHT_CELL / Math.log(solidPass) },
+    uLampSlots: { value: Array.from({ length: lampSlots }, () => new THREE.Vector3()) },
   };
+  const lamps = createLampSlots(field, lampSlots, uniforms.uUndergroundTop.value, uniforms.uLampSlots.value);
   const setWaterPalette = (p: WaterPalette): void => {
     uniforms.uWaterShallow.value.set(p.shallow);
     uniforms.uWaterDeep.value.set(p.deep);
@@ -457,10 +451,10 @@ export function createWorldLight(input: WorldLightInput): WorldLight {
       prev.call(material, shader, renderer);
       // 传送克隆会委托原材质的编译链，同一光照已注入时不能再次声明 GLSL。
       if (shader.uniforms.uLightField === uniforms.uLightField) return;
-      injectLightMap(shader, uniforms, cfg.dynamicMax, name, options);
+      injectLightMap(shader, uniforms, cfg.dynamicMax, lampSlots, name, options);
     };
     material.customProgramCacheKey = () =>
-      `${baseKey}|${LIGHT_MAP_PROGRAM_TAG}${floor > 0 ? `|floor${floor}` : ''}${terrain ? '|terrain' : ''}${water ? '|water' : ''}${auraReceive !== 1 ? `|aura${auraReceive}` : ''}`;
+      `${baseKey}|${LIGHT_MAP_PROGRAM_TAG}${floor > 0 ? `|floor${floor}` : ''}${terrain ? '|terrain' : ''}${water ? '|water' : ''}${auraReceive !== 1 ? `|aura${auraReceive}` : ''}|slots${lampSlots}`;
     material.needsUpdate = true;
     // 预览重置会复用角色材质；释放光照时撤掉这次注入，不能叠加旧地图的 shader。
     restoreMaterials.push(() => {
@@ -477,8 +471,8 @@ export function createWorldLight(input: WorldLightInput): WorldLight {
   const tmp = new THREE.Vector3();
   return {
     field,
-    atlas,
     uniforms,
+    lamps: lamps.root,
     get patched() {
       return patched;
     },
@@ -498,7 +492,7 @@ export function createWorldLight(input: WorldLightInput): WorldLight {
       });
       scene.traverseVisible((node) => {
         const pl = node as THREE.PointLight;
-        // 光场已含的灯（城区灯槽的高光点光）不再当动态光。
+        // 光场已含的灯（固定灯槽的高光点光）不再当动态光。
         if (pl.isPointLight && pl.intensity > 0 && dyn < lights.length && pl.userData.fieldLamp !== true) {
           if (pl.userData.localFill === true) { localFills.push(pl); return; }
           pl.getWorldPosition(tmp);
@@ -531,6 +525,12 @@ export function createWorldLight(input: WorldLightInput): WorldLight {
         required: [Math.floor((view.x - field.minX) / strip) - 1, Math.floor((view.x + view.w - field.minX) / strip) + 2],
         yieldNow: () => performance.now() > deadline,
       }));
+      lamps.update({ x: view.x + view.w / 2, y: view.y + view.h / 2 }, uniforms.uNight.value);
+    },
+    setSky(night, skyTint) {
+      if (disposed) throw new Error('light-field-material: setSky after dispose');
+      uniforms.uNight.value = night;
+      uniforms.uSkyTint.value.copy(skyTint);
     },
     setWaterPalette(p) {
       if (disposed) throw new Error('light-field-material: setWaterPalette after dispose');
@@ -553,6 +553,7 @@ export function createWorldLight(input: WorldLightInput): WorldLight {
       for (const restore of restoreMaterials) restore();
       restoreMaterials.length = 0;
       unsubscribe();
+      lamps.dispose();
       field.dispose();
       atlas.dispose();
       depth.dispose();

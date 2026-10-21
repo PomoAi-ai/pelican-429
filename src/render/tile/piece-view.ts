@@ -1,7 +1,7 @@
 /**
  * 块视图：按区块把定义构件实例化——建筑材料与建筑平台的块，以及瓦片视图画不了的多块格、新形态格（自然材料也在此画）。
  * 每种（材质、形态、深度、拼宽 / 平台宽、顶高、是否挂墙）先用定义构件画一次取模板，区块内同模板网格合成一个 InstancedMesh。
- * 平台挂墙随墙层变化，墙层增删也让所在区块重建。材质标 noLightMap，由城区光场着色（light-field-city）接入。
+ * 平台挂墙随墙层变化，墙层增删也让所在区块重建。
  */
 import * as THREE from 'three';
 import type { Rect } from '../../core/math.ts';
@@ -17,7 +17,7 @@ import { TILE_APPEARANCE } from './tile-view.ts';
 /** 模板绘制的原点：实体、悬空平台、挂墙平台（先铺墙）、墙各占一条，互不触发定义构件的深度互斥。 */
 const LANE = { solid: 0, platform: 2, hung: 4, wall: 8 } as const;
 
-/** 定义构件模板库：按键懒建，材质一律标 noLightMap（城区光场着色）。 */
+/** 定义构件模板库：按键懒建。 */
 export function createDefinitionTemplates() {
   const kit: DefinitionKit = createDefinitionKit({ style: 'ai-city' });
   kit.wall('W0', LANE.hung, 0);
@@ -27,7 +27,6 @@ export function createDefinitionTemplates() {
     let template = templates.get(key);
     if (!template) {
       template = captureDefinitionTemplate(kit, x, 0, draw);
-      for (const mesh of template) mesh.material.userData.noLightMap = true;
       templates.set(key, template);
     }
     return template;
@@ -88,8 +87,8 @@ const samePiece = (a: TilePiece, b: TilePiece): boolean => a.id === b.id && a.sh
 
 export interface PieceView {
   readonly root: THREE.Group;
-  /** 按镜头流式构建区块；返回本次构建的区块数（有新网格时调用方重新接入光照）。 */
-  update(view: Readonly<Rect>): number;
+  /** 按镜头流式构建区块。 */
+  update(view: Readonly<Rect>): void;
   dispose(): void;
 }
 
@@ -170,7 +169,7 @@ export function createPieceView(map: TileMap): PieceView {
     update(view) {
       const list = [...dirty].map(k => ({ cx: k % map.chunksX, cy: Math.floor(k / map.chunksX) }));
       dirty.clear();
-      return streamer.update(view, list);
+      streamer.update(view, list);
     },
     dispose() {
       for (const off of unsubscribe) off();

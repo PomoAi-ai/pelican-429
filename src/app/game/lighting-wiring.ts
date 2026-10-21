@@ -51,11 +51,13 @@ export interface WorldLighting {
  * 泰拉瑞亚式 1/4 光场：地下逐格变暗，树冠下/屋内/水下变暗，光球照亮周围（挂接到场景全部网格材质）。
  * 洞内发光源（蘑菇/晶簇/萤火虫）为静态光源；大浮空岛列的天空光穿过岛体（岛下淡投影而不是全黑）。
  */
-export function createWorldLighting(level: LevelData, world: SimWorld, waterPaletteName: WaterPaletteName, disposers: Array<() => void>, lighting: LightingTuning = TUNING.render.lighting): WorldLighting {
+export function createWorldLighting(level: LevelData, world: SimWorld, waterPaletteName: WaterPaletteName, quality: LightingQuality, disposers: Array<() => void>, lighting: LightingTuning = TUNING.render.lighting): WorldLighting {
   const city = world.city;
+  const foundationTop = city?.building.site.foundationTop;
   const worldLight = createWorldLight({
-    // 城区：地基顶面以上无墙无实心的空气露天（住宅规则）。
-    ...city ? { city: { rules: cityLightRules(city.building.site.foundationTop * SUBCELLS) } } : {},
+    // 城区：地基顶面以上无墙无实心的空气露天（住宅规则），地基以下为地下；固定灯槽补镜头附近灯具的高光。
+    ...foundationTop !== undefined
+      ? { city: { rules: cityLightRules(foundationTop * SUBCELLS), undergroundTop: foundationTop, lampSlots: quality === 'low' ? 2 : 4 } } : {},
     map: level.map,
     fluid: world.fluid,
     trees: level.trees,

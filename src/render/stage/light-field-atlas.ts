@@ -18,8 +18,8 @@ export interface LightFieldAtlas {
   readonly field: LightField;
   /** RGB = 灯光（平方根编码），A = 天空光。 */
   readonly light: THREE.DataTexture;
-  /** 城区遮挡（R：非门实心为 255，高光遮挡用；G：遮挡度 5×5 平均，太阳遮挡用）；未开启为 null。 */
-  readonly occlusion: THREE.DataTexture | null;
+  /** 遮挡（R：非门实心为 255，高光遮挡用；G：遮挡度 5×5 平均，太阳遮挡用）。 */
+  readonly occlusion: THREE.DataTexture;
   /** xy = 场左下角世界坐标，z = 每格子格数，w = 子格高。 */
   readonly bounds: THREE.Vector4;
   /** 驻留子格列 [x, y)。 */
@@ -95,8 +95,8 @@ const RECENTER_MARGIN = 2;
 /** 释放驻留窗口两侧超过该条数的已算条带。 */
 const KEEP_STRIPS = 4;
 
-/** slots：驻留条带数（超过光场条带数时取光场条带数）；occlusion：同时打包城区用的遮挡图。 */
-export function createLightFieldAtlas(field: LightField, options: { readonly slots: number; readonly occlusion: boolean }): LightFieldAtlas {
+/** slots：驻留条带数（超过光场条带数时取光场条带数）。 */
+export function createLightFieldAtlas(field: LightField, options: { readonly slots: number }): LightFieldAtlas {
   const { height } = field;
   const slots = Math.min(options.slots, field.strips);
   const perRow = Math.min(slots, Math.floor(MAX_ATLAS_WIDTH / LIGHT_SLOT_WIDTH));
@@ -106,18 +106,20 @@ export function createLightFieldAtlas(field: LightField, options: { readonly slo
   const light = new THREE.DataTexture(lightData, atlasWidth, atlasHeight, THREE.RGBAFormat, THREE.UnsignedByteType);
   light.name = 'light-field';
   // 遮挡图也用 RGBA：分区上传只认 RGBA；高光遮挡按纹素直接取，与线性过滤的遮挡度共用一张。
-  const occlusionData = options.occlusion ? new Uint8Array(atlasWidth * atlasHeight * 4) : null;
-  const occlusion = occlusionData ? new THREE.DataTexture(occlusionData, atlasWidth, atlasHeight, THREE.RGBAFormat, THREE.UnsignedByteType) : null;
-  if (occlusion) occlusion.name = 'light-field-occlusion';
+  const occlusionData = new Uint8Array(atlasWidth * atlasHeight * 4);
+  const occlusion = new THREE.DataTexture(occlusionData, atlasWidth, atlasHeight, THREE.RGBAFormat, THREE.UnsignedByteType);
+  occlusion.name = 'light-field-occlusion';
   for (const t of [light, occlusion]) {
-    if (!t) continue;
     t.wrapS = t.wrapT = THREE.ClampToEdgeWrapping;
     t.minFilter = t.magFilter = THREE.LinearFilter;
     t.generateMipmaps = false;
     t.unpackAlignment = 1;
     t.colorSpace = THREE.NoColorSpace;
   }
-  const uploads = [light, occlusion].filter((t): t is THREE.DataTexture => t !== null).map(createRowUploads);
+  const lightUploads = createRowUploads(light);
+  const occlusionUploads = createRowUploads(occlusion);
+  // 只有遮挡字节变了的行才上传；全空气的世界也要有一次初始上传。
+  occlusionUploads.all();
   const bounds = new THREE.Vector4(field.minX, field.minY, 1 / field.cellSize, height);
   const window = new THREE.Vector2(0, 0);
   const layout = new THREE.Vector4(slots, perRow, atlasWidth, atlasHeight);
@@ -131,6 +133,7 @@ export function createLightFieldAtlas(field: LightField, options: { readonly slo
   /** 遮挡度：空气 0、门 1、实心 2；世界外与未算条带按空气。 */
   const OPACITY_PAD = 3;
   const opacity = new Uint8Array((LIGHT_STRIP + OPACITY_PAD * 2) * height);
+  const occlusionChanged = new Uint8Array(height);
   /** 填遮挡度缓冲的列 [i0,i1]、行 [ya,yb)（缓冲第 0 列是世界子格列 x0）。 */
   const opacityColumns = (x0: number, i0: number, i1: number, ya: number, yb: number): void => {
     const w = LIGHT_STRIP + OPACITY_PAD * 2;
@@ -153,8 +156,9 @@ export function createLightFieldAtlas(field: LightField, options: { readonly slo
     const base = (slot - row * perRow) * LIGHT_SLOT_WIDTH, rowBase = row * height;
     const padX0 = own.x0 - OPACITY_PAD, padW = LIGHT_STRIP + OPACITY_PAD * 2;
     // 5×5 平均要用到写入列两侧各 2 列、写入行上下各 2 行。
-    if (occlusionData) opacityColumns(padX0, Math.max(0, j0 + 1), Math.min(padW - 1, j1 + 5), Math.max(0, y0 - 2), Math.min(height, y1 + 2));
-    for (let y = y0; y < y1; y++) for (const upload of uploads) upload.row(rowBase + y, base + 1 + j0, j1 - j0 + 1);
+    opacityColumns(padX0, Math.max(0, j0 + 1), Math.min(padW - 1, j1 + 5), Math.max(0, y0 - 2), Math.min(height, y1 + 2));
+    for (let y = y0; y < y1; y++) lightUploads.row(rowBase + y, base + 1 + j0, j1 - j0 + 1);
+    occlusionChanged.fill(0, y0, y1);
     for (let j = j0; j <= j1; j++) {
       const strip = stripAt(own.x0 + j) ?? own;
       const x = Math.min(strip.x0 + strip.width - 1, Math.max(strip.x0, own.x0 + j));
@@ -165,19 +169,23 @@ export function createLightFieldAtlas(field: LightField, options: { readonly slo
         lightData[to * 4 + 1] = strip.lamp[from * 3 + 1]!;
         lightData[to * 4 + 2] = strip.lamp[from * 3 + 2]!;
         lightData[to * 4 + 3] = strip.sky[from]!;
-        if (!occlusionData) continue;
         const m = strip.medium[from]!;
         // 灯具高光只被实心挡住，半透明的能量门后仍能看到。
-        occlusionData[to * 4] = m & MEDIUM_SOLID && !(m & MEDIUM_DOOR) ? 255 : 0;
+        const solid = m & MEDIUM_SOLID && !(m & MEDIUM_DOOR) ? 255 : 0;
         // 遮挡度 5×5 盒式平均，世界之外按空气计；约 1.25 格的半影与方块尺度相当，不因光场格细而变硬。
         let sum = 0;
         for (let dy = Math.max(0, y - 2); dy <= Math.min(height - 1, y + 2); dy++) {
           const row = dy * padW + x - padX0;
           sum += opacity[row - 2]! + opacity[row - 1]! + opacity[row]! + opacity[row + 1]! + opacity[row + 2]!;
         }
-        occlusionData[to * 4 + 1] = Math.round(sum * 255 / 50);
+        const opacityAverage = Math.round(sum * 255 / 50);
+        if (occlusionData[to * 4] === solid && occlusionData[to * 4 + 1] === opacityAverage) continue;
+        occlusionData[to * 4] = solid;
+        occlusionData[to * 4 + 1] = opacityAverage;
+        occlusionChanged[y] = 1;
       }
     }
+    for (let y = y0; y < y1; y++) if (occlusionChanged[y]) occlusionUploads.row(rowBase + y, base + 1 + j0, j1 - j0 + 1);
   };
 
   /** 重打包子格矩形 [x0,x1)×[y0,y1) 覆盖的驻留且已算条带（含落在边列上的相邻条带）。 */
@@ -220,7 +228,7 @@ export function createLightFieldAtlas(field: LightField, options: { readonly slo
     },
     dispose() {
       light.dispose();
-      occlusion?.dispose();
+      occlusion.dispose();
     },
   };
 }

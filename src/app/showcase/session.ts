@@ -51,7 +51,7 @@ function createSceneContent(stage: ReturnType<typeof createStageView>, rig: Retu
     const luma = !card.resource && (scenario.entry.actor === 'pelican' || scenario.entry.actor === 'human' || scenario.entry.actor === 'luma')
       ? createLumaCompanion(stage.scene, getPlayer(world)) : null;
     if (luma) disposers.push(() => luma.dispose());
-    const lighting = createWorldLighting(level, world, palette, disposers);
+    const lighting = createWorldLighting(level, world, palette, stage.quality, disposers);
     const resource = card.resource ? createResourcePreview(stage.scene, level, scenario.groundY, card, worldViews,
       { ...scenario.focus(), width: scenario.width, height: scenario.height }) : null;
     if (resource) disposers.push(() => resource.dispose());

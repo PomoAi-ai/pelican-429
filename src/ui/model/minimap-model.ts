@@ -301,11 +301,12 @@ export function createMinimapRaster(source: MinimapSource, options: MinimapRaste
 
   const { cells: water, subWidth, subHeight } = fluid;
   const fluidHash = new Uint32Array(chunksX * chunksY);
+  // 水面像素读正上/正下一行子格（drawChunk 的 top/lowest），所以哈希含区块上下各 1 行邻接子格，邻区块的水变化也会让本区块重绘。
   const hashChunk = (cx: number, cy: number): number => {
     let h = 0x811c9dc5;
     const sx1 = Math.min(W, (cx + 1) * C) * SUBCELLS;
-    const sy1 = Math.min(H, (cy + 1) * C) * SUBCELLS;
-    for (let sy = cy * C * SUBCELLS; sy < sy1; sy++) {
+    const sy1 = Math.min(subHeight, Math.min(H, (cy + 1) * C) * SUBCELLS + 1);
+    for (let sy = Math.max(0, cy * C * SUBCELLS - 1); sy < sy1; sy++) {
       const row = sy * subWidth;
       for (let sx = cx * C * SUBCELLS; sx < sx1; sx++) {
         h ^= water[row + sx] as number;
@@ -417,8 +418,9 @@ export function createMinimapRaster(source: MinimapSource, options: MinimapRaste
         const fy = (k - fx) / fluid.chunksX;
         const S = fluid.chunkSize;
         const cx1 = Math.min(chunksX - 1, Math.floor(((fx + 1) * S - 1) / C));
-        const cy1 = Math.min(chunksY - 1, Math.floor(((fy + 1) * S - 1) / C));
-        for (let cy = Math.floor((fy * S) / C); cy <= cy1; cy++) for (let cx = Math.floor((fx * S) / C); cx <= cx1; cx++) {
+        // 上下各多查 1 个小地图区块：它们的哈希含本流体区块边缘的子格行。
+        const cy1 = Math.min(chunksY - 1, Math.floor(((fy + 1) * S - 1) / C) + 1);
+        for (let cy = Math.max(0, Math.floor((fy * S) / C) - 1); cy <= cy1; cy++) for (let cx = Math.floor((fx * S) / C); cx <= cx1; cx++) {
           const i = cy * chunksX + cx;
           const h = hashChunk(cx, cy);
           if (h === fluidHash[i]) continue;

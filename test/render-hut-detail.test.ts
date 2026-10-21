@@ -180,30 +180,13 @@ describe('渔屋细节：材质挂接', () => {
 
   test('光照图与云影：三种材质都可挂接，且在本材质注入之后链式注入不丢片段', () => {
     const m = createHutMaterials();
-    const uniforms: LightMapUniforms = {
-      uLightField: { value: new THREE.Texture() },
-      uLightFieldBounds: { value: new THREE.Vector4(0, 0, 4, 40) },
-      uLightFieldWindow: { value: new THREE.Vector2(0, 40) },
-      uLightFieldLayout: { value: new THREE.Vector4(1, 1, 130, 40) },
-      uLightMin: { value: 0.1 },
-      uDynLights: { value: [new THREE.Vector4()] },
-      uDynCount: { value: 0 },
-      uWaterDepth: { value: new THREE.Texture() },
-      uWaterDepthSize: { value: new THREE.Vector2(10, 10) },
-      uWaterShallow: { value: new THREE.Color() },
-      uWaterDeep: { value: new THREE.Color() },
-      uWaterAlpha: { value: new THREE.Vector2() },
-      uWaterRange: { value: 1 },
-      uAura: { value: new THREE.Vector4(0, 0, 1, 0) },
-      uAuraColor: { value: new THREE.Color(1, 1, 1) },
-    };
+    const uniforms = { uLightField: { value: new THREE.Texture() } } as unknown as LightMapUniforms;
     for (const mat of [m.solid, m.sway, m.smoke]) {
       assert.ok(isLightMappable(mat), `${mat.name} light-mappable`);
       assert.ok(isCloudShadowable(mat), `${mat.name} cloud-shadowable`);
       const sh = shaderOf(THREE.ShaderLib.standard);
       mat.onBeforeCompile(sh as never, {} as THREE.WebGLRenderer);
-      injectLightMap(sh, uniforms, 1, mat.name);
-      assert.match(sh.fragmentShader, /lmSample/);
+      injectLightMap(sh, uniforms, 1, 0, mat.name);
       assert.ok(mat.customProgramCacheKey().startsWith(mat.name), 'own cache key');
     }
     m.dispose();

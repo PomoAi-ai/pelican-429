@@ -10,8 +10,11 @@ import { createTeleportEffect } from '../src/render/fx/teleport-effect.ts';
 import { WATER_PALETTES } from '../src/config/water-palettes.ts';
 import { decodeWaterDepth } from '../src/world/water-depth.ts';
 import type { LightMapUniforms } from '../src/render/stage/light-field-material.ts';
+import { createBuildingState, placeBuilding } from '../src/sim/building.ts';
 import { createFluidMap } from '../src/world/fluid-map.ts';
+import { cityLightRules } from '../src/world/light-field-tiles.ts';
 import { createTileMap } from '../src/world/tile-map.ts';
+import { pieceShapeCode, SUBCELLS } from '../src/world/tile-shapes.ts';
 import { DEFAULT_TILES, TILE_DIRT } from '../src/world/tile-types.ts';
 
 function shaderOf(lib: { vertexShader: string; fragmentShader: string }) {
@@ -38,7 +41,7 @@ describe('light-field-material：着色器注入', () => {
   test('缺少注入点即抛（含材质名）', () => {
     const sh = shaderOf(THREE.ShaderLib.standard);
     sh.fragmentShader = sh.fragmentShader.replace('#include <opaque_fragment>', '');
-    assert.throws(() => injectLightMap(sh, uniforms, 2, 'broken-mat'), /broken-mat.*opaque_fragment/);
+    assert.throws(() => injectLightMap(sh, uniforms, 2, 0, 'broken-mat'), /broken-mat.*opaque_fragment/);
   });
 
   test('可挂接判定：网格光照材质；ShaderMaterial/Sprite/noLightMap 跳过', () => {
@@ -108,12 +111,11 @@ describe('light-field-material：WorldLight', () => {
     assert.equal(wl.patchMaterial(mat), true, 'idempotent');
     assert.equal(wl.patched, 1);
     assert.ok(mat.version > v0, 'needsUpdate');
-    assert.equal(mat.customProgramCacheKey(), `owner-key|${LIGHT_MAP_PROGRAM_TAG}`);
+    assert.equal(mat.customProgramCacheKey(), `owner-key|${LIGHT_MAP_PROGRAM_TAG}|slots0`);
     const sh = shaderOf(THREE.ShaderLib.standard);
     mat.onBeforeCompile(sh as never, {} as THREE.WebGLRenderer);
     assert.equal(prevCalled, 1);
     assert.match(sh.fragmentShader, /^\/\/ prev/);
-    assert.match(sh.fragmentShader, /lmSample/);
     assert.equal(sh.uniforms.uLightField, wl.uniforms.uLightField, 'shared uniforms');
     assert.equal(wl.patchMaterial(new THREE.ShaderMaterial()), false);
     wl.dispose();
@@ -168,20 +170,24 @@ describe('light-field-material：WorldLight', () => {
     assert.throws(() => wl.update(scene, 2, VIEW), /after dispose/);
   });
 
-  test('掩码变化（onMaskChange）与水量变化（按扫描间隔）→ 增量重算并重新上传', () => {
+  test('掩码变化（onMaskChange）与水量变化（按扫描间隔）→ 增量重算并重新上传；遮挡不变时遮挡图不重传', () => {
     const { map, fluid } = world();
     const wl = createWorldLight({ map, fluid, trees: [], lighting: DEFAULT_LIGHTING });
     const scene = new THREE.Scene();
     const atlas = wl.uniforms.uLightField.value;
+    const occlusion = wl.uniforms.uLightOcclusion.value;
     wl.update(scene, 1, VIEW);
     const before = wl.field.sample(20.5, 11.5);
     const v0 = atlas.version;
+    const o0 = occlusion.version;
     map.set(20, 11, 0); // 挖开地表一格 → 变成露天空气
     wl.update(scene, 1, VIEW);
     assert.ok(wl.field.sample(20.5, 11.5) > before);
     assert.ok(atlas.version > v0, 'texture re-uploaded');
-    // 水：在扫描帧才发现
+    assert.ok(occlusion.version > o0, 'occlusion re-uploaded');
+    // 水：在扫描帧才发现；水不改变遮挡。
     const v1 = atlas.version;
+    const o1 = occlusion.version;
     fluid.set(20, 11, 255);
     const scan = DEFAULT_LIGHTING.lightMap.fluidScanFrames;
     if (scan > 1) {
@@ -190,8 +196,31 @@ describe('light-field-material：WorldLight', () => {
     }
     wl.update(scene, scan, VIEW);
     assert.ok(atlas.version > v1);
+    assert.equal(occlusion.version, o1, 'occlusion unchanged by water');
     wl.dispose();
     map.set(5, 5, 0); // 已退订：不再触发光场更新（不抛）
+  });
+
+  test('固定灯槽：跟随镜头附近的灯具点亮并登记世界坐标，不计入动态光', () => {
+    const map = createTileMap(48, 24, DEFAULT_TILES);
+    const ashlar = DEFAULT_TILES.byKey('ashlar').id;
+    for (let ty = 0; ty < 8; ty++) for (let tx = 0; tx < map.width; tx++) map.placePiece(tx, ty, { id: ashlar, shape: pieceShapeCode('A'), deep: true });
+    const state = createBuildingState(map, { minX: 0, maxX: map.width, bottom: 0, top: map.height, foundationTop: 8, reserved: null }, 0);
+    assert.ok(placeBuilding(state, 'pendant', 20, 10, null).ok);
+    const wl = createWorldLight({ map, fluid: createFluidMap(map), trees: [], lighting: DEFAULT_LIGHTING,
+      city: { rules: cityLightRules(8 * SUBCELLS), undergroundTop: 8, lampSlots: 2 } });
+    const scene = new THREE.Scene();
+    scene.add(wl.lamps);
+    wl.setSky(1, new THREE.Color(1, 1, 1));
+    const view = { x: 0, y: 0, w: 48, h: 24 };
+    wl.update(scene, 1, view);
+    wl.update(scene, 2, view);
+    const lit = wl.lamps.children.filter((node) => (node as THREE.PointLight).intensity > 0);
+    assert.equal(lit.length, 1);
+    assert.equal(wl.uniforms.uDynCount.value, 0, 'lamp slots are already in the light field');
+    assert.ok(wl.uniforms.uLampSlots.value.some((p) => p.distanceTo(lit[0]!.position) < 1e-9));
+    wl.dispose();
+    assert.equal(wl.lamps.parent, null);
   });
 
   test('水图尺寸不符即抛', () => {

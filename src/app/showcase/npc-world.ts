@@ -35,7 +35,7 @@ export function createNpcWorld(stage: ReturnType<typeof createStageView>, enviro
     const views = createWorldViews({ caveBackground, scene: root, level, fish: world.fish, ground, windMode: 'calm', waterPalette: DEFAULT_WATER_PALETTE });
     disposers.push(() => views.dispose());
     views.weather.setEnabled(false);
-    const lighting = createWorldLighting(level, world, DEFAULT_WATER_PALETTE, disposers);
+    const lighting = createWorldLighting(level, world, DEFAULT_WATER_PALETTE, stage.quality, disposers);
     if (environment === 'underground') lighting.worldLight.setAura(frame.x, groundY + 1.5, 7, .65, [.8, .88, 1]);
     let frameIndex = 0;
     return {

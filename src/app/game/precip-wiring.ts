@@ -10,6 +10,7 @@ import type { FreeWorldBackgroundView } from '../../render/sky/free-world-backgr
 import type { LightShafts } from '../../render/sky/light-shafts.ts';
 import { getPlayer } from '../../sim/sim-world.ts';
 import type { CameraRig } from '../../render/stage/camera-rig.ts';
+import type { WorldLight } from '../../render/stage/light-field-material.ts';
 import type { FacilityChapterId } from '../../config/facility-scenes.ts';
 import { createPrecipView, levelPrecipSource, precipSurfaceRoots } from '../../render/sky/precip-view.ts';
 import type { PrecipView } from '../../render/sky/precip-view.ts';
@@ -52,7 +53,7 @@ export function createWorldPrecip(stage: Stage<StageRenderer>, level: LevelData,
   });
 }
 
-export function createEnvironmentViews(stage: Stage<StageRenderer>, level: LevelData, world: SimWorld, worldViews: WorldViews, cameraRig: Pick<CameraRig, 'visibleRect'>, disposers: Array<() => void>, background: FreeWorldBackgroundView | null, daylight: Daylight | null, shafts: LightShafts): EnvironmentViews {
+export function createEnvironmentViews(stage: Stage<StageRenderer>, level: LevelData, world: SimWorld, worldViews: WorldViews, cameraRig: Pick<CameraRig, 'visibleRect'>, disposers: Array<() => void>, background: FreeWorldBackgroundView | null, daylight: Daylight | null, shafts: LightShafts, worldLight: WorldLight): EnvironmentViews {
   const precipView = createWorldPrecip(stage, level, worldViews, background, daylight);
   disposers.push(() => precipView.dispose());
   const update = (time: number, dt: number, alpha: number): void => {
@@ -74,7 +75,11 @@ export function createEnvironmentViews(stage: Stage<StageRenderer>, level: Level
     precipView.update(view, time, dt, world.env.precip, world.env);
     const look = precipView.sky.look!;
     if (background) background.setWeather(.55 + .45 * look.key);
-    daylight?.updateSky(look);
+    if (daylight) {
+      daylight.updateSky(look);
+      // 光场着色按昼夜折灯、按天色给室内反弹。
+      worldLight.setSky(daylight.time.night, daylight.skyTint);
+    }
   };
   return { precipView, update };
 }

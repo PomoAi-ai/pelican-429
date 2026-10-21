@@ -14,8 +14,6 @@ import { TREE_SHAPES } from '../src/config/worldgen-rules.ts';
 import { CAVE_DECOR_Z_MAX, CAVE_DECOR_Z_MIN, planCaveDecor } from '../src/render/decor/cave-decor-view.ts';
 import { caveWallCells, isCarvedWall } from '../src/render/decor/cave-wall-view.ts';
 import { createGroundProfile } from '../src/render/tile/ground-profile.ts';
-import { injectLightMap } from '../src/render/stage/light-field-material.ts';
-import type { LightMapUniforms } from '../src/render/stage/light-field-material.ts';
 import { auraDarkness, auraTarget, createPelicanAura } from '../src/render/pelican/pelican-aura.ts';
 import { islandGroundProfile, planSkyIslandParts } from '../src/render/decor/sky-island-view.ts';
 import { groundSurface } from '../src/render/stage/stage.ts';
@@ -490,37 +488,6 @@ describe('021 鹈鹕微光', () => {
     assert.equal(a.state.strength, C.waterIntensity);
     assert.deepEqual([...a.state.color], [...C.waterColor]);
     assert.throws(() => a.update(-1, 0, false), /dt/);
-  });
-
-  test('着色器注入光圈（与光照图屏幕合成）', () => {
-    const uniforms: LightMapUniforms = {
-      uLightField: { value: new THREE.Texture() },
-      uLightFieldBounds: { value: new THREE.Vector4(0, 0, 4, 40) },
-      uLightFieldWindow: { value: new THREE.Vector2(0, 40) },
-      uLightFieldLayout: { value: new THREE.Vector4(1, 1, 130, 40) },
-      uLightMin: { value: 0 },
-      uDynLights: { value: [new THREE.Vector4()] },
-      uDynCount: { value: 0 },
-      uWaterDepth: { value: new THREE.Texture() },
-      uWaterDepthSize: { value: new THREE.Vector2(10, 10) },
-      uWaterShallow: { value: new THREE.Color() },
-      uWaterDeep: { value: new THREE.Color() },
-      uWaterAlpha: { value: new THREE.Vector2() },
-      uWaterRange: { value: 1 },
-      uAura: { value: new THREE.Vector4(0, 0, 1, 0) },
-      uAuraColor: { value: new THREE.Color(1, 1, 1) },
-    };
-    const sh = { vertexShader: THREE.ShaderLib.standard.vertexShader, fragmentShader: THREE.ShaderLib.standard.fragmentShader, uniforms: {} as Record<string, THREE.IUniform> };
-    injectLightMap(sh, uniforms, 1, 'aura-test');
-    assert.match(sh.fragmentShader, /uniform vec4 uAura;/);
-    assert.match(sh.fragmentShader, /lmCombine\(lmSample\(vLmWorld\), lmAura\(vLmWorld\)\)/);
-    assert.equal(sh.uniforms.uAura, uniforms.uAura);
-    // 鹈鹕自身材质的最低亮度（userData.lightFloor → max(·, floor)）。
-    const body = { vertexShader: THREE.ShaderLib.standard.vertexShader, fragmentShader: THREE.ShaderLib.standard.fragmentShader, uniforms: {} as Record<string, THREE.IUniform> };
-    injectLightMap(body, uniforms, 1, 'pelican-body', { floor: C.bodyFloor });
-    assert.match(body.fragmentShader, new RegExp(`max\\(lmSample\\(vLmWorld\\), ${C.bodyFloor.toFixed(4)}\\)`));
-    assert.ok(C.bodyFloor > 0 && C.bodyFloor < C.intensity);
-    assert.throws(() => injectLightMap(body, uniforms, 1, 'bad', { floor: 1 }), /lightFloor/);
   });
 });
 

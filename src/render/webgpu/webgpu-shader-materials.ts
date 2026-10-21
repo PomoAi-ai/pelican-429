@@ -6,13 +6,15 @@
  * - uniform 共享原材质的 IUniform（webgpu-materials 的 shared），现有每帧写 uniform 的代码照常生效。
  * - 色调映射：WebGL 后期在 OutputPass 统一映射，WebGPU 在输出时统一映射，ShaderMaterial 的 toneMapped 两边都不起作用。
  * - 点精灵：WebGPU 原生点只有 1 像素，渲染 Points 时换成每点一个四边形的实例化网格（共用原几何的属性数据），
- *   转换里用 pointVertex / pointCoord 对应 gl_PointSize / gl_PointCoord。
+ *   转换里用 pointVertex / pointCoord 对应 gl_PointSize / gl_PointCoord。PointsMaterial（星空）同样走点精灵，
+ *   沿用 three 复制的 PointsNodeMaterial，只换顶点（size × DPR，同 WebGL 的 size * pixelRatio）。
  */
 import * as THREE from 'three';
 import { NodeMaterial } from 'three/webgpu';
 import type { WebGPURenderer } from 'three/webgpu';
-import { diffuseColor } from 'three/tsl';
-import { POINT_CORNER, shaderInputs } from './webgpu-shader-nodes.ts';
+import { cameraProjectionMatrix, diffuseColor, materialPointSize, modelViewMatrix, positionGeometry, screenDPR, vec4 } from 'three/tsl';
+import { POINT_CORNER, pointVertex, shaderInputs } from './webgpu-shader-nodes.ts';
+import type { N } from './webgpu-shader-nodes.ts';
 import type { ShaderConversion } from './webgpu-shader-nodes.ts';
 import { CITY_SHADERS } from './webgpu-shader-city.ts';
 import { refreshEveryRender } from './webgpu-node-utils.ts';
@@ -51,6 +53,13 @@ function shaderNodeMaterial(source: THREE.ShaderMaterial): NodeMaterial {
   return material;
 }
 
+function pointsNodeMaterial(source: THREE.PointsMaterial, material: NodeMaterial): NodeMaterial {
+  if (source.sizeAttenuation) throw new Error(`webgpu-shader-materials: PointsMaterial '${source.name || source.uuid}' 开了 sizeAttenuation，点精灵只支持固定像素大小`);
+  const clip = cameraProjectionMatrix.mul(modelViewMatrix).mul(vec4(positionGeometry, 1)) as unknown as N;
+  material.vertexNode = pointVertex(clip, materialPointSize.mul(screenDPR) as unknown as N);
+  return material;
+}
+
 interface PointSprites {
   readonly source: THREE.BufferGeometry;
   readonly mesh: THREE.Mesh;
@@ -70,6 +79,9 @@ function pointSprites(points: THREE.Points): PointSprites {
   const geometry = new THREE.BufferGeometry();
   geometry.setIndex([0, 1, 2, 0, 2, 3]);
   geometry.setAttribute(POINT_CORNER, new THREE.Float32BufferAttribute([-0.5, -0.5, 0.5, -0.5, 0.5, 0.5, -0.5, 0.5], 2));
+  // PointsMaterial 的 map 按 uv() 取值：角点 + 0.5（y 向上）= WebGL 的 (pointCoord.x, 1 - pointCoord.y)。
+  if (source.attributes.uv !== undefined) throw new Error(`webgpu-shader-materials: 点 '${points.name}' 自带 uv 属性，与点精灵四边形的 uv 冲突`);
+  geometry.setAttribute('uv', new THREE.Float32BufferAttribute([0, 0, 1, 0, 1, 1, 0, 1], 2));
   const mirrors: [THREE.BufferAttribute, THREE.InstancedBufferAttribute][] = [];
   for (const [name, attr] of Object.entries(source.attributes)) {
     if (!(attr as THREE.BufferAttribute).isBufferAttribute) throw new Error(`webgpu-shader-materials: 点 '${points.name}' 的属性 ${name} 是交错属性，点精灵不支持`);
@@ -106,7 +118,11 @@ function syncSprites(points: THREE.Points): THREE.Mesh {
 export function installShaderMaterials(renderer: WebGPURenderer): void {
   const { library } = renderer;
   const copy = library.fromMaterial.bind(library);
-  library.fromMaterial = (material) => ((material as THREE.ShaderMaterial).isShaderMaterial ? shaderNodeMaterial(material as THREE.ShaderMaterial) : copy(material));
+  library.fromMaterial = (material) => {
+    if ((material as THREE.ShaderMaterial).isShaderMaterial) return shaderNodeMaterial(material as THREE.ShaderMaterial);
+    const node = copy(material);
+    return (material as THREE.PointsMaterial).isPointsMaterial ? pointsNodeMaterial(material as THREE.PointsMaterial, node as NodeMaterial) : node;
+  };
   // 包装 renderObject 而不是 setRenderObjectFunction：预编译（compileAsync）也走 renderObject，点精灵因此按四边形网格预编译。
   const render = renderer.renderObject.bind(renderer);
   const keyed = new WeakSet<THREE.Material>();
@@ -119,7 +135,7 @@ export function installShaderMaterials(renderer: WebGPURenderer): void {
       const key = material.customProgramCacheKey.bind(material);
       material.customProgramCacheKey = () => `${key()}|${material.uuid}`;
     }
-    if (!((object as THREE.Points).isPoints && (material as THREE.ShaderMaterial).isShaderMaterial)) return render(...args);
+    if (!((object as THREE.Points).isPoints && ((material as THREE.ShaderMaterial).isShaderMaterial || (material as THREE.PointsMaterial).isPointsMaterial))) return render(...args);
     const mesh = syncSprites(object as THREE.Points);
     render(mesh, scene, camera, mesh.geometry, material, ...rest);
   };

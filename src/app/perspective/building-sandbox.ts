@@ -10,12 +10,11 @@ import { solarTrackingAngle } from '../../physics/solar-panel.ts';
 import { mapLevel } from '../../sim/definition-world.ts';
 import { createSimWorld } from '../../sim/sim-world.ts';
 import { createFluidMap } from '../../world/fluid-map.ts';
-import { cityLightRules, createWorldLightField } from '../../world/light-field-tiles.ts';
+import { cityLightRules } from '../../world/light-field-tiles.ts';
 import { createTileMap } from '../../world/tile-map.ts';
 import { SUBCELLS } from '../../world/tile-shapes.ts';
 import { DEFAULT_TILES, TILE_PAVING } from '../../world/tile-types.ts';
-import { createCityLighting } from '../../render/stage/light-field-city.ts';
-import { createLightFieldAtlas, GAME_LIGHT_SLOTS } from '../../render/stage/light-field-atlas.ts';
+import { createWorldLight } from '../../render/stage/light-field-material.ts';
 import { createBuildingLayerView, createBuildingPreview } from '../../render/building/building-layer-view.ts';
 import { createPieceView } from '../../render/tile/piece-view.ts';
 import { createDefinitionKit } from '../../render/building/definition-kit.ts';
@@ -76,23 +75,25 @@ export async function mountBuildingSandbox(context: SceneMountContext): Promise<
   const floor = createDefinitionKit({ style: 'ai-city' });
   floor.root.scale.z = -1;
   for (let x = bounds.minX; x < bounds.minX + bounds.width; x++) floor.solid('B', x, 1, 'ceramic');
-  stage.scene.add(floor.root); context.onDispose(() => floor.dispose());
+  context.onDispose(() => floor.dispose());
   const gridVertices: number[] = [];
   for (let x = 0; x <= bounds.width; x++) gridVertices.push(x, 1.5, 1.53, x, 36, 1.53);
   for (let y = 2; y <= 36; y++) gridVertices.push(0, y, 1.53, bounds.width, y, 1.53);
   const grid = new THREE.LineSegments(new THREE.BufferGeometry().setAttribute('position', new THREE.Float32BufferAttribute(gridVertices, 3)),
     new THREE.LineBasicMaterial({ color: '#6b8e9e', transparent: true, opacity: .22, depthWrite: false }));
   stage.scene.add(grid); context.onDispose(() => { grid.geometry.dispose(); grid.material.dispose(); });
-  // 与城区同一套块视图、建筑层与城区光场（光场只算这块小地图）。
+  // 与城区同一套块视图、建筑层与城区光场规则（光场只算这块小地图，不接场地天气的积水）。
   const pieces = createPieceView(state.map);
   const view = createBuildingLayerView(state.map, state);
-  const light = createWorldLightField({ map: state.map, fluid: createFluidMap(state.map), trees: [], decay: BUILDING_SCENE_TUNING.render.lighting.lightMap,
-    rules: cityLightRules(state.site.foundationTop * SUBCELLS) });
-  const atlas = createLightFieldAtlas(light, { slots: GAME_LIGHT_SLOTS, occlusion: true });
-  const spatialLighting = createCityLighting(light, atlas, { slots: field.quality === 'low' ? 2 : 4, undergroundTop: state.site.foundationTop });
-  spatialLighting.attach(floor.root);
-  context.onDispose(() => { spatialLighting.dispose(); atlas.dispose(); light.dispose(); });
-  stage.scene.add(pieces.root, view.root, spatialLighting.root); context.onDispose(() => { pieces.dispose(); view.dispose(); });
+  const lightFluid = createFluidMap(state.map);
+  const worldLight = createWorldLight({ map: state.map, fluid: lightFluid, trees: [], lighting: BUILDING_SCENE_TUNING.render.lighting,
+    city: { rules: cityLightRules(state.site.foundationTop * SUBCELLS), undergroundTop: state.site.foundationTop, lampSlots: field.quality === 'low' ? 2 : 4 } });
+  context.onDispose(() => { worldLight.dispose(); lightFluid.dispose(); });
+  // 只有场地本身接光场；天空与天气层、网格线和建造幽灵不接。
+  const lit = new THREE.Group();
+  lit.add(floor.root, pieces.root, view.root, worldLight.lamps);
+  stage.scene.add(lit); context.onDispose(() => { pieces.dispose(); view.dispose(); lit.removeFromParent(); });
+  let lightFrame = 0;
   let ghost: ReturnType<typeof createBuildingPreview>;
   context.onDispose(() => ghost.dispose());
   const status = page.querySelector<HTMLElement>('[data-status]')!;
@@ -266,12 +267,11 @@ export async function mountBuildingSandbox(context: SceneMountContext): Promise<
   await warmUpStage(stage, [], context.signal);
   context.signal.throwIfAborted();
   field.onFrame((time, _dt, world) => {
-    // 新建的块与建筑网格接入城区光场着色。
-    if (pieces.update(FIELD) > 0) spatialLighting.attach(pieces.root);
-    if (view.update(time, null)) spatialLighting.attach(view.root);
-    atlas.focus(FIELD);
-    atlas.apply(light.sync());
-    spatialLighting.setFrame(stage.camera, world.night, time, field.daylight.skyTint);
+    pieces.update(FIELD);
+    view.update(time, null);
+    worldLight.setSky(world.night, field.daylight.skyTint);
+    // 灯槽跟随镜头注视点；小场地的条带总在驻留窗口内。
+    worldLight.update(lit, lightFrame++, { x: orbit.target.x - FIELD.w / 2, y: orbit.target.y - FIELD.h / 2, w: FIELD.w, h: FIELD.h });
     if (ghost.root.visible) ghost.update(time);
   });
 }

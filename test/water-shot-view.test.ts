@@ -106,7 +106,7 @@ describe('水弹外形', () => {
     assert.ok(Math.abs(uniforms.uJellyTime!.value - t1 - DT) < 1e-9, '共享时钟每帧只推进一次');
     // 光照图注入叠加在果冻注入之后仍成立。
     const lmUniforms = { uLightField: { value: null } } as unknown as LightMapUniforms;
-    injectLightMap(shader, lmUniforms, 4, mat.name);
+    injectLightMap(shader, lmUniforms, 4, 0, mat.name);
     assert.match(shader.vertexShader, /uJellyTime/);
     view.dispose();
     view2.dispose();

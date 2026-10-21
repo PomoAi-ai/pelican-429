@@ -354,7 +354,7 @@ export async function start(run: GameRun, page: PageContext, story: StorySave | 
   const luma = createLumaCompanion(stage.scene, getPlayer(world));
   disposers.push(() => luma.dispose());
   // 瓦片光照图（洞内发光源、浮空岛天空光）与鹈鹕微光。
-  const lighting = createWorldLighting(level, world, waterPaletteName, disposers, tuning.render.lighting);
+  const lighting = createWorldLighting(level, world, waterPaletteName, stage.quality, disposers, tuning.render.lighting);
   const { worldLight } = lighting;
 
   const canvas = stage.canvas;
@@ -378,11 +378,11 @@ export async function start(run: GameRun, page: PageContext, story: StorySave | 
     disposers.push(daylight.dispose);
   }
   // 022 降水视图（雨雪粒子/天色/湿润积雪）：与世界视图同帧同节奏更新。
-  const env = createEnvironmentViews(stage, level, world, worldViews, devCamera ?? cameraRig, disposers, background, daylight, shafts);
+  const env = createEnvironmentViews(stage, level, world, worldViews, devCamera ?? cameraRig, disposers, background, daylight, shafts, worldLight);
   env.update(0, 0, 0);
   shafts.update(cameraRig.visibleRect(2), 0);
-  // 城区表现（住宅环境、建筑光场着色）。
-  const cityPresentation = city ? await createCityPresentation({ stage, world, city, worldViews, worldLight, precip: env.precipView, daylight: daylight!,
+  // 城区表现（住宅环境、天际线与水面、城区灯槽）。
+  const cityPresentation = city ? await createCityPresentation({ stage, world, city, worldLight, precip: env.precipView, daylight: daylight!,
     signal: page.signal, progress: (completed, total) => progress(t('装配城市与空中交通'), completed, total) }) : null;
   if (cityPresentation !== null) {
     if (run.stopped) { cityPresentation.dispose(); return; }

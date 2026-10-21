@@ -150,8 +150,6 @@ export interface WorldViews {
   readonly pieces: PieceView;
   /** 墙层、摆放物件与特殊构件。 */
   readonly buildings: BuildingLayerView;
-  /** 自上次调用以来块视图或建筑层有没有新网格（城区光照据此重新接入材质）。 */
-  takeBuildingChanges(): boolean;
   readonly trees: TreeView;
   readonly water: WaterView;
   readonly weeds: WaterWeedView;
@@ -240,7 +238,6 @@ export function createWorldViews(input: WorldViewsInput): WorldViews {
   const tiles = add(createTileView(level.map, { textureSize: input.terrainTextureSize, floraEnv: createFloraEnv({ lakes: level.lakes, trees: level.trees, felled: input.felledTrees, deserts: level.deserts, rockClear: rockGrassClearance(decorEnv) }), lakes: level.lakes, bareAir: covered, noClimbers: onIsland }));
   const pieces = add(createPieceView(level.map));
   const buildings = add(createBuildingLayerView(level.map, input.city?.building ?? null));
-  let buildingChanged = true;
   // 021：岛上树的根盘贴岛顶（树视图用岛感知轮廓；其余视图仍用真实地表）。
   const trees = add(createTreeView(level.trees, { ground: islandGroundProfile(level.map, level.islands, groundColumns, ground, level.lakes) }));
   const water = add(createWaterView(level.fluid, input.waterPalette ? { palette: input.waterPalette } : {}));
@@ -309,11 +306,6 @@ export function createWorldViews(input: WorldViewsInput): WorldViews {
     tiles,
     pieces,
     buildings,
-    takeBuildingChanges() {
-      const changed = buildingChanged;
-      buildingChanged = false;
-      return changed;
-    },
     trees,
     water,
     weeds,
@@ -350,9 +342,9 @@ export function createWorldViews(input: WorldViewsInput): WorldViews {
       rideWindState.t = values.uWeatherTime;
       tiles.update(view);
       tiles.setTime(time);
-      if (pieces.update(view) > 0) buildingChanged = true;
+      pieces.update(view);
       const actors = input.actors?.() ?? [];
-      if (buildings.update(time, actors.find((actor) => actor.pelican !== undefined)?.body ?? null)) buildingChanged = true;
+      buildings.update(time, actors.find((actor) => actor.pelican !== undefined)?.body ?? null);
       trees.update(view, time);
       decor.update(view, time);
       water.update(view, time);

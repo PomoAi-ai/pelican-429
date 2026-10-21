@@ -1,7 +1,7 @@
 /**
  * 建筑层视图（由住宅视图改写）：墙层按区块实例化定义构件（窗为圆角玻璃窗），摆放物件（家具、装饰）与特殊构件
  * （能量门、太阳能板）各自是独立对象，按格子世界的内容增删并保留自身动画；门的开合、板面角度每帧取建造状态。
- * 材质标 noLightMap，由城区光场着色接入。另给出单件预览（建造幽灵、资源缩略图）。
+ * 另给出单件预览（建造幽灵、资源缩略图）。
  */
 import * as THREE from 'three';
 import type { DefinitionDepthMode } from '../../config/definition-kit.ts';
@@ -22,11 +22,6 @@ interface BuildingPart {
   readonly update?: ViewUpdate;
   readonly dispose: () => void;
 }
-
-const unlit = (root: THREE.Object3D): void => root.traverse(node => {
-  if (!(node instanceof THREE.Mesh)) return;
-  for (const material of Array.isArray(node.material) ? node.material : [node.material]) material.userData.noLightMap = true;
-});
 
 /** 门、家具与装饰的独立对象，左下角锚点放在 (x,y)；special 为门或太阳能板的城区状态（预览时为 null）。 */
 function createBuildingPart(resource: ResidenceResource, x: number, y: number, special: SpecialItem | null): BuildingPart {
@@ -64,8 +59,8 @@ const drawWall = (templates: DefinitionTemplates, wall: WallPlacement) => {
 
 export interface BuildingLayerView {
   readonly root: THREE.Group;
-  /** 同步增删的墙与对象（有新网格返回 true，调用方重新接入光照）并推进动画。 */
-  update(time: number, player: WorkstationPlayer | null): boolean;
+  /** 同步增删的墙与对象并推进动画。 */
+  update(time: number, player: WorkstationPlayer | null): void;
   dispose(): void;
 }
 
@@ -106,16 +101,13 @@ export function createBuildingLayerView(map: TileMap, building: BuildingState | 
   });
   let parts = new Map<PlacedObject | SpecialItem, BuildingPart>();
   let updates: ViewUpdate[] = [];
-  const syncParts = (): boolean => {
+  const syncParts = (): void => {
     const next = new Map<PlacedObject | SpecialItem, BuildingPart>();
-    let added = false;
     const keep = (key: PlacedObject | SpecialItem, create: () => BuildingPart): void => {
       let part = parts.get(key);
       if (!part) {
         part = create();
-        unlit(part.root);
         root.add(part.root);
-        added = true;
       }
       next.set(key, part);
     };
@@ -127,20 +119,16 @@ export function createBuildingLayerView(map: TileMap, building: BuildingState | 
     }
     parts = next;
     updates = [...parts.values()].flatMap(part => part.update ? [part.update] : []);
-    return added;
   };
   return {
     root,
     update(time, player) {
-      let added = false;
       for (const key of dirtyWalls) buildWalls(key);
-      if (dirtyWalls.size > 0) added = true;
       dirtyWalls.clear();
       // 门与太阳能板不在建筑层，按建造版本发现增删。
       if (building && building.revision !== revision) { revision = building.revision; partsDirty = true; }
-      if (partsDirty) { added = syncParts() || added; partsDirty = false; }
+      if (partsDirty) { syncParts(); partsDirty = false; }
       for (const update of updates) update(time, player);
-      return added;
     },
     dispose() {
       unsubscribe();
